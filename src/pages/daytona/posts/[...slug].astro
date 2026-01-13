@@ -1,0 +1,35 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("posts", (p) => p.data.city === "daytona");
+  return posts.map((p) => ({ params: { slug: p.slug }, props: { post: p } }));
+}
+
+const { post } = Astro.props;
+---
+<Base title={`${post.data.title} | GoDoDaytona`} subtitle={post.data.description} cityBase="daytona">
+  <section class="section">
+    <div class="container">
+      <div class="card card-pad">
+        <div class="kicker">{new Date(post.data.pubDate).toLocaleDateString()}</div>
+        <h1 style="margin:10px 0 10px;font-size:34px;line-height:1.12">{post.data.title}</h1>
+        <p class="lede" style="margin-top:0">{post.data.description}</p>
+        <div class="tagrow">
+          {post.data.tags.map(t => <a class="tag" href={`/daytona/topic/${t}/`}>{t}</a>)}
+        </div>
+        <hr style="border:none;border-top:1px solid var(--line);margin:16px 0" />
+        <div class="lede" style="color:var(--text)">
+          <slot />
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<Content content={post.body} />
+
+---
+// Astro Content renderer
+import { Content } from "astro:content";

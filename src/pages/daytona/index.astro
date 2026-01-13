@@ -1,0 +1,76 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+const city = "daytona";
+const allPosts = await getCollection("posts", (p) => p.data.city === city);
+allPosts.sort((a,b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+
+const featured = allPosts.find(p => p.data.featured) ?? allPosts[0];
+const latest = allPosts.filter(p => p.id !== featured?.id).slice(0,5);
+---
+<Base title="GoDoDaytona" subtitle="GoDo386 • Local stories, guides, and what’s happening in Daytona Beach." cityBase="daytona">
+  <section class="hero">
+    <div class="container hero-grid">
+      <article class="card card-pad">
+        <div class="kicker">Featured</div>
+        {featured ? (
+          <>
+            <h1 class="h1" style="font-size:40px;margin-bottom:8px">{featured.data.title}</h1>
+            <p class="lede">{featured.data.description}</p>
+            <div class="tagrow">
+              {featured.data.tags.slice(0,5).map(t => (
+                <a class="tag" href={`/daytona/topic/${t}/`}>{t}</a>
+              ))}
+            </div>
+            <div style="margin-top:14px">
+              <a class="cta" href={`/daytona/posts/${featured.slug}/`}>Read →</a>
+            </div>
+          </>
+        ) : (
+          <p class="lede">Add your first post in <code>src/content/posts/daytona/</code>.</p>
+        )}
+      </article>
+
+      <aside class="card">
+        <div class="card-pad">
+          <div class="kicker">Subscribe</div>
+          <h2 style="margin:10px 0 8px">Get the GoDoDaytona newsletter</h2>
+          <p class="lede" style="margin:0 0 12px">
+            One email. The best of Daytona: events, food, and local picks.
+          </p>
+          <form method="post" action="#">
+            <input type="email" name="email" placeholder="you@email.com" required />
+            <button class="cta" type="submit">Subscribe</button>
+          </form>
+          <div class="note">
+            This is a placeholder form. When you pick Beehiiv/Mailchimp/etc, we’ll swap the form action (no redesign needed).
+          </div>
+        </div>
+
+        <div class="article">
+          <h3 style="margin:0 0 6px">Quick links</h3>
+          <div class="tagrow">
+            <a class="tag" href="/daytona/events/">Events</a>
+            <a class="tag" href="/daytona/guides/play/">Guides</a>
+            <a class="tag" href="/advertise/">Advertise</a>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2>Latest</h2>
+      <div class="card">
+        {latest.map(p => (
+          <div class="article">
+            <h3><a href={`/daytona/posts/${p.slug}/`}>{p.data.title}</a></h3>
+            <p>{p.data.description}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

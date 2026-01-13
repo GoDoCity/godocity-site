@@ -1,0 +1,57 @@
+---
+const { cityBase = "" } = Astro.props;
+const base = cityBase ? `/${cityBase}` : "";
+const topics = [
+  ["business","Business"],
+  ["city","City"],
+  ["culture","Culture"],
+  ["events","Events"],
+  ["food","Food"],
+  ["history","History"],
+  ["real-estate","Real Estate"],
+  ["sports","Sports"],
+  ["travel-outdoors","Travel & Outdoors"],
+  ["wellness","Wellness"],
+];
+const guides = [
+  ["live","Live"],
+  ["work","Work"],
+  ["play","Play"],
+  ["best","GoDo’s Best"],
+];
+---
+<nav class="nav container" aria-label="Primary">
+  <div class="nav-left">
+    <a class="pill" href={`${base}/`}>Home</a>
+    <details class="pill">
+      <summary>Topics</summary>
+      <div class="tagrow" style="padding:10px 0 0 0">
+        {topics.map(([slug,label]) => (
+          <a class="tag" href={`${base}/topic/${slug}/`}>{label}</a>
+        ))}
+      </div>
+    </details>
+    <details class="pill">
+      <summary>Guides</summary>
+      <div class="tagrow" style="padding:10px 0 0 0">
+        {guides.map(([slug,label]) => (
+          <a class="tag" href={`${base}/guides/${slug}/`}>{label}</a>
+        ))}
+      </div>
+    </details>
+    <a class="pill" href={`${base}/events/`}>Events</a>
+    <a class="pill" href={`${base}/jobs/`}>Jobs</a>
+    <a class="pill" href={`${base}/games/`}>Games</a>
+    <a class="pill" href={`${base}/the-buy/`}>The Buy</a>
+  </div>
+
+  <div class="nav-right">
+    <a class="pill" href="/advertise/">Advertise</a>
+    <a class="cta" href={`${base}/subscribe/`}>Subscribe</a>
+  </div>
+</nav>
+
+<style>
+  details > summary{cursor:pointer;list-style:none}
+  details > summary::-webkit-details-marker{display:none}
+</style>

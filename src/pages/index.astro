@@ -1,0 +1,64 @@
+---
+import Base from "../layouts/Base.astro";
+
+const cities = [
+  { slug: "daytona", name: "GoDoDaytona", nickname: "GoDo386", subdomain: "daytona.godocity.com" },
+];
+---
+<Base title="GoDoCity" subtitle="A network of simple, city-first local publications.">
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="card card-pad">
+        <div class="kicker">GoDoCity Network</div>
+        <h1 class="h1">Local stories. Local guides. Built to scale.</h1>
+        <p class="lede">
+          This is the network hub. Pick a city below to read today’s posts, browse guides, and subscribe.
+        </p>
+        <div class="tagrow">
+          {cities.map((c) => (
+            <a class="cta" href={`https://${c.subdomain}/`}>{c.name}</a>
+          ))}
+        </div>
+        <p class="note">
+          Tip: Visiting a city subdomain (like <strong>daytona.godocity.com</strong>) will take you straight into that city site.
+        </p>
+      </div>
+
+      <div class="card card-pad">
+        <div class="kicker">Launching first</div>
+        <h2 style="margin:10px 0 6px">GoDoDaytona</h2>
+        <p class="lede" style="margin:0">
+          Primary brand: <strong>GoDoDaytona</strong> • Nickname: <strong>GoDo386</strong>
+        </p>
+        <div style="margin-top:14px">
+          <a class="pill" href="https://daytona.godocity.com/">Open GoDoDaytona →</a>
+        </div>
+        <div style="margin-top:14px;color:var(--muted);font-size:13px;line-height:1.45">
+          When you add more cities later, we’ll just add them to the map and drop in their content folders.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script is:inline>
+    // Host-based routing for city subdomains (static + simple).
+    // If user visits daytona.godocity.com, send them to /daytona/ within the same deployed site.
+    (function(){
+      const host = window.location.hostname.toLowerCase();
+      const isLocal = host === "localhost" || host.endsWith(".pages.dev");
+      const map = {
+        "daytona": "/daytona/"
+      };
+
+      // Extract left-most label (subdomain) for *.godocity.com
+      const parts = host.split(".");
+      if (parts.length >= 3 && (parts.slice(-2).join(".") === "godocity.com" || isLocal)) {
+        const sub = parts[0];
+        const target = map[sub];
+        if (target && window.location.pathname === "/") {
+          window.location.replace(target);
+        }
+      }
+    })();
+  </script>
+</Base>

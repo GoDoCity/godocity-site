@@ -1,0 +1,22 @@
+---
+const { title, subtitle, cityBase } = Astro.props;
+---
+<header class="topbar">
+  <div class="container">
+    <div class="brand">
+      <div class="badge">
+        <span class="badge-dot" aria-hidden="true"></span>
+        <span>{title}</span>
+      </div>
+      {subtitle ? <small>{subtitle}</small> : null}
+    </div>
+  </div>
+
+  <Astro.component>
+    <NavMenu cityBase={cityBase} />
+  </Astro.component>
+</header>
+
+---
+// Import component in same file for simpler copy/paste
+import NavMenu from "./NavMenu.astro";
