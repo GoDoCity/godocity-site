@@ -2,10 +2,20 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+export async function getStaticPaths() {
+  return [
+    { params: { section: "live" } },
+    { params: { section: "work" } },
+    { params: { section: "play" } },
+    { params: { section: "best" } },
+  ];
+}
+
 const { section } = Astro.params;
 
 const guide = (await getCollection("guides", (g) => g.data.city === "daytona" && g.data.section === section))[0];
 ---
+
 <Base title={`${guide?.data.title ?? section} | GoDoDaytona`} subtitle={guide?.data.description ?? "GoDo guides"} cityBase="daytona">
   <section class="section">
     <div class="container">
