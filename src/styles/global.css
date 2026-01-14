@@ -76,3 +76,10 @@ button{border:none;cursor:pointer}
   position: relative;
   z-index: 1;
 }
+/* Mobile fix: show full postcard image */
+@media (max-width: 900px) {
+  .hero-daytona::before {
+    background-size: contain;
+    background-color: #000;
+  }
+}
