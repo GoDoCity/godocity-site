@@ -16,7 +16,7 @@ const cities = [
         </p>
         <div class="tagrow">
           {cities.map((c) => (
-            <a class="cta" href={`https://${c.subdomain}/`}>{c.name}</a>
+            <a class="cta" href={`/${c.slug}/`}>{c.name}</a>
           ))}
         </div>
         <p class="note">
@@ -31,7 +31,7 @@ const cities = [
           Primary brand: <strong>GoDoDaytona</strong> • Nickname: <strong>GoDo386</strong>
         </p>
         <div style="margin-top:14px">
-          <a class="pill" href="https://daytona.godocity.com/">Open GoDoDaytona →</a>
+          <a class="pill" href="/daytona/">Open GoDoDaytona →</a>
         </div>
         <div style="margin-top:14px;color:var(--muted);font-size:13px;line-height:1.45">
           When you add more cities later, we’ll just add them to the map and drop in their content folders.
