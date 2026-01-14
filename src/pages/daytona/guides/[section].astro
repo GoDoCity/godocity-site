@@ -20,13 +20,20 @@ const guide = (await getCollection("guides", (g) =>
 const rendered = guide ? await guide.render() : null;
 ---
 
-<Base title={`${guide?.data.title ?? section} | GoDoDaytona`} subtitle={guide?.data.description ?? "GoDo guides"} cityBase="daytona">
+<Base
+  title={`${guide?.data.title ?? section} | GoDoDaytona`}
+  subtitle={guide?.data.description ?? "GoDo guides"}
+  cityBase="daytona"
+>
   <section class="section">
     <div class="container">
       <div class="card card-pad">
         <div class="kicker">Guide</div>
         <h1 style="margin:10px 0 10px;font-size:34px">{guide?.data.title ?? "Guide"}</h1>
-        {guide ? <Content content={guide.body} /> : <p class="lede">No guide yet. Add one in <code>src/content/guides/daytona</code>.</p>}
+
+        {rendered ? <rendered.Content /> : (
+          <p class="lede">No guide yet. Add one in <code>src/content/guides/daytona</code>.</p>
+        )}
       </div>
     </div>
   </section>
