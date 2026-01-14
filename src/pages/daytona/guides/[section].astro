@@ -1,6 +1,6 @@
 ---
 import Base from "../../../layouts/Base.astro";
-import { getCollection, Content } from "astro:content";
+import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
   return [
@@ -13,7 +13,11 @@ export async function getStaticPaths() {
 
 const { section } = Astro.params;
 
-const guide = (await getCollection("guides", (g) => g.data.city === "daytona" && g.data.section === section))[0];
+const guide = (await getCollection("guides", (g) =>
+  g.data.city === "daytona" && g.data.section === section
+))[0];
+
+const rendered = guide ? await guide.render() : null;
 ---
 
 <Base title={`${guide?.data.title ?? section} | GoDoDaytona`} subtitle={guide?.data.description ?? "GoDo guides"} cityBase="daytona">
