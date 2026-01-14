@@ -8,27 +8,34 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+const rendered = await post.render();
 ---
+
 <Base title={`${post.data.title} | GoDoDaytona`} subtitle={post.data.description} cityBase="daytona">
   <section class="section">
     <div class="container">
       <div class="card card-pad">
         <div class="kicker">{new Date(post.data.pubDate).toLocaleDateString()}</div>
-        <h1 style="margin:10px 0 10px;font-size:34px;line-height:1.12">{post.data.title}</h1>
+
+        <h1 style="margin:10px 0 10px;font-size:34px;line-height:1.12">
+          {post.data.title}
+        </h1>
+
         <p class="lede" style="margin-top:0">{post.data.description}</p>
+
         <div class="tagrow">
-          {post.data.tags.map(t => <a class="tag" href={`/daytona/topic/${t}/`}>{t}</a>)}
+          {(post.data.tags ?? []).map((t) => (
+            <a class="tag" href={`/daytona/topic/${t}/`}>{t}</a>
+          ))}
         </div>
+
         <hr style="border:none;border-top:1px solid var(--line);margin:16px 0" />
-        <div class="lede" style="color:var(--text)">
-          <slot />
-        </div>
+
+        {rendered ? <rendered.Content /> : <p class="lede">No post content.</p>}
       </div>
     </div>
   </section>
 </Base>
-
-<Content content={post.body} />
 
 ---
 // Astro Content renderer
