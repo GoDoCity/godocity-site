@@ -67,9 +67,10 @@ button{border:none;cursor:pointer}
   background:
     linear-gradient(rgba(0,0,0,.60), rgba(0,0,0,.60)),
     url("/images/gododaytona-bg.png");
-  background-size: cover;
+  background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
+  background-color: #000;
 }
 
 .hero-daytona > * {
