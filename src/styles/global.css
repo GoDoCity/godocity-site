@@ -131,32 +131,19 @@ a:hover{opacity:.9}
   z-index:2;
 }
 
-.hero.has-hero-img .hero__poster::before{
-  content:"";
-  width: min(var(--hero-poster-width), var(--hero-poster-max));
-  aspect-ratio: var(--hero-poster-ratio);
-  background: var(--hero-img) center / contain no-repeat;
-  opacity: var(--hero-poster-opacity);
-  filter: saturate(1.05);
-}
 
 @media (max-width:900px){
   .hero{min-height:var(--hero-min-mobile)}
-  .hero.has-hero-img .hero__poster::before{width:100%;opacity:.85}
 }
 /* City postcard banner (shows full image, no cropping, no interference) */
 .city-banner{
-  width: 100%;
-  margin: 18px auto 0;
+  width: min(980px, 92%);
+  margin: 22px auto 18px;
   background: var(--hero-img) center / contain no-repeat;
   aspect-ratio: 3 / 2;
-  max-height: 420px;
+  border-radius: 14px;
+  box-shadow: 0 18px 55px rgba(0,0,0,.45);
   filter: saturate(1.05);
 }
-
-/* Mobile: allow more vertical room */
-@media (max-width: 640px){
-  .city-banner{ 
-    max-height: 520px; 
   }
 }
