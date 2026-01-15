@@ -10,7 +10,11 @@ const featured = allPosts.find(p => p.data.featured) ?? allPosts[0];
 const latest = allPosts.filter(p => p.id !== featured?.id).slice(0,5);
 ---
 <Base title="GoDoDaytona" subtitle="GoDo386 • Local stories, guides, and what’s happening in Daytona Beach." cityBase="daytona">
-  <section class="hero hero-daytona">
+ <section
+  class="hero has-hero-img hero-daytona"
+  style="--hero-img: url('/images/gododaytona-bg.png')"
+>
+<div class="hero__poster" aria-hidden="true"></div>
     <div class="container hero-grid">
       <article class="card card-pad">
         <div class="kicker">Featured</div>
