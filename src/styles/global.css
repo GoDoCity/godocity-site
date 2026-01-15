@@ -76,30 +76,26 @@ a:hover{opacity:.9}
 .cta:hover{filter:brightness(.98)}
 
 /* =========================
-   HERO (final solution)
+   HERO (variable-driven)
    ========================= */
 
-/*
-  Structure this supports:
-
-  <section class="hero">
-    <div class="hero__poster" aria-hidden="true"></div>   (optional but recommended)
-    <div class="container"> ... content ... </div>
-  </section>
-
-  If you do NOT add hero__poster, we still render the poster via ::after.
-*/
+/* Default: NO image (GoDoCity hub stays clean) */
+:root{
+  --hero-img: none;
+}
 
 .hero{
   position:relative;
   overflow:hidden;
   padding:28px 0 10px;
   min-height:var(--hero-min);
-  isolation:isolate; /* ensures clean layering */
+  isolation:isolate;
+  background: radial-gradient(1200px 600px at 20% 10%, rgba(255,210,74,.12), transparent 60%),
+              radial-gradient(900px 500px at 85% 20%, rgba(120,180,255,.10), transparent 55%);
 }
 
-/* Layer 1: full-bleed atmosphere (cropping OK, blurred cover) */
-.hero::before{
+/* Only run the image layers if --hero-img is set */
+.hero.has-hero-img::before{
   content:"";
   position:absolute;
   inset:-10%;
@@ -110,35 +106,26 @@ a:hover{opacity:.9}
   z-index:0;
 }
 
-/* Layer 2: readability overlay (dark wash) */
-.hero .hero__overlay,
-.hero::marker{ /* harmless placeholder; keeps specificity predictable */ }
-
-.hero::after{
-  /* If you do not add .hero__poster, this ::after will draw the poster. */
+.hero.has-hero-img::after{
   content:"";
   position:absolute;
   inset:0;
-
-  /* Dark overlay + (optional poster fallback) */
   background:
     linear-gradient(rgba(0,0,0,var(--hero-overlay)), rgba(0,0,0,var(--hero-overlay))),
     var(--hero-img);
-
-  /* IMPORTANT:
-     - overlay: cover
-     - poster: contain (but we control its visible size by using a poster slot if you add .hero__poster)
-  */
   background-size: cover, contain;
   background-position: center, center;
   background-repeat: no-repeat, no-repeat;
-
-  opacity: 1;
   z-index:1;
 }
 
-/* Optional + recommended: a dedicated poster slot so it doesn't fight your cards */
-.hero__poster{
+.hero.has-hero-img > .container{
+  position:relative;
+  z-index:3;
+}
+
+/* If you use the optional poster div */
+.hero.has-hero-img .hero__poster{
   position:absolute;
   inset:0;
   display:grid;
@@ -147,88 +134,16 @@ a:hover{opacity:.9}
   z-index:2;
 }
 
-/* The readable postcard, never cropped */
-.hero__poster::before{
+.hero.has-hero-img .hero__poster::before{
   content:"";
   width: min(var(--hero-poster-width), var(--hero-poster-max));
   aspect-ratio: var(--hero-poster-ratio);
   background: var(--hero-img) center / contain no-repeat;
   opacity: var(--hero-poster-opacity);
-
-  /* Small polish so the postcard reads without looking like a “box” */
   filter: saturate(1.05);
 }
 
-/* Keep actual content above all layers */
-.hero > .container{
-  position:relative;
-  z-index:3;
-}
-
-/* Your hero layout */
-.hero-grid{display:grid;grid-template-columns: 1.2fr .8fr;gap:18px}
 @media (max-width:900px){
-  .hero-grid{grid-template-columns:1fr}
   .hero{min-height:var(--hero-min-mobile)}
-  .hero__poster::before{
-    width: 100%;
-    opacity: .85;
-  }
+  .hero.has-hero-img .hero__poster::before{width:100%;opacity:.85}
 }
-
-/* Cards + typography */
-.card{
-  border:1px solid var(--line);
-  background:linear-gradient(180deg, rgba(16,20,26,.85), rgba(16,20,26,.65));
-  border-radius:var(--radius);
-  box-shadow:var(--shadow)
-}
-
-.card-pad{padding:18px}
-.kicker{color:var(--accent);font-weight:800;letter-spacing:.5px;text-transform:uppercase;font-size:12px}
-
-.h1{
-  font-size:44px;
-  line-height:1.06;
-  margin:10px 0 10px;
-  color:#fff;
-  text-shadow:0 2px 18px rgba(0,0,0,.6);
-}
-@media (max-width:900px){.h1{font-size:36px}}
-
-.lede{
-  color:rgba(232,237,244,.88);
-  font-size:16px;
-  line-height:1.55;
-  margin:0 0 12px;
-  text-shadow:0 2px 18px rgba(0,0,0,.55);
-}
-
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media (max-width:900px){.grid{grid-template-columns:1fr}}
-
-.article{padding:14px;border-top:1px solid var(--line)}
-.article:first-child{border-top:none}
-.article h3{margin:0 0 6px;font-size:18px}
-.article p{margin:0;color:var(--muted);line-height:1.5}
-
-.section{padding:18px 0}
-.section h2{margin:0 0 10px;font-size:22px}
-.footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted);font-size:14px}
-
-.tagrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.tag{border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:var(--muted);font-weight:700;font-size:12px}
-
-form{display:flex;gap:10px;flex-wrap:wrap}
-input[type="email"]{
-  flex:1;
-  min-width:210px;
-  background:rgba(0,0,0,.25);
-  border:1px solid var(--line);
-  border-radius:10px;
-  color:var(--text);
-  padding:10px 12px;
-  outline:none
-}
-button{border:none;cursor:pointer}
-.note{color:var(--muted);font-size:13px;line-height:1.4;margin-top:10px}
