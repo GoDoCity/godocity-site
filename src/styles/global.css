@@ -144,3 +144,19 @@ a:hover{opacity:.9}
   .hero{min-height:var(--hero-min-mobile)}
   .hero.has-hero-img .hero__poster::before{width:100%;opacity:.85}
 }
+/* City postcard banner (shows full image, no cropping, no interference) */
+.city-banner{
+  width: 100%;
+  margin: 18px auto 0;
+  background: var(--hero-img) center / contain no-repeat;
+  aspect-ratio: 3 / 2;
+  max-height: 420px;
+  filter: saturate(1.05);
+}
+
+/* Mobile: allow more vertical room */
+@media (max-width: 640px){
+  .city-banner{ 
+    max-height: 520px; 
+  }
+}
