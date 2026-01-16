@@ -1,32 +1,35 @@
 :root{
+  /* Core palette */
   --bg:#0b0d10;
   --panel:#10141a;
   --text:#e8edf4;
   --muted:#a8b3c2;
   --line:#1f2631;
   --accent:#ffd24a;
+
+  /* Layout */
   --max:1100px;
   --radius:14px;
   --shadow: 0 10px 30px rgba(0,0,0,.35);
+
+  /* Typography */
   --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  --font-head: var(--font);
 
-  /* Hero image */
-  --hero-img: url("/images/gododaytona-bg.png");
-
-  /* Hero tuning knobs */
+  /* Hero tuning knobs (hub uses gradients; city pages can still use these if needed) */
   --hero-min: 420px;
   --hero-min-mobile: 560px;
+  --hero-blur: 22px;
+  --hero-dim: .70;
+  --hero-overlay: .50;
 
-  --hero-blur: 22px;         /* blur on the cover layer */
-  --hero-dim: .70;           /* opacity of the blurred cover layer */
-  --hero-overlay: .50;       /* darkness of overlay for readability */
-  --hero-poster-opacity: .88;/* opacity of the readable postcard layer */
-
-  /* How big the readable postcard appears */
-  --hero-poster-max: 980px;  /* max width of the postcard slot */
-  --hero-poster-width: 92%;  /* % width of slot */
-  --hero-poster-ratio: 3/2;  /* postcard ratio (change if your image differs) */
+  /* Default: no hero image on the hub */
+  --hero-img: none;
 }
+
+/* =========================
+   Base / layout
+   ========================= */
 
 *{box-sizing:border-box}
 html,body{margin:0;padding:0;font-family:var(--font);background:var(--bg);color:var(--text)}
@@ -34,13 +37,20 @@ a{color:inherit;text-decoration:none}
 a:hover{opacity:.9}
 .container{max-width:var(--max);margin:0 auto;padding:0 18px}
 
+/* Headings can use a separate font */
+.h1, h1, h2, h3 { font-family: var(--font-head); }
+
+/* =========================
+   Topbar + brand
+   ========================= */
+
 .topbar{
   border-bottom:1px solid var(--line);
   background:rgba(11,13,16,.75);
   backdrop-filter: blur(10px);
   position:sticky;
   top:0;
-  z-index:50
+  z-index:50;
 }
 
 .brand{display:flex;align-items:center;gap:12px;padding:14px 0}
@@ -48,8 +58,12 @@ a:hover{opacity:.9}
 .badge-dot{width:10px;height:10px;border-radius:99px;background:var(--accent);box-shadow:0 0 0 4px rgba(255,210,74,.15)}
 .brand small{color:var(--muted);font-weight:600}
 
+/* =========================
+   Nav
+   ========================= */
+
 .nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0 14px}
-.nav-left{display:flex;gap:12px;flex-wrap:wrap}
+.nav-left{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .nav-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 
 .pill{
@@ -59,7 +73,7 @@ a:hover{opacity:.9}
   border:1px solid var(--line);
   background:rgba(16,20,26,.75);
   padding:9px 12px;
-  border-radius:999px
+  border-radius:999px;
 }
 .pill:hover{border-color:#2b3443}
 
@@ -71,18 +85,13 @@ a:hover{opacity:.9}
   color:#13161b;
   font-weight:800;
   padding:10px 14px;
-  border-radius:999px
+  border-radius:999px;
 }
 .cta:hover{filter:brightness(.98)}
 
 /* =========================
-   HERO (variable-driven)
+   Hero (hub-friendly default)
    ========================= */
-
-/* Default: NO image (GoDoCity hub stays clean) */
-:root{
-  --hero-img: none;
-}
 
 .hero{
   position:relative;
@@ -90,11 +99,18 @@ a:hover{opacity:.9}
   padding:28px 0 10px;
   min-height:var(--hero-min);
   isolation:isolate;
-  background: radial-gradient(1200px 600px at 20% 10%, rgba(255,210,74,.12), transparent 60%),
-              radial-gradient(900px 500px at 85% 20%, rgba(120,180,255,.10), transparent 55%);
+
+  /* Clean default background for hub and non-city pages */
+  background:
+    radial-gradient(1200px 600px at 20% 10%, rgba(255,210,74,.12), transparent 60%),
+    radial-gradient(900px 500px at 85% 20%, rgba(120,180,255,.10), transparent 55%);
 }
 
-/* Only run the image layers if --hero-img is set */
+@media (max-width:900px){
+  .hero{min-height:var(--hero-min-mobile)}
+}
+
+/* If you ever use a hero image again, this class supports it */
 .hero.has-hero-img::before{
   content:"";
   position:absolute;
@@ -110,40 +126,87 @@ a:hover{opacity:.9}
   content:"";
   position:absolute;
   inset:0;
-  /* ONLY the dark overlay — no image here */
   background: linear-gradient(rgba(0,0,0,var(--hero-overlay)), rgba(0,0,0,var(--hero-overlay)));
   z-index:1;
 }
-
 
 .hero.has-hero-img > .container{
   position:relative;
   z-index:3;
 }
 
-/* If you use the optional poster div */
-.hero.has-hero-img .hero__poster{
-  position:absolute;
-  inset:0;
-  display:grid;
-  place-items:center;
-  pointer-events:none;
-  z-index:2;
-}
+/* =========================
+   City postcard banner (Option 2)
+   ========================= */
 
-
-@media (max-width:900px){
-  .hero{min-height:var(--hero-min-mobile)}
-}
-/* City postcard banner (shows full image, no cropping, no interference) */
 .city-banner{
   width: min(980px, 92%);
-  margin: 8px auto 10px;     /* tighter spacing */
+  margin: 8px auto 10px;      /* tighter spacing */
   background: var(--hero-img) center / contain no-repeat;
   aspect-ratio: 3 / 2;
-  max-height: 320px;
+  max-height: 320px;          /* Option 2 size */
   border-radius: 14px;
   box-shadow: 0 18px 55px rgba(0,0,0,.45);
 }
 
+/* =========================
+   Cards / content
+   ========================= */
+
+.card{
+  border:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(16,20,26,.85), rgba(16,20,26,.65));
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+}
+.card-pad{padding:18px}
+
+.kicker{color:var(--accent);font-weight:800;letter-spacing:.5px;text-transform:uppercase;font-size:12px}
+
+.h1{font-size:44px;line-height:1.06;margin:10px 0 10px}
+@media (max-width:900px){.h1{font-size:36px}}
+
+.lede{color:var(--muted);font-size:16px;line-height:1.55;margin:0 0 12px}
+
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+
+.article{padding:14px;border-top:1px solid var(--line)}
+.article:first-child{border-top:none}
+.article h3{margin:0 0 6px;font-size:18px}
+.article p{margin:0;color:var(--muted);line-height:1.5}
+
+.section{padding:18px 0}
+.section h2{margin:0 0 10px;font-size:22px}
+.footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted);font-size:14px}
+
+.tagrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.tag{border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:var(--muted);font-weight:700;font-size:12px}
+
+form{display:flex;gap:10px;flex-wrap:wrap}
+input[type="email"]{
+  flex:1;
+  min-width:210px;
+  background:rgba(0,0,0,.25);
+  border:1px solid var(--line);
+  border-radius:10px;
+  color:var(--text);
+  padding:10px 12px;
+  outline:none;
+}
+button{border:none;cursor:pointer}
+.note{color:var(--muted);font-size:13px;line-height:1.4;margin-top:10px}
+
+/* =========================
+   City themes (works after you add body class in Base.astro)
+   ========================= */
+
+/* Daytona theme: applies when body class is "city city-daytona" */
+.city-daytona{
+  /* Keep your current accent (yellow). Swap if you want options later. */
+  --accent:#ffd24a;
+
+  /* Banner image for Daytona */
+  --hero-img: url("/images/gododaytona-bg.png");
+}
 
