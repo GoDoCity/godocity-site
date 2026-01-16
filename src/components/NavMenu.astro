@@ -1,59 +1,145 @@
 ---
 const { cityBase = "" } = Astro.props;
-const base = cityBase ? `/${cityBase}` : "/daytona";
-const topics = [
-  ["business","Business"],
-  ["city","City"],
-  ["culture","Culture"],
-  ["events","Events"],
-  ["food","Food"],
-  ["history","History"],
-  ["real-estate","Real Estate"],
-  ["sports","Sports"],
-  ["travel-outdoors","Travel & Outdoors"],
-  ["wellness","Wellness"],
-];
-const guides = [
-  ["live","Live"],
-  ["work","Work"],
-  ["play","Play"],
-  ["best","GoDo’s Best"],
-];
----
 
+// Base path rules:
+// - If cityBase is provided, use "/{cityBase}" (ex: "/daytona")
+// - Otherwise default to "/daytona" (safe fallback for now)
+const base = cityBase ? `/${cityBase}` : "/daytona";
+
+// Topics + Guides definitions
+const topics = [
+  ["business", "Business"],
+  ["city", "City"],
+  ["culture", "Culture"],
+  ["events", "Events"],
+  ["food", "Food"],
+  ["history", "History"],
+  ["real-estate", "Real Estate"],
+  ["sports", "Sports"],
+  ["travel-outdoors", "Travel & Outdoors"],
+  ["wellness", "Wellness"],
+];
+
+const guides = [
+  ["live", "Live"],
+  ["work", "Work"],
+  ["play", "Play"],
+  ["best", "GoDo’s Best"],
+];
+
+// Helper for building URLs
+const u = (path: string) => `${base}${path}`;
+---
 
 <nav class="nav container" aria-label="Primary">
   <div class="nav-left">
-    <a class="pill" href={`${base}/`}>Home</a>
-    <details class="pill">
-      <summary>Topics</summary>
-      <div class="tagrow" style="padding:10px 0 0 0">
-        {topics.map(([slug,label]) => (
-          <a class="tag" href={`${base}/topic/${slug}/`}>{label}</a>
+    <a class="pill" href={u("/")}>Home</a>
+
+    <!-- Topics dropdown (no JS) -->
+    <details class="nav-dd">
+      <summary class="pill">Topics</summary>
+      <div class="dd-panel" role="menu">
+        {topics.map(([slug, label]) => (
+          <a class="dd-item" role="menuitem" href={u(`/topic/${slug}/`)}>
+            {label}
+          </a>
         ))}
+        <div class="dd-sep" aria-hidden="true"></div>
+        <a class="dd-item dd-all" role="menuitem" href={u("/topics/")}>
+          All topics →
+        </a>
       </div>
     </details>
-    <details class="pill">
-      <summary>Guides</summary>
-      <div class="tagrow" style="padding:10px 0 0 0">
-        {guides.map(([slug,label]) => (
-          <a class="tag" href={`${base}/guides/${slug}/`}>{label}</a>
+
+    <!-- Guides dropdown (no JS) -->
+    <details class="nav-dd">
+      <summary class="pill">Guides</summary>
+      <div class="dd-panel" role="menu">
+        {guides.map(([slug, label]) => (
+          <a class="dd-item" role="menuitem" href={u(`/guides/${slug}/`)}>
+            {label}
+          </a>
         ))}
+        <div class="dd-sep" aria-hidden="true"></div>
+        <a class="dd-item dd-all" role="menuitem" href={u("/guides/")}>
+          All guides →
+        </a>
       </div>
     </details>
-    <a class="pill" href={`${base}/events/`}>Events</a>
-    <a class="pill" href={`${base}/jobs/`}>Jobs</a>
-    <a class="pill" href={`${base}/games/`}>Games</a>
-    <a class="pill" href={`${base}/the-buy/`}>The Buy</a>
+
+    <a class="pill" href={u("/events/")}>Events</a>
+    <a class="pill" href={u("/jobs/")}>Jobs</a>
+    <a class="pill" href={u("/games/")}>Games</a>
+    <a class="pill" href={u("/the-buy/")}>The Buy</a>
   </div>
 
   <div class="nav-right">
-    <a class="pill" href="/advertise/">Advertise</a>
-    <a class="cta" href={`${base}/subscribe/`}>Subscribe</a>
+    <a class="pill" href={u("/advertise/")}>Advertise</a>
+    <a class="cta" href={u("/subscribe/")}>Subscribe</a>
   </div>
 </nav>
 
+<!-- CSS is inline so you don't have to hunt global.css.
+     It only styles the dropdown elements and uses your existing variables. -->
 <style>
-  details > summary{cursor:pointer;list-style:none}
-  details > summary::-webkit-details-marker{display:none}
+  .nav-dd { position: relative; }
+
+  .nav-dd > summary {
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .nav-dd > summary::-webkit-details-marker { display: none; }
+
+  /* Dropdown panel */
+  .dd-panel{
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    min-width: 240px;
+    padding: 10px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: rgba(16,20,26,.95);
+    backdrop-filter: blur(10px);
+    box-shadow: var(--shadow);
+    z-index: 200;
+    display: grid;
+    gap: 6px;
+  }
+
+  .dd-item{
+    display:block;
+    padding: 10px 10px;
+    border-radius: 10px;
+    color: var(--text);
+    border: 1px solid transparent;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .dd-item:hover{
+    background: rgba(255,255,255,.06);
+    border-color: rgba(255,255,255,.08);
+  }
+
+  .dd-sep{
+    height: 1px;
+    background: rgba(255,255,255,.08);
+    margin: 4px 2px;
+  }
+
+  .dd-all{
+    color: var(--muted);
+  }
+
+  /* Mobile: dropdown becomes inline (so it doesn’t fall off screen) */
+  @media (max-width: 900px){
+    .dd-panel{
+      position: static;
+      margin-top: 10px;
+      min-width: 0;
+    }
+  }
 </style>
