@@ -138,10 +138,15 @@ a:hover{opacity:.9}
 /* City postcard banner (shows full image, no cropping, no interference) */
 .city-banner{
   width: min(980px, 92%);
-  margin: 22px auto 18px;
+  margin: 12px auto 14px;
   background: var(--hero-img) center / contain no-repeat;
   aspect-ratio: 3 / 2;
+  max-height: 240px;
   border-radius: 14px;
   box-shadow: 0 18px 55px rgba(0,0,0,.45);
-  filter: saturate(1.05);
+
+  position: sticky;
+  top: 76px;                 /* adjust if your topbar height differs */
+  z-index: 10;
 }
+
