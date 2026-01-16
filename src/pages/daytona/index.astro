@@ -16,11 +16,7 @@ const latest = allPosts.filter((p) => p.id !== featured?.id).slice(0, 5);
   cityBase="daytona"
 >
   <!-- Postcard banner (image only, no interference with content) -->
-  <header
-    class="city-banner"
-    style="--hero-img: url('/images/gododaytona-bg.png')"
-    aria-label="Greetings from Daytona Beach"
-  ></header>
+  <header class="city-banner" aria-label="Greetings from Daytona Beach"></header>
 
   <!-- Hero content (clean background, no postcard behind cards) -->
   <section class="hero hero-daytona">
