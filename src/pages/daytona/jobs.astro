@@ -1,14 +1,13 @@
 ---
-import Base from "../../layouts/Base.astro";
+import Base from "../../../layouts/Base.astro";
+const title = "Jobs";
+const subtitle = "GoDoDaytona — local jobs and hiring highlights.";
 ---
-<Base title="Jobs | GoDoDaytona" subtitle="Jobs for Daytona Beach. (MVP placeholder)" cityBase="daytona">
-  <section class="section">
-    <div class="container">
-      <div class="card card-pad">
-        <div class="kicker">MVP</div>
-        <h1 style="margin:10px 0 8px">Jobs</h1>
-        <p class="lede">This page is a placeholder. Next step: we wire up real jobs content.</p>
-      </div>
-    </div>
-  </section>
-</Base>
+<Base title={title} subtitle={subtitle} cityBase="daytona" />
+
+<section class="section">
+  <div class="container">
+    <h1 class="h1">Jobs</h1>
+    <p class="lede">Coming soon. Local hiring, featured roles, and opportunities in the Daytona area.</p>
+  </div>
+</section>
