@@ -14,7 +14,7 @@ const { title, subtitle, cityBase } = Astro.props;
     <title>{title}</title>
     <meta name="description" content={subtitle ?? "GoDoCity – multi-city local content platform"} />
   </head>
-  <body>
+  <body class={cityBase ? `city city-${cityBase}` : "city"}>
     <Header title={title} subtitle={subtitle} cityBase={cityBase} />
     <main>
       <slot />
