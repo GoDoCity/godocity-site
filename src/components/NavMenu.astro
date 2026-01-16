@@ -143,3 +143,29 @@ const u = (path: string) => `${base}${path}`;
     }
   }
 </style>
+<script is:inline>
+  // Close other nav dropdowns when one opens
+  document.addEventListener("toggle", (e) => {
+    const target = e.target;
+    if (!(target instanceof HTMLDetailsElement)) return;
+    if (!target.classList.contains("nav-dd")) return;
+    if (!target.open) return;
+
+    document.querySelectorAll("details.nav-dd[open]").forEach((el) => {
+      if (el !== target) el.removeAttribute("open");
+    });
+  });
+
+  // Close any open dropdown after clicking a link inside the dropdown
+  document.addEventListener("click", (e) => {
+    const a = e.target.closest?.("a");
+    if (!a) return;
+
+    const inDropdown = a.closest?.("details.nav-dd");
+    if (!inDropdown) return;
+
+    document.querySelectorAll("details.nav-dd[open]").forEach((el) => {
+      el.removeAttribute("open");
+    });
+  });
+</script>
