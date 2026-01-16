@@ -36,7 +36,7 @@ const u = (path: string) => `${base}${path}`;
     <a class="pill" href={u("/")}>Home</a>
 
     <!-- Topics dropdown (no JS) -->
-    <details class="nav-dd">
+  <details class="nav-dd" name="primary-nav">
       <summary class="pill">Topics</summary>
       <div class="dd-panel" role="menu">
         {topics.map(([slug, label]) => (
@@ -52,7 +52,7 @@ const u = (path: string) => `${base}${path}`;
     </details>
 
     <!-- Guides dropdown (no JS) -->
-    <details class="nav-dd">
+<details class="nav-dd" name="primary-nav">
       <summary class="pill">Guides</summary>
       <div class="dd-panel" role="menu">
         {guides.map(([slug, label]) => (
