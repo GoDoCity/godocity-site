@@ -1,0 +1,22 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+site_url: https://godocity-site.pages.dev
+display_url: https://godocity-site.pages.dev
+
+collections:
+  - name: "posts"
+    label: "Posts"
+    folder: "src/content/posts"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Title", name: "title", widget: "string" }
+      - { label: "City", name: "city", widget: "string", default: "daytona" }
+      - { label: "Featured", name: "featured", widget: "boolean", default: false }
+      - { label: "Publish Date", name: "pubDate", widget: "datetime" }
+      - { label: "Body", name: "body", widget: "markdown" }
