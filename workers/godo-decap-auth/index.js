@@ -3,7 +3,7 @@ export default {
     const url = new URL(request.url);
 
     // Start OAuth
-    if (url.pathname === "/auth") {
+   if (url.pathname === "/auth" || url.pathname === "/auth/") {
       const redirect = new URL("https://github.com/login/oauth/authorize");
       redirect.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
       redirect.searchParams.set("redirect_uri", `${url.origin}/callback`);
@@ -12,7 +12,7 @@ export default {
     }
 
     // OAuth callback
-    if (url.pathname === "/callback") {
+    if (url.pathname === "/callback" || url.pathname === "/callback/") {
       const code = url.searchParams.get("code");
       if (!code) return new Response("Missing code", { status: 400 });
 
