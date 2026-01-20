@@ -2,13 +2,18 @@ backend:
   name: github
   repo: GoDoCity/godocity-site
   branch: main
-  base_url: https://godo-decap-auth.yellowcabking.workers.dev
+  base_url: "https://godo-decap-auth.yellowcabking.workers.dev"
   auth_endpoint: /auth
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
 publish_mode: editorial_workflow
+
+slug:
+  encoding: "ascii"
+  clean_accents: true
+  sanitize_replacement: "-"
 
 collections:
   - name: "posts"
@@ -30,3 +35,4 @@ collections:
       - { label: "Body", name: "body", widget: "markdown" }
       - { label: "Source URL", name: "sourceUrl", widget: "string", required: false }
       - { label: "Permission (has rights to publish)", name: "hasPermission", widget: "boolean", default: true }
+
