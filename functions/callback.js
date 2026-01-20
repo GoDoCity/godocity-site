@@ -1,5 +1,4 @@
-export async function onRequest(context) {
-  const { env, request } = context;
+export async function onRequest({ env, request }) {
   const url = new URL(request.url);
 
   const code = url.searchParams.get("code");
@@ -7,24 +6,19 @@ export async function onRequest(context) {
 
   const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Accept": "application/json"
-    },
+    headers: { "Content-Type": "application/json", "Accept": "application/json" },
     body: JSON.stringify({
       client_id: env.GITHUB_CLIENT_ID,
       client_secret: env.GITHUB_CLIENT_SECRET,
-      code
-    })
+      code,
+    }),
   });
 
   const tokenJson = await tokenRes.json();
   if (!tokenJson.access_token) {
-    return new Response(JSON.stringify(tokenJson), { status: 400 });
+    return new Response(`OAuth failed: ${JSON.stringify(tokenJson)}`, { status: 400 });
   }
 
-  return Response.redirect(
-    `${url.origin}/admin/#token=${tokenJson.access_token}`,
-    302
-  );
+  // Decap expects the token in the URL hash (#token=...)
+  return Response.redirect(`${url.origin}/admin/#token=${tokenJson.access_token}`, 302);
 }
