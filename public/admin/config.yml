@@ -1,22 +1,32 @@
 backend:
-  name: git-gateway
+  name: github
+  repo: GoDoCity/godocity-site
   branch: main
+  base_url: https://REPLACE_WITH_YOUR_WORKER_URL
+  auth_endpoint: /auth
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
-site_url: https://godocity-site.pages.dev
-display_url: https://godocity-site.pages.dev
+publish_mode: editorial_workflow
 
 collections:
   - name: "posts"
     label: "Posts"
     folder: "src/content/posts"
     create: true
-    slug: "{{slug}}"
+    format: "frontmatter"
+    extension: "md"
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
     fields:
       - { label: "Title", name: "title", widget: "string" }
-      - { label: "City", name: "city", widget: "string", default: "daytona" }
-      - { label: "Featured", name: "featured", widget: "boolean", default: false }
+      - { label: "Description", name: "description", widget: "string", required: false }
+      - { label: "City", name: "city", widget: "select", options: ["daytona"], default: "daytona" }
+      - { label: "Topics", name: "topics", widget: "list", required: false }
+      - { label: "Guides", name: "guides", widget: "list", required: false }
+      - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false }
       - { label: "Publish Date", name: "pubDate", widget: "datetime" }
+      - { label: "Hero Image", name: "heroImage", widget: "image", required: false }
       - { label: "Body", name: "body", widget: "markdown" }
+      - { label: "Source URL", name: "sourceUrl", widget: "string", required: false }
+      - { label: "Permission (has rights to publish)", name: "hasPermission", widget: "boolean", default: true }
