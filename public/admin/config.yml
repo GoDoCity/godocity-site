@@ -2,7 +2,7 @@ backend:
   name: github
   repo: GoDoCity/godocity-site
   branch: main
-base_url: https://godo-decap-auth.yellowcabking.workers.dev
+  base_url: https://godo-decap-auth.yellowcabking.workers.dev
   auth_endpoint: /auth
 
 media_folder: "public/images/uploads"
