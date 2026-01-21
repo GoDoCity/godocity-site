@@ -1,10 +1,18 @@
-export async function onRequestGet({ request, env }) {
+export async function onRequest(context) {
+  const { request, env } = context;
   const url = new URL(request.url);
 
-  const redirect = new URL("https://github.com/login/oauth/authorize");
-  redirect.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
-  redirect.searchParams.set("redirect_uri", `${url.origin}/callback`);
-  redirect.searchParams.set("scope", "repo");
+  // Optional: keep state to reduce CSRF risk
+  const state = crypto.randomUUID();
 
-  return Response.redirect(redirect.toString(), 302);
+  // IMPORTANT: callback must be the Pages Function callback route
+  const redirectUri = `${url.origin}/callback`;
+
+  const gh = new URL("https://github.com/login/oauth/authorize");
+  gh.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
+  gh.searchParams.set("redirect_uri", redirectUri);
+  gh.searchParams.set("scope", "repo");
+  gh.searchParams.set("state", state);
+
+  return Response.redirect(gh.toString(), 302);
 }
