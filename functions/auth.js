@@ -1,5 +1,4 @@
-export async function onRequest(context) {
-  const { request, env } = context;
+export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
 
   const redirect = new URL("https://github.com/login/oauth/authorize");
