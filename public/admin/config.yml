@@ -2,6 +2,7 @@ backend:
   name: github
   repo: GoDoCity/godocity-site
   branch: main
+  base_url: https://godocity-site.pages.dev
   auth_endpoint: /auth
 
 site_url: https://godocity-site.pages.dev
