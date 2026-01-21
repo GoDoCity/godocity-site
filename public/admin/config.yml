@@ -1,4 +1,4 @@
-bbackend:
+backend:
   name: github
   repo: GoDoCity/godocity-site
   branch: main
@@ -36,4 +36,3 @@ collections:
       - { label: "Body", name: "body", widget: "markdown" }
       - { label: "Source URL", name: "sourceUrl", widget: "string", required: false }
       - { label: "Permission (has rights to publish)", name: "hasPermission", widget: "boolean", default: true }
-
