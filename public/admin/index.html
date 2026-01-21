@@ -4,8 +4,20 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>GoDo Admin</title>
+
+    <!-- Force Decap to NOT auto-init with defaults -->
+    <script>
+      window.CMS_MANUAL_INIT = true;
+    </script>
   </head>
+
   <body>
-    <script src="https://unpkg.com/decap-cms@^3/dist/decap-cms.js"></script>
+    <!-- Load Decap -->
+    <script src="https://unpkg.com/decap-cms@3.3.1/dist/decap-cms.js"></script>
+
+    <!-- Force Decap to use your config file explicitly -->
+    <script>
+      CMS.init({ config: "/admin/config.yml" });
+    </script>
   </body>
 </html>
