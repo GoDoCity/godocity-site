@@ -1,18 +1,14 @@
-export async function onRequest(context) {
-  const { request, env } = context;
+export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
 
-  // Optional: keep state to reduce CSRF risk
-  const state = crypto.randomUUID();
+  const redirect = new URL("https://github.com/login/oauth/authorize");
+  redirect.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
 
-  // IMPORTANT: callback must be the Pages Function callback route
-  const redirectUri = `${url.origin}/callback`;
+  // GitHub MUST send the user back here
+  redirect.searchParams.set("redirect_uri", `${env.SITE_URL}/callback`);
 
-  const gh = new URL("https://github.com/login/oauth/authorize");
-  gh.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
-  gh.searchParams.set("redirect_uri", redirectUri);
-  gh.searchParams.set("scope", "repo");
-  gh.searchParams.set("state", state);
+  // keep it simple; repo scope lets Decap write content
+  redirect.searchParams.set("scope", "repo");
 
-  return Response.redirect(gh.toString(), 302);
+  return Response.redirect(redirect.toString(), 302);
 }
