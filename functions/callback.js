@@ -34,7 +34,7 @@ export async function onRequestGet({ request, env }) {
 
   // Decap expects access_token + token_type in the URL hash
   const redirectTo =
-    `${siteOrigin}/admin/#access_token=${tokenJson.access_token}&token_type=bearer`;
+    `${siteOrigin}/admin/#access_token=${tokenJson.access_token}&token_type=Bearer`;
 
   return Response.redirect(redirectTo, 302);
 }
