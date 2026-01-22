@@ -1,8 +1,8 @@
+// /functions/callback.js
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
-  const siteOrigin = url.origin;
-
   const code = url.searchParams.get("code");
+
   if (!code) {
     return new Response(`Missing code.\n\nFull URL:\n${url.toString()}`, {
       status: 400,
@@ -32,9 +32,33 @@ export async function onRequestGet({ request, env }) {
     });
   }
 
-  // Decap expects access_token + token_type in the URL hash
-  const redirectTo =
-    `${siteOrigin}/admin/#access_token=${tokenJson.access_token}&token_type=Bearer`;
+  // ✅ This is the IMPORTANT part:
+  // Decap expects the popup to postMessage() the token to the opener.
+  const siteOrigin = new URL(env.SITE_URL).origin;
+  const payload = {
+    token: tokenJson.access_token,
+    provider: "github",
+  };
 
-  return Response.redirect(redirectTo, 302);
+  const html = `<!doctype html>
+<html>
+  <body>
+    <script>
+      (function() {
+        var payload = ${JSON.stringify(payload)};
+        // Decap listens for this exact message format:
+        var msg = 'authorization:github:success:' + JSON.stringify(payload);
+        if (window.opener) {
+          window.opener.postMessage(msg, ${JSON.stringify(siteOrigin)});
+        }
+        window.close();
+      })();
+    </script>
+    Logged in. You can close this window.
+  </body>
+</html>`;
+
+  return new Response(html, {
+    headers: { "content-type": "text/html; charset=utf-8" },
+  });
 }
