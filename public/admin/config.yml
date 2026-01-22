@@ -3,9 +3,12 @@ backend:
   repo: GoDoCity/godocity-site
   branch: main
 
-  # REQUIRED for custom OAuth
-  auth_endpoint: /auth
-  app_id: Ov23linwsFTCPx6mEIYP
+  # REQUIRED: tells Decap to use YOUR site for auth (not api.netlify.com)
+  base_url: "https://godocity-site.pages.dev"
+  auth_endpoint: "/auth"
+
+  # REQUIRED by Decap GitHub backend for custom OAuth
+  app_id: "Ov23linwsFTCPx6mEIYP"
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
