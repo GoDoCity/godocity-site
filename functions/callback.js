@@ -1,17 +1,19 @@
-export async function onRequest(context) {
-  const { request, env } = context;
+export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
-
   const code = url.searchParams.get("code");
+
   if (!code) {
-    return new Response("Missing code.", { status: 400 });
+    return new Response(`Missing code.\n\nFull URL:\n${url.toString()}`, {
+      status: 400,
+      headers: { "content-type": "text/plain" },
+    });
   }
 
   const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Accept": "application/json",
+      Accept: "application/json",
     },
     body: JSON.stringify({
       client_id: env.GITHUB_CLIENT_ID,
@@ -21,32 +23,17 @@ export async function onRequest(context) {
   });
 
   const tokenJson = await tokenRes.json();
-  const token = tokenJson?.access_token;
 
-  if (!token) {
-    return new Response(`OAuth failed: ${JSON.stringify(tokenJson)}`, { status: 400 });
+  if (!tokenJson.access_token) {
+    return new Response(`OAuth failed:\n${JSON.stringify(tokenJson, null, 2)}`, {
+      status: 400,
+      headers: { "content-type": "text/plain" },
+    });
   }
 
-  // Decap expects the popup to postMessage back to the opener window
-  // and then close.
-  const html = `<!doctype html>
-<html>
-  <head><meta charset="utf-8" /><title>Authenticating…</title></head>
-  <body>
-    <script>
-      (function () {
-        var msg = 'authorization:github:success:' + JSON.stringify({ token: ${JSON.stringify(token)} });
-        if (window.opener) {
-          window.opener.postMessage(msg, '*');
-        }
-        window.close();
-      })();
-    </script>
-    <p>Authentication complete. You can close this window.</p>
-  </body>
-</html>`;
+  // ✅ Decap expects access_token + token_type in the URL hash
+  const redirectTo =
+    `${env.SITE_URL}/admin/#access_token=${tokenJson.access_token}&token_type=bearer`;
 
-  return new Response(html, {
-    headers: { "content-type": "text/html; charset=utf-8" },
-  });
+  return Response.redirect(redirectTo, 302);
 }
