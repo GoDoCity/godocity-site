@@ -1,7 +1,8 @@
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
-  const code = url.searchParams.get("code");
+  const siteOrigin = url.origin;
 
+  const code = url.searchParams.get("code");
   if (!code) {
     return new Response(`Missing code.\n\nFull URL:\n${url.toString()}`, {
       status: 400,
@@ -31,9 +32,9 @@ export async function onRequestGet({ request, env }) {
     });
   }
 
-  // ✅ Decap expects access_token + token_type in the URL hash
+  // Decap expects access_token + token_type in the URL hash
   const redirectTo =
-    `${env.SITE_URL}/admin/#access_token=${tokenJson.access_token}&token_type=bearer`;
+    `${siteOrigin}/admin/#access_token=${tokenJson.access_token}&token_type=bearer`;
 
   return Response.redirect(redirectTo, 302);
 }
