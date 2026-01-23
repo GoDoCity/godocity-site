@@ -1,8 +1,34 @@
+function renderBody(status, content) {
+  const html = `<!doctype html>
+<html>
+  <head><meta charset="utf-8" /></head>
+  <body>
+    <script>
+      (function () {
+        function receiveMessage(message) {
+          // Send the result back to the Decap opener window
+          window.opener.postMessage(
+            'authorization:github:${status}:' + JSON.stringify(${JSON.stringify(content)}),
+            message.origin
+          );
+          window.removeEventListener("message", receiveMessage, false);
+          window.close();
+        }
+
+        window.addEventListener("message", receiveMessage, false);
+        // Tell Decap we're ready
+        window.opener.postMessage("authorizing:github", "*");
+      })();
+    </script>
+  </body>
+</html>`;
+  return html;
+}
+
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
-  const siteOrigin = url.origin;
-
   const code = url.searchParams.get("code");
+
   if (!code) {
     return new Response(`Missing code.\n\nFull URL:\n${url.toString()}`, {
       status: 400,
@@ -13,8 +39,9 @@ export async function onRequestGet({ request, env }) {
   const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
+      "content-type": "application/json",
+      "user-agent": "cf-pages-oauth",
+      accept: "application/json",
     },
     body: JSON.stringify({
       client_id: env.GITHUB_CLIENT_ID,
@@ -23,17 +50,18 @@ export async function onRequestGet({ request, env }) {
     }),
   });
 
-  const tokenJson = await tokenRes.json();
+  const result = await tokenRes.json();
 
-  if (!tokenJson.access_token) {
-    return new Response(`OAuth failed:\n${JSON.stringify(tokenJson, null, 2)}`, {
-      status: 400,
-      headers: { "content-type": "text/plain" },
+  if (result.error || !result.access_token) {
+    return new Response(renderBody("error", result), {
+      status: 401,
+      headers: { "content-type": "text/html; charset=UTF-8" },
     });
   }
 
-  const redirectTo =
-    `${siteOrigin}/admin/#access_token=${tokenJson.access_token}&token_type=bearer`;
-
-  return Response.redirect(redirectTo, 302);
+  // This is what Decap expects
+  return new Response(
+    renderBody("success", { token: result.access_token, provider: "github" }),
+    { status: 200, headers: { "content-type": "text/html; charset=UTF-8" } }
+  );
 }
