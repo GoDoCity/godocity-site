@@ -1,7 +1,15 @@
-// /functions/callback.js
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
+
+  const siteUrl = env.SITE_URL;
+
+  if (!siteUrl) {
+    return new Response(
+      "SITE_URL is missing. Add it in Cloudflare Pages -> Settings -> Variables and Secrets (Production).",
+      { status: 500, headers: { "content-type": "text/plain" } }
+    );
+  }
 
   if (!code) {
     return new Response(`Missing code.\n\nFull URL:\n${url.toString()}`, {
@@ -32,33 +40,10 @@ export async function onRequestGet({ request, env }) {
     });
   }
 
-  // ✅ This is the IMPORTANT part:
-  // Decap expects the popup to postMessage() the token to the opener.
-  const siteOrigin = new URL(env.SITE_URL).origin;
-  const payload = {
-    token: tokenJson.access_token,
-    provider: "github",
-  };
+  // Decap expects these exact hash keys:
+  const redirectTo =
+    `${siteUrl}/admin/#access_token=${tokenJson.access_token}&token_type=bearer`;
 
-  const html = `<!doctype html>
-<html>
-  <body>
-    <script>
-      (function() {
-        var payload = ${JSON.stringify(payload)};
-        // Decap listens for this exact message format:
-        var msg = 'authorization:github:success:' + JSON.stringify(payload);
-        if (window.opener) {
-          window.opener.postMessage(msg, ${JSON.stringify(siteOrigin)});
-        }
-        window.close();
-      })();
-    </script>
-    Logged in. You can close this window.
-  </body>
-</html>`;
-
-  return new Response(html, {
-    headers: { "content-type": "text/html; charset=utf-8" },
-  });
+  return Response.redirect(redirectTo, 302);
 }
+
