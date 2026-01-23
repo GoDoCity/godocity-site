@@ -1,16 +1,8 @@
 export async function onRequestGet({ request, env }) {
   const url = new URL(request.url);
+  const siteOrigin = url.origin;
+
   const code = url.searchParams.get("code");
-
-  const siteUrl = env.SITE_URL;
-
-  if (!siteUrl) {
-    return new Response(
-      "SITE_URL is missing. Add it in Cloudflare Pages -> Settings -> Variables and Secrets (Production).",
-      { status: 500, headers: { "content-type": "text/plain" } }
-    );
-  }
-
   if (!code) {
     return new Response(`Missing code.\n\nFull URL:\n${url.toString()}`, {
       status: 400,
@@ -40,10 +32,8 @@ export async function onRequestGet({ request, env }) {
     });
   }
 
-  // Decap expects these exact hash keys:
   const redirectTo =
-    `${siteUrl}/admin/#access_token=${tokenJson.access_token}&token_type=bearer`;
+    `${siteOrigin}/admin/#access_token=${tokenJson.access_token}&token_type=bearer`;
 
   return Response.redirect(redirectTo, 302);
 }
-
