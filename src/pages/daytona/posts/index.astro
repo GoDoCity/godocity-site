@@ -1,0 +1,36 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+const all = await getCollection("posts");
+const posts = all
+  .filter((p) => (p.data.city ?? "daytona") === "daytona")
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+const title = "Posts";
+const subtitle = "Latest GoDoDaytona posts.";
+---
+
+<Base title={title} subtitle={subtitle} cityBase="daytona" />
+
+<section class="section">
+  <div class="container">
+    <h1 class="h1">{title}</h1>
+
+    {posts.length === 0 ? (
+      <p class="lede">No posts yet. Create one in /admin.</p>
+    ) : (
+      <div style="display:grid;gap:14px;margin-top:14px">
+        {posts.map((p) => (
+          <a class="pill" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:14px;border-radius:14px">
+            <div style="font-weight:800">{p.data.title}</div>
+            <div style="opacity:.8;margin-top:6px">{p.data.description ?? ""}</div>
+            <div style="opacity:.6;margin-top:8px;font-size:13px">
+              {new Date(p.data.pubDate).toLocaleDateString()}
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </div>
+</section>
