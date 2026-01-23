@@ -1,10 +1,16 @@
 export async function onRequestGet({ request, env }) {
-  const siteOrigin = new URL(request.url).origin;
+  const url = new URL(request.url);
 
-  const redirect = new URL("https://github.com/login/oauth/authorize");
-  redirect.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
-  redirect.searchParams.set("redirect_uri", `${siteOrigin}/callback`);
-  redirect.searchParams.set("scope", "repo");
+  const redirectUrl = new URL("https://github.com/login/oauth/authorize");
+  redirectUrl.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
 
-  return Response.redirect(redirect.toString(), 302);
+  // IMPORTANT: use the current site origin (no env var)
+  redirectUrl.searchParams.set("redirect_uri", `${url.origin}/callback`);
+
+  redirectUrl.searchParams.set("scope", "repo");
+
+  // optional but recommended
+  redirectUrl.searchParams.set("state", crypto.getRandomValues(new Uint8Array(12)).join(""));
+
+  return Response.redirect(redirectUrl.toString(), 302);
 }
