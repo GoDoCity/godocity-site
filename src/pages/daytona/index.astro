@@ -2,12 +2,54 @@
 import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-const city = "daytona";
-const allPosts = await getCollection("posts", (p) => p.data.city === city);
-allPosts.sort((a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime());
+// Load all posts, then keep only Daytona posts (supports a few common field names)
+const all = await getCollection("posts");
 
-const featured = allPosts.find((p) => p.data.featured) ?? allPosts[0];
-const latest = allPosts.filter((p) => p.id !== featured?.id).slice(0, 5);
+// Normalize city field (some of your content/config uses `city`)
+const daytonaPosts = all
+  .filter((p) => {
+    const city =
+      (p.data?.city ?? p.data?.cityBase ?? p.data?.location ?? "").toString().toLowerCase();
+    return city === "daytona";
+  })
+  .sort((a, b) => {
+    const da = new Date(a.data?.pubDate ?? a.data?.date ?? 0).getTime();
+    const db = new Date(b.data?.pubDate ?? b.data?.date ?? 0).getTime();
+    return db - da;
+  });
+
+// Pick a featured post if one is marked, otherwise the newest post
+const featured =
+  daytonaPosts.find((p) => p?.data?.featured === true) ?? daytonaPosts[0] ?? null;
+
+// Latest list (excluding featured)
+const latest = (daytonaPosts ?? [])
+  .filter((p) => p?.id && p.id !== featured?.id)
+  .slice(0, 5);
+
+// Helpers
+const postUrl = (p) => `/daytona/posts/${p.slug}/`;
+const postDescription = (p) =>
+  p?.data?.description ??
+  p?.data?.excerpt ??
+  p?.data?.summary ??
+  "";
+const postTitle = (p) => p?.data?.title ?? "Untitled";
+const postTags = (p) =>
+  (p?.data?.tags ?? p?.data?.topics ?? p?.data?.topic ?? []).filter(Boolean);
+
+const formatDate = (d) => {
+  if (!d) return "";
+  try {
+    return new Date(d).toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  } catch {
+    return "";
+  }
+};
 ---
 
 <Base
@@ -18,81 +60,86 @@ const latest = allPosts.filter((p) => p.id !== featured?.id).slice(0, 5);
   <!-- Postcard banner (image only, no interference with content) -->
   <header class="city-banner" aria-label="Greetings from Daytona Beach"></header>
 
-  <!-- Hero content (clean background, no postcard behind cards) -->
+  <!-- Hero content -->
   <section class="hero hero-daytona">
     <div class="container hero-grid">
+      <!-- Featured -->
       <article class="card card-pad">
         <div class="kicker">Featured</div>
 
         {featured ? (
           <>
             <h1 class="h1" style="font-size:40px;margin-bottom:8px">
-              {featured.data.title}
+              <a href={postUrl(featured)} style="text-decoration:none;color:inherit">
+                {postTitle(featured)}
+              </a>
             </h1>
 
-            <p class="lede">{featured.data.description}</p>
+            {postDescription(featured) ? (
+              <p class="lede">{postDescription(featured)}</p>
+            ) : (
+              <p class="lede">New story coming soon.</p>
+            )}
 
             <div class="tagrow">
-              {featured.data.tags.slice(0, 5).map((t) => (
+              {(postTags(featured) ?? []).slice(0, 5).map((t) => (
                 <a class="tag" href={`/daytona/topic/${t}/`}>{t}</a>
               ))}
             </div>
 
             <div style="margin-top:14px">
-              <a class="cta" href={`/daytona/posts/${featured.slug}/`}>Read →</a>
+              <a class="cta" href={postUrl(featured)}>Read</a>
             </div>
           </>
         ) : (
-          <p class="lede">
-            Add your first post in <code>src/content/posts/daytona/</code>.
-          </p>
+          <>
+            <h1 class="h1" style="font-size:40px;margin-bottom:8px">GoDoDaytona</h1>
+            <p class="lede">No posts yet. Click “New Posts” in the admin to add your first one.</p>
+          </>
         )}
       </article>
 
-      <aside class="card">
-        <div class="card-pad">
-          <div class="kicker">Subscribe</div>
-          <h2 style="margin:10px 0 8px">Get the GoDoDaytona newsletter</h2>
+      <!-- Latest -->
+      <aside class="card card-pad">
+        <div class="kicker">Latest</div>
 
-          <p class="lede" style="margin:0 0 12px">
-            One email. The best of Daytona: events, food, and local picks.
-          </p>
+        {latest.length ? (
+          <ul class="list" style="list-style:none;padding:0;margin:10px 0 0 0;display:grid;gap:10px">
+            {latest.map((p) => (
+              <li class="row" style="display:grid;gap:4px">
+                <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
+                  <a class="h3" href={postUrl(p)} style="text-decoration:none">
+                    {postTitle(p)}
+                  </a>
+                  <span style="opacity:.7;font-size:13px">
+                    {formatDate(p.data?.pubDate ?? p.data?.date)}
+                  </span>
+                </div>
 
-          <form method="post" action="#">
-            <input type="email" name="email" placeholder="you@email.com" required />
-            <button class="cta" type="submit">Subscribe</button>
-          </form>
+                {postDescription(p) ? (
+                  <p style="margin:0;opacity:.85">{postDescription(p)}</p>
+                ) : null}
 
-          <div class="note">
-            This is a placeholder form. When you pick Beehiiv/Mailchimp/etc, we’ll swap the form action (no redesign needed).
-          </div>
-        </div>
+                <div class="tagrow">
+                  {(postTags(p) ?? []).slice(0, 3).map((t) => (
+                    <a class="tag" href={`/daytona/topic/${t}/`}>{t}</a>
+                  ))}
+                </div>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="lede" style="margin-top:10px">Nothing yet — add your first post in Admin.</p>
+        )}
 
-        <div class="article">
-          <h3 style="margin:0 0 6px">Quick links</h3>
-          <div class="tagrow">
-            <a class="tag" href="/daytona/events/">Events</a>
-            <a class="tag" href="/daytona/guides/play/">Guides</a>
-            <a class="tag" href="/advertise/">Advertise</a>
-          </div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <a class="pill" href="/daytona/posts/">All posts</a>
+          <a class="pill" href="/daytona/guides/">Guides</a>
+          <a class="pill" href="/daytona/events/">Events</a>
         </div>
       </aside>
     </div>
   </section>
-
-  <section class="section">
-    <div class="container">
-      <h2>Latest</h2>
-
-      <div class="card">
-        {latest.map((p) => (
-          <div class="article">
-            <h3><a href={`/daytona/posts/${p.slug}/`}>{p.data.title}</a></h3>
-            <p>{p.data.description}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
 </Base>
+
 
