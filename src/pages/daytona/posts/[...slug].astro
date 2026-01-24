@@ -3,36 +3,38 @@ import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("posts", (p) => p.data.city === "daytona");
-  return posts.map((p) => ({ params: { slug: p.slug }, props: { post: p } }));
+  const posts = await getCollection("posts");
+  return posts
+    .filter((p) => (p.data.city ?? "daytona") === "daytona")
+    .map((p) => ({
+      params: { slug: p.slug },
+      props: { post: p },
+    }));
 }
 
 const { post } = Astro.props;
-const rendered = await post.render();
+const title = post.data.title;
+const subtitle = post.data.description ?? "GoDoDaytona post";
+const { Content } = await post.render();
 ---
 
-<Base title={`${post.data.title} | GoDoDaytona`} subtitle={post.data.description} cityBase="daytona">
-  <section class="section">
-    <div class="container">
-      <div class="card card-pad">
-        <div class="kicker">{new Date(post.data.pubDate).toLocaleDateString()}</div>
+<Base title={title} subtitle={subtitle} cityBase="daytona" />
 
-        <h1 style="margin:10px 0 10px;font-size:34px;line-height:1.12">
-          {post.data.title}
-        </h1>
+<section class="section">
+  <div class="container" style="max-width: 780px;">
+    <h1 class="h1">{post.data.title}</h1>
+    {post.data.description && <p class="lede">{post.data.description}</p>}
 
-        <p class="lede" style="margin-top:0">{post.data.description}</p>
+    <p style="opacity:.6;margin-top:10px">
+      {new Date(post.data.pubDate).toLocaleDateString()}
+    </p>
 
-        <div class="tagrow">
-          {(post.data.tags ?? []).map((t) => (
-            <a class="tag" href={`/daytona/topic/${t}/`}>{t}</a>
-          ))}
-        </div>
+    <article style="margin-top:18px;line-height:1.65">
+      <Content />
+    </article>
 
-        <hr style="border:none;border-top:1px solid var(--line);margin:16px 0" />
-
-        {rendered ? <rendered.Content /> : <p class="lede">No post content.</p>}
-      </div>
-    </div>
-  </section>
-</Base>
+    <p style="margin-top:22px">
+      <a class="pill" href="/daytona/posts/">← All posts</a>
+    </p>
+  </div>
+</section>
