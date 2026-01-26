@@ -1,3 +1,4 @@
+---
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
@@ -15,6 +16,11 @@ const { post } = Astro.props;
 const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
+
+const tags = (post.data.tags ?? []).filter(Boolean);
+const dateLabel = post.data.pubDate
+  ? new Date(post.data.pubDate).toLocaleDateString()
+  : "";
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
@@ -23,35 +29,21 @@ const { Content } = await post.render();
   <div class="container" style="max-width: 780px;">
     <h1 class="h1">{post.data.title}</h1>
 
-    {post.data.description && (
-      <p class="lede">{post.data.description}</p>
-    )}
+    {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    {/* TAGS */}
-    {post.data.tags && post.data.tags.length > 0 && (
-      <div class="tagrow" style="margin: 12px 0 10px; display: flex; gap: 8px; flex-wrap: wrap;">
-        {post.data.tags.map((tag) => (
-          <a
-            class="tag"
-            href={`/daytona/topic/${tag}/`}
-            style="
-              font-size: 13px;
-              padding: 4px 10px;
-              border-radius: 999px;
-              background: rgba(255,255,255,0.08);
-              text-decoration: none;
-              color: inherit;
-            "
-          >
-            {tag}
-          </a>
+    {tags.length > 0 && (
+      <div class="tagrow">
+        {tags.map((tag) => (
+          <a class="tag" href={`/daytona/topic/${tag}/`}>{tag}</a>
         ))}
       </div>
     )}
 
-    <p style="opacity:.6;margin-top:6px">
-      {new Date(post.data.pubDate).toLocaleDateString()}
-    </p>
+    {dateLabel && (
+      <p style="opacity:.6;margin-top:10px">
+        {dateLabel}
+      </p>
+    )}
 
     <article style="margin-top:18px;line-height:1.65">
       <Content />
