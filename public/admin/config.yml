@@ -27,7 +27,15 @@ collections:
       - { label: "Title", name: "title", widget: "string" }
       - { label: "Description", name: "description", widget: "string", required: false }
       - { label: "City", name: "city", widget: "select", options: ["daytona"], default: "daytona" }
-      - { label: "Tags", name: "tags", widget: "list", required: false, hint: "Click Add item for each tag" }
+      - label: "Tags"
+        name: "tags"
+        widget: "list"
+        required: false
+        summary: "{{fields.tag}}"
+        field:
+          label: "Tag"
+          name: "tag"
+          widget: "string"
       - { label: "Guides", name: "guides", widget: "list", required: false }
       - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false }
       - { label: "Publish Date", name: "pubDate", widget: "datetime" }
