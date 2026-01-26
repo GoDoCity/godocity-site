@@ -1,12 +1,19 @@
+---
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
 
-  const tags = new Set(
-    posts.flatMap((p) => p.data.tags ?? [])
-  );
+  // Collect unique tags for Daytona posts
+  const tags = new Set();
+  for (const p of posts) {
+    if ((p.data.city ?? "daytona") !== "daytona") continue;
+    const list = Array.isArray(p.data.tags) ? p.data.tags : [];
+    for (const t of list) {
+      if (t) tags.add(String(t));
+    }
+  }
 
   return Array.from(tags).map((tag) => ({
     params: { tag },
@@ -17,48 +24,47 @@ export async function getStaticPaths() {
 const { tag } = Astro.props;
 
 const posts = (await getCollection("posts"))
-  .filter((p) =>
-    (p.data.city ?? "daytona") === "daytona" &&
-    (p.data.tags ?? []).includes(tag)
-  )
-  .sort(
-    (a, b) =>
-      new Date(b.data.pubDate).getTime() -
-      new Date(a.data.pubDate).getTime()
-  );
----
+  .filter((p) => (p.data.city ?? "daytona") === "daytona")
+  .filter((p) => (Array.isArray(p.data.tags) ? p.data.tags : []).includes(tag))
+  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
 
-<Base
-  title={`#${tag}`}
-  subtitle={`Posts tagged with “${tag}”`}
-  cityBase="daytona"
-/>
+const title = `#${tag}`;
+const subtitle = `Posts tagged "${tag}"`;
+const postUrl = (p) => `/daytona/posts/${p.slug}/`;
+---
+<Base title={title} subtitle={subtitle} cityBase="daytona" />
 
 <section class="section">
   <div class="container" style="max-width: 900px;">
-    {posts.length === 0 && (
-      <p>No posts found for this tag.</p>
+    <h1 class="h1">{title}</h1>
+    <p class="lede">{subtitle}</p>
+
+    {posts.length === 0 ? (
+      <div class="card card-pad" style="margin-top:14px;">
+        <div class="kicker">No posts yet</div>
+        <p class="lede" style="margin-top:10px;">
+          Add the tag <strong>{tag}</strong> to a post in Admin.
+        </p>
+      </div>
+    ) : (
+      <div style="display:grid;gap:14px;margin-top:14px;">
+        {posts.map((p) => (
+          <article class="card">
+            <div class="article">
+              <h3 style="margin:0 0 6px;font-size:18px;">
+                <a href={postUrl(p)}>{p.data.title}</a>
+              </h3>
+              {p.data.description ? <p style="margin:0;opacity:.85;">{p.data.description}</p> : null}
+              <p style="margin:10px 0 0;opacity:.6;font-size:13px;">
+                {new Date(p.data.pubDate).toLocaleDateString()}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
     )}
 
-    {posts.map((post) => (
-      <article style="margin-bottom: 28px;">
-        <h3 class="h3">
-          <a href={`/daytona/posts/${post.slug}/`}>
-            {post.data.title}
-          </a>
-        </h3>
-
-        {post.data.description && (
-          <p class="lede">{post.data.description}</p>
-        )}
-
-        <p style="opacity:.6;font-size:14px">
-          {new Date(post.data.pubDate).toLocaleDateString()}
-        </p>
-      </article>
-    ))}
-
-    <p style="margin-top:32px">
+    <p style="margin-top:22px">
       <a class="pill" href="/daytona/posts/">← All posts</a>
     </p>
   </div>
