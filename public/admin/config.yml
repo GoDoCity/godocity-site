@@ -4,6 +4,7 @@ backend:
   branch: main
   base_url: https://godocity-site.pages.dev
   auth_endpoint: /auth
+  app_id: Ov23linwsFTCPx6mEIYP
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
