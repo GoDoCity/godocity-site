@@ -2,6 +2,12 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+function cityOf(p) {
+  if (p.data?.city) return String(p.data.city).toLowerCase();
+  if (typeof p.id === "string" && p.id.startsWith("daytona/")) return "daytona";
+  return "daytona";
+}
+
 function slugifyTag(tag) {
   return String(tag ?? "")
     .toLowerCase()
@@ -11,59 +17,70 @@ function slugifyTag(tag) {
     .replace(/(^-|-$)/g, "");
 }
 
+function displayTag(tag) {
+  return String(tag ?? "").trim().replace(/\s+/g, " ");
+}
+
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter((p) => cityOf(p) === "daytona");
 
-  // only Daytona posts
-  const daytonaPosts = posts.filter((p) => (p.data.city ?? "daytona") === "daytona");
+  // slug -> { label, posts[] }
+  const map = new Map();
 
-  // collect tags -> slug map
-  const tagMap = new Map(); // slug -> original label
-  for (const p of daytonaPosts) {
-    const tags = Array.isArray(p.data.tags) ? p.data.tags : [];
-    for (const t of tags) {
-      const slug = slugifyTag(t);
-      if (slug) tagMap.set(slug, t);
+  for (const p of posts) {
+    const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
+    for (const raw of tags) {
+      const slug = slugifyTag(raw);
+      if (!slug) continue;
+
+      const label = displayTag(raw);
+      const existing = map.get(slug);
+      if (!existing) map.set(slug, { label, posts: [p] });
+      else map.set(slug, { label: existing.label, posts: [...existing.posts, p] });
     }
   }
 
-  return Array.from(tagMap.entries()).map(([slug, label]) => ({
-    params: { tag: slug },
-    props: { tagSlug: slug, tagLabel: label },
+  return Array.from(map.entries()).map(([tag, v]) => ({
+    params: { tag },
+    props: { tag, label: v.label, posts: v.posts },
   }));
 }
 
-const { tagSlug, tagLabel } = Astro.props;
-
-const posts = await getCollection("posts");
-const all = posts.filter((p) => (p.data.city ?? "daytona") === "daytona");
-
-const tagged = all
-  .filter((p) => Array.isArray(p.data.tags) && p.data.tags.some((t) => slugifyTag(t) === tagSlug))
-  .sort((a, b) => new Date(b.data.pubDate).valueOf() - new Date(a.data.pubDate).valueOf());
+const { tag, label, posts } = Astro.props;
 ---
 
-<Base title={`Topic: ${tagLabel}`} subtitle="Browse posts by topic." cityBase="daytona" />
+<Base title={`Topic: ${label}`} subtitle="Browse posts by topic." cityBase="daytona" />
 
 <section class="section">
-  <div class="container" style="max-width: 900px;">
-    <h1 class="h1">Topic: {tagLabel}</h1>
+  <div class="container" style="max-width: 980px;">
+    <h1 class="h1">{label}</h1>
+    <p class="lede" style="opacity:.8">Posts tagged “{label}”.</p>
 
-    {tagged.length === 0 ? (
-      <p>No posts yet for this topic.</p>
+    {posts?.length ? (
+      <div style="margin-top:18px;display:grid;gap:12px;">
+        {posts
+          .slice()
+          .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate))
+          .map((p) => (
+            <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
+              <div style="font-weight:700">{p.data.title}</div>
+              {p.data.description && <div style="opacity:.8;margin-top:4px">{p.data.description}</div>}
+              <div style="opacity:.6;margin-top:6px">
+                {new Date(p.data.pubDate).toLocaleDateString()}
+              </div>
+            </a>
+          ))}
+      </div>
     ) : (
-      <ul>
-        {tagged.map((p) => (
-          <li style="margin: 10px 0;">
-            <a href={`/daytona/posts/${p.slug}/`}>{p.data.title}</a>
-            <span style="opacity:.6"> — {new Date(p.data.pubDate).toLocaleDateString()}</span>
-          </li>
-        ))}
-      </ul>
+      <div class="card" style="margin-top:18px;padding:18px;">
+        No posts found for this topic yet.
+      </div>
     )}
 
-    <p style="margin-top: 22px">
+    <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/topics/">← All topics</a>
+      <a class="pill" href="/daytona/posts/">All posts</a>
+      <a class="pill" href="/daytona/">Daytona home</a>
     </p>
   </div>
 </section>
