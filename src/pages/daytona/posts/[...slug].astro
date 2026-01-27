@@ -4,8 +4,15 @@ import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
+
+  function cityOf(p) {
+    if (p.data?.city) return String(p.data.city).toLowerCase();
+    if (typeof p.id === "string" && p.id.startsWith("daytona/")) return "daytona";
+    return "daytona";
+  }
+
   return posts
-    .filter((p) => (p.data.city ?? "daytona") === "daytona")
+    .filter((p) => cityOf(p) === "daytona")
     .map((p) => ({
       params: { slug: p.slug },
       props: { post: p },
@@ -17,10 +24,10 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
-const tags = (post.data.tags ?? []).filter(Boolean);
-const dateLabel = post.data.pubDate
-  ? new Date(post.data.pubDate).toLocaleDateString()
-  : "";
+const tags = Array.isArray(post.data?.tags) ? post.data.tags : [];
+const cleanTags = tags
+  .map((t) => String(t ?? "").trim().replace(/\s+/g, " "))
+  .filter(Boolean);
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
@@ -28,30 +35,27 @@ const dateLabel = post.data.pubDate
 <section class="section">
   <div class="container" style="max-width: 780px;">
     <h1 class="h1">{post.data.title}</h1>
-
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    {tags.length > 0 && (
-      <div class="tagrow">
-        {tags.map((tag) => (
-          <a class="tag" href={`/daytona/topic/${tag}/`}>{tag}</a>
+    <p style="opacity:.6;margin-top:10px">
+      {new Date(post.data.pubDate).toLocaleDateString()}
+    </p>
+
+    {cleanTags.length > 0 && (
+      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
+        {cleanTags.map((t) => (
+          <a class="pill" href={`/daytona/topic/${encodeURIComponent(t)}/`}>{t}</a>
         ))}
       </div>
-    )}
-
-    {dateLabel && (
-      <p style="opacity:.6;margin-top:10px">
-        {dateLabel}
-      </p>
     )}
 
     <article style="margin-top:18px;line-height:1.65">
       <Content />
     </article>
 
-    <p style="margin-top:22px">
+    <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/posts/">← All posts</a>
+      <a class="pill" href="/daytona/topics/">Topics</a>
     </p>
   </div>
 </section>
-
