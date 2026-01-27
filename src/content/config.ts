@@ -9,8 +9,8 @@ const posts = defineCollection({
     pubDate: z.coerce.date(),
     heroImage: z.string().optional(),
 
-    // ✅ THIS is the key fix:
-    tags: z.array(z.string()).optional(),
+    // ✅ tags available everywhere, never undefined
+    tags: z.array(z.string()).default([]),
 
     guides: z.array(z.string()).optional(),
     featured: z.boolean().optional(),
