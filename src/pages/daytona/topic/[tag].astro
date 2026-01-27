@@ -5,67 +5,88 @@ import { getCollection } from "astro:content";
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
 
-  // Collect unique tags for Daytona posts
-  const tags = new Set();
+  const allTags = new Set();
+
   for (const p of posts) {
-    if ((p.data.city ?? "daytona") !== "daytona") continue;
-    const list = Array.isArray(p.data.tags) ? p.data.tags : [];
-    for (const t of list) {
-      if (t) tags.add(String(t));
+    // infer city (same logic as below)
+    const city =
+      p.data?.city
+        ? String(p.data.city).toLowerCase()
+        : (typeof p.id === "string" && p.id.startsWith("daytona/"))
+          ? "daytona"
+          : "daytona";
+
+    if (city !== "daytona") continue;
+
+    const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
+    for (const t of tags) {
+      const clean = String(t ?? "").trim().replace(/\s+/g, " ");
+      if (clean) allTags.add(clean);
     }
   }
 
-  return Array.from(tags).map((tag) => ({
-    params: { tag },
+  return Array.from(allTags).map((tag) => ({
+    params: { tag: encodeURIComponent(tag) },
     props: { tag },
   }));
 }
 
 const { tag } = Astro.props;
 
-const posts = (await getCollection("posts"))
-  .filter((p) => (p.data.city ?? "daytona") === "daytona")
-  .filter((p) => (Array.isArray(p.data.tags) ? p.data.tags : []).includes(tag))
-  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
+function cityOf(p) {
+  if (p.data?.city) return String(p.data.city).toLowerCase();
+  if (typeof p.id === "string" && p.id.startsWith("daytona/")) return "daytona";
+  return "daytona";
+}
 
-const title = `#${tag}`;
-const subtitle = `Posts tagged "${tag}"`;
-const postUrl = (p) => `/daytona/posts/${p.slug}/`;
+function normalizeTag(t) {
+  return String(t ?? "").trim().replace(/\s+/g, " ");
+}
+
+const posts = (await getCollection("posts"))
+  .filter((p) => cityOf(p) === "daytona")
+  .filter((p) => {
+    const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
+    return tags.map(normalizeTag).includes(normalizeTag(tag));
+  })
+  // newest first
+  .sort((a, b) => new Date(b.data.pubDate).getTime() - new Date(a.data.pubDate).getTime());
 ---
-<Base title={title} subtitle={subtitle} cityBase="daytona" />
+
+<Base title={`Topic: ${tag}`} subtitle={`Posts tagged “${tag}”.`} cityBase="daytona" />
 
 <section class="section">
-  <div class="container" style="max-width: 900px;">
-    <h1 class="h1">{title}</h1>
-    <p class="lede">{subtitle}</p>
+  <div class="container" style="max-width: 980px;">
+    <h1 class="h1">Topic: {tag}</h1>
+    <p class="lede" style="opacity:.8">Posts tagged “{tag}”.</p>
 
     {posts.length === 0 ? (
-      <div class="card card-pad" style="margin-top:14px;">
-        <div class="kicker">No posts yet</div>
-        <p class="lede" style="margin-top:10px;">
-          Add the tag <strong>{tag}</strong> to a post in Admin.
-        </p>
+      <div class="card" style="margin-top:18px;padding:18px;">
+        No posts found for this topic yet.
       </div>
     ) : (
-      <div style="display:grid;gap:14px;margin-top:14px;">
+      <div style="margin-top:18px;display:grid;gap:14px;">
         {posts.map((p) => (
-          <article class="card">
-            <div class="article">
-              <h3 style="margin:0 0 6px;font-size:18px;">
-                <a href={postUrl(p)}>{p.data.title}</a>
-              </h3>
-              {p.data.description ? <p style="margin:0;opacity:.85;">{p.data.description}</p> : null}
-              <p style="margin:10px 0 0;opacity:.6;font-size:13px;">
-                {new Date(p.data.pubDate).toLocaleDateString()}
-              </p>
+          <a class="card" href={`/daytona/posts/${p.slug}/`} style="padding:16px;text-decoration:none;">
+            <div style="opacity:.6;font-size:.9rem">
+              {new Date(p.data.pubDate).toLocaleDateString()}
             </div>
-          </article>
+            <div style="font-weight:700;font-size:1.15rem;margin-top:6px;">
+              {p.data.title}
+            </div>
+            {p.data.description && (
+              <div style="opacity:.85;margin-top:6px;">
+                {p.data.description}
+              </div>
+            )}
+          </a>
         ))}
       </div>
     )}
 
-    <p style="margin-top:22px">
-      <a class="pill" href="/daytona/posts/">← All posts</a>
+    <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
+      <a class="pill" href="/daytona/topics/">← All topics</a>
+      <a class="pill" href="/daytona/posts/">All posts</a>
     </p>
   </div>
 </section>
