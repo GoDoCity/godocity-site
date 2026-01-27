@@ -2,56 +2,57 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-const city = "daytona";
+function cityOf(p) {
+  // Prefer explicit frontmatter
+  if (p.data?.city) return String(p.data.city).toLowerCase();
+
+  // If legacy folder structure is used, infer city from id like "daytona/xxxx.md"
+  if (typeof p.id === "string" && p.id.startsWith("daytona/")) return "daytona";
+
+  // Default
+  return "daytona";
+}
+
+function normalizeTag(t) {
+  return String(t ?? "")
+    .trim()
+    .replace(/\s+/g, " ");
+}
 
 const posts = (await getCollection("posts"))
-  .filter((p) => (p.data.city ?? city) === city);
+  .filter((p) => cityOf(p) === "daytona");
 
-// Build a tag -> count map
-const counts = new Map();
-
+const tagSet = new Set();
 for (const p of posts) {
-  const tags = Array.isArray(p.data.tags) ? p.data.tags : [];
+  const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
   for (const t of tags) {
-    const tag = String(t).trim();
-    if (!tag) continue;
-    counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    const clean = normalizeTag(t);
+    if (clean) tagSet.add(clean);
   }
 }
 
-// Sort tags by count (desc), then name (asc)
-const topics = Array.from(counts.entries())
-  .map(([tag, count]) => ({ tag, count }))
-  .sort((a, b) => (b.count - a.count) || a.tag.localeCompare(b.tag));
-
-const title = "Topics";
-const subtitle = "Browse posts by topic.";
+const tags = Array.from(tagSet).sort((a, b) => a.localeCompare(b));
 ---
 
-<Base title={title} subtitle={subtitle} cityBase="daytona" />
+<Base title="Topics" subtitle="Browse posts by topic." cityBase="daytona" />
 
 <section class="section">
   <div class="container" style="max-width: 980px;">
-    <h1 class="h1">{title}</h1>
-    <p class="lede">{subtitle}</p>
+    <h1 class="h1">Topics</h1>
+    <p class="lede" style="opacity:.8">Browse posts by topic.</p>
 
-    {topics.length === 0 ? (
-      <div class="card card-pad" style="margin-top:14px;">
-        <div class="kicker">No topics yet</div>
-        <p class="lede" style="margin-top:10px;">
+    {tags.length === 0 ? (
+      <div class="card" style="margin-top:18px;padding:18px;">
+        <strong>NO TOPICS YET</strong>
+        <div style="opacity:.8;margin-top:6px;">
           Add tags to posts in Admin and they will appear here automatically.
-        </p>
+        </div>
       </div>
     ) : (
-      <div style="display:grid;gap:12px;margin-top:14px;">
-        {topics.map(({ tag, count }) => (
-          <a
-            class="pill"
-            href={`/daytona/topic/${tag}/`}
-            style="display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;"
-          >
-            <span style="font-weight:800">{tag}</span>
-            <span style="opacity:.7">{count} {count === 1 ? "post" : "posts"}</span>
+      <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;">
+        {tags.map((t) => (
+          <a class="pill" href={`/daytona/topic/${encodeURIComponent(t)}/`}>
+            {t}
           </a>
         ))}
       </div>
