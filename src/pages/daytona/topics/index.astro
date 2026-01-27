@@ -1,0 +1,64 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+const city = "daytona";
+
+const posts = (await getCollection("posts"))
+  .filter((p) => (p.data.city ?? city) === city);
+
+// Build a tag -> count map
+const counts = new Map();
+
+for (const p of posts) {
+  const tags = Array.isArray(p.data.tags) ? p.data.tags : [];
+  for (const t of tags) {
+    const tag = String(t).trim();
+    if (!tag) continue;
+    counts.set(tag, (counts.get(tag) ?? 0) + 1);
+  }
+}
+
+// Sort tags by count (desc), then name (asc)
+const topics = Array.from(counts.entries())
+  .map(([tag, count]) => ({ tag, count }))
+  .sort((a, b) => (b.count - a.count) || a.tag.localeCompare(b.tag));
+
+const title = "Topics";
+const subtitle = "Browse posts by topic.";
+---
+
+<Base title={title} subtitle={subtitle} cityBase="daytona" />
+
+<section class="section">
+  <div class="container" style="max-width: 980px;">
+    <h1 class="h1">{title}</h1>
+    <p class="lede">{subtitle}</p>
+
+    {topics.length === 0 ? (
+      <div class="card card-pad" style="margin-top:14px;">
+        <div class="kicker">No topics yet</div>
+        <p class="lede" style="margin-top:10px;">
+          Add tags to posts in Admin and they will appear here automatically.
+        </p>
+      </div>
+    ) : (
+      <div style="display:grid;gap:12px;margin-top:14px;">
+        {topics.map(({ tag, count }) => (
+          <a
+            class="pill"
+            href={`/daytona/topic/${tag}/`}
+            style="display:flex;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:14px;"
+          >
+            <span style="font-weight:800">{tag}</span>
+            <span style="opacity:.7">{count} {count === 1 ? "post" : "posts"}</span>
+          </a>
+        ))}
+      </div>
+    )}
+
+    <p style="margin-top:22px">
+      <a class="pill" href="/daytona/">← Back to Daytona</a>
+    </p>
+  </div>
+</section>
