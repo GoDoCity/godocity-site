@@ -9,6 +9,7 @@ const posts = defineCollection({
     pubDate: z.coerce.date(),
     heroImage: z.string().optional(),
 
+    // ✅ THIS is the key fix:
     tags: z.array(z.string()).optional(),
 
     guides: z.array(z.string()).optional(),
