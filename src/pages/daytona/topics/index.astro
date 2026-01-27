@@ -23,24 +23,19 @@ function displayTag(tag) {
 
 const posts = (await getCollection("posts")).filter((p) => cityOf(p) === "daytona");
 
-// slug -> { label, count }
+// slug -> label
 const tagMap = new Map();
-
 for (const p of posts) {
   const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
   for (const raw of tags) {
-    const label = displayTag(raw);
     const slug = slugifyTag(raw);
     if (!slug) continue;
-
-    const existing = tagMap.get(slug);
-    if (!existing) tagMap.set(slug, { label, count: 1 });
-    else tagMap.set(slug, { label: existing.label, count: existing.count + 1 });
+    if (!tagMap.has(slug)) tagMap.set(slug, displayTag(raw));
   }
 }
 
-const tags = Array.from(tagMap.entries())
-  .map(([slug, v]) => ({ slug, label: v.label, count: v.count }))
+const topics = Array.from(tagMap.entries())
+  .map(([slug, label]) => ({ slug, label }))
   .sort((a, b) => a.label.localeCompare(b.label));
 ---
 
@@ -51,7 +46,7 @@ const tags = Array.from(tagMap.entries())
     <h1 class="h1">Topics</h1>
     <p class="lede" style="opacity:.8">Browse posts by topic.</p>
 
-    {tags.length === 0 ? (
+    {topics.length === 0 ? (
       <div class="card" style="margin-top:18px;padding:18px;">
         <strong>NO TOPICS YET</strong>
         <div style="opacity:.8;margin-top:6px;">
@@ -60,9 +55,9 @@ const tags = Array.from(tagMap.entries())
       </div>
     ) : (
       <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;">
-        {tags.map((t) => (
+        {topics.map((t) => (
           <a class="pill" href={`/daytona/topic/${t.slug}/`}>
-            {t.label} <span style="opacity:.6">({t.count})</span>
+            {t.label}
           </a>
         ))}
       </div>
