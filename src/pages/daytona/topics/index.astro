@@ -3,35 +3,45 @@ import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 function cityOf(p) {
-  // Prefer explicit frontmatter
   if (p.data?.city) return String(p.data.city).toLowerCase();
-
-  // If legacy folder structure is used, infer city from id like "daytona/xxxx.md"
   if (typeof p.id === "string" && p.id.startsWith("daytona/")) return "daytona";
-
-  // Default
   return "daytona";
 }
 
-function normalizeTag(t) {
-  return String(t ?? "")
+function slugifyTag(tag) {
+  return String(tag ?? "")
+    .toLowerCase()
     .trim()
-    .replace(/\s+/g, " ");
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
-const posts = (await getCollection("posts"))
-  .filter((p) => cityOf(p) === "daytona");
+function displayTag(tag) {
+  return String(tag ?? "").trim().replace(/\s+/g, " ");
+}
 
-const tagSet = new Set();
+const posts = (await getCollection("posts")).filter((p) => cityOf(p) === "daytona");
+
+// slug -> { label, count }
+const tagMap = new Map();
+
 for (const p of posts) {
   const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
-  for (const t of tags) {
-    const clean = normalizeTag(t);
-    if (clean) tagSet.add(clean);
+  for (const raw of tags) {
+    const label = displayTag(raw);
+    const slug = slugifyTag(raw);
+    if (!slug) continue;
+
+    const existing = tagMap.get(slug);
+    if (!existing) tagMap.set(slug, { label, count: 1 });
+    else tagMap.set(slug, { label: existing.label, count: existing.count + 1 });
   }
 }
 
-const tags = Array.from(tagSet).sort((a, b) => a.localeCompare(b));
+const tags = Array.from(tagMap.entries())
+  .map(([slug, v]) => ({ slug, label: v.label, count: v.count }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 ---
 
 <Base title="Topics" subtitle="Browse posts by topic." cityBase="daytona" />
@@ -51,8 +61,8 @@ const tags = Array.from(tagSet).sort((a, b) => a.localeCompare(b));
     ) : (
       <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;">
         {tags.map((t) => (
-          <a class="pill" href={`/daytona/topic/${encodeURIComponent(t)}/`}>
-            {t}
+          <a class="pill" href={`/daytona/topic/${t.slug}/`}>
+            {t.label} <span style="opacity:.6">({t.count})</span>
           </a>
         ))}
       </div>
