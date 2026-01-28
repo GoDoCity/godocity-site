@@ -2,51 +2,75 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+// Rule A canonical key
+function tagKey(raw) {
+  return String(raw ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ");
+}
+
+// slug from canonical key
+function tagSlugFromKey(key) {
+  return String(key ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+// Display label from canonical key
+function tagLabelFromKey(key) {
+  const s = String(key ?? "").trim().replace(/\s+/g, " ");
+  if (!s) return "";
+  return s
+    .split(" ")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ""))
+    .join(" ");
+}
+
+function isDaytonaPost(p) {
+  const city = String(p?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof p?.id === "string" && p.id.startsWith("daytona/");
+}
+
 export async function getStaticPaths() {
-  const slugifyTag = (tag) =>
-    String(tag ?? "")
-      .toLowerCase()
-      .trim()
-      .replace(/&/g, "and")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  const displayTag = (tag) =>
-    String(tag ?? "").trim().replace(/\s+/g, " ");
-
-  const isDaytonaPost = (p) => {
-    const city = String(p?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    // supports legacy folder structure: src/content/posts/daytona/...
-    return typeof p.id === "string" && p.id.startsWith("daytona/");
-  };
-
-  const all = await getCollection("posts");
-  const posts = all.filter(isDaytonaPost);
-
-  // slug -> { label, posts[] }
+  // key -> { slug, label, posts[] }
   const map = new Map();
 
   for (const p of posts) {
-    const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
-    for (const raw of tags) {
-      const slug = slugifyTag(raw);
+    const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
+    for (const raw of rawTags) {
+      const key = tagKey(raw);
+      if (!key) continue;
+
+      const slug = tagSlugFromKey(key);
       if (!slug) continue;
 
-      const label = displayTag(raw);
+      const label = tagLabelFromKey(key);
 
-      if (!map.has(slug)) map.set(slug, { label, posts: [] });
-      map.get(slug).posts.push(p);
+      const existing = map.get(key);
+      if (!existing) map.set(key, { slug, label, posts: [p] });
+      else map.set(key, { ...existing, posts: [...existing.posts, p] });
     }
   }
 
-  return Array.from(map.entries()).map(([tag, v]) => ({
-    params: { tag },
-    props: { tag, label: v.label, posts: v.posts },
+  return Array.from(map.values()).map((v) => ({
+    params: { tag: v.slug },
+    props: { slug: v.slug, label: v.label, posts: v.posts },
   }));
 }
 
-const { label, posts } = Astro.props;
+const { slug, label, posts } = Astro.props;
+
+const sorted = (posts ?? [])
+  .slice()
+  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
 ---
 
 <Base title={`Topic: ${label}`} subtitle="Browse posts by topic." cityBase="daytona" />
@@ -56,20 +80,17 @@ const { label, posts } = Astro.props;
     <h1 class="h1">{label}</h1>
     <p class="lede" style="opacity:.8">Posts tagged “{label}”.</p>
 
-    {Array.isArray(posts) && posts.length ? (
+    {sorted.length ? (
       <div style="margin-top:18px;display:grid;gap:12px;">
-        {posts
-          .slice()
-          .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate))
-          .map((p) => (
-            <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
-              <div style="font-weight:700">{p.data.title}</div>
-              {p.data.description && <div style="opacity:.8;margin-top:4px">{p.data.description}</div>}
-              <div style="opacity:.6;margin-top:6px">
-                {new Date(p.data.pubDate).toLocaleDateString()}
-              </div>
-            </a>
-          ))}
+        {sorted.map((p) => (
+          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
+            <div style="font-weight:700">{p.data.title}</div>
+            {p.data.description && <div style="opacity:.8;margin-top:4px">{p.data.description}</div>}
+            <div style="opacity:.6;margin-top:6px">
+              {new Date(p.data.pubDate).toLocaleDateString()}
+            </div>
+          </a>
+        ))}
       </div>
     ) : (
       <div class="card" style="margin-top:18px;padding:18px;">
