@@ -2,32 +2,44 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+function isDaytonaPost(p) {
+  const city = String(p?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof p.id === "string" && p.id.startsWith("daytona/");
+}
+
+function slugifyTag(tag) {
+  return String(tag ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function displayTag(tag) {
+  return String(tag ?? "").trim().replace(/\s+/g, " ");
+}
+
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  function cityOf(p) {
-    if (p.data?.city) return String(p.data.city).toLowerCase();
-    if (typeof p.id === "string" && p.id.startsWith("daytona/")) return "daytona";
-    return "daytona";
-  }
-
-  return posts
-    .filter((p) => cityOf(p) === "daytona")
-    .map((p) => ({
-      params: { slug: p.slug },
-      props: { post: p },
-    }));
+  return posts.map((p) => ({
+    params: { slug: p.slug },
+    props: { post: p },
+  }));
 }
 
 const { post } = Astro.props;
+
 const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
-const tags = Array.isArray(post.data?.tags) ? post.data.tags : [];
-const cleanTags = tags
-  .map((t) => String(t ?? "").trim().replace(/\s+/g, " "))
-  .filter(Boolean);
+const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
+const tagLinks = rawTags
+  .map((t) => ({ label: displayTag(t), slug: slugifyTag(t) }))
+  .filter((x) => x.label && x.slug);
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
@@ -41,10 +53,10 @@ const cleanTags = tags
       {new Date(post.data.pubDate).toLocaleDateString()}
     </p>
 
-    {cleanTags.length > 0 && (
+    {tagLinks.length > 0 && (
       <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
-        {cleanTags.map((t) => (
-          <a class="pill" href={`/daytona/topic/${encodeURIComponent(t)}/`}>{t}</a>
+        {tagLinks.map(({ label, slug }) => (
+          <a class="pill" href={`/daytona/topic/${slug}/`}>{label}</a>
         ))}
       </div>
     )}
@@ -59,3 +71,4 @@ const cleanTags = tags
     </p>
   </div>
 </section>
+
