@@ -2,29 +2,27 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-function isDaytonaPost(p) {
-  const city = String(p?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-
-  // supports legacy folder structure: src/content/posts/daytona/...
-  return typeof p.id === "string" && p.id.startsWith("daytona/");
-}
-
-function slugifyTag(tag) {
-  return String(tag ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function displayTag(tag) {
-  return String(tag ?? "").trim().replace(/\s+/g, " ");
-}
-
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const slugifyTag = (tag) =>
+    String(tag ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+  const displayTag = (tag) =>
+    String(tag ?? "").trim().replace(/\s+/g, " ");
+
+  const isDaytonaPost = (p) => {
+    const city = String(p?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    // supports legacy folder structure: src/content/posts/daytona/...
+    return typeof p.id === "string" && p.id.startsWith("daytona/");
+  };
+
+  const all = await getCollection("posts");
+  const posts = all.filter(isDaytonaPost);
 
   // slug -> { label, posts[] }
   const map = new Map();
@@ -36,9 +34,9 @@ export async function getStaticPaths() {
       if (!slug) continue;
 
       const label = displayTag(raw);
-      const existing = map.get(slug);
-      if (!existing) map.set(slug, { label, posts: [p] });
-      else existing.posts.push(p);
+
+      if (!map.has(slug)) map.set(slug, { label, posts: [] });
+      map.get(slug).posts.push(p);
     }
   }
 
@@ -58,7 +56,7 @@ const { label, posts } = Astro.props;
     <h1 class="h1">{label}</h1>
     <p class="lede" style="opacity:.8">Posts tagged “{label}”.</p>
 
-    {posts?.length ? (
+    {Array.isArray(posts) && posts.length ? (
       <div style="margin-top:18px;display:grid;gap:12px;">
         {posts
           .slice()
