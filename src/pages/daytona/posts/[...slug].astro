@@ -2,18 +2,31 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+function isDaytonaPost(p) {
+  const city = String(p?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+
+  // legacy folder support: src/content/posts/daytona/...
+  return typeof p.id === "string" && p.id.startsWith("daytona/");
+}
+
+function slugifyTag(tag) {
+  return String(tag ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function displayTag(tag) {
+  return String(tag ?? "").trim().replace(/\s+/g, " ");
+}
+
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  const daytonaPosts = posts.filter((p) => {
-    const city = String(p.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-
-    // legacy folder support: src/content/posts/daytona/...
-    return typeof p.id === "string" && p.id.startsWith("daytona/");
-  });
-
-  return daytonaPosts.map((p) => ({
+  return posts.map((p) => ({
     params: { slug: p.slug },
     props: { post: p },
   }));
@@ -25,10 +38,12 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
-const tags = Array.isArray(post.data?.tags) ? post.data.tags : [];
-const cleanTags = tags
-  .map((t) => String(t ?? "").trim().replace(/\s+/g, " "))
-  .filter(Boolean);
+const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
+const cleanTags = rawTags
+  .map(displayTag)
+  .filter(Boolean)
+  .map((label) => ({ label, slug: slugifyTag(label) }))
+  .filter((t) => t.slug);
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
@@ -45,7 +60,7 @@ const cleanTags = tags
     {cleanTags.length > 0 && (
       <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
         {cleanTags.map((t) => (
-          <a class="pill" href={`/daytona/topic/${encodeURIComponent(t)}/`}>{t}</a>
+          <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
         ))}
       </div>
     )}
