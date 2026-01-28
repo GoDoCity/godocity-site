@@ -2,14 +2,28 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-function isDaytonaPost(p) {
-  const city = String(p?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-  return typeof p.id === "string" && p.id.startsWith("daytona/");
+/**
+ * Rule A normalization:
+ * - lowercases
+ * - trims
+ * - converts hyphens/underscores to spaces
+ * - collapses whitespace
+ *
+ * This is the CANONICAL KEY used for grouping.
+ */
+function tagKey(raw) {
+  return String(raw ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ");
 }
 
-function slugifyTag(tag) {
-  return String(tag ?? "")
+/**
+ * Slug used in URLs, derived from canonical key.
+ */
+function tagSlugFromKey(key) {
+  return String(key ?? "")
     .toLowerCase()
     .trim()
     .replace(/&/g, "and")
@@ -17,27 +31,58 @@ function slugifyTag(tag) {
     .replace(/(^-|-$)/g, "");
 }
 
-function displayTag(tag) {
-  return String(tag ?? "").trim().replace(/\s+/g, " ");
+/**
+ * Display label (nice looking) derived from canonical key.
+ * You can change this later if you want Title Case rules different.
+ */
+function tagLabelFromKey(key) {
+  const s = String(key ?? "").trim().replace(/\s+/g, " ");
+  if (!s) return "";
+  return s
+    .split(" ")
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ""))
+    .join(" ");
+}
+
+/**
+ * City filter: supports explicit frontmatter city,
+ * and legacy folder ids like "daytona/..."
+ */
+function isDaytonaPost(p) {
+  const city = String(p?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof p?.id === "string" && p.id.startsWith("daytona/");
 }
 
 const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-// slug -> label
-const map = new Map();
+// Build unique topic list
+// key -> { slug, label, count }
+const topicMap = new Map();
 
 for (const p of posts) {
-  const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
-  for (const raw of tags) {
-    const slug = slugifyTag(raw);
+  const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
+  for (const raw of rawTags) {
+    const key = tagKey(raw);
+    if (!key) continue;
+
+    const slug = tagSlugFromKey(key);
     if (!slug) continue;
-    if (!map.has(slug)) map.set(slug, displayTag(raw));
+
+    const label = tagLabelFromKey(key);
+
+    const existing = topicMap.get(key);
+    if (!existing) {
+      topicMap.set(key, { slug, label, count: 1 });
+    } else {
+      topicMap.set(key, { ...existing, count: existing.count + 1 });
+    }
   }
 }
 
-const topics = Array.from(map.entries())
-  .map(([slug, label]) => ({ slug, label }))
-  .sort((a, b) => a.label.localeCompare(b.label));
+const topics = Array.from(topicMap.values()).sort((a, b) =>
+  a.label.localeCompare(b.label)
+);
 ---
 
 <Base title="Topics" subtitle="Browse posts by topic." cityBase="daytona" />
@@ -57,7 +102,9 @@ const topics = Array.from(map.entries())
     ) : (
       <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;">
         {topics.map((t) => (
-          <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
+          <a class="pill" href={`/daytona/topic/${t.slug}/`}>
+            {t.label}
+          </a>
         ))}
       </div>
     )}
