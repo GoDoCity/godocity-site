@@ -7,7 +7,7 @@ import { getCollection } from "astro:content";
  * - case-insensitive
  * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
  */
-function tagKey(raw: unknown): string {
+function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
@@ -16,7 +16,7 @@ function tagKey(raw: unknown): string {
 }
 
 /** URL slug from canonical key */
-function tagSlugFromKey(key: string): string {
+function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
     .trim()
@@ -26,7 +26,7 @@ function tagSlugFromKey(key: string): string {
 }
 
 /** Display label from canonical key (Title Case) */
-function tagLabelFromKey(key: string): string {
+function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
   return s
@@ -35,18 +35,17 @@ function tagLabelFromKey(key: string): string {
     .join(" ");
 }
 
-function isDaytonaPost(p: any): boolean {
-  const city = String(p?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-
-  // legacy folder support: src/content/posts/daytona/...
-  return typeof p?.id === "string" && p.id.startsWith("daytona/");
-}
-
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
-  return posts.map((p) => ({
+  // Daytona filter (frontmatter city OR legacy id prefix daytona/)
+  const daytonaPosts = posts.filter((p) => {
+    const city = String(p?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof p?.id === "string" && p.id.startsWith("daytona/");
+  });
+
+  return daytonaPosts.map((p) => ({
     params: { slug: p.slug },
     props: { post: p },
   }));
@@ -60,7 +59,7 @@ const { Content } = await post.render();
 
 // Build unique tags for this post using Rule A
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
-const tagMap = new Map<string, { key: string; slug: string; label: string }>();
+const tagMap = new Map();
 
 for (const t of rawTags) {
   const key = tagKey(t);
