@@ -2,40 +2,37 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-function cityOf(p) {
-  if (p.data?.city) return String(p.data.city).toLowerCase();
-  if (typeof p.id === "string" && p.id.startsWith("daytona/")) return "daytona";
-  return "daytona";
-}
-
-function slugifyTag(tag) {
-  return String(tag ?? "")
+const slugifyTag = (tag) =>
+  String(tag ?? "")
     .toLowerCase()
     .trim()
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
-}
 
-function displayTag(tag) {
-  return String(tag ?? "").trim().replace(/\s+/g, " ");
-}
+const displayTag = (tag) => String(tag ?? "").trim().replace(/\s+/g, " ");
 
-const posts = (await getCollection("posts")).filter((p) => cityOf(p) === "daytona");
+const isDaytonaPost = (p) => {
+  const city = String(p?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof p.id === "string" && p.id.startsWith("daytona/");
+};
+
+const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
 // slug -> label
-const tagMap = new Map();
+const map = new Map();
 
 for (const p of posts) {
   const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
   for (const raw of tags) {
     const slug = slugifyTag(raw);
     if (!slug) continue;
-    if (!tagMap.has(slug)) tagMap.set(slug, displayTag(raw));
+    if (!map.has(slug)) map.set(slug, displayTag(raw));
   }
 }
 
-const tags = Array.from(tagMap.entries())
+const tags = Array.from(map.entries())
   .map(([slug, label]) => ({ slug, label }))
   .sort((a, b) => a.label.localeCompare(b.label));
 ---
@@ -69,3 +66,4 @@ const tags = Array.from(tagMap.entries())
     </p>
   </div>
 </section>
+
