@@ -2,15 +2,6 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-// Treat a post as "daytona" if:
-// - frontmatter city is "daytona", OR
-// - legacy folder id starts with "daytona/"
-function isDaytonaPost(p) {
-  const city = String(p?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-  return typeof p.id === "string" && p.id.startsWith("daytona/");
-}
-
 // URL-safe topic slug (canonical)
 function slugifyTag(tag) {
   return String(tag ?? "")
@@ -27,9 +18,18 @@ function displayTag(tag) {
 }
 
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
-  return posts.map((p) => ({
+  // Treat a post as "daytona" if:
+  // - frontmatter city is "daytona", OR
+  // - legacy folder id starts with "daytona/"
+  function isDaytonaPost(p) {
+    const city = String(p?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof p.id === "string" && p.id.startsWith("daytona/");
+  }
+
+  return posts.filter(isDaytonaPost).map((p) => ({
     params: { slug: p.slug },
     props: { post: p },
   }));
