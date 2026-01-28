@@ -46,7 +46,7 @@ export async function getStaticPaths() {
   }));
 }
 
-const { tag, label, posts } = Astro.props;
+const { label, posts } = Astro.props;
 ---
 
 <Base title={`Topic: ${label}`} subtitle="Browse posts by topic." cityBase="daytona" />
