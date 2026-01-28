@@ -2,14 +2,6 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-function isDaytonaPost(p) {
-  const city = String(p?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-
-  // legacy folder support: posts stored under src/content/posts/daytona/...
-  return typeof p.id === "string" && p.id.startsWith("daytona/");
-}
-
 function slugifyTag(tag) {
   return String(tag ?? "")
     .toLowerCase()
@@ -24,9 +16,17 @@ function displayTag(tag) {
 }
 
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
-  return posts.map((p) => ({
+  const daytonaPosts = posts.filter((p) => {
+    const city = String(p?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+
+    // legacy folder support: src/content/posts/daytona/...
+    return typeof p.id === "string" && p.id.startsWith("daytona/");
+  });
+
+  return daytonaPosts.map((p) => ({
     params: { slug: p.slug },
     props: { post: p },
   }));
