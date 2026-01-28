@@ -2,12 +2,6 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-function cityOf(p) {
-  if (p.data?.city) return String(p.data.city).toLowerCase();
-  if (typeof p.id === "string" && p.id.startsWith("daytona/")) return "daytona";
-  return "daytona";
-}
-
 function slugifyTag(tag) {
   return String(tag ?? "")
     .toLowerCase()
@@ -21,8 +15,16 @@ function displayTag(tag) {
   return String(tag ?? "").trim().replace(/\s+/g, " ");
 }
 
+function isDaytonaPost(p) {
+  const city = String(p.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+
+  // legacy folder layout: id like "daytona/xxxx.md"
+  return typeof p.id === "string" && p.id.startsWith("daytona/");
+}
+
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter((p) => cityOf(p) === "daytona");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
   // slug -> { label, posts[] }
   const map = new Map();
@@ -42,7 +44,7 @@ export async function getStaticPaths() {
 
   return Array.from(map.entries()).map(([tag, v]) => ({
     params: { tag },
-    props: { tag, label: v.label, posts: v.posts },
+    props: { label: v.label, posts: v.posts },
   }));
 }
 
@@ -84,3 +86,4 @@ const { label, posts } = Astro.props;
     </p>
   </div>
 </section>
+
