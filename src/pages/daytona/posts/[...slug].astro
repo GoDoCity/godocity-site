@@ -2,8 +2,12 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-// Rule A canonical key
-function tagKey(raw) {
+/**
+ * Rule A: canonical tag key
+ * - case-insensitive
+ * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
+ */
+function tagKey(raw: unknown): string {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
@@ -11,8 +15,8 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-// slug from canonical key
-function tagSlugFromKey(key) {
+/** URL slug from canonical key */
+function tagSlugFromKey(key: string): string {
   return String(key ?? "")
     .toLowerCase()
     .trim()
@@ -21,8 +25,8 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
-// Display label from canonical key
-function tagLabelFromKey(key) {
+/** Display label from canonical key (Title Case) */
+function tagLabelFromKey(key: string): string {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
   return s
@@ -31,9 +35,11 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-function isDaytonaPost(p) {
+function isDaytonaPost(p: any): boolean {
   const city = String(p?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
+
+  // legacy folder support: src/content/posts/daytona/...
   return typeof p?.id === "string" && p.id.startsWith("daytona/");
 }
 
@@ -47,23 +53,26 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+
 const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
-// Normalize + dedupe tags using Rule A
-const rawTags = Array.isArray(post?.data?.tags) ? post.data.tags : [];
+// Build unique tags for this post using Rule A
+const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
+const tagMap = new Map<string, { key: string; slug: string; label: string }>();
 
-const tagMap = new Map(); // key -> { slug, label }
-for (const raw of rawTags) {
-  const key = tagKey(raw);
+for (const t of rawTags) {
+  const key = tagKey(t);
   if (!key) continue;
 
-  const slug = tagSlugFromKey(key);
-  if (!slug) continue;
-
-  const label = tagLabelFromKey(key);
-  if (!tagMap.has(key)) tagMap.set(key, { slug, label });
+  if (!tagMap.has(key)) {
+    tagMap.set(key, {
+      key,
+      slug: tagSlugFromKey(key),
+      label: tagLabelFromKey(key),
+    });
+  }
 }
 
 const tags = Array.from(tagMap.values()).sort((a, b) => a.label.localeCompare(b.label));
@@ -95,6 +104,7 @@ const tags = Array.from(tagMap.values()).sort((a, b) => a.label.localeCompare(b.
     <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/posts/">← All posts</a>
       <a class="pill" href="/daytona/topics/">Topics</a>
+      <a class="pill" href="/daytona/">Daytona home</a>
     </p>
   </div>
 </section>
