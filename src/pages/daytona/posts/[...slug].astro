@@ -6,7 +6,7 @@ function isDaytonaPost(p) {
   const city = String(p?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
 
-  // legacy folder support: src/content/posts/daytona/...
+  // legacy folder support: posts stored under src/content/posts/daytona/...
   return typeof p.id === "string" && p.id.startsWith("daytona/");
 }
 
@@ -39,10 +39,9 @@ const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
-const cleanTags = rawTags
-  .map(displayTag)
-  .filter(Boolean)
-  .map((label) => ({ label, slug: slugifyTag(label) }))
+const cleanTags = rawTags.map(displayTag).filter(Boolean);
+const tagLinks = cleanTags
+  .map((t) => ({ label: t, slug: slugifyTag(t) }))
   .filter((t) => t.slug);
 ---
 
@@ -50,16 +49,16 @@ const cleanTags = rawTags
 
 <section class="section">
   <div class="container" style="max-width: 780px;">
-    <h1 class="h1">{post.data.title}</h1>
+    <h1 class="h1">{title}</h1>
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
     <p style="opacity:.6;margin-top:10px">
       {new Date(post.data.pubDate).toLocaleDateString()}
     </p>
 
-    {cleanTags.length > 0 && (
+    {tagLinks.length > 0 && (
       <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
-        {cleanTags.map((t) => (
+        {tagLinks.map((t) => (
           <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
         ))}
       </div>
