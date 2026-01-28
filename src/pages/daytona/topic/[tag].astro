@@ -2,6 +2,17 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+function cityOf(p) {
+  // Prefer explicit frontmatter
+  if (p.data?.city) return String(p.data.city).toLowerCase();
+
+  // If legacy folder structure is used, infer city from id like "daytona/xxxx.md"
+  if (typeof p.id === "string" && p.id.startsWith("daytona/")) return "daytona";
+
+  // Default
+  return "daytona";
+}
+
 function slugifyTag(tag) {
   return String(tag ?? "")
     .toLowerCase()
@@ -16,17 +27,12 @@ function displayTag(tag) {
 }
 
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter((p) => cityOf(p) === "daytona");
 
-  const daytonaPosts = posts.filter((p) => {
-    const city = String(p.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    return typeof p.id === "string" && p.id.startsWith("daytona/");
-  });
+  // slug -> { label, posts[] }
+  const map = new Map();
 
-  const map = new Map(); // slug -> { label, posts[] }
-
-  for (const p of daytonaPosts) {
+  for (const p of posts) {
     const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
     for (const raw of tags) {
       const slug = slugifyTag(raw);
@@ -41,7 +47,7 @@ export async function getStaticPaths() {
 
   return Array.from(map.entries()).map(([tag, v]) => ({
     params: { tag },
-    props: { label: v.label, posts: v.posts },
+    props: { tag, label: v.label, posts: v.posts },
   }));
 }
 
