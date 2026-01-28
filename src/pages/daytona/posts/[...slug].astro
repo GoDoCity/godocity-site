@@ -5,7 +5,8 @@ import { getCollection } from "astro:content";
 function isDaytonaPost(p) {
   const city = String(p?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
-  // supports legacy folder structure: src/content/posts/daytona/...
+
+  // legacy folder support: posts stored under src/content/posts/daytona/...
   return typeof p.id === "string" && p.id.startsWith("daytona/");
 }
 
