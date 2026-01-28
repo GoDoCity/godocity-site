@@ -15,21 +15,18 @@ function displayTag(tag) {
   return String(tag ?? "").trim().replace(/\s+/g, " ");
 }
 
-function isDaytonaPost(p) {
-  const city = String(p.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-
-  // legacy folder layout: id like "daytona/xxxx.md"
-  return typeof p.id === "string" && p.id.startsWith("daytona/");
-}
-
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
-  // slug -> { label, posts[] }
-  const map = new Map();
+  const daytonaPosts = posts.filter((p) => {
+    const city = String(p.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof p.id === "string" && p.id.startsWith("daytona/");
+  });
 
-  for (const p of posts) {
+  const map = new Map(); // slug -> { label, posts[] }
+
+  for (const p of daytonaPosts) {
     const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
     for (const raw of tags) {
       const slug = slugifyTag(raw);
@@ -86,4 +83,3 @@ const { label, posts } = Astro.props;
     </p>
   </div>
 </section>
-
