@@ -25,6 +25,7 @@ const posts = (await getCollection("posts")).filter((p) => cityOf(p) === "dayton
 
 // slug -> label
 const tagMap = new Map();
+
 for (const p of posts) {
   const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
   for (const raw of tags) {
@@ -34,7 +35,7 @@ for (const p of posts) {
   }
 }
 
-const topics = Array.from(tagMap.entries())
+const tags = Array.from(tagMap.entries())
   .map(([slug, label]) => ({ slug, label }))
   .sort((a, b) => a.label.localeCompare(b.label));
 ---
@@ -46,7 +47,7 @@ const topics = Array.from(tagMap.entries())
     <h1 class="h1">Topics</h1>
     <p class="lede" style="opacity:.8">Browse posts by topic.</p>
 
-    {topics.length === 0 ? (
+    {tags.length === 0 ? (
       <div class="card" style="margin-top:18px;padding:18px;">
         <strong>NO TOPICS YET</strong>
         <div style="opacity:.8;margin-top:6px;">
@@ -55,7 +56,7 @@ const topics = Array.from(tagMap.entries())
       </div>
     ) : (
       <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;">
-        {topics.map((t) => (
+        {tags.map((t) => (
           <a class="pill" href={`/daytona/topic/${t.slug}/`}>
             {t.label}
           </a>
