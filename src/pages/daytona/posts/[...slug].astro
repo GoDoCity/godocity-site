@@ -2,6 +2,16 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+// Treat a post as "daytona" if:
+// - frontmatter city is "daytona", OR
+// - legacy folder id starts with "daytona/"
+function isDaytonaPost(p) {
+  const city = String(p?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof p.id === "string" && p.id.startsWith("daytona/");
+}
+
+// URL-safe topic slug (canonical)
 function slugifyTag(tag) {
   return String(tag ?? "")
     .toLowerCase()
@@ -11,22 +21,15 @@ function slugifyTag(tag) {
     .replace(/(^-|-$)/g, "");
 }
 
+// Pretty label for display
 function displayTag(tag) {
   return String(tag ?? "").trim().replace(/\s+/g, " ");
 }
 
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  const daytonaPosts = posts.filter((p) => {
-    const city = String(p?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-
-    // legacy folder support: src/content/posts/daytona/...
-    return typeof p.id === "string" && p.id.startsWith("daytona/");
-  });
-
-  return daytonaPosts.map((p) => ({
+  return posts.map((p) => ({
     params: { slug: p.slug },
     props: { post: p },
   }));
@@ -38,27 +41,38 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
+// tags: normalize + keep display label + stable slug
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
-const cleanTags = rawTags.map(displayTag).filter(Boolean);
-const tagLinks = cleanTags
-  .map((t) => ({ label: t, slug: slugifyTag(t) }))
-  .filter((t) => t.slug);
+const tagObjects = rawTags
+  .map((t) => {
+    const label = displayTag(t);
+    const slug = slugifyTag(t);
+    return { label, slug };
+  })
+  .filter((t) => t.label && t.slug);
+
+// de-dupe by slug, keep first label
+const tagMap = new Map();
+for (const t of tagObjects) {
+  if (!tagMap.has(t.slug)) tagMap.set(t.slug, t.label);
+}
+const tags = Array.from(tagMap.entries()).map(([slug, label]) => ({ slug, label }));
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
 
 <section class="section">
   <div class="container" style="max-width: 780px;">
-    <h1 class="h1">{title}</h1>
+    <h1 class="h1">{post.data.title}</h1>
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
     <p style="opacity:.6;margin-top:10px">
       {new Date(post.data.pubDate).toLocaleDateString()}
     </p>
 
-    {tagLinks.length > 0 && (
+    {tags.length > 0 && (
       <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
-        {tagLinks.map((t) => (
+        {tags.map((t) => (
           <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
         ))}
       </div>
@@ -71,6 +85,7 @@ const tagLinks = cleanTags
     <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/posts/">← All posts</a>
       <a class="pill" href="/daytona/topics/">Topics</a>
+      <a class="pill" href="/daytona/">Daytona home</a>
     </p>
   </div>
 </section>
