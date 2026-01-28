@@ -2,21 +2,24 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-const slugifyTag = (tag) =>
-  String(tag ?? "")
+function isDaytonaPost(p) {
+  const city = String(p?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof p.id === "string" && p.id.startsWith("daytona/");
+}
+
+function slugifyTag(tag) {
+  return String(tag ?? "")
     .toLowerCase()
     .trim()
     .replace(/&/g, "and")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
 
-const displayTag = (tag) => String(tag ?? "").trim().replace(/\s+/g, " ");
-
-const isDaytonaPost = (p) => {
-  const city = String(p?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-  return typeof p.id === "string" && p.id.startsWith("daytona/");
-};
+function displayTag(tag) {
+  return String(tag ?? "").trim().replace(/\s+/g, " ");
+}
 
 const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
@@ -32,7 +35,7 @@ for (const p of posts) {
   }
 }
 
-const tags = Array.from(map.entries())
+const topics = Array.from(map.entries())
   .map(([slug, label]) => ({ slug, label }))
   .sort((a, b) => a.label.localeCompare(b.label));
 ---
@@ -44,7 +47,7 @@ const tags = Array.from(map.entries())
     <h1 class="h1">Topics</h1>
     <p class="lede" style="opacity:.8">Browse posts by topic.</p>
 
-    {tags.length === 0 ? (
+    {topics.length === 0 ? (
       <div class="card" style="margin-top:18px;padding:18px;">
         <strong>NO TOPICS YET</strong>
         <div style="opacity:.8;margin-top:6px;">
@@ -53,10 +56,8 @@ const tags = Array.from(map.entries())
       </div>
     ) : (
       <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;">
-        {tags.map((t) => (
-          <a class="pill" href={`/daytona/topic/${t.slug}/`}>
-            {t.label}
-          </a>
+        {topics.map((t) => (
+          <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
         ))}
       </div>
     )}
@@ -66,4 +67,3 @@ const tags = Array.from(map.entries())
     </p>
   </div>
 </section>
-
