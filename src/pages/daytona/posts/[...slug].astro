@@ -3,9 +3,11 @@ import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Rule A: canonical tag key
+ * -------------------------------------------------------
+ * Rule A — Canonical Tag Normalization
  * - case-insensitive
- * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
+ * - treats "motor sports", "motor-sports", "Motor Sports" as identical
+ * -------------------------------------------------------
  */
 function tagKey(raw) {
   return String(raw ?? "")
@@ -15,7 +17,6 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-/** URL slug from canonical key */
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -25,85 +26,130 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
-/** Display label from canonical key (Title Case) */
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
   return s
     .split(" ")
-    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ""))
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
 }
 
+/**
+ * -------------------------------------------------------
+ * Daytona post filter
+ * -------------------------------------------------------
+ */
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+
+  // legacy folder support: daytona/slug
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+}
+
+/**
+ * -------------------------------------------------------
+ * Static paths
+ * -------------------------------------------------------
+ */
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  // Daytona filter (frontmatter city OR legacy id prefix daytona/)
-  const daytonaPosts = posts.filter((p) => {
-    const city = String(p?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    return typeof p?.id === "string" && p.id.startsWith("daytona/");
-  });
-
-  return daytonaPosts.map((p) => ({
-    params: { slug: p.slug },
-    props: { post: p },
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post }
   }));
 }
 
+/**
+ * -------------------------------------------------------
+ * Page props
+ * -------------------------------------------------------
+ */
 const { post } = Astro.props;
 
 const title = post.data.title;
-const subtitle = post.data.description ?? "GoDoDaytona post";
-const { Content } = await post.render();
+const description = post.data.description ?? "";
+const publishDate = post.data.date;
+const tags = post.data.tags ?? [];
 
-// Build unique tags for this post using Rule A
-const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
-const tagMap = new Map();
+// Normalize tags (Rule A)
+const canonicalTagKeys = [...new Set(tags.map(tagKey))];
 
-for (const t of rawTags) {
-  const key = tagKey(t);
-  if (!key) continue;
-
-  if (!tagMap.has(key)) {
-    tagMap.set(key, {
-      key,
-      slug: tagSlugFromKey(key),
-      label: tagLabelFromKey(key),
-    });
-  }
-}
-
-const tags = Array.from(tagMap.values()).sort((a, b) => a.label.localeCompare(b.label));
+const tagLinks = canonicalTagKeys.map(key => ({
+  key,
+  label: tagLabelFromKey(key),
+  slug: tagSlugFromKey(key),
+  href: `/daytona/topic/${tagSlugFromKey(key)}/`
+}));
 ---
 
-<Base title={title} subtitle={subtitle} cityBase="daytona" />
+<Base title={title} description={description}>
+  <article class="post">
 
-<section class="section">
-  <div class="container" style="max-width: 780px;">
-    <h1 class="h1">{post.data.title}</h1>
-    {post.data.description && <p class="lede">{post.data.description}</p>}
+    <header class="post-header">
+      <h1>{title}</h1>
 
-    <p style="opacity:.6;margin-top:10px">
-      {new Date(post.data.pubDate).toLocaleDateString()}
-    </p>
+      {publishDate && (
+        <p class="post-date">
+          {new Date(publishDate).toLocaleDateString("en-US", {
+            year: "numeric",
+            month: "long",
+            day: "numeric"
+          })}
+        </p>
+      )}
+    </header>
 
-    {tags.length > 0 && (
-      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
-        {tags.map((t) => (
-          <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
-        ))}
-      </div>
+    <section class="post-content">
+      <post.Content />
+    </section>
+
+    {tagLinks.length > 0 && (
+      <footer class="post-tags">
+        <h4>Topics</h4>
+        <ul>
+          {tagLinks.map(tag => (
+            <li>
+              <a href={tag.href}>{tag.label}</a>
+            </li>
+          ))}
+        </ul>
+      </footer>
     )}
 
-    <article style="margin-top:18px;line-height:1.65">
-      <Content />
-    </article>
+  </article>
+</Base>
 
-    <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
-      <a class="pill" href="/daytona/posts/">← All posts</a>
-      <a class="pill" href="/daytona/topics/">Topics</a>
-      <a class="pill" href="/daytona/">Daytona home</a>
-    </p>
-  </div>
-</section>
+<style>
+.post {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.post-header h1 {
+  margin-bottom: 0.25rem;
+}
+
+.post-date {
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.post-tags ul {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+}
+
+.post-tags a {
+  text-decoration: none;
+  font-size: 0.85rem;
+  background: #222;
+  padding: 0.35rem 0.6rem;
+  border-radius: 4px;
+}
+</style>
