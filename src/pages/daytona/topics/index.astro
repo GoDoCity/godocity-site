@@ -2,15 +2,6 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/**
- * Rule A normalization:
- * - lowercases
- * - trims
- * - converts hyphens/underscores to spaces
- * - collapses whitespace
- *
- * This is the CANONICAL KEY used for grouping.
- */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -19,9 +10,6 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-/**
- * Slug used in URLs, derived from canonical key.
- */
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -31,58 +19,43 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
-/**
- * Display label (nice looking) derived from canonical key.
- * You can change this later if you want Title Case rules different.
- */
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
   return s
     .split(" ")
-    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ""))
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
     .join(" ");
 }
 
-/**
- * City filter: supports explicit frontmatter city,
- * and legacy folder ids like "daytona/..."
- */
-function isDaytonaPost(p) {
-  const city = String(p?.data?.city ?? "daytona").toLowerCase();
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
-  return typeof p?.id === "string" && p.id.startsWith("daytona/");
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
 const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-// Build unique topic list
-// key -> { slug, label, count }
-const topicMap = new Map();
+// key -> count
+const counts = new Map();
 
 for (const p of posts) {
-  const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
-  for (const raw of rawTags) {
+  const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
+  for (const raw of tags) {
     const key = tagKey(raw);
     if (!key) continue;
-
-    const slug = tagSlugFromKey(key);
-    if (!slug) continue;
-
-    const label = tagLabelFromKey(key);
-
-    const existing = topicMap.get(key);
-    if (!existing) {
-      topicMap.set(key, { slug, label, count: 1 });
-    } else {
-      topicMap.set(key, { ...existing, count: existing.count + 1 });
-    }
+    counts.set(key, (counts.get(key) ?? 0) + 1);
   }
 }
 
-const topics = Array.from(topicMap.values()).sort((a, b) =>
-  a.label.localeCompare(b.label)
-);
+const topics = Array.from(counts.entries())
+  .map(([key, count]) => ({
+    key,
+    count,
+    label: tagLabelFromKey(key),
+    slug: tagSlugFromKey(key),
+  }))
+  .sort((a, b) => a.label.localeCompare(b.label));
 ---
 
 <Base title="Topics" subtitle="Browse posts by topic." cityBase="daytona" />
