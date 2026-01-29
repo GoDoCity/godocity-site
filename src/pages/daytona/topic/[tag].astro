@@ -3,21 +3,17 @@ import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Rule A — Canonical Tag Normalization
- * - case-insensitive
- * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
+ * MUST match the same Rule A logic used in posts pages + topics index.
  */
 
-// canonical key for comparison/grouping
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
-    .replace(/[-_]+/g, " ")   // hyphen/underscore -> space
-    .replace(/\s+/g, " ");   // collapse whitespace
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ");
 }
 
-// URL slug from canonical key
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -27,7 +23,6 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
-// Display label from canonical key (Title Case)
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
@@ -37,7 +32,6 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-// Daytona filter (supports explicit frontmatter + legacy folder IDs)
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
@@ -47,37 +41,35 @@ function isDaytonaPost(post) {
 export async function getStaticPaths() {
   const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  // slug -> canonical key
-  const slugToKey = new Map();
+  // slug -> { key, label, posts[] }
+  const map = new Map();
 
   for (const p of posts) {
-    const rawTags = Array.isArray(p.data?.tags) ? p.data.tags : [];
-    for (const raw of rawTags) {
+    const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
+    for (const raw of tags) {
       const key = tagKey(raw);
       if (!key) continue;
 
       const slug = tagSlugFromKey(key);
       if (!slug) continue;
 
-      if (!slugToKey.has(slug)) slugToKey.set(slug, key);
+      const label = tagLabelFromKey(key);
+
+      const existing = map.get(slug);
+      if (!existing) map.set(slug, { key, label, posts: [p] });
+      else existing.posts.push(p);
     }
   }
 
-  return Array.from(slugToKey.entries()).map(([tag, key]) => ({
+  return Array.from(map.entries()).map(([tag, v]) => ({
     params: { tag },
-    props: { tag, key, label: tagLabelFromKey(key) },
+    props: { tag, label: v.label, posts: v.posts },
   }));
 }
 
-const { tag, key, label } = Astro.props;
+const { tag, label, posts } = Astro.props;
 
-// Build list of posts for this tag
-const posts = (await getCollection("posts"))
-  .filter(isDaytonaPost)
-  .filter((p) => {
-    const rawTags = Array.isArray(p.data?.tags) ? p.data.tags : [];
-    return rawTags.map(tagKey).includes(key);
-  })
+const sorted = (posts ?? [])
   .slice()
   .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
 ---
@@ -89,14 +81,12 @@ const posts = (await getCollection("posts"))
     <h1 class="h1">{label}</h1>
     <p class="lede" style="opacity:.8">Posts tagged “{label}”.</p>
 
-    {posts.length > 0 ? (
+    {sorted.length ? (
       <div style="margin-top:18px;display:grid;gap:12px;">
-        {posts.map((p) => (
+        {sorted.map((p) => (
           <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
             <div style="font-weight:700">{p.data.title}</div>
-            {p.data.description && (
-              <div style="opacity:.8;margin-top:4px">{p.data.description}</div>
-            )}
+            {p.data.description && <div style="opacity:.8;margin-top:4px">{p.data.description}</div>}
             <div style="opacity:.6;margin-top:6px">
               {new Date(p.data.pubDate).toLocaleDateString()}
             </div>
