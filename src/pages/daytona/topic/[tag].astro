@@ -38,18 +38,19 @@ function tagLabelFromKey(key) {
 }
 
 export async function getStaticPaths() {
-  // Define this INSIDE getStaticPaths to avoid Cloudflare/Astro scope issues
-  function isDaytonaPost(post) {
+  const posts = await getCollection("posts");
+
+  // ✅ INLINE Daytona filter (no named helper)
+  const daytonaPosts = posts.filter((post) => {
     const city = String(post?.data?.city ?? "daytona").toLowerCase();
     if (city === "daytona") return true;
     return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  }
+  });
 
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
-
+  // Collect unique topic slugs from tags
   const slugs = new Set();
 
-  for (const p of posts) {
+  for (const p of daytonaPosts) {
     const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
     for (const raw of tags) {
       const key = tagKey(raw);
@@ -62,29 +63,29 @@ export async function getStaticPaths() {
     }
   }
 
+  // ✅ Return ONLY valid params; no props to accidentally break shape
   return Array.from(slugs)
     .filter(Boolean)
-    .map((tag) => ({
-      params: { tag },
-    }));
+    .map((tag) => ({ params: { tag } }));
 }
 
-// ---- Page render ----
-function isDaytonaPost(post) {
+// ---------- Page render ----------
+const tag = String(Astro.params.tag ?? "").trim();
+
+const all = await getCollection("posts");
+
+// ✅ INLINE Daytona filter again
+const daytonaPosts = all.filter((post) => {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
+});
 
-const tag = String(Astro.params.tag ?? "").trim();
-
-const postsAll = (await getCollection("posts")).filter(isDaytonaPost);
-
-// Find matching posts + best label for this tag slug
+// Find matching posts + best label for this slug
 let label = tag;
 const matched = [];
 
-for (const p of postsAll) {
+for (const p of daytonaPosts) {
   const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
   for (const raw of tags) {
     const key = tagKey(raw);
@@ -118,7 +119,9 @@ const posts = matched
         {posts.map((p) => (
           <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
             <div style="font-weight:700">{p.data.title}</div>
-            {p.data.description && <div style="opacity:.8;margin-top:4px">{p.data.description}</div>}
+            {p.data.description && (
+              <div style="opacity:.8;margin-top:4px">{p.data.description}</div>
+            )}
             <div style="opacity:.6;margin-top:6px">
               {new Date(p.data.pubDate).toLocaleDateString()}
             </div>
