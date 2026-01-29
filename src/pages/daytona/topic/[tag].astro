@@ -2,44 +2,57 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+/**
+ * Rule A — Canonical Tag Normalization
+ * - case-insensitive
+ * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
+ */
+
+// canonical key for comparison/grouping
+function tagKey(raw) {
+  return String(raw ?? "")
+    .toLowerCase()
+    .trim()
+    // treat hyphens/underscores as spaces
+    .replace(/[-_]+/g, " ")
+    // collapse whitespace
+    .replace(/\s+/g, " ");
+}
+
+// URL slug from canonical key
+function tagSlugFromKey(key) {
+  return String(key ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+// Display label from canonical key (Title Case)
+function tagLabelFromKey(key) {
+  const s = String(key ?? "").trim().replace(/\s+/g, " ");
+  if (!s) return "";
+  return s
+    .split(" ")
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
+    .join(" ");
+}
+
+// Daytona filter (supports both explicit frontmatter and legacy folder IDs)
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+}
+
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  // ✅ define EVERYTHING inside getStaticPaths so nothing is “not defined”
-  const tagKey = (raw) =>
-    String(raw ?? "")
-      .toLowerCase()
-      .trim()
-      .replace(/[-_]+/g, " ")
-      .replace(/\s+/g, " ");
+  // slug -> canonicalKey
+  const seen = new Map();
 
-  const tagSlugFromKey = (key) =>
-    String(key ?? "")
-      .toLowerCase()
-      .trim()
-      .replace(/&/g, "and")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-
-  const tagLabelFromKey = (key) => {
-    const s = String(key ?? "").trim().replace(/\s+/g, " ");
-    if (!s) return "";
-    return s
-      .split(" ")
-      .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
-      .join(" ");
-  };
-
-  const isDaytonaPost = (post) => {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  };
-
-  // tagSlug -> { label, posts[] }
-  const map = new Map();
-
-  for (const p of posts.filter(isDaytonaPost)) {
+  for (const p of posts) {
     const rawTags = Array.isArray(p.data?.tags) ? p.data.tags : [];
     for (const raw of rawTags) {
       const key = tagKey(raw);
@@ -48,23 +61,29 @@ export async function getStaticPaths() {
       const slug = tagSlugFromKey(key);
       if (!slug) continue;
 
-      const label = tagLabelFromKey(key);
-
-      const existing = map.get(slug);
-      if (!existing) map.set(slug, { label, posts: [p] });
-      else existing.posts.push(p);
+      // First label wins (but label is derived from key anyway)
+      if (!seen.has(slug)) {
+        seen.set(slug, key);
+      }
     }
   }
 
-  return Array.from(map.entries()).map(([tag, v]) => ({
-    params: { tag },
-    props: { tag, label: v.label, posts: v.posts },
+  return Array.from(seen.entries()).map(([tag, key]) => ({
+    params: { tag },              // URL uses slug
+    props: { tag, key, label: tagLabelFromKey(key) }, // props carry canonical key + label
   }));
 }
 
-const { tag, label, posts } = Astro.props;
+const { tag, key, label } = Astro.props;
 
-const sortedPosts = (posts ?? [])
+// Load posts and filter by canonical tag key
+const allPosts = (await getCollection("posts")).filter(isDaytonaPost);
+
+const posts = allPosts
+  .filter((p) => {
+    const rawTags = Array.isArray(p.data?.tags) ? p.data.tags : [];
+    return rawTags.map(tagKey).includes(key);
+  })
   .slice()
   .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
 ---
@@ -76,9 +95,9 @@ const sortedPosts = (posts ?? [])
     <h1 class="h1">{label}</h1>
     <p class="lede" style="opacity:.8">Posts tagged “{label}”.</p>
 
-    {sortedPosts.length ? (
+    {posts.length > 0 ? (
       <div style="margin-top:18px;display:grid;gap:12px;">
-        {sortedPosts.map((p) => (
+        {posts.map((p) => (
           <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
             <div style="font-weight:700">{p.data.title}</div>
             {p.data.description && (
