@@ -2,14 +2,6 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/**
- * Daytona Topics Index
- * - Lists all unique tags found on Daytona posts
- * - Uses Rule A canonicalization so:
- *   "motor sports", "motor-sports", "Motor Sports" all become ONE topic: "Motor Sports"
- */
-
-// Rule A canonical key for grouping
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -18,7 +10,6 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-// URL slug from canonical key (matches [tag].astro route)
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -28,7 +19,6 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
-// Display label from canonical key (Title Case)
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
@@ -38,7 +28,6 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-// Daytona filter (supports explicit city and legacy folder IDs)
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
@@ -47,7 +36,7 @@ function isDaytonaPost(post) {
 
 const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-// Build canonical tag map: key -> { label, slug }
+// key -> { label, slug, count }
 const map = new Map();
 
 for (const post of posts) {
@@ -56,12 +45,16 @@ for (const post of posts) {
     const key = tagKey(raw);
     if (!key) continue;
 
-    if (!map.has(key)) {
+    const existing = map.get(key);
+    if (!existing) {
       map.set(key, {
         key,
         label: tagLabelFromKey(key),
         slug: tagSlugFromKey(key),
+        count: 1,
       });
+    } else {
+      existing.count += 1;
     }
   }
 }
@@ -88,7 +81,9 @@ const topics = Array.from(map.values()).sort((a, b) =>
     ) : (
       <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;">
         {topics.map((t) => (
-          <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
+          <a class="pill" href={`/daytona/topic/${t.slug}/`}>
+            {t.label} <span style="opacity:.65">({t.count})</span>
+          </a>
         ))}
       </div>
     )}
