@@ -9,18 +9,16 @@ import { getCollection } from "astro:content";
  */
 
 // canonical key for comparison/grouping
-function tagKey(raw) {
+function tagKey(raw: unknown) {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
-    // treat hyphens/underscores as spaces
-    .replace(/[-_]+/g, " ")
-    // collapse whitespace
-    .replace(/\s+/g, " ");
+    .replace(/[-_]+/g, " ") // hyphen/underscore => space
+    .replace(/\s+/g, " "); // collapse whitespace
 }
 
 // URL slug from canonical key
-function tagSlugFromKey(key) {
+function tagSlugFromKey(key: unknown) {
   return String(key ?? "")
     .toLowerCase()
     .trim()
@@ -30,7 +28,7 @@ function tagSlugFromKey(key) {
 }
 
 // Display label from canonical key (Title Case)
-function tagLabelFromKey(key) {
+function tagLabelFromKey(key: unknown) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
   return s
@@ -39,17 +37,19 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-// Daytona filter (supports both explicit frontmatter and legacy folder IDs)
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
-
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
-  return posts.map((post) => ({
+  // IMPORTANT: define the filter INSIDE getStaticPaths so it can never be "not defined"
+  const isDaytonaPost = (post: any) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+
+    // legacy folder support: id like "daytona/whatever.md"
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  };
+
+  return posts.filter(isDaytonaPost).map((post) => ({
     params: { slug: post.slug },
     props: { post },
   }));
@@ -61,7 +61,7 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
-// normalize tags for display + URL
+// normalize tags for display + URL (Rule A)
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 
