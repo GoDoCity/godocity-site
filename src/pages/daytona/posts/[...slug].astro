@@ -9,16 +9,18 @@ import { getCollection } from "astro:content";
  */
 
 // canonical key for comparison/grouping
-function tagKey(raw: unknown) {
+function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
-    .replace(/[-_]+/g, " ") // hyphen/underscore => space
-    .replace(/\s+/g, " "); // collapse whitespace
+    // treat hyphens/underscores as spaces
+    .replace(/[-_]+/g, " ")
+    // collapse whitespace
+    .replace(/\s+/g, " ");
 }
 
 // URL slug from canonical key
-function tagSlugFromKey(key: unknown) {
+function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
     .trim()
@@ -28,7 +30,7 @@ function tagSlugFromKey(key: unknown) {
 }
 
 // Display label from canonical key (Title Case)
-function tagLabelFromKey(key: unknown) {
+function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
   return s
@@ -37,19 +39,17 @@ function tagLabelFromKey(key: unknown) {
     .join(" ");
 }
 
+// Daytona filter (supports both explicit frontmatter and legacy folder IDs)
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+}
+
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  // IMPORTANT: define the filter INSIDE getStaticPaths so it can never be "not defined"
-  const isDaytonaPost = (post: any) => {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-
-    // legacy folder support: id like "daytona/whatever.md"
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  };
-
-  return posts.filter(isDaytonaPost).map((post) => ({
+  return posts.map((post) => ({
     params: { slug: post.slug },
     props: { post },
   }));
@@ -61,15 +61,38 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
-// normalize tags for display + URL (Rule A)
+// ---- Tags for THIS post (normalized + unique) ----
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
-const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
+const currentKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 
-const tagItems = Array.from(uniqueKeySet).map((key) => ({
+const tagItems = Array.from(currentKeySet).map((key) => ({
   key,
   label: tagLabelFromKey(key),
   slug: tagSlugFromKey(key),
 }));
+
+// ---- Related posts (STRICT): shares at least 1 normalized tag ----
+const allDaytonaPosts = (await getCollection("posts")).filter(isDaytonaPost);
+
+function postKeySet(p) {
+  const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
+  return new Set(tags.map(tagKey).filter(Boolean));
+}
+
+function sharesATag(aSet, bSet) {
+  for (const k of aSet) if (bSet.has(k)) return true;
+  return false;
+}
+
+const relatedPosts = allDaytonaPosts
+  .filter((p) => p.slug !== post.slug) // not this post
+  .filter((p) => {
+    if (currentKeySet.size === 0) return false; // strict means no tags => no related
+    const pSet = postKeySet(p);
+    return pSet.size > 0 && sharesATag(currentKeySet, pSet);
+  })
+  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate))
+  .slice(0, 4);
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
@@ -95,9 +118,29 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
       <Content />
     </article>
 
+    {relatedPosts.length > 0 && (
+      <div style="margin-top:28px">
+        <h2 class="h2" style="margin-bottom:10px">Related posts</h2>
+        <div style="display:grid;gap:12px;">
+          {relatedPosts.map((p) => (
+            <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
+              <div style="font-weight:700">{p.data.title}</div>
+              {p.data.description && (
+                <div style="opacity:.8;margin-top:4px">{p.data.description}</div>
+              )}
+              <div style="opacity:.6;margin-top:6px">
+                {new Date(p.data.pubDate).toLocaleDateString()}
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )}
+
     <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/posts/">← All posts</a>
       <a class="pill" href="/daytona/topics/">Topics</a>
+      <a class="pill" href="/daytona/">Daytona home</a>
     </p>
   </div>
 </section>
