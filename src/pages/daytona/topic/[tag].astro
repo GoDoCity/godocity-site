@@ -37,14 +37,14 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-// Daytona filter (supports both explicit frontmatter and legacy folder IDs)
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
-
 export async function getStaticPaths() {
+  // Define this INSIDE getStaticPaths to avoid Cloudflare/Astro scope issues
+  function isDaytonaPost(post) {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  }
+
   const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
   const slugs = new Set();
@@ -62,7 +62,6 @@ export async function getStaticPaths() {
     }
   }
 
-  // IMPORTANT: return ONLY valid params:{tag:string}
   return Array.from(slugs)
     .filter(Boolean)
     .map((tag) => ({
@@ -70,7 +69,13 @@ export async function getStaticPaths() {
     }));
 }
 
-// ----- Page build for a specific tag -----
+// ---- Page render ----
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+}
+
 const tag = String(Astro.params.tag ?? "").trim();
 
 const postsAll = (await getCollection("posts")).filter(isDaytonaPost);
@@ -90,7 +95,6 @@ for (const p of postsAll) {
 
     if (slug === tag) {
       matched.push(p);
-      // pick a nicer label (Title Case from canonical key)
       label = tagLabelFromKey(key) || label;
       break;
     }
