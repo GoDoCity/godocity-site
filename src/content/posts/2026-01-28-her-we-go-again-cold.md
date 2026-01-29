@@ -2,7 +2,7 @@
 title: Here we go again...COLD!
 city: daytona
 tags:
-  - Motor Sports
+  - motor sports
 featured: false
 pubDate: 2026-01-28T17:59:00.000Z
 hasPermission: true
