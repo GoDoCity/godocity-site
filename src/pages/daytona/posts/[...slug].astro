@@ -47,8 +47,8 @@ export async function getStaticPaths() {
   });
 
   return daytonaPosts.map((post) => ({
-    // IMPORTANT for [...slug]: slug must be an array
-    params: { slug: String(post.slug).split("/") },
+    // ✅ For [...slug], Astro expects a STRING here (not an array)
+    params: { slug: post.slug },
     props: { post },
   }));
 }
@@ -59,7 +59,7 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
-// normalize tags for display + URL
+// normalize tags for display + URL (Rule A)
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 
