@@ -2,53 +2,42 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/**
- * Rule A — Canonical Tag Normalization
- * - case-insensitive
- * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
- */
-
-// canonical key for comparison/grouping
-function tagKey(raw: unknown) {
-  return String(raw ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/[-_]+/g, " ")
-    .replace(/\s+/g, " ");
-}
-
-// URL slug from canonical key
-function tagSlugFromKey(key: unknown) {
-  return String(key ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-// Display label from canonical key (Title Case)
-function tagLabelFromKey(key: unknown) {
-  const s = String(key ?? "").trim().replace(/\s+/g, " ");
-  if (!s) return "";
-  return s
-    .split(" ")
-    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
-    .join(" ");
-}
-
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
 
-  // IMPORTANT: define filter INSIDE getStaticPaths so it can’t be “missing”
-  const isDaytonaPost = (post: any) => {
+  // ✅ define EVERYTHING inside getStaticPaths so nothing is “not defined”
+  const tagKey = (raw) =>
+    String(raw ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ");
+
+  const tagSlugFromKey = (key) =>
+    String(key ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
+  const tagLabelFromKey = (key) => {
+    const s = String(key ?? "").trim().replace(/\s+/g, " ");
+    if (!s) return "";
+    return s
+      .split(" ")
+      .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
+      .join(" ");
+  };
+
+  const isDaytonaPost = (post) => {
     const city = String(post?.data?.city ?? "daytona").toLowerCase();
     if (city === "daytona") return true;
     return typeof post?.id === "string" && post.id.startsWith("daytona/");
   };
 
-  // Build: tagSlug -> { key, label, posts[] }
-  const map = new Map<string, { key: string; label: string; posts: any[] }>();
+  // tagSlug -> { label, posts[] }
+  const map = new Map();
 
   for (const p of posts.filter(isDaytonaPost)) {
     const rawTags = Array.isArray(p.data?.tags) ? p.data.tags : [];
@@ -62,7 +51,7 @@ export async function getStaticPaths() {
       const label = tagLabelFromKey(key);
 
       const existing = map.get(slug);
-      if (!existing) map.set(slug, { key, label, posts: [p] });
+      if (!existing) map.set(slug, { label, posts: [p] });
       else existing.posts.push(p);
     }
   }
