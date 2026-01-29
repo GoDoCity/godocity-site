@@ -13,10 +13,8 @@ function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
-    // treat hyphens/underscores as spaces
-    .replace(/[-_]+/g, " ")
-    // collapse whitespace
-    .replace(/\s+/g, " ");
+    .replace(/[-_]+/g, " ")   // hyphen/underscore -> space
+    .replace(/\s+/g, " ");   // collapse whitespace
 }
 
 // URL slug from canonical key
@@ -39,7 +37,7 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-// Daytona filter (supports both explicit frontmatter and legacy folder IDs)
+// Daytona filter (supports explicit frontmatter + legacy folder IDs)
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
@@ -49,8 +47,8 @@ function isDaytonaPost(post) {
 export async function getStaticPaths() {
   const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  // slug -> canonicalKey
-  const seen = new Map();
+  // slug -> canonical key
+  const slugToKey = new Map();
 
   for (const p of posts) {
     const rawTags = Array.isArray(p.data?.tags) ? p.data.tags : [];
@@ -61,25 +59,21 @@ export async function getStaticPaths() {
       const slug = tagSlugFromKey(key);
       if (!slug) continue;
 
-      // First label wins (but label is derived from key anyway)
-      if (!seen.has(slug)) {
-        seen.set(slug, key);
-      }
+      if (!slugToKey.has(slug)) slugToKey.set(slug, key);
     }
   }
 
-  return Array.from(seen.entries()).map(([tag, key]) => ({
-    params: { tag },              // URL uses slug
-    props: { tag, key, label: tagLabelFromKey(key) }, // props carry canonical key + label
+  return Array.from(slugToKey.entries()).map(([tag, key]) => ({
+    params: { tag },
+    props: { tag, key, label: tagLabelFromKey(key) },
   }));
 }
 
 const { tag, key, label } = Astro.props;
 
-// Load posts and filter by canonical tag key
-const allPosts = (await getCollection("posts")).filter(isDaytonaPost);
-
-const posts = allPosts
+// Build list of posts for this tag
+const posts = (await getCollection("posts"))
+  .filter(isDaytonaPost)
   .filter((p) => {
     const rawTags = Array.isArray(p.data?.tags) ? p.data.tags : [];
     return rawTags.map(tagKey).includes(key);
