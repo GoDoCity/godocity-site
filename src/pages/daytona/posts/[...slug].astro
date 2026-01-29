@@ -54,11 +54,21 @@ function isDaytonaPost(post) {
  * -------------------------------------------------------
  */
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
-  return posts.map(post => ({
+  const isDaytonaPost = (post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+
+    // legacy folder support: daytona/slug
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  };
+
+  const daytonaPosts = posts.filter(isDaytonaPost);
+
+  return daytonaPosts.map((post) => ({
     params: { slug: post.slug },
-    props: { post }
+    props: { post },
   }));
 }
 
