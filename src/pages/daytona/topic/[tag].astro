@@ -2,142 +2,121 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/**
- * Rule A — Canonical Tag Normalization
- * - case-insensitive
- * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
- */
+/* ===========================
+   STATIC PATHS (ISOLATED)
+   =========================== */
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
 
-// canonical key for comparison/grouping
-function tagKey(raw) {
-  return String(raw ?? "")
+  const normalizeKey = (raw) =>
+    String(raw ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ");
+
+  const slugify = (key) =>
+    String(key ?? "")
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/gi, "-")
+      .replace(/(^-|-$)/g, "")
+      .toLowerCase();
+
+  const isDaytona = (post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  };
+
+  const tags = new Set();
+
+  for (const post of posts.filter(isDaytona)) {
+    const list = Array.isArray(post.data?.tags) ? post.data.tags : [];
+    for (const raw of list) {
+      const key = normalizeKey(raw);
+      const slug = slugify(key);
+      if (slug) tags.add(slug);
+    }
+  }
+
+  return [...tags].map((tag) => ({
+    params: { tag },
+  }));
+}
+
+/* ===========================
+   PAGE RENDER
+   =========================== */
+const { tag } = Astro.params;
+const posts = await getCollection("posts");
+
+const normalizeKey = (raw) =>
+  String(raw ?? "")
     .toLowerCase()
     .trim()
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ");
-}
 
-// URL slug from canonical key
-function tagSlugFromKey(key) {
-  return String(key ?? "")
-    .toLowerCase()
-    .trim()
+const slugify = (key) =>
+  String(key ?? "")
     .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/(^-|-$)/g, "")
+    .toLowerCase();
 
-// Display label from canonical key (Title Case)
-function tagLabelFromKey(key) {
-  const s = String(key ?? "").trim().replace(/\s+/g, " ");
-  if (!s) return "";
-  return s
+const labelize = (key) =>
+  key
     .split(" ")
-    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
-}
 
-export async function getStaticPaths() {
-  const posts = await getCollection("posts");
-
-  // ✅ INLINE Daytona filter (no named helper)
-  const daytonaPosts = posts.filter((post) => {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  });
-
-  // Collect unique topic slugs from tags
-  const slugs = new Set();
-
-  for (const p of daytonaPosts) {
-    const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
-    for (const raw of tags) {
-      const key = tagKey(raw);
-      if (!key) continue;
-
-      const slug = tagSlugFromKey(key);
-      if (!slug) continue;
-
-      slugs.add(slug);
-    }
-  }
-
-  // ✅ Return ONLY valid params; no props to accidentally break shape
-  return Array.from(slugs)
-    .filter(Boolean)
-    .map((tag) => ({ params: { tag } }));
-}
-
-// ---------- Page render ----------
-const tag = String(Astro.params.tag ?? "").trim();
-
-const all = await getCollection("posts");
-
-// ✅ INLINE Daytona filter again
-const daytonaPosts = all.filter((post) => {
+const isDaytona = (post) => {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
-});
+};
 
-// Find matching posts + best label for this slug
-let label = tag;
 const matched = [];
+let label = tag;
 
-for (const p of daytonaPosts) {
-  const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
-  for (const raw of tags) {
-    const key = tagKey(raw);
-    if (!key) continue;
-
-    const slug = tagSlugFromKey(key);
-    if (!slug) continue;
-
-    if (slug === tag) {
-      matched.push(p);
-      label = tagLabelFromKey(key) || label;
+for (const post of posts.filter(isDaytona)) {
+  const list = Array.isArray(post.data?.tags) ? post.data.tags : [];
+  for (const raw of list) {
+    const key = normalizeKey(raw);
+    if (slugify(key) === tag) {
+      matched.push(post);
+      label = labelize(key);
       break;
     }
   }
 }
 
-const posts = matched
-  .slice()
-  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
+matched.sort(
+  (a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate)
+);
 ---
 
-<Base title={`Topic: ${label}`} subtitle="Browse posts by topic." cityBase="daytona" />
+<Base title={`Topic: ${label}`} subtitle="Browse posts by topic" cityBase="daytona" />
 
 <section class="section">
-  <div class="container" style="max-width: 980px;">
+  <div class="container" style="max-width: 900px;">
     <h1 class="h1">{label}</h1>
-    <p class="lede" style="opacity:.8">Posts tagged “{label}”.</p>
 
-    {posts.length ? (
-      <div style="margin-top:18px;display:grid;gap:12px;">
-        {posts.map((p) => (
-          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
-            <div style="font-weight:700">{p.data.title}</div>
-            {p.data.description && (
-              <div style="opacity:.8;margin-top:4px">{p.data.description}</div>
-            )}
-            <div style="opacity:.6;margin-top:6px">
-              {new Date(p.data.pubDate).toLocaleDateString()}
-            </div>
+    {matched.length ? (
+      <div style="margin-top:20px;display:grid;gap:14px;">
+        {matched.map((p) => (
+          <a class="card" href={`/daytona/posts/${p.slug}/`}>
+            <strong>{p.data.title}</strong>
+            <div style="opacity:.7">{p.data.description}</div>
           </a>
         ))}
       </div>
     ) : (
-      <div class="card" style="margin-top:18px;padding:18px;">
-        No posts found for this topic yet.
-      </div>
+      <p>No posts found for this topic yet.</p>
     )}
 
-    <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
-      <a class="pill" href="/daytona/topics/">← All topics</a>
-      <a class="pill" href="/daytona/posts/">All posts</a>
-      <a class="pill" href="/daytona/">Daytona home</a>
+    <p style="margin-top:24px;">
+      <a class="pill" href="/daytona/topics/">← All Topics</a>
     </p>
   </div>
 </section>
