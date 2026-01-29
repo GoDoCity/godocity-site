@@ -2,6 +2,14 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+/**
+ * Daytona Topics Index
+ * - Lists all unique tags found on Daytona posts
+ * - Uses Rule A canonicalization so:
+ *   "motor sports", "motor-sports", "Motor Sports" all become ONE topic: "Motor Sports"
+ */
+
+// Rule A canonical key for grouping
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -10,6 +18,7 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
+// URL slug from canonical key (matches [tag].astro route)
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -19,6 +28,7 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
+// Display label from canonical key (Title Case)
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
@@ -28,6 +38,7 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
+// Daytona filter (supports explicit city and legacy folder IDs)
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
@@ -36,26 +47,28 @@ function isDaytonaPost(post) {
 
 const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-// key -> count
-const counts = new Map();
+// Build canonical tag map: key -> { label, slug }
+const map = new Map();
 
-for (const p of posts) {
-  const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
-  for (const raw of tags) {
+for (const post of posts) {
+  const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
+  for (const raw of rawTags) {
     const key = tagKey(raw);
     if (!key) continue;
-    counts.set(key, (counts.get(key) ?? 0) + 1);
+
+    if (!map.has(key)) {
+      map.set(key, {
+        key,
+        label: tagLabelFromKey(key),
+        slug: tagSlugFromKey(key),
+      });
+    }
   }
 }
 
-const topics = Array.from(counts.entries())
-  .map(([key, count]) => ({
-    key,
-    count,
-    label: tagLabelFromKey(key),
-    slug: tagSlugFromKey(key),
-  }))
-  .sort((a, b) => a.label.localeCompare(b.label));
+const topics = Array.from(map.values()).sort((a, b) =>
+  a.label.localeCompare(b.label)
+);
 ---
 
 <Base title="Topics" subtitle="Browse posts by topic." cityBase="daytona" />
@@ -69,21 +82,20 @@ const topics = Array.from(counts.entries())
       <div class="card" style="margin-top:18px;padding:18px;">
         <strong>NO TOPICS YET</strong>
         <div style="opacity:.8;margin-top:6px;">
-          Add tags to posts in Admin and they will appear here automatically.
+          Add tags to posts and they will appear here automatically.
         </div>
       </div>
     ) : (
       <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;">
         {topics.map((t) => (
-          <a class="pill" href={`/daytona/topic/${t.slug}/`}>
-            {t.label}
-          </a>
+          <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
         ))}
       </div>
     )}
 
-    <p style="margin-top:22px">
-      <a class="pill" href="/daytona/">← Back to Daytona</a>
+    <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
+      <a class="pill" href="/daytona/">← Daytona home</a>
+      <a class="pill" href="/daytona/posts/">All posts</a>
     </p>
   </div>
 </section>
