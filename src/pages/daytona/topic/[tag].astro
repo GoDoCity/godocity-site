@@ -2,8 +2,14 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-// Rule A canonical key
-function tagKey(raw) {
+/**
+ * Rule A — Canonical Tag Normalization
+ * - case-insensitive
+ * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
+ */
+
+// canonical key for comparison/grouping
+function tagKey(raw: unknown) {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
@@ -11,8 +17,8 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-// slug from canonical key
-function tagSlugFromKey(key) {
+// URL slug from canonical key
+function tagSlugFromKey(key: unknown) {
   return String(key ?? "")
     .toLowerCase()
     .trim()
@@ -21,30 +27,31 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
-// Display label from canonical key
-function tagLabelFromKey(key) {
+// Display label from canonical key (Title Case)
+function tagLabelFromKey(key: unknown) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
   return s
     .split(" ")
-    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : ""))
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
     .join(" ");
 }
 
-function isDaytonaPost(p) {
-  const city = String(p?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-  return typeof p?.id === "string" && p.id.startsWith("daytona/");
-}
-
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
-  // key -> { slug, label, posts[] }
-  const map = new Map();
+  // IMPORTANT: define filter INSIDE getStaticPaths so it can’t be “missing”
+  const isDaytonaPost = (post: any) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  };
 
-  for (const p of posts) {
-    const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
+  // Build: tagSlug -> { key, label, posts[] }
+  const map = new Map<string, { key: string; label: string; posts: any[] }>();
+
+  for (const p of posts.filter(isDaytonaPost)) {
+    const rawTags = Array.isArray(p.data?.tags) ? p.data.tags : [];
     for (const raw of rawTags) {
       const key = tagKey(raw);
       if (!key) continue;
@@ -54,21 +61,21 @@ export async function getStaticPaths() {
 
       const label = tagLabelFromKey(key);
 
-      const existing = map.get(key);
-      if (!existing) map.set(key, { slug, label, posts: [p] });
-      else map.set(key, { ...existing, posts: [...existing.posts, p] });
+      const existing = map.get(slug);
+      if (!existing) map.set(slug, { key, label, posts: [p] });
+      else existing.posts.push(p);
     }
   }
 
-  return Array.from(map.values()).map((v) => ({
-    params: { tag: v.slug },
-    props: { slug: v.slug, label: v.label, posts: v.posts },
+  return Array.from(map.entries()).map(([tag, v]) => ({
+    params: { tag },
+    props: { tag, label: v.label, posts: v.posts },
   }));
 }
 
-const { slug, label, posts } = Astro.props;
+const { tag, label, posts } = Astro.props;
 
-const sorted = (posts ?? [])
+const sortedPosts = (posts ?? [])
   .slice()
   .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
 ---
@@ -80,12 +87,14 @@ const sorted = (posts ?? [])
     <h1 class="h1">{label}</h1>
     <p class="lede" style="opacity:.8">Posts tagged “{label}”.</p>
 
-    {sorted.length ? (
+    {sortedPosts.length ? (
       <div style="margin-top:18px;display:grid;gap:12px;">
-        {sorted.map((p) => (
+        {sortedPosts.map((p) => (
           <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
             <div style="font-weight:700">{p.data.title}</div>
-            {p.data.description && <div style="opacity:.8;margin-top:4px">{p.data.description}</div>}
+            {p.data.description && (
+              <div style="opacity:.8;margin-top:4px">{p.data.description}</div>
+            )}
             <div style="opacity:.6;margin-top:6px">
               {new Date(p.data.pubDate).toLocaleDateString()}
             </div>
