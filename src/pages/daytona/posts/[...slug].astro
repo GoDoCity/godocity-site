@@ -13,10 +13,8 @@ function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
-    // treat hyphens/underscores as spaces
-    .replace(/[-_]+/g, " ")
-    // collapse whitespace
-    .replace(/\s+/g, " ");
+    .replace(/[-_]+/g, " ")   // hyphens/underscores -> space
+    .replace(/\s+/g, " ");   // collapse whitespace
 }
 
 // URL slug from canonical key
@@ -39,17 +37,23 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-// Daytona filter (supports both explicit frontmatter and legacy folder IDs)
-function isDaytonaPost(post) {
+// Shared: Daytona matcher (supports both frontmatter city + legacy folder IDs)
+function isDaytona(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  // IMPORTANT: keep Daytona filtering self-contained & reliable
+  const posts = await getCollection("posts");
+  const daytonaPosts = posts.filter((p) => {
+    const city = String(p?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof p?.id === "string" && p.id.startsWith("daytona/");
+  });
 
-  return posts.map((post) => ({
+  return daytonaPosts.map((post) => ({
     params: { slug: post.slug },
     props: { post },
   }));
@@ -72,8 +76,6 @@ const tagItems = Array.from(currentKeySet).map((key) => ({
 }));
 
 // ---- Related posts (STRICT): shares at least 1 normalized tag ----
-const allDaytonaPosts = (await getCollection("posts")).filter(isDaytonaPost);
-
 function postKeySet(p) {
   const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
   return new Set(tags.map(tagKey).filter(Boolean));
@@ -84,15 +86,19 @@ function sharesATag(aSet, bSet) {
   return false;
 }
 
-const relatedPosts = allDaytonaPosts
-  .filter((p) => p.slug !== post.slug) // not this post
-  .filter((p) => {
-    if (currentKeySet.size === 0) return false; // strict means no tags => no related
-    const pSet = postKeySet(p);
-    return pSet.size > 0 && sharesATag(currentKeySet, pSet);
-  })
-  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate))
-  .slice(0, 4);
+let relatedPosts = [];
+if (currentKeySet.size > 0) {
+  const allDaytonaPosts = (await getCollection("posts")).filter(isDaytona);
+
+  relatedPosts = allDaytonaPosts
+    .filter((p) => p.slug !== post.slug)
+    .filter((p) => {
+      const pSet = postKeySet(p);
+      return pSet.size > 0 && sharesATag(currentKeySet, pSet);
+    })
+    .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate))
+    .slice(0, 4);
+}
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
