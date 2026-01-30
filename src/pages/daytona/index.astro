@@ -2,144 +2,175 @@
 import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-// Load all posts, then keep only Daytona posts (supports a few common field names)
-const all = await getCollection("posts");
+/**
+ * Daytona Home — polish
+ * - Top Topics (counts, canonical slugs)
+ * - Latest Posts
+ * - Safe: no getStaticPaths changes
+ */
 
-// Normalize city field (some of your content/config uses `city`)
-const daytonaPosts = all
-  .filter((p) => {
-    const city =
-      (p.data?.city ?? p.data?.cityBase ?? p.data?.location ?? "").toString().toLowerCase();
-    return city === "daytona";
-  })
-  .sort((a, b) => {
-    const da = new Date(a.data?.pubDate ?? a.data?.date ?? 0).getTime();
-    const db = new Date(b.data?.pubDate ?? b.data?.date ?? 0).getTime();
-    return db - da;
-  });
+// Rule A canonical key
+function tagKey(raw) {
+  return String(raw ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ");
+}
 
-// Pick a featured post if one is marked, otherwise the newest post
-const featured =
-  daytonaPosts.find((p) => p?.data?.featured === true) ?? daytonaPosts[0] ?? null;
+function tagSlugFromKey(key) {
+  return String(key ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
-// Latest list (excluding featured)
-const latest = (daytonaPosts ?? [])
-  .filter((p) => p?.id && p.id !== featured?.id)
-  .slice(0, 5);
+function tagLabelFromKey(key) {
+  const s = String(key ?? "").trim().replace(/\s+/g, " ");
+  if (!s) return "";
+  return s
+    .split(" ")
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
+    .join(" ");
+}
 
-// Helpers
-const postUrl = (p) => `/daytona/posts/${p.slug}/`;
-const postDescription = (p) =>
-  p?.data?.description ??
-  p?.data?.excerpt ??
-  p?.data?.summary ??
-  "";
-const postTitle = (p) => p?.data?.title ?? "Untitled";
-const postTags = (p) =>
-  (p?.data?.tags ?? p?.data?.topics ?? p?.data?.topic ?? []).filter(Boolean);
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+}
 
-const formatDate = (d) => {
-  if (!d) return "";
-  try {
-    return new Date(d).toLocaleDateString(undefined, {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  } catch {
-    return "";
+const allPosts = (await getCollection("posts")).filter(isDaytonaPost);
+
+const latestPosts = allPosts
+  .slice()
+  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate))
+  .slice(0, 6);
+
+// Build topic counts
+const topicCounts = new Map(); // key -> count
+for (const p of allPosts) {
+  const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
+  for (const raw of tags) {
+    const key = tagKey(raw);
+    if (!key) continue;
+    topicCounts.set(key, (topicCounts.get(key) ?? 0) + 1);
   }
-};
+}
+
+const topTopics = Array.from(topicCounts.entries())
+  .map(([key, count]) => ({
+    key,
+    count,
+    label: tagLabelFromKey(key),
+    slug: tagSlugFromKey(key),
+  }))
+  .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
+  .slice(0, 10);
+
+// Hero image for Daytona (already in your CSS vars)
+const title = "GoDoDaytona";
+const subtitle = "Local picks, events, guides, and stories — Daytona Beach & surrounding areas.";
 ---
 
-<Base
-  title="GoDoDaytona"
-  subtitle="GoDo386 • Local stories, guides, and what’s happening in Daytona Beach."
-  cityBase="daytona"
->
-  <!-- Postcard banner (image only, no interference with content) -->
-  <header class="city-banner" aria-label="Greetings from Daytona Beach"></header>
+<Base title={title} subtitle={subtitle} cityBase="daytona" />
 
-  <!-- Hero content -->
-  <section class="hero hero-daytona">
-    <div class="container hero-grid">
-      <!-- Featured -->
-      <article class="card card-pad">
-        <div class="kicker">Featured</div>
+<section class="hero has-hero-img">
+  <div class="container">
+    <div class="hero-grid">
+      <div class="card card-pad">
+        <div class="kicker">GoDoDaytona</div>
+        <div class="h1">Your Daytona cheat code.</div>
+        <p class="lede">
+          Curated local stories, events, and guides — built fast, kept clean, and organized by Topics.
+        </p>
 
-        {featured ? (
-          <>
-            <h1 class="h1" style="font-size:40px;margin-bottom:8px">
-              <a href={postUrl(featured)} style="text-decoration:none;color:inherit">
-                {postTitle(featured)}
-              </a>
-            </h1>
+        <div class="tagrow">
+          <a class="tag" href="/daytona/topics/">Browse Topics</a>
+          <a class="tag" href="/daytona/posts/">Latest Posts</a>
+          <a class="tag" href="/daytona/subscribe/">Subscribe</a>
+        </div>
+      </div>
 
-            {postDescription(featured) ? (
-              <p class="lede">{postDescription(featured)}</p>
-            ) : (
-              <p class="lede">New story coming soon.</p>
-            )}
+      <div class="card">
+        <div class="article">
+          <h3 style="margin:0 0 6px;">Top Topics</h3>
+          <p style="margin:0;color:var(--muted);line-height:1.5;">
+            The most active topics right now.
+          </p>
+        </div>
 
-            <div class="tagrow">
-              {(postTags(featured) ?? []).slice(0, 5).map((t) => (
-                <a class="tag" href={`/daytona/topic/${t}/`}>{t}</a>
+        <div class="article">
+          {topTopics.length ? (
+            <div style="display:flex;flex-wrap:wrap;gap:10px;">
+              {topTopics.map((t) => (
+                <a class="pill" href={`/daytona/topic/${t.slug}/`}>
+                  {t.label} <span style="opacity:.65">({t.count})</span>
+                </a>
               ))}
             </div>
-
-            <div style="margin-top:14px">
-              <a class="cta" href={postUrl(featured)}>Read</a>
-            </div>
-          </>
-        ) : (
-          <>
-            <h1 class="h1" style="font-size:40px;margin-bottom:8px">GoDoDaytona</h1>
-            <p class="lede">No posts yet. Click “New Posts” in the admin to add your first one.</p>
-          </>
-        )}
-      </article>
-
-      <!-- Latest -->
-      <aside class="card card-pad">
-        <div class="kicker">Latest</div>
-
-        {latest.length ? (
-          <ul class="list" style="list-style:none;padding:0;margin:10px 0 0 0;display:grid;gap:10px">
-            {latest.map((p) => (
-              <li class="row" style="display:grid;gap:4px">
-                <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
-                  <a class="h3" href={postUrl(p)} style="text-decoration:none">
-                    {postTitle(p)}
-                  </a>
-                  <span style="opacity:.7;font-size:13px">
-                    {formatDate(p.data?.pubDate ?? p.data?.date)}
-                  </span>
-                </div>
-
-                {postDescription(p) ? (
-                  <p style="margin:0;opacity:.85">{postDescription(p)}</p>
-                ) : null}
-
-                <div class="tagrow">
-                  {(postTags(p) ?? []).slice(0, 3).map((t) => (
-                    <a class="tag" href={`/daytona/topic/${t}/`}>{t}</a>
-                  ))}
-                </div>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p class="lede" style="margin-top:10px">Nothing yet — add your first post in Admin.</p>
-        )}
-
-        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
-          <a class="pill" href="/daytona/posts/">All posts</a>
-          <a class="pill" href="/daytona/guides/">Guides</a>
-          <a class="pill" href="/daytona/events/">Events</a>
+          ) : (
+            <p style="margin:0;color:var(--muted);">
+              No topics yet — add tags to posts in Admin and they’ll appear here.
+            </p>
+          )}
         </div>
-      </aside>
+      </div>
     </div>
-  </section>
-</Base>
+  </div>
+</section>
 
+<section class="section">
+  <div class="container">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <h2 style="margin:0;font-size:22px;">Latest Posts</h2>
+      <a class="pill" href="/daytona/posts/">View all</a>
+    </div>
 
+    <div class="grid" style="margin-top:14px;">
+      {latestPosts.length ? (
+        latestPosts.map((p) => (
+          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;">
+            <div class="card-pad">
+              <div style="font-weight:900;font-size:18px;line-height:1.2;">
+                {p.data.title}
+              </div>
+              {p.data.description && (
+                <div style="opacity:.82;margin-top:6px;line-height:1.45;">
+                  {p.data.description}
+                </div>
+              )}
+              <div style="opacity:.6;margin-top:10px;font-size:13px;">
+                {new Date(p.data.pubDate).toLocaleDateString()}
+              </div>
+            </div>
+          </a>
+        ))
+      ) : (
+        <div class="card card-pad">
+          No posts yet. Create one in Admin and it will show up here.
+        </div>
+      )}
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="card card-pad">
+      <h2 style="margin:0 0 8px 0;font-size:22px;">Get the weekly drop</h2>
+      <p class="lede" style="margin:0 0 12px 0;">
+        One email. The best of Daytona. No spam.
+      </p>
+      <form action="#" method="post">
+        <input type="email" placeholder="Email address" aria-label="Email address" />
+        <button class="cta" type="button">Subscribe</button>
+      </form>
+      <div class="note">
+        (Form hookup later — this is placeholder UI so the site feels complete.)
+      </div>
+    </div>
+  </div>
+</section>
