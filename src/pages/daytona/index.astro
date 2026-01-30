@@ -3,7 +3,8 @@ import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Daytona Home — polish
+ * Daytona Home — polish + featured
+ * - Featured posts (featured: true)
  * - Top Topics (counts, canonical slugs)
  * - Latest Posts
  * - Safe: no getStaticPaths changes
@@ -44,10 +45,15 @@ function isDaytonaPost(post) {
 
 const allPosts = (await getCollection("posts")).filter(isDaytonaPost);
 
-const latestPosts = allPosts
+const sortedPosts = allPosts
   .slice()
-  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate))
-  .slice(0, 6);
+  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
+
+const featuredPosts = sortedPosts
+  .filter((p) => p.data?.featured === true)
+  .slice(0, 3);
+
+const latestPosts = sortedPosts.slice(0, 6);
 
 // Build topic counts
 const topicCounts = new Map(); // key -> count
@@ -70,9 +76,9 @@ const topTopics = Array.from(topicCounts.entries())
   .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label))
   .slice(0, 10);
 
-// Hero image for Daytona (already in your CSS vars)
 const title = "GoDoDaytona";
-const subtitle = "Local picks, events, guides, and stories — Daytona Beach & surrounding areas.";
+const subtitle =
+  "Local picks, events, guides, and stories — Daytona Beach & surrounding areas.";
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
@@ -122,6 +128,37 @@ const subtitle = "Local picks, events, guides, and stories — Daytona Beach & s
   </div>
 </section>
 
+{featuredPosts.length > 0 && (
+  <section class="section">
+    <div class="container">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <h2 style="margin:0;font-size:22px;">Featured</h2>
+        <span style="opacity:.65;font-size:13px;">Editor picks</span>
+      </div>
+
+      <div class="grid" style="margin-top:14px;">
+        {featuredPosts.map((p) => (
+          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;">
+            <div class="card-pad">
+              <div style="font-weight:900;font-size:18px;line-height:1.2;">
+                {p.data.title}
+              </div>
+              {p.data.description && (
+                <div style="opacity:.82;margin-top:6px;line-height:1.45;">
+                  {p.data.description}
+                </div>
+              )}
+              <div style="opacity:.6;margin-top:10px;font-size:13px;">
+                {new Date(p.data.pubDate).toLocaleDateString()}
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+)}
+
 <section class="section">
   <div class="container">
     <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
@@ -169,7 +206,7 @@ const subtitle = "Local picks, events, guides, and stories — Daytona Beach & s
         <button class="cta" type="button">Subscribe</button>
       </form>
       <div class="note">
-        (Form hookup later — this is placeholder UI so the site feels complete.)
+        (Form hookup later — placeholder UI so the site feels complete.)
       </div>
     </div>
   </div>
