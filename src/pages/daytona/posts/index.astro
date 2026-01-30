@@ -2,35 +2,98 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-const all = await getCollection("posts");
-const posts = all
-  .filter((p) => (p.data.city ?? "daytona") === "daytona")
-  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+}
 
-const title = "Posts";
-const subtitle = "Latest GoDoDaytona posts.";
+const url = new URL(Astro.request.url);
+const featuredOnly = url.searchParams.get("featured") === "1";
+
+const postsAll = (await getCollection("posts"))
+  .filter(isDaytonaPost)
+  .slice()
+  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
+
+const posts = featuredOnly
+  ? postsAll.filter((p) => p.data?.featured === true)
+  : postsAll;
+
+const title = featuredOnly ? "Featured Posts" : "All Posts";
+const subtitle = featuredOnly
+  ? "Editor picks for GoDoDaytona."
+  : "Newest posts first.";
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
 
 <section class="section">
-  <div class="container">
-    <h1 class="h1">{title}</h1>
+  <div class="container" style="max-width: 980px;">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <h1 class="h1" style="margin:0;">{title}</h1>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="pill" href="/daytona/posts/">All posts</a>
+        <a class="pill" href="/daytona/posts/?featured=1">Featured</a>
+      </div>
+    </div>
 
-    {posts.length === 0 ? (
-      <p class="lede">No posts yet. Create one in /admin.</p>
-    ) : (
-      <div style="display:grid;gap:14px;margin-top:14px">
+    <p class="lede" style="opacity:.82;margin-top:10px;">
+      {featuredOnly ? "Only posts marked Featured = true." : "All posts, newest first."}
+    </p>
+
+    {posts.length ? (
+      <div style="margin-top:18px;display:grid;gap:12px;">
         {posts.map((p) => (
-          <a class="pill" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:14px;border-radius:14px">
-            <div style="font-weight:800">{p.data.title}</div>
-            <div style="opacity:.8;margin-top:6px">{p.data.description ?? ""}</div>
-            <div style="opacity:.6;margin-top:8px;font-size:13px">
+          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <div style="font-weight:900;font-size:18px;line-height:1.2;">
+                {p.data.title}
+              </div>
+
+              {p.data?.featured === true && (
+                <span
+                  style="
+                    font-size:11px;
+                    font-weight:900;
+                    letter-spacing:.6px;
+                    text-transform:uppercase;
+                    padding:6px 10px;
+                    border-radius:999px;
+                    background:rgba(255,210,74,.14);
+                    border:1px solid rgba(255,210,74,.28);
+                    color:var(--accent);
+                    white-space:nowrap;
+                  "
+                >
+                  Featured
+                </span>
+              )}
+            </div>
+
+            {p.data.description && (
+              <div style="opacity:.82;margin-top:6px;line-height:1.45;">
+                {p.data.description}
+              </div>
+            )}
+
+            <div style="opacity:.6;margin-top:10px;font-size:13px;">
               {new Date(p.data.pubDate).toLocaleDateString()}
             </div>
           </a>
         ))}
       </div>
+    ) : (
+      <div class="card" style="margin-top:18px;padding:18px;">
+        {featuredOnly
+          ? "No featured posts yet. Mark a post as Featured in Admin and it will appear here."
+          : "No posts yet. Create one in Admin and it will appear here."}
+      </div>
     )}
+
+    <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
+      <a class="pill" href="/daytona/">← Daytona home</a>
+      <a class="pill" href="/daytona/topics/">Topics</a>
+    </div>
   </div>
 </section>
