@@ -3,11 +3,11 @@ import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Daytona Home — polish + featured
- * - Featured posts (featured: true)
- * - Top Topics (counts, canonical slugs)
+ * Daytona Home — polish + featured badges
+ * - Featured section (featured: true)
+ * - Featured badge on cards
+ * - Top Topics
  * - Latest Posts
- * - Safe: no getStaticPaths changes
  */
 
 // Rule A canonical key
@@ -138,11 +138,31 @@ const subtitle =
 
       <div class="grid" style="margin-top:14px;">
         {featuredPosts.map((p) => (
-          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;">
+          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;position:relative;">
             <div class="card-pad">
-              <div style="font-weight:900;font-size:18px;line-height:1.2;">
-                {p.data.title}
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div style="font-weight:900;font-size:18px;line-height:1.2;">
+                  {p.data.title}
+                </div>
+
+                <span
+                  style="
+                    font-size:11px;
+                    font-weight:900;
+                    letter-spacing:.6px;
+                    text-transform:uppercase;
+                    padding:6px 10px;
+                    border-radius:999px;
+                    background:rgba(255,210,74,.18);
+                    border:1px solid rgba(255,210,74,.35);
+                    color:var(--accent);
+                    white-space:nowrap;
+                  "
+                >
+                  Featured
+                </span>
               </div>
+
               {p.data.description && (
                 <div style="opacity:.82;margin-top:6px;line-height:1.45;">
                   {p.data.description}
@@ -171,9 +191,32 @@ const subtitle =
         latestPosts.map((p) => (
           <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;">
             <div class="card-pad">
-              <div style="font-weight:900;font-size:18px;line-height:1.2;">
-                {p.data.title}
+              <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+                <div style="font-weight:900;font-size:18px;line-height:1.2;">
+                  {p.data.title}
+                </div>
+
+                {p.data?.featured === true && (
+                  <span
+                    style="
+                      font-size:11px;
+                      font-weight:900;
+                      letter-spacing:.6px;
+                      text-transform:uppercase;
+                      padding:6px 10px;
+                      border-radius:999px;
+                      background:rgba(255,210,74,.14);
+                      border:1px solid rgba(255,210,74,.28);
+                      color:var(--accent);
+                      white-space:nowrap;
+                      opacity:.95;
+                    "
+                  >
+                    Featured
+                  </span>
+                )}
               </div>
+
               {p.data.description && (
                 <div style="opacity:.82;margin-top:6px;line-height:1.45;">
                   {p.data.description}
