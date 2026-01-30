@@ -1,0 +1,87 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+}
+
+const posts = (await getCollection("posts"))
+  .filter(isDaytonaPost)
+  .filter((p) => p.data?.featured === true)
+  .slice()
+  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
+
+const title = "Featured Posts";
+const subtitle = "Editor picks for GoDoDaytona.";
+---
+
+<Base title={title} subtitle={subtitle} cityBase="daytona" />
+
+<section class="section">
+  <div class="container" style="max-width: 980px;">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <h1 class="h1" style="margin:0;">{title}</h1>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a class="pill" href="/daytona/posts/">All posts</a>
+        <a class="pill" href="/daytona/featured/">Featured</a>
+      </div>
+    </div>
+
+    <p class="lede" style="opacity:.82;margin-top:10px;">
+      Only posts with <code>featured: true</code>.
+    </p>
+
+    {posts.length ? (
+      <div style="margin-top:18px;display:grid;gap:12px;">
+        {posts.map((p) => (
+          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+              <div style="font-weight:900;font-size:18px;line-height:1.2;">
+                {p.data.title}
+              </div>
+
+              <span
+                style="
+                  font-size:11px;
+                  font-weight:900;
+                  letter-spacing:.6px;
+                  text-transform:uppercase;
+                  padding:6px 10px;
+                  border-radius:999px;
+                  background:rgba(255,210,74,.14);
+                  border:1px solid rgba(255,210,74,.28);
+                  color:var(--accent);
+                  white-space:nowrap;
+                "
+              >
+                Featured
+              </span>
+            </div>
+
+            {p.data.description && (
+              <div style="opacity:.82;margin-top:6px;line-height:1.45;">
+                {p.data.description}
+              </div>
+            )}
+
+            <div style="opacity:.6;margin-top:10px;font-size:13px;">
+              {new Date(p.data.pubDate).toLocaleDateString()}
+            </div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <div class="card" style="margin-top:18px;padding:18px;">
+        No featured posts yet. Add <code>featured: true</code> to a post.
+      </div>
+    )}
+
+    <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
+      <a class="pill" href="/daytona/">← Daytona home</a>
+      <a class="pill" href="/daytona/topics/">Topics</a>
+    </div>
+  </div>
+</section>
