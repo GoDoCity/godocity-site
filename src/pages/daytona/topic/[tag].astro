@@ -48,7 +48,7 @@ export async function getStaticPaths() {
    PAGE RENDER
    =========================== */
 const { tag } = Astro.params;
-const posts = await getCollection("posts");
+const postsAll = await getCollection("posts");
 
 const normalizeKey = (raw) =>
   String(raw ?? "")
@@ -79,7 +79,7 @@ const isDaytona = (post) => {
 const matched = [];
 let label = tag;
 
-for (const post of posts.filter(isDaytona)) {
+for (const post of postsAll.filter(isDaytona)) {
   const list = Array.isArray(post.data?.tags) ? post.data.tags : [];
   for (const raw of list) {
     const key = normalizeKey(raw);
@@ -91,32 +91,50 @@ for (const post of posts.filter(isDaytona)) {
   }
 }
 
-matched.sort(
-  (a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate)
-);
+matched.sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
+
+const count = matched.length;
 ---
 
 <Base title={`Topic: ${label}`} subtitle="Browse posts by topic" cityBase="daytona" />
 
 <section class="section">
-  <div class="container" style="max-width: 900px;">
-    <h1 class="h1">{label}</h1>
+  <div class="container" style="max-width: 980px;">
+    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+      <h1 class="h1" style="margin:0;">{label}</h1>
+      <div style="opacity:.7;font-weight:700;">
+        {count} {count === 1 ? "post" : "posts"}
+      </div>
+    </div>
+
+    <p class="lede" style="opacity:.82;margin-top:8px;">
+      Newest first. Click any post to read.
+    </p>
 
     {matched.length ? (
-      <div style="margin-top:20px;display:grid;gap:14px;">
+      <div style="margin-top:18px;display:grid;gap:12px;">
         {matched.map((p) => (
-          <a class="card" href={`/daytona/posts/${p.slug}/`}>
-            <strong>{p.data.title}</strong>
-            <div style="opacity:.7">{p.data.description}</div>
+          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
+            <div style="font-weight:900">{p.data.title}</div>
+            {p.data.description && (
+              <div style="opacity:.82;margin-top:4px">{p.data.description}</div>
+            )}
+            <div style="opacity:.6;margin-top:6px">
+              {new Date(p.data.pubDate).toLocaleDateString()}
+            </div>
           </a>
         ))}
       </div>
     ) : (
-      <p>No posts found for this topic yet.</p>
+      <div class="card" style="margin-top:18px;padding:18px;">
+        No posts found for this topic yet.
+      </div>
     )}
 
-    <p style="margin-top:24px;">
-      <a class="pill" href="/daytona/topics/">← All Topics</a>
-    </p>
+    <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
+      <a class="pill" href="/daytona/topics/">← All topics</a>
+      <a class="pill" href="/daytona/posts/">All posts</a>
+      <a class="pill" href="/daytona/">Daytona home</a>
+    </div>
   </div>
 </section>
