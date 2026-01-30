@@ -65,6 +65,8 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
+const isFeatured = post.data?.featured === true;
+
 // ---- Tags for THIS post (Rule A, unique) ----
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const currentKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
@@ -110,9 +112,30 @@ if (currentKeySet.size > 0) {
     <h1 class="h1">{title}</h1>
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    <p style="opacity:.6;margin-top:10px">
-      {new Date(post.data.pubDate).toLocaleDateString()}
-    </p>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
+      <p style="opacity:.6;margin:0;">
+        {new Date(post.data.pubDate).toLocaleDateString()}
+      </p>
+
+      {isFeatured && (
+        <span
+          style="
+            font-size:11px;
+            font-weight:900;
+            letter-spacing:.6px;
+            text-transform:uppercase;
+            padding:6px 10px;
+            border-radius:999px;
+            background:rgba(255,210,74,.14);
+            border:1px solid rgba(255,210,74,.28);
+            color:var(--accent);
+            white-space:nowrap;
+          "
+        >
+          Featured
+        </span>
+      )}
+    </div>
 
     {tagItems.length > 0 && (
       <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
@@ -128,7 +151,7 @@ if (currentKeySet.size > 0) {
 
     {relatedPosts.length > 0 && (
       <section style="margin-top:30px;">
-        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
           <h2 style="font-size:18px;font-weight:900;margin:0;">Related posts</h2>
           <span style="opacity:.6;font-size:13px;">Based on shared topics</span>
         </div>
