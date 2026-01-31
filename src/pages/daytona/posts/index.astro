@@ -2,93 +2,145 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+/**
+ * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
+ */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-const url = new URL(Astro.request.url);
-const featuredOnly = url.searchParams.get("featured") === "1";
+/**
+ * Featured flag normalization:
+ * supports:
+ *   featured: true
+ *   featured: "true"
+ *   featured: "yes"
+ *   featured: 1
+ *   featured: "1"
+ */
+function isFeatured(post) {
+  const v = post?.data?.featured;
+  if (v === true) return true;
+  if (v === 1) return true;
+  const s = String(v ?? "").toLowerCase().trim();
+  return s === "true" || s === "yes" || s === "1";
+}
 
-const postsAll = (await getCollection("posts"))
-  .filter(isDaytonaPost)
-  .slice()
-  .sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
+/**
+ * Safe date getter (fallback order)
+ */
+function getPostDate(post) {
+  return (
+    post?.data?.pubDate ??
+    post?.data?.date ??
+    post?.data?.published ??
+    post?.data?.updated ??
+    null
+  );
+}
 
-const posts = featuredOnly
-  ? postsAll.filter((p) => p.data?.featured === true)
-  : postsAll;
+/**
+ * Sort newest first
+ */
+function sortNewestFirst(a, b) {
+  const da = new Date(getPostDate(a) ?? 0).getTime();
+  const db = new Date(getPostDate(b) ?? 0).getTime();
+  return db - da;
+}
 
-const title = featuredOnly ? "Featured Posts" : "All Posts";
-const subtitle = featuredOnly
-  ? "Editor picks for GoDoDaytona."
-  : "Newest posts first.";
+// Query param: ?featured=1
+const featuredParam = Astro.url.searchParams.get("featured");
+const showFeaturedOnly =
+  featuredParam === "1" ||
+  String(featuredParam ?? "").toLowerCase() === "true" ||
+  String(featuredParam ?? "").toLowerCase() === "yes";
+
+// Load posts
+const all = await getCollection("posts");
+
+// Daytona only + newest first
+let posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
+
+// Apply featured filter (if requested)
+if (showFeaturedOnly) {
+  posts = posts.filter(isFeatured);
+}
+
+const pageTitle = showFeaturedOnly ? "Featured Posts" : "All Posts";
+const pageSubtitle = showFeaturedOnly ? "Featured posts only." : "All posts, newest first.";
 ---
 
-<Base title={title} subtitle={subtitle} cityBase="daytona" />
+<Base title={pageTitle} subtitle={pageSubtitle} cityBase="daytona" />
 
 <section class="section">
   <div class="container" style="max-width: 980px;">
-    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-      <h1 class="h1" style="margin:0;">{title}</h1>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <a class="pill" href="/daytona/posts/">All posts</a>
-        <a class="pill" href="/daytona/posts/?featured=1">Featured</a>
-      </div>
+    <h1 class="h1">{pageTitle}</h1>
+    <p class="lede">{pageSubtitle}</p>
+
+    <!-- Toggle pills -->
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+      <a class="pill" href="/daytona/posts/">All posts</a>
+      <a class="pill" href="/daytona/posts/?featured=1">Featured</a>
     </div>
 
-    <p class="lede" style="opacity:.82;margin-top:10px;">
-      {featuredOnly ? "Only posts marked Featured = true." : "All posts, newest first."}
-    </p>
+    <!-- Posts list -->
+    <div style="margin-top:18px;display:flex;flex-direction:column;gap:14px;">
+      {posts.map((p) => {
+        const title = p.data.title ?? p.slug;
+        const desc = p.data.description ?? "";
+        const d = getPostDate(p);
+        const dateText = d ? new Date(d).toLocaleDateString() : "";
 
-    {posts.length ? (
-      <div style="margin-top:18px;display:grid;gap:12px;">
-        {posts.map((p) => (
-          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
-            <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
-              <div style="font-weight:900;font-size:18px;line-height:1.2;">
-                {p.data.title}
+        return (
+          <a
+            href={`/daytona/posts/${p.slug}/`}
+            style="display:block;text-decoration:none;"
+          >
+            <div
+              style="
+                border: 1px solid rgba(255,255,255,.12);
+                border-radius: 14px;
+                padding: 14px 16px;
+                background: rgba(255,255,255,.03);
+              "
+            >
+              <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+                <div>
+                  <div style="font-weight:700;font-size:18px;line-height:1.25">{title}</div>
+                  {desc && <div style="opacity:.8;margin-top:6px">{desc}</div>}
+                  {dateText && <div style="opacity:.6;margin-top:8px">{dateText}</div>}
+                </div>
+
+                {isFeatured(p) && (
+                  <span
+                    style="
+                      font-size: 12px;
+                      font-weight: 800;
+                      letter-spacing: .04em;
+                      padding: 6px 10px;
+                      border-radius: 999px;
+                      border: 1px solid rgba(255,220,80,.65);
+                      color: rgba(255,220,80,.95);
+                      background: rgba(255,220,80,.12);
+                      white-space: nowrap;
+                    "
+                  >
+                    FEATURED
+                  </span>
+                )}
               </div>
-
-              {p.data?.featured === true && (
-                <span
-                  style="
-                    font-size:11px;
-                    font-weight:900;
-                    letter-spacing:.6px;
-                    text-transform:uppercase;
-                    padding:6px 10px;
-                    border-radius:999px;
-                    background:rgba(255,210,74,.14);
-                    border:1px solid rgba(255,210,74,.28);
-                    color:var(--accent);
-                    white-space:nowrap;
-                  "
-                >
-                  Featured
-                </span>
-              )}
-            </div>
-
-            {p.data.description && (
-              <div style="opacity:.82;margin-top:6px;line-height:1.45;">
-                {p.data.description}
-              </div>
-            )}
-
-            <div style="opacity:.6;margin-top:10px;font-size:13px;">
-              {new Date(p.data.pubDate).toLocaleDateString()}
             </div>
           </a>
-        ))}
-      </div>
-    ) : (
-      <div class="card" style="margin-top:18px;padding:18px;">
-        {featuredOnly
-          ? "No featured posts yet. Mark a post as Featured in Admin and it will appear here."
-          : "No posts yet. Create one in Admin and it will appear here."}
-      </div>
+        );
+      })}
+    </div>
+
+    {posts.length === 0 && (
+      <p style="margin-top:18px;opacity:.7">
+        No posts found {showFeaturedOnly ? "with featured=1." : "."}
+      </p>
     )}
 
     <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
