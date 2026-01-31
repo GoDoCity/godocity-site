@@ -50,26 +50,14 @@ function sortNewestFirst(a, b) {
   return db - da;
 }
 
-// Query param: ?featured=1
-const featuredParam = Astro.url.searchParams.get("featured");
-const showFeaturedOnly =
-  featuredParam === "1" ||
-  String(featuredParam ?? "").toLowerCase() === "true" ||
-  String(featuredParam ?? "").toLowerCase() === "yes";
-
 // Load posts
 const all = await getCollection("posts");
 
 // Daytona only + newest first
-let posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
+const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
-// Apply featured filter (if requested)
-if (showFeaturedOnly) {
-  posts = posts.filter(isFeatured);
-}
-
-const pageTitle = showFeaturedOnly ? "Featured Posts" : "All Posts";
-const pageSubtitle = showFeaturedOnly ? "Featured posts only." : "All posts, newest first.";
+const pageTitle = "All Posts";
+const pageSubtitle = "All posts, newest first.";
 ---
 
 <Base title={pageTitle} subtitle={pageSubtitle} cityBase="daytona" />
@@ -79,10 +67,10 @@ const pageSubtitle = showFeaturedOnly ? "Featured posts only." : "All posts, new
     <h1 class="h1">{pageTitle}</h1>
     <p class="lede">{pageSubtitle}</p>
 
-    <!-- Toggle pills -->
+    <!-- Toggle pills (STATIC ROUTES) -->
     <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/posts/">All posts</a>
-      <a class="pill" href="/daytona/posts/?featured=1">Featured</a>
+      <a class="pill" href="/daytona/posts/featured/">Featured</a>
     </div>
 
     <!-- Posts list -->
@@ -94,10 +82,7 @@ const pageSubtitle = showFeaturedOnly ? "Featured posts only." : "All posts, new
         const dateText = d ? new Date(d).toLocaleDateString() : "";
 
         return (
-          <a
-            href={`/daytona/posts/${p.slug}/`}
-            style="display:block;text-decoration:none;"
-          >
+          <a href={`/daytona/posts/${p.slug}/`} style="display:block;text-decoration:none;">
             <div
               style="
                 border: 1px solid rgba(255,255,255,.12);
@@ -138,9 +123,7 @@ const pageSubtitle = showFeaturedOnly ? "Featured posts only." : "All posts, new
     </div>
 
     {posts.length === 0 && (
-      <p style="margin-top:18px;opacity:.7">
-        No posts found {showFeaturedOnly ? "with featured=1." : "."}
-      </p>
+      <p style="margin-top:18px;opacity:.7">No posts found.</p>
     )}
 
     <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
