@@ -3,15 +3,6 @@ import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
- */
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
-
-/**
  * Featured flag normalization
  * supports: true, "true", "yes", 1, "1"
  */
@@ -71,11 +62,18 @@ function sortNewestFirst(a, b) {
 }
 
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
-  // IMPORTANT: for `[...slug]`, Astro expects `slug` to be a STRING (not an array).
-  return posts.map((post) => ({
-    params: { slug: post.slug },
+  // Inline Daytona filter (NO external function reference)
+  const daytonaPosts = posts.filter((post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  });
+
+  // IMPORTANT: for `[...slug]`, you are using Astro’s “string slug” style
+  return daytonaPosts.map((post) => ({
+    params: { slug: post.slug }, // STRING
     props: { post },
   }));
 }
@@ -99,9 +97,15 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
 const d = getPostDate(post);
 const dateText = d ? new Date(d).toLocaleDateString() : "";
 
-// Related posts: same city, share tags, exclude current, top 5
-const allDaytona = (await getCollection("posts"))
-  .filter(isDaytonaPost)
+// Related posts: Daytona only, share tags, exclude current, top 5
+const allPosts = await getCollection("posts");
+
+const allDaytona = allPosts
+  .filter((p) => {
+    const city = String(p?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof p?.id === "string" && p.id.startsWith("daytona/");
+  })
   .sort(sortNewestFirst);
 
 const currentTagKeys = new Set(rawTags.map(tagKey).filter(Boolean));
