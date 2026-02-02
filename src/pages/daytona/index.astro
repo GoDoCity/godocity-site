@@ -1,44 +1,24 @@
 ---
-import Base from "../../../layouts/Base.astro";
+import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Rule A — Canonical Tag Normalization
- * - case-insensitive
- * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
+ * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
  */
-
-// canonical key for comparison/grouping
-function tagKey(raw) {
-  return String(raw ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/[-_]+/g, " ")
-    .replace(/\s+/g, " ");
-}
-
-// URL slug from canonical key
-function tagSlugFromKey(key) {
-  return String(key ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-// Display label from canonical key (Title Case)
-function tagLabelFromKey(key) {
-  const s = String(key ?? "").trim().replace(/\s+/g, " ");
-  if (!s) return "";
-  return s
-    .split(" ")
-    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
-    .join(" ");
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
 /**
- * Featured flag normalization
+ * Featured flag normalization:
+ * supports:
+ *   featured: true
+ *   featured: "true"
+ *   featured: "yes"
+ *   featured: 1
+ *   featured: "1"
  */
 function isFeatured(post) {
   const v = post?.data?.featured;
@@ -48,97 +28,166 @@ function isFeatured(post) {
   return s === "true" || s === "yes" || s === "1";
 }
 
-export async function getStaticPaths() {
-  const posts = await getCollection("posts");
-
-  // INLINE Daytona filter (prevents “isDaytonaPost is not defined” build failures)
-  const daytonaPosts = posts.filter((post) => {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  });
-
-  // IMPORTANT: for [...slug], slug must be a STRING
-  return daytonaPosts.map((post) => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
+/**
+ * Safe date getter (fallback order)
+ */
+function getPostDate(post) {
+  return (
+    post?.data?.pubDate ??
+    post?.data?.date ??
+    post?.data?.published ??
+    post?.data?.updated ??
+    null
+  );
 }
 
-const { post } = Astro.props;
+/**
+ * Sort newest first
+ */
+function sortNewestFirst(a, b) {
+  const da = new Date(getPostDate(a) ?? 0).getTime();
+  const db = new Date(getPostDate(b) ?? 0).getTime();
+  return db - da;
+}
 
-const title = post.data.title;
-const subtitle = post.data.description ?? "GoDoDaytona post";
-const { Content } = await post.render();
+// Load posts
+const all = await getCollection("posts");
 
-// normalize tags for display + URL (Rule A)
-const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
-const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
+// Daytona only
+const daytonaPosts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
-const tagItems = Array.from(uniqueKeySet).map((key) => ({
-  key,
-  label: tagLabelFromKey(key),
-  slug: tagSlugFromKey(key),
-}));
+// Featured only (top 3)
+const featuredPosts = daytonaPosts.filter(isFeatured).slice(0, 3);
 
-const featured = isFeatured(post);
-
-// Safe date fallback
-const d =
-  post?.data?.pubDate ??
-  post?.data?.date ??
-  post?.data?.published ??
-  post?.data?.updated ??
-  null;
-
-const dateText = d ? new Date(d).toLocaleDateString() : "";
+// Latest posts (top 5)
+const latestPosts = daytonaPosts.slice(0, 5);
 ---
 
-<Base title={title} subtitle={subtitle} cityBase="daytona" />
+<Base
+  title="GoDoDaytona"
+  subtitle="GoDo386 • Local stories, guides, and what’s happening in Daytona Beach."
+  cityBase="daytona"
+/>
 
 <section class="section">
-  <div class="container" style="max-width: 780px;">
-    <h1 class="h1">{title}</h1>
-    {post.data.description && <p class="lede">{post.data.description}</p>}
+  <div class="container" style="max-width: 980px;">
+    <h1 class="h1">GoDoDaytona</h1>
+    <p class="lede">GoDo386 • Local stories, guides, and what’s happening in Daytona Beach.</p>
 
-    <p style="opacity:.6;margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      {dateText && <span>{dateText}</span>}
+    {featuredPosts.length > 0 && (
+      <section style="margin-top:22px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+          <h2 style="margin:0;font-size:22px;font-weight:800;">Featured</h2>
+          <a class="pill" href="/daytona/posts/?featured=1">View all featured</a>
+        </div>
 
-      {featured && (
-        <span
-          style="
-            font-size: 12px;
-            font-weight: 800;
-            letter-spacing: .04em;
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid rgba(255,220,80,.65);
-            color: rgba(255,220,80,.95);
-            background: rgba(255,220,80,.12);
-            white-space: nowrap;
-          "
-        >
-          FEATURED
-        </span>
-      )}
-    </p>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:14px;">
+          {featuredPosts.map((p) => {
+            const title = p.data.title ?? p.slug;
+            const desc = p.data.description ?? "";
+            const d = getPostDate(p);
+            const dateText = d ? new Date(d).toLocaleDateString() : "";
 
-    {tagItems.length > 0 && (
-      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
-        {tagItems.map((t) => (
-          <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
-        ))}
-      </div>
+            return (
+              <a href={`/daytona/posts/${p.slug}/`} style="display:block;text-decoration:none;">
+                <div
+                  style="
+                    border: 1px solid rgba(255,255,255,.12);
+                    border-radius: 14px;
+                    padding: 14px 16px;
+                    background: rgba(255,255,255,.03);
+                  "
+                >
+                  <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+                    <div>
+                      <div style="font-weight:800;font-size:18px;line-height:1.25">{title}</div>
+                      {desc && <div style="opacity:.8;margin-top:6px">{desc}</div>}
+                      {dateText && <div style="opacity:.6;margin-top:8px">{dateText}</div>}
+                    </div>
+
+                    <span
+                      style="
+                        font-size: 12px;
+                        font-weight: 800;
+                        letter-spacing: .04em;
+                        padding: 6px 10px;
+                        border-radius: 999px;
+                        border: 1px solid rgba(255,220,80,.65);
+                        color: rgba(255,220,80,.95);
+                        background: rgba(255,220,80,.12);
+                        white-space: nowrap;
+                      "
+                    >
+                      FEATURED
+                    </span>
+                  </div>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </section>
     )}
 
-    <article style="margin-top:18px;line-height:1.65">
-      <Content />
-    </article>
+    <section style="margin-top:26px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+        <h2 style="margin:0;font-size:22px;font-weight:800;">Latest</h2>
+        <a class="pill" href="/daytona/posts/">All posts</a>
+      </div>
 
-    <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
-      <a class="pill" href="/daytona/posts/">← All posts</a>
-      <a class="pill" href="/daytona/posts/?featured=1">Featured</a>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:14px;">
+        {latestPosts.map((p) => {
+          const title = p.data.title ?? p.slug;
+          const desc = p.data.description ?? "";
+          const d = getPostDate(p);
+          const dateText = d ? new Date(d).toLocaleDateString() : "";
+          const featured = isFeatured(p);
+
+          return (
+            <a href={`/daytona/posts/${p.slug}/`} style="display:block;text-decoration:none;">
+              <div
+                style="
+                  border: 1px solid rgba(255,255,255,.12);
+                  border-radius: 14px;
+                  padding: 14px 16px;
+                  background: rgba(255,255,255,.03);
+                "
+              >
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+                  <div>
+                    <div style="font-weight:800;font-size:18px;line-height:1.25">{title}</div>
+                    {desc && <div style="opacity:.8;margin-top:6px">{desc}</div>}
+                    {dateText && <div style="opacity:.6;margin-top:8px">{dateText}</div>}
+                  </div>
+
+                  {featured && (
+                    <span
+                      style="
+                        font-size: 12px;
+                        font-weight: 800;
+                        letter-spacing: .04em;
+                        padding: 6px 10px;
+                        border-radius: 999px;
+                        border: 1px solid rgba(255,220,80,.65);
+                        color: rgba(255,220,80,.95);
+                        background: rgba(255,220,80,.12);
+                        white-space: nowrap;
+                      "
+                    >
+                      FEATURED
+                    </span>
+                  )}
+                </div>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    </section>
+
+    <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/topics/">Topics</a>
-    </p>
+      <a class="pill" href="/daytona/posts/?featured=1">Featured</a>
+    </div>
   </div>
 </section>
