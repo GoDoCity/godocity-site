@@ -37,7 +37,7 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-// Daytona filter (supports both explicit frontmatter and legacy folder IDs)
+// Daytona filter (we still keep this for other logic)
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
@@ -84,9 +84,16 @@ function sortNewestFirst(a, b) {
 }
 
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
-  return posts.map((post) => ({
+  // Inline Daytona filter INSIDE getStaticPaths (prevents "isDaytonaPost not defined" forever)
+  const daytonaPosts = posts.filter((post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  });
+
+  return daytonaPosts.map((post) => ({
     // For [...slug], Astro expects a STRING param
     params: { slug: post.slug },
     props: { post },
@@ -102,14 +109,13 @@ const { Content } = await post.render();
 // normalize tags for display + URL (Rule A)
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
-
 const tagItems = Array.from(uniqueKeySet).map((key) => ({
   key,
   label: tagLabelFromKey(key),
   slug: tagSlugFromKey(key),
 }));
 
-// Related posts
+// Related posts (same city + shared tags)
 const allPosts = (await getCollection("posts")).filter(isDaytonaPost);
 
 const currentSlug = post.slug;
