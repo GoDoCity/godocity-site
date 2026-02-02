@@ -13,9 +13,7 @@ function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
-    // treat hyphens/underscores as spaces
     .replace(/[-_]+/g, " ")
-    // collapse whitespace
     .replace(/\s+/g, " ");
 }
 
@@ -89,7 +87,7 @@ export async function getStaticPaths() {
   const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
   return posts.map((post) => ({
-    // IMPORTANT: For [...slug], Astro expects a STRING here (not an array)
+    // For [...slug], Astro expects a STRING param
     params: { slug: post.slug },
     props: { post },
   }));
@@ -111,12 +109,7 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
   slug: tagSlugFromKey(key),
 }));
 
-// Build related posts list:
-// - Same city (Daytona)
-// - Shares at least 1 canonical tagKey
-// - Exclude the current post
-// - Sort newest first
-// - Top 6
+// Related posts
 const allPosts = (await getCollection("posts")).filter(isDaytonaPost);
 
 const currentSlug = post.slug;
@@ -134,7 +127,6 @@ const relatedPosts = allPosts
   .filter((p) => p.slug !== currentSlug)
   .map((p) => ({ p, score: sharedTagCount(p) }))
   .filter((x) => x.score > 0)
-  // higher tag overlap first, then newest
   .sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
     return sortNewestFirst(a.p, b.p);
