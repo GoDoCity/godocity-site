@@ -13,7 +13,9 @@ function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
+    // treat hyphens/underscores as spaces
     .replace(/[-_]+/g, " ")
+    // collapse whitespace
     .replace(/\s+/g, " ");
 }
 
@@ -37,8 +39,21 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
+// Daytona filter (supports both explicit frontmatter and legacy folder IDs)
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+}
+
 /**
- * Featured flag normalization
+ * Featured flag normalization:
+ * supports:
+ *   featured: true
+ *   featured: "true"
+ *   featured: "yes"
+ *   featured: 1
+ *   featured: "1"
  */
 function isFeatured(post) {
   const v = post?.data?.featured;
@@ -48,18 +63,33 @@ function isFeatured(post) {
   return s === "true" || s === "yes" || s === "1";
 }
 
+/**
+ * Safe date getter (fallback order)
+ */
+function getPostDate(post) {
+  return (
+    post?.data?.pubDate ??
+    post?.data?.date ??
+    post?.data?.published ??
+    post?.data?.updated ??
+    null
+  );
+}
+
+/**
+ * Sort newest first
+ */
+function sortNewestFirst(a, b) {
+  const da = new Date(getPostDate(a) ?? 0).getTime();
+  const db = new Date(getPostDate(b) ?? 0).getTime();
+  return db - da;
+}
+
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  // INLINE Daytona filter (prevents “isDaytonaPost is not defined” build failures)
-  const daytonaPosts = posts.filter((post) => {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  });
-
-  // IMPORTANT: for [...slug], slug must be a STRING
-  return daytonaPosts.map((post) => ({
+  return posts.map((post) => ({
+    // IMPORTANT: For [...slug], Astro expects a STRING here (not an array)
     params: { slug: post.slug },
     props: { post },
   }));
@@ -81,16 +111,39 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
   slug: tagSlugFromKey(key),
 }));
 
+// Build related posts list:
+// - Same city (Daytona)
+// - Shares at least 1 canonical tagKey
+// - Exclude the current post
+// - Sort newest first
+// - Top 6
+const allPosts = (await getCollection("posts")).filter(isDaytonaPost);
+
+const currentSlug = post.slug;
+const currentKeys = new Set(tagItems.map((t) => t.key));
+
+function sharedTagCount(p) {
+  const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
+  const keys = new Set(tags.map(tagKey).filter(Boolean));
+  let count = 0;
+  for (const k of keys) if (currentKeys.has(k)) count++;
+  return count;
+}
+
+const relatedPosts = allPosts
+  .filter((p) => p.slug !== currentSlug)
+  .map((p) => ({ p, score: sharedTagCount(p) }))
+  .filter((x) => x.score > 0)
+  // higher tag overlap first, then newest
+  .sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return sortNewestFirst(a.p, b.p);
+  })
+  .slice(0, 6)
+  .map((x) => x.p);
+
 const featured = isFeatured(post);
-
-// Safe date fallback
-const d =
-  post?.data?.pubDate ??
-  post?.data?.date ??
-  post?.data?.published ??
-  post?.data?.updated ??
-  null;
-
+const d = getPostDate(post);
 const dateText = d ? new Date(d).toLocaleDateString() : "";
 ---
 
@@ -101,8 +154,8 @@ const dateText = d ? new Date(d).toLocaleDateString() : "";
     <h1 class="h1">{title}</h1>
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    <p style="opacity:.6;margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      {dateText && <span>{dateText}</span>}
+    <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      {dateText && <p style="opacity:.6;margin:0">{dateText}</p>}
 
       {featured && (
         <span
@@ -121,7 +174,7 @@ const dateText = d ? new Date(d).toLocaleDateString() : "";
           FEATURED
         </span>
       )}
-    </p>
+    </div>
 
     {tagItems.length > 0 && (
       <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
@@ -135,10 +188,65 @@ const dateText = d ? new Date(d).toLocaleDateString() : "";
       <Content />
     </article>
 
+    {relatedPosts.length > 0 && (
+      <section style="margin-top:28px;">
+        <h2 style="margin:0 0 12px 0;font-size:20px;font-weight:900;">Related posts</h2>
+
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          {relatedPosts.map((p) => {
+            const rt = p.data.title ?? p.slug;
+            const rd = p.data.description ?? "";
+            const pd = getPostDate(p);
+            const rDate = pd ? new Date(pd).toLocaleDateString() : "";
+            const rFeatured = isFeatured(p);
+
+            return (
+              <a href={`/daytona/posts/${p.slug}/`} style="display:block;text-decoration:none;">
+                <div
+                  style="
+                    border: 1px solid rgba(255,255,255,.12);
+                    border-radius: 14px;
+                    padding: 12px 14px;
+                    background: rgba(255,255,255,.03);
+                  "
+                >
+                  <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
+                    <div>
+                      <div style="font-weight:800;font-size:16px;line-height:1.25">{rt}</div>
+                      {rd && <div style="opacity:.8;margin-top:6px">{rd}</div>}
+                      {rDate && <div style="opacity:.6;margin-top:8px">{rDate}</div>}
+                    </div>
+
+                    {rFeatured && (
+                      <span
+                        style="
+                          font-size: 12px;
+                          font-weight: 800;
+                          letter-spacing: .04em;
+                          padding: 6px 10px;
+                          border-radius: 999px;
+                          border: 1px solid rgba(255,220,80,.65);
+                          color: rgba(255,220,80,.95);
+                          background: rgba(255,220,80,.12);
+                          white-space: nowrap;
+                        "
+                      >
+                        FEATURED
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+    )}
+
     <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/posts/">← All posts</a>
-      <a class="pill" href="/daytona/posts/?featured=1">Featured</a>
       <a class="pill" href="/daytona/topics/">Topics</a>
+      <a class="pill" href="/daytona/posts/?featured=1">Featured</a>
     </p>
   </div>
 </section>
