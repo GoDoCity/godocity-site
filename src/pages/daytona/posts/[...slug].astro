@@ -2,6 +2,11 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+}
 /**
  * Rule A — Canonical Tag Normalization
  * - case-insensitive
