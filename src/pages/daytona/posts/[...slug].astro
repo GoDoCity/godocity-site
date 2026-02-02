@@ -37,23 +37,37 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-// Daytona filter (supports explicit frontmatter and legacy folder IDs)
+/**
+ * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
+ */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
+/**
+ * Featured flag normalization:
+ * supports:
+ *   featured: true
+ *   featured: "true"
+ *   featured: "yes"
+ *   featured: 1
+ *   featured: "1"
+ */
+function isFeatured(post) {
+  const v = post?.data?.featured;
+  if (v === true) return true;
+  if (v === 1) return true;
+  const s = String(v ?? "").toLowerCase().trim();
+  return s === "true" || s === "yes" || s === "1";
+}
+
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  const daytonaPosts = posts.filter((post) => {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  });
-
-  return daytonaPosts.map((post) => ({
+  // IMPORTANT: for [...slug], keep slug as a STRING
+  return posts.map((post) => ({
     params: { slug: post.slug },
     props: { post },
   }));
@@ -65,44 +79,27 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
-const isFeatured = post.data?.featured === true;
-
-// ---- Tags for THIS post (Rule A, unique) ----
+// normalize tags for display + URL (Rule A)
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
-const currentKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
+const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 
-const tagItems = Array.from(currentKeySet).map((key) => ({
+const tagItems = Array.from(uniqueKeySet).map((key) => ({
   key,
   label: tagLabelFromKey(key),
   slug: tagSlugFromKey(key),
 }));
 
-// ---- Related posts (STRICT: shares >=1 canonical tag) ----
-let relatedPosts = [];
-if (currentKeySet.size > 0) {
-  const all = (await getCollection("posts")).filter(isDaytonaPost);
+const featured = isFeatured(post);
 
-  const overlapCount = (aSet, bSet) => {
-    let c = 0;
-    for (const v of aSet) if (bSet.has(v)) c++;
-    return c;
-  };
+// date (safe fallback)
+const d =
+  post?.data?.pubDate ??
+  post?.data?.date ??
+  post?.data?.published ??
+  post?.data?.updated ??
+  null;
 
-  relatedPosts = all
-    .filter((p) => p.slug !== post.slug)
-    .map((p) => {
-      const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
-      const pSet = new Set(tags.map(tagKey).filter(Boolean));
-      return { p, overlap: overlapCount(currentKeySet, pSet) };
-    })
-    .filter((x) => x.overlap > 0)
-    .sort((a, b) => {
-      if (b.overlap !== a.overlap) return b.overlap - a.overlap;
-      return +new Date(b.p.data.pubDate) - +new Date(a.p.data.pubDate);
-    })
-    .slice(0, 4)
-    .map((x) => x.p);
-}
+const dateText = d ? new Date(d).toLocaleDateString() : "";
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
@@ -112,30 +109,27 @@ if (currentKeySet.size > 0) {
     <h1 class="h1">{title}</h1>
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;">
-      <p style="opacity:.6;margin:0;">
-        {new Date(post.data.pubDate).toLocaleDateString()}
-      </p>
+    <p style="opacity:.6;margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      {dateText && <span>{dateText}</span>}
 
-      {isFeatured && (
+      {featured && (
         <span
           style="
-            font-size:11px;
-            font-weight:900;
-            letter-spacing:.6px;
-            text-transform:uppercase;
-            padding:6px 10px;
-            border-radius:999px;
-            background:rgba(255,210,74,.14);
-            border:1px solid rgba(255,210,74,.28);
-            color:var(--accent);
-            white-space:nowrap;
+            font-size: 12px;
+            font-weight: 800;
+            letter-spacing: .04em;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(255,220,80,.65);
+            color: rgba(255,220,80,.95);
+            background: rgba(255,220,80,.12);
+            white-space: nowrap;
           "
         >
-          Featured
+          FEATURED
         </span>
       )}
-    </div>
+    </p>
 
     {tagItems.length > 0 && (
       <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
@@ -149,33 +143,10 @@ if (currentKeySet.size > 0) {
       <Content />
     </article>
 
-    {relatedPosts.length > 0 && (
-      <section style="margin-top:30px;">
-        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-          <h2 style="font-size:18px;font-weight:900;margin:0;">Related posts</h2>
-          <span style="opacity:.6;font-size:13px;">Based on shared topics</span>
-        </div>
-
-        <div style="margin-top:12px;display:grid;gap:12px;">
-          {relatedPosts.map((p) => (
-            <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
-              <div style="font-weight:900">{p.data.title}</div>
-              {p.data.description && (
-                <div style="opacity:.82;margin-top:4px">{p.data.description}</div>
-              )}
-              <div style="opacity:.6;margin-top:6px">
-                {new Date(p.data.pubDate).toLocaleDateString()}
-              </div>
-            </a>
-          ))}
-        </div>
-      </section>
-    )}
-
     <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/posts/">← All posts</a>
+      <a class="pill" href="/daytona/posts/featured/">Featured</a>
       <a class="pill" href="/daytona/topics/">Topics</a>
-      <a class="pill" href="/daytona/">Daytona home</a>
     </p>
   </div>
 </section>
