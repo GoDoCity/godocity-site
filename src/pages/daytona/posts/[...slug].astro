@@ -38,22 +38,7 @@ function tagLabelFromKey(key) {
 }
 
 /**
- * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
- */
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
-
-/**
- * Featured flag normalization:
- * supports:
- *   featured: true
- *   featured: "true"
- *   featured: "yes"
- *   featured: 1
- *   featured: "1"
+ * Featured flag normalization
  */
 function isFeatured(post) {
   const v = post?.data?.featured;
@@ -64,10 +49,17 @@ function isFeatured(post) {
 }
 
 export async function getStaticPaths() {
-  const posts = (await getCollection("posts")).filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
-  // IMPORTANT: for [...slug], keep slug as a STRING
-  return posts.map((post) => ({
+  // INLINE Daytona filter (prevents “isDaytonaPost is not defined” build failures)
+  const daytonaPosts = posts.filter((post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  });
+
+  // IMPORTANT: for [...slug], slug must be a STRING
+  return daytonaPosts.map((post) => ({
     params: { slug: post.slug },
     props: { post },
   }));
@@ -91,7 +83,7 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
 
 const featured = isFeatured(post);
 
-// date (safe fallback)
+// Safe date fallback
 const d =
   post?.data?.pubDate ??
   post?.data?.date ??
@@ -145,7 +137,7 @@ const dateText = d ? new Date(d).toLocaleDateString() : "";
 
     <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/posts/">← All posts</a>
-      <a class="pill" href="/daytona/posts/featured/">Featured</a>
+      <a class="pill" href="/daytona/posts/?featured=1">Featured</a>
       <a class="pill" href="/daytona/topics/">Topics</a>
     </p>
   </div>
