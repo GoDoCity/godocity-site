@@ -37,22 +37,14 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-// Daytona filter (we still keep this for other logic)
+// Daytona filter (supports both explicit frontmatter and legacy folder IDs)
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/**
- * Featured flag normalization:
- * supports:
- *   featured: true
- *   featured: "true"
- *   featured: "yes"
- *   featured: 1
- *   featured: "1"
- */
+// Featured flag normalization
 function isFeatured(post) {
   const v = post?.data?.featured;
   if (v === true) return true;
@@ -61,9 +53,7 @@ function isFeatured(post) {
   return s === "true" || s === "yes" || s === "1";
 }
 
-/**
- * Safe date getter (fallback order)
- */
+// Safe date getter (fallback order)
 function getPostDate(post) {
   return (
     post?.data?.pubDate ??
@@ -74,9 +64,7 @@ function getPostDate(post) {
   );
 }
 
-/**
- * Sort newest first
- */
+// Sort newest first
 function sortNewestFirst(a, b) {
   const da = new Date(getPostDate(a) ?? 0).getTime();
   const db = new Date(getPostDate(b) ?? 0).getTime();
@@ -84,17 +72,10 @@ function sortNewestFirst(a, b) {
 }
 
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+  const posts = (await getCollection("posts")).filter(isDaytonaPost);
 
-  // Inline Daytona filter INSIDE getStaticPaths (prevents "isDaytonaPost not defined" forever)
-  const daytonaPosts = posts.filter((post) => {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  });
-
-  return daytonaPosts.map((post) => ({
-    // For [...slug], Astro expects a STRING param
+  return posts.map((post) => ({
+    // For [...slug], Astro expects a STRING here (not an array)
     params: { slug: post.slug },
     props: { post },
   }));
@@ -109,40 +90,46 @@ const { Content } = await post.render();
 // normalize tags for display + URL (Rule A)
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
+
 const tagItems = Array.from(uniqueKeySet).map((key) => ({
   key,
   label: tagLabelFromKey(key),
   slug: tagSlugFromKey(key),
 }));
 
-// Related posts (same city + shared tags)
+// ---- Related posts (max 3 TOTAL, regardless of featured) ----
 const allPosts = (await getCollection("posts")).filter(isDaytonaPost);
 
-const currentSlug = post.slug;
+// current post canonical tag keys
 const currentKeys = new Set(tagItems.map((t) => t.key));
 
-function sharedTagCount(p) {
-  const tags = Array.isArray(p.data?.tags) ? p.data.tags : [];
-  const keys = new Set(tags.map(tagKey).filter(Boolean));
-  let count = 0;
-  for (const k of keys) if (currentKeys.has(k)) count++;
-  return count;
+// Only compute related if current post has tags
+let related = [];
+if (currentKeys.size > 0) {
+  const candidates = allPosts.filter((p) => p.slug !== post.slug);
+
+  const scored = candidates
+    .map((p) => {
+      const pTags = Array.isArray(p.data?.tags) ? p.data.tags : [];
+      const pKeys = new Set(pTags.map(tagKey).filter(Boolean));
+
+      // shared tag count
+      let shared = 0;
+      for (const k of pKeys) if (currentKeys.has(k)) shared++;
+
+      return { post: p, shared };
+    })
+    // must share at least 1 tag
+    .filter((x) => x.shared > 0)
+    // sort by: most shared tags, then newest
+    .sort((a, b) => {
+      if (b.shared !== a.shared) return b.shared - a.shared;
+      return sortNewestFirst(a.post, b.post);
+    });
+
+  // HARD CAP: slice ONCE at the end
+  related = scored.slice(0, 3).map((x) => x.post);
 }
-
-const relatedPosts = allPosts
-  .filter((p) => p.slug !== currentSlug)
-  .map((p) => ({ p, score: sharedTagCount(p) }))
-  .filter((x) => x.score > 0)
-  .sort((a, b) => {
-    if (b.score !== a.score) return b.score - a.score;
-    return sortNewestFirst(a.p, b.p);
-  })
-  .slice(0, 6)
-  .map((x) => x.p);
-
-const featured = isFeatured(post);
-const d = getPostDate(post);
-const dateText = d ? new Date(d).toLocaleDateString() : "";
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
@@ -152,10 +139,12 @@ const dateText = d ? new Date(d).toLocaleDateString() : "";
     <h1 class="h1">{title}</h1>
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      {dateText && <p style="opacity:.6;margin:0">{dateText}</p>}
+    <p style="opacity:.6;margin-top:10px">
+      {new Date(post.data.pubDate).toLocaleDateString()}
+    </p>
 
-      {featured && (
+    <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+      {isFeatured(post) && (
         <span
           style="
             font-size: 12px;
@@ -172,50 +161,49 @@ const dateText = d ? new Date(d).toLocaleDateString() : "";
           FEATURED
         </span>
       )}
-    </div>
 
-    {tagItems.length > 0 && (
-      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
-        {tagItems.map((t) => (
-          <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
-        ))}
-      </div>
-    )}
+      {tagItems.length > 0 && (
+        <>
+          {tagItems.map((t) => (
+            <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
+          ))}
+        </>
+      )}
+    </div>
 
     <article style="margin-top:18px;line-height:1.65">
       <Content />
     </article>
 
-    {relatedPosts.length > 0 && (
-      <section style="margin-top:28px;">
-        <h2 style="margin:0 0 12px 0;font-size:20px;font-weight:900;">Related posts</h2>
+    {related.length > 0 && (
+      <div style="margin-top:26px;">
+        <h2 style="font-size:18px;margin:0 0 10px 0;">Related posts</h2>
 
         <div style="display:flex;flex-direction:column;gap:12px;">
-          {relatedPosts.map((p) => {
-            const rt = p.data.title ?? p.slug;
-            const rd = p.data.description ?? "";
-            const pd = getPostDate(p);
-            const rDate = pd ? new Date(pd).toLocaleDateString() : "";
-            const rFeatured = isFeatured(p);
+          {related.map((rp) => {
+            const rTitle = rp.data.title ?? rp.slug;
+            const rDesc = rp.data.description ?? "";
+            const rDate = getPostDate(rp);
+            const rDateText = rDate ? new Date(rDate).toLocaleDateString() : "";
 
             return (
-              <a href={`/daytona/posts/${p.slug}/`} style="display:block;text-decoration:none;">
+              <a href={`/daytona/posts/${rp.slug}/`} style="text-decoration:none;display:block;">
                 <div
                   style="
                     border: 1px solid rgba(255,255,255,.12);
                     border-radius: 14px;
-                    padding: 12px 14px;
+                    padding: 14px 16px;
                     background: rgba(255,255,255,.03);
                   "
                 >
                   <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
                     <div>
-                      <div style="font-weight:800;font-size:16px;line-height:1.25">{rt}</div>
-                      {rd && <div style="opacity:.8;margin-top:6px">{rd}</div>}
-                      {rDate && <div style="opacity:.6;margin-top:8px">{rDate}</div>}
+                      <div style="font-weight:700;font-size:16px;line-height:1.25">{rTitle}</div>
+                      {rDesc && <div style="opacity:.8;margin-top:6px">{rDesc}</div>}
+                      {rDateText && <div style="opacity:.6;margin-top:8px">{rDateText}</div>}
                     </div>
 
-                    {rFeatured && (
+                    {isFeatured(rp) && (
                       <span
                         style="
                           font-size: 12px;
@@ -238,13 +226,12 @@ const dateText = d ? new Date(d).toLocaleDateString() : "";
             );
           })}
         </div>
-      </section>
+      </div>
     )}
 
     <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
       <a class="pill" href="/daytona/posts/">← All posts</a>
       <a class="pill" href="/daytona/topics/">Topics</a>
-      <a class="pill" href="/daytona/posts/?featured=1">Featured</a>
     </p>
   </div>
 </section>
