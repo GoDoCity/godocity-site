@@ -160,7 +160,6 @@ export async function getStaticPaths() {
   return db - da;
 });
 
-  });
 
   return daytonaPosts.map((post) => ({
     params: { slug: post.slug },
