@@ -178,7 +178,22 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
 }));
 
 // Build related posts
-const relatedPosts = buildRelatedPosts(post, daytonaPosts);
+const relatedAll = buildRelatedPosts(post, daytonaPosts);
+
+// de-dupe by slug (just in case)
+const seen = new Set();
+const deduped = relatedAll.filter((p) => {
+  if (seen.has(p.slug)) return false;
+  seen.add(p.slug);
+  return true;
+});
+
+// Featured first, then non-featured, then cap to 3
+const relatedPosts = [
+  ...deduped.filter(isFeatured),
+  ...deduped.filter((p) => !isFeatured(p)),
+].slice(0, 3);
+
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
