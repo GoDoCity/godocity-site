@@ -155,9 +155,11 @@ export async function getStaticPaths() {
     return typeof post?.id === "string" && post.id.startsWith("daytona/");
   })
   .sort((a, b) => {
-    const da = new Date(getPostDate(a) ?? 0).getTime();
-    const db = new Date(getPostDate(b) ?? 0).getTime();
-    return db - da;
+  const da = new Date(a?.data?.pubDate ?? a?.data?.updated ?? a?.data?.published ?? 0).getTime();
+  const db = new Date(b?.data?.pubDate ?? b?.data?.updated ?? b?.data?.published ?? 0).getTime();
+  return db - da;
+});
+
   });
 
   return daytonaPosts.map((post) => ({
