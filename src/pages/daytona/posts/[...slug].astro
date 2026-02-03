@@ -88,6 +88,17 @@ function sortNewestFirst(a, b) {
 /**
  * Related posts: score by shared canonical tags, cap, avoid duplicates/self
  */
+/**
+ * ================================
+ * STABLE – DO NOT MODIFY
+ * Related posts logic + limits
+ *
+ * - Max related posts: 3
+ * - Max featured in related: 1
+ * - Cloudflare build-safe
+ * - Used by buildRelatedPosts()
+ * ================================
+ */
 const RELATED_LIMIT = 3;
 const MAX_FEATURED_IN_RELATED = 1;
 
