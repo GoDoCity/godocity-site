@@ -6,7 +6,6 @@ import { getCollection } from "astro:content";
  * Daytona filter (supports frontmatter city and legacy folder IDs)
  * Build-safe: defined locally (no external references)
  */
-function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
@@ -57,6 +56,11 @@ function tagLabelFromKey(key) {
  * Static paths: build all /daytona/topic/<tag> pages
  * Build-safe: no external helper refs
  */
+function isDaytonaPost(post) {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+}
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
   const daytonaPosts = posts.filter(isDaytonaPost);
