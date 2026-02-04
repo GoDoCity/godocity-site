@@ -2,16 +2,6 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/**
- * Daytona filter (supports frontmatter city and legacy folder IDs)
- * Build-safe: defined locally (no external references)
- */
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
-
 /** Canonical tag key (normalize tags for matching) */
 function tagKey(raw) {
   return String(raw ?? "")
@@ -55,16 +45,18 @@ function getPostDate(post) {
   return dt && !Number.isNaN(dt.getTime()) ? dt : null;
 }
 
-/**
- * Static paths: build all /daytona/topic/<tag> pages
- * IMPORTANT: this MUST be in the same frontmatter block as isDaytonaPost()
- */
 export async function getStaticPaths() {
+  // define inline to avoid any bundler/scope weirdness
+  const isDaytonaPost = (post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  };
+
   const all = await getCollection("posts");
   const daytonaPosts = all.filter(isDaytonaPost);
 
   const keys = new Set();
-
   for (const p of daytonaPosts) {
     const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of rawTags) {
@@ -83,7 +75,13 @@ export async function getStaticPaths() {
 
 const { tagKeyValue } = Astro.props;
 
-// Load posts for this topic page (Daytona-only, matching canonical key)
+// define inline again (same reason)
+const isDaytonaPost = (post) => {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+};
+
 const posts = (await getCollection("posts"))
   .filter(isDaytonaPost)
   .filter((p) => {
