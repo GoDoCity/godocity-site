@@ -6,6 +6,7 @@ import { getCollection } from "astro:content";
  * Daytona filter (supports frontmatter city and legacy folder IDs)
  * Build-safe: defined locally (no external references)
  */
+function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
@@ -31,7 +32,6 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-/** Turn canonical key into URL slug */
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -52,15 +52,18 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
+/** Feature flag helper */
+function isFeatured(post) {
+  const v = post?.data?.featured;
+  if (v === true || v === 1) return true;
+  const s = String(v ?? "").toLowerCase().trim();
+  return s === "true" || s === "yes" || s === "1";
+}
+
 /**
  * Static paths: build all /daytona/topic/<tag> pages
  * Build-safe: no external helper refs
  */
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
   const daytonaPosts = posts.filter(isDaytonaPost);
@@ -82,21 +85,15 @@ export async function getStaticPaths() {
     }));
 }
 
-const { tag } = Astro.params;
 const { tagKeyValue } = Astro.props;
+const tagParam = Astro.params.tag;
 
-// Fallback: if Astro.props isn't present (edge cases), derive from URL param
-const activeKey = tagKeyValue ?? tagKey(tag);
-
-// Pull & filter posts for this topic
-const allPosts = await getCollection("posts");
-
-const posts = allPosts
+// Load posts for this topic page
+const posts = (await getCollection("posts"))
   .filter(isDaytonaPost)
   .filter((p) => {
     const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
-    const keys = rawTags.map(tagKey).filter(Boolean);
-    return keys.includes(activeKey);
+    return rawTags.map(tagKey).includes(tagKeyValue);
   })
   .sort((a, b) => {
     const da = getPostDate(a)?.getTime() ?? 0;
@@ -104,49 +101,55 @@ const posts = allPosts
     return db - da;
   });
 
-const label = tagLabelFromKey(activeKey);
-const pageTitle = `${label} – GoDoDaytona`;
-const subtitle = `Posts tagged “${label}”`;
+const topicLabel = tagLabelFromKey(tagKeyValue);
 ---
 
-<Base title={pageTitle} description={subtitle}>
-  <section class="container">
-    <div style="margin: 24px 0 10px;">
-      <a href="/daytona/topics/">← All Topics</a>
-    </div>
+<Base title={`Topic: ${topicLabel}`} description={`Posts tagged ${topicLabel} in Daytona.`}>
+  <main class="container">
+    <header class="header">
+      <a class="back" href="/daytona/topics/">← All topics</a>
+      <h1>{topicLabel}</h1>
+      <p class="meta">
+        Showing {posts.length} post{posts.length === 1 ? "" : "s"} tagged “{topicLabel}”
+      </p>
+    </header>
 
-    <h1 style="margin: 0 0 6px;">{label}</h1>
-    <p style="margin: 0 0 22px; opacity: 0.8;">{subtitle}</p>
-
-    {posts.length === 0 ? (
-      <p>No posts found for this topic.</p>
-    ) : (
-      <ul style="list-style:none; padding:0; margin:0; display:grid; gap:14px;">
-        {posts.map((post) => {
-          const title = post?.data?.title ?? post.slug;
-          const desc = post?.data?.description ?? "";
-          const d = getPostDate(post);
-          const dateText = d ? d.toLocaleDateString() : "";
-
-          return (
-            <li style="border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:14px 16px;">
-              <a href={`/daytona/posts/${post.slug}/`} style="display:block;">
-                <div style="font-weight:700; font-size:1.05rem; margin-bottom:6px;">
-                  {title}
-                </div>
-
-                {(dateText || desc) && (
-                  <div style="opacity:.75; font-size:.95rem;">
-                    {dateText && <span>{dateText}</span>}
-                    {dateText && desc && <span> • </span>}
-                    {desc && <span>{desc}</span>}
-                  </div>
-                )}
+    <section class="list">
+      {posts.length === 0 ? (
+        <p>No posts found for this topic.</p>
+      ) : (
+        <ul>
+          {posts.map((p) => (
+            <li class={isFeatured(p) ? "featured" : ""}>
+              <a href={`/daytona/posts/${p.slug}/`}>
+                <span class="title">{p.data.title}</span>
+                <span class="date">
+                  {getPostDate(p)
+                    ? getPostDate(p).toLocaleDateString("en-US", {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })
+                    : ""}
+                </span>
               </a>
             </li>
-          );
-        })}
-      </ul>
-    )}
-  </section>
+          ))}
+        </ul>
+      )}
+    </section>
+  </main>
+
+  <style>
+    .container{max-width:900px;margin:0 auto;padding:24px}
+    .header{margin-bottom:18px}
+    .back{display:inline-block;margin-bottom:10px;opacity:.8}
+    .meta{opacity:.75;margin:6px 0 0}
+    ul{list-style:none;padding:0;margin:0}
+    li{border:1px solid rgba(255,255,255,.08);border-radius:12px;margin:10px 0}
+    li a{display:flex;justify-content:space-between;gap:12px;padding:14px 16px}
+    .title{font-weight:600}
+    .date{opacity:.7;white-space:nowrap}
+    .featured{border-color:rgba(255,210,74,.35)}
+  </style>
 </Base>
