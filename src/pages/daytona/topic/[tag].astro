@@ -7,7 +7,7 @@ import { getCollection } from "astro:content";
  * Build-safe: defined locally (no external references)
  */
 function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
@@ -33,7 +33,7 @@ function tagSlugFromKey(key) {
 
 /** Display label */
 function tagLabelFromKey(key) {
-  const s = String(key ?? "").trim();
+  const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "Topic";
   return s
     .split(" ")
@@ -42,15 +42,29 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
+/** Build-safe date getter */
+function getPostDate(post) {
+  const d =
+    post?.data?.date ??
+    post?.data?.pubDate ??
+    post?.data?.published ??
+    post?.data?.updated ??
+    null;
+
+  const dt = d ? new Date(d) : null;
+  return dt && !Number.isNaN(dt.getTime()) ? dt : null;
+}
+
 /**
  * Static paths: build all /daytona/topic/<tag> pages
- * Build-safe: no external helper refs
+ * IMPORTANT: this MUST be in the same frontmatter block as isDaytonaPost()
  */
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
-  const daytonaPosts = posts.filter(isDaytonaPost);
+  const all = await getCollection("posts");
+  const daytonaPosts = all.filter(isDaytonaPost);
 
   const keys = new Set();
+
   for (const p of daytonaPosts) {
     const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of rawTags) {
@@ -77,71 +91,59 @@ const posts = (await getCollection("posts"))
     return rawTags.map(tagKey).includes(tagKeyValue);
   })
   .sort((a, b) => {
-    const da = new Date(a?.data?.date ?? a?.data?.pubDate ?? 0).getTime();
-    const db = new Date(b?.data?.date ?? b?.data?.pubDate ?? 0).getTime();
+    const da = getPostDate(a)?.getTime() ?? 0;
+    const db = getPostDate(b)?.getTime() ?? 0;
     return db - da;
   });
 
-const topicTitle = tagLabelFromKey(tagKeyValue);
+const title = tagLabelFromKey(tagKeyValue);
 ---
 
-<Base title={`GoDo Daytona — ${topicTitle}`} description={`Posts tagged ${topicTitle}`}>
+<Base
+  title={`${title} | GoDo Daytona`}
+  description={`GoDo Daytona posts tagged "${title}".`}
+>
   <main class="container">
-    <header class="pagehead">
-      <p class="kicker">Topic</p>
-      <h1>{topicTitle}</h1>
-      <p class="sub">
-        {posts.length} post{posts.length === 1 ? "" : "s"}
-      </p>
-      <p class="back">
-        <a href="/daytona/topics/">← All topics</a>
-      </p>
+    <header class="topic-header">
+      <p class="kicker"><a href="/daytona/">GoDo Daytona</a> / Topic</p>
+      <h1>{title}</h1>
+      <p class="meta">{posts.length} post{posts.length === 1 ? "" : "s"}</p>
     </header>
 
-    {posts.length ? (
-      <ul class="grid">
-        {posts.map((p) => (
-          <li class="card">
-            <a class="cardLink" href={`/daytona/posts/${p.slug}/`}>
-              <h2 class="cardTitle">{p.data.title}</h2>
-              {p.data.description ? (
-                <p class="cardDesc">{p.data.description}</p>
-              ) : null}
-              <p class="meta">
-                {p.data.date
-                  ? new Date(p.data.date).toLocaleDateString("en-US", {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    })
-                  : ""}
-              </p>
-            </a>
-          </li>
-        ))}
-      </ul>
+    {posts.length === 0 ? (
+      <p>No posts found for this topic.</p>
     ) : (
-      <p class="empty">No posts found for this topic yet.</p>
+      <ul class="topic-list">
+        {posts.map((p) => {
+          const d = getPostDate(p);
+          const dateText = d
+            ? d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+            : "";
+          const href = `/daytona/posts/${p.id}/`;
+          return (
+            <li class="topic-item">
+              <a class="topic-link" href={href}>
+                <span class="topic-title">{p.data.title}</span>
+                {dateText ? <span class="topic-date">{dateText}</span> : null}
+              </a>
+              {p.data.description ? <p class="topic-desc">{p.data.description}</p> : null}
+            </li>
+          );
+        })}
+      </ul>
     )}
   </main>
 
   <style>
-    {`
-      .container{max-width:1100px;margin:0 auto;padding:28px 18px}
-      .pagehead{margin:10px 0 22px}
-      .kicker{margin:0;color:var(--muted, #a8b3c2);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}
-      h1{margin:.25rem 0 .35rem;font-size:2.1rem;line-height:1.15}
-      .sub{margin:0 0 .6rem;color:var(--muted, #a8b3c2)}
-      .back a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.18)}
-      .back a:hover{opacity:.9}
-
-      .grid{list-style:none;margin:0;padding:0;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
-      .card{background:var(--panel,#10141a);border:1px solid var(--line,#1f2631);border-radius:14px;overflow:hidden}
-      .cardLink{display:block;padding:16px 16px 14px}
-      .cardTitle{margin:0 0 .35rem;font-size:1.05rem;line-height:1.25}
-      .cardDesc{margin:0 0 .6rem;color:var(--muted,#a8b3c2);font-size:.95rem}
-      .meta{margin:0;color:var(--muted,#a8b3c2);font-size:.85rem}
-      .empty{color:var(--muted,#a8b3c2)}
-    `}
+    .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+    .kicker { margin: 0 0 8px; opacity: 0.8; }
+    .topic-header h1 { margin: 0 0 8px; }
+    .meta { margin: 0 0 24px; opacity: 0.8; }
+    .topic-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+    .topic-item { border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px; }
+    .topic-link { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+    .topic-title { font-weight: 700; }
+    .topic-date { opacity: 0.75; font-size: 0.95em; white-space: nowrap; }
+    .topic-desc { margin: 8px 0 0; opacity: 0.85; }
   </style>
 </Base>
