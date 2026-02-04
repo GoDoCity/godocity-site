@@ -12,17 +12,6 @@ function isDaytonaPost(post) {
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/** Build-safe date getter (no external helper refs) */
-function getPostDate(post) {
-  const d =
-    post?.data?.date ??
-    post?.data?.pubDate ??
-    post?.data?.published ??
-    post?.data?.updated ??
-    null;
-  return d ? new Date(d) : null;
-}
-
 /** Canonical tag key (normalize tags for matching) */
 function tagKey(raw) {
   return String(raw ?? "")
@@ -32,7 +21,7 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-/** Convert canonical key to URL slug */
+/** URL slug for the route param */
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -42,9 +31,9 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
-/** Turn canonical key into label */
+/** Display label */
 function tagLabelFromKey(key) {
-  const s = String(key ?? "").trim().replace(/\s+/g, " ");
+  const s = String(key ?? "").trim();
   if (!s) return "Topic";
   return s
     .split(" ")
@@ -58,8 +47,8 @@ function tagLabelFromKey(key) {
  * Build-safe: no external helper refs
  */
 export async function getStaticPaths() {
-  const all = await getCollection("posts");
-  const daytonaPosts = all.filter(isDaytonaPost);
+  const posts = await getCollection("posts");
+  const daytonaPosts = posts.filter(isDaytonaPost);
 
   const keys = new Set();
   for (const p of daytonaPosts) {
@@ -79,9 +68,8 @@ export async function getStaticPaths() {
 }
 
 const { tagKeyValue } = Astro.props;
-const tagParam = Astro.params.tag;
 
-// Load posts for this topic page
+// Load posts for this topic page (Daytona-only, matching canonical key)
 const posts = (await getCollection("posts"))
   .filter(isDaytonaPost)
   .filter((p) => {
@@ -89,54 +77,71 @@ const posts = (await getCollection("posts"))
     return rawTags.map(tagKey).includes(tagKeyValue);
   })
   .sort((a, b) => {
-    const da = (getPostDate(a) ?? new Date(0)).getTime();
-    const db = (getPostDate(b) ?? new Date(0)).getTime();
-    return db - da; // newest first
+    const da = new Date(a?.data?.date ?? a?.data?.pubDate ?? 0).getTime();
+    const db = new Date(b?.data?.date ?? b?.data?.pubDate ?? 0).getTime();
+    return db - da;
   });
 
-const title = `${tagLabelFromKey(tagKeyValue)} | GoDo Daytona`;
-const description = `Posts tagged ${tagLabelFromKey(tagKeyValue)} in Daytona Beach.`;
+const topicTitle = tagLabelFromKey(tagKeyValue);
 ---
 
-<Base title={title} description={description}>
+<Base title={`GoDo Daytona — ${topicTitle}`} description={`Posts tagged ${topicTitle}`}>
   <main class="container">
-    <header class="page-head">
-      <p class="kicker">
-        <a href="/daytona/topics/">Topics</a>
-        <span aria-hidden="true"> / </span>
-        <span>{tagParam}</span>
+    <header class="pagehead">
+      <p class="kicker">Topic</p>
+      <h1>{topicTitle}</h1>
+      <p class="sub">
+        {posts.length} post{posts.length === 1 ? "" : "s"}
       </p>
-      <h1>{tagLabelFromKey(tagKeyValue)}</h1>
-      <p class="muted">{posts.length} post{posts.length === 1 ? "" : "s"}</p>
+      <p class="back">
+        <a href="/daytona/topics/">← All topics</a>
+      </p>
     </header>
 
-    {posts.length === 0 ? (
-      <p>No posts found for this topic.</p>
-    ) : (
-      <ul class="list">
+    {posts.length ? (
+      <ul class="grid">
         {posts.map((p) => (
-          <li class="item">
-            <a href={`/daytona/posts/${p.slug}/`}>
-              <strong>{p.data.title}</strong>
+          <li class="card">
+            <a class="cardLink" href={`/daytona/posts/${p.slug}/`}>
+              <h2 class="cardTitle">{p.data.title}</h2>
+              {p.data.description ? (
+                <p class="cardDesc">{p.data.description}</p>
+              ) : null}
+              <p class="meta">
+                {p.data.date
+                  ? new Date(p.data.date).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })
+                  : ""}
+              </p>
             </a>
-            <div class="meta">
-              {getPostDate(p) ? getPostDate(p).toLocaleDateString() : ""}
-            </div>
-            {p.data.description ? <p class="desc">{p.data.description}</p> : null}
           </li>
         ))}
       </ul>
+    ) : (
+      <p class="empty">No posts found for this topic yet.</p>
     )}
   </main>
-</Base>
 
-<style>
-  .container{max-width:980px;margin:0 auto;padding:28px 18px}
-  .page-head{margin-bottom:18px}
-  .kicker{margin:0 0 8px 0;font-size:14px;opacity:.8}
-  .muted{margin:6px 0 0 0;opacity:.8}
-  .list{list-style:none;padding:0;margin:18px 0;display:grid;gap:14px}
-  .item{padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px}
-  .meta{font-size:13px;opacity:.75;margin-top:6px}
-  .desc{margin:8px 0 0 0;opacity:.9}
-</style>
+  <style>
+    {`
+      .container{max-width:1100px;margin:0 auto;padding:28px 18px}
+      .pagehead{margin:10px 0 22px}
+      .kicker{margin:0;color:var(--muted, #a8b3c2);text-transform:uppercase;letter-spacing:.08em;font-size:.78rem}
+      h1{margin:.25rem 0 .35rem;font-size:2.1rem;line-height:1.15}
+      .sub{margin:0 0 .6rem;color:var(--muted, #a8b3c2)}
+      .back a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.18)}
+      .back a:hover{opacity:.9}
+
+      .grid{list-style:none;margin:0;padding:0;display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+      .card{background:var(--panel,#10141a);border:1px solid var(--line,#1f2631);border-radius:14px;overflow:hidden}
+      .cardLink{display:block;padding:16px 16px 14px}
+      .cardTitle{margin:0 0 .35rem;font-size:1.05rem;line-height:1.25}
+      .cardDesc{margin:0 0 .6rem;color:var(--muted,#a8b3c2);font-size:.95rem}
+      .meta{margin:0;color:var(--muted,#a8b3c2);font-size:.85rem}
+      .empty{color:var(--muted,#a8b3c2)}
+    `}
+  </style>
+</Base>
