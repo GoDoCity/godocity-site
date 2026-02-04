@@ -32,6 +32,7 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
+/** Convert canonical key to URL slug */
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -43,7 +44,7 @@ function tagSlugFromKey(key) {
 
 /** Turn canonical key into label */
 function tagLabelFromKey(key) {
-  const s = String(key ?? "").trim();
+  const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "Topic";
   return s
     .split(" ")
@@ -52,21 +53,13 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-/** Feature flag helper */
-function isFeatured(post) {
-  const v = post?.data?.featured;
-  if (v === true || v === 1) return true;
-  const s = String(v ?? "").toLowerCase().trim();
-  return s === "true" || s === "yes" || s === "1";
-}
-
 /**
  * Static paths: build all /daytona/topic/<tag> pages
  * Build-safe: no external helper refs
  */
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
-  const daytonaPosts = posts.filter(isDaytonaPost);
+  const all = await getCollection("posts");
+  const daytonaPosts = all.filter(isDaytonaPost);
 
   const keys = new Set();
   for (const p of daytonaPosts) {
@@ -96,60 +89,54 @@ const posts = (await getCollection("posts"))
     return rawTags.map(tagKey).includes(tagKeyValue);
   })
   .sort((a, b) => {
-    const da = getPostDate(a)?.getTime() ?? 0;
-    const db = getPostDate(b)?.getTime() ?? 0;
-    return db - da;
+    const da = (getPostDate(a) ?? new Date(0)).getTime();
+    const db = (getPostDate(b) ?? new Date(0)).getTime();
+    return db - da; // newest first
   });
 
-const topicLabel = tagLabelFromKey(tagKeyValue);
+const title = `${tagLabelFromKey(tagKeyValue)} | GoDo Daytona`;
+const description = `Posts tagged ${tagLabelFromKey(tagKeyValue)} in Daytona Beach.`;
 ---
 
-<Base title={`Topic: ${topicLabel}`} description={`Posts tagged ${topicLabel} in Daytona.`}>
+<Base title={title} description={description}>
   <main class="container">
-    <header class="header">
-      <a class="back" href="/daytona/topics/">← All topics</a>
-      <h1>{topicLabel}</h1>
-      <p class="meta">
-        Showing {posts.length} post{posts.length === 1 ? "" : "s"} tagged “{topicLabel}”
+    <header class="page-head">
+      <p class="kicker">
+        <a href="/daytona/topics/">Topics</a>
+        <span aria-hidden="true"> / </span>
+        <span>{tagParam}</span>
       </p>
+      <h1>{tagLabelFromKey(tagKeyValue)}</h1>
+      <p class="muted">{posts.length} post{posts.length === 1 ? "" : "s"}</p>
     </header>
 
-    <section class="list">
-      {posts.length === 0 ? (
-        <p>No posts found for this topic.</p>
-      ) : (
-        <ul>
-          {posts.map((p) => (
-            <li class={isFeatured(p) ? "featured" : ""}>
-              <a href={`/daytona/posts/${p.slug}/`}>
-                <span class="title">{p.data.title}</span>
-                <span class="date">
-                  {getPostDate(p)
-                    ? getPostDate(p).toLocaleDateString("en-US", {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })
-                    : ""}
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      )}
-    </section>
+    {posts.length === 0 ? (
+      <p>No posts found for this topic.</p>
+    ) : (
+      <ul class="list">
+        {posts.map((p) => (
+          <li class="item">
+            <a href={`/daytona/posts/${p.slug}/`}>
+              <strong>{p.data.title}</strong>
+            </a>
+            <div class="meta">
+              {getPostDate(p) ? getPostDate(p).toLocaleDateString() : ""}
+            </div>
+            {p.data.description ? <p class="desc">{p.data.description}</p> : null}
+          </li>
+        ))}
+      </ul>
+    )}
   </main>
-
-  <style>
-    .container{max-width:900px;margin:0 auto;padding:24px}
-    .header{margin-bottom:18px}
-    .back{display:inline-block;margin-bottom:10px;opacity:.8}
-    .meta{opacity:.75;margin:6px 0 0}
-    ul{list-style:none;padding:0;margin:0}
-    li{border:1px solid rgba(255,255,255,.08);border-radius:12px;margin:10px 0}
-    li a{display:flex;justify-content:space-between;gap:12px;padding:14px 16px}
-    .title{font-weight:600}
-    .date{opacity:.7;white-space:nowrap}
-    .featured{border-color:rgba(255,210,74,.35)}
-  </style>
 </Base>
+
+<style>
+  .container{max-width:980px;margin:0 auto;padding:28px 18px}
+  .page-head{margin-bottom:18px}
+  .kicker{margin:0 0 8px 0;font-size:14px;opacity:.8}
+  .muted{margin:6px 0 0 0;opacity:.8}
+  .list{list-style:none;padding:0;margin:18px 0;display:grid;gap:14px}
+  .item{padding:14px;border:1px solid rgba(255,255,255,.08);border-radius:12px}
+  .meta{font-size:13px;opacity:.75;margin-top:6px}
+  .desc{margin:8px 0 0 0;opacity:.9}
+</style>
