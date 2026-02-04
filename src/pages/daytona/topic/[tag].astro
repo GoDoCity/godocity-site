@@ -2,14 +2,28 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/** Daytona filter (supports frontmatter city and legacy folder IDs) */
+/**
+ * Daytona filter (supports frontmatter city and legacy folder IDs)
+ * Build-safe: defined locally (no external references)
+ */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/** Canonical tag key */
+/** Build-safe date getter (no external helper refs) */
+function getPostDate(post) {
+  const d =
+    post?.data?.date ??
+    post?.data?.pubDate ??
+    post?.data?.published ??
+    post?.data?.updated ??
+    null;
+  return d ? new Date(d) : null;
+}
+
+/** Canonical tag key (normalize tags for matching) */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -18,6 +32,7 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
+/** Turn canonical key into URL slug */
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -27,14 +42,21 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
+/** Turn canonical key into label */
 function tagLabelFromKey(key) {
-  const s = String(key ?? "").trim().replace(/\s+/g, " ");
+  const s = String(key ?? "").trim();
+  if (!s) return "Topic";
   return s
     .split(" ")
+    .filter(Boolean)
     .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
     .join(" ");
 }
 
+/**
+ * Static paths: build all /daytona/topic/<tag> pages
+ * Build-safe: no external helper refs
+ */
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
   const daytonaPosts = posts.filter(isDaytonaPost);
@@ -56,62 +78,71 @@ export async function getStaticPaths() {
     }));
 }
 
+const { tag } = Astro.params;
 const { tagKeyValue } = Astro.props;
 
-const posts = (await getCollection("posts"))
+// Fallback: if Astro.props isn't present (edge cases), derive from URL param
+const activeKey = tagKeyValue ?? tagKey(tag);
+
+// Pull & filter posts for this topic
+const allPosts = await getCollection("posts");
+
+const posts = allPosts
   .filter(isDaytonaPost)
   .filter((p) => {
     const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
-    return rawTags.map(tagKey).includes(tagKeyValue);
+    const keys = rawTags.map(tagKey).filter(Boolean);
+    return keys.includes(activeKey);
   })
   .sort((a, b) => {
-    const da = new Date(a?.data?.date ?? 0).getTime();
-    const db = new Date(b?.data?.date ?? 0).getTime();
+    const da = getPostDate(a)?.getTime() ?? 0;
+    const db = getPostDate(b)?.getTime() ?? 0;
     return db - da;
   });
 
-const pageTitle = `${tagLabelFromKey(tagKeyValue)} • GoDoDaytona`;
-const pageDescription = `Posts tagged "${tagLabelFromKey(tagKeyValue)}" in Daytona Beach.`;
+const label = tagLabelFromKey(activeKey);
+const pageTitle = `${label} – GoDoDaytona`;
+const subtitle = `Posts tagged “${label}”`;
 ---
 
-<Base title={pageTitle} description={pageDescription}>
-  <main class="container" style="max-width: 900px; padding: 24px 16px;">
-    <a href="/daytona/topics/" style="opacity:.8;text-decoration:none;">← All topics</a>
+<Base title={pageTitle} description={subtitle}>
+  <section class="container">
+    <div style="margin: 24px 0 10px;">
+      <a href="/daytona/topics/">← All Topics</a>
+    </div>
 
-    <h1 style="margin:14px 0 6px; font-size:34px; line-height:1.1;">
-      {tagLabelFromKey(tagKeyValue)}
-    </h1>
-
-    <p style="opacity:.8; margin:0 0 18px;">
-      {posts.length} post{posts.length === 1 ? "" : "s"}
-    </p>
+    <h1 style="margin: 0 0 6px;">{label}</h1>
+    <p style="margin: 0 0 22px; opacity: 0.8;">{subtitle}</p>
 
     {posts.length === 0 ? (
-      <p style="opacity:.8;">No posts found for this topic yet.</p>
+      <p>No posts found for this topic.</p>
     ) : (
-      <div style="display:flex; flex-direction:column; gap:12px;">
-        {posts.map((p) => (
-          <a href={`/daytona/posts/${p.slug}/`} style="display:block; text-decoration:none;">
-            <div style="border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 14px 16px; background: rgba(255,255,255,.03);">
-              <div style="font-weight:800; font-size:16px; line-height:1.25;">
-                {p.data.title ?? p.slug}
-              </div>
+      <ul style="list-style:none; padding:0; margin:0; display:grid; gap:14px;">
+        {posts.map((post) => {
+          const title = post?.data?.title ?? post.slug;
+          const desc = post?.data?.description ?? "";
+          const d = getPostDate(post);
+          const dateText = d ? d.toLocaleDateString() : "";
 
-              {p.data.description ? (
-                <div style="opacity:.82; margin-top:6px;">
-                  {p.data.description}
+          return (
+            <li style="border:1px solid rgba(255,255,255,.08); border-radius:12px; padding:14px 16px;">
+              <a href={`/daytona/posts/${post.slug}/`} style="display:block;">
+                <div style="font-weight:700; font-size:1.05rem; margin-bottom:6px;">
+                  {title}
                 </div>
-              ) : null}
 
-              {p.data.date ? (
-                <div style="opacity:.65; margin-top:8px; font-size:13px;">
-                  {new Date(p.data.date).toLocaleDateString()}
-                </div>
-              ) : null}
-            </div>
-          </a>
-        ))}
-      </div>
+                {(dateText || desc) && (
+                  <div style="opacity:.75; font-size:.95rem;">
+                    {dateText && <span>{dateText}</span>}
+                    {dateText && desc && <span> • </span>}
+                    {desc && <span>{desc}</span>}
+                  </div>
+                )}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
     )}
-  </main>
+  </section>
 </Base>
