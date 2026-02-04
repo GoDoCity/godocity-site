@@ -2,139 +2,186 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/* ===========================
-   STATIC PATHS (ISOLATED)
-   =========================== */
-export async function getStaticPaths() {
-  const posts = await getCollection("posts");
+/**
+ * Rule A — Canonical Tag Normalization
+ */
 
-  const normalizeKey = (raw) =>
-    String(raw ?? "")
-      .toLowerCase()
-      .trim()
-      .replace(/[-_]+/g, " ")
-      .replace(/\s+/g, " ");
-
-  const slugify = (key) =>
-    String(key ?? "")
-      .replace(/&/g, "and")
-      .replace(/[^a-z0-9]+/gi, "-")
-      .replace(/(^-|-$)/g, "")
-      .toLowerCase();
-
-  const isDaytona = (post) => {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  };
-
-  const tags = new Set();
-
-  for (const post of posts.filter(isDaytona)) {
-    const list = Array.isArray(post.data?.tags) ? post.data.tags : [];
-    for (const raw of list) {
-      const key = normalizeKey(raw);
-      const slug = slugify(key);
-      if (slug) tags.add(slug);
-    }
-  }
-
-  return [...tags].map((tag) => ({
-    params: { tag },
-  }));
-}
-
-/* ===========================
-   PAGE RENDER
-   =========================== */
-const { tag } = Astro.params;
-const postsAll = await getCollection("posts");
-
-const normalizeKey = (raw) =>
-  String(raw ?? "")
+// normalize raw tag to canonical key
+function tagKey(raw) {
+  return String(raw ?? "")
     .toLowerCase()
     .trim()
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ");
+}
 
-const slugify = (key) =>
-  String(key ?? "")
+// slug from canonical key
+function tagSlugFromKey(key) {
+  return String(key ?? "")
+    .toLowerCase()
+    .trim()
     .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/gi, "-")
-    .replace(/(^-|-$)/g, "")
-    .toLowerCase();
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
-const labelize = (key) =>
-  key
+// label from canonical key
+function tagLabelFromKey(key) {
+  const s = String(key ?? "").trim().replace(/\s+/g, " ");
+  return s
     .split(" ")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
     .join(" ");
+}
 
-const isDaytona = (post) => {
+/**
+ * Daytona filter
+ */
+function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
-};
-
-const matched = [];
-let label = tag;
-
-for (const post of postsAll.filter(isDaytona)) {
-  const list = Array.isArray(post.data?.tags) ? post.data.tags : [];
-  for (const raw of list) {
-    const key = normalizeKey(raw);
-    if (slugify(key) === tag) {
-      matched.push(post);
-      label = labelize(key);
-      break;
-    }
-  }
 }
 
-matched.sort((a, b) => new Date(b.data.pubDate) - new Date(a.data.pubDate));
+/**
+ * Featured flag
+ */
+function isFeatured(post) {
+  const v = post?.data?.featured;
+  if (v === true || v === 1) return true;
+  const s = String(v ?? "").toLowerCase().trim();
+  return s === "true" || s === "yes" || s === "1";
+}
 
-const count = matched.length;
+/**
+ * Date helper
+ */
+function getPostDate(post) {
+  return post?.data?.pubDate ?? post?.data?.date ?? null;
+}
+
+/**
+ * Static paths
+ */
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+  const map = new Map();
+
+  posts.filter(isDaytonaPost).forEach((post) => {
+    const tags = Array.isArray(post.data?.tags) ? post.data.tags : [];
+    tags.forEach((t) => {
+      const key = tagKey(t);
+      if (!key) return;
+
+      const slug = tagSlugFromKey(key);
+      if (!map.has(slug)) {
+        map.set(slug, {
+          key,
+          label: tagLabelFromKey(key),
+          posts: [],
+        });
+      }
+      map.get(slug).posts.push(post);
+    });
+  });
+
+  return Array.from(map.entries()).map(([tag, v]) => ({
+    params: { tag },
+    props: {
+      tag,
+      label: v.label,
+      posts: v.posts,
+    },
+  }));
+}
+
+const { tag, label, posts } = Astro.props;
+
+// sort newest first
+const sortedPosts = posts
+  .slice()
+  .sort(
+    (a, b) =>
+      new Date(getPostDate(b) ?? 0) - new Date(getPostDate(a) ?? 0)
+  );
 ---
 
-<Base title={`Topic: ${label}`} subtitle="Browse posts by topic" cityBase="daytona" />
+<Base
+  title={`Topic: ${label}`}
+  subtitle={`Posts tagged “${label}”`}
+  cityBase="daytona"
+/>
 
 <section class="section">
   <div class="container" style="max-width: 980px;">
-    <div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;">
-      <h1 class="h1" style="margin:0;">{label}</h1>
-      <div style="opacity:.7;font-weight:700;">
-        {count} {count === 1 ? "post" : "posts"}
-      </div>
-    </div>
-
-    <p class="lede" style="opacity:.82;margin-top:8px;">
-      Newest first. Click any post to read.
+    <h1 class="h1">{label}</h1>
+    <p class="lede" style="opacity:.8">
+      Posts tagged “{label}”
     </p>
 
-    {matched.length ? (
-      <div style="margin-top:18px;display:grid;gap:12px;">
-        {matched.map((p) => (
-          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
-            <div style="font-weight:900">{p.data.title}</div>
-            {p.data.description && (
-              <div style="opacity:.82;margin-top:4px">{p.data.description}</div>
-            )}
-            <div style="opacity:.6;margin-top:6px">
-              {new Date(p.data.pubDate).toLocaleDateString()}
+    {sortedPosts.length > 0 ? (
+      <div style="margin-top:18px;display:flex;flex-direction:column;gap:14px;">
+        {sortedPosts.map((p) => (
+          <a
+            href={`/daytona/posts/${p.slug}/`}
+            style="text-decoration:none;"
+          >
+            <div
+              style="
+                border:1px solid rgba(255,255,255,.12);
+                border-radius:14px;
+                padding:14px 16px;
+                background:rgba(255,255,255,.03);
+              "
+            >
+              <div style="display:flex;justify-content:space-between;gap:12px;">
+                <div>
+                  <div style="font-weight:700;font-size:18px;">
+                    {p.data.title}
+                  </div>
+                  {p.data.description && (
+                    <div style="opacity:.8;margin-top:6px">
+                      {p.data.description}
+                    </div>
+                  )}
+                  {getPostDate(p) && (
+                    <div style="opacity:.6;margin-top:8px">
+                      {new Date(getPostDate(p)).toLocaleDateString()}
+                    </div>
+                  )}
+                </div>
+
+                {isFeatured(p) && (
+                  <span
+                    style="
+                      font-size:12px;
+                      font-weight:800;
+                      padding:6px 10px;
+                      border-radius:999px;
+                      border:1px solid rgba(255,220,80,.6);
+                      color:rgba(255,220,80,.95);
+                      background:rgba(255,220,80,.12);
+                      white-space:nowrap;
+                    "
+                  >
+                    FEATURED
+                  </span>
+                )}
+              </div>
             </div>
           </a>
         ))}
       </div>
     ) : (
-      <div class="card" style="margin-top:18px;padding:18px;">
-        No posts found for this topic yet.
-      </div>
+      <p style="margin-top:18px;opacity:.7">
+        No posts yet for this topic.
+      </p>
     )}
 
-    <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
-      <a class="pill" href="/daytona/topics/">← All topics</a>
-      <a class="pill" href="/daytona/posts/">All posts</a>
-      <a class="pill" href="/daytona/">Daytona home</a>
+    <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap;">
+      <a class="pill" href="/daytona/topics/">← All Topics</a>
+      <a class="pill" href="/daytona/posts/">All Posts</a>
+      <a class="pill" href="/daytona/">Daytona Home</a>
     </div>
   </div>
 </section>
