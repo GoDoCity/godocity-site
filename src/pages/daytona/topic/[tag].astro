@@ -2,36 +2,6 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/** Canonical tag key (normalize tags for matching) */
-function tagKey(raw) {
-  return String(raw ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/[-_]+/g, " ")
-    .replace(/\s+/g, " ");
-}
-
-/** URL slug for the route param */
-function tagSlugFromKey(key) {
-  return String(key ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-/** Display label */
-function tagLabelFromKey(key) {
-  const s = String(key ?? "").trim().replace(/\s+/g, " ");
-  if (!s) return "Topic";
-  return s
-    .split(" ")
-    .filter(Boolean)
-    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
-    .join(" ");
-}
-
 /** Build-safe date getter */
 function getPostDate(post) {
   const d =
@@ -45,12 +15,44 @@ function getPostDate(post) {
   return dt && !Number.isNaN(dt.getTime()) ? dt : null;
 }
 
+/** Display label */
+function tagLabelFromKey(key) {
+  const s = String(key ?? "").trim().replace(/\s+/g, " ");
+  if (!s) return "Topic";
+  return s
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+/**
+ * Static paths: build all /daytona/topic/<tag> pages
+ * EVERYTHING used here is defined INSIDE this function (build-proof).
+ */
 export async function getStaticPaths() {
-  // define inline to avoid any bundler/scope weirdness
+  // helpers must be local to guarantee scope in Cloudflare/Astro build
   const isDaytonaPost = (post) => {
     const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
     if (city === "daytona") return true;
     return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  };
+
+  const tagKey = (raw) => {
+    return String(raw ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ");
+  };
+
+  const tagSlugFromKey = (key) => {
+    return String(key ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
   };
 
   const all = await getCollection("posts");
@@ -75,13 +77,22 @@ export async function getStaticPaths() {
 
 const { tagKeyValue } = Astro.props;
 
-// define inline again (same reason)
+// page-level helpers (can be outside; only getStaticPaths was failing scope)
 const isDaytonaPost = (post) => {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 };
 
+const tagKey = (raw) => {
+  return String(raw ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ");
+};
+
+// Load posts for this topic page (Daytona-only, matching canonical key)
 const posts = (await getCollection("posts"))
   .filter(isDaytonaPost)
   .filter((p) => {
@@ -115,7 +126,11 @@ const title = tagLabelFromKey(tagKeyValue);
         {posts.map((p) => {
           const d = getPostDate(p);
           const dateText = d
-            ? d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+            ? d.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
             : "";
           const href = `/daytona/posts/${p.id}/`;
           return (
@@ -124,7 +139,9 @@ const title = tagLabelFromKey(tagKeyValue);
                 <span class="topic-title">{p.data.title}</span>
                 {dateText ? <span class="topic-date">{dateText}</span> : null}
               </a>
-              {p.data.description ? <p class="topic-desc">{p.data.description}</p> : null}
+              {p.data.description ? (
+                <p class="topic-desc">{p.data.description}</p>
+              ) : null}
             </li>
           );
         })}
