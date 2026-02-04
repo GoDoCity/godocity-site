@@ -2,95 +2,163 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-function tagKey(raw) {
+/** Build-safe date getter */
+function getPostDate(post) {
+  const d =
+    post?.data?.date ??
+    post?.data?.pubDate ??
+    post?.data?.published ??
+    post?.data?.updated ??
+    null;
+
+  const dt = d ? new Date(d) : null;
+  return dt && !Number.isNaN(dt.getTime()) ? dt : null;
+}
+
+/** Display label */
+function tagLabelFromKey(key) {
+  const s = String(key ?? "").trim().replace(/\s+/g, " ");
+  if (!s) return "Topic";
+  return s
+    .split(" ")
+    .filter(Boolean)
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
+/**
+ * Static paths: build all /daytona/topic/<tag> pages
+ * EVERYTHING used here is defined INSIDE this function (build-proof).
+ */
+export async function getStaticPaths() {
+  // helpers must be local to guarantee scope in Cloudflare/Astro build
+  const isDaytonaPost = (post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  };
+
+  const tagKey = (raw) => {
+    return String(raw ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ");
+  };
+
+  const tagSlugFromKey = (key) => {
+    return String(key ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  };
+
+  const all = await getCollection("posts");
+  const daytonaPosts = all.filter(isDaytonaPost);
+
+  const keys = new Set();
+  for (const p of daytonaPosts) {
+    const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
+    for (const t of rawTags) {
+      const k = tagKey(t);
+      if (k) keys.add(k);
+    }
+  }
+
+  return Array.from(keys)
+    .sort((a, b) => a.localeCompare(b))
+    .map((k) => ({
+      params: { tag: tagSlugFromKey(k) },
+      props: { tagKeyValue: k },
+    }));
+}
+
+const { tagKeyValue } = Astro.props;
+
+// page-level helpers (can be outside; only getStaticPaths was failing scope)
+const isDaytonaPost = (post) => {
+  const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+  if (city === "daytona") return true;
+  return typeof post?.id === "string" && post.id.startsWith("daytona/");
+};
+
+const tagKey = (raw) => {
   return String(raw ?? "")
     .toLowerCase()
     .trim()
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ");
-}
+};
 
-function tagSlugFromKey(key) {
-  return String(key ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
+// Load posts for this topic page (Daytona-only, matching canonical key)
+const posts = (await getCollection("posts"))
+  .filter(isDaytonaPost)
+  .filter((p) => {
+    const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
+    return rawTags.map(tagKey).includes(tagKeyValue);
+  })
+  .sort((a, b) => {
+    const da = getPostDate(a)?.getTime() ?? 0;
+    const db = getPostDate(b)?.getTime() ?? 0;
+    return db - da;
+  });
 
-function tagLabelFromKey(key) {
-  const s = String(key ?? "").trim().replace(/\s+/g, " ");
-  if (!s) return "";
-  return s
-    .split(" ")
-    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
-    .join(" ");
-}
-
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
-
-const posts = (await getCollection("posts")).filter(isDaytonaPost);
-
-// key -> { label, slug, count }
-const map = new Map();
-
-for (const post of posts) {
-  const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
-  for (const raw of rawTags) {
-    const key = tagKey(raw);
-    if (!key) continue;
-
-    const existing = map.get(key);
-    if (!existing) {
-      map.set(key, {
-        key,
-        label: tagLabelFromKey(key),
-        slug: tagSlugFromKey(key),
-        count: 1,
-      });
-    } else {
-      existing.count += 1;
-    }
-  }
-}
-
-const topics = Array.from(map.values()).sort((a, b) =>
-  a.label.localeCompare(b.label)
-);
+const title = tagLabelFromKey(tagKeyValue);
 ---
 
-<Base title="Topics" subtitle="Browse posts by topic." cityBase="daytona" />
+<Base
+  title={`${title} | GoDo Daytona`}
+  description={`GoDo Daytona posts tagged "${title}".`}
+>
+  <main class="container">
+    <header class="topic-header">
+      <p class="kicker"><a href="/daytona/">GoDo Daytona</a> / Topic</p>
+      <h1>{title}</h1>
+      <p class="meta">{posts.length} post{posts.length === 1 ? "" : "s"}</p>
+    </header>
 
-<section class="section">
-  <div class="container" style="max-width: 980px;">
-    <h1 class="h1">Topics</h1>
-    <p class="lede" style="opacity:.8">Browse posts by topic.</p>
-
-    {topics.length === 0 ? (
-      <div class="card" style="margin-top:18px;padding:18px;">
-        <strong>NO TOPICS YET</strong>
-        <div style="opacity:.8;margin-top:6px;">
-          Add tags to posts and they will appear here automatically.
-        </div>
-      </div>
+    {posts.length === 0 ? (
+      <p>No posts found for this topic.</p>
     ) : (
-      <div style="margin-top:18px;display:flex;flex-wrap:wrap;gap:10px;">
-        {topics.map((t) => (
-          <a class="pill" href={`/daytona/topic/${t.slug}/`}>
-            {t.label} <span style="opacity:.65">({t.count})</span>
-          </a>
-        ))}
-      </div>
+      <ul class="topic-list">
+        {posts.map((p) => {
+          const d = getPostDate(p);
+          const dateText = d
+            ? d.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : "";
+          const href = `/daytona/posts/${p.id}/`;
+          return (
+            <li class="topic-item">
+              <a class="topic-link" href={href}>
+                <span class="topic-title">{p.data.title}</span>
+                {dateText ? <span class="topic-date">{dateText}</span> : null}
+              </a>
+              {p.data.description ? (
+                <p class="topic-desc">{p.data.description}</p>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
     )}
+  </main>
 
-    <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
-      <a class="pill" href="/daytona/">← Daytona home</a>
-      <a class="pill" href="/daytona/posts/">All posts</a>
-    </p>
-  </div>
-</section>
+  <style>
+    .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+    .kicker { margin: 0 0 8px; opacity: 0.8; }
+    .topic-header h1 { margin: 0 0 8px; }
+    .meta { margin: 0 0 24px; opacity: 0.8; }
+    .topic-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+    .topic-item { border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px; }
+    .topic-link { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+    .topic-title { font-weight: 700; }
+    .topic-date { opacity: 0.75; font-size: 0.95em; white-space: nowrap; }
+    .topic-desc { margin: 8px 0 0; opacity: 0.85; }
+  </style>
+</Base>
