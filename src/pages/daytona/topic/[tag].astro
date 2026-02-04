@@ -9,7 +9,7 @@ function isDaytonaPost(post) {
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/** Canonical tag key (normalize spacing & separators) */
+/** Canonical tag key */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -35,10 +35,8 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-/** Build all tag pages */
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
-
   const daytonaPosts = posts.filter(isDaytonaPost);
 
   const keys = new Set();
@@ -93,18 +91,8 @@ const pageDescription = `Posts tagged "${tagLabelFromKey(tagKeyValue)}" in Dayto
     ) : (
       <div style="display:flex; flex-direction:column; gap:12px;">
         {posts.map((p) => (
-          <a
-            href={`/daytona/posts/${p.slug}/`}
-            style="display:block; text-decoration:none;"
-          >
-            <div
-              style="
-                border: 1px solid rgba(255,255,255,.12);
-                border-radius: 14px;
-                padding: 14px 16px;
-                background: rgba(255,255,255,.03);
-              "
-            >
+          <a href={`/daytona/posts/${p.slug}/`} style="display:block; text-decoration:none;">
+            <div style="border: 1px solid rgba(255,255,255,.12); border-radius: 14px; padding: 14px 16px; background: rgba(255,255,255,.03);">
               <div style="font-weight:800; font-size:16px; line-height:1.25;">
                 {p.data.title ?? p.slug}
               </div>
