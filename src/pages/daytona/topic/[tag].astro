@@ -50,7 +50,6 @@ export async function getStaticPaths() {
     }
   }
 
-  // Create one static page per unique tag
   return Array.from(keys)
     .sort((a, b) => a.localeCompare(b))
     .map((k) => ({
@@ -61,7 +60,6 @@ export async function getStaticPaths() {
 
 const { tagKeyValue } = Astro.props;
 
-// Load posts for THIS tag page
 const posts = (await getCollection("posts"))
   .filter(isDaytonaPost)
   .filter((p) => {
