@@ -12,13 +12,7 @@ function isDaytonaPost(post) {
 }
 
 /**
- * Featured flag normalization:
- * supports:
- *   featured: true
- *   featured: "true"
- *   featured: "yes"
- *   featured: 1
- *   featured: "1"
+ * Featured flag normalization
  */
 function isFeatured(post) {
   const v = post?.data?.featured;
@@ -30,8 +24,6 @@ function isFeatured(post) {
 
 /**
  * Canonical Tag Normalization
- * - case-insensitive
- * - treats "motor sports", "motor-sports", "Motor Sports" as same tag
  */
 function tagKey(raw) {
   return String(raw ?? "")
@@ -60,7 +52,8 @@ function tagLabelFromKey(key) {
 }
 
 /**
- * Safe date getter (fallback order)
+ * ✅ Safe date getter (returns Date|null)
+ * MUST be defined before getStaticPaths()
  */
 function getPostDate(post) {
   const d =
@@ -74,6 +67,9 @@ function getPostDate(post) {
   return dt && !Number.isNaN(dt.getTime()) ? dt : null;
 }
 
+/**
+ * Sort newest first
+ */
 function sortNewestFirst(a, b) {
   const da = getPostDate(a)?.getTime() ?? 0;
   const db = getPostDate(b)?.getTime() ?? 0;
@@ -82,13 +78,7 @@ function sortNewestFirst(a, b) {
 
 /**
  * ================================
- * STABLE – DO NOT MODIFY
- * Related posts logic + limits
- *
- * - Max related posts: 3
- * - Max featured in related: 1
- * - Cloudflare build-safe
- * - Used by buildRelatedPosts()
+ * STABLE – Related posts logic
  * ================================
  */
 const RELATED_LIMIT = 3;
@@ -143,6 +133,9 @@ function buildRelatedPosts(currentPost, allCityPosts) {
   return result.slice(0, RELATED_LIMIT);
 }
 
+/**
+ * ✅ getStaticPaths uses getPostDate, so it must appear after getPostDate()
+ */
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
 
@@ -152,11 +145,7 @@ export async function getStaticPaths() {
       if (city === "daytona") return true;
       return typeof post?.id === "string" && post.id.startsWith("daytona/");
     })
-    .sort((a, b) => {
-      const da = getPostDate(a)?.getTime() ?? 0;
-      const db = getPostDate(b)?.getTime() ?? 0;
-      return db - da;
-    });
+    .sort((a, b) => (getPostDate(b)?.getTime() ?? 0) - (getPostDate(a)?.getTime() ?? 0));
 
   return daytonaPosts.map((post) => ({
     params: { slug: post.slug },
@@ -165,14 +154,16 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
+
 const title = post.data.title;
-const subtitle = post.data.description ?? "GoDoDaytona post";
+const subtitle = post.data.description ?? "GoDo Daytona post";
 const { Content } = await post.render();
 
+// For related lookup
 const all = await getCollection("posts");
 const daytonaPosts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
-// Tag pills for this post
+// Pills for this post
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 
@@ -182,7 +173,7 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
   slug: tagSlugFromKey(key),
 }));
 
-// Related
+// Related posts
 const relatedAll = buildRelatedPosts(post, daytonaPosts);
 const seen = new Set();
 const deduped = relatedAll.filter((p) => {
@@ -229,7 +220,7 @@ const dateText = getPostDate(post)
       )}
     </p>
 
-    {/* ✅ Yellow topic pills inside article page */}
+    {/* ✅ Yellow clickable topic pills */}
     {tagItems.length > 0 && (
       <div class="tag-row">
         {tagItems.map((t) => (
@@ -250,8 +241,9 @@ const dateText = getPostDate(post)
           {relatedPosts.map((p) => {
             const t = p.data.title ?? p.slug;
             const desc = p.data.description ?? "";
-            const d = getPostDate(p);
-            const relDateText = d ? d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "";
+            const relDateText = getPostDate(p)
+              ? getPostDate(p).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+              : "";
 
             return (
               <a href={`/daytona/posts/${p.slug}/`} style="text-decoration:none;display:block;">
@@ -304,7 +296,6 @@ const dateText = getPostDate(post)
 </section>
 
 <style>
-  /* Yellow pill styling — matches Subscribe vibe */
   .tag-row {
     margin-top: 12px;
     display: flex;
@@ -312,6 +303,7 @@ const dateText = getPostDate(post)
     gap: 10px;
   }
 
+  /* Yellow rounded pill like Subscribe */
   .tag-pill {
     display: inline-block;
     padding: 7px 14px;
