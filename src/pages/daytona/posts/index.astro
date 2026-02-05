@@ -1,135 +1,231 @@
 ---
-// checkpoint: featured posts stable
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
+ * Daytona-only filter
  */
 function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase();
+  const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
 /**
- * Featured flag normalization:
- * supports:
- *   featured: true
- *   featured: "true"
- *   featured: "yes"
- *   featured: 1
- *   featured: "1"
+ * Canonical tag key
+ * Makes "Motor Sports" == "motor-sports"
  */
-function isFeatured(post) {
-  const v = post?.data?.featured;
-  if (v === true) return true;
-  if (v === 1) return true;
-  const s = String(v ?? "").toLowerCase().trim();
-  return s === "true" || s === "yes" || s === "1";
+function tagKey(raw) {
+  return String(raw ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ");
 }
 
 /**
- * Safe date getter (fallback order)
+ * Slug for URL
+ */
+function tagSlugFromKey(key) {
+  return String(key ?? "")
+    .toLowerCase()
+    .trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+/**
+ * Pretty label
+ */
+function tagLabelFromKey(key) {
+  const s = String(key ?? "").trim().replace(/\s+/g, " ");
+  if (!s) return "";
+  return s
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+}
+
+/**
+ * Safe date getter
  */
 function getPostDate(post) {
-  return (
+  const d =
     post?.data?.pubDate ??
     post?.data?.date ??
     post?.data?.published ??
     post?.data?.updated ??
-    null
-  );
+    null;
+
+  const dt = d ? new Date(d) : null;
+  return dt && !Number.isNaN(dt.getTime()) ? dt : null;
 }
 
 /**
  * Sort newest first
  */
 function sortNewestFirst(a, b) {
-  const da = new Date(getPostDate(a) ?? 0).getTime();
-  const db = new Date(getPostDate(b) ?? 0).getTime();
-  return db - da;
+  return (getPostDate(b)?.getTime() ?? 0) - (getPostDate(a)?.getTime() ?? 0);
 }
 
-// Load posts
 const all = await getCollection("posts");
 
-// Daytona only + newest first
-const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
+const posts = all
+  .filter(isDaytonaPost)
+  .sort(sortNewestFirst);
 
-const pageTitle = "All Posts";
-const pageSubtitle = "All posts, newest first.";
+const title = "Posts";
 ---
 
-<Base title={pageTitle} subtitle={pageSubtitle} cityBase="daytona" />
+<Base
+  title={`${title} | GoDo Daytona`}
+  description="Latest GoDo Daytona posts"
+>
+  <main class="container">
+    <header class="page-header">
+      <p class="kicker">
+        <a href="/daytona/">GoDo Daytona</a> / Posts
+      </p>
+      <h1>Latest Posts</h1>
+      <p class="meta">{posts.length} total</p>
+    </header>
 
-<section class="section">
-  <div class="container" style="max-width: 980px;">
-    <h1 class="h1">{pageTitle}</h1>
-    <p class="lede">{pageSubtitle}</p>
+    {posts.length === 0 ? (
+      <p>No posts yet.</p>
+    ) : (
+      <ul class="post-list">
+        {posts.map((p) => {
+          const d = getPostDate(p);
+          const dateText = d
+            ? d.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              })
+            : "";
 
-    <!-- Toggle pills (STATIC ROUTES) -->
-    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
-      <a class="pill" href="/daytona/posts/">All posts</a>
-      <a class="pill" href="/daytona/posts/featured/">Featured</a>
-    </div>
+          // Tags for this post
+          const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
+          const tagKeys = Array.from(
+            new Set(rawTags.map(tagKey).filter(Boolean))
+          );
 
-    <!-- Posts list -->
-    <div style="margin-top:18px;display:flex;flex-direction:column;gap:14px;">
-      {posts.map((p) => {
-        const title = p.data.title ?? p.slug;
-        const desc = p.data.description ?? "";
-        const d = getPostDate(p);
-        const dateText = d ? new Date(d).toLocaleDateString() : "";
+          const tagLinks = tagKeys.map((k) => ({
+            label: tagLabelFromKey(k),
+            slug: tagSlugFromKey(k),
+          }));
 
-        return (
-          <a href={`/daytona/posts/${p.slug}/`} style="display:block;text-decoration:none;">
-            <div
-              style="
-                border: 1px solid rgba(255,255,255,.12);
-                border-radius: 14px;
-                padding: 14px 16px;
-                background: rgba(255,255,255,.03);
-              "
-            >
-              <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
-                <div>
-                  <div style="font-weight:700;font-size:18px;line-height:1.25">{title}</div>
-                  {desc && <div style="opacity:.8;margin-top:6px">{desc}</div>}
-                  {dateText && <div style="opacity:.6;margin-top:8px">{dateText}</div>}
-                </div>
-
-                {isFeatured(p) && (
-                  <span
-                    style="
-                      font-size: 12px;
-                      font-weight: 800;
-                      letter-spacing: .04em;
-                      padding: 6px 10px;
-                      border-radius: 999px;
-                      border: 1px solid rgba(255,220,80,.65);
-                      color: rgba(255,220,80,.95);
-                      background: rgba(255,220,80,.12);
-                      white-space: nowrap;
-                    "
-                  >
-                    FEATURED
-                  </span>
+          return (
+            <li class="post-card">
+              <a class="post-link" href={`/daytona/posts/${p.slug}/`}>
+                <div class="post-title">{p.data.title}</div>
+                {p.data.description && (
+                  <div class="post-desc">{p.data.description}</div>
                 )}
-              </div>
-            </div>
-          </a>
-        );
-      })}
-    </div>
+                {dateText && <div class="post-date">{dateText}</div>}
+              </a>
 
-    {posts.length === 0 && (
-      <p style="margin-top:18px;opacity:.7">No posts found.</p>
+              {/* ✅ Topic links under the post */}
+              {tagLinks.length > 0 && (
+                <div class="post-tags">
+                  {tagLinks.map((t, i) => (
+                    <>
+                      <a class="tag-pill" href={`/daytona/topic/${t.slug}/`}>
+                        {t.label}
+                      </a>
+                      {i < tagLinks.length - 1 && (
+                        <span class="dot">·</span>
+                      )}
+                    </>
+                  ))}
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     )}
+  </main>
 
-    <div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
-      <a class="pill" href="/daytona/">← Daytona home</a>
-      <a class="pill" href="/daytona/topics/">Topics</a>
-    </div>
-  </div>
-</section>
+  <style>
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .kicker {
+      margin: 0 0 8px;
+      opacity: 0.8;
+    }
+
+    .meta {
+      opacity: 0.75;
+      margin-bottom: 22px;
+    }
+
+    .post-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 16px;
+    }
+
+    .post-card {
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .post-link {
+      text-decoration: none;
+      display: block;
+    }
+
+    .post-title {
+      font-weight: 800;
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
+    .post-desc {
+      opacity: 0.85;
+      margin-bottom: 8px;
+    }
+
+    .post-date {
+      opacity: 0.6;
+      font-size: 0.95em;
+    }
+
+    /* ✅ Tag row */
+    .post-tags {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: center;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    .tag-pill {
+      text-decoration: none;
+      font-weight: 600;
+      opacity: 0.85;
+    }
+
+    .tag-pill:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .dot {
+      opacity: 0.5;
+      padding: 0 4px;
+    }
+  </style>
+</Base>
