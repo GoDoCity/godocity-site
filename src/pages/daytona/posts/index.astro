@@ -2,14 +2,30 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/** Daytona filter (supports frontmatter city and legacy folder IDs) */
+/**
+ * Daytona filter (supports frontmatter city + legacy folder IDs)
+ * Build-safe: defined locally in this file.
+ */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/** Canonical tag key */
+/** Build-safe date getter */
+function getPostDate(post) {
+  const d =
+    post?.data?.pubDate ??
+    post?.data?.date ??
+    post?.data?.published ??
+    post?.data?.updated ??
+    null;
+
+  const dt = d ? new Date(d) : null;
+  return dt && !Number.isNaN(dt.getTime()) ? dt : null;
+}
+
+/** Canonical tag key (normalize tags for matching) */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -18,7 +34,7 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-/** URL slug from canonical key */
+/** URL slug for the route param */
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -35,35 +51,26 @@ function tagLabelFromKey(key) {
   return s
     .split(" ")
     .filter(Boolean)
-    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
+    .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
     .join(" ");
 }
 
-/** Build-safe date getter */
-function getPostDate(post) {
-  const d =
-    post?.data?.date ??
-    post?.data?.pubDate ??
-    post?.data?.published ??
-    post?.data?.updated ??
-    null;
-
-  const dt = d ? new Date(d) : null;
-  return dt && !Number.isNaN(dt.getTime()) ? dt : null;
+/** Sort newest first */
+function sortNewestFirst(a, b) {
+  const da = getPostDate(a)?.getTime() ?? 0;
+  const db = getPostDate(b)?.getTime() ?? 0;
+  return db - da;
 }
 
-const posts = (await getCollection("posts"))
-  .filter(isDaytonaPost)
-  .sort((a, b) => {
-    const da = getPostDate(a)?.getTime() ?? 0;
-    const db = getPostDate(b)?.getTime() ?? 0;
-    return db - da;
-  });
+const all = await getCollection("posts");
+const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
 const title = "Latest Posts";
+const pageTitle = `${title} | GoDo Daytona`;
+const description = "The latest GoDo Daytona posts.";
 ---
 
-<Base title={`${title} | GoDo Daytona`} description="Latest GoDo Daytona posts.">
+<Base title={pageTitle} description={description}>
   <main class="container">
     <header class="page-header">
       <p class="kicker"><a href="/daytona/">GoDo Daytona</a> / Posts</p>
@@ -71,41 +78,63 @@ const title = "Latest Posts";
       <p class="meta">{posts.length} total</p>
     </header>
 
-    <ul class="post-list">
-      {posts.map((p) => {
-        const d = getPostDate(p);
-        const dateText = d
-          ? d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
-          : "";
+    {posts.length === 0 ? (
+      <p>No posts yet.</p>
+    ) : (
+      <ul class="post-list">
+        {posts.map((p) => {
+          const d = getPostDate(p);
+          const dateText = d
+            ? d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+            : "";
 
-        // tags -> yellow pills
-        const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
-        const uniqueKeys = Array.from(new Set(rawTags.map(tagKey).filter(Boolean)));
-        const tagItems = uniqueKeys.map((key) => ({
-          key,
-          slug: tagSlugFromKey(key),
-          label: tagLabelFromKey(key),
-        }));
+          // Tags -> normalized + unique + ready for linking
+          const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
+          const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
+          const tagItems = Array.from(uniqueKeySet).map((k) => ({
+            key: k,
+            label: tagLabelFromKey(k),
+            slug: tagSlugFromKey(k),
+          }));
 
-        return (
-          <li class="post-item">
-            <a class="post-link" href={`/daytona/posts/${p.slug}/`}>
-              <div class="post-title">{p.data.title}</div>
-              {p.data.description ? <div class="post-desc">{p.data.description}</div> : null}
-              {dateText ? <div class="post-date">{dateText}</div> : null}
-            </a>
+          // IMPORTANT: use p.id to support legacy folder IDs (daytona/...)
+          const href = `/daytona/posts/${p.id}/`;
 
-            {tagItems.length > 0 ? (
-              <div class="tagRow">
-                {tagItems.map((t) => (
-                  <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
-                ))}
-              </div>
-            ) : null}
-          </li>
-        );
-      })}
-    </ul>
+          return (
+            <li class="post-item">
+              <a class="post-link" href={href}>
+                <div class="post-title">{p.data.title ?? p.id}</div>
+
+                {/* Inline date + pills (same line, wraps nicely) */}
+                <div class="metaRow">
+                  {dateText ? <span class="post-date">{dateText}</span> : null}
+
+                  {tagItems.length ? (
+                    <>
+                      <span class="dot">·</span>
+                      <span class="tagInline">
+                        {tagItems.map((t, i) => (
+                          <>
+                            <span class="pillWrap">
+                              <a class="topicPill" href={`/daytona/topic/${t.slug}/`} onClick={(e) => e.stopPropagation()}>
+                                {t.label}
+                              </a>
+                            </span>
+                            {i < tagItems.length - 1 ? <span class="dot">·</span> : null}
+                          </>
+                        ))}
+                      </span>
+                    </>
+                  ) : null}
+                </div>
+
+                {p.data.description ? <div class="post-desc">{p.data.description}</div> : null}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    )}
   </main>
 
   <style>
@@ -115,98 +144,89 @@ const title = "Latest Posts";
     .meta { margin: 0 0 24px; opacity: 0.8; }
 
     .post-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
-    .post-item { border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px; }
-
-    .post-link { display: block; text-decoration: none; }
-     <style>
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 24px;
-    }
-
-    .kicker {
-      margin: 0 0 8px;
-      opacity: 0.8;
-    }
-
-    .post-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: grid;
-      gap: 14px;
-    }
 
     .post-item {
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.08);
       border-radius: 12px;
-      padding: 14px 16px;
+      padding: 0;
+      overflow: hidden;
     }
 
     .post-link {
       display: block;
+      padding: 16px 18px; /* slightly bigger card */
       text-decoration: none;
     }
 
-    /* ✅ Post titles ~15% larger */
-    .post-title {
-      font-weight: 800;
-      font-size: 18.5px; /* was 16px */
-      margin: 0;
-    }
+    /* ~15% larger */
+    .post-title { font-weight: 900; font-size: 19px; line-height: 1.25; }
 
-    .post-desc {
-      margin-top: 6px;
-      opacity: 0.85;
-    }
+    .post-desc { margin-top: 8px; opacity: 0.85; }
 
-    .post-date {
-      margin-top: 10px;
-      opacity: 0.65;
-      font-size: 0.95em;
-    }
-
-    /* ✅ Tag row spacing */
-    .tagRow {
+    /* Inline date + tags */
+    .metaRow{
       margin-top: 10px;
       display: flex;
+      align-items: baseline;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
+      opacity: .78;
     }
 
-    /* ✅ Smaller + faded yellow pills */
-    .topicPill {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+    .post-date{
+      font-size: .95em;
+      opacity: .9;
+      white-space: nowrap;
+    }
 
-      padding: 5px 9px; /* smaller */
+    .tagInline{
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      align-items: baseline;
+    }
+
+    .dot{
+      opacity: .6;
+      margin: 0 2px;
+      user-select: none;
+    }
+
+    /* Smaller + ~30% faded yellow (vs your bright yellow) */
+    .topicPill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+
+      padding: 4px 8px;
       border-radius: 999px;
 
       font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.01em;
+      font-weight: 900;
+      letter-spacing: .01em;
 
-      text-decoration: none;
-      color: #111;
+      text-decoration:none;
+      color:#111;
 
-      /* Yellow faded about 30% */
       background: rgba(255, 220, 80, 0.65);
       border: 1px solid rgba(255, 220, 80, 0.55);
 
-      transition: transform 0.08s ease, filter 0.12s ease,
-        opacity 0.12s ease;
+      transition: transform .08s ease, filter .12s ease, opacity .12s ease;
     }
 
-    .topicPill:hover {
+    .topicPill:hover{
       transform: translateY(-1px);
       filter: brightness(1.03);
     }
 
-    .topicPill:active {
+    .topicPill:active{
       transform: translateY(0px);
-      opacity: 0.9;
+      opacity: .9;
+    }
+
+    .topicPill:focus-visible{
+      outline: 2px solid rgba(255,220,80,.9);
+      outline-offset: 2px;
     }
   </style>
 </Base>
