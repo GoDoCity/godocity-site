@@ -12,6 +12,15 @@ function isDaytonaPost(post) {
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
+/** Featured flag normalization */
+function isFeatured(post) {
+  const v = post?.data?.featured;
+  if (v === true) return true;
+  if (v === 1) return true;
+  const s = String(v ?? "").toLowerCase().trim();
+  return s === "true" || s === "yes" || s === "1";
+}
+
 /** Build-safe date getter */
 function getPostDate(post) {
   const d =
@@ -34,7 +43,7 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-/** URL slug for the route param */
+/** URL slug for topic route */
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -88,7 +97,6 @@ const description = "The latest GoDo Daytona posts.";
             ? d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
             : "";
 
-          // Tags -> normalized + unique + ready for linking
           const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
           const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
           const tagItems = Array.from(uniqueKeySet).map((k) => ({
@@ -102,34 +110,34 @@ const description = "The latest GoDo Daytona posts.";
 
           return (
             <li class="post-item">
-              <a class="post-link" href={href}>
-                <div class="post-title">{p.data.title ?? p.id}</div>
+              {/* Card content (NOT a link) */}
+              <div class="card">
+                {/* The stretched link (only link inside the card for the post) */}
+                <a class="stretched-link" href={href} aria-label={p.data.title ?? p.id}></a>
 
-                {/* Inline date + pills (same line, wraps nicely) */}
+                <div class="cardTop">
+                  <div class="post-title">{p.data.title ?? p.id}</div>
+
+                  {isFeatured(p) && (
+                    <span class="featuredPill">FEATURED</span>
+                  )}
+                </div>
+
+                {/* Inline date + tags */}
                 <div class="metaRow">
                   {dateText ? <span class="post-date">{dateText}</span> : null}
 
                   {tagItems.length ? (
-                    <>
-                      <span class="dot">·</span>
-                      <span class="tagInline">
-                        {tagItems.map((t, i) => (
-                          <>
-                            <span class="pillWrap">
-                              <a class="topicPill" href={`/daytona/topic/${t.slug}/`} onClick={(e) => e.stopPropagation()}>
-                                {t.label}
-                              </a>
-                            </span>
-                            {i < tagItems.length - 1 ? <span class="dot">·</span> : null}
-                          </>
-                        ))}
-                      </span>
-                    </>
+                    <span class="tagInline">
+                      {tagItems.map((t) => (
+                        <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
+                      ))}
+                    </span>
                   ) : null}
                 </div>
 
-                {p.data.description ? <div class="post-desc">{p.data.description}</div> : null}
-              </a>
+                {p.data.description ? <div class="post-desc clamp2">{p.data.description}</div> : null}
+              </div>
             </li>
           );
         })}
@@ -145,31 +153,45 @@ const description = "The latest GoDo Daytona posts.";
 
     .post-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
 
-    .post-item {
+    .post-item { margin: 0; }
+
+    .card{
+      position: relative;
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 12px;
-      padding: 0;
+      padding: 16px 18px;
+      background: rgba(255,255,255,0.02);
       overflow: hidden;
     }
 
-    .post-link {
-      display: block;
-      padding: 16px 18px; /* slightly bigger card */
+    /* The “whole card clickable” link */
+    .stretched-link{
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: 12px;
       text-decoration: none;
     }
+
+    /* Ensure real controls sit above stretched-link */
+    .cardTop, .metaRow, .post-desc { position: relative; z-index: 2; }
 
     /* ~15% larger */
     .post-title { font-weight: 900; font-size: 19px; line-height: 1.25; }
 
-    .post-desc { margin-top: 8px; opacity: 0.85; }
+    .cardTop{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap: 12px;
+    }
 
-    /* Inline date + tags */
     .metaRow{
       margin-top: 10px;
       display: flex;
       align-items: baseline;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 10px;
       opacity: .78;
     }
 
@@ -179,20 +201,15 @@ const description = "The latest GoDo Daytona posts.";
       white-space: nowrap;
     }
 
+    /* Tags line (no dots; cleaner on lists) */
     .tagInline{
       display: inline-flex;
       flex-wrap: wrap;
-      gap: 6px;
+      gap: 8px;
       align-items: baseline;
     }
 
-    .dot{
-      opacity: .6;
-      margin: 0 2px;
-      user-select: none;
-    }
-
-    /* Smaller + ~30% faded yellow (vs your bright yellow) */
+    /* Smaller + ~30% faded yellow */
     .topicPill{
       display:inline-flex;
       align-items:center;
@@ -212,21 +229,41 @@ const description = "The latest GoDo Daytona posts.";
       border: 1px solid rgba(255, 220, 80, 0.55);
 
       transition: transform .08s ease, filter .12s ease, opacity .12s ease;
+      position: relative;
+      z-index: 3; /* above stretched link */
     }
 
-    .topicPill:hover{
-      transform: translateY(-1px);
-      filter: brightness(1.03);
-    }
-
-    .topicPill:active{
-      transform: translateY(0px);
-      opacity: .9;
-    }
+    .topicPill:hover{ transform: translateY(-1px); filter: brightness(1.03); }
+    .topicPill:active{ transform: translateY(0px); opacity: .9; }
 
     .topicPill:focus-visible{
       outline: 2px solid rgba(255,220,80,.9);
       outline-offset: 2px;
+    }
+
+    /* Featured pill */
+    .featuredPill{
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .04em;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,220,80,.65);
+      color: rgba(255,220,80,.95);
+      background: rgba(255,220,80,.12);
+      white-space: nowrap;
+      position: relative;
+      z-index: 3; /* above stretched link */
+    }
+
+    /* 2-line clamp */
+    .clamp2{
+      margin-top: 8px;
+      opacity: 0.85;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
   </style>
 </Base>
