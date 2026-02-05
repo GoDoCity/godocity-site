@@ -140,12 +140,26 @@ export async function getStaticPaths() {
   const posts = await getCollection("posts");
 
   const daytonaPosts = posts
-    .filter((post) => {
-      const city = String(post?.data?.city ?? "daytona").toLowerCase();
-      if (city === "daytona") return true;
-      return typeof post?.id === "string" && post.id.startsWith("daytona/");
-    })
-    .sort((a, b) => (getPostDate(b)?.getTime() ?? 0) - (getPostDate(a)?.getTime() ?? 0));
+    .filter(isDaytonaPost)
+    .sort((a, b) => {
+      const ad =
+        a?.data?.pubDate ??
+        a?.data?.date ??
+        a?.data?.published ??
+        a?.data?.updated ??
+        0;
+
+      const bd =
+        b?.data?.pubDate ??
+        b?.data?.date ??
+        b?.data?.published ??
+        b?.data?.updated ??
+        0;
+
+      const da = new Date(ad).getTime();
+      const db = new Date(bd).getTime();
+      return db - da;
+    });
 
   return daytonaPosts.map((post) => ({
     params: { slug: post.slug },
