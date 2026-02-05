@@ -2,19 +2,14 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/**
- * Daytona-only filter
- */
+/** Daytona filter (supports frontmatter city and legacy folder IDs) */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/**
- * Canonical tag key
- * Makes "Motor Sports" == "motor-sports"
- */
+/** Canonical tag key */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -23,9 +18,7 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-/**
- * Slug for URL
- */
+/** URL slug from canonical key */
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -35,25 +28,22 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
-/**
- * Pretty label
- */
+/** Display label */
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
   return s
     .split(" ")
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .filter(Boolean)
+    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
     .join(" ");
 }
 
-/**
- * Safe date getter
- */
+/** Build-safe date getter */
 function getPostDate(post) {
   const d =
-    post?.data?.pubDate ??
     post?.data?.date ??
+    post?.data?.pubDate ??
     post?.data?.published ??
     post?.data?.updated ??
     null;
@@ -62,170 +52,98 @@ function getPostDate(post) {
   return dt && !Number.isNaN(dt.getTime()) ? dt : null;
 }
 
-/**
- * Sort newest first
- */
-function sortNewestFirst(a, b) {
-  return (getPostDate(b)?.getTime() ?? 0) - (getPostDate(a)?.getTime() ?? 0);
-}
-
-const all = await getCollection("posts");
-
-const posts = all
+const posts = (await getCollection("posts"))
   .filter(isDaytonaPost)
-  .sort(sortNewestFirst);
+  .sort((a, b) => {
+    const da = getPostDate(a)?.getTime() ?? 0;
+    const db = getPostDate(b)?.getTime() ?? 0;
+    return db - da;
+  });
 
-const title = "Posts";
+const title = "Latest Posts";
 ---
 
-<Base
-  title={`${title} | GoDo Daytona`}
-  description="Latest GoDo Daytona posts"
->
+<Base title={`${title} | GoDo Daytona`} description="Latest GoDo Daytona posts.">
   <main class="container">
     <header class="page-header">
-      <p class="kicker">
-        <a href="/daytona/">GoDo Daytona</a> / Posts
-      </p>
-      <h1>Latest Posts</h1>
+      <p class="kicker"><a href="/daytona/">GoDo Daytona</a> / Posts</p>
+      <h1>{title}</h1>
       <p class="meta">{posts.length} total</p>
     </header>
 
-    {posts.length === 0 ? (
-      <p>No posts yet.</p>
-    ) : (
-      <ul class="post-list">
-        {posts.map((p) => {
-          const d = getPostDate(p);
-          const dateText = d
-            ? d.toLocaleDateString("en-US", {
-                year: "numeric",
-                month: "short",
-                day: "numeric",
-              })
-            : "";
+    <ul class="post-list">
+      {posts.map((p) => {
+        const d = getPostDate(p);
+        const dateText = d
+          ? d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+          : "";
 
-          // Tags for this post
-          const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
-          const tagKeys = Array.from(
-            new Set(rawTags.map(tagKey).filter(Boolean))
-          );
+        // tags -> yellow pills
+        const rawTags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
+        const uniqueKeys = Array.from(new Set(rawTags.map(tagKey).filter(Boolean)));
+        const tagItems = uniqueKeys.map((key) => ({
+          key,
+          slug: tagSlugFromKey(key),
+          label: tagLabelFromKey(key),
+        }));
 
-          const tagLinks = tagKeys.map((k) => ({
-            label: tagLabelFromKey(k),
-            slug: tagSlugFromKey(k),
-          }));
+        return (
+          <li class="post-item">
+            <a class="post-link" href={`/daytona/posts/${p.slug}/`}>
+              <div class="post-title">{p.data.title}</div>
+              {p.data.description ? <div class="post-desc">{p.data.description}</div> : null}
+              {dateText ? <div class="post-date">{dateText}</div> : null}
+            </a>
 
-          return (
-            <li class="post-card">
-              <a class="post-link" href={`/daytona/posts/${p.slug}/`}>
-                <div class="post-title">{p.data.title}</div>
-                {p.data.description && (
-                  <div class="post-desc">{p.data.description}</div>
-                )}
-                {dateText && <div class="post-date">{dateText}</div>}
-              </a>
-
-              {/* ✅ Topic links under the post */}
-              {tagLinks.length > 0 && (
-                <div class="post-tags">
-                  {tagLinks.map((t, i) => (
-                    <>
-                      <a class="tag-pill" href={`/daytona/topic/${t.slug}/`}>
-                        {t.label}
-                      </a>
-                      {i < tagLinks.length - 1 && (
-                        <span class="dot">·</span>
-                      )}
-                    </>
-                  ))}
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-    )}
+            {tagItems.length > 0 ? (
+              <div class="tagRow">
+                {tagItems.map((t) => (
+                  <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
+                ))}
+              </div>
+            ) : null}
+          </li>
+        );
+      })}
+    </ul>
   </main>
 
   <style>
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-      padding: 24px;
-    }
+    .container { max-width: 900px; margin: 0 auto; padding: 24px; }
+    .kicker { margin: 0 0 8px; opacity: 0.8; }
+    .page-header h1 { margin: 0 0 8px; }
+    .meta { margin: 0 0 24px; opacity: 0.8; }
 
-    .kicker {
-      margin: 0 0 8px;
-      opacity: 0.8;
-    }
+    .post-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+    .post-item { border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px; }
 
-    .meta {
-      opacity: 0.75;
-      margin-bottom: 22px;
-    }
+    .post-link { display: block; text-decoration: none; }
+    .post-title { font-weight: 800; font-size: 16px; }
+    .post-desc { margin-top: 6px; opacity: 0.85; }
+    .post-date { margin-top: 10px; opacity: 0.65; font-size: 0.95em; }
 
-    .post-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: grid;
-      gap: 16px;
-    }
+    .tagRow { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; }
 
-    .post-card {
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.02);
-    }
-
-    .post-link {
-      text-decoration: none;
-      display: block;
-    }
-
-    .post-title {
-      font-weight: 800;
-      font-size: 18px;
-      margin-bottom: 6px;
-    }
-
-    .post-desc {
-      opacity: 0.85;
-      margin-bottom: 8px;
-    }
-
-    .post-date {
-      opacity: 0.6;
-      font-size: 0.95em;
-    }
-
-    /* ✅ Tag row */
-    .post-tags {
-      margin-top: 10px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
+    /* Yellow rounded topic pills (Subscribe vibe) */
+    .topicPill {
+      display: inline-flex;
       align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border-radius: 999px;
       font-size: 13px;
-      opacity: 0.9;
-    }
-
-    .tag-pill {
+      font-weight: 900;
+      letter-spacing: .02em;
       text-decoration: none;
-      font-weight: 600;
-      opacity: 0.85;
+
+      color: #111;
+      background: rgba(255, 220, 80, 0.95);
+      border: 1px solid rgba(255, 220, 80, 0.95);
+
+      transition: transform .08s ease, filter .12s ease, opacity .12s ease;
     }
 
-    .tag-pill:hover {
-      opacity: 1;
-      text-decoration: underline;
-    }
-
-    .dot {
-      opacity: 0.5;
-      padding: 0 4px;
-    }
+    .topicPill:hover { transform: translateY(-1px); filter: brightness(1.02); }
+    .topicPill:active { transform: translateY(0px); opacity: .92; }
   </style>
 </Base>
