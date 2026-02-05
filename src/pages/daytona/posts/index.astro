@@ -118,32 +118,95 @@ const title = "Latest Posts";
     .post-item { border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 16px; }
 
     .post-link { display: block; text-decoration: none; }
-    .post-title { font-weight: 800; font-size: 16px; }
-    .post-desc { margin-top: 6px; opacity: 0.85; }
-    .post-date { margin-top: 10px; opacity: 0.65; font-size: 0.95em; }
+     <style>
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px;
+    }
 
-    .tagRow { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; }
+    .kicker {
+      margin: 0 0 8px;
+      opacity: 0.8;
+    }
 
-    /* Yellow rounded topic pills (Subscribe vibe) */
+    .post-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 14px;
+    }
+
+    .post-item {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .post-link {
+      display: block;
+      text-decoration: none;
+    }
+
+    /* ✅ Post titles ~15% larger */
+    .post-title {
+      font-weight: 800;
+      font-size: 18.5px; /* was 16px */
+      margin: 0;
+    }
+
+    .post-desc {
+      margin-top: 6px;
+      opacity: 0.85;
+    }
+
+    .post-date {
+      margin-top: 10px;
+      opacity: 0.65;
+      font-size: 0.95em;
+    }
+
+    /* ✅ Tag row spacing */
+    .tagRow {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    /* ✅ Smaller + faded yellow pills */
     .topicPill {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 8px 12px;
+
+      padding: 5px 9px; /* smaller */
       border-radius: 999px;
-      font-size: 13px;
-      font-weight: 900;
-      letter-spacing: .02em;
+
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+
       text-decoration: none;
-
       color: #111;
-      background: rgba(255, 220, 80, 0.95);
-      border: 1px solid rgba(255, 220, 80, 0.95);
 
-      transition: transform .08s ease, filter .12s ease, opacity .12s ease;
+      /* Yellow faded about 30% */
+      background: rgba(255, 220, 80, 0.65);
+      border: 1px solid rgba(255, 220, 80, 0.55);
+
+      transition: transform 0.08s ease, filter 0.12s ease,
+        opacity 0.12s ease;
     }
 
-    .topicPill:hover { transform: translateY(-1px); filter: brightness(1.02); }
-    .topicPill:active { transform: translateY(0px); opacity: .92; }
+    .topicPill:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+    }
+
+    .topicPill:active {
+      transform: translateY(0px);
+      opacity: 0.9;
+    }
   </style>
 </Base>
