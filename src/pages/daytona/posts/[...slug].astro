@@ -3,8 +3,8 @@ import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
- * Keep this in the SAME frontmatter block as getStaticPaths().
+ * Helpers (safe for normal page logic)
+ * We'll intentionally NOT use these inside getStaticPaths() to avoid Cloudflare/Astro scope weirdness.
  */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
@@ -12,9 +12,6 @@ function isDaytonaPost(post) {
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/**
- * Featured flag normalization
- */
 function isFeatured(post) {
   const v = post?.data?.featured;
   if (v === true) return true;
@@ -23,9 +20,6 @@ function isFeatured(post) {
   return s === "true" || s === "yes" || s === "1";
 }
 
-/**
- * Canonical Tag Normalization (build-safe)
- */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -53,10 +47,6 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-/**
- * Safe date getter (fallback order)
- * (Return value can be string/Date — we normalize where used.)
- */
 function getPostDate(post) {
   return (
     post?.data?.pubDate ??
@@ -74,7 +64,7 @@ function sortNewestFirst(a, b) {
 }
 
 /**
- * Related posts logic (STABLE)
+ * Related posts (STABLE)
  */
 const RELATED_LIMIT = 3;
 const MAX_FEATURED_IN_RELATED = 1;
@@ -129,11 +119,25 @@ function buildRelatedPosts(currentPost, allCityPosts) {
 }
 
 /**
- * getStaticPaths (build-safe)
+ * ✅ getStaticPaths — DO NOT reference helpers here.
+ * Inline everything to avoid “X is not defined” build failures on Cloudflare.
  */
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
-  const daytonaPosts = posts.filter(isDaytonaPost).sort(sortNewestFirst);
+
+  const daytonaPosts = posts
+    .filter((post) => {
+      const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+      if (city === "daytona") return true;
+      return typeof post?.id === "string" && post.id.startsWith("daytona/");
+    })
+    .sort((a, b) => {
+      const aDate =
+        a?.data?.pubDate ?? a?.data?.date ?? a?.data?.published ?? a?.data?.updated ?? 0;
+      const bDate =
+        b?.data?.pubDate ?? b?.data?.date ?? b?.data?.published ?? b?.data?.updated ?? 0;
+      return new Date(bDate).getTime() - new Date(aDate).getTime();
+    });
 
   return daytonaPosts.map((post) => ({
     params: { slug: post.slug },
@@ -149,11 +153,11 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDo Daytona post";
 const { Content } = await post.render();
 
-// For related lookup
+// Related lookup set
 const all = await getCollection("posts");
 const daytonaPosts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
-// Tag pills for THIS post
+// Tag pills
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 const tagItems = Array.from(uniqueKeySet).map((key) => ({
@@ -162,7 +166,7 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
   slug: tagSlugFromKey(key),
 }));
 
-// Related posts (cap + de-dupe)
+// Related posts
 const relatedAll = buildRelatedPosts(post, daytonaPosts);
 const seen = new Set();
 const deduped = relatedAll.filter((p) => {
@@ -175,7 +179,7 @@ const relatedPosts = [
   ...deduped.filter((p) => !isFeatured(p)),
 ].slice(0, 3);
 
-// Date display (safe)
+// Date display
 const pub = getPostDate(post);
 const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
 ---
@@ -192,6 +196,7 @@ const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
       {isFeatured(post) && <span class="featuredPill">FEATURED</span>}
     </p>
 
+    {/* ✅ Yellow rounded topic pills */}
     {tagItems.length > 0 && (
       <div class="tagRow">
         {tagItems.map((t) => (
