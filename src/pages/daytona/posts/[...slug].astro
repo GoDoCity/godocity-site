@@ -29,12 +29,10 @@ function isFeatured(post) {
 }
 
 /**
- * Rule A — Canonical Tag Normalization
+ * Canonical Tag Normalization
  * - case-insensitive
- * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
+ * - treats "motor sports", "motor-sports", "Motor Sports" as same tag
  */
-
-// canonical key for comparison/grouping
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -43,7 +41,6 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-// URL slug from canonical key
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -53,7 +50,6 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
-// Display label from canonical key (Title Case)
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
@@ -67,27 +63,23 @@ function tagLabelFromKey(key) {
  * Safe date getter (fallback order)
  */
 function getPostDate(post) {
-  return (
+  const d =
     post?.data?.pubDate ??
     post?.data?.date ??
     post?.data?.published ??
     post?.data?.updated ??
-    null
-  );
+    null;
+
+  const dt = d ? new Date(d) : null;
+  return dt && !Number.isNaN(dt.getTime()) ? dt : null;
 }
 
-/**
- * Sort newest first
- */
 function sortNewestFirst(a, b) {
-  const da = new Date(getPostDate(a) ?? 0).getTime();
-  const db = new Date(getPostDate(b) ?? 0).getTime();
+  const da = getPostDate(a)?.getTime() ?? 0;
+  const db = getPostDate(b)?.getTime() ?? 0;
   return db - da;
 }
 
-/**
- * Related posts: score by shared canonical tags, cap, avoid duplicates/self
- */
 /**
  * ================================
  * STABLE – DO NOT MODIFY
@@ -125,23 +117,19 @@ function buildRelatedPosts(currentPost, allCityPosts) {
     .map((p) => {
       const keys = normalizeTags(p);
       const score = sharedTagScore(currentKeys, keys);
-      const date = new Date(getPostDate(p) ?? 0).getTime();
+      const date = getPostDate(p)?.getTime() ?? 0;
       return { p, score, date };
     });
 
-  // Sort: highest overlap first, then newest
   candidates.sort((x, y) => {
     if (y.score !== x.score) return y.score - x.score;
     return y.date - x.date;
   });
 
-  // Prefer at least 1 shared tag when possible
   const withOverlap = candidates.filter((c) => c.score > 0).map((c) => c.p);
   const withoutOverlap = candidates.filter((c) => c.score === 0).map((c) => c.p);
-
   let ranked = [...withOverlap, ...withoutOverlap];
 
-  // Prevent featured takeover
   const featured = ranked.filter(isFeatured);
   const nonFeatured = ranked.filter((p) => !isFeatured(p));
 
@@ -149,7 +137,6 @@ function buildRelatedPosts(currentPost, allCityPosts) {
   result.push(...featured.slice(0, MAX_FEATURED_IN_RELATED));
   result.push(...nonFeatured.slice(0, RELATED_LIMIT - result.length));
 
-  // Fill if still short
   const remaining = ranked.filter((p) => !result.some((r) => r.slug === p.slug));
   result.push(...remaining.slice(0, RELATED_LIMIT - result.length));
 
@@ -160,17 +147,16 @@ export async function getStaticPaths() {
   const posts = await getCollection("posts");
 
   const daytonaPosts = posts
-  .filter((post) => {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase();
-    if (city === "daytona") return true;
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  })
-  .sort((a, b) => {
-  const da = new Date(a?.data?.pubDate ?? a?.data?.updated ?? a?.data?.published ?? 0).getTime();
-  const db = new Date(b?.data?.pubDate ?? b?.data?.updated ?? b?.data?.published ?? 0).getTime();
-  return db - da;
-});
-
+    .filter((post) => {
+      const city = String(post?.data?.city ?? "daytona").toLowerCase();
+      if (city === "daytona") return true;
+      return typeof post?.id === "string" && post.id.startsWith("daytona/");
+    })
+    .sort((a, b) => {
+      const da = getPostDate(a)?.getTime() ?? 0;
+      const db = getPostDate(b)?.getTime() ?? 0;
+      return db - da;
+    });
 
   return daytonaPosts.map((post) => ({
     params: { slug: post.slug },
@@ -183,11 +169,10 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDoDaytona post";
 const { Content } = await post.render();
 
-// Daytona posts list for related lookup
 const all = await getCollection("posts");
 const daytonaPosts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
-// normalize tags for display + URL
+// Tag pills for this post
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 
@@ -197,10 +182,8 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
   slug: tagSlugFromKey(key),
 }));
 
-// Build related posts
+// Related
 const relatedAll = buildRelatedPosts(post, daytonaPosts);
-
-// de-dupe by slug (just in case)
 const seen = new Set();
 const deduped = relatedAll.filter((p) => {
   if (seen.has(p.slug)) return false;
@@ -208,12 +191,14 @@ const deduped = relatedAll.filter((p) => {
   return true;
 });
 
-// Featured first, then non-featured, then cap to 3
 const relatedPosts = [
   ...deduped.filter(isFeatured),
   ...deduped.filter((p) => !isFeatured(p)),
 ].slice(0, 3);
 
+const dateText = getPostDate(post)
+  ? getPostDate(post).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
+  : "";
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
@@ -224,7 +209,7 @@ const relatedPosts = [
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
     <p style="opacity:.6;margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <span>{new Date(post.data.pubDate).toLocaleDateString()}</span>
+      {dateText && <span>{dateText}</span>}
       {isFeatured(post) && (
         <span
           style="
@@ -244,10 +229,11 @@ const relatedPosts = [
       )}
     </p>
 
+    {/* ✅ Yellow topic pills inside article page */}
     {tagItems.length > 0 && (
-      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:10px;">
+      <div class="tag-row">
         {tagItems.map((t) => (
-          <a class="pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
+          <a class="tag-pill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
         ))}
       </div>
     )}
@@ -265,7 +251,7 @@ const relatedPosts = [
             const t = p.data.title ?? p.slug;
             const desc = p.data.description ?? "";
             const d = getPostDate(p);
-            const dateText = d ? new Date(d).toLocaleDateString() : "";
+            const relDateText = d ? d.toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "";
 
             return (
               <a href={`/daytona/posts/${p.slug}/`} style="text-decoration:none;display:block;">
@@ -281,7 +267,7 @@ const relatedPosts = [
                     <div>
                       <div style="font-weight:800;font-size:16px;line-height:1.25">{t}</div>
                       {desc && <div style="opacity:.82;margin-top:6px">{desc}</div>}
-                      {dateText && <div style="opacity:.6;margin-top:8px">{dateText}</div>}
+                      {relDateText && <div style="opacity:.6;margin-top:8px">{relDateText}</div>}
                     </div>
 
                     {isFeatured(p) && (
@@ -311,8 +297,39 @@ const relatedPosts = [
     )}
 
     <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
-      <a class="pill" href="/daytona/posts/">← All posts</a>
-      <a class="pill" href="/daytona/topics/">Topics</a>
+      <a class="tag-pill" href="/daytona/posts/">← All posts</a>
+      <a class="tag-pill" href="/daytona/topics/">Topics</a>
     </p>
   </div>
 </section>
+
+<style>
+  /* Yellow pill styling — matches Subscribe vibe */
+  .tag-row {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .tag-pill {
+    display: inline-block;
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+
+    background: rgba(255, 220, 80, 0.92);
+    color: #111;
+
+    border: 1px solid rgba(255, 220, 80, 0.85);
+    transition: all 0.15s ease;
+  }
+
+  .tag-pill:hover {
+    background: rgba(255, 220, 80, 1);
+    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(255, 220, 80, 0.25);
+  }
+</style>
