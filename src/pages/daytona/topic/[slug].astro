@@ -3,9 +3,7 @@ import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Canonical Tag Normalization
- * - case-insensitive
- * - treats "motor sports", "motor-sports", "Motor_Sports" as the same
+ * Helpers (safe to use in page render)
  */
 function tagKey(raw) {
   return String(raw ?? "")
@@ -51,9 +49,8 @@ function sortNewestFirst(a, b) {
 }
 
 /**
- * ✅ getStaticPaths — BUILD-SAFE
- * IMPORTANT: do NOT call external helpers here.
- * Inline the Daytona filter to avoid Cloudflare scope weirdness.
+ * ✅ getStaticPaths — SUPER BUILD-SAFE
+ * No helper references whatsoever inside this function.
  */
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
@@ -65,12 +62,29 @@ export async function getStaticPaths() {
     return typeof post?.id === "string" && post.id.startsWith("daytona/");
   });
 
-  // collect unique canonical tag keys
+  // tagKey inline (DO NOT reference outer tagKey)
+  const localTagKey = (raw) =>
+    String(raw ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ");
+
+  // slugify inline (DO NOT reference outer tagSlugFromKey)
+  const localSlug = (key) =>
+    String(key ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
   const keySet = new Set();
+
   for (const p of daytonaPosts) {
     const raw = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of raw) {
-      const k = tagKey(t);
+      const k = localTagKey(t);
       if (k) keySet.add(k);
     }
   }
@@ -78,7 +92,7 @@ export async function getStaticPaths() {
   const keys = Array.from(keySet).sort((a, b) => a.localeCompare(b));
 
   return keys.map((key) => ({
-    params: { slug: tagSlugFromKey(key) },
+    params: { slug: localSlug(key) },
     props: { key },
   }));
 }
@@ -143,9 +157,7 @@ const subtitle = `${postsForTopic.length} post${postsForTopic.length === 1 ? "" 
               {/* whole card clickable */}
               <a class="stretched" href={`/daytona/posts/${p.slug}/`} aria-label={t}></a>
 
-              <div class="postTop">
-                <div class="postTitle">{t}</div>
-              </div>
+              <div class="postTitle">{t}</div>
 
               {desc && <div class="postDesc">{desc}</div>}
 
@@ -214,7 +226,7 @@ const subtitle = `${postsForTopic.length} post${postsForTopic.length === 1 ? "" 
     z-index: 1;
   }
   .postItem a.topicPill,
-  .postTop,
+  .postTitle,
   .postDesc,
   .metaRow {
     position: relative;
@@ -230,8 +242,6 @@ const subtitle = `${postsForTopic.length} post${postsForTopic.length === 1 ? "" 
   .postDesc {
     margin-top: 6px;
     opacity: .85;
-
-    /* clamp to 2 lines */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -251,7 +261,7 @@ const subtitle = `${postsForTopic.length} post${postsForTopic.length === 1 ? "" 
     font-size: 0.95em;
   }
 
-  /* Smaller + slightly faded yellow pill */
+  /* Smaller + faded yellow pill */
   .topicPill {
     display: inline-flex;
     align-items: center;
