@@ -2,17 +2,7 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/**
- * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
- * IMPORTANT: must be in the SAME frontmatter block as getStaticPaths().
- */
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
-
-/** Featured flag normalization */
+/* Featured flag normalization */
 function isFeatured(post) {
   const v = post?.data?.featured;
   if (v === true) return true;
@@ -21,7 +11,7 @@ function isFeatured(post) {
   return s === "true" || s === "yes" || s === "1";
 }
 
-/** Canonical tag normalization */
+/* Tag normalization */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -47,7 +37,7 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-/** Safe date getter */
+/* Safe date getter */
 function getPostDate(post) {
   return (
     post?.data?.pubDate ??
@@ -63,7 +53,7 @@ function sortNewestFirst(a, b) {
   return db - da;
 }
 
-/** Related posts logic (stable) */
+/* Related posts */
 const RELATED_LIMIT = 3;
 const MAX_FEATURED_IN_RELATED = 1;
 
@@ -114,10 +104,25 @@ function buildRelatedPosts(currentPost, allCityPosts) {
   return result.slice(0, RELATED_LIMIT);
 }
 
-/** getStaticPaths (build-safe) */
+/* Build-safe getStaticPaths: NO external helper references */
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
-  const daytonaPosts = posts.filter(isDaytonaPost).sort(sortNewestFirst);
+
+  const daytonaPosts = posts
+    .filter((post) => {
+      const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+      if (city === "daytona") return true;
+      return typeof post?.id === "string" && post.id.startsWith("daytona/");
+    })
+    .sort((a, b) => {
+      const da = new Date(
+        a?.data?.pubDate ?? a?.data?.date ?? a?.data?.published ?? a?.data?.updated ?? 0
+      ).getTime();
+      const db = new Date(
+        b?.data?.pubDate ?? b?.data?.date ?? b?.data?.published ?? b?.data?.updated ?? 0
+      ).getTime();
+      return db - da;
+    });
 
   return daytonaPosts.map((post) => ({
     params: { slug: post.slug },
@@ -125,16 +130,22 @@ export async function getStaticPaths() {
   }));
 }
 
-/** Page data */
+/* Page data */
 const { post } = Astro.props;
 const title = post.data.title;
 const subtitle = post.data.description ?? "GoDo Daytona post";
 const { Content } = await post.render();
 
 const all = await getCollection("posts");
-const daytonaPosts = all.filter(isDaytonaPost).sort(sortNewestFirst);
+const daytonaPosts = all
+  .filter((p) => {
+    const city = String(p?.data?.city ?? "daytona").toLowerCase().trim();
+    if (city === "daytona") return true;
+    return typeof p?.id === "string" && p.id.startsWith("daytona/");
+  })
+  .sort(sortNewestFirst);
 
-// tags for THIS post
+// tags for this post
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 const tagItems = Array.from(uniqueKeySet).map((key) => ({
@@ -143,7 +154,7 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
   slug: tagSlugFromKey(key),
 }));
 
-// related
+// related posts
 const relatedAll = buildRelatedPosts(post, daytonaPosts);
 const seen = new Set();
 const deduped = relatedAll.filter((p) => {
@@ -169,7 +180,7 @@ const featured = isFeatured(post);
     <h1 class={`h1 postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    {/* Date + tag pills inline */}
+    <!-- Date + pills inline -->
     <div class="metaRow">
       {pubText && <span class="metaDate">{pubText}</span>}
 
@@ -227,7 +238,7 @@ const featured = isFeatured(post);
 </section>
 
 <style>
-  /* Title: featured posts 15% bigger */
+  /* Featured title 15% larger on article page */
   .postTitle { margin: 0; }
   .postTitle.isFeatured { font-size: calc(1em * 1.15); }
 
@@ -236,7 +247,6 @@ const featured = isFeatured(post);
     line-height: 1.65;
   }
 
-  /* Meta row: date + tags inline */
   .metaRow{
     margin-top: 10px;
     display:flex;
@@ -246,7 +256,6 @@ const featured = isFeatured(post);
     opacity:.82;
   }
   .metaDate{ opacity:.75; }
-
   .metaTags{
     display:inline-flex;
     flex-wrap:wrap;
@@ -254,32 +263,26 @@ const featured = isFeatured(post);
     align-items:center;
   }
 
-  /* Smaller + ~30% faded yellow pills (and force override of global styles) */
+  /* Smaller + faded yellow (~30% down) */
   .metaRow .topicPill{
     display:inline-flex !important;
     align-items:center !important;
     justify-content:center !important;
-    padding: 5px 10px !important;         /* smaller */
+    padding: 5px 10px !important;
     border-radius: 999px !important;
-    font-size: 11px !important;           /* smaller */
+    font-size: 11px !important;
     font-weight: 800 !important;
     letter-spacing: .02em !important;
     text-decoration: none !important;
 
     color: #111 !important;
-    background: rgba(255, 220, 80, 0.65) !important; /* ~30% faded vs .95 */
+    background: rgba(255, 220, 80, 0.65) !important;
     border: 1px solid rgba(255, 220, 80, 0.55) !important;
 
     transition: transform .08s ease, filter .12s ease, opacity .12s ease;
   }
-  .metaRow .topicPill:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.02);
-  }
-  .metaRow .topicPill:active {
-    transform: translateY(0px);
-    opacity: .92;
-  }
+  .metaRow .topicPill:hover { transform: translateY(-1px); filter: brightness(1.02); }
+  .metaRow .topicPill:active { transform: translateY(0px); opacity: .92; }
 
   .featuredPill {
     font-size: 12px;
