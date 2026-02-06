@@ -3,16 +3,6 @@ import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
- * Keep in SAME frontmatter as getStaticPaths.
- */
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
-
-/**
  * Canonical Tag Normalization
  * - case-insensitive
  * - treats "motor sports", "motor-sports", "Motor_Sports" as the same
@@ -25,7 +15,6 @@ function tagKey(raw) {
     .replace(/\s+/g, " ");
 }
 
-// URL slug from canonical key (stable)
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -35,7 +24,6 @@ function tagSlugFromKey(key) {
     .replace(/(^-|-$)/g, "");
 }
 
-// Display label from canonical key (Title Case)
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
@@ -63,14 +51,22 @@ function sortNewestFirst(a, b) {
 }
 
 /**
- * Static paths = all unique topic slugs used by Daytona posts
+ * ✅ getStaticPaths — BUILD-SAFE
+ * IMPORTANT: do NOT call external helpers here.
+ * Inline the Daytona filter to avoid Cloudflare scope weirdness.
  */
 export async function getStaticPaths() {
-  const all = await getCollection("posts");
-  const daytonaPosts = all.filter(isDaytonaPost);
+  const posts = await getCollection("posts");
 
+  // Daytona-only (inline filter)
+  const daytonaPosts = posts.filter((post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  });
+
+  // collect unique canonical tag keys
   const keySet = new Set();
-
   for (const p of daytonaPosts) {
     const raw = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of raw) {
@@ -80,6 +76,7 @@ export async function getStaticPaths() {
   }
 
   const keys = Array.from(keySet).sort((a, b) => a.localeCompare(b));
+
   return keys.map((key) => ({
     params: { slug: tagSlugFromKey(key) },
     props: { key },
@@ -91,15 +88,19 @@ export async function getStaticPaths() {
  */
 const { key } = Astro.props;
 
-// Build list of posts for this topic
 const all = await getCollection("posts");
-const daytonaPosts = all.filter(isDaytonaPost).sort(sortNewestFirst);
+const daytonaPosts = all
+  .filter((post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  })
+  .sort(sortNewestFirst);
 
 const topicKey = String(key ?? "").trim();
 const topicSlug = tagSlugFromKey(topicKey);
 const topicLabel = tagLabelFromKey(topicKey);
 
-// Filter: post must contain this canonical tag key
 const postsForTopic = daytonaPosts.filter((p) => {
   const raw = Array.isArray(p?.data?.tags) ? p.data.tags : [];
   const keys = raw.map(tagKey).filter(Boolean);
@@ -137,9 +138,9 @@ const subtitle = `${postsForTopic.length} post${postsForTopic.length === 1 ? "" 
           const d = getPostDate(p);
           const dateText = d ? new Date(d).toLocaleDateString("en-US") : "";
 
-          // Optional: show THIS topic as a pill next to date (consistent)
           return (
             <li class="postItem">
+              {/* whole card clickable */}
               <a class="stretched" href={`/daytona/posts/${p.slug}/`} aria-label={t}></a>
 
               <div class="postTop">
@@ -150,7 +151,7 @@ const subtitle = `${postsForTopic.length} post${postsForTopic.length === 1 ? "" 
 
               <div class="metaRow">
                 {dateText && <span class="postDate">{dateText}</span>}
-                {/* show the topic pill so users see what they’re browsing */}
+                {/* topic pill stays clickable */}
                 <a class="topicPill" href={`/daytona/topic/${topicSlug}/`}>{topicLabel}</a>
               </div>
             </li>
@@ -202,24 +203,20 @@ const subtitle = `${postsForTopic.length} post${postsForTopic.length === 1 ? "" 
     border-radius: 14px;
     padding: 14px 16px;
     background: rgba(255,255,255,.03);
+    cursor: pointer;
   }
 
-  /* whole card clickable, without breaking pill clicks */
+  /* whole card clickable without breaking pill clicks */
   .stretched {
     position: absolute;
     inset: 0;
     border-radius: 14px;
     z-index: 1;
   }
-
-  /* ensure real interactive elements sit above stretched link */
-  .postItem a.topicPill { position: relative; z-index: 2; }
-
-  .postTop {
-    display: flex;
-    justify-content: space-between;
-    gap: 12px;
-    align-items: flex-start;
+  .postItem a.topicPill,
+  .postTop,
+  .postDesc,
+  .metaRow {
     position: relative;
     z-index: 2;
   }
@@ -233,10 +230,8 @@ const subtitle = `${postsForTopic.length} post${postsForTopic.length === 1 ? "" 
   .postDesc {
     margin-top: 6px;
     opacity: .85;
-    position: relative;
-    z-index: 2;
 
-    /* clamp to 2 lines for clean list */
+    /* clamp to 2 lines */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -250,15 +245,13 @@ const subtitle = `${postsForTopic.length} post${postsForTopic.length === 1 ? "" 
     align-items: center;
     flex-wrap: wrap;
     opacity: .72;
-    position: relative;
-    z-index: 2;
   }
 
   .postDate {
     font-size: 0.95em;
   }
 
-  /* Smaller + slightly faded yellow pill (same vibe as your posts list) */
+  /* Smaller + slightly faded yellow pill */
   .topicPill {
     display: inline-flex;
     align-items: center;
@@ -280,4 +273,3 @@ const subtitle = `${postsForTopic.length} post${postsForTopic.length === 1 ? "" 
     border-color: rgba(255, 220, 80, 0.70);
   }
 </style>
-
