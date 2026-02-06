@@ -3,8 +3,8 @@ import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /**
- * Helpers (safe for normal page logic)
- * We'll intentionally NOT use these inside getStaticPaths() to avoid Cloudflare/Astro scope weirdness.
+ * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
+ * MUST be above getStaticPaths()
  */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
@@ -12,6 +12,9 @@ function isDaytonaPost(post) {
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
+/**
+ * Featured flag normalization
+ */
 function isFeatured(post) {
   const v = post?.data?.featured;
   if (v === true) return true;
@@ -20,6 +23,9 @@ function isFeatured(post) {
   return s === "true" || s === "yes" || s === "1";
 }
 
+/**
+ * Canonical Tag Normalization (build-safe)
+ */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -47,6 +53,9 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
+/**
+ * Safe date getter (fallback order)
+ */
 function getPostDate(post) {
   return (
     post?.data?.pubDate ??
@@ -64,7 +73,7 @@ function sortNewestFirst(a, b) {
 }
 
 /**
- * Related posts (STABLE)
+ * Related posts logic (stable)
  */
 const RELATED_LIMIT = 3;
 const MAX_FEATURED_IN_RELATED = 1;
@@ -119,25 +128,11 @@ function buildRelatedPosts(currentPost, allCityPosts) {
 }
 
 /**
- * ✅ getStaticPaths — DO NOT reference helpers here.
- * Inline everything to avoid “X is not defined” build failures on Cloudflare.
+ * getStaticPaths (build-safe)
  */
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
-
-  const daytonaPosts = posts
-    .filter((post) => {
-      const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
-      if (city === "daytona") return true;
-      return typeof post?.id === "string" && post.id.startsWith("daytona/");
-    })
-    .sort((a, b) => {
-      const aDate =
-        a?.data?.pubDate ?? a?.data?.date ?? a?.data?.published ?? a?.data?.updated ?? 0;
-      const bDate =
-        b?.data?.pubDate ?? b?.data?.date ?? b?.data?.published ?? b?.data?.updated ?? 0;
-      return new Date(bDate).getTime() - new Date(aDate).getTime();
-    });
+  const daytonaPosts = posts.filter(isDaytonaPost).sort(sortNewestFirst);
 
   return daytonaPosts.map((post) => ({
     params: { slug: post.slug },
@@ -153,11 +148,11 @@ const title = post.data.title;
 const subtitle = post.data.description ?? "GoDo Daytona post";
 const { Content } = await post.render();
 
-// Related lookup set
+// For related lookup
 const all = await getCollection("posts");
 const daytonaPosts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
-// Tag pills
+// Tag pills for THIS post
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 const tagItems = Array.from(uniqueKeySet).map((key) => ({
@@ -166,7 +161,7 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
   slug: tagSlugFromKey(key),
 }));
 
-// Related posts
+// Related posts (cap + de-dupe)
 const relatedAll = buildRelatedPosts(post, daytonaPosts);
 const seen = new Set();
 const deduped = relatedAll.filter((p) => {
@@ -179,7 +174,7 @@ const relatedPosts = [
   ...deduped.filter((p) => !isFeatured(p)),
 ].slice(0, 3);
 
-// Date display
+// Date display (safe)
 const pub = getPostDate(post);
 const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
 ---
@@ -191,19 +186,20 @@ const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
     <h1 class="h1">{title}</h1>
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    <p class="metaRow">
-      {pubText && <span>{pubText}</span>}
-      {isFeatured(post) && <span class="featuredPill">FEATURED</span>}
-    </p>
+    {/* ✅ One row: date + tags inline + featured badge */}
+    <div class="metaRow">
+      {pubText && <span class="postDate">{pubText}</span>}
 
-    {/* ✅ Yellow rounded topic pills */}
-    {tagItems.length > 0 && (
-      <div class="tagRow">
-        {tagItems.map((t) => (
-          <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
-        ))}
-      </div>
-    )}
+      {tagItems.length > 0 && (
+        <span class="tagRow">
+          {tagItems.map((t) => (
+            <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
+          ))}
+        </span>
+      )}
+
+      {isFeatured(post) && <span class="featuredPill">FEATURED</span>}
+    </div>
 
     <article class="postBody">
       <Content />
@@ -248,59 +244,62 @@ const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
 </section>
 
 <style>
-  .metaRow {
-    opacity: .6;
+  /* Row that MUST keep date+tags inline */
+  .metaRow{
     margin-top: 10px;
     display: flex;
-    gap: 10px;
     align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .postBody {
-    margin-top: 18px;
-    line-height: 1.65;
-  }
-
-  .tagRow {
-    margin-top: 12px;
-    display: flex;
-    flex-wrap: wrap;
     gap: 10px;
+    flex-wrap: wrap;
   }
 
-  /* Yellow rounded topic pills (Subscribe vibe) */
-  .topicPill {
+  .postDate{
+    opacity: .75;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  /* Make sure tags don’t break to a “new block” */
+  .tagRow{
     display: inline-flex;
+    flex-wrap: wrap;
+    gap: 8px;
     align-items: center;
-    justify-content: center;
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-size: 13px;
-    font-weight: 900;
-    letter-spacing: .02em;
-    text-decoration: none;
-
-    color: #111;
-    background: rgba(255, 220, 80, 0.95);
-    border: 1px solid rgba(255, 220, 80, 0.95);
-
-    transition: transform .08s ease, filter .12s ease, opacity .12s ease;
   }
 
-  .topicPill:hover {
+  /* ✅ Force smaller + faded yellow (wins over global styles) */
+  .metaRow .topicPill{
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 5px 10px !important;
+    border-radius: 999px !important;
+    font-size: 11px !important;
+    font-weight: 900 !important;
+    letter-spacing: .02em !important;
+    text-decoration: none !important;
+
+    color: #111 !important;
+    background: rgba(255, 220, 80, 0.65) !important; /* faded */
+    border: 1px solid rgba(255, 220, 80, 0.65) !important;
+
+    transition: transform .08s ease, filter .12s ease, opacity .12s ease !important;
+  }
+
+  .metaRow .topicPill:hover{
     transform: translateY(-1px);
-    filter: brightness(1.02);
+    filter: brightness(1.03);
   }
 
-  .topicPill:active {
+  .metaRow .topicPill:active{
     transform: translateY(0px);
     opacity: .92;
   }
 
-  .featuredPill {
-    font-size: 12px;
-    font-weight: 800;
+  .featuredPill{
+    font-size: 11px;
+    font-weight: 900;
     letter-spacing: .04em;
     padding: 6px 10px;
     border-radius: 999px;
@@ -310,7 +309,12 @@ const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
     white-space: nowrap;
   }
 
-  .relatedCard {
+  .postBody{
+    margin-top: 18px;
+    line-height: 1.65;
+  }
+
+  .relatedCard{
     border: 1px solid rgba(255,255,255,.12);
     border-radius: 14px;
     padding: 14px 16px;
