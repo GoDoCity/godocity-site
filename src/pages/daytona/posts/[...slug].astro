@@ -4,7 +4,7 @@ import { getCollection } from "astro:content";
 
 /**
  * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
- * MUST be above getStaticPaths()
+ * IMPORTANT: must be in the SAME frontmatter block as getStaticPaths().
  */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
@@ -12,9 +12,7 @@ function isDaytonaPost(post) {
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/**
- * Featured flag normalization
- */
+/** Featured flag normalization */
 function isFeatured(post) {
   const v = post?.data?.featured;
   if (v === true) return true;
@@ -23,9 +21,7 @@ function isFeatured(post) {
   return s === "true" || s === "yes" || s === "1";
 }
 
-/**
- * Canonical Tag Normalization (build-safe)
- */
+/** Canonical tag normalization */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -33,7 +29,6 @@ function tagKey(raw) {
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ");
 }
-
 function tagSlugFromKey(key) {
   return String(key ?? "")
     .toLowerCase()
@@ -42,7 +37,6 @@ function tagSlugFromKey(key) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }
-
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
@@ -53,9 +47,7 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-/**
- * Safe date getter (fallback order)
- */
+/** Safe date getter */
 function getPostDate(post) {
   return (
     post?.data?.pubDate ??
@@ -65,16 +57,13 @@ function getPostDate(post) {
     null
   );
 }
-
 function sortNewestFirst(a, b) {
   const da = new Date(getPostDate(a) ?? 0).getTime();
   const db = new Date(getPostDate(b) ?? 0).getTime();
   return db - da;
 }
 
-/**
- * Related posts logic (stable)
- */
+/** Related posts logic (stable) */
 const RELATED_LIMIT = 3;
 const MAX_FEATURED_IN_RELATED = 1;
 
@@ -83,7 +72,6 @@ function normalizeTags(post) {
   const keys = raw.map(tagKey).filter(Boolean);
   return Array.from(new Set(keys));
 }
-
 function sharedTagScore(aKeys, bKeys) {
   if (!aKeys.length || !bKeys.length) return 0;
   const set = new Set(aKeys);
@@ -91,7 +79,6 @@ function sharedTagScore(aKeys, bKeys) {
   for (const k of bKeys) if (set.has(k)) score++;
   return score;
 }
-
 function buildRelatedPosts(currentPost, allCityPosts) {
   const currentSlug = currentPost?.slug;
   const currentKeys = normalizeTags(currentPost);
@@ -127,9 +114,7 @@ function buildRelatedPosts(currentPost, allCityPosts) {
   return result.slice(0, RELATED_LIMIT);
 }
 
-/**
- * getStaticPaths (build-safe)
- */
+/** getStaticPaths (build-safe) */
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
   const daytonaPosts = posts.filter(isDaytonaPost).sort(sortNewestFirst);
@@ -140,19 +125,16 @@ export async function getStaticPaths() {
   }));
 }
 
-/**
- * Page data
- */
+/** Page data */
 const { post } = Astro.props;
 const title = post.data.title;
 const subtitle = post.data.description ?? "GoDo Daytona post";
 const { Content } = await post.render();
 
-// For related lookup
 const all = await getCollection("posts");
 const daytonaPosts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
-// Tag pills for THIS post
+// tags for THIS post
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 const tagItems = Array.from(uniqueKeySet).map((key) => ({
@@ -161,7 +143,7 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
   slug: tagSlugFromKey(key),
 }));
 
-// Related posts (cap + de-dupe)
+// related
 const relatedAll = buildRelatedPosts(post, daytonaPosts);
 const seen = new Set();
 const deduped = relatedAll.filter((p) => {
@@ -174,31 +156,32 @@ const relatedPosts = [
   ...deduped.filter((p) => !isFeatured(p)),
 ].slice(0, 3);
 
-// Date display (safe)
+// date display
 const pub = getPostDate(post);
 const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
+const featured = isFeatured(post);
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
 
 <section class="section">
   <div class="container" style="max-width: 780px;">
-    <h1 class="h1">{title}</h1>
+    <h1 class={`h1 postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    {/* ✅ One row: date + tags inline + featured badge */}
+    {/* Date + tag pills inline */}
     <div class="metaRow">
-      {pubText && <span class="postDate">{pubText}</span>}
+      {pubText && <span class="metaDate">{pubText}</span>}
 
       {tagItems.length > 0 && (
-        <span class="tagRow">
+        <span class="metaTags" aria-label="Topics">
           {tagItems.map((t) => (
             <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
           ))}
         </span>
       )}
 
-      {isFeatured(post) && <span class="featuredPill">FEATURED</span>}
+      {featured && <span class="featuredPill">FEATURED</span>}
     </div>
 
     <article class="postBody">
@@ -244,62 +227,63 @@ const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
 </section>
 
 <style>
-  /* Row that MUST keep date+tags inline */
+  /* Title: featured posts 15% bigger */
+  .postTitle { margin: 0; }
+  .postTitle.isFeatured { font-size: calc(1em * 1.15); }
+
+  .postBody {
+    margin-top: 18px;
+    line-height: 1.65;
+  }
+
+  /* Meta row: date + tags inline */
   .metaRow{
     margin-top: 10px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex-wrap: wrap;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    opacity:.82;
+  }
+  .metaDate{ opacity:.75; }
+
+  .metaTags{
+    display:inline-flex;
+    flex-wrap:wrap;
+    gap:8px;
+    align-items:center;
   }
 
-  .postDate{
-    opacity: .75;
-    font-weight: 700;
-    white-space: nowrap;
-  }
-
-  /* Make sure tags don’t break to a “new block” */
-  .tagRow{
-    display: inline-flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-  }
-
-  /* ✅ Force smaller + faded yellow (wins over global styles) */
+  /* Smaller + ~30% faded yellow pills (and force override of global styles) */
   .metaRow .topicPill{
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-
-    padding: 5px 10px !important;
+    display:inline-flex !important;
+    align-items:center !important;
+    justify-content:center !important;
+    padding: 5px 10px !important;         /* smaller */
     border-radius: 999px !important;
-    font-size: 11px !important;
-    font-weight: 900 !important;
+    font-size: 11px !important;           /* smaller */
+    font-weight: 800 !important;
     letter-spacing: .02em !important;
     text-decoration: none !important;
 
     color: #111 !important;
-    background: rgba(255, 220, 80, 0.65) !important; /* faded */
-    border: 1px solid rgba(255, 220, 80, 0.65) !important;
+    background: rgba(255, 220, 80, 0.65) !important; /* ~30% faded vs .95 */
+    border: 1px solid rgba(255, 220, 80, 0.55) !important;
 
-    transition: transform .08s ease, filter .12s ease, opacity .12s ease !important;
+    transition: transform .08s ease, filter .12s ease, opacity .12s ease;
   }
-
-  .metaRow .topicPill:hover{
+  .metaRow .topicPill:hover {
     transform: translateY(-1px);
-    filter: brightness(1.03);
+    filter: brightness(1.02);
   }
-
-  .metaRow .topicPill:active{
+  .metaRow .topicPill:active {
     transform: translateY(0px);
     opacity: .92;
   }
 
-  .featuredPill{
-    font-size: 11px;
-    font-weight: 900;
+  .featuredPill {
+    font-size: 12px;
+    font-weight: 800;
     letter-spacing: .04em;
     padding: 6px 10px;
     border-radius: 999px;
@@ -309,12 +293,7 @@ const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
     white-space: nowrap;
   }
 
-  .postBody{
-    margin-top: 18px;
-    line-height: 1.65;
-  }
-
-  .relatedCard{
+  .relatedCard {
     border: 1px solid rgba(255,255,255,.12);
     border-radius: 14px;
     padding: 14px 16px;
