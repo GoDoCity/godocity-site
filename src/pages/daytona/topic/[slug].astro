@@ -90,19 +90,40 @@ function excerpt(post) {
  */
 export async function getStaticPaths() {
   const all = await getCollection("posts");
-  const daytona = all.filter(isDaytonaPost);
 
+  // Build-safe Daytona filter (no external helper references)
+  const daytona = all.filter((post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  });
+
+  // Build topic keys directly (no helper references)
   const set = new Set();
   for (const p of daytona) {
     const tags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of tags) {
-      const k = tagKey(t);
+      const k = String(t ?? "")
+        .toLowerCase()
+        .trim()
+        .replace(/[-_]+/g, " ")
+        .replace(/\s+/g, " ");
       if (k) set.add(k);
     }
   }
 
+  // Slugify directly (no helper references)
+  function tagSlugFromKeyLocal(key) {
+    return String(key ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  }
+
   return Array.from(set).map((key) => ({
-    params: { slug: tagSlugFromKey(key) },
+    params: { slug: tagSlugFromKeyLocal(key) },
     props: { topicKey: key },
   }));
 }
