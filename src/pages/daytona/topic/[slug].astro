@@ -86,23 +86,50 @@ function excerpt(post) {
 
 /**
  * getStaticPaths: build all topic pages from unique tag keys
- * (uses ONLY locally defined helpers)
+ * IMPORTANT: inline helpers used here so Cloudflare/Astro build never breaks with "not defined"
+ * Logic/output is identical to before.
  */
 export async function getStaticPaths() {
+  // Inline Daytona filter (same logic as isDaytonaPost)
+  function _isDaytonaPost(post) {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  }
+
+  // Inline tag normalizer (same logic as tagKey)
+  function _tagKey(raw) {
+    return String(raw ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ");
+  }
+
+  // Inline slug builder (same logic as tagSlugFromKey)
+  function _tagSlugFromKey(key) {
+    return String(key ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+  }
+
   const all = await getCollection("posts");
-  const daytona = all.filter(isDaytonaPost);
+  const daytona = all.filter(_isDaytonaPost);
 
   const set = new Set();
   for (const p of daytona) {
     const tags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of tags) {
-      const k = tagKey(t);
+      const k = _tagKey(t);
       if (k) set.add(k);
     }
   }
 
   return Array.from(set).map((key) => ({
-    params: { slug: tagSlugFromKey(key) },
+    params: { slug: _tagSlugFromKey(key) },
     props: { topicKey: key },
   }));
 }
@@ -132,7 +159,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 <section class="section">
   <div class="container topicShell">
     <div class="topicMain">
-      <!-- Decision #1: NO "TOPIC" kicker, only the big topic name -->
       <div class="topicHeader">
         <h1 class="topicTitle">{topicLabel}</h1>
         <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
@@ -191,7 +217,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
       </p>
     </div>
 
-    {/* Sidebar: standardized wrapper + module classes (no hunting class names) */}
     <aside class="topicSidebar">
       <div class="moduleCard newsletterCard card">
         <div class="moduleHeader">
@@ -245,9 +270,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 </section>
 
 <style>
-  /* =========================
-     Premium card system (v2)
-     ========================= */
   :global(:root) {
     --card-radius: 18px;
     --card-border: rgba(255,255,255,.10);
@@ -266,7 +288,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     --text-faint: rgba(255,255,255,.58);
   }
 
-  /* Shell layout */
   .topicShell {
     max-width: 1120px;
     display: grid;
@@ -296,7 +317,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     }
   }
 
-  /* Shared card behavior */
   .card {
     border-radius: var(--card-radius);
     border: 1px solid var(--card-border-soft);
@@ -312,9 +332,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     box-shadow: var(--card-shadow-hover);
   }
 
-  /* Header */
   .topicHeader {
-    margin-bottom: 18px; /* more air before hero */
+    margin-bottom: 18px;
   }
   .topicTitle {
     margin: 10px 0 6px 0;
@@ -330,9 +349,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     color: var(--text-soft);
   }
 
-  /* =========================
-     Hero (magazine-like)
-     ========================= */
   .heroCard {
     display: grid;
     grid-template-columns: 1.15fr 1fr;
@@ -340,7 +356,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     overflow: hidden;
     text-decoration: none;
     cursor: pointer;
-    margin: 0 0 18px; /* more air before list */
+    margin: 0 0 18px;
   }
   .heroMedia {
     position: relative;
@@ -350,7 +366,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     width: 100%;
     height: 100%;
     display: block;
-    /* Taller than 16:9 */
     aspect-ratio: 3 / 2;
     object-fit: cover;
     transform: scale(1.01);
@@ -397,23 +412,14 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   }
 
   @media (max-width: 860px) {
-    .heroCard {
-      grid-template-columns: 1fr;
-    }
-    .heroBody {
-      padding: 16px 16px 14px;
-    }
-    .heroImg {
-      aspect-ratio: 16 / 10; /* still a touch taller than 16:9 on mobile */
-    }
+    .heroCard { grid-template-columns: 1fr; }
+    .heroBody { padding: 16px 16px 14px; }
+    .heroImg { aspect-ratio: 16 / 10; }
   }
 
-  /* =========================
-     List rows (NOOGAtoday-ish)
-     ========================= */
   .list {
     display: grid;
-    gap: 12px; /* slightly more separation */
+    gap: 12px;
     margin-top: 2px;
   }
 
@@ -436,18 +442,14 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     background: rgba(255,255,255,.03);
     flex: 0 0 auto;
   }
-  .rowThumbPlaceholder {
-    background: rgba(255,255,255,.02);
-  }
+  .rowThumbPlaceholder { background: rgba(255,255,255,.02); }
 
-  .rowText {
-    min-width: 0;
-  }
+  .rowText { min-width: 0; }
 
   .rowTitle {
     font-weight: 900;
-    font-size: 17px;       /* slightly larger */
-    line-height: 1.18;     /* tighter */
+    font-size: 17px;
+    line-height: 1.18;
     letter-spacing: -0.01em;
     color: var(--text-strong);
   }
@@ -484,16 +486,9 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     .rowTitle { font-size: 16px; }
   }
 
-  /* =========================
-     Sidebar modules (balanced)
-     ========================= */
-  .moduleCard {
-    padding: 18px;
-  }
+  .moduleCard { padding: 18px; }
 
-  .moduleHeader {
-    margin-bottom: 12px;
-  }
+  .moduleHeader { margin-bottom: 12px; }
   .moduleTitle {
     font-weight: 950;
     font-size: 16px;
@@ -508,9 +503,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     font-size: 13.5px;
   }
 
-  /* Newsletter */
   .newsletterCard {
-    min-height: 260px; /* helps balance with hero presence */
+    min-height: 260px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
@@ -556,10 +550,9 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     color: var(--text-faint);
   }
 
-  /* Events widget */
   .eventsCard .moduleHeader {
     padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255,255,255,.08); /* subtle divider module feel */
+    border-bottom: 1px solid rgba(255,255,255,.08);
     margin-bottom: 12px;
   }
   .eventsList {
@@ -620,7 +613,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   }
   .moduleLink:hover { filter: brightness(1.05); }
 
-  /* Nav pills area */
   .topicNav {
     margin-top: 18px;
     display: flex;
@@ -628,7 +620,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     flex-wrap: wrap;
   }
 
-  /* Accessibility helper */
   .srOnly {
     position: absolute;
     width: 1px;
