@@ -2,20 +2,14 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/**
- * Daytona filter (supports both explicit frontmatter city and legacy folder IDs)
- */
+/** Daytona filter */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/**
- * Canonical Tag Normalization (build-safe)
- * - case-insensitive
- * - treats "motor sports", "motor-sports", "Motor Sports" as the same tag
- */
+/** Tag normalization */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -43,164 +37,76 @@ function tagLabelFromKey(key) {
     .join(" ");
 }
 
-/**
- * Safe date getter (fallback order)
- */
-function getPostDate(post) {
-  return (
-    post?.data?.pubDate ??
-    post?.data?.date ??
-    post?.data?.published ??
-    post?.data?.updated ??
-    null
-  );
-}
-
-/**
- * Sort newest first
- */
-function sortNewestFirst(a, b) {
-  const da = new Date(getPostDate(a) ?? 0).getTime();
-  const db = new Date(getPostDate(b) ?? 0).getTime();
-  return db - da;
-}
-
-/**
- * Build Topic Map: { key -> { key, slug, label, count } }
- */
-function buildTopicItems(posts) {
-  const map = new Map();
-
-  for (const post of posts) {
-    const raw = Array.isArray(post?.data?.tags) ? post.data.tags : [];
-    const keys = Array.from(new Set(raw.map(tagKey).filter(Boolean))); // de-dupe within post
-
-    for (const k of keys) {
-      if (!map.has(k)) {
-        map.set(k, {
-          key: k,
-          slug: tagSlugFromKey(k),
-          label: tagLabelFromKey(k),
-          count: 0,
-          latestTs: 0,
-        });
-      }
-      const item = map.get(k);
-      item.count += 1;
-
-      const ts = new Date(getPostDate(post) ?? 0).getTime();
-      if (ts > item.latestTs) item.latestTs = ts;
-    }
-  }
-
-  // Sort: most recent activity first, then count, then alpha
-  const items = Array.from(map.values());
-  items.sort((a, b) => {
-    if (b.latestTs !== a.latestTs) return b.latestTs - a.latestTs;
-    if (b.count !== a.count) return b.count - a.count;
-    return a.label.localeCompare(b.label);
-  });
-
-  return items;
-}
-
 const all = await getCollection("posts");
-const daytonaPosts = all.filter(isDaytonaPost).sort(sortNewestFirst);
-const topics = buildTopicItems(daytonaPosts);
+const daytona = all.filter(isDaytonaPost);
 
-const title = "Topics";
-const subtitle = "Browse posts by topic";
+const counts = new Map();
+for (const p of daytona) {
+  const tags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
+  for (const t of tags) {
+    const k = tagKey(t);
+    if (!k) continue;
+    counts.set(k, (counts.get(k) ?? 0) + 1);
+  }
+}
+
+const topics = Array.from(counts.entries())
+  .map(([key, count]) => ({
+    key,
+    count,
+    slug: tagSlugFromKey(key),
+    label: tagLabelFromKey(key),
+  }))
+  .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
 ---
 
-<Base title={title} subtitle={subtitle} cityBase="daytona" />
+<Base title="Topics | GoDo Daytona" subtitle="Browse topics" cityBase="daytona" />
 
 <section class="section">
-  <div class="container" style="max-width: 980px;">
-    <div style="margin-bottom: 8px;">
-      <div style="opacity:.7;font-weight:800;letter-spacing:.08em;font-size:12px;">GODO DAYTONA / TOPICS</div>
-      <h1 class="h1" style="margin-top:8px;">Topics</h1>
-      <div style="opacity:.7;margin-top:6px;">
-        {topics.length} total
-      </div>
+  <div class="container" style="max-width: 780px;">
+    <h1 class="h1">Topics</h1>
+    <p style="opacity:.7;margin-top:6px;">{topics.length} total</p>
+
+    <div class="grid">
+      {topics.map((t) => (
+        <!-- Decision #3: topic detail route is singular -->
+        <a class="topicCard" href={`/daytona/topic/${t.slug}/`}>
+          <div class="topicName">{t.label}</div>
+          <div class="topicCount">{t.count} post{t.count === 1 ? "" : "s"}</div>
+        </a>
+      ))}
     </div>
 
-    {topics.length > 0 ? (
-      <div class="topicGrid" aria-label="Topics">
-        {topics.map((t) => (
-          <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>
-            <span class="topicLabel">{t.label}</span>
-            <span class="topicCount">{t.count}</span>
-          </a>
-        ))}
-      </div>
-    ) : (
-      <div style="opacity:.75;margin-top:14px;">
-        No topics yet. Add <code>tags</code> to a post’s frontmatter to populate this page.
-      </div>
-    )}
-
-    <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
-      <a class="pill" href="/daytona/posts/">← Posts</a>
-      <a class="pill" href="/daytona/">Home</a>
+    <p style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+      <a class="pill" href="/daytona/posts/">← Latest posts</a>
     </p>
   </div>
 </section>
 
 <style>
-  /* Responsive pill grid */
-  .topicGrid {
+  .grid {
     margin-top: 14px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  @media (max-width: 560px) {
+    .grid { grid-template-columns: 1fr; }
   }
 
-  /* Faded yellow pills (small) */
-  .topicPill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-
-    padding: 6px 10px;
-    border-radius: 999px;
-
+  .topicCard {
     text-decoration: none;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+    border-radius: 14px;
+    padding: 14px;
     cursor: pointer;
-
-    /* ~30% faded vs solid */
-    background: rgba(255, 220, 80, 0.65);
-    border: 1px solid rgba(255, 220, 80, 0.55);
-    color: #111;
-
-    transition: transform 0.08s ease, filter 0.12s ease, opacity 0.12s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
   }
+  .topicCard:hover { background: rgba(255,255,255,.04); }
 
-  .topicPill:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.03);
-  }
-
-  .topicPill:active {
-    transform: translateY(0px);
-    opacity: 0.92;
-  }
-
-  .topicLabel {
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.02em;
-    line-height: 1;
-  }
-
-  .topicCount {
-    font-size: 11px;
-    font-weight: 900;
-    line-height: 1;
-
-    padding: 4px 7px;
-    border-radius: 999px;
-
-    background: rgba(17, 17, 17, 0.14);
-    border: 1px solid rgba(17, 17, 17, 0.12);
-  }
+  .topicName { font-weight: 900; font-size: 16px; line-height: 1.2; }
+  .topicCount { opacity: .7; font-size: 13px; }
 </style>
