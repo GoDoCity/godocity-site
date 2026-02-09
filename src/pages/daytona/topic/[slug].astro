@@ -85,34 +85,48 @@ function excerpt(post) {
 }
 
 /**
- * getStaticPaths: build all topic pages from unique tag keys
- * IMPORTANT: inline the Daytona filter here so Cloudflare builds never break.
- * (Behavior is identical — only the reference is inlined.)
+ * getStaticPaths: MUST be build-safe in Cloudflare.
+ * Make it fully self-contained: no references to helper functions outside this scope.
+ * Behavior stays identical.
  */
 export async function getStaticPaths() {
   const all = await getCollection("posts");
 
+  // inline Daytona filter (same logic)
   const daytona = all.filter((post) => {
     const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
     if (city === "daytona") return true;
     return typeof post?.id === "string" && post.id.startsWith("daytona/");
   });
 
+  // inline tag normalizer (same logic as tagKey)
+  const keyOf = (raw) =>
+    String(raw ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ");
+
+  // inline slugify (same logic as tagSlugFromKey)
+  const slugOf = (key) =>
+    String(key ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
   const set = new Set();
   for (const p of daytona) {
     const tags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of tags) {
-      const k = String(t ?? "")
-        .toLowerCase()
-        .trim()
-        .replace(/[-_]+/g, " ")
-        .replace(/\s+/g, " ");
+      const k = keyOf(t);
       if (k) set.add(k);
     }
   }
 
   return Array.from(set).map((key) => ({
-    params: { slug: tagSlugFromKey(key) },
+    params: { slug: slugOf(key) },
     props: { topicKey: key },
   }));
 }
@@ -251,8 +265,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     --text-color: rgba(255,255,255,.88);
     --meta-color: rgba(255,255,255,.62);
 
-    --space-1: 8px;
-    --space-2: 12px;
     --space-3: 16px;
     --space-4: 22px;
     --space-5: 28px;
@@ -349,7 +361,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     margin-top: var(--space-3);
   }
 
-  /* NOOGAtoday-ish rows: bigger thumbs, tighter alignment */
   .row {
     display: grid;
     grid-template-columns: 148px 1fr;
