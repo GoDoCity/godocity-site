@@ -72,7 +72,7 @@ function postHasTopic(post, topicKey) {
 
 /** Optional hero image field */
 function heroImage(post) {
-  return post?.data?.heroImage ?? "";
+  return String(post?.data?.heroImage ?? "").trim();
 }
 
 function dateText(post) {
@@ -133,41 +133,54 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   <div class="container" style="max-width: 780px;">
 
     <!-- Decision #1: NO "TOPIC" kicker, only the big topic name -->
-    <div class="topicHeader">
+    <header class="topicHeader">
       <h1 class="topicTitle">{topicLabel}</h1>
       <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
-    </div>
+    </header>
 
     {hero && (
-      <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
-        {heroImage(hero) && (
-          <img
-            class="heroImg"
-            src={heroImage(hero)}
-            alt={hero.data.title ?? "Hero image"}
-            loading="lazy"
-            decoding="async"
-          />
-        )}
+      <a class="heroModule" href={`/daytona/posts/${hero.slug}/`} aria-label={`Open post: ${hero.data.title ?? hero.slug}`}>
+        <div class="heroInner">
+          {heroImage(hero) ? (
+            <img
+              class="heroThumb"
+              src={heroImage(hero)}
+              alt={hero.data.title ?? "Hero image"}
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div class="heroThumb heroThumbEmpty" aria-hidden="true"></div>
+          )}
 
-        <div class="heroBody">
-          <div class="heroTitle">{hero.data.title}</div>
-          {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
-          <div class="heroMeta">{dateText(hero)}</div>
+          <div class="heroText">
+            <div class="heroTitle">
+              {hero.data.title ?? hero.slug}
+              {isFeatured(hero) && <span class="heroBadge">FEATURED</span>}
+            </div>
+
+            {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
+
+            <div class="heroMeta">{dateText(hero)}</div>
+          </div>
         </div>
       </a>
     )}
 
     <div class="list">
       {rest.map((p) => (
-        <a class="row" href={`/daytona/posts/${p.slug}/`}>
+        <a class="row" href={`/daytona/posts/${p.slug}/`} aria-label={`Open post: ${p.data.title ?? p.slug}`}>
           <div class="rowText">
-            <div class="rowTitle">{p.data.title ?? p.slug}</div>
+            <div class="rowTitle">
+              {p.data.title ?? p.slug}
+              {isFeatured(p) && <span class="rowBadge">FEATURED</span>}
+            </div>
+
             {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
             <div class="rowMeta">{dateText(p)}</div>
           </div>
 
-          {heroImage(p) && (
+          {heroImage(p) ? (
             <img
               class="rowThumb"
               src={heroImage(p)}
@@ -175,6 +188,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
               loading="lazy"
               decoding="async"
             />
+          ) : (
+            <div class="rowThumb rowThumbEmpty" aria-hidden="true"></div>
           )}
         </a>
       ))}
@@ -197,30 +212,61 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   }
   .topicMeta { opacity: .7; }
 
-  .heroCard {
+  /* NOOGAtoday-ish: “feature module” with small image, not full-bleed */
+  .heroModule {
     display: block;
     text-decoration: none;
     border: 1px solid rgba(255,255,255,.10);
     background: rgba(255,255,255,.03);
     border-radius: 16px;
-    overflow: hidden;
+    padding: 14px;
     margin: 14px 0 14px;
     cursor: pointer;
   }
-  .heroImg {
-    width: 100%;
-    height: auto;
-    display: block;
-    aspect-ratio: 16 / 9;
+  .heroModule:hover { background: rgba(255,255,255,.04); }
+
+  .heroInner {
+    display: grid;
+    grid-template-columns: 150px 1fr;
+    gap: 14px;
+    align-items: start;
+  }
+
+  .heroThumb {
+    width: 150px;
+    height: 105px;
+    border-radius: 14px;
     object-fit: cover;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.02);
+    display: block;
+  }
+  .heroThumbEmpty {
     background: rgba(255,255,255,.02);
   }
-  .heroBody { padding: 14px 14px 12px; }
+
   .heroTitle {
     font-weight: 900;
-    font-size: 20px;
+    font-size: 18px;
     line-height: 1.18;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
   }
+
+  .heroBadge {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .04em;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,220,80,.65);
+    color: rgba(255,220,80,.95);
+    background: rgba(255,220,80,.12);
+    white-space: nowrap;
+  }
+
   .heroDesc {
     margin-top: 8px;
     opacity: .85;
@@ -229,9 +275,11 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
   .heroMeta { margin-top: 10px; opacity: .65; font-size: 13px; }
 
   .list { display: grid; gap: 10px; margin-top: 10px; }
+
   .row {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -246,7 +294,28 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   }
   .row:hover { background: rgba(255,255,255,.03); }
 
-  .rowTitle { font-weight: 900; font-size: 16px; line-height: 1.2; }
+  .rowTitle {
+    font-weight: 900;
+    font-size: 16px;
+    line-height: 1.2;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .rowBadge {
+    font-size: 10.5px;
+    font-weight: 900;
+    letter-spacing: .04em;
+    padding: 5px 9px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,220,80,.55);
+    color: rgba(255,220,80,.92);
+    background: rgba(255,220,80,.10);
+    white-space: nowrap;
+  }
+
   .rowDesc {
     margin-top: 6px;
     opacity: .82;
@@ -257,6 +326,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+
   .rowMeta { margin-top: 8px; opacity: .6; font-size: 13px; }
 
   .rowThumb {
@@ -266,7 +336,17 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     object-fit: cover;
     border: 1px solid rgba(255,255,255,.10);
     background: rgba(255,255,255,.02);
+    display: block;
   }
+  .rowThumbEmpty {
+    background: rgba(255,255,255,.02);
+  }
+
+  @media (max-width: 560px) {
+    .heroInner { grid-template-columns: 120px 1fr; }
+    .heroThumb { width: 120px; height: 86px; border-radius: 12px; }
+  }
+
   @media (max-width: 520px) {
     .rowThumb { width: 84px; height: 62px; }
   }
