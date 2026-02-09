@@ -2,14 +2,7 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/** Daytona filter */
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
-
-/** Featured flag */
+/** Featured flag (safe) */
 function isFeatured(post) {
   const v = post?.data?.featured;
   if (v === true) return true;
@@ -18,7 +11,7 @@ function isFeatured(post) {
   return s === "true" || s === "yes" || s === "1";
 }
 
-/** Tag normalization */
+/** Tag normalization (for page rendering) */
 function tagKey(raw) {
   return String(raw ?? "")
     .toLowerCase()
@@ -26,16 +19,6 @@ function tagKey(raw) {
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ");
 }
-
-function tagSlugFromKey(key) {
-  return String(key ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
@@ -56,7 +39,6 @@ function getPostDate(post) {
     null
   );
 }
-
 function sortNewestFirst(a, b) {
   const da = new Date(getPostDate(a) ?? 0).getTime();
   const db = new Date(getPostDate(b) ?? 0).getTime();
@@ -74,7 +56,9 @@ function postHasTopic(post, topicKey) {
 function heroImage(post) {
   return post?.data?.heroImage ?? "";
 }
-
+function excerpt(post) {
+  return post?.data?.description ?? "";
+}
 function dateText(post) {
   const d = getPostDate(post);
   if (!d) return "";
@@ -89,29 +73,46 @@ function dateText(post) {
   }
 }
 
-function excerpt(post) {
-  return post?.data?.description ?? "";
-}
-
 /**
- * getStaticPaths: build all topic pages from unique tag keys
- * (uses ONLY locally defined helpers)
+ * ✅ Build-safe getStaticPaths:
+ * - NO references to helpers outside this function
+ * - Inline Daytona filter + tag normalization + slugging
  */
 export async function getStaticPaths() {
   const all = await getCollection("posts");
-  const daytona = all.filter(isDaytonaPost);
+
+  const daytona = all.filter((post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  });
+
+  const tagKeyLocal = (raw) =>
+    String(raw ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ");
+
+  const tagSlugFromKeyLocal = (key) =>
+    String(key ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
 
   const set = new Set();
   for (const p of daytona) {
     const tags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of tags) {
-      const k = tagKey(t);
+      const k = tagKeyLocal(t);
       if (k) set.add(k);
     }
   }
 
   return Array.from(set).map((key) => ({
-    params: { slug: tagSlugFromKey(key) },
+    params: { slug: tagSlugFromKeyLocal(key) },
     props: { topicKey: key },
   }));
 }
@@ -122,13 +123,17 @@ const topicLabel = tagLabelFromKey(topicKey);
 
 const all = await getCollection("posts");
 const posts = all
-  .filter(isDaytonaPost)
+  .filter((post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  })
   .filter((p) => postHasTopic(p, topicKey))
   .sort(sortNewestFirst);
 
 /**
- * Decision #2 (hero selection):
- * - first featured post
+ * Decision #2:
+ * - first featured
  * - else newest
  * - do not duplicate hero in list
  */
@@ -147,7 +152,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     </header>
 
     <div class="layout">
-      <!-- MAIN -->
       <main class="main">
         {hero && (
           <a class="heroRow" href={`/daytona/posts/${hero.slug}/`}>
@@ -204,7 +208,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
         </div>
       </main>
 
-      <!-- SIDEBAR (visual match to NOOGAtoday; functionality optional) -->
       <aside class="side">
         <div class="sideCard subscribe">
           <div class="sideTitle">Good news for Daytona</div>
@@ -221,7 +224,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
         <div class="sideCard events">
           <div class="eventsHeader">Upcoming Events</div>
 
-          <!-- Placeholder list (swap to real data later) -->
           <div class="eventRow">
             <div class="eventDate">
               <div class="d1">SAT</div>
@@ -250,253 +252,71 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 </section>
 
 <style>
-  /* Page width like NOOGAtoday */
-  .topicWrap{
-    max-width: 1180px;
-    margin: 0 auto;
-    padding: 0 18px;
-  }
+  .topicWrap{ max-width:1180px; margin:0 auto; padding:0 18px; }
+  .topicTop{ text-align:center; margin:12px 0 22px; }
+  .topicH1{ margin:0; font-size:clamp(40px,6vw,72px); line-height:1.02; letter-spacing:-0.02em; }
+  .topicCount{ margin-top:10px; opacity:.7; font-weight:700; }
 
-  .topicTop{
-    text-align: center;
-    margin: 12px 0 22px;
-  }
-  .topicH1{
-    margin: 0;
-    font-size: clamp(40px, 6vw, 72px);
-    line-height: 1.02;
-    letter-spacing: -0.02em;
-  }
-  .topicCount{
-    margin-top: 10px;
-    opacity: .7;
-    font-weight: 700;
-  }
+  .layout{ display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:22px; align-items:start; }
 
-  .layout{
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 340px;
-    gap: 22px;
-    align-items: start;
-  }
-
-  /* Hero row */
   .heroRow{
-    display: grid;
-    grid-template-columns: 360px minmax(0, 1fr);
-    gap: 16px;
-    text-decoration: none;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
-    border-radius: 14px;
-    overflow: hidden;
+    display:grid; grid-template-columns:360px minmax(0,1fr);
+    gap:16px; text-decoration:none;
+    border:1px solid rgba(255,255,255,.10);
+    background:rgba(255,255,255,.03);
+    border-radius:14px; overflow:hidden;
   }
-  .heroMedia{
-    background: rgba(255,255,255,.02);
-    min-height: 210px;
-  }
-  .heroMedia img{
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    aspect-ratio: 16/9;
-  }
-  .heroPlaceholder{
-    width: 100%;
-    height: 100%;
-    min-height: 210px;
-    background: rgba(255,255,255,.04);
-  }
-  .heroText{
-    padding: 14px 16px 14px 0;
-    align-self: center;
-  }
-  .heroKicker{
-    font-weight: 900;
-    font-size: 12px;
-    letter-spacing: .08em;
-    text-transform: uppercase;
-    opacity: .8;
-    margin-bottom: 8px;
-  }
-  .heroTitle{
-    font-weight: 900;
-    font-size: 28px;
-    line-height: 1.12;
-  }
-  .heroDesc{
-    margin-top: 10px;
-    opacity: .85;
-    line-height: 1.45;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .heroMeta{
-    margin-top: 10px;
-    opacity: .65;
-    font-size: 13px;
-  }
+  .heroMedia{ background:rgba(255,255,255,.02); min-height:210px; }
+  .heroMedia img{ width:100%; height:100%; display:block; object-fit:cover; aspect-ratio:16/9; }
+  .heroPlaceholder{ width:100%; height:100%; min-height:210px; background:rgba(255,255,255,.04); }
+  .heroText{ padding:14px 16px 14px 0; align-self:center; }
+  .heroKicker{ font-weight:900; font-size:12px; letter-spacing:.08em; text-transform:uppercase; opacity:.8; margin-bottom:8px; }
+  .heroTitle{ font-weight:900; font-size:28px; line-height:1.12; }
+  .heroDesc{ margin-top:10px; opacity:.85; line-height:1.45; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+  .heroMeta{ margin-top:10px; opacity:.65; font-size:13px; }
 
-  /* Feed list like NOOGAtoday (thumb left, text right) */
-  .feed{
-    margin-top: 18px;
-    display: grid;
-    gap: 14px;
-  }
+  .feed{ margin-top:18px; display:grid; gap:14px; }
   .feedItem{
-    display: grid;
-    grid-template-columns: 210px minmax(0, 1fr);
-    gap: 14px;
-    align-items: start;
-    text-decoration: none;
-    border-top: 1px solid rgba(255,255,255,.10);
-    padding-top: 14px;
+    display:grid; grid-template-columns:210px minmax(0,1fr);
+    gap:14px; align-items:start; text-decoration:none;
+    border-top:1px solid rgba(255,255,255,.10); padding-top:14px;
   }
-  .feedItem:first-child{
-    border-top: none;
-    padding-top: 0;
-  }
+  .feedItem:first-child{ border-top:none; padding-top:0; }
 
-  .thumb{
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.02);
-  }
-  .thumb img{
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-    aspect-ratio: 16/9;
-  }
-  .thumbPlaceholder{
-    width: 100%;
-    aspect-ratio: 16/9;
-    background: rgba(255,255,255,.04);
-  }
+  .thumb{ border-radius:12px; overflow:hidden; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.02); }
+  .thumb img{ width:100%; height:100%; display:block; object-fit:cover; aspect-ratio:16/9; }
+  .thumbPlaceholder{ width:100%; aspect-ratio:16/9; background:rgba(255,255,255,.04); }
 
-  .feedTitle{
-    font-weight: 900;
-    font-size: 20px;
-    line-height: 1.18;
-  }
-  .feedDesc{
-    margin-top: 8px;
-    opacity: .84;
-    line-height: 1.45;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .feedMeta{
-    margin-top: 10px;
-    opacity: .65;
-    font-size: 13px;
-  }
+  .feedTitle{ font-weight:900; font-size:20px; line-height:1.18; }
+  .feedDesc{ margin-top:8px; opacity:.84; line-height:1.45; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .feedMeta{ margin-top:10px; opacity:.65; font-size:13px; }
 
-  .bottomLinks{
-    margin-top: 22px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
+  .bottomLinks{ margin-top:22px; display:flex; gap:10px; flex-wrap:wrap; }
 
-  /* Sidebar cards */
-  .side{
-    position: sticky;
-    top: 14px;
-    display: grid;
-    gap: 14px;
-  }
-  .sideCard{
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
-    padding: 14px;
-  }
+  .side{ position:sticky; top:14px; display:grid; gap:14px; }
+  .sideCard{ border-radius:14px; border:1px solid rgba(255,255,255,.10); background:rgba(255,255,255,.03); padding:14px; }
 
-  .subscribe{
-    background: linear-gradient(180deg, rgba(60,160,60,.25), rgba(60,160,60,.10));
-    border-color: rgba(120,255,120,.20);
-  }
-  .sideTitle{
-    font-weight: 900;
-    font-size: 20px;
-    line-height: 1.15;
-  }
-  .sideSub{
-    margin-top: 8px;
-    opacity: .9;
-    line-height: 1.4;
-  }
-  .subForm{
-    margin-top: 12px;
-    display: grid;
-    gap: 10px;
-  }
-  .subInput{
-    width: 100%;
-    padding: 11px 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,.14);
-    background: rgba(0,0,0,.20);
-    color: inherit;
-  }
-  .subBtn{
-    padding: 11px 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(0,0,0,.25);
-    background: rgba(0,0,0,.55);
-    color: #fff;
-    font-weight: 900;
-    letter-spacing: .02em;
-    cursor: pointer;
-  }
-  .sideFine{
-    margin-top: 10px;
-    opacity: .75;
-    font-size: 12px;
-  }
+  .subscribe{ background:linear-gradient(180deg, rgba(60,160,60,.25), rgba(60,160,60,.10)); border-color:rgba(120,255,120,.20); }
+  .sideTitle{ font-weight:900; font-size:20px; line-height:1.15; }
+  .sideSub{ margin-top:8px; opacity:.9; line-height:1.4; }
+  .subForm{ margin-top:12px; display:grid; gap:10px; }
+  .subInput{ width:100%; padding:11px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.14); background:rgba(0,0,0,.20); color:inherit; }
+  .subBtn{ padding:11px 12px; border-radius:10px; border:1px solid rgba(0,0,0,.25); background:rgba(0,0,0,.55); color:#fff; font-weight:900; letter-spacing:.02em; cursor:pointer; }
+  .sideFine{ margin-top:10px; opacity:.75; font-size:12px; }
 
-  .eventsHeader{
-    font-weight: 900;
-    font-size: 16px;
-    margin-bottom: 10px;
-  }
-  .eventRow{
-    display: grid;
-    grid-template-columns: 46px minmax(0, 1fr);
-    gap: 10px;
-    padding: 10px 0;
-    border-top: 1px solid rgba(255,255,255,.10);
-  }
-  .eventRow:first-of-type{ border-top: none; padding-top: 0; }
-  .eventDate{
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.03);
-    text-align: center;
-    padding: 6px 0;
-  }
-  .d1{ font-size: 11px; font-weight: 900; opacity: .8; }
-  .d2{ font-size: 16px; font-weight: 900; }
-  .eventTitle{ font-weight: 900; line-height: 1.2; }
-  .eventMeta{ margin-top: 4px; opacity: .75; font-size: 12px; }
+  .eventsHeader{ font-weight:900; font-size:16px; margin-bottom:10px; }
+  .eventRow{ display:grid; grid-template-columns:46px minmax(0,1fr); gap:10px; padding:10px 0; border-top:1px solid rgba(255,255,255,.10); }
+  .eventRow:first-of-type{ border-top:none; padding-top:0; }
+  .eventDate{ border-radius:10px; border:1px solid rgba(255,255,255,.12); background:rgba(255,255,255,.03); text-align:center; padding:6px 0; }
+  .d1{ font-size:11px; font-weight:900; opacity:.8; }
+  .d2{ font-size:16px; font-weight:900; }
+  .eventTitle{ font-weight:900; line-height:1.2; }
+  .eventMeta{ margin-top:4px; opacity:.75; font-size:12px; }
 
-  /* Responsive */
-  @media (max-width: 980px){
-    .layout{ grid-template-columns: 1fr; }
-    .side{ position: static; }
-  }
-  @media (max-width: 760px){
-    .heroRow{ grid-template-columns: 1fr; }
-    .heroText{ padding: 14px; }
-    .feedItem{ grid-template-columns: 1fr; }
-    .thumb{ max-width: 100%; }
+  @media (max-width:980px){ .layout{ grid-template-columns:1fr; } .side{ position:static; } }
+  @media (max-width:760px){
+    .heroRow{ grid-template-columns:1fr; }
+    .heroText{ padding:14px; }
+    .feedItem{ grid-template-columns:1fr; }
   }
 </style>
