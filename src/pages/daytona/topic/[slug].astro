@@ -85,48 +85,24 @@ function excerpt(post) {
 }
 
 /**
- * getStaticPaths: MUST be build-safe in Cloudflare.
- * Make it fully self-contained: no references to helper functions outside this scope.
- * Behavior stays identical.
+ * getStaticPaths: build all topic pages from unique tag keys
+ * (uses ONLY locally defined helpers)
  */
 export async function getStaticPaths() {
   const all = await getCollection("posts");
-
-  // inline Daytona filter (same logic)
-  const daytona = all.filter((post) => {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
-    if (city === "daytona") return true;
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  });
-
-  // inline tag normalizer (same logic as tagKey)
-  const keyOf = (raw) =>
-    String(raw ?? "")
-      .toLowerCase()
-      .trim()
-      .replace(/[-_]+/g, " ")
-      .replace(/\s+/g, " ");
-
-  // inline slugify (same logic as tagSlugFromKey)
-  const slugOf = (key) =>
-    String(key ?? "")
-      .toLowerCase()
-      .trim()
-      .replace(/&/g, "and")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+  const daytona = all.filter(isDaytonaPost);
 
   const set = new Set();
   for (const p of daytona) {
     const tags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of tags) {
-      const k = keyOf(t);
+      const k = tagKey(t);
       if (k) set.add(k);
     }
   }
 
   return Array.from(set).map((key) => ({
-    params: { slug: slugOf(key) },
+    params: { slug: tagSlugFromKey(key) },
     props: { topicKey: key },
   }));
 }
@@ -154,26 +130,30 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 <Base title={`${topicLabel} | GoDo Daytona`} subtitle={`${topicLabel}`} cityBase="daytona" />
 
 <section class="section">
-  <div class="container topicLayout" style="max-width: 1100px;">
+  <div class="container topicShell">
     <div class="topicMain">
+      <!-- Decision #1: NO "TOPIC" kicker, only the big topic name -->
       <div class="topicHeader">
         <h1 class="topicTitle">{topicLabel}</h1>
         <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
       </div>
 
       {hero && (
-        <a class="heroCard moduleCard" href={`/daytona/posts/${hero.slug}/`}>
+        <a class="heroCard card" href={`/daytona/posts/${hero.slug}/`}>
           {heroImage(hero) && (
-            <img
-              class="heroImg"
-              src={heroImage(hero)}
-              alt={hero.data.title ?? "Hero image"}
-              loading="lazy"
-              decoding="async"
-            />
+            <div class="heroMedia">
+              <img
+                class="heroImg"
+                src={heroImage(hero)}
+                alt={hero.data.title ?? "Hero image"}
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           )}
 
           <div class="heroBody">
+            <div class="heroKicker">Featured</div>
             <div class="heroTitle">{hero.data.title}</div>
             {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
             <div class="heroMeta">{dateText(hero)}</div>
@@ -183,8 +163,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
       <div class="list">
         {rest.map((p) => (
-          <a class="row moduleCard" href={`/daytona/posts/${p.slug}/`}>
-            {heroImage(p) && (
+          <a class="row card" href={`/daytona/posts/${p.slug}/`}>
+            {heroImage(p) ? (
               <img
                 class="rowThumb"
                 src={heroImage(p)}
@@ -192,6 +172,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
                 loading="lazy"
                 decoding="async"
               />
+            ) : (
+              <div class="rowThumb rowThumbPlaceholder" aria-hidden="true"></div>
             )}
 
             <div class="rowText">
@@ -203,49 +185,59 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
         ))}
       </div>
 
-      <p style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+      <p class="topicNav">
         <a class="pill" href="/daytona/topics/">← All topics</a>
         <a class="pill" href="/daytona/posts/">Latest posts</a>
       </p>
     </div>
 
-    <aside class="topicSidebar" aria-label="Sidebar">
-      <div class="moduleCard newsletterCard">
-        <div class="moduleTitle">Good news for Daytona</div>
-        <div class="moduleSub">
-          Get the best local posts and events sent to your inbox, for free.
+    {/* Sidebar: standardized wrapper + module classes (no hunting class names) */}
+    <aside class="topicSidebar">
+      <div class="moduleCard newsletterCard card">
+        <div class="moduleHeader">
+          <div class="moduleTitle">Good news for Daytona</div>
+          <div class="moduleSub">Get the best local posts and events sent to your inbox, for free.</div>
         </div>
 
-        <label class="srOnly" for="newsletterEmail">Email address</label>
-        <input id="newsletterEmail" class="moduleInput" type="email" placeholder="Enter your email address" />
-
-        <button class="moduleButton" type="button">SIGN UP — IT’S FREE!</button>
-        <div class="moduleFine">100% free. Unsubscribe anytime.</div>
+        <div class="newsletterForm">
+          <label class="srOnly" for="topicNewsletterEmail">Email address</label>
+          <input id="topicNewsletterEmail" class="newsletterInput" type="email" placeholder="Enter your email address" />
+          <button class="newsletterButton" type="button">SIGN UP — IT’S FREE!</button>
+          <div class="newsletterFine">100% free. Unsubscribe anytime.</div>
+        </div>
       </div>
 
-      <div class="moduleCard eventsCard">
-        <div class="moduleTitle">Upcoming Events</div>
+      <div class="moduleCard eventsCard card">
+        <div class="moduleHeader">
+          <div class="moduleTitle">Upcoming Events</div>
+        </div>
 
-        <div class="eventRow">
-          <div class="eventDate">
-            <div class="eventDow">SAT</div>
-            <div class="eventDay">15</div>
+        <div class="eventsList" role="list">
+          <div class="eventRow" role="listitem">
+            <div class="eventDate">
+              <div class="eventDow">SAT</div>
+              <div class="eventDay">15</div>
+            </div>
+            <div class="eventText">
+              <div class="eventName">Add your first event</div>
+              <div class="eventMeta">Daytona Beach</div>
+            </div>
           </div>
-          <div class="eventInfo">
-            <div class="eventName">Add your first event</div>
-            <div class="eventPlace">Daytona Beach</div>
+
+          <div class="eventRow" role="listitem">
+            <div class="eventDate">
+              <div class="eventDow">SUN</div>
+              <div class="eventDay">16</div>
+            </div>
+            <div class="eventText">
+              <div class="eventName">Second event placeholder</div>
+              <div class="eventMeta">Ormond Beach</div>
+            </div>
           </div>
         </div>
 
-        <div class="eventRow">
-          <div class="eventDate">
-            <div class="eventDow">SUN</div>
-            <div class="eventDay">16</div>
-          </div>
-          <div class="eventInfo">
-            <div class="eventName">Second event placeholder</div>
-            <div class="eventPlace">Ormond Beach</div>
-          </div>
+        <div class="moduleFooter">
+          <a class="moduleLink" href="/daytona/events/">View all events →</a>
         </div>
       </div>
     </aside>
@@ -253,148 +245,218 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 </section>
 
 <style>
-  :root {
-    --card-radius: 16px;
+  /* =========================
+     Premium card system (v2)
+     ========================= */
+  :global(:root) {
+    --card-radius: 18px;
     --card-border: rgba(255,255,255,.10);
-    --card-border-hover: rgba(255,255,255,.16);
+    --card-border-soft: rgba(255,255,255,.08);
     --card-bg: rgba(255,255,255,.035);
     --card-bg-hover: rgba(255,255,255,.05);
-    --card-shadow-hover: 0 14px 34px rgba(0,0,0,.34);
-
-    --title-color: rgba(255,255,255,.96);
-    --text-color: rgba(255,255,255,.88);
-    --meta-color: rgba(255,255,255,.62);
-
-    --space-3: 16px;
-    --space-4: 22px;
-    --space-5: 28px;
-
+    --card-shadow: 0 10px 30px rgba(0,0,0,.20);
+    --card-shadow-hover: 0 16px 42px rgba(0,0,0,.28);
+    --card-pad: 16px;
+    --card-pad-lg: 18px;
     --ease: 160ms ease;
+
+    --text-strong: rgba(255,255,255,.96);
+    --text: rgba(255,255,255,.88);
+    --text-soft: rgba(255,255,255,.70);
+    --text-faint: rgba(255,255,255,.58);
   }
 
-  .topicLayout {
+  /* Shell layout */
+  .topicShell {
+    max-width: 1120px;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 22px;
-    align-items: start;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
   }
-  .topicMain { min-width: 0; }
-  .topicSidebar { display: flex; flex-direction: column; gap: 14px; }
-
-  @media (max-width: 980px) {
-    .topicLayout { grid-template-columns: 1fr; }
-    .topicSidebar { margin-top: 18px; }
+  @media (min-width: 980px) {
+    .topicShell {
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 22px;
+      align-items: start;
+    }
+    .topicSidebar {
+      position: sticky;
+      top: 18px;
+      align-self: start;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
   }
-
-  .topicHeader { margin: 8px 0 var(--space-4); }
-  .topicTitle {
-    margin: 10px 0 6px;
-    font-size: clamp(36px, 4.6vw, 56px);
-    line-height: 1.02;
-    font-weight: 950;
-    letter-spacing: -0.02em;
-    color: var(--title-color);
-  }
-  .topicMeta {
-    margin-top: 2px;
-    font-size: 12px;
-    letter-spacing: .02em;
-    color: var(--meta-color);
+  @media (max-width: 979px) {
+    .topicSidebar {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
   }
 
-  .moduleCard {
+  /* Shared card behavior */
+  .card {
     border-radius: var(--card-radius);
-    border: 1px solid var(--card-border);
+    border: 1px solid var(--card-border-soft);
     background: var(--card-bg);
+    box-shadow: 0 0 0 1px rgba(0,0,0,.10) inset;
     transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease);
+    will-change: transform;
   }
-  .moduleCard:hover {
+  .card:hover {
     transform: translateY(-2px);
-    border-color: var(--card-border-hover);
     background: var(--card-bg-hover);
+    border-color: var(--card-border);
     box-shadow: var(--card-shadow-hover);
   }
 
+  /* Header */
+  .topicHeader {
+    margin-bottom: 18px; /* more air before hero */
+  }
+  .topicTitle {
+    margin: 10px 0 6px 0;
+    font-size: clamp(40px, 5.2vw, 62px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--text-strong);
+  }
+  .topicMeta {
+    opacity: .72;
+    font-size: 13px;
+    letter-spacing: .02em;
+    color: var(--text-soft);
+  }
+
+  /* =========================
+     Hero (magazine-like)
+     ========================= */
   .heroCard {
-    display: block;
-    text-decoration: none;
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: 0;
     overflow: hidden;
+    text-decoration: none;
     cursor: pointer;
-    margin: 0 0 var(--space-5);
+    margin: 0 0 18px; /* more air before list */
+  }
+  .heroMedia {
+    position: relative;
+    background: rgba(255,255,255,.02);
   }
   .heroImg {
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
-    aspect-ratio: 16 / 9;
+    /* Taller than 16:9 */
+    aspect-ratio: 3 / 2;
     object-fit: cover;
-    background: rgba(255,255,255,.02);
+    transform: scale(1.01);
   }
-  .heroBody { padding: 18px 18px 16px; }
+  .heroBody {
+    padding: 18px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 100%;
+  }
+  .heroKicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(255,220,80,.90);
+    margin-bottom: 10px;
+  }
   .heroTitle {
     font-weight: 950;
-    font-size: 24px;
-    line-height: 1.14;
+    font-size: clamp(22px, 2.2vw, 30px);
+    line-height: 1.12;
     letter-spacing: -0.01em;
-    color: var(--title-color);
+    color: var(--text-strong);
   }
   .heroDesc {
     margin-top: 10px;
-    color: var(--text-color);
-    line-height: 1.45;
-    opacity: .88;
+    color: var(--text);
+    opacity: .9;
+    line-height: 1.52;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
   .heroMeta {
     margin-top: 12px;
-    font-size: 12px;
-    letter-spacing: .02em;
-    color: var(--meta-color);
+    font-size: 12.5px;
+    color: var(--text-faint);
   }
 
+  @media (max-width: 860px) {
+    .heroCard {
+      grid-template-columns: 1fr;
+    }
+    .heroBody {
+      padding: 16px 16px 14px;
+    }
+    .heroImg {
+      aspect-ratio: 16 / 10; /* still a touch taller than 16:9 on mobile */
+    }
+  }
+
+  /* =========================
+     List rows (NOOGAtoday-ish)
+     ========================= */
   .list {
     display: grid;
-    gap: 12px;
-    margin-top: var(--space-3);
+    gap: 12px; /* slightly more separation */
+    margin-top: 2px;
   }
 
   .row {
     display: grid;
-    grid-template-columns: 148px 1fr;
-    gap: 16px;
+    grid-template-columns: auto 1fr;
+    gap: 14px;
     align-items: center;
     text-decoration: none;
+    padding: var(--card-pad-lg);
     cursor: pointer;
-    padding: 16px 16px;
   }
 
   .rowThumb {
-    width: 148px;
-    height: 104px;
+    width: 128px;
+    height: 88px;
     border-radius: 14px;
     object-fit: cover;
-    border: 1px solid rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+    flex: 0 0 auto;
+  }
+  .rowThumbPlaceholder {
     background: rgba(255,255,255,.02);
   }
 
-  .rowText { min-width: 0; }
+  .rowText {
+    min-width: 0;
+  }
 
   .rowTitle {
-    font-weight: 950;
-    font-size: 18px;
-    line-height: 1.16;
+    font-weight: 900;
+    font-size: 17px;       /* slightly larger */
+    line-height: 1.18;     /* tighter */
     letter-spacing: -0.01em;
-    color: var(--title-color);
+    color: var(--text-strong);
   }
 
   .rowDesc {
     margin-top: 7px;
     font-size: 14px;
     line-height: 1.45;
-    color: var(--text-color);
+    color: var(--text);
     opacity: .86;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -403,112 +465,170 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   }
 
   .rowMeta {
-    margin-top: 10px;
-    font-size: 12px;
-    letter-spacing: .02em;
-    color: var(--meta-color);
+    margin-top: 9px;
+    font-size: 12.5px;
+    color: var(--text-faint);
   }
 
-  @media (max-width: 640px) {
-    .row { grid-template-columns: 1fr; }
-    .rowThumb { width: 100%; height: auto; aspect-ratio: 16/9; }
+  @media (max-width: 560px) {
+    .row {
+      grid-template-columns: 108px 1fr;
+      gap: 12px;
+      padding: 14px;
+    }
+    .rowThumb {
+      width: 108px;
+      height: 76px;
+      border-radius: 12px;
+    }
+    .rowTitle { font-size: 16px; }
   }
 
-  .newsletterCard,
-  .eventsCard { padding: 20px; }
+  /* =========================
+     Sidebar modules (balanced)
+     ========================= */
+  .moduleCard {
+    padding: 18px;
+  }
 
+  .moduleHeader {
+    margin-bottom: 12px;
+  }
   .moduleTitle {
-    margin: 0 0 10px 0;
-    font-size: 13px;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    font-weight: 900;
-    color: rgba(255,255,255,.86);
+    font-weight: 950;
+    font-size: 16px;
+    letter-spacing: -0.01em;
+    color: var(--text-strong);
   }
   .moduleSub {
-    margin-top: 2px;
-    color: rgba(255,255,255,.82);
+    margin-top: 8px;
+    color: var(--text);
+    opacity: .82;
     line-height: 1.45;
+    font-size: 13.5px;
   }
-  .moduleInput {
+
+  /* Newsletter */
+  .newsletterCard {
+    min-height: 260px; /* helps balance with hero presence */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .newsletterForm {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .newsletterInput {
     width: 100%;
-    margin-top: 12px;
-    padding: 12px 12px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,.12);
-    background: rgba(0,0,0,.20);
+    background: rgba(255,255,255,.03);
+    padding: 12px 12px;
     color: rgba(255,255,255,.92);
     outline: none;
   }
-  .moduleButton {
-    width: 100%;
-    margin-top: 12px;
-    padding: 12px 12px;
+  .newsletterInput:focus {
+    border-color: rgba(255,220,80,.35);
+    box-shadow: 0 0 0 3px rgba(255,220,80,.12);
+  }
+  .newsletterButton {
     border-radius: 12px;
+    border: 1px solid rgba(255,220,80,.55);
+    background: rgba(255,220,80,.14);
+    color: rgba(255,220,80,.95);
     font-weight: 950;
     letter-spacing: .02em;
+    padding: 12px 12px;
     cursor: pointer;
+    transition: transform var(--ease), filter var(--ease), background var(--ease), border-color var(--ease);
   }
-  .moduleFine {
-    margin-top: 10px;
+  .newsletterButton:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+    background: rgba(255,220,80,.18);
+    border-color: rgba(255,220,80,.65);
+  }
+  .newsletterFine {
+    margin-top: 2px;
     font-size: 12px;
-    color: rgba(255,255,255,.62);
+    color: var(--text-faint);
   }
 
-  .eventsCard { position: relative; }
-  .eventsCard::before {
-    content: "";
-    position: absolute;
-    top: -10px;
-    left: 14px;
-    right: 14px;
-    height: 1px;
-    background: rgba(255,255,255,.08);
+  /* Events widget */
+  .eventsCard .moduleHeader {
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08); /* subtle divider module feel */
+    margin-bottom: 12px;
   }
-
+  .eventsList {
+    display: grid;
+    gap: 12px;
+    margin-top: 4px;
+  }
   .eventRow {
     display: grid;
-    grid-template-columns: 56px 1fr;
+    grid-template-columns: 44px 1fr;
     gap: 12px;
     align-items: center;
-    padding: 12px 0;
-    border-top: 1px solid rgba(255,255,255,.08);
+    padding: 10px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.02);
   }
-  .eventRow:first-of-type { border-top: 0; padding-top: 6px; }
-
   .eventDate {
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
     border-radius: 12px;
-    padding: 10px 0;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.18);
+    padding: 8px 6px;
     text-align: center;
     line-height: 1.05;
   }
   .eventDow {
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: .06em;
-    opacity: .75;
+    font-size: 10px;
+    font-weight: 950;
+    letter-spacing: .12em;
+    opacity: .8;
   }
   .eventDay {
-    margin-top: 4px;
-    font-size: 18px;
+    margin-top: 5px;
+    font-size: 16px;
     font-weight: 950;
-    color: rgba(255,255,255,.92);
+    color: var(--text-strong);
   }
-
   .eventName {
     font-weight: 900;
     font-size: 14px;
-    line-height: 1.2;
-    color: rgba(255,255,255,.92);
+    line-height: 1.22;
+    color: var(--text-strong);
   }
-  .eventPlace {
+  .eventMeta {
     margin-top: 6px;
-    font-size: 12px;
-    color: rgba(255,255,255,.62);
+    font-size: 12.5px;
+    color: var(--text-faint);
+  }
+  .moduleFooter {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+  .moduleLink {
+    text-decoration: none;
+    font-weight: 900;
+    color: rgba(255,220,80,.92);
+  }
+  .moduleLink:hover { filter: brightness(1.05); }
+
+  /* Nav pills area */
+  .topicNav {
+    margin-top: 18px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
   }
 
+  /* Accessibility helper */
   .srOnly {
     position: absolute;
     width: 1px;
