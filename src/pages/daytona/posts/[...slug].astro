@@ -53,6 +53,11 @@ function sortNewestFirst(a, b) {
   return db - da;
 }
 
+/* Hero image field */
+function heroImage(post) {
+  return String(post?.data?.heroImage ?? "").trim();
+}
+
 /* Related posts */
 const RELATED_LIMIT = 3;
 const MAX_FEATURED_IN_RELATED = 1;
@@ -104,7 +109,7 @@ function buildRelatedPosts(currentPost, allCityPosts) {
   return result.slice(0, RELATED_LIMIT);
 }
 
-/* Build-safe getStaticPaths: NO external helper references */
+/* Build-safe getStaticPaths */
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
 
@@ -171,6 +176,9 @@ const relatedPosts = [
 const pub = getPostDate(post);
 const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
 const featured = isFeatured(post);
+
+// hero image
+const hero = heroImage(post);
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
@@ -194,6 +202,19 @@ const featured = isFeatured(post);
 
       {featured && <span class="featuredPill">FEATURED</span>}
     </div>
+
+    {/* Small “compliment” image under meta (NOT full-screen) */}
+    {hero && (
+      <figure class="heroFigure">
+        <img
+          class="heroInline"
+          src={hero}
+          alt={post.data.title ?? "Post image"}
+          loading="lazy"
+          decoding="async"
+        />
+      </figure>
+    )}
 
     <article class="postBody">
       <Content />
@@ -294,6 +315,22 @@ const featured = isFeatured(post);
     color: rgba(255,220,80,.95);
     background: rgba(255,220,80,.12);
     white-space: nowrap;
+  }
+
+  /* NEW: small hero image styling */
+  .heroFigure {
+    margin: 14px 0 0 0;
+  }
+  .heroInline {
+    display: block;
+    width: 100%;
+    max-width: 520px;          /* keeps it “compliment” sized */
+    max-height: 320px;
+    height: auto;
+    object-fit: cover;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.02);
   }
 
   .relatedCard {
