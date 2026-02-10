@@ -8,6 +8,7 @@ tags:
   - events
 featured: false
 pubDate: 2026-01-29T17:29:00.000Z
+heroImage: /images/uploads/daytona-international-speedway-nascar-xfinity-series-daytona-500.jpg-1.jpg
 hasPermission: true
 ---
 Gkdsjfvlsddfhaiuriu. adfijepifvuhevpiehvpeihvepaihvpeihvpeihvaiuerfhvpiuerhvpaiojer;vaioeh. apiuvhaeipvuericvueorivuoieruvoaieurvqoaiuervqaieurvaoiuerhvoauiacpeivuhapi. qihveoivuqebiovubqeoirvuqeoirvuqehorivuqhrviouqiupqui
