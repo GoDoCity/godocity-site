@@ -2,7 +2,7 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/** Daytona filter (MUST be module-scope + hoisted for getStaticPaths build) */
+/** Daytona filter */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
   if (city === "daytona") return true;
@@ -86,23 +86,44 @@ function excerpt(post) {
 
 /**
  * getStaticPaths: build all topic pages from unique tag keys
- * NOTE: build-safe: only references module-scope helpers
+ * BUILD-SAFE: inline Daytona filter + tag normalization here
+ * (avoids "isDaytonaPost is not defined" during build)
  */
 export async function getStaticPaths() {
   const all = await getCollection("posts");
-  const daytona = all.filter(isDaytonaPost);
+
+  const daytona = all.filter((post) => {
+    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
+    if (city === "daytona") return true;
+    return typeof post?.id === "string" && post.id.startsWith("daytona/");
+  });
+
+  const _tagKey = (raw) =>
+    String(raw ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/[-_]+/g, " ")
+      .replace(/\s+/g, " ");
+
+  const _tagSlugFromKey = (key) =>
+    String(key ?? "")
+      .toLowerCase()
+      .trim()
+      .replace(/&/g, "and")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
 
   const set = new Set();
   for (const p of daytona) {
     const tags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of tags) {
-      const k = tagKey(t);
+      const k = _tagKey(t);
       if (k) set.add(k);
     }
   }
 
   return Array.from(set).map((key) => ({
-    params: { slug: tagSlugFromKey(key) },
+    params: { slug: _tagSlugFromKey(key) },
     props: { topicKey: key },
   }));
 }
@@ -118,7 +139,7 @@ const posts = all
   .sort(sortNewestFirst);
 
 /**
- * Hero selection (keep exactly):
+ * Hero selection (unchanged):
  * - first featured post
  * - else newest
  * - do not duplicate hero in list
@@ -132,13 +153,11 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 <section class="section">
   <div class="container" style="max-width: 1080px;">
 
-    <!-- Header stays full-width -->
     <div class="topicHeader">
       <h1 class="topicTitle">{topicLabel}</h1>
       <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
     </div>
 
-    <!-- Layout: main + sidebar (CSS only, safe) -->
     <div class="topicLayout">
       <div class="topicMain">
 
@@ -198,7 +217,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
       </div>
 
-      <!-- Sidebar (standard wrappers you requested) -->
       <aside class="topicSidebar">
         <div class="moduleCard newsletterCard">
           <div class="moduleTitle">Good news for Daytona</div>
@@ -263,7 +281,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     --ease: 160ms ease;
   }
 
-  /* Header */
   .topicHeader { margin-bottom: 18px; }
   .topicTitle{
     margin: 8px 0 6px 0;
@@ -277,7 +294,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     line-height: 1.2;
   }
 
-  /* Layout */
   .topicLayout{
     display: grid;
     grid-template-columns: 1fr 320px;
@@ -315,7 +331,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   }
 
   /* ----------------------------
-     Hero (editorial crop + gradient anchor)
+     Hero: editorial crop + subtle bottom gradient overlay
      ---------------------------- */
   .heroCard{
     display: grid;
@@ -336,7 +352,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     background: rgba(255,255,255,.02);
   }
 
-  /* subtle bottom gradient overlay (anchored title feel, not heavy darkening) */
   .heroMedia::after{
     content:"";
     position:absolute;
@@ -344,15 +359,15 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     pointer-events:none;
     background: linear-gradient(to bottom,
       rgba(0,0,0,0) 55%,
-      rgba(0,0,0,.18) 78%,
-      rgba(0,0,0,.26) 100%);
+      rgba(0,0,0,.16) 78%,
+      rgba(0,0,0,.22) 100%);
   }
 
   .heroImg{
     width: 100%;
     height: 100%;
     display: block;
-    aspect-ratio: 4 / 3; /* slightly taller, more magazine-like */
+    aspect-ratio: 4 / 3;
     object-fit: cover;
     transform: scale(1.01);
   }
@@ -399,11 +414,11 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   }
 
   /* ----------------------------
-     List (NOOGAtoday-ish: bigger thumbs, tighter alignment)
+     List: tighter alignment + hover polish
      ---------------------------- */
   .list{
     display: grid;
-    gap: 12px; /* slightly more air between rows */
+    gap: 12px;
     margin-top: 6px;
   }
 
@@ -439,7 +454,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
   .rowMeta{
     margin-top: 9px;
-    opacity: .58; /* softer */
+    opacity: .58;
     font-size: 12.5px;
     line-height: 1.2;
   }
@@ -454,9 +469,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     flex: none;
   }
 
-  .rowThumbWrap.isEmpty{
-    opacity: .25;
-  }
+  .rowThumbWrap.isEmpty{ opacity: .25; }
 
   .rowThumb{
     width: 100%;
@@ -467,9 +480,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     transition: filter var(--ease);
   }
 
-  /* v3 row hover polish: subtle glow + thumb brighten */
   .row:hover{
-    box-shadow: 0 0 0 1px rgba(255,220,80,.10), var(--shadow-soft);
+    box-shadow: 0 0 0 1px rgba(255,220,80,.12), var(--shadow-soft);
   }
   .row:hover .rowThumb{
     filter: brightness(1.06) contrast(1.03);
@@ -481,7 +493,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     .rowTitle{ font-size: 16px; }
   }
 
-  /* Links */
   .topicLinks{
     margin-top: 18px;
     display: flex;
@@ -490,15 +501,13 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   }
 
   /* ----------------------------
-     Sidebar (typography polish + widget feel)
+     Sidebar typography (v3)
      ---------------------------- */
-  .moduleCard{
-    padding: 16px 16px;
-  }
+  .moduleCard{ padding: 16px 16px; }
 
   .moduleTitle{
     font-weight: 950;
-    font-size: 16px; /* slightly larger */
+    font-size: 16px;
     line-height: 1.15;
     letter-spacing: -0.01em;
     margin: 0 0 8px 0;
@@ -507,7 +516,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   .moduleSubtext{
     opacity: .80;
     font-size: 13.5px;
-    line-height: 1.35; /* tighter */
+    line-height: 1.35;
     margin-bottom: 12px;
   }
 
@@ -518,9 +527,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     margin-top: 10px;
   }
 
-  .newsletterCard{
-    padding: 18px 16px 16px; /* slightly taller/airier */
-  }
+  .newsletterCard{ padding: 18px 16px 16px; }
 
   .newsletterForm{
     display: grid;
@@ -553,7 +560,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     font-weight: 900;
     letter-spacing: .02em;
     cursor: pointer;
-    transition: transform var(--ease), filter var(--ease), background var(--ease), border-color var(--ease);
+    transition: filter var(--ease), background var(--ease), border-color var(--ease);
   }
 
   .newsletterButton:hover{
@@ -561,9 +568,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     border-color: rgba(255,220,80,.45);
   }
 
-  .eventsCard{
-    padding: 16px 16px;
-  }
+  .eventsCard{ padding: 16px 16px; }
 
   .eventsList{
     margin-top: 10px;
