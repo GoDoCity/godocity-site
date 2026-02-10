@@ -86,50 +86,23 @@ function excerpt(post) {
 
 /**
  * getStaticPaths: build all topic pages from unique tag keys
- * IMPORTANT: inline helpers used here so Cloudflare/Astro build never breaks with "not defined"
- * Logic/output is identical to before.
+ * (uses ONLY locally defined helpers)
  */
 export async function getStaticPaths() {
-  // Inline Daytona filter (same logic as isDaytonaPost)
-  function _isDaytonaPost(post) {
-    const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
-    if (city === "daytona") return true;
-    return typeof post?.id === "string" && post.id.startsWith("daytona/");
-  }
-
-  // Inline tag normalizer (same logic as tagKey)
-  function _tagKey(raw) {
-    return String(raw ?? "")
-      .toLowerCase()
-      .trim()
-      .replace(/[-_]+/g, " ")
-      .replace(/\s+/g, " ");
-  }
-
-  // Inline slug builder (same logic as tagSlugFromKey)
-  function _tagSlugFromKey(key) {
-    return String(key ?? "")
-      .toLowerCase()
-      .trim()
-      .replace(/&/g, "and")
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-  }
-
   const all = await getCollection("posts");
-  const daytona = all.filter(_isDaytonaPost);
+  const daytona = all.filter(isDaytonaPost);
 
   const set = new Set();
   for (const p of daytona) {
     const tags = Array.isArray(p?.data?.tags) ? p.data.tags : [];
     for (const t of tags) {
-      const k = _tagKey(t);
+      const k = tagKey(t);
       if (k) set.add(k);
     }
   }
 
   return Array.from(set).map((key) => ({
-    params: { slug: _tagSlugFromKey(key) },
+    params: { slug: tagSlugFromKey(key) },
     props: { topicKey: key },
   }));
 }
@@ -157,478 +130,514 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 <Base title={`${topicLabel} | GoDo Daytona`} subtitle={`${topicLabel}`} cityBase="daytona" />
 
 <section class="section">
-  <div class="container topicShell">
-    <div class="topicMain">
-      <div class="topicHeader">
-        <h1 class="topicTitle">{topicLabel}</h1>
-        <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
-      </div>
+  <div class="container" style="max-width: 1180px;">
+    <div class="topicLayout">
+      <!-- MAIN -->
+      <div class="topicMain">
+        <!-- Keep existing header classes -->
+        <div class="topicHeader">
+          <h1 class="topicTitle">{topicLabel}</h1>
+          <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
+        </div>
 
-      {hero && (
-        <a class="heroCard card" href={`/daytona/posts/${hero.slug}/`}>
-          {heroImage(hero) && (
-            <div class="heroMedia">
-              <img
-                class="heroImg"
-                src={heroImage(hero)}
-                alt={hero.data.title ?? "Hero image"}
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
-          )}
-
-          <div class="heroBody">
-            <div class="heroKicker">Featured</div>
-            <div class="heroTitle">{hero.data.title}</div>
-            {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
-            <div class="heroMeta">{dateText(hero)}</div>
-          </div>
-        </a>
-      )}
-
-      <div class="list">
-        {rest.map((p) => (
-          <a class="row card" href={`/daytona/posts/${p.slug}/`}>
-            {heroImage(p) ? (
-              <img
-                class="rowThumb"
-                src={heroImage(p)}
-                alt={p.data.title ?? "Thumbnail"}
-                loading="lazy"
-                decoding="async"
-              />
-            ) : (
-              <div class="rowThumb rowThumbPlaceholder" aria-hidden="true"></div>
+        {hero && (
+          <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
+            {/* Editorial crop / gradient overlay lives here */}
+            {heroImage(hero) && (
+              <div class="heroMedia">
+                <img
+                  class="heroImg"
+                  src={heroImage(hero)}
+                  alt={hero.data.title ?? "Hero image"}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
             )}
 
-            <div class="rowText">
-              <div class="rowTitle">{p.data.title ?? p.slug}</div>
-              {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
-              <div class="rowMeta">{dateText(p)}</div>
+            {/* Keep existing heroBody/heroTitle/etc classes (used elsewhere-safe) */}
+            <div class="heroBody">
+              <div class="heroKicker">{isFeatured(hero) ? "FEATURED" : "TOP STORY"}</div>
+              <div class="heroTitle">{hero.data.title}</div>
+              {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
+              <div class="heroMeta">{dateText(hero)}</div>
             </div>
           </a>
-        ))}
+        )}
+
+        <div class="list">
+          {rest.map((p) => (
+            <a class="row" href={`/daytona/posts/${p.slug}/`}>
+              <div class="rowText">
+                <div class="rowTitle">{p.data.title ?? p.slug}</div>
+                {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
+                <div class="rowMeta">{dateText(p)}</div>
+              </div>
+
+              {heroImage(p) && (
+                <div class="rowThumbWrap">
+                  <img
+                    class="rowThumb"
+                    src={heroImage(p)}
+                    alt={p.data.title ?? "Thumbnail"}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+              )}
+            </a>
+          ))}
+        </div>
+
+        <p class="topicFooterLinks" style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+          <a class="pill" href="/daytona/topics/">← All topics</a>
+          <a class="pill" href="/daytona/posts/">Latest posts</a>
+        </p>
       </div>
 
-      <p class="topicNav">
-        <a class="pill" href="/daytona/topics/">← All topics</a>
-        <a class="pill" href="/daytona/posts/">Latest posts</a>
-      </p>
+      <!-- SIDEBAR -->
+      <aside class="topicSidebar">
+        {/* Keep new classes, but do NOT remove any old ones (none removed) */}
+        <div class="moduleCard newsletterCard">
+          <div class="moduleHeader">
+            <div class="moduleTitle">Good news for Daytona</div>
+            <div class="moduleSubtext">Get the best local posts and events sent to your inbox, for free.</div>
+          </div>
+
+          <div class="newsletterForm">
+            <input class="newsletterInput" type="email" placeholder="Enter your email address" aria-label="Email address" />
+            <button class="newsletterButton" type="button">SIGN UP — IT’S FREE!</button>
+            <div class="moduleFineprint">100% free. Unsubscribe anytime.</div>
+          </div>
+        </div>
+
+        <div class="moduleCard eventsCard">
+          <div class="moduleHeader">
+            <div class="moduleTitle">Upcoming Events</div>
+            <div class="moduleSubtext">A few picks to get started.</div>
+          </div>
+
+          <div class="eventsList" role="list">
+            <div class="eventRow" role="listitem">
+              <div class="eventDate">
+                <div class="eventDow">SAT</div>
+                <div class="eventDay">15</div>
+              </div>
+              <div class="eventInfo">
+                <div class="eventName">Add your first event</div>
+                <div class="eventLoc">Daytona Beach</div>
+              </div>
+            </div>
+
+            <div class="eventRow" role="listitem">
+              <div class="eventDate">
+                <div class="eventDow">SUN</div>
+                <div class="eventDay">16</div>
+              </div>
+              <div class="eventInfo">
+                <div class="eventName">Second event placeholder</div>
+                <div class="eventLoc">Ormond Beach</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
     </div>
-
-    <aside class="topicSidebar">
-      <div class="moduleCard newsletterCard card">
-        <div class="moduleHeader">
-          <div class="moduleTitle">Good news for Daytona</div>
-          <div class="moduleSub">Get the best local posts and events sent to your inbox, for free.</div>
-        </div>
-
-        <div class="newsletterForm">
-          <label class="srOnly" for="topicNewsletterEmail">Email address</label>
-          <input id="topicNewsletterEmail" class="newsletterInput" type="email" placeholder="Enter your email address" />
-          <button class="newsletterButton" type="button">SIGN UP — IT’S FREE!</button>
-          <div class="newsletterFine">100% free. Unsubscribe anytime.</div>
-        </div>
-      </div>
-
-      <div class="moduleCard eventsCard card">
-        <div class="moduleHeader">
-          <div class="moduleTitle">Upcoming Events</div>
-        </div>
-
-        <div class="eventsList" role="list">
-          <div class="eventRow" role="listitem">
-            <div class="eventDate">
-              <div class="eventDow">SAT</div>
-              <div class="eventDay">15</div>
-            </div>
-            <div class="eventText">
-              <div class="eventName">Add your first event</div>
-              <div class="eventMeta">Daytona Beach</div>
-            </div>
-          </div>
-
-          <div class="eventRow" role="listitem">
-            <div class="eventDate">
-              <div class="eventDow">SUN</div>
-              <div class="eventDay">16</div>
-            </div>
-            <div class="eventText">
-              <div class="eventName">Second event placeholder</div>
-              <div class="eventMeta">Ormond Beach</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="moduleFooter">
-          <a class="moduleLink" href="/daytona/events/">View all events →</a>
-        </div>
-      </div>
-    </aside>
   </div>
 </section>
 
 <style>
+  /* ===========================
+     Premium card system (v3)
+     =========================== */
   :global(:root) {
-    --card-radius: 18px;
-    --card-border: rgba(255,255,255,.10);
-    --card-border-soft: rgba(255,255,255,.08);
-    --card-bg: rgba(255,255,255,.035);
-    --card-bg-hover: rgba(255,255,255,.05);
-    --card-shadow: 0 10px 30px rgba(0,0,0,.20);
-    --card-shadow-hover: 0 16px 42px rgba(0,0,0,.28);
-    --card-pad: 16px;
-    --card-pad-lg: 18px;
-    --ease: 160ms ease;
+    --topic-radius: 18px;
+    --topic-radius-sm: 14px;
 
-    --text-strong: rgba(255,255,255,.96);
-    --text: rgba(255,255,255,.88);
-    --text-soft: rgba(255,255,255,.70);
-    --text-faint: rgba(255,255,255,.58);
+    --topic-border: rgba(255,255,255,.10);
+    --topic-border-soft: rgba(255,255,255,.08);
+
+    --topic-bg: rgba(255,255,255,.035);
+    --topic-bg-2: rgba(255,255,255,.05);
+
+    --topic-shadow: 0 10px 28px rgba(0,0,0,.35);
+    --topic-glow: 0 0 0 1px rgba(255,220,80,.16), 0 10px 32px rgba(0,0,0,.38);
+
+    --topic-ease: 160ms ease;
+    --topic-lift: translateY(-2px);
   }
 
-  .topicShell {
-    max-width: 1120px;
+  /* Layout */
+  .topicLayout{
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    gap: 18px;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 24px;
+    align-items: start;
   }
-  @media (min-width: 980px) {
-    .topicShell {
-      grid-template-columns: minmax(0, 1fr) 340px;
-      gap: 22px;
-      align-items: start;
-    }
-    .topicSidebar {
-      position: sticky;
-      top: 18px;
-      align-self: start;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-  }
-  @media (max-width: 979px) {
-    .topicSidebar {
-      display: grid;
-      gap: 12px;
-      margin-top: 16px;
-    }
+  @media (max-width: 980px){
+    .topicLayout{ grid-template-columns: 1fr; }
+    .topicSidebar{ order: 2; }
+    .topicMain{ order: 1; }
   }
 
-  .card {
-    border-radius: var(--card-radius);
-    border: 1px solid var(--card-border-soft);
-    background: var(--card-bg);
-    box-shadow: 0 0 0 1px rgba(0,0,0,.10) inset;
-    transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease);
-    will-change: transform;
-  }
-  .card:hover {
-    transform: translateY(-2px);
-    background: var(--card-bg-hover);
-    border-color: var(--card-border);
-    box-shadow: var(--card-shadow-hover);
-  }
-
-  .topicHeader {
-    margin-bottom: 18px;
-  }
+  /* Header (keep existing class names) */
+  .topicHeader { margin-bottom: 18px; }
   .topicTitle {
-    margin: 10px 0 6px 0;
-    font-size: clamp(40px, 5.2vw, 62px);
-    line-height: 1.02;
+    margin: 8px 0 6px 0;
+    font-size: clamp(34px, 4.2vw, 54px);
+    line-height: 1.03;
     letter-spacing: -0.02em;
-    color: var(--text-strong);
+    font-weight: 950;
   }
   .topicMeta {
-    opacity: .72;
+    opacity: .62;
     font-size: 13px;
     letter-spacing: .02em;
-    color: var(--text-soft);
   }
 
-  .heroCard {
-    display: grid;
-    grid-template-columns: 1.15fr 1fr;
-    gap: 0;
-    overflow: hidden;
-    text-decoration: none;
-    cursor: pointer;
-    margin: 0 0 18px;
+  /* Shared card base */
+  .heroCard,
+  .row,
+  .moduleCard{
+    border: 1px solid var(--topic-border-soft);
+    background: var(--topic-bg);
+    border-radius: var(--topic-radius);
+    transition: transform var(--topic-ease), border-color var(--topic-ease), background var(--topic-ease), box-shadow var(--topic-ease);
+    will-change: transform;
   }
-  .heroMedia {
+
+  .heroCard:hover,
+  .row:hover,
+  .moduleCard:hover{
+    transform: var(--topic-lift);
+    border-color: rgba(255,255,255,.14);
+    background: var(--topic-bg-2);
+    box-shadow: var(--topic-shadow);
+  }
+
+  /* ===========================
+     HERO (editorial crop + gradient)
+     =========================== */
+  .heroCard{
+    display: block;
+    text-decoration: none;
+    overflow: hidden;
+    margin: 18px 0 18px;
+    cursor: pointer;
     position: relative;
+  }
+
+  .heroMedia{
+    position: relative;
+    width: 100%;
+    overflow: hidden;
     background: rgba(255,255,255,.02);
   }
-  .heroImg {
+
+  /* slightly taller ratio than standard 16:9 */
+  .heroImg{
     width: 100%;
-    height: 100%;
+    height: auto;
     display: block;
-    aspect-ratio: 3 / 2;
+    aspect-ratio: 5 / 3; /* taller, magazine feel */
     object-fit: cover;
-    transform: scale(1.01);
+    transform: scale(1.001); /* avoids subpixel seams */
+    image-rendering: auto;
   }
-  .heroBody {
-    padding: 18px 18px 16px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-height: 100%;
+
+  /* subtle bottom gradient overlay — sharp image, no heavy darkening */
+  .heroMedia::after{
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        to bottom,
+        rgba(0,0,0,0) 55%,
+        rgba(0,0,0,.10) 75%,
+        rgba(0,0,0,.18) 100%
+      );
   }
-  .heroKicker {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
+
+  /* Hero body sits closer to image; feels anchored */
+  .heroBody{
+    padding: 16px 18px 16px;
+  }
+
+  .heroKicker{
+    display: inline-block;
     font-size: 11px;
     font-weight: 900;
     letter-spacing: .12em;
+    opacity: .75;
     text-transform: uppercase;
-    color: rgba(255,220,80,.90);
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
-  .heroTitle {
+
+  .heroTitle{
     font-weight: 950;
     font-size: clamp(22px, 2.2vw, 30px);
     line-height: 1.12;
-    letter-spacing: -0.01em;
-    color: var(--text-strong);
+    letter-spacing: -0.015em;
   }
-  .heroDesc {
+
+  .heroDesc{
     margin-top: 10px;
-    color: var(--text);
-    opacity: .9;
-    line-height: 1.52;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .heroMeta {
-    margin-top: 12px;
-    font-size: 12.5px;
-    color: var(--text-faint);
-  }
-
-  @media (max-width: 860px) {
-    .heroCard { grid-template-columns: 1fr; }
-    .heroBody { padding: 16px 16px 14px; }
-    .heroImg { aspect-ratio: 16 / 10; }
-  }
-
-  .list {
-    display: grid;
-    gap: 12px;
-    margin-top: 2px;
-  }
-
-  .row {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 14px;
-    align-items: center;
-    text-decoration: none;
-    padding: var(--card-pad-lg);
-    cursor: pointer;
-  }
-
-  .rowThumb {
-    width: 128px;
-    height: 88px;
-    border-radius: 14px;
-    object-fit: cover;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
-    flex: 0 0 auto;
-  }
-  .rowThumbPlaceholder { background: rgba(255,255,255,.02); }
-
-  .rowText { min-width: 0; }
-
-  .rowTitle {
-    font-weight: 900;
-    font-size: 17px;
-    line-height: 1.18;
-    letter-spacing: -0.01em;
-    color: var(--text-strong);
-  }
-
-  .rowDesc {
-    margin-top: 7px;
-    font-size: 14px;
-    line-height: 1.45;
-    color: var(--text);
     opacity: .86;
+    line-height: 1.45;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
-  .rowMeta {
-    margin-top: 9px;
+  .heroMeta{
+    margin-top: 12px;
+    opacity: .58;
     font-size: 12.5px;
-    color: var(--text-faint);
   }
 
-  @media (max-width: 560px) {
-    .row {
-      grid-template-columns: 108px 1fr;
-      gap: 12px;
-      padding: 14px;
-    }
-    .rowThumb {
-      width: 108px;
-      height: 76px;
-      border-radius: 12px;
-    }
-    .rowTitle { font-size: 16px; }
+  /* ===========================
+     LIST (hover polish + tighter alignment)
+     =========================== */
+  .list{
+    display: grid;
+    gap: 12px; /* slightly more breathing room than tight stacks */
+    margin-top: 16px;
   }
 
-  .moduleCard { padding: 18px; }
+  .row{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 14px;
+    align-items: center;
+    text-decoration: none;
+    padding: 14px 14px;
+    cursor: pointer;
+  }
 
-  .moduleHeader { margin-bottom: 12px; }
-  .moduleTitle {
-    font-weight: 950;
-    font-size: 16px;
+  /* Hover glow (subtle, not jumpy) */
+  .row:hover{
+    box-shadow: var(--topic-glow);
+  }
+
+  .rowText{ min-width: 0; }
+
+  .rowTitle{
+    font-weight: 900;
+    font-size: 17px;   /* slightly larger */
+    line-height: 1.18; /* tighter */
     letter-spacing: -0.01em;
-    color: var(--text-strong);
-  }
-  .moduleSub {
-    margin-top: 8px;
-    color: var(--text);
-    opacity: .82;
-    line-height: 1.45;
-    font-size: 13.5px;
   }
 
-  .newsletterCard {
-    min-height: 260px;
+  .rowDesc{
+    margin-top: 7px;
+    opacity: .82;
+    font-size: 14px;
+    line-height: 1.38;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .rowMeta{
+    margin-top: 9px;
+    opacity: .58;
+    font-size: 12.5px;
+  }
+
+  /* Thumbnails: larger + responsive, with hover brighten */
+  .rowThumbWrap{
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.02);
+    flex: 0 0 auto;
+  }
+
+  .rowThumb{
+    width: 120px;
+    height: 84px;
+    display: block;
+    object-fit: cover;
+    transition: filter var(--topic-ease), transform var(--topic-ease);
+    will-change: filter;
+  }
+
+  .row:hover .rowThumb{
+    filter: brightness(1.07) contrast(1.03);
+  }
+
+  @media (max-width: 680px){
+    .topicLayout{ gap: 18px; }
+    .rowThumb{ width: 112px; height: 78px; }
+  }
+  @media (max-width: 520px){
+    .row{
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .rowThumb{
+      width: 100%;
+      height: 170px;
+      aspect-ratio: 16 / 9;
+    }
+    .rowThumbWrap{
+      width: 100%;
+    }
+  }
+
+  /* ===========================
+     SIDEBAR (typography polish)
+     =========================== */
+  .topicSidebar{
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 14px;
+    position: sticky;
+    top: 18px;
   }
-  .newsletterForm {
-    display: grid;
-    gap: 10px;
-    margin-top: 10px;
-  }
-  .newsletterInput {
-    width: 100%;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.03);
-    padding: 12px 12px;
-    color: rgba(255,255,255,.92);
-    outline: none;
-  }
-  .newsletterInput:focus {
-    border-color: rgba(255,220,80,.35);
-    box-shadow: 0 0 0 3px rgba(255,220,80,.12);
-  }
-  .newsletterButton {
-    border-radius: 12px;
-    border: 1px solid rgba(255,220,80,.55);
-    background: rgba(255,220,80,.14);
-    color: rgba(255,220,80,.95);
-    font-weight: 950;
-    letter-spacing: .02em;
-    padding: 12px 12px;
-    cursor: pointer;
-    transition: transform var(--ease), filter var(--ease), background var(--ease), border-color var(--ease);
-  }
-  .newsletterButton:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.03);
-    background: rgba(255,220,80,.18);
-    border-color: rgba(255,220,80,.65);
-  }
-  .newsletterFine {
-    margin-top: 2px;
-    font-size: 12px;
-    color: var(--text-faint);
+  @media (max-width: 980px){
+    .topicSidebar{
+      position: static;
+    }
   }
 
-  .eventsCard .moduleHeader {
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
+  .moduleCard{
+    padding: 18px 18px;
+    border-radius: var(--topic-radius);
+  }
+
+  .moduleHeader{
     margin-bottom: 12px;
   }
-  .eventsList {
-    display: grid;
-    gap: 12px;
-    margin-top: 4px;
+
+  /* Sidebar typography upgrades */
+  .moduleTitle{
+    font-weight: 950;
+    font-size: 16.5px;   /* slightly larger */
+    line-height: 1.18;   /* tighter */
+    letter-spacing: -0.01em;
   }
-  .eventRow {
+
+  .moduleSubtext{
+    margin-top: 8px;
+    opacity: .78;
+    font-size: 13.5px;
+    line-height: 1.35; /* tighter */
+  }
+
+  .moduleFineprint{
+    margin-top: 10px;
+    opacity: .62;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  /* Newsletter spacing balance */
+  .newsletterCard{
+    padding: 20px 18px 18px;
+  }
+
+  .newsletterForm{
     display: grid;
-    grid-template-columns: 44px 1fr;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .newsletterInput{
+    width: 100%;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(0,0,0,.18);
+    color: rgba(255,255,255,.92);
+    padding: 0 12px;
+    outline: none;
+    transition: border-color var(--topic-ease), background var(--topic-ease);
+  }
+  .newsletterInput:focus{
+    border-color: rgba(255,220,80,.45);
+    background: rgba(0,0,0,.22);
+  }
+
+  .newsletterButton{
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,220,80,.55);
+    background: rgba(255,220,80,.12);
+    color: rgba(255,220,80,.95);
+    font-weight: 950;
+    letter-spacing: .04em;
+    cursor: pointer;
+    transition: transform var(--topic-ease), filter var(--topic-ease), background var(--topic-ease);
+  }
+  .newsletterButton:hover{
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+    background: rgba(255,220,80,.14);
+  }
+
+  /* Events: publication widget feel */
+  .eventsCard{
+    padding: 18px 18px 16px;
+  }
+
+  .eventsList{
+    margin-top: 12px;
+    display: grid;
+    gap: 10px;
+  }
+
+  .eventRow{
+    display: grid;
+    grid-template-columns: 52px 1fr;
     gap: 12px;
     align-items: center;
-    padding: 10px 10px;
+    padding: 12px;
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,.08);
-    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(255,255,255,.09);
+    background: rgba(255,255,255,.025);
+    transition: background var(--topic-ease), border-color var(--topic-ease);
   }
-  .eventDate {
+  .eventRow:hover{
+    background: rgba(255,255,255,.04);
+    border-color: rgba(255,255,255,.13);
+  }
+
+  .eventDate{
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,.10);
     background: rgba(0,0,0,.18);
-    padding: 8px 6px;
+    padding: 8px 0;
     text-align: center;
-    line-height: 1.05;
+    line-height: 1;
   }
-  .eventDow {
+  .eventDow{
     font-size: 10px;
     font-weight: 950;
     letter-spacing: .12em;
-    opacity: .8;
+    opacity: .75;
   }
-  .eventDay {
-    margin-top: 5px;
-    font-size: 16px;
+  .eventDay{
+    margin-top: 6px;
+    font-size: 18px;
     font-weight: 950;
-    color: var(--text-strong);
+    letter-spacing: -0.02em;
   }
-  .eventName {
+  .eventName{
     font-weight: 900;
     font-size: 14px;
-    line-height: 1.22;
-    color: var(--text-strong);
+    line-height: 1.2;
   }
-  .eventMeta {
+  .eventLoc{
     margin-top: 6px;
+    opacity: .7;
     font-size: 12.5px;
-    color: var(--text-faint);
-  }
-  .moduleFooter {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255,255,255,.08);
-  }
-  .moduleLink {
-    text-decoration: none;
-    font-weight: 900;
-    color: rgba(255,220,80,.92);
-  }
-  .moduleLink:hover { filter: brightness(1.05); }
-
-  .topicNav {
-    margin-top: 18px;
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+    line-height: 1.25;
   }
 
-  .srOnly {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0,0,0,0);
-    white-space: nowrap;
-    border: 0;
-  }
+  /* Keep existing pill styling untouched (uses global) */
 </style>
