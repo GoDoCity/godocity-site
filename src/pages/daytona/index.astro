@@ -2,14 +2,14 @@
 import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/** Daytona filter (supports both explicit frontmatter city and legacy folder IDs) */
+/** Daytona filter */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/** Featured flag normalization */
+/** Featured flag */
 function isFeatured(post) {
   const v = post?.data?.featured;
   if (v === true) return true;
@@ -18,7 +18,7 @@ function isFeatured(post) {
   return s === "true" || s === "yes" || s === "1";
 }
 
-/** Safe date getter (fallback order) */
+/** Dates */
 function getPostDate(post) {
   return (
     post?.data?.pubDate ??
@@ -38,68 +38,91 @@ function sortNewestFirst(a, b) {
 function formatDate(d) {
   if (!d) return "";
   try {
-    return new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    return new Date(d).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   } catch {
     return "";
   }
-}
-
-/** Optional hero image field */
-function heroImage(post) {
-  return post?.data?.heroImage ?? "";
 }
 
 function excerpt(post) {
   return post?.data?.description ?? "";
 }
 
+/**
+ * FIX (per your note): heroImage is a STRING path (no .src)
+ * and it must check multiple common keys.
+ */
+function heroImage(post) {
+  const v =
+    post?.data?.heroImage ??
+    post?.data?.heroimage ??
+    post?.data?.image ??
+    post?.data?.thumbnail ??
+    post?.data?.cover ??
+    "";
+  return typeof v === "string" ? v.trim() : "";
+}
+
+/** Data (keep getCollection logic) */
 const all = await getCollection("posts");
 const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
-// Main hero story: first featured, else newest
-const hero = posts.find(isFeatured) ?? posts[0] ?? null;
+/** Main hero story: first featured, else newest */
+const mainHero = posts.find(isFeatured) ?? posts[0] ?? null;
 
-// Feeds (exclude hero from both so it doesn’t duplicate)
-const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
+/** Feed rows (don’t duplicate main hero) */
+const feed = mainHero ? posts.filter((p) => p.slug !== mainHero.slug) : posts;
 
-const featuredPosts = rest.filter(isFeatured).slice(0, 5);
-const latestPosts = rest.slice(0, 10);
+/** Optional: show a few featured first, then the rest */
+const featured = feed.filter(isFeatured);
+const nonFeatured = feed.filter((p) => !isFeatured(p));
+const FEED_LIMIT = 12;
+const feedRows = [...featured, ...nonFeatured].slice(0, FEED_LIMIT);
 ---
 
-<Base title="GoDo Daytona" subtitle="Local posts, guides, and events" cityBase="daytona" />
+<Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona" />
 
 <section class="section">
-  <div class="container homeWrap">
-
-    <!-- 1) TOP NEWSLETTER SIGNUP HERO (above the fold) -->
+  <div class="container" style="max-width: 1120px;">
+    <!-- 1) TOP NEWSLETTER SIGNUP HERO -->
     <div class="newsletterBand">
-      <div class="newsletterInner">
+      <div class="newsletterBandInner">
         <div class="newsletterCopy">
-          <div class="bandKicker">Newsletter</div>
-          <h1 class="bandTitle">Good news for Daytona</h1>
-          <p class="bandSub">Get the best local posts and events sent to your inbox, for free.</p>
-          <p class="bandFine">100% free. Unsubscribe anytime.</p>
+          <div class="newsletterKicker">GODO DAYTONA</div>
+          <h1 class="newsletterTitle">Good news for Daytona</h1>
+          <p class="newsletterSub">Get the best local posts and events sent to your inbox, for free.</p>
+          <div class="newsletterFine">100% free. Unsubscribe anytime.</div>
         </div>
 
-        <form class="newsletterForm" method="get" action="/daytona/subscribe/">
+        <form class="newsletterForm" action="/daytona/subscribe/" method="get">
           <label class="srOnly" for="email">Email address</label>
-          <input id="email" class="emailInput" type="email" name="email" placeholder="Enter your email address" autocomplete="email" />
-          <button class="ctaBtn" type="submit">SIGN UP — IT’S FREE!</button>
-          <div class="formFine">No spam. Just Daytona.</div>
+          <input
+            id="email"
+            name="email"
+            class="newsletterInput"
+            type="email"
+            placeholder="Enter your email address"
+            autocomplete="email"
+          />
+          <button class="newsletterBtn" type="submit">SIGN UP — IT’S FREE!</button>
         </form>
       </div>
     </div>
 
-    <!-- 2) ONE MAIN HERO STORY (editorial feature) -->
-    {hero && (
-      <div class="topRow">
-        <a class="heroFeature cardBase" href={`/daytona/posts/${hero.slug}/`}>
+    <!-- 2) ONE MAIN HERO STORY -->
+    {mainHero && (
+      <div class="heroWrap">
+        <a class="heroCard premiumCard" href={`/daytona/posts/${mainHero.slug}/`}>
           <div class="heroMedia">
-            {heroImage(hero) ? (
+            {heroImage(mainHero) ? (
               <img
                 class="heroImg"
-                src={heroImage(hero)}
-                alt={hero.data.title ?? "Hero story"}
+                src={heroImage(mainHero)}
+                alt={mainHero.data.title ?? "Hero image"}
                 loading="lazy"
                 decoding="async"
               />
@@ -108,176 +131,138 @@ const latestPosts = rest.slice(0, 10);
             )}
           </div>
 
-          <div class="heroInfo">
-            {isFeatured(hero) && <div class="heroTag">FEATURED</div>}
-            <div class="heroTitle">{hero.data.title ?? hero.slug}</div>
-            {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
-            <div class="heroMeta">{formatDate(getPostDate(hero))}</div>
+          <div class="heroBody">
+            <div class="heroEyebrow">
+              {isFeatured(mainHero) && <span class="pillTag">FEATURED</span>}
+              <span class="heroDate">{formatDate(getPostDate(mainHero))}</span>
+            </div>
+
+            <div class="heroTitle">{mainHero.data.title ?? mainHero.slug}</div>
+
+            {excerpt(mainHero) && <div class="heroDesc">{excerpt(mainHero)}</div>}
           </div>
         </a>
       </div>
     )}
 
     <!-- 3) CATEGORY HIGHLIGHT GRID (3 cards) -->
-    <div class="sectionHead">
-      <div class="sectionTitle">Explore Daytona</div>
-      <div class="sectionRule"></div>
-    </div>
-
-    <div class="catGrid">
-      <a class="catCard cardBase" href="/daytona/topics/">
-        <div class="catKicker">Browse</div>
-        <div class="catTitle">Topics</div>
-        <div class="catDesc">Food, events, outdoors, and more.</div>
+    <div class="categoryGrid">
+      <a class="categoryCard premiumCard" href="/daytona/topics/">
+        <div class="categoryLabel">Topics</div>
+        <div class="categoryDesc">Browse what Daytona is talking about.</div>
       </a>
 
-      <a class="catCard cardBase" href="/daytona/guides/">
-        <div class="catKicker">Go deeper</div>
-        <div class="catTitle">City Guides</div>
-        <div class="catDesc">Curated lists, neighborhoods, and picks.</div>
+      <a class="categoryCard premiumCard" href="/daytona/guides/">
+        <div class="categoryLabel">City Guides</div>
+        <div class="categoryDesc">Curated guides for locals and visitors.</div>
       </a>
 
-      <a class="catCard cardBase" href="/daytona/events/">
-        <div class="catKicker">Don’t miss</div>
-        <div class="catTitle">Events</div>
-        <div class="catDesc">What’s happening this week.</div>
+      <a class="categoryCard premiumCard" href="/daytona/events/">
+        <div class="categoryLabel">Events</div>
+        <div class="categoryDesc">What’s happening this week.</div>
       </a>
     </div>
 
-    <!-- 4) FEATURED + LATEST FEED ROWS (scannable) -->
-    <div class="twoCol">
-      <div class="col">
-        <div class="sectionHead small">
-          <div class="sectionTitle">Featured</div>
-          <div class="sectionRule"></div>
+    <!-- 4 + 5) FEED ROWS + UPCOMING EVENTS MODULE -->
+    <div class="mainGrid">
+      <div class="feedCol">
+        <div class="sectionHeader">
+          <h2 class="sectionTitle">Latest</h2>
+          <a class="sectionLink" href="/daytona/posts/">View all</a>
         </div>
 
         <div class="rows">
-          {featuredPosts.length === 0 && (
-            <div class="emptyCard cardBase">
-              No featured posts yet. Mark a post with <code>featured: true</code> to surface it here.
+          {feedRows.map((p) => (
+            <a class="row premiumCard" href={`/daytona/posts/${p.slug}/`}>
+              <div class="rowText">
+                <div class="rowTitle">{p.data.title ?? p.slug}</div>
+                {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
+                <div class="rowMeta">{formatDate(getPostDate(p))}</div>
+              </div>
+
+              {heroImage(p) ? (
+                <img
+                  class="rowThumb"
+                  src={heroImage(p)}
+                  alt={p.data.title ?? "Thumbnail"}
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div class="rowThumb rowThumbFallback" aria-hidden="true"></div>
+              )}
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <aside class="rightCol">
+        <div class="moduleCard eventsCard premiumCard">
+          <div class="moduleHeader">
+            <div class="moduleTitle">Upcoming Events</div>
+            <a class="moduleLink" href="/daytona/events/">See all</a>
+          </div>
+
+          <div class="eventList">
+            <div class="eventRow">
+              <div class="eventDate">
+                <div class="eventDow">SAT</div>
+                <div class="eventDay">15</div>
+              </div>
+              <div class="eventInfo">
+                <div class="eventName">Add your first event</div>
+                <div class="eventLoc">Daytona Beach</div>
+              </div>
             </div>
-          )}
 
-          {featuredPosts.map((p) => (
-            <a class="rowItem cardBase" href={`/daytona/posts/${p.slug}/`}>
-              <div class="rowText">
-                <div class="rowTitle">{p.data.title ?? p.slug}</div>
-                {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
-                <div class="rowMeta">{formatDate(getPostDate(p))}</div>
+            <div class="divider"></div>
+
+            <div class="eventRow">
+              <div class="eventDate">
+                <div class="eventDow">SUN</div>
+                <div class="eventDay">16</div>
               </div>
-
-              {heroImage(p) ? (
-                <img
-                  class="rowThumb"
-                  src={heroImage(p)}
-                  alt={p.data.title ?? "Thumbnail"}
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div class="rowThumb rowThumbFallback" aria-hidden="true"></div>
-              )}
-            </a>
-          ))}
-        </div>
-      </div>
-
-      <div class="col">
-        <div class="sectionHead small">
-          <div class="sectionTitle">Latest</div>
-          <div class="sectionRule"></div>
-        </div>
-
-        <div class="rows">
-          {latestPosts.map((p) => (
-            <a class="rowItem cardBase" href={`/daytona/posts/${p.slug}/`}>
-              <div class="rowText">
-                <div class="rowTitle">{p.data.title ?? p.slug}</div>
-                {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
-                <div class="rowMeta">{formatDate(getPostDate(p))}</div>
+              <div class="eventInfo">
+                <div class="eventName">Second event placeholder</div>
+                <div class="eventLoc">Ormond Beach</div>
               </div>
-
-              {heroImage(p) ? (
-                <img
-                  class="rowThumb"
-                  src={heroImage(p)}
-                  alt={p.data.title ?? "Thumbnail"}
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div class="rowThumb rowThumbFallback" aria-hidden="true"></div>
-              )}
-            </a>
-          ))}
+            </div>
+          </div>
         </div>
 
-        <div class="moreLinks">
-          <a class="pill" href="/daytona/posts/">View all posts</a>
-          <a class="pill" href="/daytona/topics/">Browse topics</a>
+        <div class="moduleCard premiumCard">
+          <div class="moduleTitle">Resources</div>
+          <div class="resourceList">
+            <a class="resourceLink" href="/daytona/subscribe/">Subscribe</a>
+            <a class="resourceLink" href="/daytona/advertise/">Advertise</a>
+            <a class="resourceLink" href="/daytona/topics/">Topics</a>
+            <a class="resourceLink" href="/daytona/events/">Events</a>
+          </div>
         </div>
-      </div>
+      </aside>
     </div>
 
-    <!-- 5) UPCOMING EVENTS MODULE -->
-    <div class="sectionHead">
-      <div class="sectionTitle">Upcoming Events</div>
-      <div class="sectionRule"></div>
-    </div>
-
-    <div class="eventsCard cardBase">
-      <div class="eventsList">
-        <div class="eventRow">
-          <div class="eventDate">
-            <div class="eventDow">SAT</div>
-            <div class="eventNum">15</div>
-          </div>
-          <div class="eventInfo">
-            <div class="eventTitle">Add your first event</div>
-            <div class="eventMeta">Daytona Beach</div>
-          </div>
-        </div>
-
-        <div class="eventRow">
-          <div class="eventDate">
-            <div class="eventDow">SUN</div>
-            <div class="eventNum">16</div>
-          </div>
-          <div class="eventInfo">
-            <div class="eventTitle">Second event placeholder</div>
-            <div class="eventMeta">Ormond Beach</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="eventsFooter">
-        <a class="pill" href="/daytona/events/">All events</a>
-      </div>
-    </div>
-
-    <!-- 6) BOTTOM “ADVERTISE WITH US” PROMO BAND -->
-    <div class="adBand">
-      <div class="adInner">
+    <!-- 6) BOTTOM ADVERTISE BAND -->
+    <div class="promoBand">
+      <div class="promoInner">
         <div>
-          <div class="adKicker">For local brands</div>
-          <div class="adTitle">Advertise with us.</div>
-          <div class="adDesc">
-            Reach readers who actually live here. Branded content + display placements that feel native to a premium local publication.
+          <div class="promoTitle">Advertise with us.</div>
+          <div class="promoDesc">
+            Reach locals where they actually pay attention — in the inbox and on the site.
           </div>
         </div>
 
-        <div class="adBtns">
-          <a class="btnGhost" href="/daytona/advertise/">Branded Content + Display</a>
-          <a class="btnSolid" href="/daytona/advertise/">Events</a>
+        <div class="promoBtns">
+          <a class="promoBtn" href="/daytona/advertise/">Branded Content + Display</a>
+          <a class="promoBtn promoBtnGhost" href="/daytona/advertise/">Events</a>
         </div>
       </div>
     </div>
 
-    <!-- 7) FOOTER SECTION -->
-    <footer class="siteFooter">
+    <!-- 7) FOOTER -->
+    <footer class="footer">
       <div class="footerGrid">
-        <div class="footerCol">
+        <div>
           <div class="footerHead">Resources</div>
           <a class="footerLink" href="/daytona/subscribe/">Subscribe</a>
           <a class="footerLink" href="/daytona/advertise/">Advertise</a>
@@ -285,449 +270,562 @@ const latestPosts = rest.slice(0, 10);
           <a class="footerLink" href="/daytona/events/">Events</a>
         </div>
 
-        <div class="footerCol">
+        <div>
           <div class="footerHead">About</div>
           <a class="footerLink" href="/daytona/contact/">Contact</a>
           <a class="footerLink" href="/daytona/legal/">Legal</a>
         </div>
 
-        <div class="footerCol footerBrand">
-          <div class="footerHead">GoDo Daytona</div>
+        <div>
+          <div class="footerHead">GoDoCity</div>
           <div class="footerText">
-            A local publication for Daytona. Built to scale city-by-city with consistent design, editorial workflow, and advertising packages.
+            GoDoDaytona is part of the GoDoCity network. Built to scale city-by-city with consistent design,
+            editorial workflow, and advertising packages.
           </div>
-          <div class="footerFine">© {new Date().getFullYear()} GoDoCity. All rights reserved.</div>
         </div>
       </div>
-    </footer>
 
+      <div class="footerBottom">
+        © {new Date().getFullYear()} GoDoCity. All rights reserved.
+      </div>
+    </footer>
   </div>
 </section>
 
 <style>
-  /* =========================================================
-     Premium card system (dark theme)
-     ========================================================= */
-  .homeWrap { max-width: 1120px; }
-
-  :global(:root) {
-    /* keep global vars untouched if you already have them elsewhere */
+  /* -------- Premium card system (reused) -------- */
+  :global(body) {
+    /* keep your site-wide dark theme; this just ensures our local surfaces fit */
   }
 
-  .cardBase {
-    border-radius: 16px;
-    border: 1px solid rgba(255,255,255,0.10);
-    background: rgba(255,255,255,0.035);
-    box-shadow: 0 10px 28px rgba(0,0,0,0.28);
-    transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
-    text-decoration: none;
-    color: inherit;
-  }
-  .cardBase:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255,255,255,0.16);
-    background: rgba(255,255,255,0.045);
+  :root {
+    --card-radius: 18px;
+    --card-border: rgba(255, 255, 255, 0.10);
+    --card-border-hover: rgba(255, 255, 255, 0.16);
+    --card-bg: rgba(255, 255, 255, 0.035);
+    --card-bg-hover: rgba(255, 255, 255, 0.055);
+    --muted: rgba(255, 255, 255, 0.72);
+    --muted2: rgba(255, 255, 255, 0.58);
+    --muted3: rgba(255, 255, 255, 0.42);
+    --lift: translateY(-2px);
+    --ease: 160ms ease;
   }
 
-  .srOnly {
-    position: absolute !important;
-    width: 1px; height: 1px;
-    padding: 0; margin: -1px;
-    overflow: hidden; clip: rect(0,0,0,0);
-    white-space: nowrap; border: 0;
+  .premiumCard {
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    border-radius: var(--card-radius);
+    transition: transform var(--ease), background var(--ease), border-color var(--ease);
+  }
+  .premiumCard:hover {
+    transform: var(--lift);
+    background: var(--card-bg-hover);
+    border-color: var(--card-border-hover);
   }
 
-  /* =========================================================
-     1) Newsletter band
-     ========================================================= */
+  /* -------- Newsletter band -------- */
   .newsletterBand {
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,0.10);
-    background: linear-gradient(135deg, rgba(255,220,80,0.10), rgba(255,255,255,0.03));
-    padding: 22px;
-    margin: 6px 0 18px;
+    margin-top: 8px;
+    margin-bottom: 22px;
+    border-radius: calc(var(--card-radius) + 2px);
+    border: 1px solid rgba(120, 255, 180, 0.22);
+    background:
+      radial-gradient(1200px 300px at 15% 20%, rgba(80, 255, 170, 0.10), transparent 55%),
+      radial-gradient(900px 260px at 85% 30%, rgba(90, 180, 255, 0.10), transparent 55%),
+      rgba(255, 255, 255, 0.02);
+    overflow: hidden;
   }
-  .newsletterInner {
+
+  .newsletterBandInner {
+    padding: 22px 22px;
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: 1.2fr 0.9fr;
     gap: 18px;
     align-items: center;
   }
-  .bandKicker {
+
+  .newsletterKicker {
     font-weight: 900;
-    letter-spacing: .12em;
+    letter-spacing: 0.12em;
     font-size: 12px;
     text-transform: uppercase;
-    color: rgba(255,220,80,.95);
-    margin-bottom: 8px;
+    color: rgba(255, 220, 80, 0.95);
+    margin-bottom: 10px;
   }
-  .bandTitle {
+  .newsletterTitle {
     margin: 0;
-    font-size: clamp(28px, 3.2vw, 44px);
-    line-height: 1.05;
     font-weight: 950;
+    font-size: clamp(30px, 3.2vw, 44px);
+    line-height: 1.06;
   }
-  .bandSub {
+  .newsletterSub {
     margin: 10px 0 8px;
-    opacity: .90;
+    color: var(--muted);
     line-height: 1.45;
-    max-width: 52ch;
   }
-  .bandFine { margin: 0; opacity: .70; font-size: 13px; }
+  .newsletterFine {
+    color: var(--muted3);
+    font-size: 13px;
+  }
 
   .newsletterForm {
     display: grid;
+    grid-template-columns: 1fr;
     gap: 10px;
-    justify-items: stretch;
   }
-  .emailInput {
+
+  .newsletterInput {
     width: 100%;
     border-radius: 12px;
     padding: 12px 12px;
     border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(0,0,0,0.25);
-    color: rgba(255,255,255,0.95);
+    background: rgba(0,0,0,0.18);
+    color: rgba(255,255,255,0.92);
     outline: none;
   }
-  .emailInput:focus {
-    border-color: rgba(255,220,80,0.45);
-    box-shadow: 0 0 0 3px rgba(255,220,80,0.12);
+  .newsletterInput:focus {
+    border-color: rgba(255,255,255,0.22);
   }
-  .ctaBtn {
+
+  .newsletterBtn {
     border-radius: 12px;
     padding: 12px 12px;
-    font-weight: 950;
-    letter-spacing: .02em;
-    border: 1px solid rgba(255,220,80,0.65);
-    background: rgba(255,220,80,0.92);
-    color: #111;
+    border: 1px solid rgba(255, 220, 80, 0.55);
+    background: rgba(255, 220, 80, 0.14);
+    color: rgba(255, 220, 80, 0.95);
+    font-weight: 900;
+    letter-spacing: 0.03em;
     cursor: pointer;
-    transition: transform 120ms ease, filter 160ms ease, opacity 160ms ease;
   }
-  .ctaBtn:hover { filter: brightness(1.02); transform: translateY(-1px); }
-  .ctaBtn:active { transform: translateY(0px); opacity: .95; }
-  .formFine { opacity: .65; font-size: 12px; }
+  .newsletterBtn:hover {
+    filter: brightness(1.03);
+  }
 
   @media (max-width: 860px) {
-    .newsletterInner { grid-template-columns: 1fr; }
+    .newsletterBandInner {
+      grid-template-columns: 1fr;
+    }
   }
 
-  /* =========================================================
-     2) Main hero feature
-     ========================================================= */
-  .topRow { margin: 10px 0 22px; }
-  .heroFeature {
+  /* -------- Hero story -------- */
+  .heroWrap { margin-bottom: 18px; }
+
+  .heroCard {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: 1.1fr 0.9fr;
     gap: 0;
+    text-decoration: none;
     overflow: hidden;
   }
+
   .heroMedia {
     position: relative;
-    border-right: 1px solid rgba(255,255,255,0.08);
     min-height: 100%;
-    background: rgba(255,255,255,0.02);
   }
+
   .heroImg {
     width: 100%;
     height: 100%;
     display: block;
-    aspect-ratio: 16 / 11;
+    aspect-ratio: 16 / 10;
     object-fit: cover;
+    background: rgba(255,255,255,0.03);
   }
-  .heroImgFallback { aspect-ratio: 16 / 11; }
 
-  .heroInfo {
-    padding: 18px 18px 16px;
+  .heroImgFallback {
+    aspect-ratio: 16 / 10;
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+  }
+
+  .heroBody {
+    padding: 18px 18px;
     display: flex;
     flex-direction: column;
     justify-content: center;
   }
-  .heroTag {
-    width: fit-content;
-    font-size: 11px;
-    font-weight: 950;
-    letter-spacing: .04em;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,220,80,.55);
-    color: rgba(255,220,80,.95);
-    background: rgba(255,220,80,.10);
+
+  .heroEyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 10px;
+    color: var(--muted2);
+    font-size: 13px;
   }
+
+  .pillTag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,220,80,0.55);
+    color: rgba(255,220,80,0.92);
+    background: rgba(255,220,80,0.12);
+    font-weight: 900;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+  }
+
+  .heroDate { opacity: 0.9; }
+
   .heroTitle {
-    font-weight: 980;
-    font-size: clamp(22px, 2.2vw, 34px);
-    line-height: 1.08;
+    font-weight: 950;
+    font-size: clamp(20px, 2.2vw, 30px);
+    line-height: 1.10;
+    letter-spacing: -0.01em;
   }
+
   .heroDesc {
     margin-top: 10px;
-    opacity: .88;
-    line-height: 1.45;
+    color: var(--muted);
+    line-height: 1.55;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .heroMeta { margin-top: 12px; opacity: .60; font-size: 13px; }
 
   @media (max-width: 860px) {
-    .heroFeature { grid-template-columns: 1fr; }
-    .heroMedia { border-right: 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .heroInfo { padding: 16px 16px 14px; }
+    .heroCard { grid-template-columns: 1fr; }
+    .heroBody { padding: 16px 16px; }
   }
 
-  /* =========================================================
-     Section headings
-     ========================================================= */
-  .sectionHead {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin: 16px 0 10px;
-  }
-  .sectionHead.small { margin-top: 8px; }
-  .sectionTitle {
-    font-weight: 950;
-    letter-spacing: .02em;
-    font-size: 16px;
-    opacity: .95;
-    white-space: nowrap;
-  }
-  .sectionRule {
-    height: 1px;
-    flex: 1;
-    background: linear-gradient(to right, rgba(255,255,255,0.20), rgba(255,255,255,0.00));
-  }
-
-  /* =========================================================
-     3) Category grid
-     ========================================================= */
-  .catGrid {
+  /* -------- Category grid -------- */
+  .categoryGrid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
-    margin-bottom: 8px;
+    margin: 16px 0 20px;
   }
-  .catCard { padding: 16px; display: grid; gap: 8px; }
-  .catKicker {
+
+  .categoryCard {
+    text-decoration: none;
+    padding: 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .categoryLabel {
     font-weight: 950;
-    letter-spacing: .10em;
-    font-size: 11px;
-    text-transform: uppercase;
-    color: rgba(255,220,80,.92);
-    opacity: .95;
-  }
-  .catTitle { font-weight: 980; font-size: 18px; line-height: 1.15; }
-  .catDesc { opacity: .78; line-height: 1.4; }
-
-  @media (max-width: 900px) {
-    .catGrid { grid-template-columns: 1fr; }
+    font-size: 16px;
+    letter-spacing: -0.01em;
   }
 
-  /* =========================================================
-     4) Featured + Latest feed rows
-     ========================================================= */
-  .twoCol {
+  .categoryDesc {
+    color: var(--muted2);
+    line-height: 1.45;
+  }
+
+  @media (max-width: 860px) {
+    .categoryGrid { grid-template-columns: 1fr; }
+  }
+
+  /* -------- Main grid: feed + right column -------- */
+  .mainGrid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 18px;
+    grid-template-columns: 1fr 340px;
+    gap: 16px;
+    align-items: start;
     margin-top: 6px;
   }
+
   @media (max-width: 980px) {
-    .twoCol { grid-template-columns: 1fr; }
+    .mainGrid { grid-template-columns: 1fr; }
   }
 
+  .sectionHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin: 2px 0 10px;
+  }
+
+  .sectionTitle {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 950;
+    letter-spacing: -0.01em;
+  }
+
+  .sectionLink {
+    text-decoration: none;
+    color: rgba(255,220,80,0.88);
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: 0.03em;
+  }
+
+  /* -------- Feed rows (NOOGAtoday-like rows) -------- */
   .rows { display: grid; gap: 10px; }
 
-  .rowItem {
+  .row {
+    text-decoration: none;
+    padding: 12px 12px;
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 12px;
     align-items: center;
-    padding: 14px 14px;
   }
 
-  .rowTitle { font-weight: 950; font-size: 16px; line-height: 1.2; }
+  .rowText { min-width: 0; }
+
+  .rowTitle {
+    font-weight: 950;
+    font-size: 16px;
+    line-height: 1.18;
+    letter-spacing: -0.01em;
+  }
+
   .rowDesc {
     margin-top: 6px;
-    opacity: .82;
+    color: var(--muted);
     font-size: 14px;
-    line-height: 1.35;
+    line-height: 1.42;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .rowMeta { margin-top: 8px; opacity: .60; font-size: 12.5px; }
+
+  .rowMeta {
+    margin-top: 8px;
+    color: var(--muted3);
+    font-size: 12.5px;
+  }
 
   .rowThumb {
     width: 92px;
     height: 68px;
     border-radius: 12px;
     object-fit: cover;
-    border: 1px solid rgba(255,255,255,0.12);
-    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.03);
   }
-  .rowThumbFallback { display: block; }
+
+  /* Make fallback look intentional (not broken) */
+  .rowThumbFallback {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
+    position: relative;
+  }
+  .rowThumbFallback::after {
+    content: "—";
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: rgba(255,255,255,0.25);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+  }
 
   @media (max-width: 520px) {
     .rowThumb { width: 84px; height: 62px; }
-    .rowItem { padding: 12px 12px; }
   }
 
-  .emptyCard {
+  /* -------- Sidebar modules -------- */
+  .rightCol { display: grid; gap: 12px; }
+
+  .moduleCard {
     padding: 14px 14px;
-    opacity: .82;
-    line-height: 1.5;
-  }
-  .emptyCard code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    background: rgba(255,255,255,0.06);
-    padding: 2px 6px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.10);
   }
 
-  .moreLinks {
-    margin-top: 14px;
+  .moduleHeader {
     display: flex;
+    justify-content: space-between;
+    align-items: baseline;
     gap: 10px;
-    flex-wrap: wrap;
+    margin-bottom: 10px;
   }
 
-  /* =========================================================
-     5) Upcoming events module
-     ========================================================= */
-  .eventsCard { padding: 16px; }
-  .eventsList { display: grid; gap: 12px; }
+  .moduleTitle {
+    font-weight: 950;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+
+  .moduleLink {
+    text-decoration: none;
+    color: rgba(255,220,80,0.88);
+    font-weight: 900;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+  }
+
+  .eventList { display: grid; gap: 10px; }
+
   .eventRow {
     display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 12px;
+    grid-template-columns: 52px 1fr;
+    gap: 10px;
     align-items: center;
-    padding: 10px 10px;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.02);
   }
+
   .eventDate {
-    width: 54px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,0.10);
-    background: rgba(0,0,0,0.18);
-    padding: 10px 0;
+    background: rgba(255,255,255,0.03);
+    padding: 8px 6px;
     text-align: center;
   }
-  .eventDow { font-weight: 950; font-size: 11px; opacity: .78; letter-spacing: .06em; }
-  .eventNum { font-weight: 980; font-size: 18px; line-height: 1.1; margin-top: 2px; }
 
-  .eventTitle { font-weight: 950; font-size: 15px; line-height: 1.2; }
-  .eventMeta { opacity: .70; font-size: 13px; margin-top: 4px; }
-
-  .eventsFooter { margin-top: 14px; }
-
-  /* Pills (re-use existing global if you have it; these are safe) */
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 7px 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(255,255,255,0.03);
-    text-decoration: none;
-    color: rgba(255,255,255,0.92);
-    font-weight: 850;
-    font-size: 12px;
-    transition: transform 120ms ease, border-color 160ms ease, background 160ms ease;
+  .eventDow {
+    font-weight: 900;
+    font-size: 11px;
+    color: rgba(255,255,255,0.70);
+    letter-spacing: 0.08em;
   }
-  .pill:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.20); background: rgba(255,255,255,0.04); }
 
-  /* =========================================================
-     6) Advertise band
-     ========================================================= */
-  .adBand {
-    margin: 22px 0 18px;
-    border-radius: 18px;
-    border: 1px solid rgba(255,255,255,0.10);
-    background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,220,80,0.06));
-    padding: 18px;
+  .eventDay {
+    font-weight: 950;
+    font-size: 18px;
+    line-height: 1.05;
+    margin-top: 2px;
   }
-  .adInner {
+
+  .eventName {
+    font-weight: 900;
+    font-size: 13.5px;
+    line-height: 1.2;
+  }
+
+  .eventLoc {
+    margin-top: 4px;
+    color: var(--muted3);
+    font-size: 12.5px;
+  }
+
+  .divider {
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+  }
+
+  .resourceList {
+    margin-top: 10px;
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
+    gap: 8px;
+  }
+  .resourceLink {
+    text-decoration: none;
+    color: rgba(255,255,255,0.82);
+  }
+  .resourceLink:hover { color: rgba(255,255,255,0.92); }
+
+  /* -------- Promo band -------- */
+  .promoBand {
+    margin-top: 22px;
+    border-radius: calc(var(--card-radius) + 2px);
+    border: 1px solid rgba(255,220,80,0.22);
+    background:
+      radial-gradient(900px 240px at 20% 30%, rgba(255,220,80,0.14), transparent 55%),
+      rgba(255,255,255,0.02);
+    overflow: hidden;
+  }
+
+  .promoInner {
+    padding: 18px 18px;
+    display: grid;
+    grid-template-columns: 1fr auto;
     gap: 14px;
     align-items: center;
   }
-  .adKicker {
-    font-weight: 950;
-    letter-spacing: .10em;
-    font-size: 11px;
-    text-transform: uppercase;
-    color: rgba(255,220,80,.92);
-    margin-bottom: 6px;
-  }
-  .adTitle { font-weight: 980; font-size: 26px; line-height: 1.1; }
-  .adDesc { margin-top: 8px; opacity: .80; line-height: 1.45; max-width: 62ch; }
 
-  .adBtns {
+  .promoTitle {
+    font-weight: 950;
+    font-size: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  .promoDesc {
+    margin-top: 6px;
+    color: var(--muted);
+    line-height: 1.45;
+  }
+
+  .promoBtns {
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
     justify-content: flex-end;
   }
-  .btnGhost, .btnSolid {
+
+  .promoBtn {
     text-decoration: none;
-    font-weight: 950;
-    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     padding: 10px 12px;
-    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px;
+    font-weight: 950;
+    font-size: 13px;
+    border: 1px solid rgba(255,220,80,0.55);
+    color: rgba(255,220,80,0.95);
+    background: rgba(255,220,80,0.12);
+  }
+
+  .promoBtnGhost {
+    border-color: rgba(255,255,255,0.14);
+    color: rgba(255,255,255,0.88);
     background: rgba(255,255,255,0.03);
-    color: rgba(255,255,255,0.92);
-    transition: transform 120ms ease, filter 160ms ease, background 160ms ease, border-color 160ms ease;
-    white-space: nowrap;
-  }
-  .btnGhost:hover { transform: translateY(-1px); border-color: rgba(255,255,255,0.20); background: rgba(255,255,255,0.04); }
-
-  .btnSolid {
-    border-color: rgba(255,220,80,0.65);
-    background: rgba(255,220,80,0.92);
-    color: #111;
-  }
-  .btnSolid:hover { transform: translateY(-1px); filter: brightness(1.02); }
-
-  @media (max-width: 900px) {
-    .adInner { grid-template-columns: 1fr; }
-    .adBtns { justify-content: flex-start; }
   }
 
-  /* =========================================================
-     7) Footer
-     ========================================================= */
-  .siteFooter {
-    margin-top: 18px;
+  @media (max-width: 860px) {
+    .promoInner { grid-template-columns: 1fr; }
+    .promoBtns { justify-content: flex-start; }
+  }
+
+  /* -------- Footer -------- */
+  .footer {
+    margin-top: 22px;
     padding-top: 18px;
-    border-top: 1px solid rgba(255,255,255,0.10);
+    border-top: 1px solid rgba(255,255,255,0.08);
   }
+
   .footerGrid {
     display: grid;
-    grid-template-columns: 1fr 1fr 1.4fr;
-    gap: 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
   }
-  .footerHead { font-weight: 950; margin-bottom: 10px; opacity: .95; }
+
+  .footerHead {
+    font-weight: 950;
+    margin-bottom: 10px;
+  }
+
   .footerLink {
     display: block;
     text-decoration: none;
-    color: rgba(255,255,255,0.84);
-    padding: 6px 0;
-    opacity: .86;
+    color: rgba(255,255,255,0.80);
+    margin: 6px 0;
   }
-  .footerLink:hover { opacity: 1; }
-  .footerText { opacity: .78; line-height: 1.55; }
-  .footerFine { margin-top: 10px; opacity: .55; font-size: 12px; }
+  .footerLink:hover { color: rgba(255,255,255,0.92); }
 
-  @media (max-width: 900px) {
+  .footerText { color: var(--muted2); line-height: 1.5; }
+
+  .footerBottom {
+    margin-top: 14px;
+    color: var(--muted3);
+    font-size: 13px;
+  }
+
+  @media (max-width: 860px) {
     .footerGrid { grid-template-columns: 1fr; }
+  }
+
+  /* a11y */
+  .srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
   }
 </style>
