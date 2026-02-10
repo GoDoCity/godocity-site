@@ -2,7 +2,7 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/** Daytona filter */
+/** Daytona filter (MUST be module-scope + hoisted for getStaticPaths build) */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
   if (city === "daytona") return true;
@@ -86,7 +86,7 @@ function excerpt(post) {
 
 /**
  * getStaticPaths: build all topic pages from unique tag keys
- * (uses ONLY locally defined helpers)
+ * NOTE: build-safe: only references module-scope helpers
  */
 export async function getStaticPaths() {
   const all = await getCollection("posts");
@@ -118,7 +118,7 @@ const posts = all
   .sort(sortNewestFirst);
 
 /**
- * Decision #2 (hero selection):
+ * Hero selection (keep exactly):
  * - first featured post
  * - else newest
  * - do not duplicate hero in list
@@ -130,19 +130,20 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 <Base title={`${topicLabel} | GoDo Daytona`} subtitle={`${topicLabel}`} cityBase="daytona" />
 
 <section class="section">
-  <div class="container" style="max-width: 1180px;">
+  <div class="container" style="max-width: 1080px;">
+
+    <!-- Header stays full-width -->
+    <div class="topicHeader">
+      <h1 class="topicTitle">{topicLabel}</h1>
+      <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
+    </div>
+
+    <!-- Layout: main + sidebar (CSS only, safe) -->
     <div class="topicLayout">
-      <!-- MAIN -->
       <div class="topicMain">
-        <!-- Keep existing header classes -->
-        <div class="topicHeader">
-          <h1 class="topicTitle">{topicLabel}</h1>
-          <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
-        </div>
 
         {hero && (
           <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
-            {/* Editorial crop / gradient overlay lives here */}
             {heroImage(hero) && (
               <div class="heroMedia">
                 <img
@@ -155,7 +156,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
               </div>
             )}
 
-            {/* Keep existing heroBody/heroTitle/etc classes (used elsewhere-safe) */}
             <div class="heroBody">
               <div class="heroKicker">{isFeatured(hero) ? "FEATURED" : "TOP STORY"}</div>
               <div class="heroTitle">{hero.data.title}</div>
@@ -168,13 +168,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
         <div class="list">
           {rest.map((p) => (
             <a class="row" href={`/daytona/posts/${p.slug}/`}>
-              <div class="rowText">
-                <div class="rowTitle">{p.data.title ?? p.slug}</div>
-                {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
-                <div class="rowMeta">{dateText(p)}</div>
-              </div>
-
-              {heroImage(p) && (
+              {heroImage(p) ? (
                 <div class="rowThumbWrap">
                   <img
                     class="rowThumb"
@@ -184,258 +178,259 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
                     decoding="async"
                   />
                 </div>
+              ) : (
+                <div class="rowThumbWrap isEmpty" aria-hidden="true"></div>
               )}
+
+              <div class="rowText">
+                <div class="rowTitle">{p.data.title ?? p.slug}</div>
+                {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
+                <div class="rowMeta">{dateText(p)}</div>
+              </div>
             </a>
           ))}
         </div>
 
-        <p class="topicFooterLinks" style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;">
+        <p class="topicLinks">
           <a class="pill" href="/daytona/topics/">← All topics</a>
           <a class="pill" href="/daytona/posts/">Latest posts</a>
         </p>
+
       </div>
 
-      <!-- SIDEBAR -->
+      <!-- Sidebar (standard wrappers you requested) -->
       <aside class="topicSidebar">
-        {/* Keep new classes, but do NOT remove any old ones (none removed) */}
         <div class="moduleCard newsletterCard">
-          <div class="moduleHeader">
-            <div class="moduleTitle">Good news for Daytona</div>
-            <div class="moduleSubtext">Get the best local posts and events sent to your inbox, for free.</div>
-          </div>
+          <div class="moduleTitle">Good news for Daytona</div>
+          <div class="moduleSubtext">Get the best local posts and events sent to your inbox, for free.</div>
 
           <div class="newsletterForm">
             <input class="newsletterInput" type="email" placeholder="Enter your email address" aria-label="Email address" />
             <button class="newsletterButton" type="button">SIGN UP — IT’S FREE!</button>
-            <div class="moduleFineprint">100% free. Unsubscribe anytime.</div>
           </div>
+
+          <div class="moduleFineprint">100% free. Unsubscribe anytime.</div>
         </div>
 
         <div class="moduleCard eventsCard">
-          <div class="moduleHeader">
-            <div class="moduleTitle">Upcoming Events</div>
-            <div class="moduleSubtext">A few picks to get started.</div>
-          </div>
+          <div class="moduleTitle">Upcoming Events</div>
 
           <div class="eventsList" role="list">
             <div class="eventRow" role="listitem">
               <div class="eventDate">
-                <div class="eventDow">SAT</div>
-                <div class="eventDay">15</div>
+                <div class="eventDay">SAT</div>
+                <div class="eventNum">15</div>
               </div>
               <div class="eventInfo">
                 <div class="eventName">Add your first event</div>
-                <div class="eventLoc">Daytona Beach</div>
+                <div class="eventPlace">Daytona Beach</div>
               </div>
             </div>
 
+            <div class="eventDivider" aria-hidden="true"></div>
+
             <div class="eventRow" role="listitem">
               <div class="eventDate">
-                <div class="eventDow">SUN</div>
-                <div class="eventDay">16</div>
+                <div class="eventDay">SUN</div>
+                <div class="eventNum">16</div>
               </div>
               <div class="eventInfo">
                 <div class="eventName">Second event placeholder</div>
-                <div class="eventLoc">Ormond Beach</div>
+                <div class="eventPlace">Ormond Beach</div>
               </div>
             </div>
           </div>
         </div>
       </aside>
+
     </div>
+
   </div>
 </section>
 
 <style>
-  /* ===========================
+  /* ----------------------------
      Premium card system (v3)
-     =========================== */
-  :global(:root) {
-    --topic-radius: 18px;
-    --topic-radius-sm: 14px;
+     ---------------------------- */
+  :root{
+    --card-radius: 18px;
+    --card-border: rgba(255,255,255,.10);
+    --card-border-hover: rgba(255,220,80,.22);
+    --card-bg: rgba(255,255,255,.035);
+    --card-bg-hover: rgba(255,255,255,.05);
+    --shadow-soft: 0 10px 30px rgba(0,0,0,.24);
+    --lift: translateY(-2px);
+    --ease: 160ms ease;
+  }
 
-    --topic-border: rgba(255,255,255,.10);
-    --topic-border-soft: rgba(255,255,255,.08);
-
-    --topic-bg: rgba(255,255,255,.035);
-    --topic-bg-2: rgba(255,255,255,.05);
-
-    --topic-shadow: 0 10px 28px rgba(0,0,0,.35);
-    --topic-glow: 0 0 0 1px rgba(255,220,80,.16), 0 10px 32px rgba(0,0,0,.38);
-
-    --topic-ease: 160ms ease;
-    --topic-lift: translateY(-2px);
+  /* Header */
+  .topicHeader { margin-bottom: 18px; }
+  .topicTitle{
+    margin: 8px 0 6px 0;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+  .topicMeta{
+    opacity: .72;
+    font-size: 14px;
+    line-height: 1.2;
   }
 
   /* Layout */
   .topicLayout{
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
-    gap: 24px;
+    grid-template-columns: 1fr 320px;
+    gap: 18px;
     align-items: start;
   }
-  @media (max-width: 980px){
-    .topicLayout{ grid-template-columns: 1fr; }
-    .topicSidebar{ order: 2; }
-    .topicMain{ order: 1; }
+  .topicMain{ min-width: 0; }
+  .topicSidebar{
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: sticky;
+    top: 16px;
   }
 
-  /* Header (keep existing class names) */
-  .topicHeader { margin-bottom: 18px; }
-  .topicTitle {
-    margin: 8px 0 6px 0;
-    font-size: clamp(34px, 4.2vw, 54px);
-    line-height: 1.03;
-    letter-spacing: -0.02em;
-    font-weight: 950;
-  }
-  .topicMeta {
-    opacity: .62;
-    font-size: 13px;
-    letter-spacing: .02em;
+  @media (max-width: 980px){
+    .topicLayout{ grid-template-columns: 1fr; }
+    .topicSidebar{ position: static; }
   }
 
   /* Shared card base */
-  .heroCard,
-  .row,
-  .moduleCard{
-    border: 1px solid var(--topic-border-soft);
-    background: var(--topic-bg);
-    border-radius: var(--topic-radius);
-    transition: transform var(--topic-ease), border-color var(--topic-ease), background var(--topic-ease), box-shadow var(--topic-ease);
+  .heroCard, .row, .moduleCard{
+    border-radius: var(--card-radius);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease), filter var(--ease);
     will-change: transform;
   }
 
-  .heroCard:hover,
-  .row:hover,
-  .moduleCard:hover{
-    transform: var(--topic-lift);
-    border-color: rgba(255,255,255,.14);
-    background: var(--topic-bg-2);
-    box-shadow: var(--topic-shadow);
+  .heroCard:hover, .row:hover, .moduleCard:hover{
+    transform: var(--lift);
+    background: var(--card-bg-hover);
+    border-color: var(--card-border-hover);
+    box-shadow: 0 0 0 1px rgba(255,220,80,.08), var(--shadow-soft);
   }
 
-  /* ===========================
-     HERO (editorial crop + gradient)
-     =========================== */
+  /* ----------------------------
+     Hero (editorial crop + gradient anchor)
+     ---------------------------- */
   .heroCard{
-    display: block;
-    text-decoration: none;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 0;
     overflow: hidden;
-    margin: 18px 0 18px;
-    cursor: pointer;
-    position: relative;
+    text-decoration: none;
+    margin: 6px 0 18px;
+  }
+
+  @media (max-width: 880px){
+    .heroCard{ grid-template-columns: 1fr; }
   }
 
   .heroMedia{
     position: relative;
-    width: 100%;
     overflow: hidden;
     background: rgba(255,255,255,.02);
   }
 
-  /* slightly taller ratio than standard 16:9 */
+  /* subtle bottom gradient overlay (anchored title feel, not heavy darkening) */
+  .heroMedia::after{
+    content:"";
+    position:absolute;
+    inset: 0;
+    pointer-events:none;
+    background: linear-gradient(to bottom,
+      rgba(0,0,0,0) 55%,
+      rgba(0,0,0,.18) 78%,
+      rgba(0,0,0,.26) 100%);
+  }
+
   .heroImg{
     width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
-    aspect-ratio: 5 / 3; /* taller, magazine feel */
+    aspect-ratio: 4 / 3; /* slightly taller, more magazine-like */
     object-fit: cover;
-    transform: scale(1.001); /* avoids subpixel seams */
-    image-rendering: auto;
+    transform: scale(1.01);
   }
 
-  /* subtle bottom gradient overlay — sharp image, no heavy darkening */
-  .heroMedia::after{
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-      linear-gradient(
-        to bottom,
-        rgba(0,0,0,0) 55%,
-        rgba(0,0,0,.10) 75%,
-        rgba(0,0,0,.18) 100%
-      );
-  }
-
-  /* Hero body sits closer to image; feels anchored */
   .heroBody{
-    padding: 16px 18px 16px;
+    padding: 18px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
   }
 
   .heroKicker{
-    display: inline-block;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 900;
-    letter-spacing: .12em;
-    opacity: .75;
+    letter-spacing: .10em;
+    opacity: .78;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
   .heroTitle{
     font-weight: 950;
     font-size: clamp(22px, 2.2vw, 30px);
-    line-height: 1.12;
+    line-height: 1.10;
     letter-spacing: -0.015em;
   }
 
   .heroDesc{
     margin-top: 10px;
     opacity: .86;
-    line-height: 1.45;
+    line-height: 1.5;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
 
   .heroMeta{
     margin-top: 12px;
-    opacity: .58;
+    opacity: .62;
     font-size: 12.5px;
+    line-height: 1.2;
   }
 
-  /* ===========================
-     LIST (hover polish + tighter alignment)
-     =========================== */
+  /* ----------------------------
+     List (NOOGAtoday-ish: bigger thumbs, tighter alignment)
+     ---------------------------- */
   .list{
     display: grid;
-    gap: 12px; /* slightly more breathing room than tight stacks */
-    margin-top: 16px;
+    gap: 12px; /* slightly more air between rows */
+    margin-top: 6px;
   }
 
   .row{
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: auto 1fr;
     gap: 14px;
     align-items: center;
-    text-decoration: none;
     padding: 14px 14px;
+    text-decoration: none;
     cursor: pointer;
-  }
-
-  /* Hover glow (subtle, not jumpy) */
-  .row:hover{
-    box-shadow: var(--topic-glow);
   }
 
   .rowText{ min-width: 0; }
 
   .rowTitle{
     font-weight: 900;
-    font-size: 17px;   /* slightly larger */
-    line-height: 1.18; /* tighter */
+    font-size: 17px;
+    line-height: 1.18;
     letter-spacing: -0.01em;
   }
 
   .rowDesc{
     margin-top: 7px;
-    opacity: .82;
+    opacity: .84;
     font-size: 14px;
-    line-height: 1.38;
+    line-height: 1.45;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
@@ -444,200 +439,184 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
   .rowMeta{
     margin-top: 9px;
-    opacity: .58;
+    opacity: .58; /* softer */
     font-size: 12.5px;
+    line-height: 1.2;
   }
 
-  /* Thumbnails: larger + responsive, with hover brighten */
   .rowThumbWrap{
+    width: 118px;
+    height: 86px;
     border-radius: 14px;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,.10);
     background: rgba(255,255,255,.02);
-    flex: 0 0 auto;
+    flex: none;
+  }
+
+  .rowThumbWrap.isEmpty{
+    opacity: .25;
   }
 
   .rowThumb{
-    width: 120px;
-    height: 84px;
-    display: block;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    transition: filter var(--topic-ease), transform var(--topic-ease);
-    will-change: filter;
+    display: block;
+    filter: brightness(.98) contrast(1.02);
+    transition: filter var(--ease);
   }
 
+  /* v3 row hover polish: subtle glow + thumb brighten */
+  .row:hover{
+    box-shadow: 0 0 0 1px rgba(255,220,80,.10), var(--shadow-soft);
+  }
   .row:hover .rowThumb{
-    filter: brightness(1.07) contrast(1.03);
+    filter: brightness(1.06) contrast(1.03);
   }
 
-  @media (max-width: 680px){
-    .topicLayout{ gap: 18px; }
-    .rowThumb{ width: 112px; height: 78px; }
-  }
-  @media (max-width: 520px){
-    .row{
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
-    .rowThumb{
-      width: 100%;
-      height: 170px;
-      aspect-ratio: 16 / 9;
-    }
-    .rowThumbWrap{
-      width: 100%;
-    }
+  @media (max-width: 560px){
+    .rowThumbWrap{ width: 104px; height: 76px; border-radius: 12px; }
+    .row{ padding: 12px 12px; gap: 12px; }
+    .rowTitle{ font-size: 16px; }
   }
 
-  /* ===========================
-     SIDEBAR (typography polish)
-     =========================== */
-  .topicSidebar{
+  /* Links */
+  .topicLinks{
+    margin-top: 18px;
     display: flex;
-    flex-direction: column;
-    gap: 14px;
-    position: sticky;
-    top: 18px;
-  }
-  @media (max-width: 980px){
-    .topicSidebar{
-      position: static;
-    }
+    gap: 10px;
+    flex-wrap: wrap;
   }
 
+  /* ----------------------------
+     Sidebar (typography polish + widget feel)
+     ---------------------------- */
   .moduleCard{
-    padding: 18px 18px;
-    border-radius: var(--topic-radius);
+    padding: 16px 16px;
   }
 
-  .moduleHeader{
-    margin-bottom: 12px;
-  }
-
-  /* Sidebar typography upgrades */
   .moduleTitle{
     font-weight: 950;
-    font-size: 16.5px;   /* slightly larger */
-    line-height: 1.18;   /* tighter */
+    font-size: 16px; /* slightly larger */
+    line-height: 1.15;
     letter-spacing: -0.01em;
+    margin: 0 0 8px 0;
   }
 
   .moduleSubtext{
-    margin-top: 8px;
-    opacity: .78;
+    opacity: .80;
     font-size: 13.5px;
     line-height: 1.35; /* tighter */
+    margin-bottom: 12px;
   }
 
   .moduleFineprint{
-    margin-top: 10px;
     opacity: .62;
     font-size: 12px;
-    line-height: 1.3;
+    line-height: 1.25;
+    margin-top: 10px;
   }
 
-  /* Newsletter spacing balance */
   .newsletterCard{
-    padding: 20px 18px 18px;
+    padding: 18px 16px 16px; /* slightly taller/airier */
   }
 
   .newsletterForm{
     display: grid;
     gap: 10px;
-    margin-top: 12px;
+    margin-top: 10px;
   }
 
   .newsletterInput{
     width: 100%;
-    height: 44px;
+    padding: 12px 12px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,.12);
-    background: rgba(0,0,0,.18);
-    color: rgba(255,255,255,.92);
-    padding: 0 12px;
+    background: rgba(0,0,0,.25);
+    color: inherit;
     outline: none;
-    transition: border-color var(--topic-ease), background var(--topic-ease);
   }
+
   .newsletterInput:focus{
-    border-color: rgba(255,220,80,.45);
-    background: rgba(0,0,0,.22);
+    border-color: rgba(255,220,80,.35);
+    box-shadow: 0 0 0 3px rgba(255,220,80,.10);
   }
 
   .newsletterButton{
-    height: 44px;
+    width: 100%;
+    padding: 12px 12px;
     border-radius: 12px;
-    border: 1px solid rgba(255,220,80,.55);
-    background: rgba(255,220,80,.12);
-    color: rgba(255,220,80,.95);
-    font-weight: 950;
-    letter-spacing: .04em;
-    cursor: pointer;
-    transition: transform var(--topic-ease), filter var(--topic-ease), background var(--topic-ease);
-  }
-  .newsletterButton:hover{
-    filter: brightness(1.04);
-    transform: translateY(-1px);
+    border: 1px solid rgba(255,220,80,.35);
     background: rgba(255,220,80,.14);
+    color: rgba(255,220,80,.98);
+    font-weight: 900;
+    letter-spacing: .02em;
+    cursor: pointer;
+    transition: transform var(--ease), filter var(--ease), background var(--ease), border-color var(--ease);
   }
 
-  /* Events: publication widget feel */
+  .newsletterButton:hover{
+    filter: brightness(1.06);
+    border-color: rgba(255,220,80,.45);
+  }
+
   .eventsCard{
-    padding: 18px 18px 16px;
+    padding: 16px 16px;
   }
 
   .eventsList{
-    margin-top: 12px;
+    margin-top: 10px;
     display: grid;
     gap: 10px;
   }
 
   .eventRow{
     display: grid;
-    grid-template-columns: 52px 1fr;
+    grid-template-columns: 44px 1fr;
     gap: 12px;
     align-items: center;
-    padding: 12px;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,.09);
-    background: rgba(255,255,255,.025);
-    transition: background var(--topic-ease), border-color var(--topic-ease);
-  }
-  .eventRow:hover{
-    background: rgba(255,255,255,.04);
-    border-color: rgba(255,255,255,.13);
   }
 
   .eventDate{
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,.10);
-    background: rgba(0,0,0,.18);
-    padding: 8px 0;
+    background: rgba(255,255,255,.03);
+    padding: 8px 8px;
     text-align: center;
-    line-height: 1;
-  }
-  .eventDow{
-    font-size: 10px;
-    font-weight: 950;
-    letter-spacing: .12em;
-    opacity: .75;
-  }
-  .eventDay{
-    margin-top: 6px;
-    font-size: 18px;
-    font-weight: 950;
-    letter-spacing: -0.02em;
-  }
-  .eventName{
-    font-weight: 900;
-    font-size: 14px;
-    line-height: 1.2;
-  }
-  .eventLoc{
-    margin-top: 6px;
-    opacity: .7;
-    font-size: 12.5px;
-    line-height: 1.25;
+    line-height: 1.05;
   }
 
-  /* Keep existing pill styling untouched (uses global) */
+  .eventDay{
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .10em;
+    opacity: .78;
+  }
+
+  .eventNum{
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 950;
+  }
+
+  .eventName{
+    font-weight: 900;
+    font-size: 13.8px;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+
+  .eventPlace{
+    opacity: .72;
+    font-size: 12.5px;
+    line-height: 1.2;
+  }
+
+  .eventDivider{
+    height: 1px;
+    background: rgba(255,255,255,.08);
+    border-radius: 999px;
+    margin: 2px 0;
+  }
 </style>
