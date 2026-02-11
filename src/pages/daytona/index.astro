@@ -285,6 +285,10 @@ const latest = feed.slice(0, 8);
     --t4: rgba(232,237,244,.58);
 
     --glow: 0 0 0 1px rgba(255,210,74,.18), 0 10px 26px rgba(0,0,0,.30);
+
+    /* NASCAR-style yellow */
+    --yellow: #ffd24a;
+    --yellowDeep: #ffc400;
   }
 
   /* Grid */
@@ -336,28 +340,38 @@ const latest = feed.slice(0, 8);
     line-height: 1.25;
     font-size: 13px;
   }
+
+  /* NASCAR-style CTA */
   .newsletterForm { display: grid; gap: 10px; }
   .newsletterInput {
     width: 100%;
     height: 44px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,.10);
-    background: rgba(0,0,0,.18);
+    background: rgba(0,0,0,.22);
     color: var(--t1);
     padding: 0 12px;
     outline: none;
   }
-  .newsletterInput:focus { border-color: rgba(255,210,74,.30); box-shadow: 0 0 0 3px rgba(255,210,74,.10); }
-  .newsletterButton {
-    height: 44px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,210,74,.38);
-    background: rgba(255,210,74,.14);
-    color: var(--t1);
-    font-weight: 900;
-    cursor: pointer;
+  .newsletterInput::placeholder { color: rgba(232,237,244,.55); }
+  .newsletterInput:focus {
+    border-color: rgba(255,210,74,.55);
+    box-shadow: 0 0 0 3px rgba(255,210,74,.14);
   }
-  .newsletterButton:hover { background: rgba(255,210,74,.18); }
+
+  .newsletterButton {
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.35);
+    background: linear-gradient(180deg, var(--yellow), var(--yellowDeep));
+    color: #0b0d10;
+    font-weight: 950;
+    letter-spacing: .01em;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(0,0,0,.22);
+  }
+  .newsletterButton:hover { filter: brightness(1.02) contrast(1.02); }
+  .newsletterButton:active { transform: translateY(0.5px); }
 
   /* Hero feature */
   .heroFeature {
@@ -409,7 +423,13 @@ const latest = feed.slice(0, 8);
 
   /* Section headers */
   .sectionHeader { margin: 6px 0 10px; }
-  .sectionTitle { font-weight: 950; font-size: 14px; color: var(--t3); text-transform: uppercase; letter-spacing: .12em; }
+  .sectionTitle {
+    font-weight: 950;
+    font-size: 14px;
+    color: var(--t3);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+  }
   .feedHeader {
     display: flex;
     align-items: baseline;
@@ -456,13 +476,13 @@ const latest = feed.slice(0, 8);
   .row {
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 10px; /* tighter gap between text and thumb */
-    align-items: center; /* ensures thumb vertically centers */
+    gap: 10px;
+    align-items: center;
     text-decoration: none;
     border: 1px solid var(--cardBorderSoft);
     background: rgba(255,255,255,.022);
     border-radius: 14px;
-    padding: 12px 12px; /* slightly more padding */
+    padding: 12px 12px;
     box-shadow: 0 0 0 rgba(0,0,0,0);
     transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
     cursor: pointer;
@@ -475,7 +495,7 @@ const latest = feed.slice(0, 8);
 
   .rowText { min-width: 0; }
   .rowTitle {
-    font-weight: 900; /* hair bolder */
+    font-weight: 900;
     font-size: 16px;
     line-height: 1.18;
     color: var(--t1);
@@ -506,11 +526,9 @@ const latest = feed.slice(0, 8);
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(255,255,255,.03);
     box-shadow: 0 10px 18px rgba(0,0,0,.22);
-    transition: filter 160ms ease, transform 160ms ease;
+    transition: filter 160ms ease;
   }
-  .row:hover .rowThumb {
-    filter: brightness(1.08) contrast(1.02);
-  }
+  .row:hover .rowThumb { filter: brightness(1.08) contrast(1.02); }
   .rowThumbFallback {
     background:
       radial-gradient(80px 80px at 30% 25%, rgba(255,255,255,.08), rgba(255,255,255,0)),
@@ -538,7 +556,7 @@ const latest = feed.slice(0, 8);
     justify-content: space-between;
     align-items: baseline;
     gap: 10px;
-    margin-bottom: 10px; /* match list spacing */
+    margin-bottom: 10px;
   }
   .moduleTitle {
     font-weight: 950;
@@ -647,4 +665,41 @@ const latest = feed.slice(0, 8);
   }
   .footerLink:hover { color: rgba(255,210,74,.92); }
   .footerFine { color: var(--t4); font-size: 13px; line-height: 1.35; }
+
+  /* ================= Mobile-only polish pass ================= */
+  @media (max-width: 520px) {
+    /* nav pills + subscribe (global-ish) */
+    :global(.pill) {
+      padding: 6px 10px;
+      font-size: 11.5px;
+      border-radius: 999px;
+      letter-spacing: .01em;
+    }
+
+    /* Try to keep Home/Topics/Guides/Events in one row if they live in a pill row */
+    :global(.navPills),
+    :global(.pillRow),
+    :global(.navRow) {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 8px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px;
+    }
+
+    /* Subscribe pill: black with yellow outline (premium) */
+    :global(a.pill.subscribe),
+    :global(.pill.subscribe),
+    :global(a.pill[href*="subscribe"]) {
+      background: rgba(0,0,0,.55) !important;
+      border: 1px solid rgba(255,210,74,.65) !important;
+      color: rgba(255,210,74,.95) !important;
+    }
+
+    /* newsletter: tighten spacing a hair */
+    .newsletterBandInner { padding: 16px 14px; }
+    .newsletterHeadline { font-size: 18px; }
+    .newsletterButton { height: 44px; }
+  }
 </style>
