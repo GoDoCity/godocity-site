@@ -35,17 +35,9 @@ function sortNewestFirst(a, b) {
   return db - da;
 }
 
-function formatDate(d) {
-  if (!d) return "";
-  try {
-    return new Date(d).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return "";
-  }
+function dateText(post) {
+  const d = getPostDate(post);
+  return d ? new Date(d).toLocaleDateString("en-US") : "";
 }
 
 function excerpt(post) {
@@ -53,8 +45,8 @@ function excerpt(post) {
 }
 
 /**
- * FIX (per your note): heroImage is a STRING path (no .src)
- * and it must check multiple common keys.
+ * IMPORTANT: keep thumbnails working exactly as-is
+ * (do not use .src, this is a STRING path)
  */
 function heroImage(post) {
   const v =
@@ -67,117 +59,102 @@ function heroImage(post) {
   return typeof v === "string" ? v.trim() : "";
 }
 
-/** Data (keep getCollection logic) */
+/** Data (keep logic stable) */
 const all = await getCollection("posts");
 const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
-/** Main hero story: first featured, else newest */
-const mainHero = posts.find(isFeatured) ?? posts[0] ?? null;
+const hero = posts.find(isFeatured) ?? posts[0] ?? null;
+const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
-/** Feed rows (don’t duplicate main hero) */
-const feed = mainHero ? posts.filter((p) => p.slug !== mainHero.slug) : posts;
-
-/** Optional: show a few featured first, then the rest */
-const featured = feed.filter(isFeatured);
-const nonFeatured = feed.filter((p) => !isFeatured(p));
-const FEED_LIMIT = 12;
-const feedRows = [...featured, ...nonFeatured].slice(0, FEED_LIMIT);
+// Split for “Featured + Latest” feel (no logic change to content source; just presentation)
+const latest = feed.slice(0, 8);
 ---
 
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona" />
 
 <section class="section">
-  <div class="container" style="max-width: 1120px;">
-    <!-- 1) TOP NEWSLETTER SIGNUP HERO -->
+  <div class="container homeWrap">
+
+    <!-- (1) Top Newsletter Signup Hero -->
     <div class="newsletterBand">
       <div class="newsletterBandInner">
-        <div class="newsletterCopy">
-          <div class="newsletterKicker">GODO DAYTONA</div>
-          <h1 class="newsletterTitle">Good news for Daytona</h1>
-          <p class="newsletterSub">Get the best local posts and events sent to your inbox, for free.</p>
+        <div class="newsletterText">
+          <div class="newsletterKicker">Good news for Daytona</div>
+          <div class="newsletterHeadline">Get the best local posts and events sent to your inbox.</div>
           <div class="newsletterFine">100% free. Unsubscribe anytime.</div>
         </div>
 
         <form class="newsletterForm" action="/daytona/subscribe/" method="get">
-          <label class="srOnly" for="email">Email address</label>
-          <input
-            id="email"
-            name="email"
-            class="newsletterInput"
-            type="email"
-            placeholder="Enter your email address"
-            autocomplete="email"
-          />
-          <button class="newsletterBtn" type="submit">SIGN UP — IT’S FREE!</button>
+          <input class="newsletterInput" type="email" name="email" placeholder="Enter your email address" />
+          <button class="newsletterButton" type="submit">Sign up — it’s free</button>
         </form>
       </div>
     </div>
 
-    <!-- 2) ONE MAIN HERO STORY -->
-    {mainHero && (
-      <div class="heroWrap">
-        <a class="heroCard premiumCard" href={`/daytona/posts/${mainHero.slug}/`}>
-          <div class="heroMedia">
-            {heroImage(mainHero) ? (
-              <img
-                class="heroImg"
-                src={heroImage(mainHero)}
-                alt={mainHero.data.title ?? "Hero image"}
-                loading="lazy"
-                decoding="async"
-              />
-            ) : (
-              <div class="heroImg heroImgFallback" aria-hidden="true"></div>
-            )}
-          </div>
+    <!-- Main grid: left content + right rail -->
+    <div class="homeGrid">
 
-          <div class="heroBody">
-            <div class="heroEyebrow">
-              {isFeatured(mainHero) && <span class="pillTag">FEATURED</span>}
-              <span class="heroDate">{formatDate(getPostDate(mainHero))}</span>
+      <!-- LEFT -->
+      <div class="homeMain">
+
+        <!-- (2) One Main Hero Story -->
+        {hero && (
+          <a class="heroFeature" href={`/daytona/posts/${hero.slug}/`}>
+            <div class="heroMedia">
+              {heroImage(hero) ? (
+                <img
+                  class="heroImg"
+                  src={heroImage(hero)}
+                  alt={hero.data.title ?? "Hero image"}
+                  loading="lazy"
+                  decoding="async"
+                />
+              ) : (
+                <div class="heroImg heroImgFallback" aria-hidden="true"></div>
+              )}
             </div>
 
-            <div class="heroTitle">{mainHero.data.title ?? mainHero.slug}</div>
+            <div class="heroCopy">
+              <div class="heroTitle">{hero.data.title ?? hero.slug}</div>
+              {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
+              <div class="heroMeta">{dateText(hero)}</div>
+            </div>
+          </a>
+        )}
 
-            {excerpt(mainHero) && <div class="heroDesc">{excerpt(mainHero)}</div>}
-          </div>
-        </a>
-      </div>
-    )}
-
-    <!-- 3) CATEGORY HIGHLIGHT GRID (3 cards) -->
-    <div class="categoryGrid">
-      <a class="categoryCard premiumCard" href="/daytona/topics/">
-        <div class="categoryLabel">Topics</div>
-        <div class="categoryDesc">Browse what Daytona is talking about.</div>
-      </a>
-
-      <a class="categoryCard premiumCard" href="/daytona/guides/">
-        <div class="categoryLabel">City Guides</div>
-        <div class="categoryDesc">Curated guides for locals and visitors.</div>
-      </a>
-
-      <a class="categoryCard premiumCard" href="/daytona/events/">
-        <div class="categoryLabel">Events</div>
-        <div class="categoryDesc">What’s happening this week.</div>
-      </a>
-    </div>
-
-    <!-- 4 + 5) FEED ROWS + UPCOMING EVENTS MODULE -->
-    <div class="mainGrid">
-      <div class="feedCol">
+        <!-- (3) Category Highlight Grid -->
         <div class="sectionHeader">
-          <h2 class="sectionTitle">Latest</h2>
-          <a class="sectionLink" href="/daytona/posts/">View all</a>
+          <div class="sectionTitle">Explore</div>
         </div>
 
-        <div class="rows">
-          {feedRows.map((p) => (
-            <a class="row premiumCard" href={`/daytona/posts/${p.slug}/`}>
+        <div class="catGrid">
+          <a class="catCard" href="/daytona/topics/">
+            <div class="catTitle">Topics</div>
+            <div class="catDesc">Browse what Daytona is talking about.</div>
+          </a>
+          <a class="catCard" href="/daytona/guides/">
+            <div class="catTitle">City Guides</div>
+            <div class="catDesc">Curated guides for locals and visitors.</div>
+          </a>
+          <a class="catCard" href="/daytona/events/">
+            <div class="catTitle">Events</div>
+            <div class="catDesc">What’s happening this week.</div>
+          </a>
+        </div>
+
+        <!-- (4) Featured + Latest Feed Rows -->
+        <div class="feedHeader">
+          <div class="sectionTitle">Latest</div>
+          <a class="viewAllLink" href="/daytona/posts/">View all</a>
+        </div>
+
+        <div class="list">
+          {latest.map((p) => (
+            <a class="row" href={`/daytona/posts/${p.slug}/`}>
               <div class="rowText">
                 <div class="rowTitle">{p.data.title ?? p.slug}</div>
                 {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
-                <div class="rowMeta">{formatDate(getPostDate(p))}</div>
+                <div class="rowMeta">{dateText(p)}</div>
               </div>
 
               {heroImage(p) ? (
@@ -194,16 +171,19 @@ const feedRows = [...featured, ...nonFeatured].slice(0, FEED_LIMIT);
             </a>
           ))}
         </div>
+
       </div>
 
-      <aside class="rightCol">
-        <div class="moduleCard eventsCard premiumCard">
-          <div class="moduleHeader">
+      <!-- RIGHT RAIL -->
+      <aside class="homeRail">
+        <!-- (5) Upcoming Events Module -->
+        <div class="moduleCard eventsCard">
+          <div class="moduleHead">
             <div class="moduleTitle">Upcoming Events</div>
-            <a class="moduleLink" href="/daytona/events/">See all</a>
+            <a class="viewAllLink viewAllLinkSmall" href="/daytona/events/">See all</a>
           </div>
 
-          <div class="eventList">
+          <div class="eventsList">
             <div class="eventRow">
               <div class="eventDate">
                 <div class="eventDow">SAT</div>
@@ -211,11 +191,9 @@ const feedRows = [...featured, ...nonFeatured].slice(0, FEED_LIMIT);
               </div>
               <div class="eventInfo">
                 <div class="eventName">Add your first event</div>
-                <div class="eventLoc">Daytona Beach</div>
+                <div class="eventPlace">Daytona Beach</div>
               </div>
             </div>
-
-            <div class="divider"></div>
 
             <div class="eventRow">
               <div class="eventDate">
@@ -224,45 +202,41 @@ const feedRows = [...featured, ...nonFeatured].slice(0, FEED_LIMIT);
               </div>
               <div class="eventInfo">
                 <div class="eventName">Second event placeholder</div>
-                <div class="eventLoc">Ormond Beach</div>
+                <div class="eventPlace">Ormond Beach</div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="moduleCard premiumCard">
-          <div class="moduleTitle">Resources</div>
-          <div class="resourceList">
-            <a class="resourceLink" href="/daytona/subscribe/">Subscribe</a>
-            <a class="resourceLink" href="/daytona/advertise/">Advertise</a>
-            <a class="resourceLink" href="/daytona/topics/">Topics</a>
-            <a class="resourceLink" href="/daytona/events/">Events</a>
+          <div class="railDivider"></div>
+
+          <div class="railLinks">
+            <div class="moduleTitle moduleTitleSmall">Resources</div>
+            <a class="railLink" href="/daytona/subscribe/">Subscribe</a>
+            <a class="railLink" href="/daytona/advertise/">Advertise</a>
+            <a class="railLink" href="/daytona/topics/">Topics</a>
+            <a class="railLink" href="/daytona/events/">Events</a>
           </div>
         </div>
       </aside>
+
     </div>
 
-    <!-- 6) BOTTOM ADVERTISE BAND -->
+    <!-- (6) Bottom “Advertise with us” Promo Band -->
     <div class="promoBand">
-      <div class="promoInner">
-        <div>
-          <div class="promoTitle">Advertise with us.</div>
-          <div class="promoDesc">
-            Reach locals where they actually pay attention — in the inbox and on the site.
-          </div>
-        </div>
-
-        <div class="promoBtns">
-          <a class="promoBtn" href="/daytona/advertise/">Branded Content + Display</a>
-          <a class="promoBtn promoBtnGhost" href="/daytona/advertise/">Events</a>
-        </div>
+      <div class="promoCopy">
+        <div class="promoTitle">Advertise with us.</div>
+        <div class="promoDesc">Reach locals with sponsored stories, display placements, and event promotion.</div>
+      </div>
+      <div class="promoActions">
+        <a class="btn" href="/daytona/advertise/">Branded Content + Display</a>
+        <a class="btn btnGhost" href="/daytona/advertise/">Events</a>
       </div>
     </div>
 
-    <!-- 7) FOOTER -->
-    <footer class="footer">
-      <div class="footerGrid">
-        <div>
+    <!-- (7) Footer -->
+    <footer class="homeFooter">
+      <div class="footerCols">
+        <div class="footerCol">
           <div class="footerHead">Resources</div>
           <a class="footerLink" href="/daytona/subscribe/">Subscribe</a>
           <a class="footerLink" href="/daytona/advertise/">Advertise</a>
@@ -270,562 +244,407 @@ const feedRows = [...featured, ...nonFeatured].slice(0, FEED_LIMIT);
           <a class="footerLink" href="/daytona/events/">Events</a>
         </div>
 
-        <div>
+        <div class="footerCol">
           <div class="footerHead">About</div>
           <a class="footerLink" href="/daytona/contact/">Contact</a>
           <a class="footerLink" href="/daytona/legal/">Legal</a>
         </div>
 
-        <div>
-          <div class="footerHead">GoDoCity</div>
-          <div class="footerText">
+        <div class="footerCol footerColWide">
+          <div class="footerHead">GoDoDaytona</div>
+          <div class="footerFine">
             GoDoDaytona is part of the GoDoCity network. Built to scale city-by-city with consistent design,
             editorial workflow, and advertising packages.
           </div>
+          <div class="footerFine" style="margin-top:10px;">© {new Date().getFullYear()} GoDoCity. All rights reserved.</div>
         </div>
       </div>
-
-      <div class="footerBottom">
-        © {new Date().getFullYear()} GoDoCity. All rights reserved.
-      </div>
     </footer>
+
   </div>
 </section>
 
 <style>
-  /* -------- Premium card system (reused) -------- */
-  :global(body) {
-    /* keep your site-wide dark theme; this just ensures our local surfaces fit */
+  /* ============ Premium system (homepage scoped) ============ */
+  .homeWrap {
+    --maxMain: 760px;
+    --rail: 320px;
+
+    --cardRadius: 16px;
+    --cardBorder: rgba(255,255,255,.10);
+    --cardBorderSoft: rgba(255,255,255,.08);
+    --cardBg: rgba(255,255,255,.03);
+    --cardBg2: rgba(255,255,255,.04);
+
+    --shadow: 0 10px 26px rgba(0,0,0,.30);
+    --shadowSoft: 0 8px 18px rgba(0,0,0,.22);
+
+    --t1: #e8edf4;
+    --t2: rgba(232,237,244,.86);
+    --t3: rgba(232,237,244,.70);
+    --t4: rgba(232,237,244,.58);
+
+    --glow: 0 0 0 1px rgba(255,210,74,.18), 0 10px 26px rgba(0,0,0,.30);
   }
 
-  :root {
-    --card-radius: 18px;
-    --card-border: rgba(255, 255, 255, 0.10);
-    --card-border-hover: rgba(255, 255, 255, 0.16);
-    --card-bg: rgba(255, 255, 255, 0.035);
-    --card-bg-hover: rgba(255, 255, 255, 0.055);
-    --muted: rgba(255, 255, 255, 0.72);
-    --muted2: rgba(255, 255, 255, 0.58);
-    --muted3: rgba(255, 255, 255, 0.42);
-    --lift: translateY(-2px);
-    --ease: 160ms ease;
-  }
-
-  .premiumCard {
-    border: 1px solid var(--card-border);
-    background: var(--card-bg);
-    border-radius: var(--card-radius);
-    transition: transform var(--ease), background var(--ease), border-color var(--ease);
-  }
-  .premiumCard:hover {
-    transform: var(--lift);
-    background: var(--card-bg-hover);
-    border-color: var(--card-border-hover);
-  }
-
-  /* -------- Newsletter band -------- */
-  .newsletterBand {
-    margin-top: 8px;
-    margin-bottom: 22px;
-    border-radius: calc(var(--card-radius) + 2px);
-    border: 1px solid rgba(120, 255, 180, 0.22);
-    background:
-      radial-gradient(1200px 300px at 15% 20%, rgba(80, 255, 170, 0.10), transparent 55%),
-      radial-gradient(900px 260px at 85% 30%, rgba(90, 180, 255, 0.10), transparent 55%),
-      rgba(255, 255, 255, 0.02);
-    overflow: hidden;
-  }
-
-  .newsletterBandInner {
-    padding: 22px 22px;
+  /* Grid */
+  .homeGrid {
     display: grid;
-    grid-template-columns: 1.2fr 0.9fr;
+    grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
     gap: 18px;
+    align-items: start;
+  }
+  @media (max-width: 980px) {
+    .homeGrid { grid-template-columns: 1fr; }
+    .homeRail { order: 2; }
+  }
+
+  /* Newsletter band */
+  .newsletterBand {
+    border: 1px solid var(--cardBorder);
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border-radius: var(--cardRadius);
+    box-shadow: var(--shadowSoft);
+    overflow: hidden;
+    margin: 6px 0 16px;
+  }
+  .newsletterBandInner {
+    display: grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap: 14px;
+    padding: 18px 18px;
     align-items: center;
   }
-
+  @media (max-width: 880px) {
+    .newsletterBandInner { grid-template-columns: 1fr; }
+  }
   .newsletterKicker {
     font-weight: 900;
-    letter-spacing: 0.12em;
-    font-size: 12px;
-    text-transform: uppercase;
-    color: rgba(255, 220, 80, 0.95);
-    margin-bottom: 10px;
+    letter-spacing: .2px;
+    color: var(--t1);
+    margin-bottom: 6px;
   }
-  .newsletterTitle {
-    margin: 0;
-    font-weight: 950;
-    font-size: clamp(30px, 3.2vw, 44px);
-    line-height: 1.06;
-  }
-  .newsletterSub {
-    margin: 10px 0 8px;
-    color: var(--muted);
-    line-height: 1.45;
+  .newsletterHeadline {
+    font-size: 20px;
+    line-height: 1.15;
+    font-weight: 900;
+    color: var(--t1);
+    margin-bottom: 8px;
   }
   .newsletterFine {
-    color: var(--muted3);
+    color: var(--t4);
+    line-height: 1.25;
     font-size: 13px;
   }
-
-  .newsletterForm {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-  }
-
+  .newsletterForm { display: grid; gap: 10px; }
   .newsletterInput {
     width: 100%;
+    height: 44px;
     border-radius: 12px;
-    padding: 12px 12px;
-    border: 1px solid rgba(255,255,255,0.14);
-    background: rgba(0,0,0,0.18);
-    color: rgba(255,255,255,0.92);
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.18);
+    color: var(--t1);
+    padding: 0 12px;
     outline: none;
   }
-  .newsletterInput:focus {
-    border-color: rgba(255,255,255,0.22);
-  }
-
-  .newsletterBtn {
+  .newsletterInput:focus { border-color: rgba(255,210,74,.30); box-shadow: 0 0 0 3px rgba(255,210,74,.10); }
+  .newsletterButton {
+    height: 44px;
     border-radius: 12px;
-    padding: 12px 12px;
-    border: 1px solid rgba(255, 220, 80, 0.55);
-    background: rgba(255, 220, 80, 0.14);
-    color: rgba(255, 220, 80, 0.95);
+    border: 1px solid rgba(255,210,74,.38);
+    background: rgba(255,210,74,.14);
+    color: var(--t1);
     font-weight: 900;
-    letter-spacing: 0.03em;
     cursor: pointer;
   }
-  .newsletterBtn:hover {
-    filter: brightness(1.03);
-  }
+  .newsletterButton:hover { background: rgba(255,210,74,.18); }
 
-  @media (max-width: 860px) {
-    .newsletterBandInner {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  /* -------- Hero story -------- */
-  .heroWrap { margin-bottom: 18px; }
-
-  .heroCard {
+  /* Hero feature */
+  .heroFeature {
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 0;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
     text-decoration: none;
+    border: 1px solid var(--cardBorder);
+    background: var(--cardBg);
+    border-radius: var(--cardRadius);
     overflow: hidden;
+    box-shadow: var(--shadowSoft);
+    margin-bottom: 16px;
   }
-
-  .heroMedia {
-    position: relative;
-    min-height: 100%;
+  @media (max-width: 740px) {
+    .heroFeature { grid-template-columns: 1fr; }
   }
-
+  .heroMedia { background: rgba(255,255,255,.02); }
   .heroImg {
     width: 100%;
     height: 100%;
+    min-height: 220px;
     display: block;
-    aspect-ratio: 16 / 10;
     object-fit: cover;
-    background: rgba(255,255,255,0.03);
   }
-
-  .heroImgFallback {
-    aspect-ratio: 16 / 10;
-    background:
-      linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
-  }
-
-  .heroBody {
-    padding: 18px 18px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .heroEyebrow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
-    color: var(--muted2);
-    font-size: 13px;
-  }
-
-  .pillTag {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,220,80,0.55);
-    color: rgba(255,220,80,0.92);
-    background: rgba(255,220,80,0.12);
-    font-weight: 900;
-    font-size: 11px;
-    letter-spacing: 0.04em;
-  }
-
-  .heroDate { opacity: 0.9; }
-
+  .heroImgFallback { min-height: 220px; }
+  .heroCopy { padding: 16px 16px 14px; }
   .heroTitle {
+    font-size: 26px;
+    line-height: 1.1;
     font-weight: 950;
-    font-size: clamp(20px, 2.2vw, 30px);
-    line-height: 1.10;
-    letter-spacing: -0.01em;
+    color: var(--t1);
+    letter-spacing: -0.2px;
   }
-
   .heroDesc {
     margin-top: 10px;
-    color: var(--muted);
-    line-height: 1.55;
+    color: var(--t2);
+    line-height: 1.35;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
-  @media (max-width: 860px) {
-    .heroCard { grid-template-columns: 1fr; }
-    .heroBody { padding: 16px 16px; }
+  .heroMeta {
+    margin-top: 12px;
+    color: var(--t4);
+    font-size: 13px;
   }
 
-  /* -------- Category grid -------- */
-  .categoryGrid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
-    margin: 16px 0 20px;
-  }
-
-  .categoryCard {
-    text-decoration: none;
-    padding: 16px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .categoryLabel {
-    font-weight: 950;
-    font-size: 16px;
-    letter-spacing: -0.01em;
-  }
-
-  .categoryDesc {
-    color: var(--muted2);
-    line-height: 1.45;
-  }
-
-  @media (max-width: 860px) {
-    .categoryGrid { grid-template-columns: 1fr; }
-  }
-
-  /* -------- Main grid: feed + right column -------- */
-  .mainGrid {
-    display: grid;
-    grid-template-columns: 1fr 340px;
-    gap: 16px;
-    align-items: start;
-    margin-top: 6px;
-  }
-
-  @media (max-width: 980px) {
-    .mainGrid { grid-template-columns: 1fr; }
-  }
-
-  .sectionHeader {
+  /* Section headers */
+  .sectionHeader { margin: 6px 0 10px; }
+  .sectionTitle { font-weight: 950; font-size: 14px; color: var(--t3); text-transform: uppercase; letter-spacing: .12em; }
+  .feedHeader {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 12px;
-    margin: 2px 0 10px;
+    gap: 10px;
+    margin: 16px 0 10px;
   }
 
-  .sectionTitle {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 950;
-    letter-spacing: -0.01em;
-  }
-
-  .sectionLink {
-    text-decoration: none;
-    color: rgba(255,220,80,0.88);
-    font-weight: 900;
+  /* View all links */
+  .viewAllLink {
+    color: rgba(255,210,74,.92);
+    font-weight: 800;
     font-size: 13px;
-    letter-spacing: 0.03em;
+    text-decoration: none;
+    opacity: .95;
   }
+  .viewAllLink:hover { opacity: 1; text-decoration: underline; }
+  .viewAllLinkSmall { font-size: 12px; }
 
-  /* -------- Feed rows (NOOGAtoday-like rows) -------- */
-  .rows { display: grid; gap: 10px; }
+  /* Category grid */
+  .catGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  @media (max-width: 740px) {
+    .catGrid { grid-template-columns: 1fr; }
+  }
+  .catCard {
+    text-decoration: none;
+    border: 1px solid var(--cardBorderSoft);
+    background: var(--cardBg);
+    border-radius: var(--cardRadius);
+    padding: 14px 14px 13px;
+    box-shadow: var(--shadowSoft);
+  }
+  .catTitle { font-weight: 950; font-size: 16px; color: var(--t1); }
+  .catDesc { margin-top: 6px; color: var(--t4); line-height: 1.25; font-size: 13px; }
+
+  /* ============ Latest list rows (polish request) ============ */
+  .list { display: grid; gap: 10px; }
 
   .row {
-    text-decoration: none;
-    padding: 12px 12px;
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: 12px;
-    align-items: center;
+    gap: 10px; /* tighter gap between text and thumb */
+    align-items: center; /* ensures thumb vertically centers */
+    text-decoration: none;
+    border: 1px solid var(--cardBorderSoft);
+    background: rgba(255,255,255,.022);
+    border-radius: 14px;
+    padding: 12px 12px; /* slightly more padding */
+    box-shadow: 0 0 0 rgba(0,0,0,0);
+    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    cursor: pointer;
+  }
+  .row:hover {
+    border-color: rgba(255,210,74,.22);
+    box-shadow: var(--glow);
+    background: rgba(255,255,255,.03);
   }
 
   .rowText { min-width: 0; }
-
   .rowTitle {
-    font-weight: 950;
+    font-weight: 900; /* hair bolder */
     font-size: 16px;
     line-height: 1.18;
-    letter-spacing: -0.01em;
+    color: var(--t1);
+    letter-spacing: -0.1px;
   }
-
   .rowDesc {
     margin-top: 6px;
-    color: var(--muted);
+    color: var(--t3);
     font-size: 14px;
-    line-height: 1.42;
+    line-height: 1.35;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
   .rowMeta {
     margin-top: 8px;
-    color: var(--muted3);
-    font-size: 12.5px;
+    color: var(--t4);
+    font-size: 12px;
   }
 
+  /* Thumbnails: intentional + premium (56–64 square) */
   .rowThumb {
-    width: 92px;
-    height: 68px;
+    width: 60px;
+    height: 60px;
     border-radius: 12px;
     object-fit: cover;
-    border: 1px solid rgba(255,255,255,0.10);
-    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.03);
+    box-shadow: 0 10px 18px rgba(0,0,0,.22);
+    transition: filter 160ms ease, transform 160ms ease;
   }
-
-  /* Make fallback look intentional (not broken) */
+  .row:hover .rowThumb {
+    filter: brightness(1.08) contrast(1.02);
+  }
   .rowThumbFallback {
     background:
-      linear-gradient(135deg, rgba(255,255,255,0.07), rgba(255,255,255,0.02));
-    position: relative;
-  }
-  .rowThumbFallback::after {
-    content: "—";
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    color: rgba(255,255,255,0.25);
-    font-weight: 900;
-    letter-spacing: 0.1em;
+      radial-gradient(80px 80px at 30% 25%, rgba(255,255,255,.08), rgba(255,255,255,0)),
+      linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border: 1px solid rgba(255,255,255,.10);
   }
 
   @media (max-width: 520px) {
-    .rowThumb { width: 84px; height: 62px; }
+    .row { padding: 12px; }
+    .rowThumb { width: 56px; height: 56px; }
+    .rowTitle { font-size: 15px; }
+    .rowDesc { font-size: 13.5px; }
   }
 
-  /* -------- Sidebar modules -------- */
-  .rightCol { display: grid; gap: 12px; }
-
+  /* Right rail modules */
   .moduleCard {
-    padding: 14px 14px;
+    border: 1px solid var(--cardBorder);
+    background: var(--cardBg);
+    border-radius: var(--cardRadius);
+    padding: 14px;
+    box-shadow: var(--shadowSoft);
   }
-
-  .moduleHeader {
+  .moduleHead {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
     gap: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 10px; /* match list spacing */
   }
-
   .moduleTitle {
     font-weight: 950;
-    font-size: 15px;
-    letter-spacing: -0.01em;
+    color: var(--t1);
+    letter-spacing: -0.1px;
   }
+  .moduleTitleSmall { font-size: 13px; margin-bottom: 8px; opacity: .9; }
 
-  .moduleLink {
-    text-decoration: none;
-    color: rgba(255,220,80,0.88);
-    font-weight: 900;
-    font-size: 12px;
-    letter-spacing: 0.04em;
-  }
-
-  .eventList { display: grid; gap: 10px; }
-
+  .eventsList { display: grid; gap: 10px; }
   .eventRow {
     display: grid;
-    grid-template-columns: 52px 1fr;
+    grid-template-columns: 44px 1fr;
     gap: 10px;
     align-items: center;
+    padding: 10px 10px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.02);
   }
-
   .eventDate {
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.10);
-    background: rgba(255,255,255,0.03);
-    padding: 8px 6px;
-    text-align: center;
-  }
-
-  .eventDow {
-    font-weight: 900;
-    font-size: 11px;
-    color: rgba(255,255,255,0.70);
-    letter-spacing: 0.08em;
-  }
-
-  .eventDay {
-    font-weight: 950;
-    font-size: 18px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(0,0,0,.18);
+    display: grid;
+    place-items: center;
     line-height: 1.05;
-    margin-top: 2px;
   }
+  .eventDow { font-size: 11px; color: var(--t4); font-weight: 900; letter-spacing: .08em; }
+  .eventDay { font-size: 16px; color: var(--t1); font-weight: 950; margin-top: 2px; }
+  .eventName { font-weight: 900; color: var(--t1); line-height: 1.15; }
+  .eventPlace { margin-top: 4px; color: var(--t4); font-size: 12.5px; }
 
-  .eventName {
-    font-weight: 900;
-    font-size: 13.5px;
-    line-height: 1.2;
-  }
-
-  .eventLoc {
-    margin-top: 4px;
-    color: var(--muted3);
-    font-size: 12.5px;
-  }
-
-  .divider {
+  .railDivider {
     height: 1px;
-    background: rgba(255,255,255,0.08);
+    background: rgba(255,255,255,.08);
+    margin: 14px 0 12px;
   }
-
-  .resourceList {
-    margin-top: 10px;
-    display: grid;
-    gap: 8px;
-  }
-  .resourceLink {
+  .railLinks { display: grid; gap: 8px; }
+  .railLink {
+    color: rgba(232,237,244,.78);
     text-decoration: none;
-    color: rgba(255,255,255,0.82);
+    font-size: 13px;
   }
-  .resourceLink:hover { color: rgba(255,255,255,0.92); }
+  .railLink:hover { color: rgba(255,210,74,.92); }
 
-  /* -------- Promo band -------- */
+  /* Promo band */
   .promoBand {
-    margin-top: 22px;
-    border-radius: calc(var(--card-radius) + 2px);
-    border: 1px solid rgba(255,220,80,0.22);
-    background:
-      radial-gradient(900px 240px at 20% 30%, rgba(255,220,80,0.14), transparent 55%),
-      rgba(255,255,255,0.02);
-    overflow: hidden;
-  }
-
-  .promoInner {
-    padding: 18px 18px;
-    display: grid;
-    grid-template-columns: 1fr auto;
+    margin: 18px 0 0;
+    border: 1px solid var(--cardBorder);
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border-radius: var(--cardRadius);
+    padding: 16px;
+    display: flex;
+    justify-content: space-between;
     gap: 14px;
     align-items: center;
-  }
-
-  .promoTitle {
-    font-weight: 950;
-    font-size: 20px;
-    letter-spacing: -0.01em;
-  }
-
-  .promoDesc {
-    margin-top: 6px;
-    color: var(--muted);
-    line-height: 1.45;
-  }
-
-  .promoBtns {
-    display: flex;
-    gap: 10px;
+    box-shadow: var(--shadowSoft);
     flex-wrap: wrap;
-    justify-content: flex-end;
   }
-
-  .promoBtn {
-    text-decoration: none;
+  .promoTitle { font-weight: 950; font-size: 18px; color: var(--t1); }
+  .promoDesc { margin-top: 6px; color: var(--t3); line-height: 1.3; }
+  .promoActions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 12px;
+    height: 40px;
+    padding: 0 12px;
     border-radius: 12px;
-    font-weight: 950;
-    font-size: 13px;
-    border: 1px solid rgba(255,220,80,0.55);
-    color: rgba(255,220,80,0.95);
-    background: rgba(255,220,80,0.12);
+    border: 1px solid rgba(255,210,74,.38);
+    background: rgba(255,210,74,.14);
+    color: var(--t1);
+    font-weight: 900;
+    text-decoration: none;
   }
-
-  .promoBtnGhost {
-    border-color: rgba(255,255,255,0.14);
-    color: rgba(255,255,255,0.88);
-    background: rgba(255,255,255,0.03);
+  .btn:hover { background: rgba(255,210,74,.18); }
+  .btnGhost {
+    border-color: rgba(255,255,255,.14);
+    background: rgba(255,255,255,.03);
   }
+  .btnGhost:hover { background: rgba(255,255,255,.05); }
 
-  @media (max-width: 860px) {
-    .promoInner { grid-template-columns: 1fr; }
-    .promoBtns { justify-content: flex-start; }
+  /* Footer */
+  .homeFooter {
+    margin-top: 18px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    padding-top: 16px;
   }
-
-  /* -------- Footer -------- */
-  .footer {
-    margin-top: 22px;
-    padding-top: 18px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-  }
-
-  .footerGrid {
+  .footerCols {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
+    grid-template-columns: 1fr 1fr 1.8fr;
+    gap: 16px;
   }
-
-  .footerHead {
-    font-weight: 950;
-    margin-bottom: 10px;
+  @media (max-width: 860px) {
+    .footerCols { grid-template-columns: 1fr; }
   }
-
+  .footerHead { font-weight: 950; color: var(--t1); margin-bottom: 10px; }
   .footerLink {
     display: block;
+    color: rgba(232,237,244,.78);
     text-decoration: none;
-    color: rgba(255,255,255,0.80);
-    margin: 6px 0;
-  }
-  .footerLink:hover { color: rgba(255,255,255,0.92); }
-
-  .footerText { color: var(--muted2); line-height: 1.5; }
-
-  .footerBottom {
-    margin-top: 14px;
-    color: var(--muted3);
+    margin-bottom: 8px;
     font-size: 13px;
   }
-
-  @media (max-width: 860px) {
-    .footerGrid { grid-template-columns: 1fr; }
-  }
-
-  /* a11y */
-  .srOnly {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
-  }
+  .footerLink:hover { color: rgba(255,210,74,.92); }
+  .footerFine { color: var(--t4); font-size: 13px; line-height: 1.35; }
 </style>
