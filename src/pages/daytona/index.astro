@@ -148,26 +148,28 @@ const latest = feed.slice(0, 8);
           <a class="viewAllLink" href="/daytona/posts/">View all</a>
         </div>
 
-        <div class="list">
+        <div class="latestList">
           {latest.map((p) => (
-            <a class="row" href={`/daytona/posts/${p.slug}/`}>
-              <div class="rowText">
-                <div class="rowTitle">{p.data.title ?? p.slug}</div>
-                {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
-                <div class="rowMeta">{dateText(p)}</div>
+            <a class="latestCard" href={`/daytona/posts/${p.slug}/`}>
+              <div class="latestMedia" aria-hidden={heroImage(p) ? "false" : "true"}>
+                {heroImage(p) ? (
+                  <img
+                    class="latestImg"
+                    src={heroImage(p)}
+                    alt={p.data.title ?? "Thumbnail"}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div class="latestImg latestImgFallback" aria-hidden="true"></div>
+                )}
               </div>
 
-              {heroImage(p) ? (
-                <img
-                  class="rowThumb"
-                  src={heroImage(p)}
-                  alt={p.data.title ?? "Thumbnail"}
-                  loading="lazy"
-                  decoding="async"
-                />
-              ) : (
-                <div class="rowThumb rowThumbFallback" aria-hidden="true"></div>
-              )}
+              <div class="latestBody">
+                <div class="latestTitle">{p.data.title ?? p.slug}</div>
+                {excerpt(p) && <div class="latestDesc">{excerpt(p)}</div>}
+                <div class="latestMeta">{dateText(p)}</div>
+              </div>
             </a>
           ))}
         </div>
@@ -271,10 +273,10 @@ const latest = feed.slice(0, 8);
     --rail: 320px;
 
     --cardRadius: 16px;
+    --cardRadiusSm: 14px;
     --cardBorder: rgba(255,255,255,.10);
     --cardBorderSoft: rgba(255,255,255,.08);
     --cardBg: rgba(255,255,255,.03);
-    --cardBg2: rgba(255,255,255,.04);
 
     --shadow: 0 10px 26px rgba(0,0,0,.30);
     --shadowSoft: 0 8px 18px rgba(0,0,0,.22);
@@ -331,9 +333,10 @@ const latest = feed.slice(0, 8);
   .newsletterHeadline {
     font-size: 20px;
     line-height: 1.15;
-    font-weight: 900;
+    font-weight: 950;
     color: var(--t1);
     margin-bottom: 8px;
+    letter-spacing: -0.2px;
   }
   .newsletterFine {
     color: var(--t4);
@@ -341,8 +344,19 @@ const latest = feed.slice(0, 8);
     font-size: 13px;
   }
 
-  /* NASCAR-style CTA */
-  .newsletterForm { display: grid; gap: 10px; }
+  /* Punchy NOOGAtoday-ish CTA: yellow button on dark */
+  .newsletterForm {
+    display: grid;
+    gap: 10px;
+    align-items: center;
+  }
+  @media (min-width: 560px) {
+    .newsletterForm {
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+    }
+  }
+
   .newsletterInput {
     width: 100%;
     height: 44px;
@@ -362,13 +376,15 @@ const latest = feed.slice(0, 8);
   .newsletterButton {
     height: 46px;
     border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.35);
+    border: 1px solid rgba(0,0,0,.45);
     background: linear-gradient(180deg, var(--yellow), var(--yellowDeep));
     color: #0b0d10;
     font-weight: 950;
     letter-spacing: .01em;
     cursor: pointer;
     box-shadow: 0 10px 20px rgba(0,0,0,.22);
+    padding: 0 14px;
+    white-space: nowrap;
   }
   .newsletterButton:hover { filter: brightness(1.02) contrast(1.02); }
   .newsletterButton:active { transform: translateY(0.5px); }
@@ -470,77 +486,92 @@ const latest = feed.slice(0, 8);
   .catTitle { font-weight: 950; font-size: 16px; color: var(--t1); }
   .catDesc { margin-top: 6px; color: var(--t4); line-height: 1.25; font-size: 13px; }
 
-  /* ============ Latest list rows (polish request) ============ */
-  .list { display: grid; gap: 10px; }
+  /* ============ Latest (NOOGAtoday-style card rows) ============ */
+  .latestList { display: grid; gap: 12px; }
 
-  .row {
+  .latestCard {
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 10px;
-    align-items: center;
+    grid-template-columns: 44% 1fr; /* image left ~40–45% */
+    gap: 14px;
+    align-items: stretch;
     text-decoration: none;
     border: 1px solid var(--cardBorderSoft);
     background: rgba(255,255,255,.022);
-    border-radius: 14px;
-    padding: 12px 12px;
+    border-radius: var(--cardRadiusSm);
+    overflow: hidden;
     box-shadow: 0 0 0 rgba(0,0,0,0);
-    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
-    cursor: pointer;
+    transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease, transform 160ms ease;
   }
-  .row:hover {
+  .latestCard:hover {
     border-color: rgba(255,210,74,.22);
     box-shadow: var(--glow);
     background: rgba(255,255,255,.03);
+    transform: translateY(-1px);
   }
 
-  .rowText { min-width: 0; }
-  .rowTitle {
-    font-weight: 900;
-    font-size: 16px;
-    line-height: 1.18;
-    color: var(--t1);
-    letter-spacing: -0.1px;
+  .latestMedia {
+    background: rgba(255,255,255,.02);
+    border-right: 1px solid rgba(255,255,255,.06);
+    min-height: 170px;
   }
-  .rowDesc {
-    margin-top: 6px;
+  .latestImg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+    min-height: 170px;
+  }
+  .latestImgFallback {
+    background:
+      radial-gradient(220px 180px at 25% 25%, rgba(255,255,255,.08), rgba(255,255,255,0)),
+      linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  }
+
+  .latestBody {
+    padding: 14px 14px 13px;
+    min-width: 0;
+    display: grid;
+    align-content: center;
+  }
+  .latestTitle {
+    font-weight: 950;
+    font-size: 18px;
+    line-height: 1.15;
+    color: var(--t1);
+    letter-spacing: -0.2px;
+  }
+  .latestDesc {
+    margin-top: 8px;
     color: var(--t3);
-    font-size: 14px;
+    font-size: 14.5px;
     line-height: 1.35;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .rowMeta {
-    margin-top: 8px;
+  .latestMeta {
+    margin-top: 10px;
     color: var(--t4);
-    font-size: 12px;
+    font-size: 12.5px;
   }
 
-  /* Thumbnails: intentional + premium (56–64 square) */
-  .rowThumb {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    object-fit: cover;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.03);
-    box-shadow: 0 10px 18px rgba(0,0,0,.22);
-    transition: filter 160ms ease;
+  @media (max-width: 720px) {
+    .latestCard { grid-template-columns: 1fr; }
+    .latestMedia {
+      border-right: none;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      min-height: 210px;
+    }
+    .latestImg { min-height: 210px; }
+    .latestTitle { font-size: 19px; }
   }
-  .row:hover .rowThumb { filter: brightness(1.08) contrast(1.02); }
-  .rowThumbFallback {
-    background:
-      radial-gradient(80px 80px at 30% 25%, rgba(255,255,255,.08), rgba(255,255,255,0)),
-      linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-    border: 1px solid rgba(255,255,255,.10);
-  }
-
   @media (max-width: 520px) {
-    .row { padding: 12px; }
-    .rowThumb { width: 56px; height: 56px; }
-    .rowTitle { font-size: 15px; }
-    .rowDesc { font-size: 13.5px; }
+    .latestMedia { min-height: 200px; }
+    .latestImg { min-height: 200px; }
+    .latestBody { padding: 13px 13px 12px; }
+    .latestTitle { font-size: 18px; }
+    .latestDesc { font-size: 14px; -webkit-line-clamp: 3; }
   }
 
   /* Right rail modules */
@@ -666,40 +697,58 @@ const latest = feed.slice(0, 8);
   .footerLink:hover { color: rgba(255,210,74,.92); }
   .footerFine { color: var(--t4); font-size: 13px; line-height: 1.35; }
 
-  /* ================= Mobile-only polish pass ================= */
-  @media (max-width: 520px) {
-    /* nav pills + subscribe (global-ish) */
+  /* ================= Mobile header/pills cleanup (homepage only) ================= */
+  @media (max-width: 560px) {
+    /* Smaller pills */
     :global(.pill) {
       padding: 6px 10px;
       font-size: 11.5px;
       border-radius: 999px;
       letter-spacing: .01em;
+      line-height: 1;
+      white-space: nowrap;
     }
 
-    /* Try to keep Home/Topics/Guides/Events in one row if they live in a pill row */
+    /* Wrap cleanly instead of ugly overflow */
     :global(.navPills),
     :global(.pillRow),
-    :global(.navRow) {
+    :global(.navRow),
+    :global(nav .pills),
+    :global(header .pills) {
       display: flex;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
       gap: 8px;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 2px;
+      overflow: visible;
     }
 
-    /* Subscribe pill: black with yellow outline (premium) */
+    /* If Subscribe is present as a pill, let it be slightly smaller and drop naturally */
     :global(a.pill.subscribe),
     :global(.pill.subscribe),
     :global(a.pill[href*="subscribe"]) {
+      padding: 6px 10px !important;
+      font-size: 11.25px !important;
       background: rgba(0,0,0,.55) !important;
       border: 1px solid rgba(255,210,74,.65) !important;
       color: rgba(255,210,74,.95) !important;
     }
 
-    /* newsletter: tighten spacing a hair */
+    /* Tighten newsletter band on mobile */
     .newsletterBandInner { padding: 16px 14px; }
     .newsletterHeadline { font-size: 18px; }
     .newsletterButton { height: 44px; }
+  }
+
+  /* ================= Hide duplicate network blurb at TOP (homepage only) =================
+     This text is already in the footer. We hide the header/top instance via broad, safe selectors.
+     (No effect unless Base/header uses one of these common classes/ids.) */
+  :global(.networkBlurb),
+  :global(.cityNetworkBlurb),
+  :global(.siteNetworkNote),
+  :global(#networkBlurb),
+  :global(header .networkBlurb),
+  :global(header .cityNetworkBlurb),
+  :global(header .siteNetworkNote),
+  :global(header #networkBlurb) {
+    display: none !important;
   }
 </style>
