@@ -704,55 +704,52 @@ const latest = feed.slice(0, 8);
 <style>
   ...all your existing CSS...
 
-  /* ================= Wider page like NOOGAtoday + roomier grid ================= */
+  /* ================= NOOGA-like proportions patch (paste at end of <style>) ================= */
 
-  :global(.container) {
-    max-width: 1240px;
-    padding-left: clamp(14px, 2vw, 22px);
-    padding-right: clamp(14px, 2vw, 22px);
-  }
+/* 1) Make main content column wider so card text blocks are wider */
+.homeWrap {
+  --maxMain: 860px; /* was ~760px */
+}
 
-  @media (min-width: 1100px) {
-    :global(.container) {
-      padding-left: 18px;
-      padding-right: 18px;
-    }
-  }
+/* If your global .container max-width is still ~1100 elsewhere,
+   this nudges the usable width up without touching markup. */
+:global(.container) {
+  max-width: 1240px;
+  padding-left: clamp(14px, 2vw, 22px);
+  padding-right: clamp(14px, 2vw, 22px);
+}
 
-  @media (min-width: 1400px) {
-    :global(.container) {
-      max-width: 1280px;
-    }
-  }
+/* Keep a little more separation between main + rail */
+.homeGrid {
+  gap: 22px; /* keep roomy */
+}
 
-  .homeGrid {
-    gap: 22px;
-  }
+/* 2) Keep the Latest grid airy (NOOGA spacing) */
+.latestGrid {
+  gap: 24px; /* target ~22–26px */
+}
 
-  .latestGrid {
-    gap: 24px;
-  }
+/* 3) Slightly reduce card media height (still 16:9, still cover) */
+.latestMedia {
+  aspect-ratio: 16 / 9;
+  min-height: 175px; /* was ~190 */
+}
+@media (min-width: 760px) {
+  .latestMedia { min-height: 190px; } /* was ~205 */
+}
+@media (min-width: 1040px) {
+  .latestMedia { min-height: 205px; } /* was ~220 */
+}
 
-  .latestMedia {
-    aspect-ratio: 16 / 9;
-    min-height: 190px;
-  }
+/* Ensure images stay crisp and never stretch */
+.latestImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-  @media (min-width: 760px) {
-    .latestMedia { min-height: 205px; }
-  }
-
-  @media (min-width: 1040px) {
-    .latestMedia { min-height: 220px; }
-  }
-
-  .latestImg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .latestBody {
-    padding: 16px 16px 14px;
-  }
+/* Optional: tiny trim so cards don’t feel as tall */
+.latestBody {
+  padding: 15px 16px 13px; /* slightly tighter than 16/16/14 */
+}
 </style>
