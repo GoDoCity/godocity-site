@@ -497,6 +497,55 @@ const latest = feed.slice(0, 8);
   @media (min-width: 1040px) {
     .latestGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
+/* ================= MOBILE TIGHTENING (keep desktop big) ================= */
+@media (max-width: 520px) {
+  :global(.container) {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .latestGrid {
+    gap: 14px;
+  }
+
+  .latestMedia {
+    min-height: 140px;
+  }
+
+  .latestBody {
+    padding: 12px 12px 11px;
+  }
+
+  .latestTitle {
+    font-size: 16px;
+    line-height: 1.15;
+  }
+
+  .latestDesc {
+    margin-top: 6px;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .latestMeta {
+    margin-top: 8px;
+    font-size: 12px;
+    opacity: 0.9;
+  }
+
+  .navPills {
+    gap: 8px;
+  }
+  .pill,
+  .subscribePill {
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 999px;
+  }
+}
 
   .latestCard {
     display: grid;
