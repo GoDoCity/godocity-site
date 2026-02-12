@@ -75,6 +75,45 @@ const latest = feed.slice(0, 8);
 <section class="section">
   <div class="container homeWrap">
 
+    <!-- Mobile-only compact menu (CSS-only hamburger via checkbox; no JS) -->
+    <div class="mNav">
+      <input id="mnavToggle" class="mNavToggle" type="checkbox" />
+      <div class="mNavBar">
+        <div class="mBrand">
+          <span class="mBrandDot" aria-hidden="true"></span>
+          <span class="mBrandText">GoDo Daytona</span>
+        </div>
+        <label class="mMenuBtn" for="mnavToggle" aria-label="Open menu">
+          <span class="mBurger" aria-hidden="true"></span>
+          <span class="mMenuText">Menu</span>
+        </label>
+      </div>
+
+      <label class="mBackdrop" for="mnavToggle" aria-hidden="true"></label>
+
+      <div class="mDrawer" role="dialog" aria-label="Site menu">
+        <div class="mDrawerHead">
+          <div class="mDrawerTitle">GoDo Daytona</div>
+          <label class="mCloseBtn" for="mnavToggle" aria-label="Close menu">✕</label>
+        </div>
+
+        <nav class="mLinks">
+          <a class="mLink" href="/daytona/">Home</a>
+          <a class="mLink" href="/daytona/topics/">Topics</a>
+          <a class="mLink" href="/daytona/guides/">Guides</a>
+          <a class="mLink" href="/daytona/events/">Events</a>
+          <a class="mLink" href="/daytona/jobs/">Jobs</a>
+          <a class="mLink" href="/daytona/games/">Games</a>
+          <a class="mLink" href="/daytona/buy/">The Buy</a>
+          <a class="mLink" href="/daytona/advertise/">Advertise</a>
+
+          <div class="mDivider"></div>
+
+          <a class="mCTA" href="/daytona/subscribe/">Subscribe</a>
+        </nav>
+      </div>
+    </div>
+
     <!-- (1) Top Newsletter Signup Hero -->
     <div class="newsletterBand">
       <div class="newsletterBandInner">
@@ -269,17 +308,17 @@ const latest = feed.slice(0, 8);
 <style>
   /* =================== PAGE WIDTH (Nooga-like margins) =================== */
   :global(.container) {
-    max-width: 1240px; /* wider usable area */
+    max-width: 1240px;
     padding-left: clamp(14px, 2vw, 22px);
     padding-right: clamp(14px, 2vw, 22px);
   }
   @media (min-width: 1400px) {
-    :global(.container) { max-width: 1280px; } /* tasteful on ultra-wide */
+    :global(.container) { max-width: 1280px; }
   }
 
   /* ============ Premium system (homepage scoped) ============ */
   .homeWrap {
-    --maxMain: 860px; /* give main column more room */
+    --maxMain: 860px;
     --rail: 320px;
 
     --cardRadius: 16px;
@@ -303,65 +342,263 @@ const latest = feed.slice(0, 8);
     --yellowDeep: #ffc400;
   }
 
-  /* Grid */
-  .homeGrid {
-    display: grid;
-    grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
-    gap: 22px; /* a little more separation */
-    align-items: start;
-  }
-  @media (max-width: 980px) {
-    .homeGrid { grid-template-columns: 1fr; }
-    .homeRail { order: 2; }
-  }
-  .homeRail { width: 100%; } /* ensure it stays in rail */
-
-  /* ================= Remove duplicate top blurb (homepage only) =================
-     If Base/header renders a network blurb near the top, hide it on this page only.
-     Keep footer copy intact (it uses .footerFine inside footer). */
-  :global(.networkBlurb),
-  :global(.cityNetworkBlurb),
-  :global(.siteNetworkNote),
-  :global(#networkBlurb),
+  /* =================== HEADER / TOP BLOCK CLEANUP (Base-driven; CSS-only) ===================
+     You asked to delete markup if it's in this file: it is NOT in this file.
+     These selectors hide the TOP duplicate blurb + the two right-side pills when rendered by Base. */
   :global(header .networkBlurb),
   :global(header .cityNetworkBlurb),
   :global(header .siteNetworkNote),
   :global(header #networkBlurb),
-  :global([data-network-blurb="top"]) {
+  :global(header [data-network-blurb="top"]),
+  :global(header .topNetwork),
+  :global(header .topNetworkBlock),
+  :global(header .topFooter),
+  :global(header .topFooterBlock) {
     display: none !important;
   }
 
-  /* ================= Subscribe pill styling (if present in Base) ================= */
-  :global(a.pill.subscribe),
-  :global(.pill.subscribe),
-  :global(a.pill[href*="subscribe"]) {
-    background: rgba(0,0,0,.55) !important;
-    border: 1px solid rgba(255,210,74,.65) !important;
-    color: rgba(255,210,74,.95) !important;
+  /* Hide the two “right pills” near the top if they exist there */
+  :global(header a.pill[href*="advertise"]),
+  :global(header a.pill[href*="directory"]),
+  :global(header a.pill[href*="city-directory"]),
+  :global(header a.pill[href*="directory/"]) {
+    /* We’ll re-surface Advertise in the main pill row ordering below if it lives there too */
   }
 
-  /* ================= Mobile header/nav density tweaks (Base-driven; CSS-only) ================= */
-  @media (max-width: 560px) {
-    :global(.pill) {
-      padding: 6px 10px;
-      font-size: 11.25px;
-      line-height: 1;
-      border-radius: 999px;
-      white-space: nowrap;
-    }
-    :global(.navPills),
-    :global(.pillRow),
-    :global(.navRow),
-    :global(header .pills),
-    :global(nav .pills) {
+  /* 2) Top nav pills cleanup (desktop): hide Subscribe pill; keep pills inline; try to order Advertise after The Buy */
+  :global(header a.pill[href*="subscribe"]) {
+    display: none !important;
+  }
+
+  /* Attempt to order “Advertise” into the main pill row (works if pills share a flex container) */
+  @media (min-width: 900px) {
+    :global(header .navPills),
+    :global(header .pillRow),
+    :global(header .navRow),
+    :global(header nav .pills),
+    :global(header nav .navPills) {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
-      overflow: visible;
+      gap: 10px;
+      align-items: center;
+    }
+
+    :global(header a.pill[href*="/buy"]),
+    :global(header a.pill[href*="the-buy"]) {
+      order: 70;
+    }
+    :global(header a.pill[href*="advertise"]) {
+      order: 71;
+      display: inline-flex !important; /* ensure visible if it was in the same group */
+    }
+    :global(header a.pill[href*="directory"]),
+    :global(header a.pill[href*="city-directory"]) {
+      display: none !important;
     }
   }
 
-  /* ================= Newsletter band (more pop / yellow accent) ================= */
+  /* ================= Mobile: hide Base’s pill nav to save height; use our CSS-only drawer instead ================= */
+  @media (max-width: 720px) {
+    :global(header .navPills),
+    :global(header .pillRow),
+    :global(header .navRow),
+    :global(header nav .pills),
+    :global(header nav .navPills),
+    :global(header a.pill) {
+      display: none !important;
+    }
+    /* reduce header vertical padding if Base has it */
+    :global(header) {
+      padding-top: 8px !important;
+      padding-bottom: 8px !important;
+    }
+  }
+
+  /* ================= Mobile drawer menu (homepage only) ================= */
+  .mNav { display: none; }
+  @media (max-width: 720px) {
+    .mNav { display: block; margin: 2px 0 10px; }
+  }
+
+  .mNavToggle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .mNavBar {
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.02);
+    border-radius: 14px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 8px 18px rgba(0,0,0,.22);
+  }
+
+  .mBrand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  .mBrandDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(255,210,74,.95);
+    box-shadow: 0 0 0 3px rgba(255,210,74,.14);
+    flex: 0 0 auto;
+  }
+  .mBrandText {
+    font-weight: 950;
+    color: rgba(232,237,244,.92);
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .mMenuBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 12px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,210,74,.35);
+    background: rgba(255,210,74,.10);
+    color: rgba(232,237,244,.92);
+    font-weight: 900;
+    cursor: pointer;
+    user-select: none;
+  }
+  .mMenuText { font-size: 12.5px; }
+
+  .mBurger {
+    width: 18px;
+    height: 12px;
+    position: relative;
+    display: inline-block;
+  }
+  .mBurger::before,
+  .mBurger::after,
+  .mBurger span {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: rgba(232,237,244,.92);
+  }
+  .mBurger::before { top: 0; }
+  .mBurger::after { bottom: 0; }
+  .mBurger span { top: 5px; }
+
+  .mBackdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(2px);
+    z-index: 90;
+  }
+
+  .mDrawer {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100dvh;
+    width: min(86vw, 360px);
+    background: #0b0d10;
+    border-left: 1px solid rgba(255,255,255,.10);
+    box-shadow: -20px 0 60px rgba(0,0,0,.45);
+    transform: translateX(100%);
+    transition: transform 220ms ease;
+    z-index: 100;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+
+  .mDrawerHead {
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .mDrawerTitle {
+    font-weight: 950;
+    color: rgba(232,237,244,.92);
+    letter-spacing: -0.2px;
+  }
+  .mCloseBtn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.03);
+    color: rgba(232,237,244,.86);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .mLinks {
+    padding: 12px 14px 16px;
+    display: grid;
+    gap: 8px;
+    overflow: auto;
+  }
+  .mLink {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    color: rgba(232,237,244,.86);
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.02);
+    border-radius: 12px;
+    padding: 12px 12px;
+    font-weight: 850;
+  }
+  .mLink:hover {
+    border-color: rgba(255,210,74,.22);
+    box-shadow: 0 0 0 1px rgba(255,210,74,.12);
+  }
+
+  .mDivider {
+    height: 1px;
+    background: rgba(255,255,255,.10);
+    margin: 8px 0;
+  }
+
+  .mCTA {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid rgba(0,0,0,.45);
+    background: linear-gradient(180deg, var(--yellow), var(--yellowDeep));
+    color: #0b0d10;
+    font-weight: 950;
+    text-decoration: none;
+    letter-spacing: .01em;
+    box-shadow: 0 10px 20px rgba(0,0,0,.22);
+  }
+
+  /* open state */
+  .mNavToggle:checked ~ .mBackdrop { display: block; }
+  .mNavToggle:checked ~ .mDrawer { transform: translateX(0); }
+
+  /* Newsletter band (conversion-focused yellow pop) */
   .newsletterBand {
     border: 1px solid rgba(255,210,74,.38);
     background:
@@ -402,7 +639,7 @@ const latest = feed.slice(0, 8);
     font-size: 13px;
   }
 
-  /* NASCAR-style CTA */
+  /* CTA */
   .newsletterForm {
     display: grid;
     gap: 10px;
@@ -444,6 +681,27 @@ const latest = feed.slice(0, 8);
   }
   .newsletterButton:hover { filter: brightness(1.02) contrast(1.02); }
   .newsletterButton:active { transform: translateY(0.5px); }
+
+  /* Grid + rail alignment polish:
+     Align the right rail a touch left (visually closer to newsletter input column),
+     without cramming the main content. */
+  .homeGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, var(--rail));
+    gap: 22px;
+    align-items: start;
+  }
+  @media (min-width: 980px) {
+    .homeGrid {
+      /* pulls the rail slightly left by reducing the effective “outer” feel */
+      column-gap: 20px;
+    }
+    .homeRail {
+      justify-self: start;
+      margin-left: 0;
+      padding-left: 0;
+    }
+  }
 
   /* Hero feature */
   .heroFeature {
@@ -545,8 +803,8 @@ const latest = feed.slice(0, 8);
   /* ============ LATEST GRID (3 / 2 / 1) ============ */
   .latestGrid {
     display: grid !important;
-    gap: 24px; /* clearer separation between cards */
-    grid-template-columns: 1fr; /* mobile default */
+    gap: 24px;
+    grid-template-columns: 1fr;
   }
   @media (min-width: 760px) {
     .latestGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -574,18 +832,18 @@ const latest = feed.slice(0, 8);
     transform: translateY(-2px);
   }
 
-  /* Media: bigger editorial tiles on desktop; tighter on mobile */
+  /* Media: editorial on desktop, denser on mobile */
   .latestMedia {
     aspect-ratio: 16 / 9;
     background: rgba(255,255,255,.02);
     overflow: hidden;
-    min-height: 170px; /* mobile tighter for density */
+    min-height: 170px;
   }
   @media (min-width: 760px) {
-    .latestMedia { min-height: 215px; } /* larger on desktop */
+    .latestMedia { min-height: 215px; }
   }
   @media (min-width: 1040px) {
-    .latestMedia { min-height: 235px; } /* more editorial on wide desktop */
+    .latestMedia { min-height: 235px; }
   }
 
   .latestImg {
@@ -601,12 +859,11 @@ const latest = feed.slice(0, 8);
   }
 
   .latestBody {
-    padding: 15px 16px 14px; /* readable, slightly tighter than before */
+    padding: 15px 16px 14px;
     min-width: 0;
     display: grid;
     align-content: start;
   }
-
   .latestTitle {
     font-weight: 950;
     font-size: 18px;
@@ -618,7 +875,6 @@ const latest = feed.slice(0, 8);
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
   .latestDesc {
     margin-top: 8px;
     color: var(--t3);
@@ -629,14 +885,13 @@ const latest = feed.slice(0, 8);
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-
   .latestMeta {
     margin-top: 10px;
     color: var(--t4);
     font-size: 12.5px;
   }
 
-  /* Mobile density: slightly tighter spacing/padding while staying readable */
+  /* Mobile density */
   @media (max-width: 520px) {
     .newsletterBandInner { padding: 16px 14px; }
     .newsletterHeadline { font-size: 18px; }
