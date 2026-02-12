@@ -752,4 +752,61 @@ const latest = feed.slice(0, 8);
 .latestBody {
   padding: 15px 16px 13px; /* slightly tighter than 16/16/14 */
 }
+/* ================= MOBILE TIGHTENING (keep desktop big) ================= */
+@media (max-width: 520px) {
+  /* Reduce overall page side padding a touch */
+  :global(.container) {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  /* More cards per scroll: slightly tighter grid gaps */
+  .latestGrid {
+    gap: 14px; /* keep tighter on phones */
+  }
+
+  /* Key fix: make images shorter on mobile */
+  .latestMedia {
+    min-height: 140px; /* was too tall; 135–155 is the sweet spot */
+  }
+
+  /* Tighten card interior spacing */
+  .latestBody {
+    padding: 12px 12px 11px;
+  }
+
+  /* Tighten headline + excerpt rhythm */
+  .latestTitle {
+    font-size: 16px;     /* keep readable */
+    line-height: 1.15;
+  }
+
+  .latestDesc {
+    margin-top: 6px;
+    line-height: 1.25;
+    /* Optional: clamp to reduce height if you have long excerpts */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .latestMeta {
+    margin-top: 8px;
+    font-size: 12px;
+    opacity: 0.9;
+  }
+
+  /* Nav pills: smaller + less vertical height */
+  .navPills {
+    gap: 8px;
+  }
+  .pill,
+  .subscribePill {
+    padding: 8px 10px;
+    font-size: 13px;
+    border-radius: 999px;
+  }
+}
+
 </style>
