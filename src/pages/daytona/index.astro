@@ -74,8 +74,24 @@ const latest = feed.slice(0, 8);
 
 <section class="section">
   <div class="container homeWrap">
+    <!-- ===================== TOP DUPLICATE BLOCK REMOVED ===================== -->
+    <!-- If your old file had a top “GoDoDaytona is part of the GoDoCity network… © …”
+         with right-side pills (Advertise / City Directory), it should NOT be here anymore. -->
 
-    <!-- Mobile-only compact menu (CSS-only hamburger via checkbox; no JS) -->
+    <!-- ===================== DESKTOP MAIN NAV PILLS (page-controlled) ===================== -->
+    <!-- Header Subscribe pill removed; Advertise moved next to The Buy in this row -->
+    <nav class="pagePills" aria-label="Daytona navigation">
+      <a class="pill" href="/daytona/">Home</a>
+      <a class="pill" href="/daytona/topics/">Topics</a>
+      <a class="pill" href="/daytona/guides/">Guides</a>
+      <a class="pill" href="/daytona/events/">Events</a>
+      <a class="pill" href="/daytona/jobs/">Jobs</a>
+      <a class="pill" href="/daytona/games/">Games</a>
+      <a class="pill" href="/daytona/buy/">The Buy</a>
+      <a class="pill" href="/daytona/advertise/">Advertise</a>
+    </nav>
+
+    <!-- ===================== MOBILE MENU (CSS-only hamburger / drawer; no JS) ===================== -->
     <div class="mNav">
       <input id="mnavToggle" class="mNavToggle" type="checkbox" />
       <div class="mNavBar">
@@ -84,7 +100,7 @@ const latest = feed.slice(0, 8);
           <span class="mBrandText">GoDo Daytona</span>
         </div>
         <label class="mMenuBtn" for="mnavToggle" aria-label="Open menu">
-          <span class="mBurger" aria-hidden="true"></span>
+          <span class="mBurger" aria-hidden="true"><span></span></span>
           <span class="mMenuText">Menu</span>
         </label>
       </div>
@@ -109,12 +125,13 @@ const latest = feed.slice(0, 8);
 
           <div class="mDivider"></div>
 
+          <!-- Subscribe lives inside slide-over menu -->
           <a class="mCTA" href="/daytona/subscribe/">Subscribe</a>
         </nav>
       </div>
     </div>
 
-    <!-- (1) Top Newsletter Signup Hero -->
+    <!-- ===================== NEWSLETTER SIGNUP BAND (taller + translucent yellow) ===================== -->
     <div class="newsletterBand">
       <div class="newsletterBandInner">
         <div class="newsletterText">
@@ -132,10 +149,8 @@ const latest = feed.slice(0, 8);
 
     <!-- Main grid: left content + right rail -->
     <div class="homeGrid">
-
       <!-- LEFT -->
       <div class="homeMain">
-
         <!-- (2) One Main Hero Story -->
         {hero && (
           <a class="heroFeature" href={`/daytona/posts/${hero.slug}/`}>
@@ -212,12 +227,10 @@ const latest = feed.slice(0, 8);
             </a>
           ))}
         </div>
-
       </div>
 
       <!-- RIGHT RAIL -->
       <aside class="homeRail">
-        <!-- (5) Upcoming Events Module -->
         <div class="moduleCard eventsCard">
           <div class="moduleHead">
             <div class="moduleTitle">Upcoming Events</div>
@@ -259,10 +272,9 @@ const latest = feed.slice(0, 8);
           </div>
         </div>
       </aside>
-
     </div>
 
-    <!-- (6) Bottom “Advertise with us” Promo Band -->
+    <!-- (6) Bottom Promo Band -->
     <div class="promoBand">
       <div class="promoCopy">
         <div class="promoTitle">Advertise with us.</div>
@@ -301,12 +313,11 @@ const latest = feed.slice(0, 8);
         </div>
       </div>
     </footer>
-
   </div>
 </section>
 
 <style>
-  /* =================== PAGE WIDTH (Nooga-like margins) =================== */
+  /* Wider page like Nooga */
   :global(.container) {
     max-width: 1240px;
     padding-left: clamp(14px, 2vw, 22px);
@@ -316,7 +327,6 @@ const latest = feed.slice(0, 8);
     :global(.container) { max-width: 1280px; }
   }
 
-  /* ============ Premium system (homepage scoped) ============ */
   .homeWrap {
     --maxMain: 860px;
     --rail: 320px;
@@ -327,7 +337,6 @@ const latest = feed.slice(0, 8);
     --cardBorderSoft: rgba(255,255,255,.08);
     --cardBg: rgba(255,255,255,.03);
 
-    --shadow: 0 10px 26px rgba(0,0,0,.30);
     --shadowSoft: 0 8px 18px rgba(0,0,0,.22);
 
     --t1: #e8edf4;
@@ -335,69 +344,38 @@ const latest = feed.slice(0, 8);
     --t3: rgba(232,237,244,.70);
     --t4: rgba(232,237,244,.58);
 
-    --glow: 0 0 0 1px rgba(255,210,74,.18), 0 10px 26px rgba(0,0,0,.30);
-
-    /* NASCAR-style yellow */
     --yellow: #ffd24a;
     --yellowDeep: #ffc400;
+
+    --glow: 0 0 0 1px rgba(255,210,74,.18), 0 10px 26px rgba(0,0,0,.30);
+    --glowSoft: 0 0 0 1px rgba(255,210,74,.16), 0 18px 40px rgba(0,0,0,.40);
   }
 
-  /* =================== HEADER / TOP BLOCK CLEANUP (Base-driven; CSS-only) ===================
-     You asked to delete markup if it's in this file: it is NOT in this file.
-     These selectors hide the TOP duplicate blurb + the two right-side pills when rendered by Base. */
+  /* =================== HEADER PILL RULES (remove duplicates from Base) =================== */
+  /* Remove header Subscribe pill entirely */
+  :global(header a.pill[href*="subscribe"]) { display: none !important; }
+  /* Remove “City Directory” and any top-right duplicate Advertise pill */
+  :global(header a.pill[href*="directory"]),
+  :global(header a.pill[href*="city-directory"]) { display: none !important; }
+  /* Also hide any header network blurb if Base still renders it */
   :global(header .networkBlurb),
   :global(header .cityNetworkBlurb),
   :global(header .siteNetworkNote),
-  :global(header #networkBlurb),
-  :global(header [data-network-blurb="top"]),
-  :global(header .topNetwork),
-  :global(header .topNetworkBlock),
-  :global(header .topFooter),
-  :global(header .topFooterBlock) {
-    display: none !important;
+  :global(header [data-network-blurb="top"]) { display: none !important; }
+
+  /* Desktop pills row (this page) */
+  .pagePills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin: 6px 0 14px;
+  }
+  @media (max-width: 720px) {
+    .pagePills { display: none; } /* mobile uses hamburger drawer */
   }
 
-  /* Hide the two “right pills” near the top if they exist there */
-  :global(header a.pill[href*="advertise"]),
-  :global(header a.pill[href*="directory"]),
-  :global(header a.pill[href*="city-directory"]),
-  :global(header a.pill[href*="directory/"]) {
-    /* We’ll re-surface Advertise in the main pill row ordering below if it lives there too */
-  }
-
-  /* 2) Top nav pills cleanup (desktop): hide Subscribe pill; keep pills inline; try to order Advertise after The Buy */
-  :global(header a.pill[href*="subscribe"]) {
-    display: none !important;
-  }
-
-  /* Attempt to order “Advertise” into the main pill row (works if pills share a flex container) */
-  @media (min-width: 900px) {
-    :global(header .navPills),
-    :global(header .pillRow),
-    :global(header .navRow),
-    :global(header nav .pills),
-    :global(header nav .navPills) {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      align-items: center;
-    }
-
-    :global(header a.pill[href*="/buy"]),
-    :global(header a.pill[href*="the-buy"]) {
-      order: 70;
-    }
-    :global(header a.pill[href*="advertise"]) {
-      order: 71;
-      display: inline-flex !important; /* ensure visible if it was in the same group */
-    }
-    :global(header a.pill[href*="directory"]),
-    :global(header a.pill[href*="city-directory"]) {
-      display: none !important;
-    }
-  }
-
-  /* ================= Mobile: hide Base’s pill nav to save height; use our CSS-only drawer instead ================= */
+  /* Mobile: hide Base nav pills to shorten header, use our drawer */
   @media (max-width: 720px) {
     :global(header .navPills),
     :global(header .pillRow),
@@ -407,17 +385,12 @@ const latest = feed.slice(0, 8);
     :global(header a.pill) {
       display: none !important;
     }
-    /* reduce header vertical padding if Base has it */
-    :global(header) {
-      padding-top: 8px !important;
-      padding-bottom: 8px !important;
-    }
   }
 
-  /* ================= Mobile drawer menu (homepage only) ================= */
+  /* =================== MOBILE DRAWER =================== */
   .mNav { display: none; }
   @media (max-width: 720px) {
-    .mNav { display: block; margin: 2px 0 10px; }
+    .mNav { display: block; margin: 2px 0 12px; }
   }
 
   .mNavToggle {
@@ -437,7 +410,7 @@ const latest = feed.slice(0, 8);
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    box-shadow: 0 8px 18px rgba(0,0,0,.22);
+    box-shadow: var(--shadowSoft);
   }
 
   .mBrand {
@@ -469,7 +442,7 @@ const latest = feed.slice(0, 8);
     gap: 8px;
     border-radius: 12px;
     padding: 8px 10px;
-    border: 1px solid rgba(255,210,74,.35);
+    border: 1px solid rgba(255,210,74,.40);
     background: rgba(255,210,74,.10);
     color: rgba(232,237,244,.92);
     font-weight: 900;
@@ -496,8 +469,8 @@ const latest = feed.slice(0, 8);
     background: rgba(232,237,244,.92);
   }
   .mBurger::before { top: 0; }
-  .mBurger::after { bottom: 0; }
   .mBurger span { top: 5px; }
+  .mBurger::after { bottom: 0; }
 
   .mBackdrop {
     display: none;
@@ -583,7 +556,7 @@ const latest = feed.slice(0, 8);
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    height: 44px;
+    height: 50px;
     border-radius: 12px;
     border: 1px solid rgba(0,0,0,.45);
     background: linear-gradient(180deg, var(--yellow), var(--yellowDeep));
@@ -594,116 +567,121 @@ const latest = feed.slice(0, 8);
     box-shadow: 0 10px 20px rgba(0,0,0,.22);
   }
 
-  /* open state */
   .mNavToggle:checked ~ .mBackdrop { display: block; }
   .mNavToggle:checked ~ .mDrawer { transform: translateX(0); }
 
-  /* Newsletter band (conversion-focused yellow pop) */
+  /* =================== NEWSLETTER BAND (translucent yellow + ~2x taller) =================== */
   .newsletterBand {
-    border: 1px solid rgba(255,210,74,.38);
-    background:
-      radial-gradient(900px 380px at 25% -10%, rgba(255,210,74,.12), rgba(255,210,74,0) 55%),
-      linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+    border: 1px solid rgba(255,210,74,.48);
+    background: rgba(255,210,74,.14);
+    box-shadow: var(--glowSoft);
     border-radius: var(--cardRadius);
-    box-shadow: var(--shadowSoft);
     overflow: hidden;
-    margin: 6px 0 16px;
-  }
-  .newsletterBandInner {
-    display: grid;
-    grid-template-columns: 1.15fr .85fr;
-    gap: 14px;
-    padding: 18px 18px;
-    align-items: center;
-  }
-  @media (max-width: 880px) {
-    .newsletterBandInner { grid-template-columns: 1fr; }
-  }
-  .newsletterKicker {
-    font-weight: 900;
-    letter-spacing: .2px;
-    color: var(--t1);
-    margin-bottom: 6px;
-  }
-  .newsletterHeadline {
-    font-size: 20px;
-    line-height: 1.15;
-    font-weight: 950;
-    color: var(--t1);
-    margin-bottom: 8px;
-    letter-spacing: -0.2px;
-  }
-  .newsletterFine {
-    color: var(--t4);
-    line-height: 1.25;
-    font-size: 13px;
+    margin: 6px 0 18px;
   }
 
-  /* CTA */
-  .newsletterForm {
+  /* IMPORTANT: newsletter columns now match the page grid so the rail aligns to the input edge */
+  .newsletterBandInner {
     display: grid;
-    gap: 10px;
+    grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
+    gap: 22px;
+    padding: 30px 22px; /* taller */
     align-items: center;
   }
-  @media (min-width: 560px) {
+  @media (max-width: 980px) {
+    .newsletterBandInner {
+      grid-template-columns: 1fr;
+      gap: 14px;
+      padding: 26px 18px;
+    }
+  }
+
+  .newsletterKicker {
+    font-weight: 950;
+    letter-spacing: .2px;
+    color: rgba(12,14,18,.85);
+    background: rgba(0,0,0,.10);
+    display: inline-flex;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,.14);
+    margin-bottom: 10px;
+  }
+  .newsletterHeadline {
+    font-size: 22px;
+    line-height: 1.12;
+    font-weight: 950;
+    color: #0b0d10;
+    letter-spacing: -0.3px;
+    margin-bottom: 10px;
+  }
+  .newsletterFine {
+    color: rgba(12,14,18,.74);
+    line-height: 1.3;
+    font-size: 14px;
+  }
+
+  .newsletterForm {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  @media (max-width: 560px) {
     .newsletterForm {
-      grid-template-columns: 1fr auto;
+      grid-template-columns: 1fr;
       gap: 10px;
     }
   }
+
   .newsletterInput {
     width: 100%;
-    height: 44px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(0,0,0,.22);
-    color: var(--t1);
-    padding: 0 12px;
+    height: 54px; /* bigger */
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,.25);
+    background: rgba(11,13,16,.80); /* dark input */
+    color: rgba(232,237,244,.92);
+    padding: 0 14px;
     outline: none;
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
   }
-  .newsletterInput::placeholder { color: rgba(232,237,244,.55); }
+  .newsletterInput::placeholder { color: rgba(232,237,244,.60); }
   .newsletterInput:focus {
-    border-color: rgba(255,210,74,.55);
-    box-shadow: 0 0 0 3px rgba(255,210,74,.14);
+    border-color: rgba(255,210,74,.70);
+    box-shadow: 0 0 0 4px rgba(255,210,74,.20);
   }
+
   .newsletterButton {
-    height: 46px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.45);
+    height: 54px; /* match input */
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,.55);
     background: linear-gradient(180deg, var(--yellow), var(--yellowDeep));
     color: #0b0d10;
     font-weight: 950;
     letter-spacing: .01em;
     cursor: pointer;
-    box-shadow: 0 10px 20px rgba(0,0,0,.22);
-    padding: 0 14px;
+    box-shadow: 0 16px 26px rgba(0,0,0,.22);
+    padding: 0 16px;
     white-space: nowrap;
   }
   .newsletterButton:hover { filter: brightness(1.02) contrast(1.02); }
   .newsletterButton:active { transform: translateY(0.5px); }
 
-  /* Grid + rail alignment polish:
-     Align the right rail a touch left (visually closer to newsletter input column),
-     without cramming the main content. */
+  /* =================== MAIN GRID (rail aligned to newsletter input edge) =================== */
   .homeGrid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, var(--rail));
-    gap: 22px;
+    grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
+    gap: 22px; /* reasonable spacing between main + rail */
     align-items: start;
   }
-  @media (min-width: 980px) {
-    .homeGrid {
-      /* pulls the rail slightly left by reducing the effective “outer” feel */
-      column-gap: 20px;
-    }
-    .homeRail {
-      justify-self: start;
-      margin-left: 0;
-      padding-left: 0;
-    }
+  @media (max-width: 980px) {
+    .homeGrid { grid-template-columns: 1fr; }
+    .homeRail { order: 2; }
   }
+  /* No extra inset on rail; it should start exactly at column boundary */
+  .homeRail { padding: 0; margin: 0; }
 
-  /* Hero feature */
+  /* Hero */
   .heroFeature {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -768,7 +746,6 @@ const latest = feed.slice(0, 8);
     margin: 16px 0 10px;
   }
 
-  /* View all links */
   .viewAllLink {
     color: rgba(255,210,74,.92);
     font-weight: 800;
@@ -800,7 +777,7 @@ const latest = feed.slice(0, 8);
   .catTitle { font-weight: 950; font-size: 16px; color: var(--t1); }
   .catDesc { margin-top: 6px; color: var(--t4); line-height: 1.25; font-size: 13px; }
 
-  /* ============ LATEST GRID (3 / 2 / 1) ============ */
+  /* Latest grid */
   .latestGrid {
     display: grid !important;
     gap: 24px;
@@ -821,7 +798,6 @@ const latest = feed.slice(0, 8);
     background: rgba(255,255,255,.022);
     border-radius: var(--cardRadiusSm);
     overflow: hidden;
-    box-shadow: 0 0 0 rgba(0,0,0,0);
     transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease, transform 160ms ease;
     min-height: 100%;
   }
@@ -832,7 +808,6 @@ const latest = feed.slice(0, 8);
     transform: translateY(-2px);
   }
 
-  /* Media: editorial on desktop, denser on mobile */
   .latestMedia {
     aspect-ratio: 16 / 9;
     background: rgba(255,255,255,.02);
@@ -891,20 +866,19 @@ const latest = feed.slice(0, 8);
     font-size: 12.5px;
   }
 
-  /* Mobile density */
   @media (max-width: 520px) {
-    .newsletterBandInner { padding: 16px 14px; }
-    .newsletterHeadline { font-size: 18px; }
-    .newsletterButton { height: 44px; }
+    .newsletterBandInner { padding: 22px 14px; }
+    .newsletterHeadline { font-size: 20px; }
+    .newsletterInput, .newsletterButton { height: 50px; border-radius: 13px; }
 
     .latestGrid { gap: 18px; }
     .latestMedia { min-height: 155px; }
     .latestBody { padding: 13px 13px 12px; }
     .latestTitle { font-size: 17.5px; }
-    .latestDesc { font-size: 14px; -webkit-line-clamp: 3; }
+    .latestDesc { font-size: 14px; }
   }
 
-  /* Right rail modules */
+  /* Rail module */
   .moduleCard {
     border: 1px solid var(--cardBorder);
     background: var(--cardBg);
