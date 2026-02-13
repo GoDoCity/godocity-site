@@ -74,50 +74,10 @@ const latest = feed.slice(0, 8);
 
 <section class="section">
   <div class="container homeWrap">
-    <!-- NOTE: The duplicate top “GoDoDaytona is part of the GoDoCity network…” block is NOT rendered in this file.
-         If it’s coming from Base/topbar, we hide it via :global selectors in the CSS below. -->
+    <!-- NOTE: The duplicate GoDoCity network block + right-side pills are injected by Base.
+         We remove/hide them for Daytona via body.city-daytona CSS overrides below. -->
 
-    <!-- MOBILE MENU (CSS-only hamburger / drawer; no JS) -->
-    <div class="mNav">
-      <input id="mnavToggle" class="mNavToggle" type="checkbox" />
-      <div class="mNavBar">
-        <div class="mBrand">
-          <span class="mBrandDot" aria-hidden="true"></span>
-          <span class="mBrandText">GoDo Daytona</span>
-        </div>
-        <label class="mMenuBtn" for="mnavToggle" aria-label="Open menu">
-          <span class="mBurger" aria-hidden="true"><span></span></span>
-          <span class="mMenuText">Menu</span>
-        </label>
-      </div>
-
-      <label class="mBackdrop" for="mnavToggle" aria-hidden="true"></label>
-
-      <div class="mDrawer" role="dialog" aria-label="Site menu">
-        <div class="mDrawerHead">
-          <div class="mDrawerTitle">GoDo Daytona</div>
-          <label class="mCloseBtn" for="mnavToggle" aria-label="Close menu">✕</label>
-        </div>
-
-        <nav class="mLinks">
-          <a class="mLink" href="/daytona/">Home</a>
-          <a class="mLink" href="/daytona/topics/">Topics</a>
-          <a class="mLink" href="/daytona/guides/">Guides</a>
-          <a class="mLink" href="/daytona/events/">Events</a>
-          <a class="mLink" href="/daytona/jobs/">Jobs</a>
-          <a class="mLink" href="/daytona/games/">Games</a>
-          <a class="mLink" href="/daytona/buy/">The Buy</a>
-          <a class="mLink" href="/daytona/advertise/">Advertise</a>
-
-          <div class="mDivider"></div>
-
-          <!-- Subscribe lives inside slide-over menu -->
-          <a class="mCTA" href="/daytona/subscribe/">Subscribe</a>
-        </nav>
-      </div>
-    </div>
-
-    <!-- NEWSLETTER SIGNUP BAND (translucent yellow; taller; responsive form; no overflow) -->
+    <!-- NEWSLETTER SIGNUP BAND (Nooga-ish: tall, yellow, stacked input/button) -->
     <div class="newsletterBand">
       <div class="newsletterBandInner">
         <div class="newsletterText">
@@ -315,8 +275,11 @@ const latest = feed.slice(0, 8);
     --rail: 320px;
     --gridGap: 22px;
 
-    /* Use ONE shared left/right inset that we can reuse to align the rail to the input edge */
+    /* shared inset for alignment */
     --contentInset: 22px;
+
+    /* rail nudge right (~0.5cm) to match email field edge exactly */
+    --railNudge: 19px;
 
     --cardRadius: 16px;
     --cardRadiusSm: 14px;
@@ -335,213 +298,108 @@ const latest = feed.slice(0, 8);
     --yellowDeep: #ffc400;
 
     --glow: 0 0 0 1px rgba(255,210,74,.18), 0 10px 26px rgba(0,0,0,.30);
-    --glowSoft: 0 0 0 1px rgba(255,210,74,.16), 0 18px 40px rgba(0,0,0,.40);
+    --glowSoft: 0 0 0 1px rgba(255,210,74,.18), 0 18px 44px rgba(0,0,0,.45);
   }
 
-  /* ================= Daytona-only header cleanup (Base/topbar) =================
-     Replace the selector below with the exact class you saw in Inspect.
-     I included common candidates; KEEP the one that matches your actual DOM. */
+  /* ================= Daytona-only Base header overrides =================
+     User note: body.city-daytona exists. Use it as the scope so other cities are unaffected. */
 
-  /* Hide the Base/topbar “GoDoDaytona is part of…” block (Daytona homepage only) */
-  :global(body[data-city="daytona"] .cityNetworkBlurb),
-  :global(body[data-city="daytona"] .networkBlurb),
-  :global(body[data-city="daytona"] .siteNetworkNote),
-  :global(body[data-city="daytona"] .topNetworkNote),
-  :global(body[data-city="daytona"] .topNetworkBlurb),
-  :global(body[data-city="daytona"] [data-network-blurb="top"]) {
+  /* 1) Kill the injected top GoDoCity network block + “All rights reserved” */
+  :global(body.city-daytona .cityNetworkBlurb),
+  :global(body.city-daytona .networkBlurb),
+  :global(body.city-daytona .siteNetworkNote),
+  :global(body.city-daytona .topNetworkNote),
+  :global(body.city-daytona .topNetworkBlurb),
+  :global(body.city-daytona [data-network-blurb="top"]),
+  :global(body.city-daytona .allRightsReserved),
+  :global(body.city-daytona [data-all-rights-reserved]),
+  :global(body.city-daytona .networkFooterTop),
+  :global(body.city-daytona .topNetworkFooter) {
     display: none !important;
   }
 
-  /* Hide header Subscribe pill on Daytona page (Base) */
-  :global(body[data-city="daytona"] header a.pill[href*="subscribe"]) {
+  /* 1) Kill the “Advertise” + “City Directory” pills that sit beside that block (top only) */
+  :global(body.city-daytona header a.pill[href*="advertise"]),
+  :global(body.city-daytona header a.pill[href*="city-directory"]),
+  :global(body.city-daytona header a.pill[href*="directory"]) {
     display: none !important;
   }
 
-  /* (Optional) Hide any top “City Directory” pill if Base renders it */
-  :global(body[data-city="daytona"] header a.pill[href*="directory"]),
-  :global(body[data-city="daytona"] header a.pill[href*="city-directory"]) {
+  /* 2) Remove the yellow “Subscribe” pill in header (duplicate) */
+  :global(body.city-daytona header a.pill[href*="subscribe"]) {
     display: none !important;
   }
 
-  /* =================== MOBILE DRAWER =================== */
-  .mNav { display: none; }
-  @media (max-width: 720px) { .mNav { display: block; margin: 2px 0 12px; } }
-
-  .mNavToggle {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .mNavBar {
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.02);
-    border-radius: 14px;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    box-shadow: var(--shadowSoft);
-  }
-  .mBrand { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
-  .mBrandDot {
-    width: 10px; height: 10px; border-radius: 999px;
-    background: rgba(255,210,74,.95);
-    box-shadow: 0 0 0 3px rgba(255,210,74,.14);
-    flex: 0 0 auto;
-  }
-  .mBrandText {
-    font-weight: 950;
-    color: rgba(232,237,244,.92);
-    letter-spacing: -0.2px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  /* 2) Put “Advertise” into the MAIN pill row next to “The Buy”
+     (We’re not editing Base markup. We:
+       - hide the header's advertise pill above (so it can’t float right),
+       - and force the nav-row to include Advertise by showing any non-header advertise pill if Base already renders it in nav row.
+     If Base already has Advertise in the row, this does nothing. */
+  :global(body.city-daytona nav a.pill[href*="advertise"]) {
+    display: inline-flex !important;
   }
 
-  .mMenuBtn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    border-radius: 12px;
-    padding: 8px 10px;
-    border: 1px solid rgba(255,210,74,.40);
-    background: rgba(255,210,74,.10);
-    color: rgba(232,237,244,.92);
-    font-weight: 900;
-    cursor: pointer;
-    user-select: none;
-  }
-  .mMenuText { font-size: 12.5px; }
+  /* 3) Mobile pills missing: keep Base pills visible, tighter, wrapping into 2 rows */
+  @media (max-width: 720px) {
+    :global(body.city-daytona header .navPills),
+    :global(body.city-daytona header .pillRow),
+    :global(body.city-daytona header .navRow),
+    :global(body.city-daytona header nav .pills),
+    :global(body.city-daytona header nav .navPills) {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      gap: 6px !important;
+      overflow: visible !important;
+      padding-bottom: 0 !important;
+    }
 
-  .mBurger { width: 18px; height: 12px; position: relative; display: inline-block; }
-  .mBurger::before,
-  .mBurger::after,
-  .mBurger span {
-    content: "";
-    position: absolute;
-    left: 0; right: 0;
-    height: 2px;
-    border-radius: 2px;
-    background: rgba(232,237,244,.92);
+    :global(body.city-daytona header a.pill),
+    :global(body.city-daytona header .pill) {
+      padding: 6px 10px !important;
+      font-size: 11.5px !important;
+      line-height: 1 !important;
+      border-radius: 999px !important;
+      white-space: nowrap !important;
+    }
   }
-  .mBurger::before { top: 0; }
-  .mBurger span { top: 5px; }
-  .mBurger::after { bottom: 0; }
 
-  .mBackdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.55);
-    backdrop-filter: blur(2px);
-    z-index: 90;
-  }
-  .mDrawer {
-    position: fixed;
-    top: 0; right: 0;
-    height: 100dvh;
-    width: min(86vw, 360px);
-    background: #0b0d10;
-    border-left: 1px solid rgba(255,255,255,.10);
-    box-shadow: -20px 0 60px rgba(0,0,0,.45);
-    transform: translateX(100%);
-    transition: transform 220ms ease;
-    z-index: 100;
-    display: grid;
-    grid-template-rows: auto 1fr;
-  }
-  .mDrawerHead {
-    padding: 14px 14px 12px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .mDrawerTitle { font-weight: 950; color: rgba(232,237,244,.92); letter-spacing: -0.2px; }
-  .mCloseBtn {
-    width: 34px; height: 34px;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.03);
-    color: rgba(232,237,244,.86);
-    cursor: pointer;
-    user-select: none;
-  }
-  .mLinks { padding: 12px 14px 16px; display: grid; gap: 8px; overflow: auto; }
-  .mLink {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    text-decoration: none;
-    color: rgba(232,237,244,.86);
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.02);
-    border-radius: 12px;
-    padding: 12px 12px;
-    font-weight: 850;
-  }
-  .mLink:hover { border-color: rgba(255,210,74,.22); box-shadow: 0 0 0 1px rgba(255,210,74,.12); }
-  .mDivider { height: 1px; background: rgba(255,255,255,.10); margin: 8px 0; }
-  .mCTA {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 50px;
-    border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.55);
-    background: linear-gradient(180deg, var(--yellow), var(--yellowDeep));
-    color: #0b0d10;
-    font-weight: 950;
-    text-decoration: none;
-    letter-spacing: .01em;
-    box-shadow: 0 10px 20px rgba(0,0,0,.22);
-  }
-  .mNavToggle:checked ~ .mBackdrop { display: block; }
-  .mNavToggle:checked ~ .mDrawer { transform: translateX(0); }
-
-  /* =================== NEWSLETTER BAND (translucent yellow, taller, readable, no cutoff) =================== */
+  /* =================== NEWSLETTER BAND (Nooga-ish) =================== */
   .newsletterBand {
-    border: 1px solid rgba(255,210,74,.55);
+    border: 1px solid rgba(255,210,74,.58);
     background:
-      radial-gradient(1100px 520px at 20% 0%, rgba(255,210,74,.18), rgba(255,210,74,0) 60%),
-      rgba(255,210,74,.12);
+      radial-gradient(1000px 520px at 20% 0%, rgba(255,210,74,.24), rgba(255,210,74,0) 60%),
+      rgba(255,210,74,.14);
     box-shadow: var(--glowSoft);
     border-radius: var(--cardRadius);
     overflow: hidden;
     margin: 10px 0 18px;
   }
 
-  /* IMPORTANT for alignment: consistent inset. This makes input’s left edge = newsletter inset */
   .newsletterBandInner {
     display: grid;
-    grid-template-columns: 1fr; /* Keep band content full-width; form never overflows */
-    gap: 16px;
-    padding: 34px var(--contentInset);
+    grid-template-columns: 1fr;
+    gap: 18px;
+    padding: 36px var(--contentInset); /* ~2x height feel */
     align-items: start;
   }
   @media (max-width: 520px) {
-    .newsletterBandInner { padding: 26px 14px; }
+    .newsletterBandInner { padding: 30px 14px; }
   }
 
-  /* Band text readable on dark theme */
-  .newsletterHeadline,
-  .newsletterFine { color: rgba(232,237,244,.92); }
+  /* All text in band must be WHITE (except the yellow badge) */
+  .newsletterHeadline { color: rgba(232,237,244,.96); }
+  .newsletterFine { color: rgba(232,237,244,.78); }
+
   .newsletterHeadline {
     font-size: 22px;
     line-height: 1.12;
     font-weight: 950;
     letter-spacing: -0.3px;
-    margin-bottom: 8px;
+    margin: 0;
   }
-  .newsletterFine { color: rgba(232,237,244,.72); font-size: 14px; line-height: 1.35; }
+  .newsletterFine { font-size: 14px; line-height: 1.35; margin-top: 6px; }
 
-  /* Kicker: bright yellow pill with black text */
+  /* Badge: bright yellow with black text */
   .newsletterKicker {
     font-weight: 950;
     letter-spacing: .2px;
@@ -550,41 +408,39 @@ const latest = feed.slice(0, 8);
     display: inline-flex;
     padding: 7px 12px;
     border-radius: 999px;
-    border: 1px solid rgba(0,0,0,.28);
-    margin-bottom: 10px;
+    border: 1px solid rgba(0,0,0,.30);
     box-shadow: 0 10px 18px rgba(0,0,0,.18);
+    width: fit-content;
   }
 
-  /* Form: never overflows; wraps cleanly; with gap */
+  /* Stack layout: input full-width, button full-width below */
   .newsletterForm {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr;
     gap: 12px;
-    min-width: 0;
     width: 100%;
+    min-width: 0;
   }
 
   .newsletterInput {
-    flex: 1 1 360px;
-    min-width: min(100%, 280px);
+    width: 100%;
     height: 54px;
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.20);
     background: rgba(11,13,16,.72);
-    color: rgba(232,237,244,.95);
+    color: rgba(232,237,244,.96); /* input text white */
     padding: 0 14px;
     outline: none;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
   }
-  .newsletterInput::placeholder { color: rgba(232,237,244,.70); }
+  .newsletterInput::placeholder { color: rgba(232,237,244,.72); } /* readable */
   .newsletterInput:focus {
-    border-color: rgba(255,210,74,.72);
-    box-shadow: 0 0 0 4px rgba(255,210,74,.20);
+    border-color: rgba(255,210,74,.78);
+    box-shadow: 0 0 0 4px rgba(255,210,74,.22);
   }
 
   .newsletterButton {
-    flex: 0 1 auto;
+    width: 100%;
     height: 54px;
     border-radius: 14px;
     border: 1px solid rgba(0,0,0,.55);
@@ -594,213 +450,39 @@ const latest = feed.slice(0, 8);
     letter-spacing: .01em;
     cursor: pointer;
     box-shadow: 0 16px 26px rgba(0,0,0,.22);
-    padding: 0 16px;
-    white-space: nowrap;
-    max-width: 100%;
   }
+  .newsletterButton:hover { filter: brightness(1.02) contrast(1.02); }
+  .newsletterButton:active { transform: translateY(0.5px); }
+
   @media (max-width: 520px) {
     .newsletterInput, .newsletterButton { height: 50px; border-radius: 13px; }
-    .newsletterButton { width: 100%; }
+    .newsletterHeadline { font-size: 20px; }
   }
 
-  /* =================== HOME GRID + RAIL NU DGE (align rail to newsletter input edge) =================== */
-  /* Key idea:
-     - Newsletter input starts at newsletterBandInner left padding (--contentInset)
-     - We apply the SAME left/right padding to homeGrid so homeRail column starts at that same x-position */
+  /* =================== HOME GRID + RAIL ALIGNMENT =================== */
   .homeGrid {
     display: grid;
     grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
     gap: var(--gridGap);
     align-items: start;
-    padding: 0 var(--contentInset); /* aligns rail column start to input edge */
+
+    /* Grid inset = newsletter inset so columns start under same left edge */
+    padding: 0 var(--contentInset);
   }
   @media (max-width: 980px) {
     .homeGrid { grid-template-columns: 1fr; padding: 0; }
     .homeRail { order: 2; }
   }
-  .homeRail { padding: 0; margin: 0; }
-/* =========================
-   DAYTONA PAGE OVERRIDES
-   ========================= */
 
-/* (A) Kill the TOP GoDoCity blurb block (keep footer version) */
-:global(body.city-daytona .topbar .cityIntro),
-:global(body.city-daytona .topbar .networkBlurb),
-:global(body.city-daytona .topbar .goDoCityBlurb),
-:global(body.city-daytona .topbar .topBlurb),
-:global(body.city-daytona .topbar .aboutBlock),
-:global(body.city-daytona .topbar .cityAbout),
-:global(body.city-daytona .topbar .subbar),
-:global(body.city-daytona .topbar .topbarSub),
-:global(body.city-daytona .topbar .topbarMeta),
-:global(body.city-daytona .topbar .topbarBlurb) {
-  display: none !important;
-}
-
-/* If the block is just "the next row" under the pills in the header,
-   this also nukes it safely without killing the whole header. */
-:global(body.city-daytona .topbar > *:not(.container)) {
-  display: none !important;
-}
-
-/* (B) Remove the top Subscribe pill (duplicate CTA) */
-:global(body.city-daytona .topbar a[href*="/subscribe"]),
-:global(body.city-daytona .topbar button[href*="/subscribe"]),
-:global(body.city-daytona .topbar .subscribePill),
-:global(body.city-daytona .topbar .pillSubscribe) {
-  display: none !important;
-}
-
-/* (C) Make the main pill row always visible + “Nooga-style” mobile scroll */
-.pagePills{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding: 12px 0 10px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.pagePills::-webkit-scrollbar{ display:none; }
-
-/* Pills tighter on small screens (closer together) */
-@media (max-width: 520px){
-  .pagePills{
-    gap:8px;
-    padding: 10px 0 8px;
+  /* Move Upcoming Events column slightly RIGHT (~0.5cm) to match email field edge precisely */
+  .homeRail {
+    padding: 0;
+    margin: 0;
+    transform: translateX(var(--railNudge));
   }
-  .pagePills .pill{
-    padding: 8px 10px;
-    font-size: 13px;
-    border-radius: 999px;
+  @media (max-width: 980px) {
+    .homeRail { transform: none; }
   }
-}
-
-/* =========================
-   NEWSLETTER BAND (CTA)
-   ========================= */
-
-/* Translucent NASCAR-yellow like your tag pills, but bigger */
-.newsletterBand{
-  /* translucent yellow wash */
-  background: rgba(255, 210, 74, 0.22);
-  border: 1px solid rgba(255, 210, 74, 0.35);
-  border-radius: 16px;
-  padding: 22px 18px;         /* taller */
-  margin: 12px 0 18px;
-  box-shadow: 0 10px 28px rgba(0,0,0,.25);
-}
-
-/* Make it feel ~2× taller than before (without cartoon padding) */
-@media (min-width: 740px){
-  .newsletterBand{
-    padding: 28px 22px;
-  }
-}
-
-.newsletterKicker{
-  display:inline-block;
-  background: #ffd24a;
-  color: #111;
-  font-weight: 900;
-  padding: 8px 12px;
-  border-radius: 999px;
-  letter-spacing: .2px;
-  margin-bottom: 10px;
-}
-
-.newsletterHeadline{
-  color: #fff;
-  font-weight: 900;
-  font-size: 22px;
-  line-height: 1.15;
-  margin: 0 0 6px;
-}
-
-.newsletterFine{
-  color: rgba(255,255,255,.85);
-  font-size: 13px;
-  margin: 0 0 14px;
-}
-
-/* Form: not ridiculously long, and never cut off */
-.newsletterForm{
-  display:grid;
-  grid-template-columns: minmax(0, 520px) auto;
-  gap: 12px;
-  align-items: center;
-}
-
-/* Input stays dark but readable */
-.newsletterInput{
-  width: 100%;
-  background: rgba(0,0,0,.35);
-  border: 1px solid rgba(255,255,255,.18);
-  color: #fff;
-  padding: 14px 14px;
-  border-radius: 12px;
-  outline: none;
-}
-.newsletterInput::placeholder{
-  color: rgba(255,255,255,.72);
-}
-.newsletterInput:focus{
-  border-color: rgba(255,210,74,.55);
-  box-shadow: 0 0 0 3px rgba(255,210,74,.18);
-}
-
-/* Button: premium yellow, black text */
-.newsletterButton{
-  background: #ffd24a;
-  color: #111;
-  font-weight: 900;
-  border: 0;
-  padding: 14px 16px;
-  border-radius: 12px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-/* Mobile: STACK input + button (fixes the "half gone" cutoff and long bar) */
-@media (max-width: 740px){
-  .newsletterForm{
-    grid-template-columns: 1fr;
-  }
-  .newsletterButton{
-    width: 100%;
-  }
-}
-
-/* =========================
-   MAIN GRID / UPCOMING EVENTS ALIGN
-   ========================= */
-
-/* Give the grid the SAME side inset as the newsletter band */
-:root{
-  --contentInset: clamp(0px, 1.2vw, 14px);
-}
-
-/* This nudges the rail to line up with the email band edge */
-.homeGrid{
-  padding: 0 var(--contentInset);
-}
-
-/* Tiny right nudge for the rail (~0.5cm-ish depending on DPI) */
-.homeRail{
-  margin-left: 0;
-  padding-left: 0;
-  transform: translateX(6px);
-}
-
-/* On mobile stack, don’t offset */
-@media (max-width: 980px){
-  .homeRail{
-    transform: none;
-  }
-}
-
-  /* ---------------- existing styling below (unchanged) ---------------- */
 
   /* Hero */
   .heroFeature {
