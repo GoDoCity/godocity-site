@@ -74,19 +74,8 @@ const latest = feed.slice(0, 8);
 
 <section class="section">
   <div class="container homeWrap">
-    <!-- NOTE: duplicate top “GoDoDaytona is part of the GoDoCity network… © …” block is intentionally NOT present here. -->
-
-    <!-- MAIN NAV PILLS (page-controlled row; Advertise is in-line; NO Subscribe pill) -->
-    <nav class="pagePills" aria-label="Daytona navigation">
-      <a class="pill" href="/daytona/">Home</a>
-      <a class="pill" href="/daytona/topics/">Topics</a>
-      <a class="pill" href="/daytona/guides/">Guides</a>
-      <a class="pill" href="/daytona/events/">Events</a>
-      <a class="pill" href="/daytona/jobs/">Jobs</a>
-      <a class="pill" href="/daytona/games/">Games</a>
-      <a class="pill" href="/daytona/buy/">The Buy</a>
-      <a class="pill" href="/daytona/advertise/">Advertise</a>
-    </nav>
+    <!-- NOTE: The duplicate top “GoDoDaytona is part of the GoDoCity network…” block is NOT rendered in this file.
+         If it’s coming from Base/topbar, we hide it via :global selectors in the CSS below. -->
 
     <!-- MOBILE MENU (CSS-only hamburger / drawer; no JS) -->
     <div class="mNav">
@@ -122,7 +111,7 @@ const latest = feed.slice(0, 8);
 
           <div class="mDivider"></div>
 
-          <!-- Subscribe lives inside slide-over menu (not in header pills) -->
+          <!-- Subscribe lives inside slide-over menu -->
           <a class="mCTA" href="/daytona/subscribe/">Subscribe</a>
         </nav>
       </div>
@@ -326,7 +315,7 @@ const latest = feed.slice(0, 8);
     --rail: 320px;
     --gridGap: 22px;
 
-    /* critical for #5 alignment: same inner inset on BOTH newsletter band + main grid */
+    /* Use ONE shared left/right inset that we can reuse to align the rail to the input edge */
     --contentInset: 22px;
 
     --cardRadius: 16px;
@@ -349,31 +338,29 @@ const latest = feed.slice(0, 8);
     --glowSoft: 0 0 0 1px rgba(255,210,74,.16), 0 18px 40px rgba(0,0,0,.40);
   }
 
-  /* ===== Header pills: keep main row left; ensure Base header Subscribe doesn’t show (in case Base renders it) ===== */
-  :global(header a.pill[href*="subscribe"]) { display: none !important; }
-  :global(header .networkBlurb),
-  :global(header .cityNetworkBlurb),
-  :global(header .siteNetworkNote),
-  :global(header [data-network-blurb="top"]) { display: none !important; }
+  /* ================= Daytona-only header cleanup (Base/topbar) =================
+     Replace the selector below with the exact class you saw in Inspect.
+     I included common candidates; KEEP the one that matches your actual DOM. */
 
-  /* MAIN NAV ROW (this page) */
-  .pagePills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
-    margin: 6px 0 14px;
+  /* Hide the Base/topbar “GoDoDaytona is part of…” block (Daytona homepage only) */
+  :global(body[data-city="daytona"] .cityNetworkBlurb),
+  :global(body[data-city="daytona"] .networkBlurb),
+  :global(body[data-city="daytona"] .siteNetworkNote),
+  :global(body[data-city="daytona"] .topNetworkNote),
+  :global(body[data-city="daytona"] .topNetworkBlurb),
+  :global(body[data-city="daytona"] [data-network-blurb="top"]) {
+    display: none !important;
   }
-  @media (max-width: 720px) { .pagePills { display: none; } }
 
-  /* Mobile: shorten Base header by hiding its pills */
-  @media (max-width: 720px) {
-    :global(header .navPills),
-    :global(header .pillRow),
-    :global(header .navRow),
-    :global(header nav .pills),
-    :global(header nav .navPills),
-    :global(header a.pill) { display: none !important; }
+  /* Hide header Subscribe pill on Daytona page (Base) */
+  :global(body[data-city="daytona"] header a.pill[href*="subscribe"]) {
+    display: none !important;
+  }
+
+  /* (Optional) Hide any top “City Directory” pill if Base renders it */
+  :global(body[data-city="daytona"] header a.pill[href*="directory"]),
+  :global(body[data-city="daytona"] header a.pill[href*="city-directory"]) {
+    display: none !important;
   }
 
   /* =================== MOBILE DRAWER =================== */
@@ -518,9 +505,9 @@ const latest = feed.slice(0, 8);
   .mNavToggle:checked ~ .mBackdrop { display: block; }
   .mNavToggle:checked ~ .mDrawer { transform: translateX(0); }
 
-  /* =================== NEWSLETTER BAND (FIX #1 + #3) =================== */
+  /* =================== NEWSLETTER BAND (translucent yellow, taller, readable, no cutoff) =================== */
   .newsletterBand {
-    border: 1px solid rgba(255,210,74,.48);
+    border: 1px solid rgba(255,210,74,.55);
     background:
       radial-gradient(1100px 520px at 20% 0%, rgba(255,210,74,.18), rgba(255,210,74,0) 60%),
       rgba(255,210,74,.12);
@@ -530,22 +517,19 @@ const latest = feed.slice(0, 8);
     margin: 10px 0 18px;
   }
 
+  /* IMPORTANT for alignment: consistent inset. This makes input’s left edge = newsletter inset */
   .newsletterBandInner {
     display: grid;
-    grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
-    gap: var(--gridGap);
-    padding: 34px var(--contentInset); /* taller (≈2x) */
-    align-items: center;
+    grid-template-columns: 1fr; /* Keep band content full-width; form never overflows */
+    gap: 16px;
+    padding: 34px var(--contentInset);
+    align-items: start;
   }
-  @media (max-width: 980px) {
-    .newsletterBandInner {
-      grid-template-columns: 1fr;
-      gap: 16px;
-      padding: 28px 16px;
-    }
+  @media (max-width: 520px) {
+    .newsletterBandInner { padding: 26px 14px; }
   }
 
-  /* All band text should be white on dark theme */
+  /* Band text readable on dark theme */
   .newsletterHeadline,
   .newsletterFine { color: rgba(232,237,244,.92); }
   .newsletterHeadline {
@@ -553,11 +537,11 @@ const latest = feed.slice(0, 8);
     line-height: 1.12;
     font-weight: 950;
     letter-spacing: -0.3px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
   }
   .newsletterFine { color: rgba(232,237,244,.72); font-size: 14px; line-height: 1.35; }
 
-  /* Kicker: bright yellow pill w/ black text */
+  /* Kicker: bright yellow pill with black text */
   .newsletterKicker {
     font-weight: 950;
     letter-spacing: .2px;
@@ -567,27 +551,27 @@ const latest = feed.slice(0, 8);
     padding: 7px 12px;
     border-radius: 999px;
     border: 1px solid rgba(0,0,0,.28);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     box-shadow: 0 10px 18px rgba(0,0,0,.18);
   }
 
-  /* Responsive form: NEVER overflow; wrap cleanly; always stays inside band */
+  /* Form: never overflows; wraps cleanly; with gap */
   .newsletterForm {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px; /* required gap */
+    gap: 12px;
     min-width: 0;
     width: 100%;
   }
+
   .newsletterInput {
-    flex: 1 1 280px; /* shrink/grow safely */
-    min-width: 0;
-    width: 100%;
+    flex: 1 1 360px;
+    min-width: min(100%, 280px);
     height: 54px;
     border-radius: 14px;
-    border: 1px solid rgba(255,255,255,.16);
-    background: rgba(11,13,16,.70);
+    border: 1px solid rgba(255,255,255,.18);
+    background: rgba(11,13,16,.72);
     color: rgba(232,237,244,.95);
     padding: 0 14px;
     outline: none;
@@ -600,7 +584,7 @@ const latest = feed.slice(0, 8);
   }
 
   .newsletterButton {
-    flex: 0 0 auto;
+    flex: 0 1 auto;
     height: 54px;
     border-radius: 14px;
     border: 1px solid rgba(0,0,0,.55);
@@ -614,32 +598,29 @@ const latest = feed.slice(0, 8);
     white-space: nowrap;
     max-width: 100%;
   }
-  .newsletterButton:hover { filter: brightness(1.02) contrast(1.02); }
-  .newsletterButton:active { transform: translateY(0.5px); }
-
   @media (max-width: 520px) {
-    .newsletterBandInner { padding: 26px 14px; }
-    .newsletterHeadline { font-size: 20px; }
     .newsletterInput, .newsletterButton { height: 50px; border-radius: 13px; }
-    .newsletterButton { width: 100%; } /* ensures no cutoff on very small widths */
+    .newsletterButton { width: 100%; }
   }
 
-  /* =================== MAIN GRID (FIX #5 alignment) =================== */
+  /* =================== HOME GRID + RAIL NU DGE (align rail to newsletter input edge) =================== */
+  /* Key idea:
+     - Newsletter input starts at newsletterBandInner left padding (--contentInset)
+     - We apply the SAME left/right padding to homeGrid so homeRail column starts at that same x-position */
   .homeGrid {
     display: grid;
     grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
     gap: var(--gridGap);
     align-items: start;
-
-    /* This is the key: same inset as the newsletter band so the rail column
-       starts at the same X as the input field. */
-    padding: 0 var(--contentInset);
+    padding: 0 var(--contentInset); /* aligns rail column start to input edge */
   }
   @media (max-width: 980px) {
     .homeGrid { grid-template-columns: 1fr; padding: 0; }
     .homeRail { order: 2; }
   }
   .homeRail { padding: 0; margin: 0; }
+
+  /* ---------------- existing styling below (unchanged) ---------------- */
 
   /* Hero */
   .heroFeature {
