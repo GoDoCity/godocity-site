@@ -74,12 +74,9 @@ const latest = feed.slice(0, 8);
 
 <section class="section">
   <div class="container homeWrap">
-    <!-- ===================== TOP DUPLICATE BLOCK REMOVED ===================== -->
-    <!-- If your old file had a top “GoDoDaytona is part of the GoDoCity network… © …”
-         with right-side pills (Advertise / City Directory), it should NOT be here anymore. -->
+    <!-- NOTE: duplicate top “GoDoDaytona is part of the GoDoCity network… © …” block is intentionally NOT present here. -->
 
-    <!-- ===================== DESKTOP MAIN NAV PILLS (page-controlled) ===================== -->
-    <!-- Header Subscribe pill removed; Advertise moved next to The Buy in this row -->
+    <!-- MAIN NAV PILLS (page-controlled row; Advertise is in-line; NO Subscribe pill) -->
     <nav class="pagePills" aria-label="Daytona navigation">
       <a class="pill" href="/daytona/">Home</a>
       <a class="pill" href="/daytona/topics/">Topics</a>
@@ -91,7 +88,7 @@ const latest = feed.slice(0, 8);
       <a class="pill" href="/daytona/advertise/">Advertise</a>
     </nav>
 
-    <!-- ===================== MOBILE MENU (CSS-only hamburger / drawer; no JS) ===================== -->
+    <!-- MOBILE MENU (CSS-only hamburger / drawer; no JS) -->
     <div class="mNav">
       <input id="mnavToggle" class="mNavToggle" type="checkbox" />
       <div class="mNavBar">
@@ -125,13 +122,13 @@ const latest = feed.slice(0, 8);
 
           <div class="mDivider"></div>
 
-          <!-- Subscribe lives inside slide-over menu -->
+          <!-- Subscribe lives inside slide-over menu (not in header pills) -->
           <a class="mCTA" href="/daytona/subscribe/">Subscribe</a>
         </nav>
       </div>
     </div>
 
-    <!-- ===================== NEWSLETTER SIGNUP BAND (taller + translucent yellow) ===================== -->
+    <!-- NEWSLETTER SIGNUP BAND (translucent yellow; taller; responsive form; no overflow) -->
     <div class="newsletterBand">
       <div class="newsletterBandInner">
         <div class="newsletterText">
@@ -151,7 +148,6 @@ const latest = feed.slice(0, 8);
     <div class="homeGrid">
       <!-- LEFT -->
       <div class="homeMain">
-        <!-- (2) One Main Hero Story -->
         {hero && (
           <a class="heroFeature" href={`/daytona/posts/${hero.slug}/`}>
             <div class="heroMedia">
@@ -176,7 +172,6 @@ const latest = feed.slice(0, 8);
           </a>
         )}
 
-        <!-- (3) Category Highlight Grid -->
         <div class="sectionHeader">
           <div class="sectionTitle">Explore</div>
         </div>
@@ -196,7 +191,6 @@ const latest = feed.slice(0, 8);
           </a>
         </div>
 
-        <!-- (4) Latest Feed Cards -->
         <div class="feedHeader">
           <div class="sectionTitle">Latest</div>
           <a class="viewAllLink" href="/daytona/posts/">View all</a>
@@ -274,7 +268,6 @@ const latest = feed.slice(0, 8);
       </aside>
     </div>
 
-    <!-- (6) Bottom Promo Band -->
     <div class="promoBand">
       <div class="promoCopy">
         <div class="promoTitle">Advertise with us.</div>
@@ -286,7 +279,6 @@ const latest = feed.slice(0, 8);
       </div>
     </div>
 
-    <!-- (7) Footer -->
     <footer class="homeFooter">
       <div class="footerCols">
         <div class="footerCol">
@@ -309,7 +301,9 @@ const latest = feed.slice(0, 8);
             GoDoDaytona is part of the GoDoCity network. Built to scale city-by-city with consistent design,
             editorial workflow, and advertising packages.
           </div>
-          <div class="footerFine" style="margin-top:10px;">© {new Date().getFullYear()} GoDoCity. All rights reserved.</div>
+          <div class="footerFine" style="margin-top:10px;">
+            © {new Date().getFullYear()} GoDoCity. All rights reserved.
+          </div>
         </div>
       </div>
     </footer>
@@ -330,6 +324,10 @@ const latest = feed.slice(0, 8);
   .homeWrap {
     --maxMain: 860px;
     --rail: 320px;
+    --gridGap: 22px;
+
+    /* critical for #5 alignment: same inner inset on BOTH newsletter band + main grid */
+    --contentInset: 22px;
 
     --cardRadius: 16px;
     --cardRadiusSm: 14px;
@@ -351,19 +349,14 @@ const latest = feed.slice(0, 8);
     --glowSoft: 0 0 0 1px rgba(255,210,74,.16), 0 18px 40px rgba(0,0,0,.40);
   }
 
-  /* =================== HEADER PILL RULES (remove duplicates from Base) =================== */
-  /* Remove header Subscribe pill entirely */
+  /* ===== Header pills: keep main row left; ensure Base header Subscribe doesn’t show (in case Base renders it) ===== */
   :global(header a.pill[href*="subscribe"]) { display: none !important; }
-  /* Remove “City Directory” and any top-right duplicate Advertise pill */
-  :global(header a.pill[href*="directory"]),
-  :global(header a.pill[href*="city-directory"]) { display: none !important; }
-  /* Also hide any header network blurb if Base still renders it */
   :global(header .networkBlurb),
   :global(header .cityNetworkBlurb),
   :global(header .siteNetworkNote),
   :global(header [data-network-blurb="top"]) { display: none !important; }
 
-  /* Desktop pills row (this page) */
+  /* MAIN NAV ROW (this page) */
   .pagePills {
     display: flex;
     flex-wrap: wrap;
@@ -371,27 +364,21 @@ const latest = feed.slice(0, 8);
     align-items: center;
     margin: 6px 0 14px;
   }
-  @media (max-width: 720px) {
-    .pagePills { display: none; } /* mobile uses hamburger drawer */
-  }
+  @media (max-width: 720px) { .pagePills { display: none; } }
 
-  /* Mobile: hide Base nav pills to shorten header, use our drawer */
+  /* Mobile: shorten Base header by hiding its pills */
   @media (max-width: 720px) {
     :global(header .navPills),
     :global(header .pillRow),
     :global(header .navRow),
     :global(header nav .pills),
     :global(header nav .navPills),
-    :global(header a.pill) {
-      display: none !important;
-    }
+    :global(header a.pill) { display: none !important; }
   }
 
   /* =================== MOBILE DRAWER =================== */
   .mNav { display: none; }
-  @media (max-width: 720px) {
-    .mNav { display: block; margin: 2px 0 12px; }
-  }
+  @media (max-width: 720px) { .mNav { display: block; margin: 2px 0 12px; } }
 
   .mNavToggle {
     position: absolute;
@@ -400,7 +387,6 @@ const latest = feed.slice(0, 8);
     opacity: 0;
     pointer-events: none;
   }
-
   .mNavBar {
     border: 1px solid rgba(255,255,255,.10);
     background: rgba(255,255,255,.02);
@@ -412,17 +398,9 @@ const latest = feed.slice(0, 8);
     gap: 10px;
     box-shadow: var(--shadowSoft);
   }
-
-  .mBrand {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-  }
+  .mBrand { display: inline-flex; align-items: center; gap: 10px; min-width: 0; }
   .mBrandDot {
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
+    width: 10px; height: 10px; border-radius: 999px;
     background: rgba(255,210,74,.95);
     box-shadow: 0 0 0 3px rgba(255,210,74,.14);
     flex: 0 0 auto;
@@ -451,19 +429,13 @@ const latest = feed.slice(0, 8);
   }
   .mMenuText { font-size: 12.5px; }
 
-  .mBurger {
-    width: 18px;
-    height: 12px;
-    position: relative;
-    display: inline-block;
-  }
+  .mBurger { width: 18px; height: 12px; position: relative; display: inline-block; }
   .mBurger::before,
   .mBurger::after,
   .mBurger span {
     content: "";
     position: absolute;
-    left: 0;
-    right: 0;
+    left: 0; right: 0;
     height: 2px;
     border-radius: 2px;
     background: rgba(232,237,244,.92);
@@ -480,11 +452,9 @@ const latest = feed.slice(0, 8);
     backdrop-filter: blur(2px);
     z-index: 90;
   }
-
   .mDrawer {
     position: fixed;
-    top: 0;
-    right: 0;
+    top: 0; right: 0;
     height: 100dvh;
     width: min(86vw, 360px);
     background: #0b0d10;
@@ -496,7 +466,6 @@ const latest = feed.slice(0, 8);
     display: grid;
     grid-template-rows: auto 1fr;
   }
-
   .mDrawerHead {
     padding: 14px 14px 12px;
     border-bottom: 1px solid rgba(255,255,255,.08);
@@ -505,14 +474,9 @@ const latest = feed.slice(0, 8);
     justify-content: space-between;
     gap: 10px;
   }
-  .mDrawerTitle {
-    font-weight: 950;
-    color: rgba(232,237,244,.92);
-    letter-spacing: -0.2px;
-  }
+  .mDrawerTitle { font-weight: 950; color: rgba(232,237,244,.92); letter-spacing: -0.2px; }
   .mCloseBtn {
-    width: 34px;
-    height: 34px;
+    width: 34px; height: 34px;
     border-radius: 10px;
     display: grid;
     place-items: center;
@@ -522,13 +486,7 @@ const latest = feed.slice(0, 8);
     cursor: pointer;
     user-select: none;
   }
-
-  .mLinks {
-    padding: 12px 14px 16px;
-    display: grid;
-    gap: 8px;
-    overflow: auto;
-  }
+  .mLinks { padding: 12px 14px 16px; display: grid; gap: 8px; overflow: auto; }
   .mLink {
     display: flex;
     align-items: center;
@@ -541,24 +499,15 @@ const latest = feed.slice(0, 8);
     padding: 12px 12px;
     font-weight: 850;
   }
-  .mLink:hover {
-    border-color: rgba(255,210,74,.22);
-    box-shadow: 0 0 0 1px rgba(255,210,74,.12);
-  }
-
-  .mDivider {
-    height: 1px;
-    background: rgba(255,255,255,.10);
-    margin: 8px 0;
-  }
-
+  .mLink:hover { border-color: rgba(255,210,74,.22); box-shadow: 0 0 0 1px rgba(255,210,74,.12); }
+  .mDivider { height: 1px; background: rgba(255,255,255,.10); margin: 8px 0; }
   .mCTA {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     height: 50px;
     border-radius: 12px;
-    border: 1px solid rgba(0,0,0,.45);
+    border: 1px solid rgba(0,0,0,.55);
     background: linear-gradient(180deg, var(--yellow), var(--yellowDeep));
     color: #0b0d10;
     font-weight: 950;
@@ -566,93 +515,93 @@ const latest = feed.slice(0, 8);
     letter-spacing: .01em;
     box-shadow: 0 10px 20px rgba(0,0,0,.22);
   }
-
   .mNavToggle:checked ~ .mBackdrop { display: block; }
   .mNavToggle:checked ~ .mDrawer { transform: translateX(0); }
 
-  /* =================== NEWSLETTER BAND (translucent yellow + ~2x taller) =================== */
+  /* =================== NEWSLETTER BAND (FIX #1 + #3) =================== */
   .newsletterBand {
     border: 1px solid rgba(255,210,74,.48);
-    background: rgba(255,210,74,.14);
+    background:
+      radial-gradient(1100px 520px at 20% 0%, rgba(255,210,74,.18), rgba(255,210,74,0) 60%),
+      rgba(255,210,74,.12);
     box-shadow: var(--glowSoft);
     border-radius: var(--cardRadius);
     overflow: hidden;
-    margin: 6px 0 18px;
+    margin: 10px 0 18px;
   }
 
-  /* IMPORTANT: newsletter columns now match the page grid so the rail aligns to the input edge */
   .newsletterBandInner {
     display: grid;
     grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
-    gap: 22px;
-    padding: 30px 22px; /* taller */
+    gap: var(--gridGap);
+    padding: 34px var(--contentInset); /* taller (≈2x) */
     align-items: center;
   }
   @media (max-width: 980px) {
     .newsletterBandInner {
       grid-template-columns: 1fr;
-      gap: 14px;
-      padding: 26px 18px;
+      gap: 16px;
+      padding: 28px 16px;
     }
   }
 
-  .newsletterKicker {
-    font-weight: 950;
-    letter-spacing: .2px;
-    color: rgba(12,14,18,.85);
-    background: rgba(0,0,0,.10);
-    display: inline-flex;
-    padding: 6px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(0,0,0,.14);
-    margin-bottom: 10px;
-  }
+  /* All band text should be white on dark theme */
+  .newsletterHeadline,
+  .newsletterFine { color: rgba(232,237,244,.92); }
   .newsletterHeadline {
     font-size: 22px;
     line-height: 1.12;
     font-weight: 950;
-    color: #0b0d10;
     letter-spacing: -0.3px;
     margin-bottom: 10px;
   }
-  .newsletterFine {
-    color: rgba(12,14,18,.74);
-    line-height: 1.3;
-    font-size: 14px;
+  .newsletterFine { color: rgba(232,237,244,.72); font-size: 14px; line-height: 1.35; }
+
+  /* Kicker: bright yellow pill w/ black text */
+  .newsletterKicker {
+    font-weight: 950;
+    letter-spacing: .2px;
+    background: rgba(255,210,74,.98);
+    color: #0b0d10;
+    display: inline-flex;
+    padding: 7px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(0,0,0,.28);
+    margin-bottom: 12px;
+    box-shadow: 0 10px 18px rgba(0,0,0,.18);
   }
 
+  /* Responsive form: NEVER overflow; wrap cleanly; always stays inside band */
   .newsletterForm {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 12px;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-  }
-  @media (max-width: 560px) {
-    .newsletterForm {
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-  }
-
-  .newsletterInput {
+    gap: 12px; /* required gap */
+    min-width: 0;
     width: 100%;
-    height: 54px; /* bigger */
+  }
+  .newsletterInput {
+    flex: 1 1 280px; /* shrink/grow safely */
+    min-width: 0;
+    width: 100%;
+    height: 54px;
     border-radius: 14px;
-    border: 1px solid rgba(0,0,0,.25);
-    background: rgba(11,13,16,.80); /* dark input */
-    color: rgba(232,237,244,.92);
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(11,13,16,.70);
+    color: rgba(232,237,244,.95);
     padding: 0 14px;
     outline: none;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
   }
-  .newsletterInput::placeholder { color: rgba(232,237,244,.60); }
+  .newsletterInput::placeholder { color: rgba(232,237,244,.70); }
   .newsletterInput:focus {
-    border-color: rgba(255,210,74,.70);
+    border-color: rgba(255,210,74,.72);
     box-shadow: 0 0 0 4px rgba(255,210,74,.20);
   }
 
   .newsletterButton {
-    height: 54px; /* match input */
+    flex: 0 0 auto;
+    height: 54px;
     border-radius: 14px;
     border: 1px solid rgba(0,0,0,.55);
     background: linear-gradient(180deg, var(--yellow), var(--yellowDeep));
@@ -663,22 +612,33 @@ const latest = feed.slice(0, 8);
     box-shadow: 0 16px 26px rgba(0,0,0,.22);
     padding: 0 16px;
     white-space: nowrap;
+    max-width: 100%;
   }
   .newsletterButton:hover { filter: brightness(1.02) contrast(1.02); }
   .newsletterButton:active { transform: translateY(0.5px); }
 
-  /* =================== MAIN GRID (rail aligned to newsletter input edge) =================== */
+  @media (max-width: 520px) {
+    .newsletterBandInner { padding: 26px 14px; }
+    .newsletterHeadline { font-size: 20px; }
+    .newsletterInput, .newsletterButton { height: 50px; border-radius: 13px; }
+    .newsletterButton { width: 100%; } /* ensures no cutoff on very small widths */
+  }
+
+  /* =================== MAIN GRID (FIX #5 alignment) =================== */
   .homeGrid {
     display: grid;
     grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
-    gap: 22px; /* reasonable spacing between main + rail */
+    gap: var(--gridGap);
     align-items: start;
+
+    /* This is the key: same inset as the newsletter band so the rail column
+       starts at the same X as the input field. */
+    padding: 0 var(--contentInset);
   }
   @media (max-width: 980px) {
-    .homeGrid { grid-template-columns: 1fr; }
+    .homeGrid { grid-template-columns: 1fr; padding: 0; }
     .homeRail { order: 2; }
   }
-  /* No extra inset on rail; it should start exactly at column boundary */
   .homeRail { padding: 0; margin: 0; }
 
   /* Hero */
@@ -694,26 +654,12 @@ const latest = feed.slice(0, 8);
     box-shadow: var(--shadowSoft);
     margin-bottom: 16px;
   }
-  @media (max-width: 740px) {
-    .heroFeature { grid-template-columns: 1fr; }
-  }
+  @media (max-width: 740px) { .heroFeature { grid-template-columns: 1fr; } }
   .heroMedia { background: rgba(255,255,255,.02); }
-  .heroImg {
-    width: 100%;
-    height: 100%;
-    min-height: 220px;
-    display: block;
-    object-fit: cover;
-  }
+  .heroImg { width: 100%; height: 100%; min-height: 220px; display: block; object-fit: cover; }
   .heroImgFallback { min-height: 220px; }
   .heroCopy { padding: 16px 16px 14px; }
-  .heroTitle {
-    font-size: 26px;
-    line-height: 1.1;
-    font-weight: 950;
-    color: var(--t1);
-    letter-spacing: -0.2px;
-  }
+  .heroTitle { font-size: 26px; line-height: 1.1; font-weight: 950; color: var(--t1); letter-spacing: -0.2px; }
   .heroDesc {
     margin-top: 10px;
     color: var(--t2);
@@ -723,49 +669,20 @@ const latest = feed.slice(0, 8);
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .heroMeta {
-    margin-top: 12px;
-    color: var(--t4);
-    font-size: 13px;
-  }
+  .heroMeta { margin-top: 12px; color: var(--t4); font-size: 13px; }
 
   /* Section headers */
   .sectionHeader { margin: 6px 0 10px; }
-  .sectionTitle {
-    font-weight: 950;
-    font-size: 14px;
-    color: var(--t3);
-    text-transform: uppercase;
-    letter-spacing: .12em;
-  }
-  .feedHeader {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 10px;
-    margin: 16px 0 10px;
-  }
+  .sectionTitle { font-weight: 950; font-size: 14px; color: var(--t3); text-transform: uppercase; letter-spacing: .12em; }
+  .feedHeader { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 16px 0 10px; }
 
-  .viewAllLink {
-    color: rgba(255,210,74,.92);
-    font-weight: 800;
-    font-size: 13px;
-    text-decoration: none;
-    opacity: .95;
-  }
+  .viewAllLink { color: rgba(255,210,74,.92); font-weight: 800; font-size: 13px; text-decoration: none; opacity: .95; }
   .viewAllLink:hover { opacity: 1; text-decoration: underline; }
   .viewAllLinkSmall { font-size: 12px; }
 
   /* Category grid */
-  .catGrid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0,1fr));
-    gap: 12px;
-    margin-bottom: 8px;
-  }
-  @media (max-width: 740px) {
-    .catGrid { grid-template-columns: 1fr; }
-  }
+  .catGrid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 8px; }
+  @media (max-width: 740px) { .catGrid { grid-template-columns: 1fr; } }
   .catCard {
     text-decoration: none;
     border: 1px solid var(--cardBorderSoft);
@@ -778,17 +695,9 @@ const latest = feed.slice(0, 8);
   .catDesc { margin-top: 6px; color: var(--t4); line-height: 1.25; font-size: 13px; }
 
   /* Latest grid */
-  .latestGrid {
-    display: grid !important;
-    gap: 24px;
-    grid-template-columns: 1fr;
-  }
-  @media (min-width: 760px) {
-    .latestGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  }
-  @media (min-width: 1040px) {
-    .latestGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  }
+  .latestGrid { display: grid !important; gap: 24px; grid-template-columns: 1fr; }
+  @media (min-width: 760px) { .latestGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (min-width: 1040px) { .latestGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
   .latestCard {
     display: grid;
@@ -808,37 +717,18 @@ const latest = feed.slice(0, 8);
     transform: translateY(-2px);
   }
 
-  .latestMedia {
-    aspect-ratio: 16 / 9;
-    background: rgba(255,255,255,.02);
-    overflow: hidden;
-    min-height: 170px;
-  }
-  @media (min-width: 760px) {
-    .latestMedia { min-height: 215px; }
-  }
-  @media (min-width: 1040px) {
-    .latestMedia { min-height: 235px; }
-  }
+  .latestMedia { aspect-ratio: 16 / 9; background: rgba(255,255,255,.02); overflow: hidden; min-height: 170px; }
+  @media (min-width: 760px) { .latestMedia { min-height: 215px; } }
+  @media (min-width: 1040px) { .latestMedia { min-height: 235px; } }
 
-  .latestImg {
-    width: 100%;
-    height: 100%;
-    display: block;
-    object-fit: cover;
-  }
+  .latestImg { width: 100%; height: 100%; display: block; object-fit: cover; }
   .latestImgFallback {
     background:
       radial-gradient(280px 200px at 25% 25%, rgba(255,255,255,.08), rgba(255,255,255,0)),
       linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
   }
 
-  .latestBody {
-    padding: 15px 16px 14px;
-    min-width: 0;
-    display: grid;
-    align-content: start;
-  }
+  .latestBody { padding: 15px 16px 14px; min-width: 0; display: grid; align-content: start; }
   .latestTitle {
     font-weight: 950;
     font-size: 18px;
@@ -860,23 +750,7 @@ const latest = feed.slice(0, 8);
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .latestMeta {
-    margin-top: 10px;
-    color: var(--t4);
-    font-size: 12.5px;
-  }
-
-  @media (max-width: 520px) {
-    .newsletterBandInner { padding: 22px 14px; }
-    .newsletterHeadline { font-size: 20px; }
-    .newsletterInput, .newsletterButton { height: 50px; border-radius: 13px; }
-
-    .latestGrid { gap: 18px; }
-    .latestMedia { min-height: 155px; }
-    .latestBody { padding: 13px 13px 12px; }
-    .latestTitle { font-size: 17.5px; }
-    .latestDesc { font-size: 14px; }
-  }
+  .latestMeta { margin-top: 10px; color: var(--t4); font-size: 12.5px; }
 
   /* Rail module */
   .moduleCard {
@@ -886,18 +760,8 @@ const latest = feed.slice(0, 8);
     padding: 14px;
     box-shadow: var(--shadowSoft);
   }
-  .moduleHead {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .moduleTitle {
-    font-weight: 950;
-    color: var(--t1);
-    letter-spacing: -0.1px;
-  }
+  .moduleHead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px; }
+  .moduleTitle { font-weight: 950; color: var(--t1); letter-spacing: -0.1px; }
   .moduleTitleSmall { font-size: 13px; margin-bottom: 8px; opacity: .9; }
 
   .eventsList { display: grid; gap: 10px; }
@@ -926,17 +790,9 @@ const latest = feed.slice(0, 8);
   .eventName { font-weight: 900; color: var(--t1); line-height: 1.15; }
   .eventPlace { margin-top: 4px; color: var(--t4); font-size: 12.5px; }
 
-  .railDivider {
-    height: 1px;
-    background: rgba(255,255,255,.08);
-    margin: 14px 0 12px;
-  }
+  .railDivider { height: 1px; background: rgba(255,255,255,.08); margin: 14px 0 12px; }
   .railLinks { display: grid; gap: 8px; }
-  .railLink {
-    color: rgba(232,237,244,.78);
-    text-decoration: none;
-    font-size: 13px;
-  }
+  .railLink { color: rgba(232,237,244,.78); text-decoration: none; font-size: 13px; }
   .railLink:hover { color: rgba(255,210,74,.92); }
 
   /* Promo band */
@@ -970,34 +826,15 @@ const latest = feed.slice(0, 8);
     text-decoration: none;
   }
   .btn:hover { background: rgba(255,210,74,.18); }
-  .btnGhost {
-    border-color: rgba(255,255,255,.14);
-    background: rgba(255,255,255,.03);
-  }
+  .btnGhost { border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.03); }
   .btnGhost:hover { background: rgba(255,255,255,.05); }
 
   /* Footer */
-  .homeFooter {
-    margin-top: 18px;
-    border-top: 1px solid rgba(255,255,255,.08);
-    padding-top: 16px;
-  }
-  .footerCols {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.8fr;
-    gap: 16px;
-  }
-  @media (max-width: 860px) {
-    .footerCols { grid-template-columns: 1fr; }
-  }
+  .homeFooter { margin-top: 18px; border-top: 1px solid rgba(255,255,255,.08); padding-top: 16px; }
+  .footerCols { display: grid; grid-template-columns: 1fr 1fr 1.8fr; gap: 16px; }
+  @media (max-width: 860px) { .footerCols { grid-template-columns: 1fr; } }
   .footerHead { font-weight: 950; color: var(--t1); margin-bottom: 10px; }
-  .footerLink {
-    display: block;
-    color: rgba(232,237,244,.78);
-    text-decoration: none;
-    margin-bottom: 8px;
-    font-size: 13px;
-  }
+  .footerLink { display: block; color: rgba(232,237,244,.78); text-decoration: none; margin-bottom: 8px; font-size: 13px; }
   .footerLink:hover { color: rgba(255,210,74,.92); }
   .footerFine { color: var(--t4); font-size: 13px; line-height: 1.35; }
 </style>
