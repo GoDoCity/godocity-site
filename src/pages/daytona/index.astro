@@ -74,29 +74,35 @@ const latest = feed.slice(0, 8);
 
 <section class="section">
   <div class="container homeWrap">
-    <!-- NOTE: The duplicate GoDoCity network block + right-side pills are injected by Base.
-         We remove/hide them for Daytona via body.city-daytona CSS overrides below. -->
 
-    <!-- NEWSLETTER SIGNUP BAND (Nooga-ish: tall, yellow, stacked input/button) -->
+    <!-- Newsletter Signup (Nooga-ish) -->
     <div class="newsletterBand">
       <div class="newsletterBandInner">
         <div class="newsletterText">
-          <div class="newsletterKicker">Good news for Daytona</div>
-          <div class="newsletterHeadline">Get the best local posts and events sent to your inbox.</div>
-          <div class="newsletterFine">100% free. Unsubscribe anytime.</div>
+          <div class="newsletterHeadline">Good News Daytona</div>
+          <div class="newsletterSub">Daytona Pulse: your FREE local insider.</div>
+          <div class="newsletterFine">Sent straight to your inbox, 100% FREE! Unsubscribe anytime.</div>
         </div>
 
         <form class="newsletterForm" action="/daytona/subscribe/" method="get">
-          <input class="newsletterInput" type="email" name="email" placeholder="Enter your email address" />
-          <button class="newsletterButton" type="submit">Sign up — it’s free</button>
+          <input
+            class="newsletterInput"
+            type="email"
+            name="email"
+            placeholder="Enter your email address"
+            aria-label="Email address"
+          />
+          <button class="newsletterButton" type="submit">SIGN UP, IT’S FREE!</button>
         </form>
       </div>
     </div>
 
     <!-- Main grid: left content + right rail -->
     <div class="homeGrid">
+
       <!-- LEFT -->
       <div class="homeMain">
+
         {hero && (
           <a class="heroFeature" href={`/daytona/posts/${hero.slug}/`}>
             <div class="heroMedia">
@@ -170,6 +176,7 @@ const latest = feed.slice(0, 8);
             </a>
           ))}
         </div>
+
       </div>
 
       <!-- RIGHT RAIL -->
@@ -208,13 +215,13 @@ const latest = feed.slice(0, 8);
 
           <div class="railLinks">
             <div class="moduleTitle moduleTitleSmall">Resources</div>
-            <a class="railLink" href="/daytona/subscribe/">Subscribe</a>
             <a class="railLink" href="/daytona/advertise/">Advertise</a>
             <a class="railLink" href="/daytona/topics/">Topics</a>
             <a class="railLink" href="/daytona/events/">Events</a>
           </div>
         </div>
       </aside>
+
     </div>
 
     <div class="promoBand">
@@ -232,7 +239,6 @@ const latest = feed.slice(0, 8);
       <div class="footerCols">
         <div class="footerCol">
           <div class="footerHead">Resources</div>
-          <a class="footerLink" href="/daytona/subscribe/">Subscribe</a>
           <a class="footerLink" href="/daytona/advertise/">Advertise</a>
           <a class="footerLink" href="/daytona/topics/">Topics</a>
           <a class="footerLink" href="/daytona/events/">Events</a>
@@ -256,11 +262,12 @@ const latest = feed.slice(0, 8);
         </div>
       </div>
     </footer>
+
   </div>
 </section>
 
 <style>
-  /* Wider page like Nooga */
+  /* Nooga-ish page width */
   :global(.container) {
     max-width: 1240px;
     padding-left: clamp(14px, 2vw, 22px);
@@ -273,16 +280,19 @@ const latest = feed.slice(0, 8);
   .homeWrap {
     --maxMain: 860px;
     --rail: 320px;
-    --gridGap: 22px;
 
-    /* shared inset for alignment */
-    --contentInset: 22px;
+    /* separation between left + rail and between cards */
+    --gridGap: clamp(18px, 2vw, 26px);
 
-    /* rail nudge right (~0.5cm) to match email field edge exactly */
+    /* “Nooga inner padding feel” for newsletter + grid alignment */
+    --contentInset: clamp(18px, 3.3vw, 52px);
+
+    /* your requested ~0.5cm nudge right for rail to sit under email field edge */
     --railNudge: 19px;
 
     --cardRadius: 16px;
     --cardRadiusSm: 14px;
+
     --cardBorder: rgba(255,255,255,.10);
     --cardBorderSoft: rgba(255,255,255,.08);
     --cardBg: rgba(255,255,255,.03);
@@ -301,74 +311,14 @@ const latest = feed.slice(0, 8);
     --glowSoft: 0 0 0 1px rgba(255,210,74,.18), 0 18px 44px rgba(0,0,0,.45);
   }
 
-  /* ================= Daytona-only Base header overrides =================
-     User note: body.city-daytona exists. Use it as the scope so other cities are unaffected. */
-
-  /* 1) Kill the injected top GoDoCity network block + “All rights reserved” */
-  :global(body.city-daytona .cityNetworkBlurb),
-  :global(body.city-daytona .networkBlurb),
-  :global(body.city-daytona .siteNetworkNote),
-  :global(body.city-daytona .topNetworkNote),
-  :global(body.city-daytona .topNetworkBlurb),
-  :global(body.city-daytona [data-network-blurb="top"]),
-  :global(body.city-daytona .allRightsReserved),
-  :global(body.city-daytona [data-all-rights-reserved]),
-  :global(body.city-daytona .networkFooterTop),
-  :global(body.city-daytona .topNetworkFooter) {
-    display: none !important;
-  }
-
-  /* 1) Kill the “Advertise” + “City Directory” pills that sit beside that block (top only) */
-  :global(body.city-daytona header a.pill[href*="advertise"]),
-  :global(body.city-daytona header a.pill[href*="city-directory"]),
-  :global(body.city-daytona header a.pill[href*="directory"]) {
-    display: none !important;
-  }
-
-  /* 2) Remove the yellow “Subscribe” pill in header (duplicate) */
-  :global(body.city-daytona header a.pill[href*="subscribe"]) {
-    display: none !important;
-  }
-
-  /* 2) Put “Advertise” into the MAIN pill row next to “The Buy”
-     (We’re not editing Base markup. We:
-       - hide the header's advertise pill above (so it can’t float right),
-       - and force the nav-row to include Advertise by showing any non-header advertise pill if Base already renders it in nav row.
-     If Base already has Advertise in the row, this does nothing. */
-  :global(body.city-daytona nav a.pill[href*="advertise"]) {
-    display: inline-flex !important;
-  }
-
-  /* 3) Mobile pills missing: keep Base pills visible, tighter, wrapping into 2 rows */
-  @media (max-width: 720px) {
-    :global(body.city-daytona header .navPills),
-    :global(body.city-daytona header .pillRow),
-    :global(body.city-daytona header .navRow),
-    :global(body.city-daytona header nav .pills),
-    :global(body.city-daytona header nav .navPills) {
-      display: flex !important;
-      flex-wrap: wrap !important;
-      gap: 6px !important;
-      overflow: visible !important;
-      padding-bottom: 0 !important;
-    }
-
-    :global(body.city-daytona header a.pill),
-    :global(body.city-daytona header .pill) {
-      padding: 6px 10px !important;
-      font-size: 11.5px !important;
-      line-height: 1 !important;
-      border-radius: 999px !important;
-      white-space: nowrap !important;
-    }
-  }
-
-  /* =================== NEWSLETTER BAND (Nooga-ish) =================== */
+  /* =========================
+     NEWSLETTER (Nooga + yellow)
+     ========================= */
   .newsletterBand {
-    border: 1px solid rgba(255,210,74,.58);
+    border: 1px solid rgba(255,210,74,.62);
     background:
-      radial-gradient(1000px 520px at 20% 0%, rgba(255,210,74,.24), rgba(255,210,74,0) 60%),
-      rgba(255,210,74,.14);
+      radial-gradient(900px 420px at 18% 0%, rgba(255,210,74,.28), rgba(255,210,74,0) 60%),
+      rgba(255,210,74,.18);
     box-shadow: var(--glowSoft);
     border-radius: var(--cardRadius);
     overflow: hidden;
@@ -376,112 +326,108 @@ const latest = feed.slice(0, 8);
   }
 
   .newsletterBandInner {
+    padding: clamp(18px, 2.2vw, 28px) var(--contentInset);
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 18px;
-    padding: 36px var(--contentInset); /* ~2x height feel */
+    gap: 14px;
     align-items: start;
   }
-  @media (max-width: 520px) {
-    .newsletterBandInner { padding: 30px 14px; }
-  }
-
-  /* All text in band must be WHITE (except the yellow badge) */
-  .newsletterHeadline { color: rgba(232,237,244,.96); }
-  .newsletterFine { color: rgba(232,237,244,.78); }
 
   .newsletterHeadline {
-    font-size: 22px;
-    line-height: 1.12;
+    color: rgba(232,237,244,.96);
     font-weight: 950;
     letter-spacing: -0.3px;
-    margin: 0;
+    font-size: clamp(22px, 2.2vw, 28px);
+    line-height: 1.05;
   }
-  .newsletterFine { font-size: 14px; line-height: 1.35; margin-top: 6px; }
-
-  /* Badge: bright yellow with black text */
-  .newsletterKicker {
-    font-weight: 950;
-    letter-spacing: .2px;
-    background: rgba(255,210,74,.98);
-    color: #0b0d10;
-    display: inline-flex;
-    padding: 7px 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(0,0,0,.30);
-    box-shadow: 0 10px 18px rgba(0,0,0,.18);
-    width: fit-content;
+  .newsletterSub {
+    margin-top: 6px;
+    color: rgba(232,237,244,.88);
+    font-size: 15px;
+    line-height: 1.35;
+    font-weight: 650;
+  }
+  .newsletterFine {
+    margin-top: 8px;
+    color: rgba(232,237,244,.72);
+    font-size: 13.5px;
+    line-height: 1.35;
   }
 
-  /* Stack layout: input full-width, button full-width below */
+  /* Desktop: one line if room; never cuts off. Mobile: stack. */
   .newsletterForm {
     display: grid;
     grid-template-columns: 1fr;
     gap: 12px;
     width: 100%;
     min-width: 0;
+    margin-top: 6px;
   }
 
   .newsletterInput {
     width: 100%;
-    height: 54px;
+    height: 52px;
     border-radius: 14px;
     border: 1px solid rgba(255,255,255,.20);
-    background: rgba(11,13,16,.72);
-    color: rgba(232,237,244,.96); /* input text white */
+    background: rgba(11,13,16,.74);
+    color: rgba(232,237,244,.96);
     padding: 0 14px;
     outline: none;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
   }
-  .newsletterInput::placeholder { color: rgba(232,237,244,.72); } /* readable */
+  .newsletterInput::placeholder { color: rgba(232,237,244,.70); }
   .newsletterInput:focus {
-    border-color: rgba(255,210,74,.78);
+    border-color: rgba(255,210,74,.82);
     box-shadow: 0 0 0 4px rgba(255,210,74,.22);
   }
 
   .newsletterButton {
     width: 100%;
-    height: 54px;
+    height: 52px;
     border-radius: 14px;
     border: 1px solid rgba(0,0,0,.55);
     background: linear-gradient(180deg, var(--yellow), var(--yellowDeep));
     color: #0b0d10;
     font-weight: 950;
-    letter-spacing: .01em;
+    letter-spacing: .02em;
     cursor: pointer;
     box-shadow: 0 16px 26px rgba(0,0,0,.22);
   }
-  .newsletterButton:hover { filter: brightness(1.02) contrast(1.02); }
-  .newsletterButton:active { transform: translateY(0.5px); }
 
-  @media (max-width: 520px) {
-    .newsletterInput, .newsletterButton { height: 50px; border-radius: 13px; }
-    .newsletterHeadline { font-size: 20px; }
+  @media (min-width: 900px) {
+    .newsletterForm {
+      grid-template-columns: 1fr auto;
+      align-items: center;
+    }
+    .newsletterButton {
+      width: auto;
+      padding: 0 18px;
+      white-space: nowrap;
+    }
   }
 
-  /* =================== HOME GRID + RAIL ALIGNMENT =================== */
+  /* =========================
+     HOME GRID + rail alignment
+     ========================= */
   .homeGrid {
     display: grid;
     grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
     gap: var(--gridGap);
     align-items: start;
 
-    /* Grid inset = newsletter inset so columns start under same left edge */
+    /* Make grid start at same inset as newsletter content */
     padding: 0 var(--contentInset);
   }
-  @media (max-width: 980px) {
-    .homeGrid { grid-template-columns: 1fr; padding: 0; }
-    .homeRail { order: 2; }
-  }
 
-  /* Move Upcoming Events column slightly RIGHT (~0.5cm) to match email field edge precisely */
+  /* Nudge rail right slightly so left edge aligns under email field edge */
   .homeRail {
     padding: 0;
     margin: 0;
     transform: translateX(var(--railNudge));
   }
+
   @media (max-width: 980px) {
-    .homeRail { transform: none; }
+    .homeGrid { grid-template-columns: 1fr; padding: 0; }
+    .homeRail { order: 2; transform: none; }
   }
 
   /* Hero */
@@ -538,7 +484,7 @@ const latest = feed.slice(0, 8);
   .catDesc { margin-top: 6px; color: var(--t4); line-height: 1.25; font-size: 13px; }
 
   /* Latest grid */
-  .latestGrid { display: grid !important; gap: 24px; grid-template-columns: 1fr; }
+  .latestGrid { display: grid !important; gap: var(--gridGap); grid-template-columns: 1fr; }
   @media (min-width: 760px) { .latestGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (min-width: 1040px) { .latestGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 
@@ -605,7 +551,6 @@ const latest = feed.slice(0, 8);
   }
   .moduleHead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px; }
   .moduleTitle { font-weight: 950; color: var(--t1); letter-spacing: -0.1px; }
-  .moduleTitleSmall { font-size: 13px; margin-bottom: 8px; opacity: .9; }
 
   .eventsList { display: grid; gap: 10px; }
   .eventRow {
@@ -638,7 +583,7 @@ const latest = feed.slice(0, 8);
   .railLink { color: rgba(232,237,244,.78); text-decoration: none; font-size: 13px; }
   .railLink:hover { color: rgba(255,210,74,.92); }
 
-  /* Promo band */
+  /* Promo + footer (unchanged vibe) */
   .promoBand {
     margin: 18px 0 0;
     border: 1px solid var(--cardBorder);
@@ -672,7 +617,6 @@ const latest = feed.slice(0, 8);
   .btnGhost { border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.03); }
   .btnGhost:hover { background: rgba(255,255,255,.05); }
 
-  /* Footer */
   .homeFooter { margin-top: 18px; border-top: 1px solid rgba(255,255,255,.08); padding-top: 16px; }
   .footerCols { display: grid; grid-template-columns: 1fr 1fr 1.8fr; gap: 16px; }
   @media (max-width: 860px) { .footerCols { grid-template-columns: 1fr; } }
