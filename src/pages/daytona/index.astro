@@ -70,7 +70,12 @@ const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 const latest = feed.slice(0, 8);
 ---
 
-<Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona" />
+<Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
+  <!-- EVERYTHING that is currently on the page goes here -->
+  <section class="section">
+    ...
+  </section>
+</Base>
 
 <section class="section">
   <div class="container homeWrap">
