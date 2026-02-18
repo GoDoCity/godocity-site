@@ -184,11 +184,24 @@ const hero = heroImage(post);
 <Base title={title} subtitle={subtitle} cityBase="daytona" />
 
 <section class="section">
-  <div class="container" style="max-width: 780px;">
+  <div class="container postWrap">
+    {/* HERO FIRST */}
+    {hero && (
+      <figure class="heroFigure">
+        <img
+          class="heroFull"
+          src={hero}
+          alt={post.data.title ?? "Post image"}
+          loading="eager"
+          decoding="async"
+        />
+      </figure>
+    )}
+
+    {/* THEN TITLE / DECK / META */}
     <h1 class={`h1 postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
     {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    <!-- Date + pills inline -->
     <div class="metaRow">
       {pubText && <span class="metaDate">{pubText}</span>}
 
@@ -203,47 +216,40 @@ const hero = heroImage(post);
       {featured && <span class="featuredPill">FEATURED</span>}
     </div>
 
-    {/* Small “compliment” image under meta (NOT full-screen) */}
-    {hero && (
-      <figure class="heroFigure">
-        <img
-          class="heroInline"
-          src={hero}
-          alt={post.data.title ?? "Post image"}
-          loading="lazy"
-          decoding="async"
-        />
-      </figure>
-    )}
-
     <article class="postBody">
       <Content />
     </article>
 
+    {/* Related posts: vertical list with thumbnail LEFT + text RIGHT */}
     {relatedPosts.length > 0 && (
-      <div style="margin-top:26px;">
-        <h3 style="margin:0 0 10px 0;font-size:16px;opacity:.9;">Related posts</h3>
+      <div class="relatedWrap">
+        <h3 class="relatedHead">Related posts</h3>
 
-        <div style="display:flex;flex-direction:column;gap:12px;">
+        <div class="relatedList">
           {relatedPosts.map((p) => {
             const t = p.data.title ?? p.slug;
             const desc = p.data.description ?? "";
             const d = getPostDate(p);
             const dateText = d ? new Date(d).toLocaleDateString("en-US") : "";
+            const img = heroImage(p);
 
             return (
-              <a href={`/daytona/posts/${p.slug}/`} style="text-decoration:none;display:block;">
-                <div class="relatedCard">
-                  <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;">
-                    <div>
-                      <div style="font-weight:800;font-size:16px;line-height:1.25">{t}</div>
-                      {desc && <div style="opacity:.82;margin-top:6px">{desc}</div>}
-                      {dateText && <div style="opacity:.6;margin-top:8px">{dateText}</div>}
-                    </div>
-
-                    {isFeatured(p) && <span class="featuredPill">FEATURED</span>}
-                  </div>
+              <a class="relatedRow" href={`/daytona/posts/${p.slug}/`}>
+                <div class="relatedThumb">
+                  {img ? (
+                    <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async" />
+                  ) : (
+                    <div class="relatedImg relatedFallback" aria-hidden="true"></div>
+                  )}
                 </div>
+
+                <div class="relatedText">
+                  <div class="relatedTitle">{t}</div>
+                  {desc && <div class="relatedDesc">{desc}</div>}
+                  {dateText && <div class="relatedMeta">{dateText}</div>}
+                </div>
+
+                {isFeatured(p) && <span class="featuredPill featuredPillSmall">FEATURED</span>}
               </a>
             );
           })}
@@ -251,7 +257,7 @@ const hero = heroImage(post);
       </div>
     )}
 
-    <p style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap;">
+    <p class="postLinks">
       <a class="pill" href="/daytona/posts/">← All posts</a>
       <a class="pill" href="/daytona/topics/">Topics</a>
     </p>
@@ -259,9 +265,29 @@ const hero = heroImage(post);
 </section>
 
 <style>
+  /* Keep layout logic intact; just presentation */
+  .postWrap {
+    max-width: 780px;
+  }
+
   /* Featured title 15% larger on article page */
   .postTitle { margin: 0; }
   .postTitle.isFeatured { font-size: calc(1em * 1.15); }
+
+  /* HERO FIRST: 16:9 editorial hero */
+  .heroFigure {
+    margin: 0 0 14px 0;
+  }
+  .heroFull {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.02);
+    box-shadow: 0 10px 26px rgba(0,0,0,.30);
+  }
 
   .postBody {
     margin-top: 18px;
@@ -316,27 +342,102 @@ const hero = heroImage(post);
     background: rgba(255,220,80,.12);
     white-space: nowrap;
   }
-
-  /* NEW: small hero image styling */
-  .heroFigure {
-    margin: 14px 0 0 0;
-  }
-  .heroInline {
-    display: block;
-    width: 100%;
-    max-width: 520px;          /* keeps it “compliment” sized */
-    max-height: 320px;
-    height: auto;
-    object-fit: cover;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.02);
+  .featuredPillSmall {
+    font-size: 11px;
+    padding: 5px 9px;
+    align-self: start;
   }
 
-  .relatedCard {
+  /* Related posts: vertical list like homepage feed */
+  .relatedWrap {
+    margin-top: 26px;
+  }
+  .relatedHead {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    opacity: .9;
+  }
+  .relatedList {
+    display: grid;
+    gap: 12px;
+  }
+  .relatedRow {
+    text-decoration: none;
+    display: grid;
+    grid-template-columns: 96px 1fr auto;
+    gap: 12px;
+    align-items: start;
     border: 1px solid rgba(255,255,255,.12);
     border-radius: 14px;
-    padding: 14px 16px;
+    padding: 12px 12px;
     background: rgba(255,255,255,.03);
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  }
+  .relatedRow:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255,220,80,.22);
+    box-shadow: 0 0 0 1px rgba(255,220,80,.16), 0 10px 26px rgba(0,0,0,.30);
+  }
+  .relatedThumb {
+    width: 96px;
+  }
+  .relatedImg {
+    width: 96px;
+    height: 66px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.02);
+    display: block;
+  }
+  .relatedFallback {
+    background:
+      radial-gradient(160px 120px at 30% 25%, rgba(255,255,255,.08), rgba(255,255,255,0)),
+      linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+  }
+  .relatedText { min-width: 0; }
+  .relatedTitle {
+    font-weight: 900;
+    color: rgba(232,237,244,.95);
+    line-height: 1.18;
+    font-size: 15.5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .relatedDesc {
+    margin-top: 6px;
+    opacity: .82;
+    color: rgba(232,237,244,.78);
+    line-height: 1.35;
+    font-size: 13.5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .relatedMeta {
+    margin-top: 8px;
+    opacity: .6;
+    color: rgba(232,237,244,.65);
+    font-size: 12.5px;
+  }
+
+  @media (max-width: 520px) {
+    .relatedRow {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .relatedThumb { width: 100%; }
+    .relatedImg { width: 100%; height: auto; aspect-ratio: 16 / 9; }
+    .featuredPillSmall { justify-self: start; }
+  }
+
+  .postLinks {
+    margin-top: 22px;
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
   }
 </style>
