@@ -1,10 +1,14 @@
 ---
 /**
  * Footer should ONLY render in the true page footer.
- * Do not reuse this component in header/nav/drawer/topbar areas.
- * (This prevents the network blurb + pills from appearing above content.)
+ * If you see this at the top, Footer is being rendered somewhere else (Header or post template).
  */
 const year = new Date().getFullYear();
+
+const rawBase = Astro.props?.cityBase ? String(Astro.props.cityBase).trim() : "";
+const cityBase = rawBase ? `/${rawBase.replace(/^\/+/, "").replace(/\/+$/, "")}` : "/daytona";
+
+const siteName = Astro.props?.title ?? (rawBase ? `GoDo ${rawBase[0].toUpperCase()}${rawBase.slice(1)}` : "GoDoDaytona");
 ---
 
 <footer class="siteFooter">
@@ -12,31 +16,27 @@ const year = new Date().getFullYear();
     <div class="footerCols">
       <div class="footerCol">
         <div class="footerHead">Resources</div>
-        <a class="footerLink" href="/daytona/subscribe/">Subscribe</a>
-        <a class="footerLink" href="/daytona/advertise/">Advertise</a>
-        <a class="footerLink" href="/daytona/topics/">Topics</a>
-        <a class="footerLink" href="/daytona/events/">Events</a>
+        <a class="footerLink" href={`${cityBase}/advertise/`}>Advertise</a>
+        <a class="footerLink" href={`${cityBase}/topics/`}>Topics</a>
+        <a class="footerLink" href={`${cityBase}/events/`}>Events</a>
+        <a class="footerLink" href={`${cityBase}/guides/`}>Guides</a>
       </div>
 
       <div class="footerCol">
         <div class="footerHead">About</div>
-        <a class="footerLink" href="/daytona/contact/">Contact</a>
-        <a class="footerLink" href="/daytona/legal/">Legal</a>
+        <a class="footerLink" href={`${cityBase}/contact/`}>Contact</a>
+        <a class="footerLink" href={`${cityBase}/legal/`}>Legal</a>
       </div>
 
       <div class="footerCol footerColWide">
-        <div class="footerHead">GoDoDaytona</div>
+        <div class="footerHead">{siteName}</div>
 
-        <!-- Keep the network blurb ONLY here in the true footer -->
         <div class="footerFine">
-          GoDoDaytona is part of the GoDoCity network. Built to scale city-by-city with consistent design,
+          {siteName} is part of the GoDoCity network. Built to scale city-by-city with consistent design,
           editorial workflow, and advertising packages.
         </div>
 
-        <div class="footerPills">
-          <a class="pill" href="/daytona/advertise/">Advertise</a>
-          <a class="pill" href="/daytona/city-directory/">City Directory</a>
-        </div>
+        <!-- Removed City Directory + removed extra footer pills (keeps footer clean) -->
 
         <div class="footerFine footerCopyright">© {year} GoDoCity. All rights reserved.</div>
       </div>
@@ -85,27 +85,4 @@ const year = new Date().getFullYear();
     line-height: 1.35;
   }
   .footerCopyright { margin-top: 10px; }
-
-  .footerPills {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-  }
-
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 34px;
-    padding: 0 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,210,74,.38);
-    background: rgba(255,210,74,.14);
-    color: rgba(232,237,244,.92);
-    font-weight: 900;
-    font-size: 12.5px;
-    text-decoration: none;
-  }
-  .pill:hover { background: rgba(255,210,74,.18); }
 </style>
