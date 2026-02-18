@@ -1,20 +1,111 @@
 ---
+/**
+ * Footer should ONLY render in the true page footer.
+ * Do not reuse this component in header/nav/drawer/topbar areas.
+ * (This prevents the network blurb + pills from appearing above content.)
+ */
 const year = new Date().getFullYear();
 ---
-<footer class="footer">
-  <div class="container">
-    <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between;align-items:flex-start">
-      <div>
-        <div style="font-weight:800;color:#d7deea">GoDoCity</div>
-        <div style="margin-top:6px;max-width:720px">
-          GoDoDaytona is part of the GoDoCity network. Built to scale city-by-city with consistent design, editorial workflow, and advertising packages.
-        </div>
+
+<footer class="siteFooter">
+  <div class="footerInner">
+    <div class="footerCols">
+      <div class="footerCol">
+        <div class="footerHead">Resources</div>
+        <a class="footerLink" href="/daytona/subscribe/">Subscribe</a>
+        <a class="footerLink" href="/daytona/advertise/">Advertise</a>
+        <a class="footerLink" href="/daytona/topics/">Topics</a>
+        <a class="footerLink" href="/daytona/events/">Events</a>
       </div>
-      <div style="display:flex;gap:12px;flex-wrap:wrap">
-        <a class="pill" href="/advertise/">Advertise</a>
-        <a class="pill" href="/">City Directory</a>
+
+      <div class="footerCol">
+        <div class="footerHead">About</div>
+        <a class="footerLink" href="/daytona/contact/">Contact</a>
+        <a class="footerLink" href="/daytona/legal/">Legal</a>
+      </div>
+
+      <div class="footerCol footerColWide">
+        <div class="footerHead">GoDoDaytona</div>
+
+        <!-- Keep the network blurb ONLY here in the true footer -->
+        <div class="footerFine">
+          GoDoDaytona is part of the GoDoCity network. Built to scale city-by-city with consistent design,
+          editorial workflow, and advertising packages.
+        </div>
+
+        <div class="footerPills">
+          <a class="pill" href="/daytona/advertise/">Advertise</a>
+          <a class="pill" href="/daytona/city-directory/">City Directory</a>
+        </div>
+
+        <div class="footerFine footerCopyright">© {year} GoDoCity. All rights reserved.</div>
       </div>
     </div>
-    <div style="margin-top:14px">© {year} GoDoCity. All rights reserved.</div>
   </div>
 </footer>
+
+<style>
+  .siteFooter {
+    margin-top: 22px;
+    border-top: 1px solid rgba(255,255,255,.08);
+    padding: 18px 0 28px;
+  }
+  .footerInner {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 clamp(14px, 2vw, 22px);
+  }
+
+  .footerCols {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1.8fr;
+    gap: 18px;
+  }
+  @media (max-width: 860px) {
+    .footerCols { grid-template-columns: 1fr; }
+  }
+
+  .footerHead {
+    font-weight: 950;
+    color: rgba(232,237,244,.92);
+    margin-bottom: 10px;
+  }
+  .footerLink {
+    display: block;
+    color: rgba(232,237,244,.78);
+    text-decoration: none;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .footerLink:hover { color: rgba(255,210,74,.92); }
+
+  .footerFine {
+    color: rgba(232,237,244,.58);
+    font-size: 13px;
+    line-height: 1.35;
+  }
+  .footerCopyright { margin-top: 10px; }
+
+  .footerPills {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,210,74,.38);
+    background: rgba(255,210,74,.14);
+    color: rgba(232,237,244,.92);
+    font-weight: 900;
+    font-size: 12.5px;
+    text-decoration: none;
+  }
+  .pill:hover { background: rgba(255,210,74,.18); }
+</style>
