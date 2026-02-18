@@ -181,9 +181,12 @@ const featured = isFeatured(post);
 const hero = heroImage(post);
 ---
 
-<Base title={title} subtitle={subtitle} cityBase="daytona" />
+<Base title={title} subtitle={subtitle} cityBase="daytona">
+  <section class="section">
+    ...everything that is currently in your section...
+  </section>
+</Base>
 
-<section class="section">
   <div class="container postWrap">
     {/* HERO FIRST */}
     {hero && (
