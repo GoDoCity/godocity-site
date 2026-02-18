@@ -1,171 +1,201 @@
 ---
-const { cityBase = "" } = Astro.props;
+/**
+ * NavMenu: single source of truth for pills + drawer links.
+ * - No Subscribe CTA here (subscribe happens via the newsletter module).
+ * - Advertise sits in the main pill row next to The Buy.
+ * - Mobile pills: horizontal scroll, never clipped/hidden.
+ */
+const base = Astro.props?.cityBase ? `/${Astro.props.cityBase}` : "";
+const cityBase = base || "/daytona";
 
-// Base path rules:
-// - If cityBase is provided, use "/{cityBase}" (ex: "/daytona")
-// - Otherwise default to "/daytona" (safe fallback for now)
-const base = cityBase ? `/${cityBase}` : "/daytona";
-
-// Topics + Guides definitions
-const topics = [
-  ["business", "Business"],
-  ["city", "City"],
-  ["culture", "Culture"],
-  ["events", "Events"],
-  ["food", "Food"],
-  ["history", "History"],
-  ["real-estate", "Real Estate"],
-  ["sports", "Sports"],
-  ["travel-outdoors", "Travel & Outdoors"],
-  ["wellness", "Wellness"],
+const pills = [
+  { label: "Home", href: `${cityBase}/` },
+  { label: "Topics", href: `${cityBase}/topics/` },
+  { label: "Guides", href: `${cityBase}/guides/` },
+  { label: "Events", href: `${cityBase}/events/` },
+  { label: "Jobs", href: `${cityBase}/jobs/` },
+  { label: "Games", href: `${cityBase}/games/` },
+  { label: "The Buy", href: `${cityBase}/buy/` },
+  { label: "Advertise", href: `${cityBase}/advertise/` },
 ];
 
-const guides = [
-  ["live", "Live"],
-  ["work", "Work"],
-  ["play", "Play"],
-  ["best", "GoDo’s Best"],
-];
-
-// Helper for building URLs
-const u = (path: string) => `${base}${path}`;
+// Drawer links should match pills exactly (no duplicates beyond this list)
+const drawerLinks = pills;
 ---
 
-<nav class="nav container" aria-label="Primary">
-  <div class="nav-left">
-    <a class="pill" href={u("/")}>Home</a>
-
-    <!-- Topics dropdown (no JS) -->
-  <details class="nav-dd" name="primary-nav">
-      <summary class="pill">Topics</summary>
-      <div class="dd-panel" role="menu">
-        {topics.map(([slug, label]) => (
-          <a class="dd-item" role="menuitem" href={u(`/topic/${slug}/`)}>
-            {label}
-          </a>
-        ))}
-        <div class="dd-sep" aria-hidden="true"></div>
-        <a class="dd-item dd-all" role="menuitem" href={u("/topics/")}>
-          All topics →
-        </a>
-      </div>
-    </details>
-
-    <!-- Guides dropdown (no JS) -->
-<details class="nav-dd" name="primary-nav">
-      <summary class="pill">Guides</summary>
-      <div class="dd-panel" role="menu">
-        {guides.map(([slug, label]) => (
-          <a class="dd-item" role="menuitem" href={u(`/guides/${slug}/`)}>
-            {label}
-          </a>
-        ))}
-        <div class="dd-sep" aria-hidden="true"></div>
-        <a class="dd-item dd-all" role="menuitem" href={u("/guides/")}>
-          All guides →
-        </a>
-      </div>
-    </details>
-
-    <a class="pill" href={u("/events/")}>Events</a>
-    <a class="pill" href={u("/jobs/")}>Jobs</a>
-    <a class="pill" href={u("/games/")}>Games</a>
-    <a class="pill" href={u("/the-buy/")}>The Buy</a>
+<nav class="navMenu" aria-label="Primary navigation">
+  <div class="pillRow" role="navigation" aria-label="Site sections">
+    {pills.map((p) => (
+      <a class="pill" href={p.href}>{p.label}</a>
+    ))}
   </div>
 
-  <div class="nav-right">
-    <a class="pill" href={u("/advertise/")}>Advertise</a>
-    <a class="cta" href={u("/subscribe/")}>Subscribe</a>
-  </div>
+  <!-- Drawer (checkbox/label pattern, no JS) -->
+  <input id="navToggle" class="navToggle" type="checkbox" />
+  <label class="menuBtn" for="navToggle" aria-label="Open menu">
+    <span class="burger" aria-hidden="true"><span></span></span>
+    <span class="menuText">Menu</span>
+  </label>
+
+  <label class="backdrop" for="navToggle" aria-hidden="true"></label>
+
+  <aside class="drawer" aria-label="Site menu">
+    <div class="drawerHead">
+      <div class="drawerTitle">Menu</div>
+      <label class="closeBtn" for="navToggle" aria-label="Close menu">✕</label>
+    </div>
+
+    <!-- ONE clean nav list only -->
+    <div class="drawerLinks">
+      {drawerLinks.map((p) => (
+        <a class="drawerLink" href={p.href}>{p.label}</a>
+      ))}
+    </div>
+  </aside>
 </nav>
 
-<!-- CSS is inline so you don't have to hunt global.css.
-     It only styles the dropdown elements and uses your existing variables. -->
 <style>
-  .nav-dd { position: relative; }
-
-  .nav-dd > summary {
-    list-style: none;
-    cursor: pointer;
+  .navMenu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
-  .nav-dd > summary::-webkit-details-marker { display: none; }
-
-  /* Dropdown panel */
-  .dd-panel{
-    position: absolute;
-    top: calc(100% + 10px);
-    left: 0;
-    min-width: 240px;
-    padding: 10px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: rgba(16,20,26,.95);
-    backdrop-filter: blur(10px);
-    box-shadow: var(--shadow);
-    z-index: 200;
-    display: grid;
-    gap: 6px;
+  /* Main pills row */
+  .pillRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex: 1 1 auto;
   }
 
-  .dd-item{
-    display:block;
-    padding: 10px 10px;
-    border-radius: 10px;
-    color: var(--text);
-    border: 1px solid transparent;
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.14);
+    background: rgba(255,255,255,.03);
+    color: rgba(232,237,244,.90);
+    font-weight: 900;
+    font-size: 12.5px;
     text-decoration: none;
-    font-weight: 700;
-    font-size: 14px;
+    white-space: nowrap;
   }
+  .pill:hover { border-color: rgba(255,210,74,.22); }
 
-  .dd-item:hover{
-    background: rgba(255,255,255,.06);
-    border-color: rgba(255,255,255,.08);
-  }
+  /* Mobile pills: NEVER disappear; allow scroll instead of clipping */
+  @media (max-width: 760px) {
+    .pillRow {
+      gap: 6px;                    /* closer together first */
+      overflow-x: auto;            /* scroll if too many */
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+    .pillRow::-webkit-scrollbar { display: none; }
 
-  .dd-sep{
-    height: 1px;
-    background: rgba(255,255,255,.08);
-    margin: 4px 2px;
-  }
-
-  .dd-all{
-    color: var(--muted);
-  }
-
-  /* Mobile: dropdown becomes inline (so it doesn’t fall off screen) */
-  @media (max-width: 900px){
-    .dd-panel{
-      position: static;
-      margin-top: 10px;
-      min-width: 0;
+    .pill {
+      height: 32px;
+      padding: 0 10px;
+      font-size: 12px;
     }
   }
+
+  /* Drawer */
+  .navToggle { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+
+  .menuBtn {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    border-radius: 12px;
+    padding: 8px 10px;
+    border: 1px solid rgba(255,210,74,.40);
+    background: rgba(255,210,74,.10);
+    color: rgba(232,237,244,.92);
+    font-weight: 900;
+    cursor: pointer;
+    user-select: none;
+  }
+  .menuText { font-size: 12.5px; }
+
+  .burger { width: 18px; height: 12px; position: relative; display: inline-block; }
+  .burger::before, .burger::after, .burger span {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: rgba(232,237,244,.92);
+  }
+  .burger::before { top: 0; }
+  .burger span { top: 5px; }
+  .burger::after { bottom: 0; }
+
+  .backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(2px);
+    z-index: 90;
+  }
+  .drawer {
+    position: fixed;
+    top: 0; right: 0;
+    height: 100dvh;
+    width: min(86vw, 360px);
+    background: #0b0d10;
+    border-left: 1px solid rgba(255,255,255,.10);
+    box-shadow: -20px 0 60px rgba(0,0,0,.45);
+    transform: translateX(100%);
+    transition: transform 220ms ease;
+    z-index: 100;
+    display: grid;
+    grid-template-rows: auto 1fr;
+  }
+  .drawerHead {
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .drawerTitle { font-weight: 950; color: rgba(232,237,244,.92); }
+  .closeBtn {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.03);
+    color: rgba(232,237,244,.86);
+    cursor: pointer;
+    user-select: none;
+  }
+  .drawerLinks { padding: 12px 14px 16px; display: grid; gap: 8px; overflow: auto; }
+  .drawerLink {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: rgba(232,237,244,.86);
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.02);
+    border-radius: 12px;
+    padding: 12px 12px;
+    font-weight: 850;
+  }
+
+  /* Only show hamburger when needed */
+  @media (max-width: 760px) {
+    .menuBtn { display: inline-flex; }
+  }
+
+  .navToggle:checked ~ .backdrop { display: block; }
+  .navToggle:checked ~ .drawer { transform: translateX(0); }
 </style>
-<script is:inline>
-  // Close other nav dropdowns when one opens
-  document.addEventListener("toggle", (e) => {
-    const target = e.target;
-    if (!(target instanceof HTMLDetailsElement)) return;
-    if (!target.classList.contains("nav-dd")) return;
-    if (!target.open) return;
-
-    document.querySelectorAll("details.nav-dd[open]").forEach((el) => {
-      if (el !== target) el.removeAttribute("open");
-    });
-  });
-
-  // Close any open dropdown after clicking a link inside the dropdown
-  document.addEventListener("click", (e) => {
-    const a = e.target.closest?.("a");
-    if (!a) return;
-
-    const inDropdown = a.closest?.("details.nav-dd");
-    if (!inDropdown) return;
-
-    document.querySelectorAll("details.nav-dd[open]").forEach((el) => {
-      el.removeAttribute("open");
-    });
-  });
-</script>
