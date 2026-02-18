@@ -75,45 +75,32 @@ const latest = feed.slice(0, 8);
 <section class="section">
   <div class="container homeWrap">
 
-    <!-- Newsletter Signup (Nooga-ish) -->
+    <!-- Newsletter / Email Signup (Nooga-style) -->
     <div class="newsletterBand">
-      <div class="newsletterBandInner">
-        <div class="newsletterText">
-          <div class="newsletterHeadline">Good News Daytona</div>
-          <div class="newsletterSub">Daytona Pulse: your FREE local insider.</div>
-          <div class="newsletterFine">Sent straight to your inbox, 100% FREE! Unsubscribe anytime.</div>
+      <div class="newsletterInner">
+        <div class="newsletterCopy">
+          <div class="nlHeadline">Good News Daytona</div>
+          <div class="nlSubhead">Daytona Pulse: your FREE local insider.</div>
         </div>
 
-        <form class="newsletterForm" action="/daytona/subscribe/" method="get">
-          <input
-            class="newsletterInput"
-            type="email"
-            name="email"
-            placeholder="Enter your email address"
-            aria-label="Email address"
-          />
-          <button class="newsletterButton" type="submit">SIGN UP, IT’S FREE!</button>
+        <form class="nlForm" action="/daytona/subscribe/" method="get">
+          <input class="nlInput" type="email" name="email" placeholder="Enter your email address" />
+          <button class="nlButton" type="submit">SIGN UP, IT’S FREE!</button>
         </form>
+
+        <div class="nlFine">Sent straight to your inbox, 100% FREE! Unsubscribe anytime.</div>
       </div>
     </div>
 
-    <!-- Main grid: left content + right rail -->
     <div class="homeGrid">
 
-      <!-- LEFT -->
       <div class="homeMain">
 
         {hero && (
           <a class="heroFeature" href={`/daytona/posts/${hero.slug}/`}>
             <div class="heroMedia">
               {heroImage(hero) ? (
-                <img
-                  class="heroImg"
-                  src={heroImage(hero)}
-                  alt={hero.data.title ?? "Hero image"}
-                  loading="lazy"
-                  decoding="async"
-                />
+                <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? "Hero image"} loading="lazy" decoding="async" />
               ) : (
                 <div class="heroImg heroImgFallback" aria-hidden="true"></div>
               )}
@@ -156,13 +143,7 @@ const latest = feed.slice(0, 8);
             <a class="latestCard" role="listitem" href={`/daytona/posts/${p.slug}/`}>
               <div class="latestMedia">
                 {heroImage(p) ? (
-                  <img
-                    class="latestImg"
-                    src={heroImage(p)}
-                    alt={p.data.title ?? "Thumbnail"}
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <img class="latestImg" src={heroImage(p)} alt={p.data.title ?? "Thumbnail"} loading="lazy" decoding="async" />
                 ) : (
                   <div class="latestImg latestImgFallback" aria-hidden="true"></div>
                 )}
@@ -179,7 +160,6 @@ const latest = feed.slice(0, 8);
 
       </div>
 
-      <!-- RIGHT RAIL -->
       <aside class="homeRail">
         <div class="moduleCard eventsCard">
           <div class="moduleHead">
@@ -235,6 +215,7 @@ const latest = feed.slice(0, 8);
       </div>
     </div>
 
+    <!-- Footer rendered by your shared Footer component elsewhere; if you still keep this local footer, it’s fine -->
     <footer class="homeFooter">
       <div class="footerCols">
         <div class="footerCol">
@@ -256,9 +237,7 @@ const latest = feed.slice(0, 8);
             GoDoDaytona is part of the GoDoCity network. Built to scale city-by-city with consistent design,
             editorial workflow, and advertising packages.
           </div>
-          <div class="footerFine" style="margin-top:10px;">
-            © {new Date().getFullYear()} GoDoCity. All rights reserved.
-          </div>
+          <div class="footerFine" style="margin-top:10px;">© {new Date().getFullYear()} GoDoCity. All rights reserved.</div>
         </div>
       </div>
     </footer>
@@ -267,7 +246,6 @@ const latest = feed.slice(0, 8);
 </section>
 
 <style>
-  /* Nooga-ish page width */
   :global(.container) {
     max-width: 1240px;
     padding-left: clamp(14px, 2vw, 22px);
@@ -280,19 +258,16 @@ const latest = feed.slice(0, 8);
   .homeWrap {
     --maxMain: 860px;
     --rail: 320px;
-
-    /* separation between left + rail and between cards */
     --gridGap: clamp(18px, 2vw, 26px);
 
-    /* “Nooga inner padding feel” for newsletter + grid alignment */
-    --contentInset: clamp(18px, 3.3vw, 52px);
+    /* “~4.3cm inset feel” translated to responsive padding */
+    --inset: clamp(18px, 3.4vw, 52px);
 
-    /* your requested ~0.5cm nudge right for rail to sit under email field edge */
+    /* tiny rail nudge so events aligns with newsletter inset edge */
     --railNudge: 19px;
 
     --cardRadius: 16px;
     --cardRadiusSm: 14px;
-
     --cardBorder: rgba(255,255,255,.10);
     --cardBorderSoft: rgba(255,255,255,.08);
     --cardBg: rgba(255,255,255,.03);
@@ -308,81 +283,73 @@ const latest = feed.slice(0, 8);
     --yellowDeep: #ffc400;
 
     --glow: 0 0 0 1px rgba(255,210,74,.18), 0 10px 26px rgba(0,0,0,.30);
-    --glowSoft: 0 0 0 1px rgba(255,210,74,.18), 0 18px 44px rgba(0,0,0,.45);
+    --glowSoft: 0 0 0 1px rgba(255,210,74,.22), 0 18px 44px rgba(0,0,0,.45);
   }
 
-  /* =========================
-     NEWSLETTER (Nooga + yellow)
-     ========================= */
+  /* Newsletter band: more yellow-forward, shorter than prior tall version */
   .newsletterBand {
-    border: 1px solid rgba(255,210,74,.62);
+    border: 1px solid rgba(255,210,74,.68);
     background:
-      radial-gradient(900px 420px at 18% 0%, rgba(255,210,74,.28), rgba(255,210,74,0) 60%),
-      rgba(255,210,74,.18);
+      radial-gradient(900px 420px at 18% 0%, rgba(255,210,74,.34), rgba(255,210,74,0) 62%),
+      rgba(255,210,74,.22);
     box-shadow: var(--glowSoft);
     border-radius: var(--cardRadius);
     overflow: hidden;
     margin: 10px 0 18px;
   }
 
-  .newsletterBandInner {
-    padding: clamp(18px, 2.2vw, 28px) var(--contentInset);
+  .newsletterInner {
+    padding: clamp(16px, 2vw, 22px) var(--inset);
     display: grid;
-    gap: 14px;
+    gap: 12px;
     align-items: start;
   }
 
-  .newsletterHeadline {
+  .nlHeadline {
     color: rgba(232,237,244,.96);
     font-weight: 950;
     letter-spacing: -0.3px;
     font-size: clamp(22px, 2.2vw, 28px);
     line-height: 1.05;
   }
-  .newsletterSub {
+  .nlSubhead {
     margin-top: 6px;
-    color: rgba(232,237,244,.88);
-    font-size: 15px;
+    color: rgba(232,237,244,.90);
+    font-size: 15.5px;
     line-height: 1.35;
-    font-weight: 650;
-  }
-  .newsletterFine {
-    margin-top: 8px;
-    color: rgba(232,237,244,.72);
-    font-size: 13.5px;
-    line-height: 1.35;
+    font-weight: 700;
   }
 
-  /* Desktop: one line if room; never cuts off. Mobile: stack. */
-  .newsletterForm {
+  /* Desktop input should not be absurdly long */
+  .nlForm {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
     width: 100%;
     min-width: 0;
     margin-top: 6px;
   }
 
-  .newsletterInput {
+  .nlInput {
     width: 100%;
-    height: 52px;
+    height: 50px;
+    max-width: 380px; /* ~9.5cm visual target */
     border-radius: 14px;
     border: 1px solid rgba(255,255,255,.20);
-    background: rgba(11,13,16,.74);
+    background: rgba(11,13,16,.78);
     color: rgba(232,237,244,.96);
     padding: 0 14px;
     outline: none;
     box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
   }
-  .newsletterInput::placeholder { color: rgba(232,237,244,.70); }
-  .newsletterInput:focus {
-    border-color: rgba(255,210,74,.82);
+  .nlInput::placeholder { color: rgba(232,237,244,.70); }
+  .nlInput:focus {
+    border-color: rgba(255,210,74,.84);
     box-shadow: 0 0 0 4px rgba(255,210,74,.22);
   }
 
-  .newsletterButton {
-    width: 100%;
-    height: 52px;
+  .nlButton {
+    height: 50px;
     border-radius: 14px;
     border: 1px solid rgba(0,0,0,.55);
     background: linear-gradient(180deg, var(--yellow), var(--yellowDeep));
@@ -390,35 +357,44 @@ const latest = feed.slice(0, 8);
     font-weight: 950;
     letter-spacing: .02em;
     cursor: pointer;
-    box-shadow: 0 16px 26px rgba(0,0,0,.22);
+    box-shadow: 0 14px 22px rgba(0,0,0,.22);
+    padding: 0 16px;
+    width: 100%;
   }
 
+  .nlFine {
+    color: rgba(232,237,244,.74);
+    font-size: 13.5px;
+    line-height: 1.35;
+    margin-top: 2px;
+  }
+
+  /* Desktop: input + button on one line, never cut off */
   @media (min-width: 900px) {
-    .newsletterForm {
-      grid-template-columns: 1fr auto;
+    .nlForm {
+      grid-template-columns: minmax(260px, 380px) auto;
       align-items: center;
     }
-    .newsletterButton {
-      width: auto;
-      padding: 0 18px;
-      white-space: nowrap;
-    }
+    .nlInput { max-width: none; }
+    .nlButton { width: auto; white-space: nowrap; }
   }
 
-  /* =========================
-     HOME GRID + rail alignment
-     ========================= */
+  /* Mobile: stack, full width */
+  @media (max-width: 520px) {
+    .newsletterInner { padding: 16px 14px; }
+    .nlInput { max-width: none; width: 100%; }
+    .nlButton { width: 100%; }
+  }
+
+  /* Grid alignment: match newsletter inset */
   .homeGrid {
     display: grid;
     grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
     gap: var(--gridGap);
     align-items: start;
-
-    /* Make grid start at same inset as newsletter content */
-    padding: 0 var(--contentInset);
+    padding: 0 var(--inset);
   }
 
-  /* Nudge rail right slightly so left edge aligns under email field edge */
   .homeRail {
     padding: 0;
     margin: 0;
@@ -464,7 +440,6 @@ const latest = feed.slice(0, 8);
   .sectionHeader { margin: 6px 0 10px; }
   .sectionTitle { font-weight: 950; font-size: 14px; color: var(--t3); text-transform: uppercase; letter-spacing: .12em; }
   .feedHeader { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 16px 0 10px; }
-
   .viewAllLink { color: rgba(255,210,74,.92); font-weight: 800; font-size: 13px; text-decoration: none; opacity: .95; }
   .viewAllLink:hover { opacity: 1; text-decoration: underline; }
   .viewAllLinkSmall { font-size: 12px; }
@@ -542,37 +517,14 @@ const latest = feed.slice(0, 8);
   .latestMeta { margin-top: 10px; color: var(--t4); font-size: 12.5px; }
 
   /* Rail module */
-  .moduleCard {
-    border: 1px solid var(--cardBorder);
-    background: var(--cardBg);
-    border-radius: var(--cardRadius);
-    padding: 14px;
-    box-shadow: var(--shadowSoft);
-  }
+  .moduleCard { border: 1px solid var(--cardBorder); background: var(--cardBg); border-radius: var(--cardRadius); padding: 14px; box-shadow: var(--shadowSoft); }
   .moduleHead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px; }
   .moduleTitle { font-weight: 950; color: var(--t1); letter-spacing: -0.1px; }
+  .moduleTitleSmall { font-size: 13px; margin-bottom: 8px; opacity: .9; }
 
   .eventsList { display: grid; gap: 10px; }
-  .eventRow {
-    display: grid;
-    grid-template-columns: 44px 1fr;
-    gap: 10px;
-    align-items: center;
-    padding: 10px 10px;
-    border-radius: 14px;
-    border: 1px solid rgba(255,255,255,.08);
-    background: rgba(255,255,255,.02);
-  }
-  .eventDate {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(0,0,0,.18);
-    display: grid;
-    place-items: center;
-    line-height: 1.05;
-  }
+  .eventRow { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center; padding: 10px 10px; border-radius: 14px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02); }
+  .eventDate { width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.18); display: grid; place-items: center; line-height: 1.05; }
   .eventDow { font-size: 11px; color: var(--t4); font-weight: 900; letter-spacing: .08em; }
   .eventDay { font-size: 16px; color: var(--t1); font-weight: 950; margin-top: 2px; }
   .eventName { font-weight: 900; color: var(--t1); line-height: 1.15; }
@@ -583,36 +535,12 @@ const latest = feed.slice(0, 8);
   .railLink { color: rgba(232,237,244,.78); text-decoration: none; font-size: 13px; }
   .railLink:hover { color: rgba(255,210,74,.92); }
 
-  /* Promo + footer (unchanged vibe) */
-  .promoBand {
-    margin: 18px 0 0;
-    border: 1px solid var(--cardBorder);
-    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-    border-radius: var(--cardRadius);
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    gap: 14px;
-    align-items: center;
-    box-shadow: var(--shadowSoft);
-    flex-wrap: wrap;
-  }
+  /* Promo + footer */
+  .promoBand { margin: 18px 0 0; border: 1px solid var(--cardBorder); background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border-radius: var(--cardRadius); padding: 16px; display: flex; justify-content: space-between; gap: 14px; align-items: center; box-shadow: var(--shadowSoft); flex-wrap: wrap; }
   .promoTitle { font-weight: 950; font-size: 18px; color: var(--t1); }
   .promoDesc { margin-top: 6px; color: var(--t3); line-height: 1.3; }
   .promoActions { display: flex; gap: 10px; flex-wrap: wrap; }
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 40px;
-    padding: 0 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,210,74,.38);
-    background: rgba(255,210,74,.14);
-    color: var(--t1);
-    font-weight: 900;
-    text-decoration: none;
-  }
+  .btn { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid rgba(255,210,74,.38); background: rgba(255,210,74,.14); color: var(--t1); font-weight: 900; text-decoration: none; }
   .btn:hover { background: rgba(255,210,74,.18); }
   .btnGhost { border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.03); }
   .btnGhost:hover { background: rgba(255,255,255,.05); }
