@@ -264,3 +264,8 @@ body > footer { order: 2; }
 .siteFooter {
   position: static !important;
 }
+/* Remove the divider line under nav pills */
+.topbar {
+  border-bottom: none !important;
+  box-shadow: none !important;
+}
