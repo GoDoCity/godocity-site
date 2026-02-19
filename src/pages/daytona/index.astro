@@ -287,12 +287,22 @@ const latest = feed.slice(0, 8);
       margin: 10px 0 18px;
     }
 
-    .newsletterInner {
-      padding: clamp(16px, 2vw, 22px) var(--inset);
-      display: grid;
-      gap: 12px;
-      align-items: start;
-    }
+   /* Newsletter band layout: image left, content right (Nooga style) */
+.newsletterInner{
+  padding: clamp(16px, 2vw, 22px) var(--inset);
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 18px;
+  align-items: center;
+}
+/* Newsletter image */
+.nlArtImg{
+  width: 100%;
+  max-width: 220px;
+  border-radius: 14px;
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 10px 26px rgba(0,0,0,.25);
+}
 
     .nlHeadline {
       color: rgba(232,237,244,.96);
