@@ -275,13 +275,23 @@ const hero = heroImage(post);
   /* Featured title 15% larger on article page */
   .postTitle { margin: 0; }
   /* BIG editorial headline (2x) */
+/* BIG editorial headline (slightly reduced) */
 .postTitle {
   margin: 0;
-  font-size: clamp(38px, 4.4vw, 58px);
+  font-size: clamp(30px, 3.4vw, 46px); /* ~25% smaller */
   font-weight: 950;
-  letter-spacing: -0.6px;
-  line-height: 1.05;
+  letter-spacing: -0.5px;
+  line-height: 1.08;
 }
+
+/* Slightly smaller deck/description */
+.lede {
+  margin-top: 12px;
+  font-size: clamp(16px, 1.8vw, 20px);
+  line-height: 1.4;
+  color: rgba(232,237,244,.88);
+}
+
 
 /* Bigger deck/description */
 .lede {
