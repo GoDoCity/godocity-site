@@ -377,10 +377,94 @@ const latest = feed.slice(0, 8);
     }
 
     @media (max-width: 520px) {
-      .newsletterInner { padding: 16px 14px; }
-      .nlInput { max-width: none; width: 100%; }
-      .nlButton { width: 100%; }
-    }
+    .newsletterInner {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 18px;
+  align-items: center;
+  padding: 18px var(--inset);
+}
+
+/* LEFT IMAGE */
+.nlArt {
+  width: 140px;
+  height: 140px;
+  border-radius: 18px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(0,0,0,.25);
+  border: 1px solid rgba(255,255,255,.10);
+}
+
+.nlArtImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* RIGHT CONTENT */
+.nlContent {
+  display: grid;
+  gap: 10px;
+}
+
+.nlHeadline {
+  font-size: 26px;
+  font-weight: 950;
+  line-height: 1.05;
+}
+
+.nlSubhead {
+  font-size: 15px;
+  opacity: .88;
+}
+
+/* FORM ROW (Nooga style) */
+.nlForm {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  max-width: 520px;
+}
+
+/* SMALLER INPUT */
+.nlInput {
+  height: 44px;
+  border-radius: 12px;
+  font-size: 14px;
+}
+
+/* SMALLER BUTTON */
+.nlButton {
+  height: 44px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  padding: 0 16px;
+  white-space: nowrap;
+}
+
+/* MOBILE STACK */
+@media (max-width: 640px) {
+  .newsletterInner {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+
+  .nlArt {
+    width: 100%;
+    height: 160px;
+  }
+
+  .nlForm {
+    grid-template-columns: 1fr;
+  }
+
+  .nlButton {
+    width: 100%;
+  }
+}
 
     .homeGrid {
       display: grid;
