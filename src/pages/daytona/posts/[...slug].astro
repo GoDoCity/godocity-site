@@ -181,91 +181,90 @@ const featured = isFeatured(post);
 const hero = heroImage(post);
 ---
 
-<Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
+<Base title={title} subtitle={subtitle} cityBase="daytona">
   <section class="section">
-    ...everything that is currently in your section...
-  </section>
-</Base>
+    <div class="container postWrap">
 
-  <div class="container postWrap">
-    {/* HERO FIRST */}
-    {hero && (
-      <figure class="heroFigure">
-        <img
-          class="heroFull"
-          src={hero}
-          alt={post.data.title ?? "Post image"}
-          loading="eager"
-          decoding="async"
-        />
-      </figure>
-    )}
+      {/* TITLE / DECK / META FIRST */}
+      <h1 class={`h1 postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
+      {post.data.description && <p class="lede">{post.data.description}</p>}
 
-    {/* THEN TITLE / DECK / META */}
-    <h1 class={`h1 postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
-    {post.data.description && <p class="lede">{post.data.description}</p>}
+      <div class="metaRow">
+        {pubText && <span class="metaDate">{pubText}</span>}
 
-    <div class="metaRow">
-      {pubText && <span class="metaDate">{pubText}</span>}
+        {tagItems.length > 0 && (
+          <span class="metaTags" aria-label="Topics">
+            {tagItems.map((t) => (
+              <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
+            ))}
+          </span>
+        )}
 
-      {tagItems.length > 0 && (
-        <span class="metaTags" aria-label="Topics">
-          {tagItems.map((t) => (
-            <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
-          ))}
-        </span>
+        {featured && <span class="featuredPill">FEATURED</span>}
+      </div>
+
+      {/* HERO AFTER */}
+      {hero && (
+        <figure class="heroFigure">
+          <img
+            class="heroFull"
+            src={hero}
+            alt={post.data.title ?? "Post image"}
+            loading="eager"
+            decoding="async"
+          />
+        </figure>
       )}
 
-      {featured && <span class="featuredPill">FEATURED</span>}
-    </div>
+      <article class="postBody">
+        <Content />
+      </article>
 
-    <article class="postBody">
-      <Content />
-    </article>
+      {/* Related posts: keep as-is */}
+      {relatedPosts.length > 0 && (
+        <div class="relatedWrap">
+          <h3 class="relatedHead">Related posts</h3>
 
-    {/* Related posts: vertical list with thumbnail LEFT + text RIGHT */}
-    {relatedPosts.length > 0 && (
-      <div class="relatedWrap">
-        <h3 class="relatedHead">Related posts</h3>
+          <div class="relatedList">
+            {relatedPosts.map((p) => {
+              const t = p.data.title ?? p.slug;
+              const desc = p.data.description ?? "";
+              const d = getPostDate(p);
+              const dateText = d ? new Date(d).toLocaleDateString("en-US") : "";
+              const img = heroImage(p);
 
-        <div class="relatedList">
-          {relatedPosts.map((p) => {
-            const t = p.data.title ?? p.slug;
-            const desc = p.data.description ?? "";
-            const d = getPostDate(p);
-            const dateText = d ? new Date(d).toLocaleDateString("en-US") : "";
-            const img = heroImage(p);
+              return (
+                <a class="relatedRow" href={`/daytona/posts/${p.slug}/`}>
+                  <div class="relatedThumb">
+                    {img ? (
+                      <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async" />
+                    ) : (
+                      <div class="relatedImg relatedFallback" aria-hidden="true"></div>
+                    )}
+                  </div>
 
-            return (
-              <a class="relatedRow" href={`/daytona/posts/${p.slug}/`}>
-                <div class="relatedThumb">
-                  {img ? (
-                    <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async" />
-                  ) : (
-                    <div class="relatedImg relatedFallback" aria-hidden="true"></div>
-                  )}
-                </div>
+                  <div class="relatedText">
+                    <div class="relatedTitle">{t}</div>
+                    {desc && <div class="relatedDesc">{desc}</div>}
+                    {dateText && <div class="relatedMeta">{dateText}</div>}
+                  </div>
 
-                <div class="relatedText">
-                  <div class="relatedTitle">{t}</div>
-                  {desc && <div class="relatedDesc">{desc}</div>}
-                  {dateText && <div class="relatedMeta">{dateText}</div>}
-                </div>
-
-                {isFeatured(p) && <span class="featuredPill featuredPillSmall">FEATURED</span>}
-              </a>
-            );
-          })}
+                  {isFeatured(p) && <span class="featuredPill featuredPillSmall">FEATURED</span>}
+                </a>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
-    <p class="postLinks">
-      <a class="pill" href="/daytona/posts/">← All posts</a>
-      <a class="pill" href="/daytona/topics/">Topics</a>
-    </p>
-  </div>
-</section>
+      <p class="postLinks">
+        <a class="pill" href="/daytona/posts/">← All posts</a>
+        <a class="pill" href="/daytona/topics/">Topics</a>
+      </p>
+
+    </div>
+  </section>
+</Base>
 
 <style>
   /* Keep layout logic intact; just presentation */
