@@ -75,21 +75,38 @@ const latest = feed.slice(0, 8);
     <div class="container homeWrap">
 
       <!-- Newsletter / Email Signup (Nooga-style) -->
-      <div class="newsletterBand">
-        <div class="newsletterInner">
-          <div class="newsletterCopy">
-            <div class="nlHeadline">Good News Daytona</div>
-            <div class="nlSubhead">Daytona Pulse: your FREE local insider.</div>
-          </div>
+     <div class="newsletterBand">
+  <div class="newsletterInner">
 
-          <form class="nlForm" action="/daytona/subscribe/" method="get">
-            <input class="nlInput" type="email" name="email" placeholder="Enter your email address" />
-            <button class="nlButton" type="submit">SIGN UP, IT’S FREE!</button>
-          </form>
+    <!-- LEFT IMAGE (city-specific) -->
+    <div class="nlArt" aria-hidden="true">
+      <img
+        class="nlArtImg"
+        src={`/images/cities/${Astro.props.cityBase ?? "daytona"}/newsletter.png`}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        onerror="this.onerror=null;this.src='/images/cities/default/newsletter.png';"
+      />
+    </div>
 
-          <div class="nlFine">Sent straight to your inbox, 100% FREE! Unsubscribe anytime.</div>
-        </div>
+    <!-- RIGHT CONTENT -->
+    <div class="nlContent">
+      <div class="newsletterCopy">
+        <div class="nlHeadline">Good News Daytona</div>
+        <div class="nlSubhead">Daytona Pulse: your FREE local insider.</div>
       </div>
+
+      <form class="nlForm" action="/daytona/subscribe/" method="get">
+        <input class="nlInput" type="email" name="email" placeholder="Enter your email address" />
+        <button class="nlButton" type="submit">SIGN UP, IT’S FREE!</button>
+      </form>
+
+      <div class="nlFine">Sent straight to your inbox, 100% FREE! Unsubscribe anytime.</div>
+    </div>
+
+  </div>
+</div>
 
       <div class="homeGrid">
 
