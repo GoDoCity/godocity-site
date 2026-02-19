@@ -63,28 +63,42 @@ const drawerLinks = pills;
 
   /* Main pills row */
   .pillRow {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    flex: 1 1 auto;
-  }
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex: 1 1 auto;
+
+  justify-content: center; /* centers the pills */
+}
 
   .pill {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    height: 34px;
-    padding: 0 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.14);
-    background: rgba(255,255,255,.03);
-    color: rgba(232,237,244,.90);
-    font-weight: 900;
-    font-size: 12.5px;
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  .pill:hover { border-color: rgba(255,210,74,.22); }
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 40px;
+  padding: 0 16px;
+
+  border-radius: 999px;
+
+  border: 1px solid rgba(255,210,74,.55);
+  background: rgba(255,210,74,.14);
+
+  color: rgba(255,210,74,.95);
+
+  font-weight: 950;
+  font-size: 14px;
+
+  text-decoration: none;
+  white-space: nowrap;
+
+  transition: transform 140ms ease, background 140ms ease;
+}
+
+.pill:hover {
+  background: rgba(255,210,74,.22);
+  transform: translateY(-1px);
+}
 
   /* Mobile pills: NEVER disappear; allow scroll instead of clipping */
   @media (max-width: 760px) {
