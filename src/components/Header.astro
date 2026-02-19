@@ -16,3 +16,28 @@ const { title, subtitle, cityBase } = Astro.props;
 
   <NavMenu cityBase={cityBase} />
 </header>
+<style>
+  /* Prevent long article titles from overlapping nav pills on mobile */
+  .topbar .brand { min-width: 0; }
+
+  /* Clamp the header title to 1 line (no wrap explosion) */
+  .topbar .badge span:last-child {
+    display: block;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* Mobile: hide subtitle in header (article deck belongs in the article, not the header) */
+  @media (max-width: 760px) {
+    .topbar .brand small { display: none !important; }
+  }
+
+  /* Give pills breathing room below the brand block */
+  @media (max-width: 760px) {
+    .topbar { padding-bottom: 8px; }
+    .navMenu { margin-top: 8px; }
+  }
+</style>
