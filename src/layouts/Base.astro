@@ -3,10 +3,35 @@ import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
 
+// Theme selection: URL param wins, otherwise month-based seasonal theme.
+// Example demos:
+//   ?theme=light-black
+//   ?theme=light-blue
+//   ?theme=dark-yellow
+//   ?theme=halloween
+
+const urlTheme = Astro.url?.searchParams?.get("theme")?.trim() || "";
+
+// Month-long seasonal switching (1st -> end of month automatically)
+const m = new Date().getMonth() + 1; // 1..12
+const monthThemeMap = {
+  2: "valentine",
+  7: "patriotic",
+  10: "halloween",
+  11: "thanksgiving",
+  12: "christmas",
+};
+
+// Default if no month match:
+const seasonalTheme = monthThemeMap[m] ?? "dark-yellow";
+
+// Final theme:
+const activeTheme = urlTheme || seasonalTheme;
+
 const { title, subtitle, cityBase } = Astro.props;
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme={activeTheme}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
