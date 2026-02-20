@@ -508,14 +508,13 @@ const latest = feed.slice(0, 8);
 /* Row item */
 .latestCard{
   display: grid;
-  grid-template-columns: 1fr 96px;   /* text left, thumb right */
+  grid-template-columns: 96px 1fr;   /* thumbnail LEFT */
   gap: 14px;
   align-items: start;
 
   padding: 16px 0;
   text-decoration: none;
 
-  /* kill the “card” look */
   border: 0;
   border-bottom: 1px solid rgba(255,255,255,.10);
   background: transparent;
@@ -589,8 +588,9 @@ const latest = feed.slice(0, 8);
 
 /* Make the thumbnail a little smaller on very small phones */
 @media (max-width: 420px){
-  .latestCard{ grid-template-columns: 1fr 84px; }
-  .latestMedia{ width: 84px; height: 64px; border-radius: 10px; }
+  .latestCard{ grid-template-columns: 84px 1fr; }
+  .latestMedia{ width: 84px; height: 64px; }
+}
   .latestTitle{ font-size: 19px; }
 }
     .moduleCard { border: 1px solid var(--cardBorder); background: var(--cardBg); border-radius: var(--cardRadius); padding: 14px; box-shadow: var(--shadowSoft); }
