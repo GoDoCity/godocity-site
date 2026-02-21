@@ -204,12 +204,12 @@ h1, h2, h3, h4, h5, h6,
 .kicker{color:var(--accent);font-weight:800;letter-spacing:.5px;text-transform:uppercase;font-size:12px}
 
 .h1{font-size:44px;line-height:1.06;margin:10px 0 10px}
-@media (max-width:900px){.h1{font-size:36px}}
+@media (max-width:900px){.h1{font-size:36px}
 
 .lede{color:var(--muted);font-size:16px;line-height:1.55;margin:0 0 12px}
 
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-@media (max-width:900px){.grid{grid-template-columns:1fr}}
+@media (max-width:900px){.grid{grid-template-columns:1fr}
 
 .article{padding:14px;border-top:1px solid var(--line)}
 .article:first-child{border-top:none}
