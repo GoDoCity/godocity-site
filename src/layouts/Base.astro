@@ -40,6 +40,40 @@ const { title, subtitle, cityBase } = Astro.props;
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles/themes.css" />
+    <script is:inline>
+     (function () {
+    const params = new URLSearchParams(window.location.search);
+    const urlTheme = (params.get("theme") || "").trim();
+
+    // Month-long seasonal switching (1st -> end of month automatically)
+    const monthThemeMap = {
+      2: "valentine",
+      7: "patriotic",
+      10: "halloween",
+      11: "thanksgiving",
+      12: "christmas",
+    };
+
+    const m = new Date().getMonth() + 1;
+    const seasonalTheme = monthThemeMap[m] || "dark-yellow";
+
+    // Priority: URL param -> saved preference -> seasonal
+    const saved = (localStorage.getItem("godoTheme") || "").trim();
+    const active = urlTheme || saved || seasonalTheme;
+
+    document.documentElement.setAttribute("data-theme", active);
+
+    // Persist choice if coming from URL
+    if (urlTheme) localStorage.setItem("godoTheme", urlTheme);
+
+    // Optional: update color-scheme meta for light themes
+    const meta = document.querySelector('meta[name="color-scheme"]');
+    if (meta) {
+      const isLight = active.startsWith("light");
+      meta.setAttribute("content", isLight ? "light" : "dark");
+    }
+  })();
+</script>
     <title>{title}</title>
     <meta name="description" content={subtitle ?? "GoDoCity – multi-city local content platform"} />
   </head>
