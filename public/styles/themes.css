@@ -13,7 +13,16 @@
   --accent: #ffd24a;     /* pill + highlights */
   --accent2: #ffc400;    /* gradients */
   --accentText: #0b0d10; /* text on accent */
+  /* Derived usage tokens */
+  --brand1: var(--accent);   /* primary */
+  --brand2: var(--accent2);  /* secondary */
 
+  --link: var(--brand1);
+
+  --pillBg: color-mix(in srgb, var(--brand1) 14%, transparent);
+  --pillBorder: color-mix(in srgb, var(--brand1) 55%, transparent);
+
+  --underline: linear-gradient(90deg, var(--brand1), var(--brand2));
   --focusRing: rgba(255,210,74,.28);
 }
 
