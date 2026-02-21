@@ -13,10 +13,9 @@
   --shadow: 0 10px 30px rgba(0,0,0,.35);
 
   /* Typography */
-  /* Fonts */
---font-body: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
---font-head: "Space Grotesk", ui-sans-serif, system-ui;
-  --font-head: var(--font);
+   /* Fonts */
+  --font-body: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  --font-head: "Space Grotesk", ui-sans-serif, system-ui;
 
   /* Hero tuning knobs (hub uses gradients; city pages can still use these if needed) */
   --hero-min: 420px;
@@ -245,7 +244,20 @@ button{border:none;cursor:pointer}
 .city-daytona{
   /* Keep your current accent (yellow). Swap if you want options later. */
   --accent:#ffd24a;
+  /* Fallback theme tokens (themes.css should override per [data-theme]) */
+  --accent2:#78b4ff;
+  --accentText:#13161b;
 
+  /* Derived usage tokens (themes.css can also define these; later file wins) */
+  --brand1: var(--accent);
+  --brand2: var(--accent2);
+
+  --link: var(--brand1);
+
+  --pillBg: color-mix(in srgb, var(--brand1) 14%, transparent);
+  --pillBorder: color-mix(in srgb, var(--brand1) 55%, transparent);
+
+  --underline: linear-gradient(90deg, var(--brand1), var(--brand2));
   /* Banner image for Daytona */
   --hero-img: url("/images/gododaytona-bg.png");
 }
