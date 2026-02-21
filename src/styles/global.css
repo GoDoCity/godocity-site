@@ -42,8 +42,11 @@ html,body{
   line-height:1.6;
 }
 a{color:inherit;text-decoration:none}
-a:hover{opacity:.9}
-.container{max-width:var(--max);margin:0 auto;padding:0 18px}
+a{color:var(--link);text-decoration:none}
+a:hover{
+  color: color-mix(in srgb, var(--brand2) 70%, var(--link));
+  opacity: 1;
+}
 /* =========================
    TYPOGRAPHY
    ========================= */
