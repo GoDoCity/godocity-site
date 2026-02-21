@@ -93,7 +93,11 @@ h1, h2, h3, h4, h5, h6,
 
 .brand{display:flex;align-items:center;gap:12px;padding:14px 0}
 .badge{display:inline-flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.2px}
-.badge-dot{width:10px;height:10px;border-radius:99px;background:var(--accent);box-shadow:0 0 0 4px rgba(255,210,74,.15)}
+.badge-dot{
+  width:10px;height:10px;border-radius:99px;
+  background: var(--brand1);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand1) 18%, transparent);
+}
 .brand small{color:var(--muted);font-weight:600}
 
 /* =========================
