@@ -112,16 +112,22 @@ h1, h2, h3, h4, h5, h6,
   display:inline-flex;
   align-items:center;
   gap:8px;
-  border:1px solid var(--line);
-  background:rgba(16,20,26,.75);
+
+  border: 1px solid var(--pillBorder);
+  background: var(--pillBg);
+  color: var(--text);
+
   padding:9px 12px;
   border-radius:999px;
-}
-.pill {
+
   font-family: var(--font-head);
   font-weight: 600;
 }
-.pill:hover{border-color:#2b3443}
+
+.pill:hover{
+  border-color: color-mix(in srgb, var(--brand2) 70%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand2) 18%, transparent);
+}
 
 .cta{
   display:inline-flex;
