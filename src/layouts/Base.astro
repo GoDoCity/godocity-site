@@ -33,42 +33,16 @@ const { title, subtitle, cityBase } = Astro.props;
 <!doctype html>
 <html lang="en" data-theme={activeTheme}>
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-   <meta
-  name="color-scheme"
-  content={activeTheme.startsWith("light-") ? "light" : "dark"}
-/>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
-<script is:inline>
-  (function () {
-    var params = new URLSearchParams(window.location.search);
-    var urlTheme = (params.get("theme") || "").trim();
-    var monthThemeMap = {
-      2: "valentine",
-      7: "patriotic",
-      10: "halloween",
-      11: "thanksgiving",
-      12: "christmas",
-    };
-    var m = new Date().getMonth() + 1;
-    var seasonalTheme = monthThemeMap[m] || "dark-yellow";
-    var saved = "";
-    try { saved = (localStorage.getItem("godoTheme") || "").trim(); } catch(e) {}
-    var active = urlTheme || saved || seasonalTheme;
-    document.documentElement.setAttribute("data-theme", active);
-    try { if (urlTheme) localStorage.setItem("godoTheme", urlTheme); } catch(e) {}
-    var meta = document.querySelector('meta[name="color-scheme"]');
-    if (meta) {
-      meta.setAttribute("content", active.startsWith("light") ? "light" : "dark");
-    }
-  })();
-</script>
-<title>{title}</title>
-<meta name="description" content={subtitle ?? "GoDoCity – multi-city local content platform"} />
-<link rel="stylesheet" href="/styles/themes.css" />   <!-- LAST: must win over everything -->
+   <head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content={activeTheme.startsWith("light-") ? "light" : "dark"} />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
+  <title>{title}</title>
+  <meta name="description" content={subtitle ?? "GoDoCity – multi-city local content platform"} />
+  <link rel="stylesheet" href="/styles/themes.css" />
 </head>
      (function () {
     const params = new URLSearchParams(window.location.search);
