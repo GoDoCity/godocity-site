@@ -267,7 +267,19 @@ input[type="email"]{
 }
 button{border:none;cursor:pointer}
 .note{color:var(--muted);font-size:13px;line-height:1.4;margin-top:10px}
-
+.nlButton{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, var(--brand1), var(--brand2));
+  color: var(--accentText);
+  font-weight: 800;
+  padding: 10px 20px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+.nlButton:hover{ filter: brightness(.95); }
 /* =========================
    City themes (works after you add body class in Base.astro)
    ========================= */
