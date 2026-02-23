@@ -114,7 +114,28 @@ html[data-theme="light-red"]{
   --pillBorder: color-mix(in srgb, #e0192d 45%, transparent);
   --underline: linear-gradient(90deg, #e0192d, #9f0f1c);
 }
+  
+html[data-theme="dark-red"]{
+  --bg: #0b0d10;
+  --surface: rgba(255,255,255,.03);
+  --surface2: rgba(255,255,255,.05);
+  --text: rgba(232,237,244,.96);
+  --muted: rgba(232,237,244,.80);
+  --faint: rgba(232,237,244,.58);
+  --border: rgba(255,255,255,.12);
 
+  --accent: #e0192d;
+  --accent2: #9f0f1c;
+  --accentText: #ffffff;
+  --focusRing: rgba(224,25,45,.20);
+
+  --brand1: #e0192d;
+  --brand2: #9f0f1c;
+  --link: #e0192d;
+  --pillBg: color-mix(in srgb, #e0192d 14%, transparent);
+  --pillBorder: color-mix(in srgb, #e0192d 55%, transparent);
+  --underline: linear-gradient(90deg, #e0192d, #9f0f1c);
+}
 /* Holiday themes (MONTH-LONG) */
 
 /* Feb: Valentine (red/pink) */
