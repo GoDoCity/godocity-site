@@ -136,13 +136,13 @@ h1, h2, h3, h4, h5, h6,
   display:inline-flex;
   align-items:center;
   justify-content:center;
-  background:var(--accent);
-  color:#13161b;
+  background: linear-gradient(135deg, var(--brand1), var(--brand2));
+  color: var(--accentText);
   font-weight:800;
   padding:10px 14px;
   border-radius:999px;
 }
-.cta:hover{filter:brightness(.98)}
+.cta:hover{filter:brightness(.96)}
 
 /* =========================
    Hero (hub-friendly default)
