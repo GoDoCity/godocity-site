@@ -44,22 +44,23 @@ const { title, subtitle, cityBase } = Astro.props;
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
 <script is:inline>
   (function () {
-    const params = new URLSearchParams(window.location.search);
-    const urlTheme = (params.get("theme") || "").trim();
-    const monthThemeMap = {
+    var params = new URLSearchParams(window.location.search);
+    var urlTheme = (params.get("theme") || "").trim();
+    var monthThemeMap = {
       2: "valentine",
       7: "patriotic",
       10: "halloween",
       11: "thanksgiving",
       12: "christmas",
     };
-    const m = new Date().getMonth() + 1;
-    const seasonalTheme = monthThemeMap[m] || "dark-yellow";
-    const saved = (localStorage.getItem("godoTheme") || "").trim();
-    const active = urlTheme || saved || seasonalTheme;
+    var m = new Date().getMonth() + 1;
+    var seasonalTheme = monthThemeMap[m] || "dark-yellow";
+    var saved = "";
+    try { saved = (localStorage.getItem("godoTheme") || "").trim(); } catch(e) {}
+    var active = urlTheme || saved || seasonalTheme;
     document.documentElement.setAttribute("data-theme", active);
-    if (urlTheme) localStorage.setItem("godoTheme", urlTheme);
-    const meta = document.querySelector('meta[name="color-scheme"]');
+    try { if (urlTheme) localStorage.setItem("godoTheme", urlTheme); } catch(e) {}
+    var meta = document.querySelector('meta[name="color-scheme"]');
     if (meta) {
       meta.setAttribute("content", active.startsWith("light") ? "light" : "dark");
     }
