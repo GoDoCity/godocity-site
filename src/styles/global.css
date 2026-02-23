@@ -233,6 +233,22 @@ h1, h2, h3, h4, h5, h6,
 
 .section{padding:18px 0}
 .section h2{margin:0 0 10px;font-size:22px}
+.sectionTitle{
+  position: relative;
+  padding-bottom: 8px;
+  display: inline-block;
+}
+.sectionTitle::after{
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 48px;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--underline);
+  opacity: .95;
+}
 .footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted);font-size:14px}
 
 .tagrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
