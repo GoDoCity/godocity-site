@@ -183,7 +183,27 @@ const hero = heroImage(post);
 
 <Base title={title} subtitle={subtitle} cityBase="daytona">
   <section class="section">
-    <div class="container postWrap">
+    <div class="container">
+      <div class="postLayout">
+
+        <!-- LEFT: article (75%) -->
+        <div class="postMain">
+          <div class="postWrap">
+            ...all article content...
+          </div>
+        </div>
+
+        <!-- RIGHT: sidebar (25%) -->
+        <aside class="postSidebar">
+          <h3 class="sectionTitle">Upcoming Events</h3>
+          <!-- drop your events component here later -->
+          <p style="color:var(--muted);font-size:14px">Events coming soon.</p>
+        </aside>
+
+      </div>
+    </div>
+  </section>
+</Base>
 
       {/* TITLE / DECK / META FIRST */}
       <h1 class={`h1 postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
@@ -473,5 +493,35 @@ const hero = heroImage(post);
     display:flex;
     gap:10px;
     flex-wrap:wrap;
+  }
+.postLayout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 32px;
+  align-items: start;
+}
+
+.postMain {
+  min-width: 0;   /* prevents grid blowout */
+}
+
+.postWrap {
+  max-width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.postSidebar {
+  position: sticky;
+  top: 80px;       /* clears the sticky topbar */
+  min-width: 0;
+}
+
+@media (max-width: 860px) {
+  .postLayout {
+    grid-template-columns: 1fr;
+  }
+  .postSidebar {
+    position: static;
   }
 </style>
