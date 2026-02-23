@@ -2,28 +2,26 @@
 
 /* 1) Default tokens (fallback) */
 :root{
+  html[data-theme="dark-yellow"]{
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
   --text: rgba(232,237,244,.96);
-  --muted: rgba(232,237,244,.78);
+  --muted: rgba(232,237,244,.80);
   --faint: rgba(232,237,244,.58);
   --border: rgba(255,255,255,.12);
 
-  --accent: #ffd24a;     /* pill + highlights */
-  --accent2: #ffc400;    /* gradients */
-  --accentText: #0b0d10; /* text on accent */
-  /* Derived usage tokens */
-  --brand1: var(--accent);   /* primary */
-  --brand2: var(--accent2);  /* secondary */
-
-  --link: var(--brand1);
-
-  --pillBg: color-mix(in srgb, var(--brand1) 14%, transparent);
-  --pillBorder: color-mix(in srgb, var(--brand1) 55%, transparent);
-
-  --underline: linear-gradient(90deg, var(--brand1), var(--brand2));
+  --accent: #ffd24a;
+  --accent2: #ffc400;
+  --accentText: #0b0d10;
   --focusRing: rgba(255,210,74,.28);
+
+  --brand1: #ffd24a;
+  --brand2: #ffc400;
+  --link: #ffd24a;
+  --pillBg: color-mix(in srgb, #ffd24a 14%, transparent);
+  --pillBorder: color-mix(in srgb, #ffd24a 55%, transparent);
+  --underline: linear-gradient(90deg, #ffd24a, #ffc400);
 }
 
 /* 2) Theme presets (set by <html data-theme="..."> ) */
@@ -47,6 +45,7 @@ html[data-theme="dark-yellow"]{
 
 /* Light + Black (clean high readability) */
 html[data-theme="light-black"]{
+ html[data-theme="light-black"]{
   --bg: #ffffff;
   --surface: rgba(0,0,0,.04);
   --surface2: rgba(0,0,0,.06);
@@ -56,14 +55,21 @@ html[data-theme="light-black"]{
   --border: rgba(0,0,0,.14);
 
   --accent: #111111;
-  --accent2: #222222;
+  --accent2: #444444;
   --accentText: #ffffff;
-
   --focusRing: rgba(0,0,0,.18);
+
+  --brand1: #111111;
+  --brand2: #444444;
+  --link: #111111;
+  --pillBg: color-mix(in srgb, #111111 10%, transparent);
+  --pillBorder: color-mix(in srgb, #111111 40%, transparent);
+  --underline: linear-gradient(90deg, #111111, #444444);
 }
 
 /* Light + Blue (test-market option) */
 html[data-theme="light-blue"]{
+ html[data-theme="light-blue"]{
   --bg: #ffffff;
   --surface: rgba(0,0,0,.04);
   --surface2: rgba(0,0,0,.06);
@@ -75,11 +81,18 @@ html[data-theme="light-blue"]{
   --accent: #1e63ff;
   --accent2: #1447b8;
   --accentText: #ffffff;
-
   --focusRing: rgba(30,99,255,.22);
+
+  --brand1: #1e63ff;
+  --brand2: #1447b8;
+  --link: #1e63ff;
+  --pillBg: color-mix(in srgb, #1e63ff 12%, transparent);
+  --pillBorder: color-mix(in srgb, #1e63ff 45%, transparent);
+  --underline: linear-gradient(90deg, #1e63ff, #1447b8);
 }
 
 /* Light + Red (test-market option) */
+html[data-theme="light-red"]{
 html[data-theme="light-red"]{
   --bg: #ffffff;
   --surface: rgba(0,0,0,.04);
@@ -92,13 +105,20 @@ html[data-theme="light-red"]{
   --accent: #e0192d;
   --accent2: #9f0f1c;
   --accentText: #ffffff;
-
   --focusRing: rgba(224,25,45,.20);
+
+  --brand1: #e0192d;
+  --brand2: #9f0f1c;
+  --link: #e0192d;
+  --pillBg: color-mix(in srgb, #e0192d 12%, transparent);
+  --pillBorder: color-mix(in srgb, #e0192d 45%, transparent);
+  --underline: linear-gradient(90deg, #e0192d, #9f0f1c);
 }
 
 /* Holiday themes (MONTH-LONG) */
 
 /* Feb: Valentine (red/pink) */
+html[data-theme="valentine"]{
 html[data-theme="valentine"]{
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.035);
@@ -111,11 +131,17 @@ html[data-theme="valentine"]{
   --accent: #ff4d88;
   --accent2: #e0192d;
   --accentText: #0b0d10;
-
   --focusRing: rgba(255,77,136,.26);
-}
 
+  --brand1: #ff4d88;
+  --brand2: #e0192d;
+  --link: #ff4d88;
+  --pillBg: color-mix(in srgb, #ff4d88 14%, transparent);
+  --pillBorder: color-mix(in srgb, #ff4d88 50%, transparent);
+  --underline: linear-gradient(90deg, #ff4d88, #e0192d);
+}
 /* Jul: 4th of July (red/blue) */
+html[data-theme="patriotic"]{
 html[data-theme="patriotic"]{
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
@@ -128,11 +154,18 @@ html[data-theme="patriotic"]{
   --accent: #1e63ff;
   --accent2: #e0192d;
   --accentText: #ffffff;
-
   --focusRing: rgba(30,99,255,.22);
+
+  --brand1: #1e63ff;
+  --brand2: #e0192d;
+  --link: #1e63ff;
+  --pillBg: color-mix(in srgb, #1e63ff 14%, transparent);
+  --pillBorder: color-mix(in srgb, #1e63ff 50%, transparent);
+  --underline: linear-gradient(90deg, #1e63ff, #e0192d);
 }
 
 /* Oct: Halloween (orange/black) */
+html[data-theme="halloween"]{
 html[data-theme="halloween"]{
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
@@ -145,11 +178,17 @@ html[data-theme="halloween"]{
   --accent: #ff8a00;
   --accent2: #ff4d00;
   --accentText: #0b0d10;
-
   --focusRing: rgba(255,138,0,.24);
-}
 
+  --brand1: #ff8a00;
+  --brand2: #ff4d00;
+  --link: #ff8a00;
+  --pillBg: color-mix(in srgb, #ff8a00 14%, transparent);
+  --pillBorder: color-mix(in srgb, #ff8a00 50%, transparent);
+  --underline: linear-gradient(90deg, #ff8a00, #ff4d00);
+}
 /* Nov: Thanksgiving (brown/orange) */
+html[data-theme="thanksgiving"]{
 html[data-theme="thanksgiving"]{
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
@@ -162,11 +201,18 @@ html[data-theme="thanksgiving"]{
   --accent: #d98c2b;
   --accent2: #8a4b1c;
   --accentText: #0b0d10;
-
   --focusRing: rgba(217,140,43,.22);
+
+  --brand1: #d98c2b;
+  --brand2: #8a4b1c;
+  --link: #d98c2b;
+  --pillBg: color-mix(in srgb, #d98c2b 14%, transparent);
+  --pillBorder: color-mix(in srgb, #d98c2b 50%, transparent);
+  --underline: linear-gradient(90deg, #d98c2b, #8a4b1c);
 }
 
 /* Dec: Christmas (red/green) */
+html[data-theme="christmas"]{
 html[data-theme="christmas"]{
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
@@ -179,6 +225,12 @@ html[data-theme="christmas"]{
   --accent: #20c05c;
   --accent2: #e0192d;
   --accentText: #0b0d10;
-
   --focusRing: rgba(32,192,92,.22);
+
+  --brand1: #20c05c;
+  --brand2: #e0192d;
+  --link: #20c05c;
+  --pillBg: color-mix(in srgb, #20c05c 14%, transparent);
+  --pillBorder: color-mix(in srgb, #20c05c 50%, transparent);
+  --underline: linear-gradient(90deg, #20c05c, #e0192d);
 }
