@@ -226,8 +226,15 @@ const latest = feed.slice(0, 8);
           <div class="promoDesc">Reach locals with sponsored stories, display placements, and event promotion.</div>
         </div>
         <div class="promoActions">
-          <a class="btn" href="/daytona/advertise/">Branded Content + Display</a>
-          <a class="btn btnGhost" href="/daytona/advertise/">Events</a>
+         .btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 40px; padding: 0 12px; border-radius: 12px;
+  border: 1px solid var(--pillBorder);
+  background: var(--pillBg);
+  color: var(--text);
+  font-weight: 900; text-decoration: none;
+}
+.btn:hover { background: color-mix(in srgb, var(--brand1) 22%, transparent); }
         </div>
       </div>
 
@@ -268,8 +275,7 @@ const latest = feed.slice(0, 8);
       --t3: rgba(232,237,244,.70);
       --t4: rgba(232,237,244,.58);
 
-      --yellow: #ffd24a;
-      --yellowDeep: #ffc400;
+     .viewAllLink { color: var(--link); font-weight: 800; font-size: 13px; text-decoration: none; opacity: .95; }
 
       --glow: 0 0 0 1px rgba(255,210,74,.18), 0 10px 26px rgba(0,0,0,.30);
       --glowSoft: 0 0 0 1px rgba(255,210,74,.22), 0 18px 44px rgba(0,0,0,.45);
