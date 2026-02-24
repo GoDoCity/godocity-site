@@ -44,10 +44,6 @@ function excerpt(post) {
   return post?.data?.description ?? "";
 }
 
-/**
- * IMPORTANT: keep thumbnails working exactly as-is
- * (do not use .src, this is a STRING path)
- */
 function heroImage(post) {
   const v =
     post?.data?.heroImage ??
@@ -59,14 +55,12 @@ function heroImage(post) {
   return typeof v === "string" ? v.trim() : "";
 }
 
-/** Data (keep logic stable) */
+/** Data */
 const all = await getCollection("posts");
 const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 
 const hero = posts.find(isFeatured) ?? posts[0] ?? null;
 const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
-
-// Split for “Featured + Latest” feel (no logic change to content source; just presentation)
 const latest = feed.slice(0, 8);
 ---
 
@@ -74,39 +68,37 @@ const latest = feed.slice(0, 8);
   <section class="section">
     <div class="container homeWrap">
 
-     {/* Newsletter / Email Signup (Nooga-style) */}
-     <div class="newsletterBand">
-  <div class="newsletterInner">
+      {/* Newsletter Band */}
+      <div class="newsletterBand">
+        <div class="newsletterInner">
 
-    <!-- LEFT IMAGE (city-specific) -->
-    <div class="nlArt" aria-hidden="true">
-      <img
-        class="nlArtImg"
-        src={`/images/cities/${Astro.props.cityBase ?? "daytona"}/newsletter.png`}
-        alt=""
-        loading="lazy"
-        decoding="async"
-        onerror="this.onerror=null;this.src='/images/cities/default/newsletter.png';"
-      />
-    </div>
+          <div class="nlArt" aria-hidden="true">
+            <img
+              class="nlArtImg"
+              src="/images/cities/daytona/newsletter.png"
+              alt=""
+              loading="lazy"
+              decoding="async"
+              onerror="this.onerror=null;this.src='/images/cities/default/newsletter.png';"
+            />
+          </div>
 
-    <!-- RIGHT CONTENT -->
-    <div class="nlContent">
-      <div class="newsletterCopy">
-        <div class="nlHeadline">Good News Daytona</div>
-        <div class="nlSubhead">Daytona Pulse: your FREE local insider.</div>
+          <div class="nlContent">
+            <div class="newsletterCopy">
+              <div class="nlHeadline">Good News Daytona</div>
+              <div class="nlSubhead">Daytona Pulse: your FREE local insider.</div>
+            </div>
+
+            <form class="nlForm" action="/daytona/subscribe/" method="get">
+              <input class="nlInput" type="email" name="email" placeholder="Enter your email address" />
+              <button class="nlButton" type="submit">SIGN UP, IT'S FREE!</button>
+            </form>
+
+            <div class="nlFine">Sent straight to your inbox, 100% FREE! Unsubscribe anytime.</div>
+          </div>
+
+        </div>
       </div>
-
-      <form class="nlForm" action="/daytona/subscribe/" method="get">
-        <input class="nlInput" type="email" name="email" placeholder="Enter your email address" />
-        <button class="nlButton" type="submit">SIGN UP, IT’S FREE!</button>
-      </form>
-
-      <div class="nlFine">Sent straight to your inbox, 100% FREE! Unsubscribe anytime.</div>
-    </div>
-
-  </div>
-</div>
 
       <div class="homeGrid">
 
@@ -121,7 +113,6 @@ const latest = feed.slice(0, 8);
                   <div class="heroImg heroImgFallback" aria-hidden="true"></div>
                 )}
               </div>
-
               <div class="heroCopy">
                 <div class="heroTitle">{hero.data.title ?? hero.slug}</div>
                 {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
@@ -145,7 +136,7 @@ const latest = feed.slice(0, 8);
             </a>
             <a class="catCard" href="/daytona/events/">
               <div class="catTitle">Events</div>
-              <div class="catDesc">What’s happening this week.</div>
+              <div class="catDesc">What's happening this week.</div>
             </a>
           </div>
 
@@ -164,7 +155,6 @@ const latest = feed.slice(0, 8);
                     <div class="latestImg latestImgFallback" aria-hidden="true"></div>
                   )}
                 </div>
-
                 <div class="latestBody">
                   <div class="latestTitle">{p.data.title ?? p.slug}</div>
                   {excerpt(p) && <div class="latestDesc">{excerpt(p)}</div>}
@@ -194,7 +184,6 @@ const latest = feed.slice(0, 8);
                   <div class="eventPlace">Daytona Beach</div>
                 </div>
               </div>
-
               <div class="eventRow">
                 <div class="eventDate">
                   <div class="eventDow">SUN</div>
@@ -226,15 +215,8 @@ const latest = feed.slice(0, 8);
           <div class="promoDesc">Reach locals with sponsored stories, display placements, and event promotion.</div>
         </div>
         <div class="promoActions">
-         .btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  height: 40px; padding: 0 12px; border-radius: 12px;
-  border: 1px solid var(--pillBorder);
-  background: var(--pillBg);
-  color: var(--text);
-  font-weight: 900; text-decoration: none;
-}
-.btn:hover { background: color-mix(in srgb, var(--brand1) 22%, transparent); }
+          <a class="btn" href="/daytona/advertise/">Branded Content + Display</a>
+          <a class="btn btnGhost" href="/daytona/advertise/">Events</a>
         </div>
       </div>
 
@@ -255,183 +237,157 @@ const latest = feed.slice(0, 8);
       --maxMain: 860px;
       --rail: 320px;
       --gridGap: clamp(18px, 2vw, 26px);
-
-      /* “~4.3cm inset feel” translated to responsive padding */
       --inset: clamp(18px, 3.4vw, 52px);
-
-      /* tiny rail nudge so events aligns with newsletter inset edge */
       --railNudge: 19px;
-
       --cardRadius: 16px;
       --cardRadiusSm: 14px;
       --cardBorder: rgba(255,255,255,.10);
       --cardBorderSoft: rgba(255,255,255,.08);
       --cardBg: rgba(255,255,255,.03);
-
       --shadowSoft: 0 8px 18px rgba(0,0,0,.22);
-
       --t1: #e8edf4;
       --t2: rgba(232,237,244,.86);
       --t3: rgba(232,237,244,.70);
       --t4: rgba(232,237,244,.58);
-
-     .viewAllLink { color: var(--link); font-weight: 800; font-size: 13px; text-decoration: none; opacity: .95; }
-
-      --glow: 0 0 0 1px rgba(255,210,74,.18), 0 10px 26px rgba(0,0,0,.30);
-      --glowSoft: 0 0 0 1px rgba(255,210,74,.22), 0 18px 44px rgba(0,0,0,.45);
+      --glow: 0 0 0 1px color-mix(in srgb, var(--brand1) 18%, transparent), 0 10px 26px rgba(0,0,0,.30);
+      --glowSoft: 0 0 0 1px color-mix(in srgb, var(--brand1) 22%, transparent), 0 18px 44px rgba(0,0,0,.45);
     }
 
-   /* Newsletter band */
-.newsletterBand {
-  border: 1px solid rgba(255,210,74,.68);
-  background:
-    radial-gradient(900px 420px at 18% 0%, rgba(255,210,74,.34), rgba(255,210,74,0) 62%),
-    rgba(255,210,74,.22);
-  box-shadow: var(--glowSoft);
-  border-radius: var(--cardRadius);
-  overflow: hidden;
-  margin: 10px 0 18px;
-}
+    /* ── Newsletter band ── */
+    .newsletterBand {
+      border: 1px solid color-mix(in srgb, var(--brand1) 68%, transparent);
+      background:
+        radial-gradient(900px 420px at 18% 0%, color-mix(in srgb, var(--brand1) 34%, transparent), transparent 62%),
+        color-mix(in srgb, var(--brand1) 22%, transparent);
+      box-shadow: var(--glowSoft);
+      border-radius: var(--cardRadius);
+      overflow: hidden;
+      margin: 10px 0 18px;
+    }
 
-/* Layout: image left, content right */
-.newsletterInner{
-  padding: clamp(16px, 2vw, 22px) var(--inset);
-  display: grid;
-  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-  gap: clamp(14px, 2vw, 22px);
-  align-items: center;
-}
+    .newsletterInner {
+      padding: clamp(16px, 2vw, 22px) var(--inset);
+      display: grid;
+      grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+      gap: clamp(14px, 2vw, 22px);
+      align-items: center;
+    }
 
-.nlArt{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 0;
-}
+    .nlArt {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+    }
 
-.nlArtImg{
-  width: 100%;
-  max-width: 280px;
-  height: auto;
-  display: block;
-  border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.10);
-  box-shadow: 0 10px 26px rgba(0,0,0,.25);
-}
+    .nlArtImg {
+      width: 100%;
+      max-width: 280px;
+      height: auto;
+      display: block;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 26px rgba(0,0,0,.25);
+    }
 
-.nlContent{
-  min-width: 0;
-  display: grid;
-  gap: 10px;
-  align-content: center;
-  justify-items: start;
-}
+    .nlContent {
+      min-width: 0;
+      display: grid;
+      gap: 10px;
+      align-content: center;
+      justify-items: start;
+    }
 
-.nlHeadline {
-  color: rgba(232,237,244,.96);
-  font-weight: 950;
-  letter-spacing: -0.3px;
-  font-size: clamp(22px, 2.2vw, 28px);
-  line-height: 1.05;
-}
+    .nlHeadline {
+      color: var(--text);
+      font-weight: 950;
+      letter-spacing: -0.3px;
+      font-size: clamp(22px, 2.2vw, 28px);
+      line-height: 1.05;
+    }
 
-.nlSubhead {
-  margin-top: 6px;
-  color: rgba(232,237,244,.90);
-  font-size: 15.5px;
-  line-height: 1.35;
-  font-weight: 700;
-}
+    .nlSubhead {
+      margin-top: 6px;
+      color: var(--text);
+      font-size: 15.5px;
+      line-height: 1.35;
+      font-weight: 700;
+      opacity: .90;
+    }
 
-.nlForm {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-  width: 100%;
-  min-width: 0;
-  margin-top: 6px;
-}
+    .nlForm {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+      margin-top: 6px;
+    }
 
-.nlInput {
-  width: 100%;
-  height: 44px;
-  max-width: 380px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.20);
-  background: rgba(11,13,16,.78);
-  color: rgba(232,237,244,.96);
-  padding: 0 14px;
-  outline: none;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-}
-.nlInput::placeholder { color: rgba(232,237,244,.70); }
-.nlInput:focus {
-  border-color: rgba(255,210,74,.84);
-  box-shadow: 0 0 0 4px rgba(255,210,74,.22);
-}
+    .nlInput {
+      width: 100%;
+      height: 44px;
+      max-width: 380px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(11,13,16,.78);
+      color: rgba(232,237,244,.96);
+      padding: 0 14px;
+      outline: none;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
+    }
+    .nlInput::placeholder { color: rgba(232,237,244,.70); }
+    .nlInput:focus {
+      border-color: color-mix(in srgb, var(--brand1) 84%, transparent);
+      box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand1) 22%, transparent);
+    }
 
-.nlButton {
-  height: 44px;
-  border-radius: 12px;
-  border: 1px solid rgba(0,0,0,.55);
-  background: linear-gradient(180deg, var(--brand1), var(--brand2));
-  color: var(--accentText);
-  font-weight: 950;
-  letter-spacing: .02em;
-  cursor: pointer;
-  box-shadow: 0 14px 22px rgba(0,0,0,.22);
-  padding: 0 16px;
-  width: 100%;
-  white-space: nowrap;
-}
+    .nlButton {
+      height: 44px;
+      border-radius: 12px;
+      border: 1px solid rgba(0,0,0,.55);
+      background: linear-gradient(180deg, var(--brand1), var(--brand2));
+      color: var(--accentText);
+      font-weight: 950;
+      letter-spacing: .02em;
+      cursor: pointer;
+      box-shadow: 0 14px 22px rgba(0,0,0,.22);
+      padding: 0 16px;
+      width: 100%;
+      white-space: nowrap;
+    }
+    .nlButton:hover { filter: brightness(.96); }
 
-.nlFine {
-  color: rgba(232,237,244,.74);
-  font-size: 13.5px;
-  line-height: 1.35;
-  margin-top: 2px;
-}
+    .nlFine {
+      color: var(--muted);
+      font-size: 13.5px;
+      line-height: 1.35;
+      margin-top: 2px;
+    }
 
-/* Desktop: input + button in one row */
-@media (min-width: 900px) {
-  .nlForm {
-    grid-template-columns: minmax(260px, 380px) auto;
-    align-items: center;
-  }
-  .nlInput { max-width: none; }
-  .nlButton { width: auto; }
-}
+    @media (min-width: 900px) {
+      .nlForm {
+        grid-template-columns: minmax(260px, 380px) auto;
+        align-items: center;
+      }
+      .nlInput { max-width: none; }
+      .nlButton { width: auto; }
+    }
 
-/* Mobile: stack + center + prevent overflow */
-@media (max-width: 720px){
-  .newsletterInner{
-    grid-template-columns: 1fr;
-    gap: 12px;
-    padding: 16px 14px;
-    text-align: center;
-  }
+    @media (max-width: 720px) {
+      .newsletterInner {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 16px 14px;
+        text-align: center;
+      }
+      .nlContent { justify-items: center; }
+      .nlArtImg { max-width: 240px; margin: 0 auto; }
+      .nlForm { width: 100%; max-width: 520px; margin: 0 auto; }
+      .nlInput, .nlButton { width: 100%; }
+    }
 
-  .nlContent{
-    justify-items: center;
-  }
-
-  .nlArtImg{
-    max-width: 240px;
-    margin: 0 auto;
-  }
-
-  .nlForm{
-    width: 100%;
-    max-width: 520px;
-    margin: 0 auto;
-  }
-
-  .nlInput,
-  .nlButton{
-    width: 100%;
-  }
-}
-
+    /* ── Home grid ── */
     .homeGrid {
       display: grid;
       grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
@@ -451,6 +407,7 @@ const latest = feed.slice(0, 8);
       .homeRail { order: 2; transform: none; }
     }
 
+    /* ── Hero feature ── */
     .heroFeature {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -462,6 +419,11 @@ const latest = feed.slice(0, 8);
       overflow: hidden;
       box-shadow: var(--shadowSoft);
       margin-bottom: 16px;
+      transition: border-color 160ms ease, box-shadow 160ms ease;
+    }
+    .heroFeature:hover {
+      border-color: color-mix(in srgb, var(--brand1) 40%, transparent);
+      box-shadow: var(--glow);
     }
     @media (max-width: 740px) { .heroFeature { grid-template-columns: 1fr; } }
     .heroMedia { background: rgba(255,255,255,.02); }
@@ -480,13 +442,16 @@ const latest = feed.slice(0, 8);
     }
     .heroMeta { margin-top: 12px; color: var(--t4); font-size: 13px; }
 
+    /* ── Section headers ── */
     .sectionHeader { margin: 6px 0 10px; }
     .sectionTitle { font-weight: 950; font-size: 14px; color: var(--t3); text-transform: uppercase; letter-spacing: .12em; }
     .feedHeader { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 16px 0 10px; }
-    .viewAllLink { color: rgba(255,210,74,.92); font-weight: 800; font-size: 13px; text-decoration: none; opacity: .95; }
+
+    .viewAllLink { color: var(--link); font-weight: 800; font-size: 13px; text-decoration: none; opacity: .95; }
     .viewAllLink:hover { opacity: 1; text-decoration: underline; }
     .viewAllLinkSmall { font-size: 12px; }
 
+    /* ── Category cards ── */
     .catGrid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 8px; }
     @media (max-width: 740px) { .catGrid { grid-template-columns: 1fr; } }
     .catCard {
@@ -496,117 +461,85 @@ const latest = feed.slice(0, 8);
       border-radius: var(--cardRadius);
       padding: 14px 14px 13px;
       box-shadow: var(--shadowSoft);
+      transition: border-color 160ms ease;
     }
+    .catCard:hover { border-color: color-mix(in srgb, var(--brand1) 40%, transparent); }
     .catTitle { font-weight: 950; font-size: 16px; color: var(--t1); }
     .catDesc { margin-top: 6px; color: var(--t4); line-height: 1.25; font-size: 13px; }
 
-   /* =========================
-   LATEST — Nooga-style list
-   ========================= */
+    /* ── Latest list ── */
+    .latestGrid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0;
+      border-top: 1px solid rgba(255,255,255,.10);
+    }
 
-.latestGrid{
-  display: grid !important;
-  grid-template-columns: 1fr !important;
-  gap: 0 !important;
-  border-top: 1px solid rgba(255,255,255,.10);
-}
+    .latestCard {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 14px;
+      align-items: start;
+      padding: 16px 0;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      background: transparent;
+    }
+    .latestCard:hover { background: rgba(255,255,255,.02); }
 
-/* Row item */
-.latestCard{
-  display: grid;
-  grid-template-columns: 96px 1fr;   /* thumbnail LEFT */
-  gap: 14px;
-  align-items: start;
+    .latestMedia {
+      width: 96px;
+      height: 72px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+    }
+    .latestImg { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  padding: 16px 0;
-  text-decoration: none;
+    .latestBody { padding: 0; min-width: 0; display: grid; align-content: start; }
+    .latestTitle {
+      font-weight: 950; font-size: 20px; line-height: 1.12;
+      letter-spacing: -0.2px; color: var(--t1);
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .latestDesc {
+      margin-top: 8px; color: var(--t3); font-size: 14.5px; line-height: 1.35;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .latestMeta { margin-top: 10px; color: var(--t4); font-size: 13px; }
 
-  border: 0;
-  border-bottom: 1px solid rgba(255,255,255,.10);
-  background: transparent;
-  border-radius: 0;
-  box-shadow: none;
-  transform: none;
-}
+    @media (max-width: 420px) {
+      .latestCard { grid-template-columns: 84px 1fr; }
+      .latestMedia { width: 84px; height: 64px; }
+      .latestTitle { font-size: 19px; }
+    }
 
-.latestCard:hover{
-  background: rgba(255,255,255,.02);
-}
-
-/* Right-side thumbnail */
-.latestMedia{
-  width: 96px;
-  height: 72px;
-  min-height: 0;
-  aspect-ratio: auto;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.03);
-}
-
-.latestImg{
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-/* Left-side text block */
-.latestBody{
-  padding: 0;
-  min-width: 0;
-  display: grid;
-  align-content: start;
-}
-
-/* Title + description scale like Nooga */
-.latestTitle{
-  font-weight: 950;
-  font-size: 20px;
-  line-height: 1.12;
-  letter-spacing: -0.2px;
-  color: var(--t1);
-
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.latestDesc{
-  margin-top: 8px;
-  color: var(--t3);
-  font-size: 14.5px;
-  line-height: 1.35;
-
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.latestMeta{
-  margin-top: 10px;
-  color: var(--t4);
-  font-size: 13px;
-}
-
-/* Make the thumbnail a little smaller on very small phones */
-@media (max-width: 420px){
-  .latestCard{ grid-template-columns: 84px 1fr; }
-  .latestMedia{ width: 84px; height: 64px; }
-}
-  .latestTitle{ font-size: 19px; }
-}
-    .moduleCard { border: 1px solid var(--cardBorder); background: var(--cardBg); border-radius: var(--cardRadius); padding: 14px; box-shadow: var(--shadowSoft); }
+    /* ── Rail / sidebar ── */
+    .moduleCard {
+      border: 1px solid var(--cardBorder);
+      background: var(--cardBg);
+      border-radius: var(--cardRadius);
+      padding: 14px;
+      box-shadow: var(--shadowSoft);
+    }
     .moduleHead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px; }
     .moduleTitle { font-weight: 950; color: var(--t1); letter-spacing: -0.1px; }
     .moduleTitleSmall { font-size: 13px; margin-bottom: 8px; opacity: .9; }
 
     .eventsList { display: grid; gap: 10px; }
-    .eventRow { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center; padding: 10px 10px; border-radius: 14px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.02); }
-    .eventDate { width: 44px; height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.18); display: grid; place-items: center; line-height: 1.05; }
+    .eventRow {
+      display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center;
+      padding: 10px; border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.02);
+    }
+    .eventDate {
+      width: 44px; height: 44px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.18);
+      display: grid; place-items: center; line-height: 1.05;
+    }
     .eventDow { font-size: 11px; color: var(--t4); font-weight: 900; letter-spacing: .08em; }
     .eventDay { font-size: 16px; color: var(--t1); font-weight: 950; margin-top: 2px; }
     .eventName { font-weight: 900; color: var(--t1); line-height: 1.15; }
@@ -614,16 +547,42 @@ const latest = feed.slice(0, 8);
 
     .railDivider { height: 1px; background: rgba(255,255,255,.08); margin: 14px 0 12px; }
     .railLinks { display: grid; gap: 8px; }
-    .railLink { color: rgba(232,237,244,.78); text-decoration: none; font-size: 13px; }
-    .railLink:hover { color: rgba(255,210,74,.92); }
+    .railLink { color: var(--muted); text-decoration: none; font-size: 13px; }
+    .railLink:hover { color: var(--link); }
 
-    .promoBand { margin: 18px 0 0; border: 1px solid var(--cardBorder); background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02)); border-radius: var(--cardRadius); padding: 16px; display: flex; justify-content: space-between; gap: 14px; align-items: center; box-shadow: var(--shadowSoft); flex-wrap: wrap; }
+    /* ── Promo band ── */
+    .promoBand {
+      margin: 18px 0 0;
+      border: 1px solid var(--cardBorder);
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border-radius: var(--cardRadius);
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+      align-items: center;
+      box-shadow: var(--shadowSoft);
+      flex-wrap: wrap;
+    }
     .promoTitle { font-weight: 950; font-size: 18px; color: var(--t1); }
     .promoDesc { margin-top: 6px; color: var(--t3); line-height: 1.3; }
     .promoActions { display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; height: 40px; padding: 0 12px; border-radius: 12px; border: 1px solid rgba(255,210,74,.38); background: rgba(255,210,74,.14); color: var(--t1); font-weight: 900; text-decoration: none; }
-    .btn:hover { background: rgba(255,210,74,.18); }
-    .btnGhost { border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.03); }
-    .btnGhost:hover { background: rgba(255,255,255,.05); }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      height: 40px; padding: 0 16px; border-radius: 12px;
+      border: 1px solid var(--pillBorder);
+      background: var(--pillBg);
+      color: var(--text);
+      font-weight: 900; text-decoration: none;
+      transition: background 160ms ease, border-color 160ms ease;
+    }
+    .btn:hover { background: color-mix(in srgb, var(--brand1) 22%, transparent); }
+
+    .btnGhost {
+      border-color: rgba(255,255,255,.14);
+      background: rgba(255,255,255,.03);
+    }
+    .btnGhost:hover { background: rgba(255,255,255,.06); }
   </style>
 </Base>
