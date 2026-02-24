@@ -7,7 +7,6 @@ const urlTheme = Astro.url?.searchParams?.get("theme")?.trim() || "";
 
 const m = new Date().getMonth() + 1;
 const monthThemeMap = {
-  2: "valentine",
   7: "patriotic",
   10: "halloween",
   11: "thanksgiving",
@@ -35,10 +34,15 @@ const { title, subtitle, cityBase } = Astro.props;
   (function() {
     var p = new URLSearchParams(window.location.search).get("theme");
     if (p) {
-      localStorage.removeItem("godoTheme");
+      localStorage.setItem("godoTheme", p);
       document.documentElement.setAttribute("data-theme", p);
-    }
+    } else {
+      var saved = localStorage.getItem("godoTheme");
+      if (saved) {
+        document.documentElement.setAttribute("data-theme", saved);
+      }
   })();
+</script>
 </script>
   </head>
   <body class={cityBase ? `city city-${cityBase}` : "city"}>
