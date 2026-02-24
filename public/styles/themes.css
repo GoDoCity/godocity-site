@@ -1,8 +1,26 @@
-/* src/styles/themes.css */
+/* public/styles/themes.css */
 
-/* 1) Default tokens (fallback) */
-:root{
-  html[data-theme="dark-yellow"]{
+:root {
+  --bg: #0b0d10;
+  --text: rgba(232,237,244,.96);
+  --muted: rgba(232,237,244,.80);
+  --faint: rgba(232,237,244,.58);
+  --border: rgba(255,255,255,.12);
+  --surface: rgba(255,255,255,.03);
+  --surface2: rgba(255,255,255,.05);
+  --accent: #ffd24a;
+  --accent2: #ffc400;
+  --accentText: #0b0d10;
+  --brand1: #ffd24a;
+  --brand2: #ffc400;
+  --link: #ffd24a;
+  --pillBg: color-mix(in srgb, #ffd24a 14%, transparent);
+  --pillBorder: color-mix(in srgb, #ffd24a 55%, transparent);
+  --underline: linear-gradient(90deg, #ffd24a, #ffc400);
+  --focusRing: rgba(255,210,74,.28);
+}
+
+html[data-theme="dark-yellow"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
@@ -10,12 +28,10 @@
   --muted: rgba(232,237,244,.80);
   --faint: rgba(232,237,244,.58);
   --border: rgba(255,255,255,.12);
-
   --accent: #ffd24a;
   --accent2: #ffc400;
   --accentText: #0b0d10;
   --focusRing: rgba(255,210,74,.28);
-
   --brand1: #ffd24a;
   --brand2: #ffc400;
   --link: #ffd24a;
@@ -24,10 +40,7 @@
   --underline: linear-gradient(90deg, #ffd24a, #ffc400);
 }
 
-/* 2) Theme presets (set by <html data-theme="..."> ) */
-
-/* Dark + Yellow (current default vibe) */
-html[data-theme="dark-yellow"]{
+html[data-theme="dark-red"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
@@ -35,17 +48,19 @@ html[data-theme="dark-yellow"]{
   --muted: rgba(232,237,244,.80);
   --faint: rgba(232,237,244,.58);
   --border: rgba(255,255,255,.12);
-
-  --accent: #ffd24a;
-  --accent2: #ffc400;
-  --accentText: #0b0d10;
-
-  --focusRing: rgba(255,210,74,.28);
+  --accent: #e0192d;
+  --accent2: #9f0f1c;
+  --accentText: #ffffff;
+  --focusRing: rgba(224,25,45,.20);
+  --brand1: #e0192d;
+  --brand2: #9f0f1c;
+  --link: #e0192d;
+  --pillBg: color-mix(in srgb, #e0192d 14%, transparent);
+  --pillBorder: color-mix(in srgb, #e0192d 55%, transparent);
+  --underline: linear-gradient(90deg, #e0192d, #9f0f1c);
 }
 
-/* Light + Black (clean high readability) */
-html[data-theme="light-black"]{
- html[data-theme="light-black"]{
+html[data-theme="light-black"] {
   --bg: #ffffff;
   --surface: rgba(0,0,0,.04);
   --surface2: rgba(0,0,0,.06);
@@ -53,12 +68,10 @@ html[data-theme="light-black"]{
   --muted: rgba(12,14,18,.72);
   --faint: rgba(12,14,18,.55);
   --border: rgba(0,0,0,.14);
-
   --accent: #111111;
   --accent2: #444444;
   --accentText: #ffffff;
   --focusRing: rgba(0,0,0,.18);
-
   --brand1: #111111;
   --brand2: #444444;
   --link: #111111;
@@ -67,9 +80,7 @@ html[data-theme="light-black"]{
   --underline: linear-gradient(90deg, #111111, #444444);
 }
 
-/* Light + Blue (test-market option) */
-html[data-theme="light-blue"]{
- html[data-theme="light-blue"]{
+html[data-theme="light-blue"] {
   --bg: #ffffff;
   --surface: rgba(0,0,0,.04);
   --surface2: rgba(0,0,0,.06);
@@ -77,12 +88,10 @@ html[data-theme="light-blue"]{
   --muted: rgba(12,14,18,.72);
   --faint: rgba(12,14,18,.55);
   --border: rgba(0,0,0,.14);
-
   --accent: #1e63ff;
   --accent2: #1447b8;
   --accentText: #ffffff;
   --focusRing: rgba(30,99,255,.22);
-
   --brand1: #1e63ff;
   --brand2: #1447b8;
   --link: #1e63ff;
@@ -91,9 +100,7 @@ html[data-theme="light-blue"]{
   --underline: linear-gradient(90deg, #1e63ff, #1447b8);
 }
 
-/* Light + Red (test-market option) */
-html[data-theme="light-red"]{
-html[data-theme="light-red"]{
+html[data-theme="light-red"] {
   --bg: #ffffff;
   --surface: rgba(0,0,0,.04);
   --surface2: rgba(0,0,0,.06);
@@ -101,12 +108,10 @@ html[data-theme="light-red"]{
   --muted: rgba(12,14,18,.72);
   --faint: rgba(12,14,18,.55);
   --border: rgba(0,0,0,.14);
-
   --accent: #e0192d;
   --accent2: #9f0f1c;
   --accentText: #ffffff;
   --focusRing: rgba(224,25,45,.20);
-
   --brand1: #e0192d;
   --brand2: #9f0f1c;
   --link: #e0192d;
@@ -114,33 +119,8 @@ html[data-theme="light-red"]{
   --pillBorder: color-mix(in srgb, #e0192d 45%, transparent);
   --underline: linear-gradient(90deg, #e0192d, #9f0f1c);
 }
-  
-html[data-theme="dark-red"]{
-  --bg: #0b0d10;
-  --surface: rgba(255,255,255,.03);
-  --surface2: rgba(255,255,255,.05);
-  --text: rgba(232,237,244,.96);
-  --muted: rgba(232,237,244,.80);
-  --faint: rgba(232,237,244,.58);
-  --border: rgba(255,255,255,.12);
 
-  --accent: #e0192d;
-  --accent2: #9f0f1c;
-  --accentText: #ffffff;
-  --focusRing: rgba(224,25,45,.20);
-
-  --brand1: #e0192d;
-  --brand2: #9f0f1c;
-  --link: #e0192d;
-  --pillBg: color-mix(in srgb, #e0192d 14%, transparent);
-  --pillBorder: color-mix(in srgb, #e0192d 55%, transparent);
-  --underline: linear-gradient(90deg, #e0192d, #9f0f1c);
-}
-/* Holiday themes (MONTH-LONG) */
-
-/* Feb: Valentine (red/pink) */
-html[data-theme="valentine"]{
-html[data-theme="valentine"]{
+html[data-theme="valentine"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.035);
   --surface2: rgba(255,255,255,.06);
@@ -148,12 +128,10 @@ html[data-theme="valentine"]{
   --muted: rgba(232,237,244,.80);
   --faint: rgba(232,237,244,.58);
   --border: rgba(255,255,255,.12);
-
   --accent: #ff4d88;
   --accent2: #e0192d;
-  --accentText: #0b0d10;
+  --accentText: #ffffff;
   --focusRing: rgba(255,77,136,.26);
-
   --brand1: #ff4d88;
   --brand2: #e0192d;
   --link: #ff4d88;
@@ -161,9 +139,8 @@ html[data-theme="valentine"]{
   --pillBorder: color-mix(in srgb, #ff4d88 50%, transparent);
   --underline: linear-gradient(90deg, #ff4d88, #e0192d);
 }
-/* Jul: 4th of July (red/blue) */
-html[data-theme="patriotic"]{
-html[data-theme="patriotic"]{
+
+html[data-theme="patriotic"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
@@ -171,12 +148,10 @@ html[data-theme="patriotic"]{
   --muted: rgba(232,237,244,.80);
   --faint: rgba(232,237,244,.58);
   --border: rgba(255,255,255,.12);
-
   --accent: #1e63ff;
   --accent2: #e0192d;
   --accentText: #ffffff;
   --focusRing: rgba(30,99,255,.22);
-
   --brand1: #1e63ff;
   --brand2: #e0192d;
   --link: #1e63ff;
@@ -185,9 +160,7 @@ html[data-theme="patriotic"]{
   --underline: linear-gradient(90deg, #1e63ff, #e0192d);
 }
 
-/* Oct: Halloween (orange/black) */
-html[data-theme="halloween"]{
-html[data-theme="halloween"]{
+html[data-theme="halloween"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
@@ -195,12 +168,10 @@ html[data-theme="halloween"]{
   --muted: rgba(232,237,244,.80);
   --faint: rgba(232,237,244,.58);
   --border: rgba(255,255,255,.12);
-
   --accent: #ff8a00;
   --accent2: #ff4d00;
   --accentText: #0b0d10;
   --focusRing: rgba(255,138,0,.24);
-
   --brand1: #ff8a00;
   --brand2: #ff4d00;
   --link: #ff8a00;
@@ -208,9 +179,8 @@ html[data-theme="halloween"]{
   --pillBorder: color-mix(in srgb, #ff8a00 50%, transparent);
   --underline: linear-gradient(90deg, #ff8a00, #ff4d00);
 }
-/* Nov: Thanksgiving (brown/orange) */
-html[data-theme="thanksgiving"]{
-html[data-theme="thanksgiving"]{
+
+html[data-theme="thanksgiving"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
@@ -218,12 +188,10 @@ html[data-theme="thanksgiving"]{
   --muted: rgba(232,237,244,.80);
   --faint: rgba(232,237,244,.58);
   --border: rgba(255,255,255,.12);
-
   --accent: #d98c2b;
   --accent2: #8a4b1c;
   --accentText: #0b0d10;
   --focusRing: rgba(217,140,43,.22);
-
   --brand1: #d98c2b;
   --brand2: #8a4b1c;
   --link: #d98c2b;
@@ -232,9 +200,7 @@ html[data-theme="thanksgiving"]{
   --underline: linear-gradient(90deg, #d98c2b, #8a4b1c);
 }
 
-/* Dec: Christmas (red/green) */
-html[data-theme="christmas"]{
-html[data-theme="christmas"]{
+html[data-theme="christmas"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
@@ -242,12 +208,10 @@ html[data-theme="christmas"]{
   --muted: rgba(232,237,244,.80);
   --faint: rgba(232,237,244,.58);
   --border: rgba(255,255,255,.12);
-
   --accent: #20c05c;
   --accent2: #e0192d;
   --accentText: #0b0d10;
   --focusRing: rgba(32,192,92,.22);
-
   --brand1: #20c05c;
   --brand2: #e0192d;
   --link: #20c05c;
