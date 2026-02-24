@@ -20,569 +20,614 @@ function isFeatured(post) {
 
 /** Dates */
 function getPostDate(post) {
-  return (
-    post?.data?.pubDate ??
-    post?.data?.date ??
-    post?.data?.published ??
-    post?.data?.updated ??
-    null
-  );
+  return post?.data?.pubDate ?? post?.data?.date ?? post?.data?.published ?? post?.data?.updated ?? null;
 }
-
 function sortNewestFirst(a, b) {
-  const da = new Date(getPostDate(a) ?? 0).getTime();
-  const db = new Date(getPostDate(b) ?? 0).getTime();
-  return db - da;
+  return new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime();
 }
-
 function dateText(post) {
   const d = getPostDate(post);
-  return d ? new Date(d).toLocaleDateString("en-US") : "";
+  return d ? new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "";
 }
-
-function excerpt(post) {
-  return post?.data?.description ?? "";
-}
-
+function excerpt(post) { return post?.data?.description ?? ""; }
 function heroImage(post) {
-  const v =
-    post?.data?.heroImage ??
-    post?.data?.heroimage ??
-    post?.data?.image ??
-    post?.data?.thumbnail ??
-    post?.data?.cover ??
-    "";
+  const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.thumbnail ?? post?.data?.cover ?? "";
   return typeof v === "string" ? v.trim() : "";
+}
+function primaryTag(post) {
+  const tags = post?.data?.tags;
+  if (Array.isArray(tags) && tags.length) return String(tags[0]).trim();
+  if (typeof post?.data?.topic === "string") return post.data.topic.trim();
+  if (typeof post?.data?.category === "string") return post.data.category.trim();
+  return "";
 }
 
 /** Data */
 const all = await getCollection("posts");
 const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
-
 const hero = posts.find(isFeatured) ?? posts[0] ?? null;
 const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
-const latest = feed.slice(0, 8);
+const latest = feed.slice(0, 10);
+
+/** Topics */
+const topics = [
+  { label: "Business",          slug: "biz",             img: "/images/topics/business.jpg" },
+  { label: "City",              slug: "city",             img: "/images/topics/city.jpg" },
+  { label: "Culture",           slug: "culture",          img: "/images/topics/culture.jpg" },
+  { label: "Events",            slug: "events",           img: "/images/topics/events.jpg" },
+  { label: "Food",              slug: "food",             img: "/images/topics/food.jpg" },
+  { label: "History",           slug: "history",          img: "/images/topics/history.jpg" },
+  { label: "Real Estate",       slug: "real-estate",      img: "/images/topics/real-estate.jpg" },
+  { label: "Sports",            slug: "sports",           img: "/images/topics/sports.jpg" },
+  { label: "Travel + Outdoors", slug: "travel-outdoors",  img: "/images/topics/travel-outdoors.jpg" },
+];
 ---
 
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
-  <section class="section">
-    <div class="container homeWrap">
+  <div class="pageWrap">
 
-      {/* Newsletter Band */}
-      <div class="newsletterBand">
-        <div class="newsletterInner">
-
-          <div class="nlArt" aria-hidden="true">
-            <img
-              class="nlArtImg"
-              src="/images/cities/daytona/newsletter.png"
-              alt=""
-              loading="lazy"
-              decoding="async"
-              onerror="this.onerror=null;this.src='/images/cities/default/newsletter.png';"
-            />
-          </div>
-
-          <div class="nlContent">
-            <div class="newsletterCopy">
-              <div class="nlHeadline">Good News Daytona</div>
-              <div class="nlSubhead">Daytona Pulse: your FREE local insider.</div>
-            </div>
-
-            <form class="nlForm" action="/daytona/subscribe/" method="get">
-              <input class="nlInput" type="email" name="email" placeholder="Enter your email address" />
-              <button class="nlButton" type="submit">SIGN UP, IT'S FREE!</button>
-            </form>
-
-            <div class="nlFine">Sent straight to your inbox, 100% FREE! Unsubscribe anytime.</div>
-          </div>
-
+    {/* ── NEWSLETTER BAND ── */}
+    <div class="nlBand">
+      <div class="nlInner">
+        <div class="nlCopy">
+          <div class="nlEyebrow">Free Newsletter</div>
+          <div class="nlHead">Good news for Daytona.</div>
+          <div class="nlSub">The best local stories sent to your inbox. 100% free, unsubscribe anytime.</div>
         </div>
+        <form class="nlForm" action="/daytona/subscribe/" method="get">
+          <input class="nlInput" type="email" name="email" placeholder="Enter your email address" />
+          <button class="nlBtn" type="submit">Sign Up — It's Free</button>
+        </form>
       </div>
+    </div>
 
+    {/* ── MAIN CONTENT ── */}
+    <div class="container">
       <div class="homeGrid">
 
-        <div class="homeMain">
+        {/* LEFT: MAIN FEED */}
+        <main class="homeMain">
 
+          {/* HERO */}
           {hero && (
-            <a class="heroFeature" href={`/daytona/posts/${hero.slug}/`}>
-              <div class="heroMedia">
-                {heroImage(hero) ? (
-                  <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? "Hero image"} loading="lazy" decoding="async" />
-                ) : (
-                  <div class="heroImg heroImgFallback" aria-hidden="true"></div>
-                )}
+            <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
+              <div class="heroImgWrap">
+                {heroImage(hero)
+                  ? <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="eager" decoding="async" />
+                  : <div class="heroImg heroFallback" aria-hidden="true" />
+                }
+                {primaryTag(hero) && <span class="kicker">{primaryTag(hero)}</span>}
               </div>
               <div class="heroCopy">
-                <div class="heroTitle">{hero.data.title ?? hero.slug}</div>
-                {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
-                <div class="heroMeta">{dateText(hero)}</div>
+                <h2 class="heroTitle">{hero.data.title ?? hero.slug}</h2>
+                {excerpt(hero) && <p class="heroDesc">{excerpt(hero)}</p>}
+                <div class="postMeta">{dateText(hero)}</div>
               </div>
             </a>
           )}
 
-          <div class="sectionHeader">
-            <div class="sectionTitle">Explore</div>
+          {/* LATEST FEED */}
+          <div class="sectionHead">
+            <span class="sectionLabel">Latest</span>
+            <a class="viewAll" href="/daytona/posts/">View all →</a>
           </div>
 
-          <div class="catGrid">
-            <a class="catCard" href="/daytona/topics/">
-              <div class="catTitle">Topics</div>
-              <div class="catDesc">Browse what Daytona is talking about.</div>
-            </a>
-            <a class="catCard" href="/daytona/guides/">
-              <div class="catTitle">City Guides</div>
-              <div class="catDesc">Curated guides for locals and visitors.</div>
-            </a>
-            <a class="catCard" href="/daytona/events/">
-              <div class="catTitle">Events</div>
-              <div class="catDesc">What's happening this week.</div>
-            </a>
-          </div>
-
-          <div class="feedHeader">
-            <div class="sectionTitle">Latest</div>
-            <a class="viewAllLink" href="/daytona/posts/">View all</a>
-          </div>
-
-          <div class="latestGrid" role="list">
+          <div class="feedList">
             {latest.map((p) => (
-              <a class="latestCard" role="listitem" href={`/daytona/posts/${p.slug}/`}>
-                <div class="latestMedia">
-                  {heroImage(p) ? (
-                    <img class="latestImg" src={heroImage(p)} alt={p.data.title ?? "Thumbnail"} loading="lazy" decoding="async" />
-                  ) : (
-                    <div class="latestImg latestImgFallback" aria-hidden="true"></div>
-                  )}
+              <a class="feedRow" href={`/daytona/posts/${p.slug}/`}>
+                <div class="feedText">
+                  {primaryTag(p) && <div class="feedKicker">{primaryTag(p)}</div>}
+                  <div class="feedRowTitle">{p.data.title ?? p.slug}</div>
+                  {excerpt(p) && <div class="feedRowDesc">{excerpt(p)}</div>}
+                  <div class="postMeta">{dateText(p)}</div>
                 </div>
-                <div class="latestBody">
-                  <div class="latestTitle">{p.data.title ?? p.slug}</div>
-                  {excerpt(p) && <div class="latestDesc">{excerpt(p)}</div>}
-                  <div class="latestMeta">{dateText(p)}</div>
+                <div class="feedThumbWrap">
+                  {heroImage(p)
+                    ? <img class="feedThumb" src={heroImage(p)} alt="" loading="lazy" decoding="async" />
+                    : <div class="feedThumb feedThumbFallback" aria-hidden="true" />
+                  }
                 </div>
               </a>
             ))}
           </div>
 
-        </div>
+          {/* TOPICS VISUAL GRID */}
+          <div class="sectionHead" style="margin-top:8px">
+            <span class="sectionLabel">Topics</span>
+          </div>
+          <div class="topicsGrid">
+            {topics.map((t) => (
+              <a class="topicTile" href={`/daytona/topics/${t.slug}/`}>
+                <img
+                  class="topicImg"
+                  src={t.img}
+                  alt={t.label}
+                  loading="lazy"
+                  decoding="async"
+                  onerror="this.style.opacity='0'"
+                />
+                <div class="topicGrad" aria-hidden="true" />
+                <span class="topicLabel">{t.label}</span>
+              </a>
+            ))}
+          </div>
 
+        </main>
+
+        {/* RIGHT: SIDEBAR */}
         <aside class="homeRail">
-          <div class="moduleCard eventsCard">
-            <div class="moduleHead">
-              <div class="moduleTitle">Upcoming Events</div>
-              <a class="viewAllLink viewAllLinkSmall" href="/daytona/events/">See all</a>
-            </div>
 
-            <div class="eventsList">
-              <div class="eventRow">
-                <div class="eventDate">
-                  <div class="eventDow">SAT</div>
-                  <div class="eventDay">15</div>
+          <div class="railCard">
+            <div class="railHead">
+              <span class="railTitle">Upcoming Events</span>
+              <a class="railMore" href="/daytona/events/">See all</a>
+            </div>
+            <div class="eventList">
+              <a class="eventRow" href="/daytona/events/">
+                <div class="eventCal">
+                  <div class="eDow">SAT</div>
+                  <div class="eDay">15</div>
                 </div>
                 <div class="eventInfo">
-                  <div class="eventName">Add your first event</div>
-                  <div class="eventPlace">Daytona Beach</div>
+                  <div class="eName">Add your first event</div>
+                  <div class="ePlace">Daytona Beach</div>
                 </div>
-              </div>
-              <div class="eventRow">
-                <div class="eventDate">
-                  <div class="eventDow">SUN</div>
-                  <div class="eventDay">16</div>
+              </a>
+              <a class="eventRow" href="/daytona/events/">
+                <div class="eventCal">
+                  <div class="eDow">SUN</div>
+                  <div class="eDay">16</div>
                 </div>
                 <div class="eventInfo">
-                  <div class="eventName">Second event placeholder</div>
-                  <div class="eventPlace">Ormond Beach</div>
+                  <div class="eName">Second event placeholder</div>
+                  <div class="ePlace">Ormond Beach</div>
                 </div>
-              </div>
-            </div>
-
-            <div class="railDivider"></div>
-
-            <div class="railLinks">
-              <div class="moduleTitle moduleTitleSmall">Resources</div>
-              <a class="railLink" href="/daytona/advertise/">Advertise</a>
-              <a class="railLink" href="/daytona/topics/">Topics</a>
-              <a class="railLink" href="/daytona/events/">Events</a>
+              </a>
             </div>
           </div>
+
+          <div class="railCard">
+            <div class="railHead">
+              <span class="railTitle">City Guides</span>
+              <a class="railMore" href="/daytona/guides/">See all</a>
+            </div>
+            <div class="guideList">
+              <a class="guideRow" href="/daytona/guides/">Best beaches in Daytona</a>
+              <a class="guideRow" href="/daytona/guides/">Where to eat on the strip</a>
+              <a class="guideRow" href="/daytona/guides/">Weekend events calendar</a>
+            </div>
+          </div>
+
+          <div class="railCard railFlat">
+            <div class="railTitle" style="margin-bottom:12px">Resources</div>
+            <div class="resourceList">
+              <a class="resourceLink" href="/daytona/advertise/">Advertise with us</a>
+              <a class="resourceLink" href="/daytona/topics/">Browse topics</a>
+              <a class="resourceLink" href="/daytona/events/">Submit an event</a>
+              <a class="resourceLink" href="/daytona/guides/">City guides</a>
+            </div>
+          </div>
+
+          <div class="railCard adCard">
+            <div class="adHead">Advertise with us.</div>
+            <div class="adDesc">Reach Daytona locals with sponsored content, display ads, and event promotion.</div>
+            <a class="adBtn" href="/daytona/advertise/">Learn more →</a>
+          </div>
+
         </aside>
-
       </div>
-
-      <div class="promoBand">
-        <div class="promoCopy">
-          <div class="promoTitle">Advertise with us.</div>
-          <div class="promoDesc">Reach locals with sponsored stories, display placements, and event promotion.</div>
-        </div>
-        <div class="promoActions">
-          <a class="btn" href="/daytona/advertise/">Branded Content + Display</a>
-          <a class="btn btnGhost" href="/daytona/advertise/">Events</a>
-        </div>
-      </div>
-
     </div>
-  </section>
+  </div>
 
   <style>
-    :global(.container) {
-      max-width: 1240px;
-      padding-left: clamp(14px, 2vw, 22px);
-      padding-right: clamp(14px, 2vw, 22px);
-    }
-    @media (min-width: 1400px) {
-      :global(.container) { max-width: 1280px; }
-    }
+    /* ── Shell ── */
+    .pageWrap { min-height: 100vh; }
 
-    .homeWrap {
-      --maxMain: 860px;
-      --rail: 320px;
-      --gridGap: clamp(18px, 2vw, 26px);
-      --inset: clamp(18px, 3.4vw, 52px);
-      --railNudge: 19px;
-      --cardRadius: 16px;
-      --cardRadiusSm: 14px;
-      --cardBorder: rgba(255,255,255,.10);
-      --cardBorderSoft: rgba(255,255,255,.08);
-      --cardBg: rgba(255,255,255,.03);
-      --shadowSoft: 0 8px 18px rgba(0,0,0,.22);
-      --t1: #e8edf4;
-      --t2: rgba(232,237,244,.86);
-      --t3: rgba(232,237,244,.70);
-      --t4: rgba(232,237,244,.58);
-      --glow: 0 0 0 1px color-mix(in srgb, var(--brand1) 18%, transparent), 0 10px 26px rgba(0,0,0,.30);
-      --glowSoft: 0 0 0 1px color-mix(in srgb, var(--brand1) 22%, transparent), 0 18px 44px rgba(0,0,0,.45);
+    :global(.container) {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding-left: clamp(16px, 2.5vw, 32px);
+      padding-right: clamp(16px, 2.5vw, 32px);
     }
 
     /* ── Newsletter band ── */
-    .newsletterBand {
-      border: 1px solid color-mix(in srgb, var(--brand1) 68%, transparent);
-      background:
-        radial-gradient(900px 420px at 18% 0%, color-mix(in srgb, var(--brand1) 34%, transparent), transparent 62%),
-        color-mix(in srgb, var(--brand1) 22%, transparent);
-      box-shadow: var(--glowSoft);
-      border-radius: var(--cardRadius);
-      overflow: hidden;
-      margin: 10px 0 18px;
+    .nlBand {
+      background: var(--brand1);
+      padding: clamp(18px, 2.5vw, 28px) 0;
     }
-
-    .newsletterInner {
-      padding: clamp(16px, 2vw, 22px) var(--inset);
+    .nlInner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 clamp(16px, 2.5vw, 32px);
       display: grid;
-      grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
-      gap: clamp(14px, 2vw, 22px);
+      grid-template-columns: 1fr auto;
+      gap: clamp(20px, 3vw, 48px);
       align-items: center;
     }
-
-    .nlArt {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 0;
-    }
-
-    .nlArtImg {
-      width: 100%;
-      max-width: 280px;
-      height: auto;
-      display: block;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.10);
-      box-shadow: 0 10px 26px rgba(0,0,0,.25);
-    }
-
-    .nlContent {
-      min-width: 0;
-      display: grid;
-      gap: 10px;
-      align-content: center;
-      justify-items: start;
-    }
-
-    .nlHeadline {
-      color: var(--text);
-      font-weight: 950;
-      letter-spacing: -0.3px;
-      font-size: clamp(22px, 2.2vw, 28px);
-      line-height: 1.05;
-    }
-
-    .nlSubhead {
-      margin-top: 6px;
-      color: var(--text);
-      font-size: 15.5px;
-      line-height: 1.35;
-      font-weight: 700;
-      opacity: .90;
-    }
-
-    .nlForm {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 10px;
-      width: 100%;
-      min-width: 0;
-      margin-top: 6px;
-    }
-
-    .nlInput {
-      width: 100%;
-      height: 44px;
-      max-width: 380px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.20);
-      background: rgba(11,13,16,.78);
-      color: rgba(232,237,244,.96);
-      padding: 0 14px;
-      outline: none;
-      box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-    }
-    .nlInput::placeholder { color: rgba(232,237,244,.70); }
-    .nlInput:focus {
-      border-color: color-mix(in srgb, var(--brand1) 84%, transparent);
-      box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand1) 22%, transparent);
-    }
-
-    .nlButton {
-      height: 44px;
-      border-radius: 12px;
-      border: 1px solid rgba(0,0,0,.55);
-      background: linear-gradient(180deg, var(--brand1), var(--brand2));
+    .nlEyebrow {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
       color: var(--accentText);
+      opacity: .75;
+      margin-bottom: 4px;
+    }
+    .nlHead {
+      font-size: clamp(18px, 2vw, 24px);
       font-weight: 950;
-      letter-spacing: .02em;
-      cursor: pointer;
-      box-shadow: 0 14px 22px rgba(0,0,0,.22);
-      padding: 0 16px;
-      width: 100%;
-      white-space: nowrap;
+      color: var(--accentText);
+      line-height: 1.1;
+      letter-spacing: -0.3px;
     }
-    .nlButton:hover { filter: brightness(.96); }
-
-    .nlFine {
-      color: var(--muted);
+    .nlSub {
+      margin-top: 4px;
       font-size: 13.5px;
-      line-height: 1.35;
-      margin-top: 2px;
+      color: var(--accentText);
+      opacity: .82;
+      line-height: 1.4;
     }
-
-    @media (min-width: 900px) {
-      .nlForm {
-        grid-template-columns: minmax(260px, 380px) auto;
-        align-items: center;
-      }
-      .nlInput { max-width: none; }
-      .nlButton { width: auto; }
+    .nlForm {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
     }
+    .nlInput {
+      height: 44px;
+      width: clamp(180px, 20vw, 280px);
+      border-radius: 10px;
+      border: 2px solid rgba(0,0,0,.18);
+      background: rgba(255,255,255,.92);
+      color: #111;
+      padding: 0 14px;
+      font-size: 14px;
+      outline: none;
+    }
+    .nlInput::placeholder { color: #888; }
+    .nlInput:focus { border-color: rgba(0,0,0,.4); background: #fff; }
+    .nlBtn {
+      height: 44px;
+      padding: 0 18px;
+      border-radius: 10px;
+      border: 2px solid rgba(0,0,0,.22);
+      background: rgba(0,0,0,.18);
+      color: var(--accentText);
+      font-weight: 800;
+      font-size: 13.5px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 140ms;
+    }
+    .nlBtn:hover { background: rgba(0,0,0,.28); }
 
     @media (max-width: 720px) {
-      .newsletterInner {
-        grid-template-columns: 1fr;
-        gap: 12px;
-        padding: 16px 14px;
-        text-align: center;
-      }
-      .nlContent { justify-items: center; }
-      .nlArtImg { max-width: 240px; margin: 0 auto; }
-      .nlForm { width: 100%; max-width: 520px; margin: 0 auto; }
-      .nlInput, .nlButton { width: 100%; }
+      .nlInner { grid-template-columns: 1fr; gap: 14px; }
+      .nlForm { flex-direction: column; }
+      .nlInput, .nlBtn { width: 100%; }
     }
 
-    /* ── Home grid ── */
+    /* ── Home grid 75/25 ── */
     .homeGrid {
       display: grid;
-      grid-template-columns: minmax(0, var(--maxMain)) minmax(0, var(--rail));
-      gap: var(--gridGap);
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: clamp(24px, 3vw, 48px);
       align-items: start;
-      padding: 0 var(--inset);
+      padding-top: 30px;
+      padding-bottom: 48px;
     }
-
-    .homeRail {
-      padding: 0;
-      margin: 0;
-      transform: translateX(var(--railNudge));
-    }
-
     @media (max-width: 980px) {
-      .homeGrid { grid-template-columns: 1fr; padding: 0; }
-      .homeRail { order: 2; transform: none; }
+      .homeGrid { grid-template-columns: 1fr; }
+      .homeRail { order: 2; }
     }
 
-    /* ── Hero feature ── */
-    .heroFeature {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
+    /* ── Hero ── */
+    .heroCard {
+      display: block;
       text-decoration: none;
-      border: 1px solid var(--cardBorder);
-      background: var(--cardBg);
-      border-radius: var(--cardRadius);
+      margin-bottom: 32px;
+      padding-bottom: 28px;
+      border-bottom: 2px solid var(--brand1);
+    }
+    .heroImgWrap {
+      position: relative;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: var(--shadowSoft);
-      margin-bottom: 16px;
-      transition: border-color 160ms ease, box-shadow 160ms ease;
+      margin-bottom: 14px;
     }
-    .heroFeature:hover {
-      border-color: color-mix(in srgb, var(--brand1) 40%, transparent);
-      box-shadow: var(--glow);
+    .heroImg {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      background: var(--surface);
     }
-    @media (max-width: 740px) { .heroFeature { grid-template-columns: 1fr; } }
-    .heroMedia { background: rgba(255,255,255,.02); }
-    .heroImg { width: 100%; height: 100%; min-height: 220px; display: block; object-fit: cover; }
-    .heroImgFallback { min-height: 220px; }
-    .heroCopy { padding: 16px 16px 14px; }
-    .heroTitle { font-size: 26px; line-height: 1.1; font-weight: 950; color: var(--t1); letter-spacing: -0.2px; }
+    .heroFallback {
+      aspect-ratio: 16/9;
+      background: var(--surface2);
+    }
+    .kicker {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: var(--brand1);
+      color: var(--accentText);
+      font-size: 10.5px;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .heroTitle {
+      font-size: clamp(22px, 2.8vw, 34px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.4px;
+      color: var(--text);
+      margin: 0 0 8px;
+    }
     .heroDesc {
-      margin-top: 10px;
-      color: var(--t2);
-      line-height: 1.35;
+      color: var(--muted);
+      font-size: clamp(14px, 1.3vw, 16px);
+      line-height: 1.5;
+      margin: 0 0 10px;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .heroMeta { margin-top: 12px; color: var(--t4); font-size: 13px; }
+    .postMeta {
+      font-size: 12.5px;
+      color: var(--faint);
+    }
 
-    /* ── Section headers ── */
-    .sectionHeader { margin: 6px 0 10px; }
-    .sectionTitle { font-weight: 950; font-size: 14px; color: var(--t3); text-transform: uppercase; letter-spacing: .12em; }
-    .feedHeader { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin: 16px 0 10px; }
-
-    .viewAllLink { color: var(--link); font-weight: 800; font-size: 13px; text-decoration: none; opacity: .95; }
-    .viewAllLink:hover { opacity: 1; text-decoration: underline; }
-    .viewAllLinkSmall { font-size: 12px; }
-
-    /* ── Category cards ── */
-    .catGrid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; margin-bottom: 8px; }
-    @media (max-width: 740px) { .catGrid { grid-template-columns: 1fr; } }
-    .catCard {
+    /* ── Section head ── */
+    .sectionHead {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--brand1);
+      margin-bottom: 0;
+    }
+    .sectionLabel {
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .viewAll {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--link);
       text-decoration: none;
-      border: 1px solid var(--cardBorderSoft);
-      background: var(--cardBg);
-      border-radius: var(--cardRadius);
-      padding: 14px 14px 13px;
-      box-shadow: var(--shadowSoft);
-      transition: border-color 160ms ease;
     }
-    .catCard:hover { border-color: color-mix(in srgb, var(--brand1) 40%, transparent); }
-    .catTitle { font-weight: 950; font-size: 16px; color: var(--t1); }
-    .catDesc { margin-top: 6px; color: var(--t4); line-height: 1.25; font-size: 13px; }
+    .viewAll:hover { text-decoration: underline; }
 
-    /* ── Latest list ── */
-    .latestGrid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 0;
-      border-top: 1px solid rgba(255,255,255,.10);
-    }
+    /* ── Feed list ── */
+    .feedList { margin-bottom: 36px; }
 
-    .latestCard {
+    .feedRow {
       display: grid;
-      grid-template-columns: 96px 1fr;
-      gap: 14px;
+      grid-template-columns: 1fr 100px;
+      gap: 16px;
       align-items: start;
       padding: 16px 0;
+      border-bottom: 1px solid var(--border);
       text-decoration: none;
-      border-bottom: 1px solid rgba(255,255,255,.10);
-      background: transparent;
     }
-    .latestCard:hover { background: rgba(255,255,255,.02); }
+    .feedRow:hover .feedRowTitle { color: var(--link); }
 
-    .latestMedia {
-      width: 96px;
-      height: 72px;
-      border-radius: 12px;
+    .feedKicker {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      color: var(--brand1);
+      margin-bottom: 4px;
+    }
+    .feedRowTitle {
+      font-size: clamp(16px, 1.5vw, 19px);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.2px;
+      color: var(--text);
+      margin-bottom: 5px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
       overflow: hidden;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.03);
+      transition: color 120ms ease;
     }
-    .latestImg { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .feedRowDesc {
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+    .feedThumbWrap { width: 100px; flex-shrink: 0; }
+    .feedThumb {
+      display: block;
+      width: 100px;
+      height: 72px;
+      object-fit: cover;
+      border-radius: 8px;
+      background: var(--surface);
+    }
+    .feedThumbFallback { background: var(--surface2); }
 
-    .latestBody { padding: 0; min-width: 0; display: grid; align-content: start; }
-    .latestTitle {
-      font-weight: 950; font-size: 20px; line-height: 1.12;
-      letter-spacing: -0.2px; color: var(--t1);
-      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .latestDesc {
-      margin-top: 8px; color: var(--t3); font-size: 14.5px; line-height: 1.35;
-      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .latestMeta { margin-top: 10px; color: var(--t4); font-size: 13px; }
-
-    @media (max-width: 420px) {
-      .latestCard { grid-template-columns: 84px 1fr; }
-      .latestMedia { width: 84px; height: 64px; }
-      .latestTitle { font-size: 19px; }
+    @media (max-width: 480px) {
+      .feedRow { grid-template-columns: 1fr 80px; }
+      .feedThumbWrap { width: 80px; }
+      .feedThumb { width: 80px; height: 58px; }
     }
 
-    /* ── Rail / sidebar ── */
-    .moduleCard {
-      border: 1px solid var(--cardBorder);
-      background: var(--cardBg);
-      border-radius: var(--cardRadius);
-      padding: 14px;
-      box-shadow: var(--shadowSoft);
+    /* ── Topics image grid ── */
+    .topicsGrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+      margin-bottom: 8px;
     }
-    .moduleHead { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px; }
-    .moduleTitle { font-weight: 950; color: var(--t1); letter-spacing: -0.1px; }
-    .moduleTitleSmall { font-size: 13px; margin-bottom: 8px; opacity: .9; }
-
-    .eventsList { display: grid; gap: 10px; }
-    .eventRow {
-      display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center;
-      padding: 10px; border-radius: 14px;
-      border: 1px solid rgba(255,255,255,.08);
-      background: rgba(255,255,255,.02);
+    @media (max-width: 600px) {
+      .topicsGrid { grid-template-columns: repeat(2, 1fr); }
     }
-    .eventDate {
-      width: 44px; height: 44px; border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(0,0,0,.18);
-      display: grid; place-items: center; line-height: 1.05;
+
+    .topicTile {
+      position: relative;
+      display: block;
+      text-decoration: none;
+      border-radius: 10px;
+      overflow: hidden;
+      aspect-ratio: 3/2;
+      background: var(--surface2);
+      border: 1px solid var(--border);
     }
-    .eventDow { font-size: 11px; color: var(--t4); font-weight: 900; letter-spacing: .08em; }
-    .eventDay { font-size: 16px; color: var(--t1); font-weight: 950; margin-top: 2px; }
-    .eventName { font-weight: 900; color: var(--t1); line-height: 1.15; }
-    .eventPlace { margin-top: 4px; color: var(--t4); font-size: 12.5px; }
+    .topicImg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 320ms ease;
+    }
+    .topicTile:hover .topicImg { transform: scale(1.05); }
+    .topicGrad {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.80) 0%, rgba(0,0,0,.25) 55%, transparent 100%);
+    }
+    .topicLabel {
+      position: absolute;
+      bottom: 10px;
+      left: 11px;
+      right: 11px;
+      font-size: 13px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.2;
+      letter-spacing: -0.1px;
+      text-shadow: 0 1px 6px rgba(0,0,0,.6);
+    }
 
-    .railDivider { height: 1px; background: rgba(255,255,255,.08); margin: 14px 0 12px; }
-    .railLinks { display: grid; gap: 8px; }
-    .railLink { color: var(--muted); text-decoration: none; font-size: 13px; }
-    .railLink:hover { color: var(--link); }
+    /* Fallback when image missing — show brand color tile */
+    .topicTile:not(:has(img[src])) { background: var(--pillBg); border-color: var(--pillBorder); }
+    .topicTile:not(:has(img[src])) .topicGrad { display: none; }
+    .topicTile:not(:has(img[src])) .topicLabel {
+      bottom: 50%; transform: translateY(50%);
+      color: var(--brand1); text-shadow: none; text-align: center;
+    }
 
-    /* ── Promo band ── */
-    .promoBand {
-      margin: 18px 0 0;
-      border: 1px solid var(--cardBorder);
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      border-radius: var(--cardRadius);
+    /* ── Sidebar ── */
+    .homeRail {
+      position: sticky;
+      top: 80px;
+      display: grid;
+      gap: 18px;
+    }
+    .railCard {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 14px;
       padding: 16px;
+    }
+    .railFlat { background: transparent; }
+    .railHead {
       display: flex;
       justify-content: space-between;
-      gap: 14px;
-      align-items: center;
-      box-shadow: var(--shadowSoft);
-      flex-wrap: wrap;
+      align-items: baseline;
+      margin-bottom: 14px;
     }
-    .promoTitle { font-weight: 950; font-size: 18px; color: var(--t1); }
-    .promoDesc { margin-top: 6px; color: var(--t3); line-height: 1.3; }
-    .promoActions { display: flex; gap: 10px; flex-wrap: wrap; }
-
-    .btn {
-      display: inline-flex; align-items: center; justify-content: center;
-      height: 40px; padding: 0 16px; border-radius: 12px;
-      border: 1px solid var(--pillBorder);
-      background: var(--pillBg);
+    .railTitle {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .13em;
+      text-transform: uppercase;
       color: var(--text);
-      font-weight: 900; text-decoration: none;
-      transition: background 160ms ease, border-color 160ms ease;
     }
-    .btn:hover { background: color-mix(in srgb, var(--brand1) 22%, transparent); }
+    .railMore {
+      font-size: 11.5px;
+      font-weight: 700;
+      color: var(--link);
+      text-decoration: none;
+    }
+    .railMore:hover { text-decoration: underline; }
 
-    .btnGhost {
-      border-color: rgba(255,255,255,.14);
-      background: rgba(255,255,255,.03);
+    /* Events */
+    .eventList { display: grid; gap: 8px; }
+    .eventRow {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 10px;
+      align-items: center;
+      text-decoration: none;
+      padding: 8px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      transition: border-color 140ms;
     }
-    .btnGhost:hover { background: rgba(255,255,255,.06); }
+    .eventRow:hover { border-color: var(--pillBorder); }
+    .eventCal {
+      width: 44px; height: 44px;
+      border-radius: 10px;
+      background: var(--pillBg);
+      border: 1px solid var(--pillBorder);
+      display: grid; place-items: center;
+      text-align: center; line-height: 1;
+    }
+    .eDow { font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
+    .eDay { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 1px; }
+    .eName { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.2; }
+    .ePlace { font-size: 11.5px; color: var(--faint); margin-top: 2px; }
+
+    /* Guides */
+    .guideList { display: grid; }
+    .guideRow {
+      display: block;
+      text-decoration: none;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text);
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+      line-height: 1.3;
+      transition: color 120ms;
+    }
+    .guideRow:last-child { border-bottom: none; }
+    .guideRow:hover { color: var(--link); }
+
+    /* Resources */
+    .resourceList { display: grid; gap: 9px; }
+    .resourceLink { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 120ms; }
+    .resourceLink:hover { color: var(--link); }
+
+    /* Advertise */
+    .adCard { background: var(--pillBg); border-color: var(--pillBorder); }
+    .adHead { font-size: 15px; font-weight: 900; color: var(--text); margin-bottom: 5px; }
+    .adDesc { font-size: 12.5px; color: var(--muted); line-height: 1.4; margin-bottom: 14px; }
+    .adBtn {
+      display: inline-flex;
+      align-items: center;
+      height: 36px;
+      padding: 0 14px;
+      border-radius: 999px;
+      background: var(--brand1);
+      color: var(--accentText);
+      font-size: 12.5px;
+      font-weight: 800;
+      text-decoration: none;
+      transition: filter 140ms;
+    }
+    .adBtn:hover { filter: brightness(.92); }
   </style>
 </Base>
