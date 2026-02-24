@@ -186,18 +186,83 @@ const hero = heroImage(post);
     <div class="container">
       <div class="postLayout">
 
-        <!-- LEFT: article (75%) -->
         <div class="postMain">
-          <div class="postWrap">
-            ...all article content...
+
+          <h1 class={`postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
+          {post.data.description && <p class="postLede">{post.data.description}</p>}
+
+          <div class="metaRow">
+            {pubText && <span class="metaDate">{pubText}</span>}
+            {tagItems.length > 0 && (
+              <span class="metaTags" aria-label="Topics">
+                {tagItems.map((t) => (
+                  <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
+                ))}
+              </span>
+            )}
+            {featured && <span class="featuredPill">FEATURED</span>}
           </div>
+
+          {hero && (
+            <figure class="heroFigure">
+              <img
+                class="heroFull"
+                src={hero}
+                alt={post.data.title ?? "Post image"}
+                loading="eager"
+                decoding="async"
+              />
+            </figure>
+          )}
+
+          <article class="postBody">
+            <Content />
+          </article>
+
+          {relatedPosts.length > 0 && (
+            <div class="relatedWrap">
+              <h3 class="relatedHead">Related posts</h3>
+              <div class="relatedList">
+                {relatedPosts.map((p) => {
+                  const t = p.data.title ?? p.slug;
+                  const desc = p.data.description ?? "";
+                  const d = getPostDate(p);
+                  const dateText = d ? new Date(d).toLocaleDateString("en-US") : "";
+                  const img = heroImage(p);
+                  return (
+                    <a class="relatedRow" href={`/daytona/posts/${p.slug}/`}>
+                      <div class="relatedThumb">
+                        {img ? (
+                          <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async" />
+                        ) : (
+                          <div class="relatedImg relatedFallback" aria-hidden="true"></div>
+                        )}
+                      </div>
+                      <div class="relatedText">
+                        <div class="relatedTitle">{t}</div>
+                        {desc && <div class="relatedDesc">{desc}</div>}
+                        {dateText && <div class="relatedMeta">{dateText}</div>}
+                      </div>
+                      {isFeatured(p) && <span class="featuredPill featuredPillSmall">FEATURED</span>}
+                    </a>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <p class="postLinks">
+            <a class="pill" href="/daytona/posts/">← All posts</a>
+            <a class="pill" href="/daytona/topics/">Topics</a>
+          </p>
+
         </div>
 
-        <!-- RIGHT: sidebar (25%) -->
         <aside class="postSidebar">
-          <h3 class="sectionTitle">Upcoming Events</h3>
-          <!-- drop your events component here later -->
-          <p style="color:var(--muted);font-size:14px">Events coming soon.</p>
+          <div class="sidebarCard">
+            <div class="sidebarHead">Upcoming Events</div>
+            <p style="color:var(--muted);font-size:14px;margin:0">Events coming soon.</p>
+          </div>
         </aside>
 
       </div>
@@ -205,117 +270,58 @@ const hero = heroImage(post);
   </section>
 </Base>
 
-      {/* TITLE / DECK / META FIRST */}
-      <h1 class={`h1 postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
-      {post.data.description && <p class="lede">{post.data.description}</p>}
-
-      <div class="metaRow">
-        {pubText && <span class="metaDate">{pubText}</span>}
-
-        {tagItems.length > 0 && (
-          <span class="metaTags" aria-label="Topics">
-            {tagItems.map((t) => (
-              <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
-            ))}
-          </span>
-        )}
-
-        {featured && <span class="featuredPill">FEATURED</span>}
-      </div>
-
-      {/* HERO AFTER */}
-      {hero && (
-        <figure class="heroFigure">
-          <img
-            class="heroFull"
-            src={hero}
-            alt={post.data.title ?? "Post image"}
-            loading="eager"
-            decoding="async"
-          />
-        </figure>
-      )}
-
-      <article class="postBody">
-        <Content />
-      </article>
-
-      {/* Related posts: keep as-is */}
-      {relatedPosts.length > 0 && (
-        <div class="relatedWrap">
-          <h3 class="relatedHead">Related posts</h3>
-
-          <div class="relatedList">
-            {relatedPosts.map((p) => {
-              const t = p.data.title ?? p.slug;
-              const desc = p.data.description ?? "";
-              const d = getPostDate(p);
-              const dateText = d ? new Date(d).toLocaleDateString("en-US") : "";
-              const img = heroImage(p);
-
-              return (
-                <a class="relatedRow" href={`/daytona/posts/${p.slug}/`}>
-                  <div class="relatedThumb">
-                    {img ? (
-                      <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async" />
-                    ) : (
-                      <div class="relatedImg relatedFallback" aria-hidden="true"></div>
-                    )}
-                  </div>
-
-                  <div class="relatedText">
-                    <div class="relatedTitle">{t}</div>
-                    {desc && <div class="relatedDesc">{desc}</div>}
-                    {dateText && <div class="relatedMeta">{dateText}</div>}
-                  </div>
-
-                  {isFeatured(p) && <span class="featuredPill featuredPillSmall">FEATURED</span>}
-                </a>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      <p class="postLinks">
-        <a class="pill" href="/daytona/posts/">← All posts</a>
-        <a class="pill" href="/daytona/topics/">Topics</a>
-      </p>
-
-    </div>
-  </section>
-</Base>
-
 <style>
-  /* Keep layout logic intact; just presentation */
- .postWrap {
-  max-width: 780px;
-  margin-left: 0;        /* pin to left instead of centering */
-  margin-right: 0;
-  padding-left: 18px;
-  padding-right: 18px;
-}
-
-  /* Featured title 15% larger on article page */
-  .postTitle {
-  margin: 0;
-  font-size: clamp(22px, 2.4vw, 32px);
-  font-weight: 800;
-  letter-spacing: -0.3px;
-  line-height: 1.12;
-}
-
-.lede {
-  margin-top: 10px;
-  font-size: clamp(15px, 1.4vw, 18px);
-  line-height: 1.4;
-  color: rgba(232,237,244,.88);
-}
-
-  /* HERO FIRST: 16:9 editorial hero */
-  .heroFigure {
-    margin: 0 0 14px 0;
+  .postLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 32px;
+    align-items: start;
+    padding-top: 16px;
   }
+  @media (max-width: 860px) {
+    .postLayout { grid-template-columns: 1fr; }
+    .postSidebar { position: static; }
+  }
+
+  .postMain { min-width: 0; }
+
+  .postSidebar {
+    position: sticky;
+    top: 80px;
+    min-width: 0;
+  }
+
+  .sidebarCard {
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+    border-radius: 16px;
+    padding: 14px;
+  }
+  .sidebarHead {
+    font-weight: 900;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .postTitle {
+    margin: 0 0 8px;
+    font-size: clamp(22px, 2.6vw, 34px);
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    line-height: 1.1;
+  }
+
+  .postLede {
+    margin: 0 0 14px;
+    font-size: clamp(15px, 1.4vw, 18px);
+    line-height: 1.45;
+    color: var(--muted);
+  }
+
+  .heroFigure { margin: 0 0 18px; }
   .heroFull {
     display: block;
     width: 100%;
@@ -323,192 +329,96 @@ const hero = heroImage(post);
     object-fit: cover;
     border-radius: 16px;
     border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.02);
     box-shadow: 0 10px 26px rgba(0,0,0,.30);
   }
 
   .postBody {
     margin-top: 18px;
     line-height: 1.65;
+    font-size: 16px;
   }
 
- .metaRow{
-  margin-top: 14px;
-  margin-bottom: 18px; /* <-- adds space before hero image */
-  display:flex;
-  flex-wrap:wrap;
-  align-items:center;
-  gap:12px;
-  opacity:.82;
-}
-
+  .metaRow {
+    margin: 0 0 16px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    opacity: .85;
   }
-  .metaDate{ opacity:.75; }
-  .metaTags{
-    display:inline-flex;
-    flex-wrap:wrap;
-    gap:8px;
-    align-items:center;
+  .metaDate { opacity: .75; font-size: 13px; }
+  .metaTags { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+  .topicPill {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    text-decoration: none;
+    color: #111;
+    background: rgba(255,220,80,.65);
+    border: 1px solid rgba(255,220,80,.55);
   }
-
-  /* Smaller + faded yellow (~30% down) */
-  .metaRow .topicPill{
-    display:inline-flex !important;
-    align-items:center !important;
-    justify-content:center !important;
-    padding: 5px 10px !important;
-    border-radius: 999px !important;
-    font-size: 11px !important;
-    font-weight: 800 !important;
-    letter-spacing: .02em !important;
-    text-decoration: none !important;
-
-    color: #111 !important;
-    background: rgba(255, 220, 80, 0.65) !important;
-    border: 1px solid rgba(255, 220, 80, 0.55) !important;
-
-    transition: transform .08s ease, filter .12s ease, opacity .12s ease;
-  }
-  .metaRow .topicPill:hover { transform: translateY(-1px); filter: brightness(1.02); }
-  .metaRow .topicPill:active { transform: translateY(0px); opacity: .92; }
 
   .featuredPill {
     font-size: 12px;
     font-weight: 800;
-    letter-spacing: .04em;
-    padding: 6px 10px;
+    padding: 5px 10px;
     border-radius: 999px;
-    border: 1px solid rgba(255,220,80,.65);
-    color: rgba(255,220,80,.95);
-    background: rgba(255,220,80,.12);
+    border: 1px solid var(--pillBorder);
+    color: var(--brand1);
+    background: var(--pillBg);
     white-space: nowrap;
   }
-  .featuredPillSmall {
-    font-size: 11px;
-    padding: 5px 9px;
-    align-self: start;
-  }
+  .featuredPillSmall { font-size: 11px; padding: 4px 9px; align-self: start; }
 
-  /* Related posts: vertical list like homepage feed */
-  .relatedWrap {
-    margin-top: 26px;
-  }
-  .relatedHead {
-    margin: 0 0 10px 0;
-    font-size: 16px;
-    opacity: .9;
-  }
-  .relatedList {
-    display: grid;
-    gap: 12px;
-  }
+  .relatedWrap { margin-top: 32px; }
+  .relatedHead { margin: 0 0 12px; font-size: 15px; font-weight: 800; opacity: .9; }
+  .relatedList { display: grid; gap: 12px; }
   .relatedRow {
     text-decoration: none;
     display: grid;
     grid-template-columns: 96px 1fr auto;
     gap: 12px;
     align-items: start;
-    border: 1px solid rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.10);
     border-radius: 14px;
-    padding: 12px 12px;
+    padding: 12px;
     background: rgba(255,255,255,.03);
-    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
   }
   .relatedRow:hover {
-    transform: translateY(-1px);
-    border-color: rgba(255,220,80,.22);
-    box-shadow: 0 0 0 1px rgba(255,220,80,.16), 0 10px 26px rgba(0,0,0,.30);
+    border-color: var(--pillBorder);
+    box-shadow: 0 0 0 1px var(--pillBg), 0 10px 26px rgba(0,0,0,.30);
   }
-  .relatedThumb {
-    width: 96px;
-  }
+  .relatedThumb { width: 96px; }
   .relatedImg {
-    width: 96px;
-    height: 66px;
-    border-radius: 12px;
+    width: 96px; height: 66px;
+    border-radius: 10px;
     object-fit: cover;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(255,255,255,.10);
     display: block;
   }
-  .relatedFallback {
-    background:
-      radial-gradient(160px 120px at 30% 25%, rgba(255,255,255,.08), rgba(255,255,255,0)),
-      linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-  }
+  .relatedFallback { background: rgba(255,255,255,.04); }
   .relatedText { min-width: 0; }
   .relatedTitle {
-    font-weight: 900;
-    color: rgba(232,237,244,.95);
-    line-height: 1.18;
-    font-size: 15.5px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    font-weight: 800; font-size: 15px; line-height: 1.2; color: var(--text);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
   .relatedDesc {
-    margin-top: 6px;
-    opacity: .82;
-    color: rgba(232,237,244,.78);
-    line-height: 1.35;
-    font-size: 13.5px;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    margin-top: 5px; font-size: 13px; color: var(--muted); line-height: 1.35;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .relatedMeta {
-    margin-top: 8px;
-    opacity: .6;
-    color: rgba(232,237,244,.65);
-    font-size: 12.5px;
-  }
+  .relatedMeta { margin-top: 6px; font-size: 12px; color: var(--faint); }
 
   @media (max-width: 520px) {
-    .relatedRow {
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
+    .relatedRow { grid-template-columns: 1fr; }
     .relatedThumb { width: 100%; }
-    .relatedImg { width: 100%; height: auto; aspect-ratio: 16 / 9; }
+    .relatedImg { width: 100%; height: auto; aspect-ratio: 16/9; }
     .featuredPillSmall { justify-self: start; }
   }
 
-  .postLinks {
-    margin-top: 22px;
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-  }
-.postLayout {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 32px;
-  align-items: start;
-}
-
-.postMain {
-  min-width: 0;   /* prevents grid blowout */
-}
-
-.postWrap {
-  max-width: 100%;
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.postSidebar {
-  position: sticky;
-  top: 80px;       /* clears the sticky topbar */
-  min-width: 0;
-}
-
-@media (max-width: 860px) {
-  .postLayout {
-    grid-template-columns: 1fr;
-  }
-  .postSidebar {
-    position: static;
-  }
+  .postLinks { margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
 </style>
