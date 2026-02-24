@@ -59,56 +59,164 @@ const drawerLinks = pills;
     display: flex;
     align-items: center;
     gap: 12px;
+    width: 100%;
   }
 
   /* Main pills row */
   .pillRow {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  flex: 1 1 auto;
-
-  justify-content: center; /* centers the pills */
-}
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
 
   .pill {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--pillBorder);
+    background: var(--pillBg);
+    color: var(--brand1);
+    font-weight: 950;
+    font-size: 14px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform 140ms ease, background 140ms ease;
+  }
 
-  height: 40px;
-  padding: 0 16px;
+  .pill:hover {
+    border-color: color-mix(in srgb, var(--brand2) 70%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand2) 18%, transparent);
+    transform: translateY(-1px);
+  }
 
-  border-radius: 999px;
+  /* ── Hamburger button: HIDDEN on desktop ── */
+  .menuBtn {
+    display: none;   /* hidden by default; shown only on mobile below */
+    align-items: center;
+    gap: 8px;
+    border-radius: 12px;
+    padding: 8px 10px;
+    border: 1px solid var(--pillBorder);
+    background: var(--pillBg);
+    color: var(--text);
+    font-weight: 900;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .menuText { font-size: 12.5px; }
 
-  border: 1px solid rgba(255,210,74,.55);
-  background: rgba(255,210,74,.14);
+  .burger {
+    width: 18px; height: 12px;
+    position: relative;
+    display: inline-block;
+  }
+  .burger::before, .burger::after, .burger span {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--text);
+  }
+  .burger::before { top: 0; }
+  .burger span { top: 5px; }
+  .burger::after { bottom: 0; }
 
-  color: rgba(255,210,74,.95);
+  /* Checkbox: always hidden */
+  .navToggle {
+    position: absolute;
+    width: 1px; height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
 
-  font-weight: 950;
-  font-size: 14px;
+  /* Backdrop: hidden until drawer opens */
+  .backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(2px);
+    z-index: 90;
+  }
 
-  text-decoration: none;
-  white-space: nowrap;
+  /* Drawer: always off-screen to the right */
+  .drawer {
+    position: fixed;
+    top: 0; right: 0;
+    height: 100dvh;
+    width: min(86vw, 320px);
+    background: var(--bg, #0b0d10);
+    border-left: 1px solid var(--border, rgba(255,255,255,.10));
+    box-shadow: -20px 0 60px rgba(0,0,0,.45);
+    transform: translateX(110%);   /* 110% guarantees fully hidden */
+    transition: transform 220ms ease;
+    z-index: 100;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    visibility: hidden;            /* also hide from accessibility tree */
+  }
 
-  transition: transform 140ms ease, background 140ms ease;
-}
+  .drawerHead {
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .drawerTitle { font-weight: 950; color: var(--text); }
+  .closeBtn {
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.03);
+    color: var(--text);
+    cursor: pointer;
+    user-select: none;
+  }
+  .drawerLinks {
+    padding: 12px 14px 16px;
+    display: grid;
+    gap: 8px;
+    overflow: auto;
+  }
+  .drawerLink {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text);
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.02);
+    border-radius: 12px;
+    padding: 12px;
+    font-weight: 700;
+  }
+  .drawerLink:hover {
+    border-color: var(--pillBorder);
+    background: var(--pillBg);
+  }
 
-.pill:hover {
-  background: rgba(255,210,74,.22);
-  transform: translateY(-1px);
-}
-
-  /* Mobile pills: NEVER disappear; allow scroll instead of clipping */
+  /* ── Mobile: show hamburger, allow pill scroll ── */
   @media (max-width: 760px) {
+    .menuBtn { display: inline-flex; }
+
     .pillRow {
-      gap: 6px;                    /* closer together first */
-      overflow-x: auto;            /* scroll if too many */
+      gap: 6px;
+      overflow-x: auto;
       overflow-y: visible;
       -webkit-overflow-scrolling: touch;
       padding-bottom: 2px;
       scrollbar-width: none;
+      justify-content: flex-start;
     }
     .pillRow::-webkit-scrollbar { display: none; }
 
@@ -119,97 +227,10 @@ const drawerLinks = pills;
     }
   }
 
-  /* Drawer */
-  .navToggle { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-
-  .menuBtn {
-    display: none;
-    align-items: center;
-    gap: 8px;
-    border-radius: 12px;
-    padding: 8px 10px;
-    border: 1px solid rgba(255,210,74,.40);
-    background: rgba(255,210,74,.10);
-    color: rgba(232,237,244,.92);
-    font-weight: 900;
-    cursor: pointer;
-    user-select: none;
-  }
-  .menuText { font-size: 12.5px; }
-
-  .burger { width: 18px; height: 12px; position: relative; display: inline-block; }
-  .burger::before, .burger::after, .burger span {
-    content: "";
-    position: absolute;
-    left: 0; right: 0;
-    height: 2px;
-    border-radius: 2px;
-    background: rgba(232,237,244,.92);
-  }
-  .burger::before { top: 0; }
-  .burger span { top: 5px; }
-  .burger::after { bottom: 0; }
-
-  .backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.55);
-    backdrop-filter: blur(2px);
-    z-index: 90;
-  }
-  .drawer {
-    position: fixed;
-    top: 0; right: 0;
-    height: 100dvh;
-    width: min(86vw, 360px);
-    background: #0b0d10;
-    border-left: 1px solid rgba(255,255,255,.10);
-    box-shadow: -20px 0 60px rgba(0,0,0,.45);
-    transform: translateX(100%);
-    transition: transform 220ms ease;
-    z-index: 100;
-    display: grid;
-    grid-template-rows: auto 1fr;
-  }
-  .drawerHead {
-    padding: 14px 14px 12px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-  }
-  .drawerTitle { font-weight: 950; color: rgba(232,237,244,.92); }
-  .closeBtn {
-    width: 34px; height: 34px;
-    border-radius: 10px;
-    display: grid;
-    place-items: center;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(255,255,255,.03);
-    color: rgba(232,237,244,.86);
-    cursor: pointer;
-    user-select: none;
-  }
-  .drawerLinks { padding: 12px 14px 16px; display: grid; gap: 8px; overflow: auto; }
-  .drawerLink {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: rgba(232,237,244,.86);
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.02);
-    border-radius: 12px;
-    padding: 12px 12px;
-    font-weight: 850;
-  }
-
-  /* Only show hamburger when needed */
-  @media (max-width: 760px) {
-    .menuBtn { display: inline-flex; }
-  }
-
+  /* ── Drawer open state ── */
   .navToggle:checked ~ .backdrop { display: block; }
-  .navToggle:checked ~ .drawer { transform: translateX(0); }
+  .navToggle:checked ~ .drawer {
+    transform: translateX(0);
+    visibility: visible;
+  }
 </style>
