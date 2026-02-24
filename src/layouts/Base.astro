@@ -31,6 +31,15 @@ const { title, subtitle, cityBase } = Astro.props;
     <title>{title}</title>
     <meta name="description" content={subtitle ?? "GoDoCity – multi-city local content platform"} />
     <link rel="stylesheet" href="/styles/themes.css" />
+<script is:inline>
+  (function() {
+    var p = new URLSearchParams(window.location.search).get("theme");
+    if (p) {
+      localStorage.removeItem("godoTheme");
+      document.documentElement.setAttribute("data-theme", p);
+    }
+  })();
+</script>
   </head>
   <body class={cityBase ? `city city-${cityBase}` : "city"}>
     <Header title={title} subtitle={subtitle} cityBase={cityBase} />
