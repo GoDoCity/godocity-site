@@ -2,14 +2,12 @@
 import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/** Daytona filter */
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
   if (city === "daytona") return true;
   return typeof post?.id === "string" && post.id.startsWith("daytona/");
 }
 
-/** Featured flag */
 function isFeatured(post) {
   const v = post?.data?.featured;
   if (v === true) return true;
@@ -18,7 +16,6 @@ function isFeatured(post) {
   return s === "true" || s === "yes" || s === "1";
 }
 
-/** Dates */
 function getPostDate(post) {
   return post?.data?.pubDate ?? post?.data?.date ?? post?.data?.published ?? post?.data?.updated ?? null;
 }
@@ -42,14 +39,14 @@ function primaryTag(post) {
   return "";
 }
 
-/** Data */
 const all = await getCollection("posts");
 const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 const hero = posts.find(isFeatured) ?? posts[0] ?? null;
 const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
-const latest = feed.slice(0, 10);
 
-/** Topics */
+/* Only 3 articles total on homepage — Nooga style */
+const topThree = [hero, ...feed.slice(0, 2)].filter(Boolean).slice(0, 3);
+
 const topics = [
   { label: "Business",          slug: "biz",             img: "/images/topics/business.jpg" },
   { label: "City",              slug: "city",             img: "/images/topics/city.jpg" },
@@ -72,7 +69,7 @@ const topics = [
         <div class="nlCopy">
           <div class="nlEyebrow">Free Newsletter</div>
           <div class="nlHead">Good news for Daytona.</div>
-          <div class="nlSub">The best local stories sent to your inbox. 100% free, unsubscribe anytime.</div>
+          <div class="nlSub">The best local stories, sent free to your inbox. Unsubscribe anytime.</div>
         </div>
         <form class="nlForm" action="/daytona/subscribe/" method="get">
           <input class="nlInput" type="email" name="email" placeholder="Enter your email address" />
@@ -81,45 +78,27 @@ const topics = [
       </div>
     </div>
 
-    {/* ── MAIN CONTENT ── */}
+    {/* ── MAIN GRID ── */}
     <div class="container">
       <div class="homeGrid">
 
-        {/* LEFT: MAIN FEED */}
+        {/* LEFT: FEED */}
         <main class="homeMain">
 
-          {/* HERO */}
-          {hero && (
-            <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
-              <div class="heroImgWrap">
-                {heroImage(hero)
-                  ? <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="eager" decoding="async" />
-                  : <div class="heroImg heroFallback" aria-hidden="true" />
-                }
-                {primaryTag(hero) && <span class="kicker">{primaryTag(hero)}</span>}
-              </div>
-              <div class="heroCopy">
-                <h2 class="heroTitle">{hero.data.title ?? hero.slug}</h2>
-                {excerpt(hero) && <p class="heroDesc">{excerpt(hero)}</p>}
-                <div class="postMeta">{dateText(hero)}</div>
-              </div>
-            </a>
-          )}
-
-          {/* LATEST FEED */}
           <div class="sectionHead">
             <span class="sectionLabel">Latest</span>
             <a class="viewAll" href="/daytona/posts/">View all →</a>
           </div>
 
+          {/* 3 LARGE STACKED ARTICLES */}
           <div class="feedList">
-            {latest.map((p) => (
+            {topThree.map((p) => (
               <a class="feedRow" href={`/daytona/posts/${p.slug}/`}>
                 <div class="feedText">
                   {primaryTag(p) && <div class="feedKicker">{primaryTag(p)}</div>}
                   <div class="feedRowTitle">{p.data.title ?? p.slug}</div>
                   {excerpt(p) && <div class="feedRowDesc">{excerpt(p)}</div>}
-                  <div class="postMeta">{dateText(p)}</div>
+                  <div class="feedMeta">{dateText(p)}</div>
                 </div>
                 <div class="feedThumbWrap">
                   {heroImage(p)
@@ -132,7 +111,7 @@ const topics = [
           </div>
 
           {/* TOPICS VISUAL GRID */}
-          <div class="sectionHead" style="margin-top:8px">
+          <div class="sectionHead" style="margin-top: 36px">
             <span class="sectionLabel">Topics</span>
           </div>
           <div class="topicsGrid">
@@ -157,6 +136,7 @@ const topics = [
         {/* RIGHT: SIDEBAR */}
         <aside class="homeRail">
 
+          {/* EVENTS */}
           <div class="railCard">
             <div class="railHead">
               <span class="railTitle">Upcoming Events</span>
@@ -186,6 +166,7 @@ const topics = [
             </div>
           </div>
 
+          {/* CITY GUIDES */}
           <div class="railCard">
             <div class="railHead">
               <span class="railTitle">City Guides</span>
@@ -198,29 +179,27 @@ const topics = [
             </div>
           </div>
 
-          <div class="railCard railFlat">
-            <div class="railTitle" style="margin-bottom:12px">Resources</div>
-            <div class="resourceList">
-              <a class="resourceLink" href="/daytona/advertise/">Advertise with us</a>
-              <a class="resourceLink" href="/daytona/topics/">Browse topics</a>
-              <a class="resourceLink" href="/daytona/events/">Submit an event</a>
-              <a class="resourceLink" href="/daytona/guides/">City guides</a>
-            </div>
-          </div>
-
-          <div class="railCard adCard">
-            <div class="adHead">Advertise with us.</div>
-            <div class="adDesc">Reach Daytona locals with sponsored content, display ads, and event promotion.</div>
-            <a class="adBtn" href="/daytona/advertise/">Learn more →</a>
-          </div>
-
         </aside>
       </div>
+
+      {/* ── ADVERTISE BAND — full width, bottom ── */}
+      <div class="adBand">
+        <div class="adBandInner">
+          <div class="adCopy">
+            <div class="adHead">Advertise with GoDo Daytona.</div>
+            <div class="adDesc">Reach thousands of Daytona locals with sponsored stories, display ads, and event promotion. Built for local businesses.</div>
+          </div>
+          <div class="adActions">
+            <a class="adBtn" href="/daytona/advertise/">Get started →</a>
+            <a class="adBtnGhost" href="/daytona/advertise/">See our rates</a>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <style>
-    /* ── Shell ── */
     .pageWrap { min-height: 100vh; }
 
     :global(.container) {
@@ -230,192 +209,134 @@ const topics = [
       padding-right: clamp(16px, 2.5vw, 32px);
     }
 
-    /* ── Newsletter band ── */
+    /* ══ NEWSLETTER BAND ══ */
     .nlBand {
       background: var(--brand1);
-      padding: clamp(18px, 2.5vw, 28px) 0;
+      padding: clamp(22px, 3vw, 36px) 0;
+      /* Space between pills header and this band */
+      margin-top: 20px;
     }
     .nlInner {
-      max-width: 1200px;
+      max-width: 860px; /* Narrower — pulled in from edges */
       margin: 0 auto;
       padding: 0 clamp(16px, 2.5vw, 32px);
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: clamp(20px, 3vw, 48px);
+      gap: clamp(24px, 4vw, 56px);
       align-items: center;
     }
     .nlEyebrow {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 800;
-      letter-spacing: .14em;
+      letter-spacing: .16em;
       text-transform: uppercase;
       color: var(--accentText);
-      opacity: .75;
-      margin-bottom: 4px;
+      opacity: .72;
+      margin-bottom: 5px;
     }
     .nlHead {
-      font-size: clamp(18px, 2vw, 24px);
+      font-size: clamp(20px, 2.2vw, 26px);
       font-weight: 950;
       color: var(--accentText);
-      line-height: 1.1;
-      letter-spacing: -0.3px;
+      line-height: 1.08;
+      letter-spacing: -0.4px;
     }
     .nlSub {
-      margin-top: 4px;
-      font-size: 13.5px;
+      margin-top: 6px;
+      font-size: 14px;
       color: var(--accentText);
-      opacity: .82;
-      line-height: 1.4;
+      opacity: .80;
+      line-height: 1.45;
     }
     .nlForm {
       display: flex;
+      flex-direction: column;
       gap: 8px;
-      align-items: center;
       flex-shrink: 0;
+      min-width: 260px;
     }
     .nlInput {
-      height: 44px;
-      width: clamp(180px, 20vw, 280px);
-      border-radius: 10px;
-      border: 2px solid rgba(0,0,0,.18);
-      background: rgba(255,255,255,.92);
+      height: 52px; /* Taller as requested */
+      width: 100%;
+      border-radius: 12px;
+      border: 2px solid rgba(0,0,0,.20);
+      background: rgba(255,255,255,.94);
       color: #111;
-      padding: 0 14px;
-      font-size: 14px;
+      padding: 0 16px;
+      font-size: 15px;
       outline: none;
+      box-sizing: border-box;
     }
-    .nlInput::placeholder { color: #888; }
-    .nlInput:focus { border-color: rgba(0,0,0,.4); background: #fff; }
+    .nlInput::placeholder { color: #999; }
+    .nlInput:focus { border-color: rgba(0,0,0,.45); background: #fff; }
     .nlBtn {
-      height: 44px;
-      padding: 0 18px;
-      border-radius: 10px;
-      border: 2px solid rgba(0,0,0,.22);
-      background: rgba(0,0,0,.18);
+      height: 52px; /* Match input */
+      width: 100%;
+      border-radius: 12px;
+      border: 2px solid rgba(0,0,0,.28);
+      background: rgba(0,0,0,.22);
       color: var(--accentText);
-      font-weight: 800;
-      font-size: 13.5px;
+      font-weight: 900;
+      font-size: 15px;
       cursor: pointer;
-      white-space: nowrap;
       transition: background 140ms;
+      letter-spacing: .01em;
     }
-    .nlBtn:hover { background: rgba(0,0,0,.28); }
+    .nlBtn:hover { background: rgba(0,0,0,.34); }
 
     @media (max-width: 720px) {
-      .nlInner { grid-template-columns: 1fr; gap: 14px; }
-      .nlForm { flex-direction: column; }
-      .nlInput, .nlBtn { width: 100%; }
+      .nlInner { grid-template-columns: 1fr; gap: 18px; max-width: 100%; }
+      .nlForm { min-width: 0; }
     }
 
-    /* ── Home grid 75/25 ── */
+    /* ══ HOME GRID 75/25 ══ */
     .homeGrid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 300px;
-      gap: clamp(24px, 3vw, 48px);
+      grid-template-columns: minmax(0, 1fr) 290px;
+      gap: clamp(28px, 3.5vw, 52px);
       align-items: start;
-      padding-top: 30px;
-      padding-bottom: 48px;
+      padding-top: 28px;
+      padding-bottom: 12px;
     }
     @media (max-width: 980px) {
       .homeGrid { grid-template-columns: 1fr; }
       .homeRail { order: 2; }
     }
 
-    /* ── Hero ── */
-    .heroCard {
-      display: block;
-      text-decoration: none;
-      margin-bottom: 32px;
-      padding-bottom: 28px;
-      border-bottom: 2px solid var(--brand1);
-    }
-    .heroImgWrap {
-      position: relative;
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 14px;
-    }
-    .heroImg {
-      display: block;
-      width: 100%;
-      aspect-ratio: 16/9;
-      object-fit: cover;
-      background: var(--surface);
-    }
-    .heroFallback {
-      aspect-ratio: 16/9;
-      background: var(--surface2);
-    }
-    .kicker {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: var(--brand1);
-      color: var(--accentText);
-      font-size: 10.5px;
-      font-weight: 800;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      padding: 3px 10px;
-      border-radius: 999px;
-    }
-    .heroTitle {
-      font-size: clamp(22px, 2.8vw, 34px);
-      font-weight: 900;
-      line-height: 1.1;
-      letter-spacing: -0.4px;
-      color: var(--text);
-      margin: 0 0 8px;
-    }
-    .heroDesc {
-      color: var(--muted);
-      font-size: clamp(14px, 1.3vw, 16px);
-      line-height: 1.5;
-      margin: 0 0 10px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .postMeta {
-      font-size: 12.5px;
-      color: var(--faint);
-    }
-
-    /* ── Section head ── */
+    /* ══ SECTION HEAD ══ */
     .sectionHead {
       display: flex;
       align-items: baseline;
       justify-content: space-between;
       gap: 12px;
-      padding-bottom: 10px;
+      padding-bottom: 11px;
       border-bottom: 2px solid var(--brand1);
       margin-bottom: 0;
     }
     .sectionLabel {
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 900;
-      letter-spacing: .13em;
+      letter-spacing: .14em;
       text-transform: uppercase;
       color: var(--text);
     }
     .viewAll {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--link);
       text-decoration: none;
     }
     .viewAll:hover { text-decoration: underline; }
 
-    /* ── Feed list ── */
-    .feedList { margin-bottom: 36px; }
+    /* ══ FEED — 3 large stacked rows ══ */
+    .feedList { margin-bottom: 0; }
 
     .feedRow {
       display: grid;
-      grid-template-columns: 1fr 100px;
-      gap: 16px;
+      grid-template-columns: 1fr 160px; /* Larger thumbnail */
+      gap: 20px;
       align-items: start;
-      padding: 16px 0;
+      padding: 24px 0; /* More breathing room */
       border-bottom: 1px solid var(--border);
       text-decoration: none;
     }
@@ -424,60 +345,65 @@ const topics = [
     .feedKicker {
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: .07em;
+      letter-spacing: .08em;
       text-transform: uppercase;
       color: var(--brand1);
-      margin-bottom: 4px;
+      margin-bottom: 7px;
     }
     .feedRowTitle {
-      font-size: clamp(16px, 1.5vw, 19px);
-      font-weight: 800;
-      line-height: 1.2;
-      letter-spacing: -0.2px;
+      font-size: clamp(19px, 2vw, 24px); /* Bigger title */
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.3px;
       color: var(--text);
-      margin-bottom: 5px;
+      margin-bottom: 8px;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      transition: color 120ms ease;
+      transition: color 130ms ease;
     }
     .feedRowDesc {
-      font-size: 13.5px;
+      font-size: 15px; /* Larger description */
       color: var(--muted);
-      line-height: 1.4;
+      line-height: 1.5;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
     }
-    .feedThumbWrap { width: 100px; flex-shrink: 0; }
+    .feedMeta {
+      font-size: 12.5px;
+      color: var(--faint);
+    }
+    .feedThumbWrap { width: 160px; flex-shrink: 0; }
     .feedThumb {
       display: block;
-      width: 100px;
-      height: 72px;
+      width: 160px;
+      height: 120px; /* Taller thumbnail */
       object-fit: cover;
-      border-radius: 8px;
+      border-radius: 10px;
       background: var(--surface);
     }
     .feedThumbFallback { background: var(--surface2); }
 
-    @media (max-width: 480px) {
-      .feedRow { grid-template-columns: 1fr 80px; }
-      .feedThumbWrap { width: 80px; }
-      .feedThumb { width: 80px; height: 58px; }
+    @media (max-width: 560px) {
+      .feedRow { grid-template-columns: 1fr 110px; gap: 14px; padding: 18px 0; }
+      .feedThumbWrap { width: 110px; }
+      .feedThumb { width: 110px; height: 82px; }
+      .feedRowTitle { font-size: 18px; }
+      .feedRowDesc { font-size: 13.5px; -webkit-line-clamp: 2; }
     }
 
-    /* ── Topics image grid ── */
+    /* ══ TOPICS IMAGE GRID ══ */
     .topicsGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px;
-      margin-top: 12px;
-      margin-bottom: 8px;
+      margin-top: 14px;
     }
-    @media (max-width: 600px) {
+    @media (max-width: 560px) {
       .topicsGrid { grid-template-columns: repeat(2, 1fr); }
     }
 
@@ -504,7 +430,7 @@ const topics = [
     .topicGrad {
       position: absolute;
       inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,.80) 0%, rgba(0,0,0,.25) 55%, transparent 100%);
+      background: linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.28) 55%, transparent 100%);
     }
     .topicLabel {
       position: absolute;
@@ -515,24 +441,22 @@ const topics = [
       font-weight: 900;
       color: #fff;
       line-height: 1.2;
-      letter-spacing: -0.1px;
       text-shadow: 0 1px 6px rgba(0,0,0,.6);
     }
-
-    /* Fallback when image missing — show brand color tile */
-    .topicTile:not(:has(img[src])) { background: var(--pillBg); border-color: var(--pillBorder); }
-    .topicTile:not(:has(img[src])) .topicGrad { display: none; }
-    .topicTile:not(:has(img[src])) .topicLabel {
+    /* Fallback — no image */
+    .topicTile:not(:has(img)) .topicGrad { display: none; }
+    .topicTile:not(:has(img)) .topicLabel {
       bottom: 50%; transform: translateY(50%);
-      color: var(--brand1); text-shadow: none; text-align: center;
+      color: var(--brand1); text-shadow: none;
+      text-align: center;
     }
 
-    /* ── Sidebar ── */
+    /* ══ SIDEBAR ══ */
     .homeRail {
       position: sticky;
       top: 80px;
       display: grid;
-      gap: 18px;
+      gap: 20px;
     }
     .railCard {
       border: 1px solid var(--border);
@@ -540,7 +464,6 @@ const topics = [
       border-radius: 14px;
       padding: 16px;
     }
-    .railFlat { background: transparent; }
     .railHead {
       display: flex;
       justify-content: space-between;
@@ -606,28 +529,71 @@ const topics = [
     .guideRow:last-child { border-bottom: none; }
     .guideRow:hover { color: var(--link); }
 
-    /* Resources */
-    .resourceList { display: grid; gap: 9px; }
-    .resourceLink { font-size: 13px; color: var(--muted); text-decoration: none; transition: color 120ms; }
-    .resourceLink:hover { color: var(--link); }
-
-    /* Advertise */
-    .adCard { background: var(--pillBg); border-color: var(--pillBorder); }
-    .adHead { font-size: 15px; font-weight: 900; color: var(--text); margin-bottom: 5px; }
-    .adDesc { font-size: 12.5px; color: var(--muted); line-height: 1.4; margin-bottom: 14px; }
+    /* ══ ADVERTISE BAND — full width bottom ══ */
+    .adBand {
+      margin: 40px 0 48px;
+      border-radius: 16px;
+      /* Slightly brighter/bolder than brand1 using color-mix */
+      background: linear-gradient(135deg, var(--brand1), var(--brand2));
+      padding: clamp(24px, 3vw, 40px);
+      box-shadow: 0 8px 32px color-mix(in srgb, var(--brand1) 35%, transparent);
+    }
+    .adBandInner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .adHead {
+      font-size: clamp(20px, 2.2vw, 26px);
+      font-weight: 950;
+      color: var(--accentText);
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .adDesc {
+      font-size: 15px;
+      color: var(--accentText);
+      opacity: .82;
+      line-height: 1.45;
+      max-width: 520px;
+    }
+    .adActions {
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+      flex-wrap: wrap;
+    }
     .adBtn {
       display: inline-flex;
       align-items: center;
-      height: 36px;
-      padding: 0 14px;
-      border-radius: 999px;
-      background: var(--brand1);
+      height: 48px;
+      padding: 0 24px;
+      border-radius: 12px;
+      background: var(--accentText);
+      color: var(--brand1);
+      font-size: 15px;
+      font-weight: 900;
+      text-decoration: none;
+      transition: opacity 140ms;
+      white-space: nowrap;
+    }
+    .adBtn:hover { opacity: .88; }
+    .adBtnGhost {
+      display: inline-flex;
+      align-items: center;
+      height: 48px;
+      padding: 0 20px;
+      border-radius: 12px;
+      border: 2px solid rgba(255,255,255,.45);
       color: var(--accentText);
-      font-size: 12.5px;
+      font-size: 14px;
       font-weight: 800;
       text-decoration: none;
-      transition: filter 140ms;
+      transition: border-color 140ms;
+      white-space: nowrap;
     }
-    .adBtn:hover { filter: brightness(.92); }
+    .adBtnGhost:hover { border-color: rgba(255,255,255,.80); }
   </style>
 </Base>
