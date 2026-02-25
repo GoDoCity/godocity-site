@@ -105,10 +105,7 @@ const topics = [
             </a>
           )}
 
-          <div class="sectionHead">
-            <span class="sectionLabel">Latest</span>
-          </div>
-
+      
           <div class="feedList">
             {latest.map((p, i) => (
               <>
@@ -392,7 +389,7 @@ const topics = [
       color: var(--text);
     }
 
-    .feedList { margin-bottom: 0; }
+    .feedList { margin-bottom: 0; border-top: 2px solid var(--brand1); }
     .feedRow {
       display: grid;
       grid-template-columns: 1fr 130px;
