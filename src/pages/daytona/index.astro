@@ -81,7 +81,7 @@ const topics = [
     {/* ── NEWSLETTER BAND — vertical stack ── */}
     <div class="nlBand">
       <div class="nlInner">
-        <div class="nlHead">Good news Daytona.</div>
+        <div class="nlHead">Good News Daytona!</div>
         <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong>for free.</strong></div>
         <form class="nlForm" action="/daytona/subscribe/" method="get">
           <div class="nlRow">
@@ -256,10 +256,15 @@ const topics = [
       :global(.container) { padding-left: 1rem; padding-right: 1rem; }
     }
 
-    /* ── Newsletter — vertical stack, centered ── */
+    /* ── Newsletter — vertical stack, skyline bg, 65% dark overlay ── */
     .nlBand {
-      background: var(--brand1);
-      padding: clamp(24px, 3vw, 36px) 0;
+      position: relative;
+      background:
+        linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
+        url('/images/daytona-skyline.jpg') center/cover no-repeat;
+      /* Fallback to brand color if image missing */
+      background-color: var(--brand1);
+      padding: clamp(28px, 3.5vw, 44px) 0;
       margin-top: 16px;
     }
     .nlInner {
@@ -273,16 +278,16 @@ const topics = [
       gap: 10px;
     }
     .nlHead {
-      font-size: clamp(24px, 3vw, 36px);
-      font-weight: 950; color: var(--accentText);
+      font-size: clamp(28px, 3.5vw, 42px);
+      font-weight: 950; color: #fff;
       line-height: 1.05; letter-spacing: -0.5px;
       margin-bottom: 0;
     }
     .nlSub {
-      font-size: clamp(13px, 1.2vw, 15px);
-      color: var(--accentText); opacity: .88; line-height: 1.4;
+      font-size: clamp(13px, 1.2vw, 16px);
+      color: rgba(255,255,255,.88); line-height: 1.4;
     }
-    .nlSub strong { font-weight: 900; opacity: 1; }
+    .nlSub strong { font-weight: 900; color: #fff; }
     .nlForm { width: 100%; max-width: 520px; }
     .nlRow { display: flex; height: 50px; width: 100%; }
     .nlInput {
@@ -321,7 +326,7 @@ const topics = [
     .homeGrid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 290px;
-      gap: clamp(24px, 2.5vw, 40px);
+      gap: clamp(48px, 4vw, 64px);
       /* align-items: start keeps both columns top-aligned */
       align-items: start;
       padding-top: 22px;
@@ -346,20 +351,20 @@ const topics = [
     .heroImgWrap {
       border-radius: 12px;
       overflow: hidden;
-      max-height: 360px;
+      max-height: 285px;
     }
     .heroImg {
       display: block;
       width: 100%;
-      height: 360px;
-      max-height: 360px;
+      height: 285px;
+      max-height: 285px;
       object-fit: cover;
       object-position: center;
       background: var(--surface);
     }
     .heroFallback {
-      height: 300px;
-      max-height: 360px;
+      height: 240px;
+      max-height: 285px;
       background: var(--surface2);
     }
 
@@ -395,11 +400,11 @@ const topics = [
     }
     .heroMeta { font-size: 12.5px; color: var(--faint); }
 
-    /* Single divider + 40px extra editorial breathing room */
+    /* Single divider + 40px editorial breathing room above triple-threat */
     .feedDivider {
       height: 2px;
       background: var(--brand1);
-      margin: 0 0 60px;
+      margin: 0 0 40px;
     }
 
     /* ── 3-column cards ── */
