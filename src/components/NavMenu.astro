@@ -1,36 +1,91 @@
 ---
 /**
- * NavMenu: single source of truth for pills + drawer links.
- * - No Subscribe CTA here (subscribe happens via the newsletter module).
- * - Advertise sits in the main pill row next to The Buy.
- * - Mobile pills: horizontal scroll, never clipped/hidden.
+ * NavMenu — pills + dropdowns + mobile drawer
+ * Topics: 2-column pill grid dropdown
+ * Guides: simple 3-item dropdown
+ * Hover on desktop opens dropdown; click also toggles (JS inline)
  */
 const base = Astro.props?.cityBase ? `/${Astro.props.cityBase}` : "";
 const cityBase = base || "/daytona";
 
-const pills = [
-  { label: "Home", href: `${cityBase}/` },
-  { label: "Topics", href: `${cityBase}/topics/` },
-  { label: "Guides", href: `${cityBase}/guides/` },
-  { label: "Events", href: `${cityBase}/events/` },
-  { label: "Jobs", href: `${cityBase}/jobs/` },
-  { label: "Games", href: `${cityBase}/games/` },
-  { label: "The Buy", href: `${cityBase}/buy/` },
-  { label: "Advertise", href: `${cityBase}/advertise/` },
+const topicItems = [
+  { label: "Biz",              href: `${cityBase}/topics/biz/` },
+  { label: "City",             href: `${cityBase}/topics/city/` },
+  { label: "Culture",          href: `${cityBase}/topics/culture/` },
+  { label: "Events",           href: `${cityBase}/topics/events/` },
+  { label: "Food",             href: `${cityBase}/topics/food/` },
+  { label: "History",          href: `${cityBase}/topics/history/` },
+  { label: "Real Estate",      href: `${cityBase}/topics/real-estate/` },
+  { label: "Sports",           href: `${cityBase}/topics/sports/` },
+  { label: "Travel & Outdoors",href: `${cityBase}/topics/travel-outdoors/` },
+  { label: "Wellness",         href: `${cityBase}/topics/wellness/` },
 ];
 
-// Drawer links should match pills exactly (no duplicates beyond this list)
-const drawerLinks = pills;
+const guideItems = [
+  { label: "Live",  href: `${cityBase}/guides/live/` },
+  { label: "Work",  href: `${cityBase}/guides/work/` },
+  { label: "Play",  href: `${cityBase}/guides/play/` },
+];
+
+const pills = [
+  { label: "Home",      href: `${cityBase}/`,          dropdown: null },
+  { label: "Topics",    href: `${cityBase}/topics/`,   dropdown: "topics" },
+  { label: "Guides",    href: `${cityBase}/guides/`,   dropdown: "guides" },
+  { label: "Events",    href: `${cityBase}/events/`,   dropdown: null },
+  { label: "Jobs",      href: `${cityBase}/jobs/`,     dropdown: null },
+  { label: "Games",     href: `${cityBase}/games/`,    dropdown: null },
+  { label: "The Buy",   href: `${cityBase}/buy/`,      dropdown: null },
+  { label: "Advertise", href: `${cityBase}/advertise/`,dropdown: null },
+];
 ---
 
 <nav class="navMenu" aria-label="Primary navigation">
+
   <div class="pillRow" role="navigation" aria-label="Site sections">
     {pills.map((p) => (
-      <a class="pill" href={p.href}>{p.label}</a>
+      p.dropdown ? (
+        <div class="dropWrap" data-drop={p.dropdown}>
+          <a class="pill pillDrop" href={p.href} aria-haspopup="true" aria-expanded="false">
+            {p.label}
+            <svg class="dropArrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+              <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </a>
+
+          {p.dropdown === "topics" && (
+            <div class="dropdown topicsDropdown" role="menu">
+              <div class="dropGrid">
+                {topicItems.map((t) => (
+                  <a class="dropPill" href={t.href} role="menuitem">{t.label}</a>
+                ))}
+              </div>
+              <a class="dropFooter" href={`${cityBase}/topics/`}>Browse all topics →</a>
+            </div>
+          )}
+
+          {p.dropdown === "guides" && (
+            <div class="dropdown guidesDropdown" role="menu">
+              <div class="guideList">
+                {guideItems.map((g) => (
+                  <a class="guideDropItem" href={g.href} role="menuitem">
+                    <span class="guideIcon">
+                      {g.label === "Live" ? "🏠" : g.label === "Work" ? "💼" : "🎉"}
+                    </span>
+                    <span class="guideItemLabel">{g.label}</span>
+                  </a>
+                ))}
+              </div>
+              <a class="dropFooter" href={`${cityBase}/guides/`}>All city guides →</a>
+            </div>
+          )}
+        </div>
+      ) : (
+        <a class="pill" href={p.href}>{p.label}</a>
+      )
     ))}
   </div>
 
-  <!-- Drawer (checkbox/label pattern, no JS) -->
+  <!-- Mobile hamburger -->
   <input id="navToggle" class="navToggle" type="checkbox" />
   <label class="menuBtn" for="navToggle" aria-label="Open menu">
     <span class="burger" aria-hidden="true"><span></span></span>
@@ -45,14 +100,81 @@ const drawerLinks = pills;
       <label class="closeBtn" for="navToggle" aria-label="Close menu">✕</label>
     </div>
 
-    <!-- ONE clean nav list only -->
     <div class="drawerLinks">
-      {drawerLinks.map((p) => (
-        <a class="drawerLink" href={p.href}>{p.label}</a>
-      ))}
+      <a class="drawerLink" href={`${cityBase}/`}>Home</a>
+
+      <!-- Topics section -->
+      <div class="drawerSection">
+        <div class="drawerSectionLabel">Topics</div>
+        <div class="drawerPillGrid">
+          {topicItems.map((t) => (
+            <a class="drawerPill" href={t.href}>{t.label}</a>
+          ))}
+        </div>
+      </div>
+
+      <!-- Guides section -->
+      <div class="drawerSection">
+        <div class="drawerSectionLabel">Guides</div>
+        {guideItems.map((g) => (
+          <a class="drawerLink" href={g.href}>{g.label}</a>
+        ))}
+      </div>
+
+      <a class="drawerLink" href={`${cityBase}/events/`}>Events</a>
+      <a class="drawerLink" href={`${cityBase}/jobs/`}>Jobs</a>
+      <a class="drawerLink" href={`${cityBase}/games/`}>Games</a>
+      <a class="drawerLink" href={`${cityBase}/buy/`}>The Buy</a>
+      <a class="drawerLink drawerAdvertise" href={`${cityBase}/advertise/`}>Advertise</a>
     </div>
   </aside>
 </nav>
+
+<!-- Hover + click both work via tiny inline script -->
+<script is:inline>
+(function () {
+  function init() {
+    document.querySelectorAll(".dropWrap").forEach(function (wrap) {
+      var pill = wrap.querySelector(".pillDrop");
+
+      // Click toggles open/close
+      pill.addEventListener("click", function (e) {
+        var isOpen = wrap.classList.contains("open");
+        closeAll();
+        if (!isOpen) {
+          wrap.classList.add("open");
+          pill.setAttribute("aria-expanded", "true");
+        }
+        e.preventDefault(); // prevent nav on click; user can use Browse all link inside
+      });
+    });
+
+    // Close on outside click
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest(".dropWrap")) closeAll();
+    });
+
+    // Close on Escape
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeAll();
+    });
+
+    function closeAll() {
+      document.querySelectorAll(".dropWrap.open").forEach(function (w) {
+        w.classList.remove("open");
+        var p = w.querySelector(".pillDrop");
+        if (p) p.setAttribute("aria-expanded", "false");
+      });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
 
 <style>
   .navMenu {
@@ -62,10 +184,10 @@ const drawerLinks = pills;
     width: 100%;
   }
 
-  /* Main pills row */
+  /* ── Pill row ── */
   .pillRow {
     display: flex;
-    gap: 12px;
+    gap: 10px;
     align-items: center;
     flex: 1 1 auto;
     justify-content: center;
@@ -75,6 +197,7 @@ const drawerLinks = pills;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 5px;
     height: 40px;
     padding: 0 16px;
     border-radius: 999px;
@@ -85,18 +208,139 @@ const drawerLinks = pills;
     font-size: 14px;
     text-decoration: none;
     white-space: nowrap;
-    transition: transform 140ms ease, background 140ms ease;
+    transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
   }
-
   .pill:hover {
     border-color: color-mix(in srgb, var(--brand2) 70%, transparent);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand2) 18%, transparent);
     transform: translateY(-1px);
   }
 
-  /* ── Hamburger button: HIDDEN on desktop ── */
+  .dropArrow {
+    flex-shrink: 0;
+    transition: transform 200ms ease;
+  }
+
+  /* ── Dropdown wrapper ── */
+  .dropWrap {
+    position: relative;
+  }
+
+  /* Hover open on desktop */
+  @media (hover: hover) {
+    .dropWrap:hover > .dropdown {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      visibility: visible;
+    }
+    .dropWrap:hover > .pillDrop .dropArrow {
+      transform: rotate(180deg);
+    }
+  }
+
+  /* Click open (JS adds .open class) */
+  .dropWrap.open > .dropdown {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
+  }
+  .dropWrap.open > .pillDrop .dropArrow {
+    transform: rotate(180deg);
+  }
+
+  /* ── Dropdown panel ── */
+  .dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    background: var(--bg, #0b0d10);
+    border: 1px solid var(--border, rgba(255,255,255,.12));
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 180ms ease, transform 180ms ease;
+    min-width: 280px;
+    overflow: hidden;
+  }
+
+  /* Topics: 2-column pill grid */
+  .topicsDropdown { min-width: 340px; }
+  .dropGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 16px 16px 12px;
+  }
+  .dropPill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid var(--pillBorder);
+    background: var(--pillBg);
+    color: var(--brand1);
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 140ms, border-color 140ms, transform 120ms;
+  }
+  .dropPill:hover {
+    border-color: var(--brand1);
+    transform: translateY(-1px);
+    background: color-mix(in srgb, var(--brand1) 14%, transparent);
+  }
+
+  /* Guides: simple list */
+  .guidesDropdown { min-width: 200px; }
+  .guideList {
+    padding: 12px 12px 8px;
+    display: grid;
+    gap: 4px;
+  }
+  .guideDropItem {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 15px;
+    font-weight: 800;
+    transition: background 140ms;
+  }
+  .guideDropItem:hover {
+    background: var(--pillBg);
+    color: var(--brand1);
+  }
+  .guideIcon { font-size: 18px; flex-shrink: 0; }
+  .guideItemLabel {}
+
+  /* Footer link at bottom of dropdown */
+  .dropFooter {
+    display: block;
+    padding: 10px 16px;
+    border-top: 1px solid var(--border, rgba(255,255,255,.08));
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--brand1);
+    text-decoration: none;
+    text-align: center;
+    transition: background 140ms;
+  }
+  .dropFooter:hover { background: var(--pillBg); }
+
+  /* ── Hamburger ── */
   .menuBtn {
-    display: none;   /* hidden by default; shown only on mobile below */
+    display: none;
     align-items: center;
     gap: 8px;
     border-radius: 12px;
@@ -110,7 +354,6 @@ const drawerLinks = pills;
     flex-shrink: 0;
   }
   .menuText { font-size: 12.5px; }
-
   .burger {
     width: 18px; height: 12px;
     position: relative;
@@ -119,8 +362,7 @@ const drawerLinks = pills;
   .burger::before, .burger::after, .burger span {
     content: "";
     position: absolute;
-    left: 0; right: 0;
-    height: 2px;
+    left: 0; right: 0; height: 2px;
     border-radius: 2px;
     background: var(--text);
   }
@@ -128,15 +370,13 @@ const drawerLinks = pills;
   .burger span { top: 5px; }
   .burger::after { bottom: 0; }
 
-  /* Checkbox: always hidden */
   .navToggle {
     position: absolute;
     width: 1px; height: 1px;
-    opacity: 0;
-    pointer-events: none;
+    opacity: 0; pointer-events: none;
   }
 
-  /* Backdrop: hidden until drawer opens */
+  /* ── Backdrop ── */
   .backdrop {
     display: none;
     position: fixed;
@@ -146,7 +386,7 @@ const drawerLinks = pills;
     z-index: 90;
   }
 
-  /* Drawer: always off-screen to the right */
+  /* ── Drawer ── */
   .drawer {
     position: fixed;
     top: 0; right: 0;
@@ -155,14 +395,13 @@ const drawerLinks = pills;
     background: var(--bg, #0b0d10);
     border-left: 1px solid var(--border, rgba(255,255,255,.10));
     box-shadow: -20px 0 60px rgba(0,0,0,.45);
-    transform: translateX(110%);   /* 110% guarantees fully hidden */
+    transform: translateX(110%);
     transition: transform 220ms ease;
     z-index: 100;
     display: grid;
     grid-template-rows: auto 1fr;
-    visibility: hidden;            /* also hide from accessibility tree */
+    visibility: hidden;
   }
-
   .drawerHead {
     padding: 14px 14px 12px;
     border-bottom: 1px solid rgba(255,255,255,.08);
@@ -175,19 +414,17 @@ const drawerLinks = pills;
   .closeBtn {
     width: 34px; height: 34px;
     border-radius: 10px;
-    display: grid;
-    place-items: center;
+    display: grid; place-items: center;
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(255,255,255,.03);
-    color: var(--text);
-    cursor: pointer;
-    user-select: none;
+    color: var(--text); cursor: pointer; user-select: none;
   }
   .drawerLinks {
-    padding: 12px 14px 16px;
+    padding: 12px 14px 24px;
     display: grid;
-    gap: 8px;
-    overflow: auto;
+    gap: 6px;
+    overflow-y: auto;
+    align-content: start;
   }
   .drawerLink {
     display: flex;
@@ -199,16 +436,60 @@ const drawerLinks = pills;
     border-radius: 12px;
     padding: 12px;
     font-weight: 700;
+    transition: border-color 140ms, background 140ms;
   }
   .drawerLink:hover {
     border-color: var(--pillBorder);
     background: var(--pillBg);
   }
+  .drawerAdvertise {
+    background: var(--pillBg);
+    border-color: var(--pillBorder);
+    color: var(--brand1);
+    font-weight: 900;
+    margin-top: 4px;
+  }
 
-  /* ── Mobile: show hamburger, allow pill scroll ── */
+  /* Drawer sections (Topics, Guides) */
+  .drawerSection {
+    display: grid;
+    gap: 6px;
+    padding: 10px 0 4px;
+    border-top: 1px solid rgba(255,255,255,.07);
+  }
+  .drawerSectionLabel {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--brand1);
+    padding: 0 2px;
+  }
+  .drawerPillGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .drawerPill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    border-radius: 999px;
+    border: 1px solid var(--pillBorder);
+    background: var(--pillBg);
+    color: var(--brand1);
+    font-size: 12.5px;
+    font-weight: 800;
+    text-decoration: none;
+    text-align: center;
+    transition: background 140ms;
+  }
+  .drawerPill:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
+
+  /* ── Mobile ── */
   @media (max-width: 760px) {
     .menuBtn { display: inline-flex; }
-
     .pillRow {
       gap: 6px;
       overflow-x: auto;
@@ -219,12 +500,9 @@ const drawerLinks = pills;
       justify-content: flex-start;
     }
     .pillRow::-webkit-scrollbar { display: none; }
-
-    .pill {
-      height: 36px;
-      padding: 0 14px;
-      font-size: 13px;
-    }
+    .pill { height: 36px; padding: 0 14px; font-size: 13px; }
+    /* Dropdowns disabled on mobile — drawer handles it */
+    .dropdown { display: none; }
   }
 
   /* ── Drawer open state ── */
