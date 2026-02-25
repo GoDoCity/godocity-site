@@ -89,7 +89,7 @@ const topics = [
 
         <main class="homeMain">
 
-          {/* HERO */}
+          {/* ── HERO — cinematic wide crop, anchored to sidebar height ── */}
           {hero && (
             <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
               <div class="heroImgWrap">
@@ -109,7 +109,7 @@ const topics = [
 
           <div class="feedDivider"></div>
 
-          {/* 3 CARDS SIDE BY SIDE */}
+          {/* ── 3 CARDS SIDE BY SIDE ── */}
           <div class="cardGrid">
             {latest.map((p) => (
               <a class="articleCard" href={`/daytona/posts/${p.slug}/`}>
@@ -129,11 +129,11 @@ const topics = [
             ))}
           </div>
 
-          {/* FEATURED AD */}
+          {/* ── FEATURED AD — "FEATURED" label, never "Sponsored" ── */}
           <div class="featuredCard">
             <div class="featuredHeader">
               <span class="featuredStar">★</span>
-              <span class="featuredLabel">Featured</span>
+              <span class="featuredLabel">FEATURED</span>
               <span class="featuredTag">{featuredAd.tag}</span>
             </div>
             <div class="featuredBody">
@@ -152,7 +152,7 @@ const topics = [
             <a class="viewAllBtn" href="/daytona/posts/">View all stories →</a>
           </div>
 
-          {/* TOPICS */}
+          {/* ── TOPICS ── */}
           <div class="topicsHead">
             <span class="topicsLabel">Topics</span>
           </div>
@@ -168,7 +168,7 @@ const topics = [
 
         </main>
 
-        {/* ── SIDEBAR ── */}
+        {/* ── SIDEBAR — aligns top with hero, borderless ── */}
         <aside class="homeRail">
 
           <div class="railSection">
@@ -236,137 +236,136 @@ const topics = [
   <style>
     .pageWrap { min-height: 100vh; }
 
-    /* 1400px wide, 2rem gutters on each side */
+    /* ── 1550px container, 1.5rem gutters ── */
     :global(.container) {
-      max-width: 1400px;
+      max-width: 1550px;
       margin: 0 auto;
-      padding-left: 2rem;
-      padding-right: 2rem;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+    @media (max-width: 600px) {
+      :global(.container) { padding-left: 1rem; padding-right: 1rem; }
     }
 
-    /* Newsletter */
+    /* ── Newsletter ── */
     .nlBand {
       background: var(--brand1);
-      padding: clamp(18px, 2.5vw, 28px) 0;
+      padding: clamp(16px, 2vw, 24px) 0;
       margin-top: 16px;
     }
     .nlInner {
-      max-width: 1400px;
+      max-width: 1550px;
       margin: 0 auto;
-      padding: 0 2rem;
+      padding: 0 1.5rem;
       display: grid;
       grid-template-columns: auto 1fr;
       gap: clamp(24px, 4vw, 72px);
       align-items: center;
     }
     .nlHead {
-      font-size: clamp(20px, 2.2vw, 26px);
+      font-size: clamp(19px, 2vw, 24px);
       font-weight: 950; color: var(--accentText);
       line-height: 1.05; letter-spacing: -0.4px;
-      margin-bottom: 5px; white-space: nowrap;
+      margin-bottom: 4px; white-space: nowrap;
     }
     .nlSub {
-      font-size: clamp(13px, 1.2vw, 15px);
+      font-size: clamp(12px, 1.1vw, 14px);
       color: var(--accentText); opacity: .88;
     }
     .nlSub strong { font-weight: 900; opacity: 1; }
-    .nlRow { display: flex; height: 52px; }
+    .nlRow { display: flex; height: 48px; }
     .nlInput {
       flex: 1; min-width: 0;
-      border-radius: 12px 0 0 12px;
+      border-radius: 10px 0 0 10px;
       border: 2px solid rgba(0,0,0,.12); border-right: none;
       background: #fff; color: #111;
-      padding: 0 18px; font-size: 16px; font-weight: 500;
+      padding: 0 16px; font-size: 15px; font-weight: 500;
       outline: none;
     }
     .nlInput::placeholder { color: #999; }
     .nlInput:focus { border-color: rgba(0,0,0,.3); }
     .nlBtn {
-      flex-shrink: 0; padding: 0 22px;
-      border-radius: 0 12px 12px 0;
-      border: 2px solid rgba(0,0,0,.30);
-      background: rgba(0,0,0,.22); color: var(--accentText);
-      font-weight: 900; font-size: 15px; cursor: pointer;
+      flex-shrink: 0; padding: 0 20px;
+      border-radius: 0 10px 10px 0;
+      border: 2px solid rgba(0,0,0,.28);
+      background: rgba(0,0,0,.20); color: var(--accentText);
+      font-weight: 900; font-size: 14px; cursor: pointer;
       white-space: nowrap; transition: background 140ms;
       letter-spacing: .02em;
     }
-    .nlBtn:hover { background: rgba(0,0,0,.36); }
+    .nlBtn:hover { background: rgba(0,0,0,.34); }
     .nlFine {
-      margin-top: 7px; font-size: 12px;
-      color: var(--accentText); opacity: .65; font-style: italic;
+      margin-top: 6px; font-size: 11.5px;
+      color: var(--accentText); opacity: .62; font-style: italic;
     }
     @media (max-width: 700px) {
-      .nlInner { grid-template-columns: 1fr; gap: 14px; padding: 0 1rem; }
+      .nlInner { grid-template-columns: 1fr; gap: 12px; padding: 0 1rem; }
       .nlHead { white-space: normal; }
       .nlRow { flex-direction: column; height: auto; gap: 8px; }
-      .nlInput { border-radius: 12px; border-right: 2px solid rgba(0,0,0,.12); height: 52px; }
-      .nlBtn { border-radius: 12px; height: 52px; }
+      .nlInput { border-radius: 10px; border-right: 2px solid rgba(0,0,0,.12); height: 48px; }
+      .nlBtn { border-radius: 10px; height: 48px; }
     }
 
-    /* Home grid */
+    /* ── Home grid 75/25, sidebar aligns top with hero ── */
     .homeGrid {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 300px;
-      gap: clamp(28px, 3vw, 48px);
+      grid-template-columns: minmax(0, 1fr) 290px;
+      gap: clamp(24px, 2.5vw, 40px);
+      /* align-items: start keeps both columns top-aligned */
       align-items: start;
-      padding-top: 24px;
+      padding-top: 22px;
       padding-bottom: 12px;
     }
     @media (max-width: 980px) {
       .homeGrid { grid-template-columns: 1fr; }
       .homeRail { order: 2; }
     }
-    @media (max-width: 600px) {
-      :global(.container) { padding-left: 1rem; padding-right: 1rem; }
-    }
 
-    /* ── HERO — constrained height so triple-threat shows above fold ── */
+    /* ── HERO — 40/60 split like Nooga, image constrained to 300px ── */
     .heroCard {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
+      grid-template-columns: 2fr 3fr;
+      gap: 22px;
       align-items: start;
       text-decoration: none;
-      padding-bottom: 20px;
+      padding-bottom: 18px;
     }
     @media (max-width: 640px) { .heroCard { grid-template-columns: 1fr; } }
 
     .heroImgWrap {
-      border-radius: 14px;
+      border-radius: 12px;
       overflow: hidden;
-      /* Constrain hero image so triple-threat row is visible above fold */
-      max-height: 500px;
+      max-height: 300px;
     }
     .heroImg {
-      display: block; width: 100%;
-      /* aspect-ratio removed — max-height on wrapper does the constraining */
-      height: 100%;
-      max-height: 500px;
+      display: block;
+      width: 100%;
+      height: 300px;
+      max-height: 300px;
       object-fit: cover;
       object-position: center;
       background: var(--surface);
     }
     .heroFallback {
-      height: 380px;
-      max-height: 500px;
+      height: 260px;
+      max-height: 300px;
       background: var(--surface2);
     }
 
     .heroKicker {
-      font-size: 11px; font-weight: 800;
+      font-size: 10.5px; font-weight: 800;
       letter-spacing: .1em; text-transform: uppercase;
-      color: var(--brand1); margin-bottom: 10px;
+      color: var(--brand1); margin-bottom: 9px;
     }
     .heroTitle {
-      /* Balanced: punchy but not so tall it pushes cards below fold */
-      font-size: clamp(24px, 2.6vw, 38px);
+      /* Reduced another 10% from previous — matches Nooga's lighter touch */
+      font-size: clamp(20px, 2.1vw, 30px);
       font-weight: 800;
-      line-height: 1.08;
-      letter-spacing: -0.6px;
+      line-height: 1.09;
+      letter-spacing: -0.5px;
       color: var(--text);
-      margin: 0 0 12px;
+      margin: 0 0 11px;
       transition: color 130ms ease;
-      /* Max 3 lines — keeps it tight */
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
@@ -374,47 +373,48 @@ const topics = [
     }
     .heroCard:hover .heroTitle { color: var(--link); }
     .heroDesc {
+      /*
+        Original was clamp(13.5px, 1.1vw, 15.5px).
+        Reduced by 5%: clamp(12.8px→13px, 1.05vw, 14.7px→15px)
+      */
       color: var(--muted);
-      font-size: clamp(13.5px, 1.1vw, 15.5px);
-      line-height: 1.6; margin: 0 0 14px;
+      font-size: clamp(12.5px, 1vw, 14px);
+      line-height: 1.58; margin: 0 0 13px;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .heroMeta { font-size: 13px; color: var(--faint); }
+    .heroMeta { font-size: 12.5px; color: var(--faint); }
 
-    /* Single divider */
+    /* Single divider — no double lines */
     .feedDivider {
       height: 2px;
       background: var(--brand1);
-      margin: 0 0 22px;
+      margin: 0 0 20px;
     }
 
-    /* 3-column cards */
+    /* ── 3-column cards ── */
     .cardGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 22px;
-      margin-bottom: 24px;
+      gap: 20px;
+      margin-bottom: 22px;
     }
     @media (max-width: 640px) { .cardGrid { grid-template-columns: 1fr; gap: 0; } }
 
     .articleCard {
-      display: flex; flex-direction: column;
-      text-decoration: none;
+      display: flex; flex-direction: column; text-decoration: none;
     }
     @media (max-width: 640px) {
       .articleCard {
-        display: grid;
-        grid-template-columns: 1fr 100px;
+        display: grid; grid-template-columns: 1fr 100px;
         gap: 12px; align-items: start;
-        padding: 16px 0;
-        border-bottom: 1px solid var(--border);
+        padding: 16px 0; border-bottom: 1px solid var(--border);
       }
     }
     .cardImgWrap {
-      border-radius: 12px; overflow: hidden; margin-bottom: 12px;
+      border-radius: 11px; overflow: hidden; margin-bottom: 11px;
     }
     @media (max-width: 640px) {
       .cardImgWrap { margin-bottom: 0; order: 2; border-radius: 8px; }
@@ -433,27 +433,27 @@ const topics = [
     }
     .cardBody { flex: 1; }
     .cardKicker {
-      font-size: 10.5px; font-weight: 800;
+      font-size: 10px; font-weight: 800;
       letter-spacing: .08em; text-transform: uppercase;
-      color: var(--brand1); margin-bottom: 6px;
+      color: var(--brand1); margin-bottom: 5px;
     }
     .cardTitle {
-      font-size: clamp(15px, 1.3vw, 18px);
+      font-size: clamp(14px, 1.2vw, 17px);
       font-weight: 900; line-height: 1.2;
-      letter-spacing: -0.2px; color: var(--text); margin-bottom: 7px;
+      letter-spacing: -0.2px; color: var(--text); margin-bottom: 6px;
       display: -webkit-box; -webkit-line-clamp: 3;
       -webkit-box-orient: vertical; overflow: hidden;
       transition: color 130ms ease;
     }
     .articleCard:hover .cardTitle { color: var(--link); }
     .cardDesc {
-      font-size: 13px; color: var(--muted); line-height: 1.4; margin-bottom: 8px;
+      font-size: 12.5px; color: var(--muted); line-height: 1.4; margin-bottom: 7px;
       display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
     }
-    .cardMeta { font-size: 12px; color: var(--faint); }
+    .cardMeta { font-size: 11.5px; color: var(--faint); }
 
-    /* Featured ad */
+    /* ── FEATURED ad — "FEATURED" all-caps label ── */
     .featuredCard {
       margin: 0 0 20px;
       border: 1.5px solid var(--pillBorder);
@@ -461,27 +461,28 @@ const topics = [
     }
     .featuredHeader {
       display: flex; align-items: center; gap: 7px;
-      padding: 7px 14px; background: var(--pillBg);
+      padding: 6px 14px; background: var(--pillBg);
       border-bottom: 1px solid var(--pillBorder);
     }
-    .featuredStar { font-size: 12px; color: var(--brand1); }
+    .featuredStar { font-size: 11px; color: var(--brand1); }
     .featuredLabel {
-      font-size: 10.5px; font-weight: 900;
-      letter-spacing: .1em; text-transform: uppercase; color: var(--brand1);
+      /* All-caps FEATURED — never "Sponsored" */
+      font-size: 10px; font-weight: 900;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--brand1);
     }
-    .featuredTag { font-size: 10.5px; font-weight: 600; color: var(--muted); }
-    .featuredBody { padding: 16px; display: grid; gap: 12px; }
-    .featuredImg { display: block; width: 100%; height: 160px; object-fit: cover; border-radius: 9px; }
+    .featuredTag { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .04em; }
+    .featuredBody { padding: 14px 16px; display: grid; gap: 10px; }
+    .featuredImg { display: block; width: 100%; height: 150px; object-fit: cover; border-radius: 9px; }
     .featuredTitle {
-      font-size: 17px; font-weight: 900; color: var(--text);
-      line-height: 1.2; margin-bottom: 6px; letter-spacing: -0.2px;
+      font-size: 16.5px; font-weight: 900; color: var(--text);
+      line-height: 1.2; margin-bottom: 5px; letter-spacing: -0.2px;
     }
-    .featuredDesc { font-size: 13.5px; color: var(--muted); line-height: 1.45; margin-bottom: 12px; }
+    .featuredDesc { font-size: 13px; color: var(--muted); line-height: 1.45; margin-bottom: 12px; }
     .featuredCta {
       display: inline-flex; align-items: center;
-      height: 38px; padding: 0 18px; border-radius: 999px;
+      height: 36px; padding: 0 16px; border-radius: 999px;
       background: var(--brand1); color: var(--accentText);
-      font-size: 13.5px; font-weight: 800;
+      font-size: 13px; font-weight: 800;
       text-decoration: none; transition: filter 130ms;
     }
     .featuredCta:hover { filter: brightness(.92); }
@@ -489,17 +490,17 @@ const topics = [
     /* View all */
     .viewAllRow { padding: 4px 0 24px; text-align: center; }
     .viewAllBtn {
-      font-size: 14px; font-weight: 800; color: var(--link);
+      font-size: 13.5px; font-weight: 800; color: var(--link);
       text-decoration: none; border: 1px solid var(--pillBorder);
-      background: var(--pillBg); padding: 10px 24px;
+      background: var(--pillBg); padding: 9px 22px;
       border-radius: 999px; display: inline-flex; align-items: center;
     }
     .viewAllBtn:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
 
     /* Topics */
-    .topicsHead { padding-bottom: 10px; border-bottom: 2px solid var(--brand1); margin-bottom: 14px; }
+    .topicsHead { padding-bottom: 10px; border-bottom: 2px solid var(--brand1); margin-bottom: 13px; }
     .topicsLabel {
-      font-size: 11px; font-weight: 900;
+      font-size: 10.5px; font-weight: 900;
       letter-spacing: .15em; text-transform: uppercase; color: var(--text);
     }
     .topicsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -524,28 +525,35 @@ const topics = [
       line-height: 1.2; text-shadow: 0 1px 6px rgba(0,0,0,.6);
     }
 
-    /* Sidebar — borderless */
-    .homeRail { position: sticky; top: 80px; display: grid; gap: 28px; }
+    /* ── SIDEBAR — sticky, top-aligned with hero, borderless ── */
+    .homeRail {
+      position: sticky;
+      top: 80px;
+      display: grid;
+      gap: 24px;
+      align-self: start; /* ensures it doesn't stretch past its content */
+    }
     .railSection { display: grid; gap: 0; }
     .railHead {
       display: flex; justify-content: space-between; align-items: baseline;
-      padding-bottom: 10px; border-bottom: 2px solid var(--brand1); margin-bottom: 0;
+      padding-bottom: 10px; border-bottom: 2px solid var(--brand1);
     }
     .railTitle {
-      font-size: 10.5px; font-weight: 900;
+      font-size: 10px; font-weight: 900;
       letter-spacing: .14em; text-transform: uppercase; color: var(--text);
     }
-    .railMore { font-size: 11px; font-weight: 700; color: var(--link); text-decoration: none; }
+    .railMore { font-size: 10.5px; font-weight: 700; color: var(--link); text-decoration: none; }
     .railMore:hover { text-decoration: underline; }
 
+    /* Events — dividers only, no boxes */
     .eventList { display: grid; }
     .eventRow {
       display: grid; grid-template-columns: 44px 1fr;
       gap: 12px; align-items: center; text-decoration: none;
-      padding: 12px 0; border-bottom: 1px solid var(--border);
+      padding: 11px 0; border-bottom: 1px solid var(--border);
       transition: opacity 140ms;
     }
-    .eventRow:hover { opacity: .78; }
+    .eventRow:hover { opacity: .76; }
     .eventCal {
       width: 44px; height: 44px; border-radius: 10px;
       background: var(--pillBg); border: 1px solid var(--pillBorder);
@@ -554,46 +562,48 @@ const topics = [
     .eDow { font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
     .eDay { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 1px; }
     .eName { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.2; }
-    .ePlace { font-size: 11.5px; color: var(--faint); margin-top: 2px; }
+    .ePlace { font-size: 11px; color: var(--faint); margin-top: 2px; }
 
+    /* Display ad */
     .displayAdSlot { display: grid; gap: 5px; }
     .adSlotLabel {
-      font-size: 9px; font-weight: 700; letter-spacing: .12em;
+      font-size: 8.5px; font-weight: 700; letter-spacing: .12em;
       text-transform: uppercase; color: var(--faint); text-align: center;
     }
     .displayAdCard {
       display: block; text-decoration: none;
       border: 1.5px dashed var(--pillBorder);
-      border-radius: 14px; background: var(--pillBg);
+      border-radius: 13px; background: var(--pillBg);
       transition: border-color 140ms;
     }
     .displayAdCard:hover { border-color: var(--brand1); }
-    .displayAdInner { padding: 24px 16px; text-align: center; display: grid; gap: 5px; place-items: center; }
-    .displayAdIcon { font-size: 26px; margin-bottom: 2px; }
-    .displayAdTitle { font-size: 15px; font-weight: 900; color: var(--text); }
-    .displayAdDesc { font-size: 12.5px; color: var(--muted); line-height: 1.3; }
+    .displayAdInner { padding: 22px 14px; text-align: center; display: grid; gap: 5px; place-items: center; }
+    .displayAdIcon { font-size: 24px; margin-bottom: 2px; }
+    .displayAdTitle { font-size: 14.5px; font-weight: 900; color: var(--text); }
+    .displayAdDesc { font-size: 12px; color: var(--muted); line-height: 1.3; }
     .displayAdCta {
       margin-top: 6px; display: inline-flex; align-items: center;
-      height: 32px; padding: 0 14px; border-radius: 999px;
+      height: 30px; padding: 0 13px; border-radius: 999px;
       background: var(--brand1); color: var(--accentText);
-      font-size: 12px; font-weight: 800;
+      font-size: 11.5px; font-weight: 800;
     }
 
+    /* Guides */
     .guideList { display: grid; }
     .guideRow {
       display: block; text-decoration: none;
-      font-size: 13.5px; font-weight: 700; color: var(--text);
-      padding: 11px 0; border-bottom: 1px solid var(--border);
+      font-size: 13px; font-weight: 700; color: var(--text);
+      padding: 10px 0; border-bottom: 1px solid var(--border);
       line-height: 1.3; transition: color 120ms;
     }
     .guideRow:last-child { border-bottom: none; }
     .guideRow:hover { color: var(--link); }
 
-    /* Advertise band */
+    /* ── Advertise band ── */
     .adBand {
-      margin: 44px 0 52px; border-radius: 18px;
+      margin: 40px 0 48px; border-radius: 18px;
       background: linear-gradient(135deg, var(--brand1), var(--brand2));
-      padding: clamp(28px, 4vw, 52px);
+      padding: clamp(26px, 3.5vw, 48px);
       box-shadow: 0 12px 40px color-mix(in srgb, var(--brand1) 40%, transparent);
     }
     .adBandInner {
@@ -601,32 +611,32 @@ const topics = [
       justify-content: space-between; gap: 28px; flex-wrap: wrap;
     }
     .adEyebrow {
-      font-size: 11px; font-weight: 800; letter-spacing: .16em;
-      text-transform: uppercase; color: var(--accentText); opacity: .72; margin-bottom: 8px;
+      font-size: 10.5px; font-weight: 800; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--accentText); opacity: .72; margin-bottom: 7px;
     }
     .adHead {
-      font-size: clamp(22px, 2.5vw, 30px); font-weight: 950;
-      color: var(--accentText); letter-spacing: -0.4px; margin-bottom: 8px; line-height: 1.05;
+      font-size: clamp(20px, 2.2vw, 28px); font-weight: 950;
+      color: var(--accentText); letter-spacing: -0.4px; margin-bottom: 7px; line-height: 1.05;
     }
     .adDesc {
-      font-size: clamp(13.5px, 1.2vw, 15px); color: var(--accentText);
+      font-size: clamp(13px, 1.1vw, 14.5px); color: var(--accentText);
       opacity: .82; line-height: 1.5; max-width: 500px;
     }
-    .adActions { display: flex; gap: 12px; flex-shrink: 0; flex-wrap: wrap; }
+    .adActions { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
     .adBtnPrimary {
       display: inline-flex; align-items: center;
-      height: 52px; padding: 0 28px; border-radius: 14px;
+      height: 50px; padding: 0 26px; border-radius: 13px;
       background: var(--accentText); color: var(--brand1);
-      font-size: 16px; font-weight: 900; text-decoration: none;
+      font-size: 15px; font-weight: 900; text-decoration: none;
       white-space: nowrap; transition: opacity 140ms;
       box-shadow: 0 4px 16px rgba(0,0,0,.18);
     }
     .adBtnPrimary:hover { opacity: .88; }
     .adBtnGhost {
       display: inline-flex; align-items: center;
-      height: 52px; padding: 0 24px; border-radius: 14px;
-      border: 2px solid rgba(255,255,255,.50);
-      color: var(--accentText); font-size: 15px; font-weight: 800;
+      height: 50px; padding: 0 22px; border-radius: 13px;
+      border: 2px solid rgba(255,255,255,.48);
+      color: var(--accentText); font-size: 14px; font-weight: 800;
       text-decoration: none; white-space: nowrap; transition: border-color 140ms;
     }
     .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
