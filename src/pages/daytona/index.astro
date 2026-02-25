@@ -87,10 +87,9 @@ const topics = [
     <div class="container">
       <div class="homeGrid">
 
-        {/* ── MAIN FEED ── */}
         <main class="homeMain">
 
-          {/* HERO — image left, text right, big bold type */}
+          {/* HERO */}
           {hero && (
             <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
               <div class="heroImgWrap">
@@ -108,7 +107,6 @@ const topics = [
             </a>
           )}
 
-          {/* Single clean divider */}
           <div class="feedDivider"></div>
 
           {/* 3 CARDS SIDE BY SIDE */}
@@ -150,12 +148,11 @@ const topics = [
             </div>
           </div>
 
-          {/* VIEW ALL */}
           <div class="viewAllRow">
             <a class="viewAllBtn" href="/daytona/posts/">View all stories →</a>
           </div>
 
-          {/* TOPICS GRID */}
+          {/* TOPICS */}
           <div class="topicsHead">
             <span class="topicsLabel">Topics</span>
           </div>
@@ -171,10 +168,9 @@ const topics = [
 
         </main>
 
-        {/* ── SIDEBAR — clean borderless style ── */}
+        {/* ── SIDEBAR ── */}
         <aside class="homeRail">
 
-          {/* EVENTS — borderless, divider-only style */}
           <div class="railSection">
             <div class="railHead">
               <span class="railTitle">Upcoming Events</span>
@@ -192,7 +188,6 @@ const topics = [
             </div>
           </div>
 
-          {/* DISPLAY AD SLOT */}
           <div class="displayAdSlot">
             <div class="adSlotLabel">Advertisement</div>
             <a class="displayAdCard" href="/daytona/advertise/">
@@ -205,7 +200,6 @@ const topics = [
             </a>
           </div>
 
-          {/* CITY GUIDES — borderless */}
           <div class="railSection">
             <div class="railHead">
               <span class="railTitle">City Guides</span>
@@ -242,15 +236,15 @@ const topics = [
   <style>
     .pageWrap { min-height: 100vh; }
 
-    /* 1400px container as Gemini recommended */
+    /* 1400px wide, 2rem gutters on each side */
     :global(.container) {
       max-width: 1400px;
       margin: 0 auto;
-      padding-left: clamp(16px, 2vw, 28px);
-      padding-right: clamp(16px, 2vw, 28px);
+      padding-left: 2rem;
+      padding-right: 2rem;
     }
 
-    /* ── Newsletter ── */
+    /* Newsletter */
     .nlBand {
       background: var(--brand1);
       padding: clamp(18px, 2.5vw, 28px) 0;
@@ -259,7 +253,7 @@ const topics = [
     .nlInner {
       max-width: 1400px;
       margin: 0 auto;
-      padding: 0 clamp(16px, 2vw, 28px);
+      padding: 0 2rem;
       display: grid;
       grid-template-columns: auto 1fr;
       gap: clamp(24px, 4vw, 72px);
@@ -267,59 +261,49 @@ const topics = [
     }
     .nlHead {
       font-size: clamp(20px, 2.2vw, 26px);
-      font-weight: 950;
-      color: var(--accentText);
-      line-height: 1.05;
-      letter-spacing: -0.4px;
-      margin-bottom: 5px;
-      white-space: nowrap;
+      font-weight: 950; color: var(--accentText);
+      line-height: 1.05; letter-spacing: -0.4px;
+      margin-bottom: 5px; white-space: nowrap;
     }
     .nlSub {
       font-size: clamp(13px, 1.2vw, 15px);
-      color: var(--accentText);
-      opacity: .88;
+      color: var(--accentText); opacity: .88;
     }
     .nlSub strong { font-weight: 900; opacity: 1; }
     .nlRow { display: flex; height: 52px; }
     .nlInput {
       flex: 1; min-width: 0;
       border-radius: 12px 0 0 12px;
-      border: 2px solid rgba(0,0,0,.12);
-      border-right: none;
+      border: 2px solid rgba(0,0,0,.12); border-right: none;
       background: #fff; color: #111;
-      padding: 0 18px;
-      font-size: 16px; font-weight: 500;
+      padding: 0 18px; font-size: 16px; font-weight: 500;
       outline: none;
     }
     .nlInput::placeholder { color: #999; }
     .nlInput:focus { border-color: rgba(0,0,0,.3); }
     .nlBtn {
-      flex-shrink: 0;
-      padding: 0 22px;
+      flex-shrink: 0; padding: 0 22px;
       border-radius: 0 12px 12px 0;
       border: 2px solid rgba(0,0,0,.30);
-      background: rgba(0,0,0,.22);
-      color: var(--accentText);
-      font-weight: 900; font-size: 15px;
-      cursor: pointer; white-space: nowrap;
-      transition: background 140ms;
+      background: rgba(0,0,0,.22); color: var(--accentText);
+      font-weight: 900; font-size: 15px; cursor: pointer;
+      white-space: nowrap; transition: background 140ms;
       letter-spacing: .02em;
     }
     .nlBtn:hover { background: rgba(0,0,0,.36); }
     .nlFine {
       margin-top: 7px; font-size: 12px;
-      color: var(--accentText); opacity: .65;
-      font-style: italic;
+      color: var(--accentText); opacity: .65; font-style: italic;
     }
     @media (max-width: 700px) {
-      .nlInner { grid-template-columns: 1fr; gap: 14px; }
+      .nlInner { grid-template-columns: 1fr; gap: 14px; padding: 0 1rem; }
       .nlHead { white-space: normal; }
       .nlRow { flex-direction: column; height: auto; gap: 8px; }
       .nlInput { border-radius: 12px; border-right: 2px solid rgba(0,0,0,.12); height: 52px; }
       .nlBtn { border-radius: 12px; height: 52px; }
     }
 
-    /* ── 75/25 grid ── */
+    /* Home grid */
     .homeGrid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 300px;
@@ -332,8 +316,11 @@ const topics = [
       .homeGrid { grid-template-columns: 1fr; }
       .homeRail { order: 2; }
     }
+    @media (max-width: 600px) {
+      :global(.container) { padding-left: 1rem; padding-right: 1rem; }
+    }
 
-    /* ── Hero — bold editorial type ── */
+    /* ── HERO — constrained height so triple-threat shows above fold ── */
     .heroCard {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -344,13 +331,26 @@ const topics = [
     }
     @media (max-width: 640px) { .heroCard { grid-template-columns: 1fr; } }
 
-    .heroImgWrap { border-radius: 14px; overflow: hidden; }
+    .heroImgWrap {
+      border-radius: 14px;
+      overflow: hidden;
+      /* Constrain hero image so triple-threat row is visible above fold */
+      max-height: 500px;
+    }
     .heroImg {
       display: block; width: 100%;
-      aspect-ratio: 4/3; object-fit: cover;
+      /* aspect-ratio removed — max-height on wrapper does the constraining */
+      height: 100%;
+      max-height: 500px;
+      object-fit: cover;
+      object-position: center;
       background: var(--surface);
     }
-    .heroFallback { aspect-ratio: 4/3; background: var(--surface2); }
+    .heroFallback {
+      height: 380px;
+      max-height: 500px;
+      background: var(--surface2);
+    }
 
     .heroKicker {
       font-size: 11px; font-weight: 800;
@@ -358,22 +358,25 @@ const topics = [
       color: var(--brand1); margin-bottom: 10px;
     }
     .heroTitle {
-      /* 42-48px on desktop as Gemini recommended */
-      font-size: clamp(28px, 3.2vw, 46px);
+      /* Balanced: punchy but not so tall it pushes cards below fold */
+      font-size: clamp(24px, 2.6vw, 38px);
       font-weight: 800;
-      line-height: 1.06;
-      letter-spacing: -0.8px;
+      line-height: 1.08;
+      letter-spacing: -0.6px;
       color: var(--text);
-      margin: 0 0 14px;
+      margin: 0 0 12px;
       transition: color 130ms ease;
+      /* Max 3 lines — keeps it tight */
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .heroCard:hover .heroTitle { color: var(--link); }
     .heroDesc {
       color: var(--muted);
-      font-size: clamp(14px, 1.2vw, 16px);
-      line-height: 1.6;
-      margin: 0 0 14px;
-      /* Strictly 2-3 lines as Gemini recommended */
+      font-size: clamp(13.5px, 1.1vw, 15.5px);
+      line-height: 1.6; margin: 0 0 14px;
       display: -webkit-box;
       -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
@@ -381,64 +384,53 @@ const topics = [
     }
     .heroMeta { font-size: 13px; color: var(--faint); }
 
-    /* ── Single divider ── */
+    /* Single divider */
     .feedDivider {
       height: 2px;
       background: var(--brand1);
       margin: 0 0 22px;
     }
 
-    /* ── 3-column card grid ── */
+    /* 3-column cards */
     .cardGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 22px;
       margin-bottom: 24px;
     }
-    @media (max-width: 640px) {
-      .cardGrid { grid-template-columns: 1fr; gap: 0; }
-    }
+    @media (max-width: 640px) { .cardGrid { grid-template-columns: 1fr; gap: 0; } }
 
     .articleCard {
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
       text-decoration: none;
     }
     @media (max-width: 640px) {
       .articleCard {
         display: grid;
         grid-template-columns: 1fr 100px;
-        gap: 12px;
-        align-items: start;
+        gap: 12px; align-items: start;
         padding: 16px 0;
         border-bottom: 1px solid var(--border);
       }
     }
-
     .cardImgWrap {
-      border-radius: 12px;
-      overflow: hidden;
-      margin-bottom: 12px;
+      border-radius: 12px; overflow: hidden; margin-bottom: 12px;
     }
     @media (max-width: 640px) {
       .cardImgWrap { margin-bottom: 0; order: 2; border-radius: 8px; }
     }
-
     .cardImg {
       display: block; width: 100%;
       aspect-ratio: 16/10;
-      object-fit: cover;
-      background: var(--surface);
+      object-fit: cover; background: var(--surface);
       transition: transform 280ms ease;
     }
     .articleCard:hover .cardImg { transform: scale(1.03); }
     .cardImgFallback { aspect-ratio: 16/10; background: var(--surface2); }
-
     @media (max-width: 640px) {
       .cardImg { aspect-ratio: unset; width: 100px; height: 74px; }
       .cardImgFallback { width: 100px; height: 74px; }
     }
-
     .cardBody { flex: 1; }
     .cardKicker {
       font-size: 10.5px; font-weight: 800;
@@ -448,50 +440,41 @@ const topics = [
     .cardTitle {
       font-size: clamp(15px, 1.3vw, 18px);
       font-weight: 900; line-height: 1.2;
-      letter-spacing: -0.2px; color: var(--text);
-      margin-bottom: 7px;
+      letter-spacing: -0.2px; color: var(--text); margin-bottom: 7px;
       display: -webkit-box; -webkit-line-clamp: 3;
       -webkit-box-orient: vertical; overflow: hidden;
       transition: color 130ms ease;
     }
     .articleCard:hover .cardTitle { color: var(--link); }
     .cardDesc {
-      font-size: 13px; color: var(--muted);
-      line-height: 1.4; margin-bottom: 8px;
+      font-size: 13px; color: var(--muted); line-height: 1.4; margin-bottom: 8px;
       display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
     }
     .cardMeta { font-size: 12px; color: var(--faint); }
 
-    /* ── Featured ad ── */
+    /* Featured ad */
     .featuredCard {
       margin: 0 0 20px;
       border: 1.5px solid var(--pillBorder);
-      background: var(--surface);
-      border-radius: 14px; overflow: hidden;
+      background: var(--surface); border-radius: 14px; overflow: hidden;
     }
     .featuredHeader {
-      display: flex; align-items: center;
-      gap: 7px; padding: 7px 14px;
-      background: var(--pillBg);
+      display: flex; align-items: center; gap: 7px;
+      padding: 7px 14px; background: var(--pillBg);
       border-bottom: 1px solid var(--pillBorder);
     }
     .featuredStar { font-size: 12px; color: var(--brand1); }
     .featuredLabel {
       font-size: 10.5px; font-weight: 900;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--brand1);
+      letter-spacing: .1em; text-transform: uppercase; color: var(--brand1);
     }
     .featuredTag { font-size: 10.5px; font-weight: 600; color: var(--muted); }
     .featuredBody { padding: 16px; display: grid; gap: 12px; }
-    .featuredImg {
-      display: block; width: 100%;
-      height: 160px; object-fit: cover; border-radius: 9px;
-    }
+    .featuredImg { display: block; width: 100%; height: 160px; object-fit: cover; border-radius: 9px; }
     .featuredTitle {
-      font-size: 17px; font-weight: 900;
-      color: var(--text); line-height: 1.2;
-      margin-bottom: 6px; letter-spacing: -0.2px;
+      font-size: 17px; font-weight: 900; color: var(--text);
+      line-height: 1.2; margin-bottom: 6px; letter-spacing: -0.2px;
     }
     .featuredDesc { font-size: 13.5px; color: var(--muted); line-height: 1.45; margin-bottom: 12px; }
     .featuredCta {
@@ -503,46 +486,32 @@ const topics = [
     }
     .featuredCta:hover { filter: brightness(.92); }
 
-    /* ── View all ── */
+    /* View all */
     .viewAllRow { padding: 4px 0 24px; text-align: center; }
     .viewAllBtn {
-      font-size: 14px; font-weight: 800;
-      color: var(--link); text-decoration: none;
-      border: 1px solid var(--pillBorder);
-      background: var(--pillBg);
-      padding: 10px 24px; border-radius: 999px;
-      display: inline-flex; align-items: center;
+      font-size: 14px; font-weight: 800; color: var(--link);
+      text-decoration: none; border: 1px solid var(--pillBorder);
+      background: var(--pillBg); padding: 10px 24px;
+      border-radius: 999px; display: inline-flex; align-items: center;
     }
     .viewAllBtn:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
 
-    /* ── Topics ── */
-    .topicsHead {
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--brand1);
-      margin-bottom: 14px;
-    }
+    /* Topics */
+    .topicsHead { padding-bottom: 10px; border-bottom: 2px solid var(--brand1); margin-bottom: 14px; }
     .topicsLabel {
       font-size: 11px; font-weight: 900;
-      letter-spacing: .15em; text-transform: uppercase;
-      color: var(--text);
+      letter-spacing: .15em; text-transform: uppercase; color: var(--text);
     }
-    .topicsGrid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
+    .topicsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
     @media (max-width: 560px) { .topicsGrid { grid-template-columns: repeat(2, 1fr); } }
     .topicTile {
-      position: relative; display: block;
-      text-decoration: none; border-radius: 10px;
-      overflow: hidden; aspect-ratio: 3/2;
+      position: relative; display: block; text-decoration: none;
+      border-radius: 10px; overflow: hidden; aspect-ratio: 3/2;
       background: var(--surface2); border: 1px solid var(--border);
     }
     .topicImg {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover; display: block;
-      transition: transform 320ms ease;
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; display: block; transition: transform 320ms ease;
     }
     .topicTile:hover .topicImg { transform: scale(1.05); }
     .topicGrad {
@@ -555,26 +524,12 @@ const topics = [
       line-height: 1.2; text-shadow: 0 1px 6px rgba(0,0,0,.6);
     }
 
-    /* ── SIDEBAR — clean borderless style (Gemini) ── */
-    .homeRail {
-      position: sticky;
-      top: 80px;
-      display: grid;
-      gap: 28px; /* More breathing room between sections */
-    }
-
-    /* No more boxed cards — just clean sections with dividers */
-    .railSection {
-      display: grid;
-      gap: 0;
-    }
-
+    /* Sidebar — borderless */
+    .homeRail { position: sticky; top: 80px; display: grid; gap: 28px; }
+    .railSection { display: grid; gap: 0; }
     .railHead {
-      display: flex; justify-content: space-between;
-      align-items: baseline;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--brand1);
-      margin-bottom: 0;
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding-bottom: 10px; border-bottom: 2px solid var(--brand1); margin-bottom: 0;
     }
     .railTitle {
       font-size: 10.5px; font-weight: 900;
@@ -583,15 +538,11 @@ const topics = [
     .railMore { font-size: 11px; font-weight: 700; color: var(--link); text-decoration: none; }
     .railMore:hover { text-decoration: underline; }
 
-    /* Events — horizontal dividers only, no boxes */
     .eventList { display: grid; }
     .eventRow {
-      display: grid;
-      grid-template-columns: 44px 1fr;
-      gap: 12px; align-items: center;
-      text-decoration: none;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
+      display: grid; grid-template-columns: 44px 1fr;
+      gap: 12px; align-items: center; text-decoration: none;
+      padding: 12px 0; border-bottom: 1px solid var(--border);
       transition: opacity 140ms;
     }
     .eventRow:hover { opacity: .78; }
@@ -599,19 +550,16 @@ const topics = [
       width: 44px; height: 44px; border-radius: 10px;
       background: var(--pillBg); border: 1px solid var(--pillBorder);
       display: grid; place-items: center; text-align: center; line-height: 1;
-      flex-shrink: 0;
     }
     .eDow { font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
     .eDay { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 1px; }
     .eName { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.2; }
     .ePlace { font-size: 11.5px; color: var(--faint); margin-top: 2px; }
 
-    /* Ad slot */
     .displayAdSlot { display: grid; gap: 5px; }
     .adSlotLabel {
-      font-size: 9px; font-weight: 700;
-      letter-spacing: .12em; text-transform: uppercase;
-      color: var(--faint); text-align: center;
+      font-size: 9px; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--faint); text-align: center;
     }
     .displayAdCard {
       display: block; text-decoration: none;
@@ -631,22 +579,19 @@ const topics = [
       font-size: 12px; font-weight: 800;
     }
 
-    /* Guides — borderless list */
     .guideList { display: grid; }
     .guideRow {
       display: block; text-decoration: none;
       font-size: 13.5px; font-weight: 700; color: var(--text);
-      padding: 11px 0;
-      border-bottom: 1px solid var(--border);
+      padding: 11px 0; border-bottom: 1px solid var(--border);
       line-height: 1.3; transition: color 120ms;
     }
     .guideRow:last-child { border-bottom: none; }
     .guideRow:hover { color: var(--link); }
 
-    /* ── Advertise band ── */
+    /* Advertise band */
     .adBand {
-      margin: 44px 0 52px;
-      border-radius: 18px;
+      margin: 44px 0 52px; border-radius: 18px;
       background: linear-gradient(135deg, var(--brand1), var(--brand2));
       padding: clamp(28px, 4vw, 52px);
       box-shadow: 0 12px 40px color-mix(in srgb, var(--brand1) 40%, transparent);
@@ -656,19 +601,16 @@ const topics = [
       justify-content: space-between; gap: 28px; flex-wrap: wrap;
     }
     .adEyebrow {
-      font-size: 11px; font-weight: 800;
-      letter-spacing: .16em; text-transform: uppercase;
-      color: var(--accentText); opacity: .72; margin-bottom: 8px;
+      font-size: 11px; font-weight: 800; letter-spacing: .16em;
+      text-transform: uppercase; color: var(--accentText); opacity: .72; margin-bottom: 8px;
     }
     .adHead {
-      font-size: clamp(22px, 2.5vw, 30px);
-      font-weight: 950; color: var(--accentText);
-      letter-spacing: -0.4px; margin-bottom: 8px; line-height: 1.05;
+      font-size: clamp(22px, 2.5vw, 30px); font-weight: 950;
+      color: var(--accentText); letter-spacing: -0.4px; margin-bottom: 8px; line-height: 1.05;
     }
     .adDesc {
-      font-size: clamp(13.5px, 1.2vw, 15px);
-      color: var(--accentText); opacity: .82;
-      line-height: 1.5; max-width: 500px;
+      font-size: clamp(13.5px, 1.2vw, 15px); color: var(--accentText);
+      opacity: .82; line-height: 1.5; max-width: 500px;
     }
     .adActions { display: flex; gap: 12px; flex-shrink: 0; flex-wrap: wrap; }
     .adBtnPrimary {
