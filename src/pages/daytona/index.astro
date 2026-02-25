@@ -42,18 +42,17 @@ const hero = posts.find(isFeatured) ?? posts[0] ?? null;
 const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 const latest = feed.slice(0, 3);
 
-/* ── PLACEHOLDER AD DATA ─────────────────────────────────
-   Replace these with real advertiser content later.
-   In production these would come from a CMS or content collection.
-────────────────────────────────────────────────────── */
-const sponsoredArticle = {
-  label: "Sponsored",
-  tag: "Branded Content",
+/* ── FEATURED (PAID) AD CONTENT ───────────────────────
+   Swap in real advertiser info here when you have a client.
+   No coding needed — just update these values.
+──────────────────────────────────────────────────── */
+const featuredAd = {
+  tag: "Featured Business",
   title: "Your Business Name Here — Reach Daytona Locals",
-  description: "This is where your sponsored story goes. Up to 75 words, written by our team or yours. Drives real traffic from an engaged local audience who already love Daytona.",
-  ctaText: "Get Started",
+  description: "This is where your featured story goes. Up to 75 words, written by our team. Drives real traffic from an engaged local audience who already love Daytona.",
+  ctaText: "Learn More",
   ctaHref: "/daytona/advertise/",
-  img: "", // Add sponsor image path here
+  img: "",
 };
 
 const topics = [
@@ -72,25 +71,31 @@ const topics = [
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
   <div class="pageWrap">
 
-    {/* ══ NEWSLETTER BAND ══ */}
+    {/* ══ NEWSLETTER BAND — compact but bold ══ */}
     <div class="nlBand">
       <div class="nlInner">
+
+        {/* LEFT: copy */}
         <div class="nlCopy">
-          <div class="nlEyebrow">✉ Free Daily Newsletter</div>
           <div class="nlHead">Good news for Daytona.</div>
-          <div class="nlSub">The best local stories, events, and things to do — sent free to your inbox every morning.</div>
+          <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong>for free.</strong></div>
         </div>
+
+        {/* RIGHT: form */}
         <form class="nlForm" action="/daytona/subscribe/" method="get">
-          <input
-            class="nlInput"
-            type="email"
-            name="email"
-            placeholder="Enter your email address"
-            aria-label="Email address"
-          />
-          <button class="nlBtn" type="submit">Sign Up — It's Free →</button>
-          <div class="nlFine">100% free. Unsubscribe anytime.</div>
+          <div class="nlRow">
+            <input
+              class="nlInput"
+              type="email"
+              name="email"
+              placeholder="Enter your email address"
+              aria-label="Email address"
+            />
+            <button class="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
+          </div>
+          <div class="nlFine">100% free, unsubscribe anytime.</div>
         </form>
+
       </div>
     </div>
 
@@ -98,10 +103,10 @@ const topics = [
     <div class="container">
       <div class="homeGrid">
 
-        {/* ── LEFT: MAIN FEED ── */}
+        {/* ── LEFT: FEED ── */}
         <main class="homeMain">
 
-          {/* HERO — large featured article */}
+          {/* HERO — side by side like Nooga */}
           {hero && (
             <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
               <div class="heroImgWrap">
@@ -109,26 +114,22 @@ const topics = [
                   ? <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="eager" decoding="async" />
                   : <div class="heroImg heroFallback" aria-hidden="true" />
                 }
-                {primaryTag(hero) && <span class="heroKicker">{primaryTag(hero)}</span>}
               </div>
               <div class="heroCopy">
+                {primaryTag(hero) && <div class="heroKicker">{primaryTag(hero)}</div>}
                 <h2 class="heroTitle">{hero.data.title ?? hero.slug}</h2>
                 {excerpt(hero) && <p class="heroDesc">{excerpt(hero)}</p>}
-                <div class="heroMeta">
-                  {dateText(hero)}
-                  <span class="featBadge">Featured</span>
-                </div>
+                <div class="heroMeta">{dateText(hero)}</div>
               </div>
             </a>
           )}
 
-          {/* LATEST — section header */}
+          {/* LATEST */}
           <div class="sectionHead">
             <span class="sectionLabel">Latest</span>
             <a class="viewAll" href="/daytona/posts/">View all →</a>
           </div>
 
-          {/* 3 STACKED ARTICLES + 1 SPONSORED SLOT after #2 */}
           <div class="feedList">
             {latest.map((p, i) => (
               <>
@@ -147,24 +148,23 @@ const topics = [
                   </div>
                 </a>
 
-                {/* SPONSORED MINI ARTICLE — appears after article #2 */}
+                {/* FEATURED AD — after article #2, labeled "Featured" not "Sponsored" */}
                 {i === 1 && (
-                  <div class="sponsoredCard">
-                    <div class="sponsoredHeader">
-                      <span class="sponsoredLabel">★ Sponsored</span>
-                      <span class="sponsoredTag">{sponsoredArticle.tag}</span>
+                  <div class="featuredCard">
+                    <div class="featuredHeader">
+                      <span class="featuredStar">★</span>
+                      <span class="featuredLabel">Featured</span>
+                      <span class="featuredTag">{featuredAd.tag}</span>
                     </div>
-                    <div class="sponsoredBody">
-                      {sponsoredArticle.img && (
-                        <div class="sponsoredImgWrap">
-                          <img class="sponsoredImg" src={sponsoredArticle.img} alt="" loading="lazy" />
-                        </div>
+                    <div class="featuredBody">
+                      {featuredAd.img && (
+                        <img class="featuredImg" src={featuredAd.img} alt="" loading="lazy" />
                       )}
-                      <div class="sponsoredText">
-                        <div class="sponsoredTitle">{sponsoredArticle.title}</div>
-                        <div class="sponsoredDesc">{sponsoredArticle.description}</div>
-                        <a class="sponsoredCta" href={sponsoredArticle.ctaHref}>
-                          {sponsoredArticle.ctaText} →
+                      <div class="featuredText">
+                        <div class="featuredTitle">{featuredAd.title}</div>
+                        <div class="featuredDesc">{featuredAd.description}</div>
+                        <a class="featuredCta" href={featuredAd.ctaHref}>
+                          {featuredAd.ctaText} →
                         </a>
                       </div>
                     </div>
@@ -174,21 +174,14 @@ const topics = [
             ))}
           </div>
 
-          {/* TOPICS VISUAL GRID */}
-          <div class="sectionHead" style="margin-top:40px">
+          {/* TOPICS */}
+          <div class="sectionHead" style="margin-top:36px">
             <span class="sectionLabel">Topics</span>
           </div>
           <div class="topicsGrid">
             {topics.map((t) => (
               <a class="topicTile" href={`/daytona/topics/${t.slug}/`}>
-                <img
-                  class="topicImg"
-                  src={t.img}
-                  alt={t.label}
-                  loading="lazy"
-                  decoding="async"
-                  onerror="this.style.opacity='0'"
-                />
+                <img class="topicImg" src={t.img} alt={t.label} loading="lazy" decoding="async" onerror="this.style.opacity='0'" />
                 <div class="topicGrad" aria-hidden="true" />
                 <span class="topicLabel">{t.label}</span>
               </a>
@@ -208,24 +201,12 @@ const topics = [
             </div>
             <div class="eventList">
               <a class="eventRow" href="/daytona/events/">
-                <div class="eventCal">
-                  <div class="eDow">SAT</div>
-                  <div class="eDay">15</div>
-                </div>
-                <div class="eventInfo">
-                  <div class="eName">Add your first event</div>
-                  <div class="ePlace">Daytona Beach</div>
-                </div>
+                <div class="eventCal"><div class="eDow">SAT</div><div class="eDay">15</div></div>
+                <div class="eventInfo"><div class="eName">Add your first event</div><div class="ePlace">Daytona Beach</div></div>
               </a>
               <a class="eventRow" href="/daytona/events/">
-                <div class="eventCal">
-                  <div class="eDow">SUN</div>
-                  <div class="eDay">16</div>
-                </div>
-                <div class="eventInfo">
-                  <div class="eName">Second event placeholder</div>
-                  <div class="ePlace">Ormond Beach</div>
-                </div>
+                <div class="eventCal"><div class="eDow">SUN</div><div class="eDay">16</div></div>
+                <div class="eventInfo"><div class="eName">Second event placeholder</div><div class="ePlace">Ormond Beach</div></div>
               </a>
             </div>
           </div>
@@ -234,7 +215,7 @@ const topics = [
           <div class="displayAdSlot">
             <div class="adSlotLabel">Advertisement</div>
             <a class="displayAdCard" href="/daytona/advertise/">
-              <div class="displayAdPlaceholder">
+              <div class="displayAdInner">
                 <div class="displayAdIcon">📢</div>
                 <div class="displayAdTitle">Your Ad Here</div>
                 <div class="displayAdDesc">Reach thousands of Daytona locals</div>
@@ -259,13 +240,13 @@ const topics = [
         </aside>
       </div>
 
-      {/* ══ ADVERTISE BAND — full width bottom ══ */}
+      {/* ══ ADVERTISE BAND ══ */}
       <div class="adBand">
         <div class="adBandInner">
           <div class="adCopy">
             <div class="adEyebrow">Grow your business</div>
             <div class="adHead">Advertise with GoDo Daytona.</div>
-            <div class="adDesc">Reach thousands of engaged Daytona locals every day. Sponsored stories, display ads, event promotion, and newsletter placements — built for local businesses that want real results.</div>
+            <div class="adDesc">Reach thousands of engaged Daytona locals every day. Featured stories, display ads, event promotion, and newsletter placements — built for local businesses that want real results.</div>
           </div>
           <div class="adActions">
             <a class="adBtnPrimary" href="/daytona/advertise/">Get started →</a>
@@ -287,103 +268,99 @@ const topics = [
       padding-right: clamp(16px, 2.5vw, 32px);
     }
 
-    /* ══ NEWSLETTER BAND ══ */
+    /* ══ NEWSLETTER BAND — compact, Nooga-style ══ */
     .nlBand {
       background: var(--brand1);
-      padding: clamp(28px, 4vw, 48px) 0;
-      margin-top: 24px; /* Space between pills and band */
+      padding: clamp(18px, 2.5vw, 28px) 0;
+      margin-top: 16px;
     }
     .nlInner {
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
       padding: 0 clamp(16px, 2.5vw, 32px);
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: clamp(28px, 4vw, 60px);
+      grid-template-columns: auto 1fr;
+      gap: clamp(24px, 4vw, 64px);
       align-items: center;
     }
-    .nlEyebrow {
-      font-size: 12px;
-      font-weight: 800;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--accentText);
-      opacity: .78;
-      margin-bottom: 8px;
-    }
+    .nlCopy { min-width: 0; }
     .nlHead {
-      font-size: clamp(24px, 2.8vw, 34px);
+      font-size: clamp(20px, 2.2vw, 26px);
       font-weight: 950;
       color: var(--accentText);
       line-height: 1.05;
-      letter-spacing: -0.5px;
-      margin-bottom: 10px;
+      letter-spacing: -0.4px;
+      margin-bottom: 5px;
+      white-space: nowrap;
     }
     .nlSub {
-      font-size: clamp(14px, 1.3vw, 16px);
+      font-size: clamp(13px, 1.2vw, 15px);
       color: var(--accentText);
-      opacity: .85;
-      line-height: 1.5;
+      opacity: .88;
+      line-height: 1.4;
     }
-    .nlForm {
+    .nlSub strong { font-weight: 900; opacity: 1; }
+
+    .nlForm { min-width: 0; }
+    .nlRow {
       display: flex;
-      flex-direction: column;
-      gap: 10px;
+      gap: 0;
+      align-items: stretch;
+      height: 52px;
     }
     .nlInput {
-      height: 58px; /* Tall and prominent */
-      width: 100%;
-      border-radius: 14px;
-      border: 3px solid rgba(0,0,0,.15);
+      flex: 1;
+      min-width: 0;
+      border-radius: 12px 0 0 12px;
+      border: 2px solid rgba(0,0,0,.12);
+      border-right: none;
       background: #fff;
       color: #111;
-      padding: 0 20px;
-      font-size: 17px; /* Larger, bolder text */
-      font-weight: 600;
-      outline: none;
-      box-sizing: border-box;
-      transition: border-color 150ms, box-shadow 150ms;
-    }
-    .nlInput::placeholder {
-      color: #999;
+      padding: 0 18px;
+      font-size: 16px;
       font-weight: 500;
+      outline: none;
     }
-    .nlInput:focus {
-      border-color: rgba(0,0,0,.35);
-      box-shadow: 0 0 0 4px rgba(255,255,255,.3);
-    }
+    .nlInput::placeholder { color: #999; font-weight: 400; }
+    .nlInput:focus { border-color: rgba(0,0,0,.3); }
     .nlBtn {
-      height: 58px; /* Match input height */
-      width: 100%;
-      border-radius: 14px;
-      border: 3px solid rgba(0,0,0,.25);
+      flex-shrink: 0;
+      padding: 0 22px;
+      border-radius: 0 12px 12px 0;
+      border: 2px solid rgba(0,0,0,.30);
       background: rgba(0,0,0,.22);
       color: var(--accentText);
       font-weight: 900;
-      font-size: 17px; /* Larger button text */
+      font-size: 15px;
       cursor: pointer;
+      white-space: nowrap;
       transition: background 140ms;
-      letter-spacing: .01em;
+      letter-spacing: .02em;
     }
-    .nlBtn:hover { background: rgba(0,0,0,.35); }
+    .nlBtn:hover { background: rgba(0,0,0,.36); }
     .nlFine {
+      margin-top: 7px;
       font-size: 12px;
       color: var(--accentText);
       opacity: .65;
-      text-align: center;
+      font-style: italic;
     }
 
     @media (max-width: 700px) {
-      .nlInner { grid-template-columns: 1fr; gap: 20px; }
+      .nlInner { grid-template-columns: 1fr; gap: 14px; }
+      .nlHead { white-space: normal; }
+      .nlRow { flex-direction: column; height: auto; gap: 8px; }
+      .nlInput { border-radius: 12px; border-right: 2px solid rgba(0,0,0,.12); height: 52px; }
+      .nlBtn { border-radius: 12px; height: 52px; }
     }
 
-    /* ══ HOME GRID ══ */
+    /* ══ HOME GRID 75/25 ══ */
     .homeGrid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 290px;
       gap: clamp(28px, 3.5vw, 52px);
       align-items: start;
-      padding-top: 30px;
+      padding-top: 24px;
       padding-bottom: 12px;
     }
     @media (max-width: 980px) {
@@ -391,79 +368,64 @@ const topics = [
       .homeRail { order: 2; }
     }
 
-    /* ══ HERO ARTICLE ══ */
+    /* ══ HERO — side by side like Nooga ══ */
     .heroCard {
-      display: block;
+      display: grid;
+      grid-template-columns: 1fr 1fr; /* 50/50 image + text */
+      gap: 20px;
+      align-items: start;
       text-decoration: none;
-      margin-bottom: 32px;
-      padding-bottom: 28px;
+      margin-bottom: 24px;
+      padding-bottom: 24px;
       border-bottom: 2px solid var(--brand1);
     }
+    @media (max-width: 640px) {
+      .heroCard { grid-template-columns: 1fr; }
+    }
+
     .heroImgWrap {
-      position: relative;
-      border-radius: 14px;
+      border-radius: 12px;
       overflow: hidden;
-      margin-bottom: 18px;
     }
     .heroImg {
       display: block;
       width: 100%;
-      aspect-ratio: 16/8;
+      aspect-ratio: 4/3;
       object-fit: cover;
       background: var(--surface);
     }
     .heroFallback {
-      aspect-ratio: 16/8;
+      aspect-ratio: 4/3;
       background: var(--surface2);
     }
     .heroKicker {
-      position: absolute;
-      top: 14px; left: 14px;
-      background: var(--brand1);
-      color: var(--accentText);
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: .1em;
+      letter-spacing: .09em;
       text-transform: uppercase;
-      padding: 4px 12px;
-      border-radius: 999px;
+      color: var(--brand1);
+      margin-bottom: 8px;
     }
     .heroTitle {
-      font-size: clamp(24px, 3vw, 38px);
+      font-size: clamp(20px, 2.2vw, 28px);
       font-weight: 950;
-      line-height: 1.08;
-      letter-spacing: -0.5px;
+      line-height: 1.1;
+      letter-spacing: -0.4px;
       color: var(--text);
-      margin: 0 0 12px;
+      margin: 0 0 10px;
     }
+    .heroCard:hover .heroTitle { color: var(--link); }
     .heroDesc {
       color: var(--muted);
-      font-size: clamp(15px, 1.4vw, 17px);
+      font-size: clamp(13.5px, 1.2vw, 15px);
       line-height: 1.55;
-      margin: 0 0 14px;
+      margin: 0 0 12px;
       display: -webkit-box;
-      -webkit-line-clamp: 3;
+      -webkit-line-clamp: 4;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .heroMeta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--faint);
-    }
-    .featBadge {
-      background: var(--pillBg);
-      border: 1px solid var(--pillBorder);
-      color: var(--brand1);
-      font-size: 10.5px;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 999px;
-      letter-spacing: .05em;
-      text-transform: uppercase;
-    }
+    .heroMeta { font-size: 12.5px; color: var(--faint); }
 
     /* ══ SECTION HEAD ══ */
     .sectionHead {
@@ -471,182 +433,138 @@ const topics = [
       align-items: baseline;
       justify-content: space-between;
       gap: 12px;
-      padding-bottom: 11px;
+      padding-bottom: 10px;
       border-bottom: 2px solid var(--brand1);
-      margin-bottom: 0;
     }
     .sectionLabel {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 900;
-      letter-spacing: .14em;
+      letter-spacing: .15em;
       text-transform: uppercase;
       color: var(--text);
     }
     .viewAll {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--link);
-      text-decoration: none;
+      font-size: 12px; font-weight: 700;
+      color: var(--link); text-decoration: none;
     }
     .viewAll:hover { text-decoration: underline; }
 
     /* ══ FEED ROWS ══ */
     .feedList { margin-bottom: 0; }
-
     .feedRow {
       display: grid;
-      grid-template-columns: 1fr 150px;
-      gap: 18px;
+      grid-template-columns: 1fr 130px;
+      gap: 16px;
       align-items: start;
-      padding: 22px 0;
+      padding: 18px 0;
       border-bottom: 1px solid var(--border);
       text-decoration: none;
     }
     .feedRow:hover .feedRowTitle { color: var(--link); }
 
     .feedKicker {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-      color: var(--brand1);
-      margin-bottom: 6px;
+      font-size: 10.5px; font-weight: 800;
+      letter-spacing: .08em; text-transform: uppercase;
+      color: var(--brand1); margin-bottom: 5px;
     }
     .feedRowTitle {
-      font-size: clamp(18px, 1.8vw, 22px);
-      font-weight: 900;
-      line-height: 1.15;
-      letter-spacing: -0.3px;
-      color: var(--text);
-      margin-bottom: 7px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      font-size: clamp(17px, 1.7vw, 21px);
+      font-weight: 900; line-height: 1.15;
+      letter-spacing: -0.25px; color: var(--text);
+      margin-bottom: 6px;
+      display: -webkit-box; -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical; overflow: hidden;
       transition: color 130ms ease;
     }
     .feedRowDesc {
-      font-size: 14.5px;
-      color: var(--muted);
-      line-height: 1.5;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-      margin-bottom: 8px;
+      font-size: 13.5px; color: var(--muted);
+      line-height: 1.45; margin-bottom: 7px;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
     }
     .feedMeta { font-size: 12px; color: var(--faint); }
-
-    .feedThumbWrap { width: 150px; flex-shrink: 0; }
+    .feedThumbWrap { width: 130px; flex-shrink: 0; }
     .feedThumb {
-      display: block;
-      width: 150px;
-      height: 110px;
-      object-fit: cover;
-      border-radius: 10px;
+      display: block; width: 130px; height: 96px;
+      object-fit: cover; border-radius: 9px;
       background: var(--surface);
     }
     .feedThumbFallback { background: var(--surface2); }
 
-    @media (max-width: 540px) {
-      .feedRow { grid-template-columns: 1fr 100px; gap: 12px; padding: 16px 0; }
-      .feedThumbWrap { width: 100px; }
-      .feedThumb { width: 100px; height: 74px; }
-      .feedRowTitle { font-size: 17px; }
+    @media (max-width: 500px) {
+      .feedRow { grid-template-columns: 1fr 90px; gap: 12px; }
+      .feedThumbWrap { width: 90px; }
+      .feedThumb { width: 90px; height: 68px; }
     }
 
-    /* ══ SPONSORED MINI ARTICLE ══ */
-    .sponsoredCard {
+    /* ══ FEATURED AD (labeled "Featured", not "Sponsored") ══ */
+    .featuredCard {
       margin: 4px 0;
       border: 1.5px solid var(--pillBorder);
       background: var(--surface);
       border-radius: 14px;
       overflow: hidden;
     }
-    .sponsoredHeader {
+    .featuredHeader {
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 14px;
+      gap: 7px;
+      padding: 7px 14px;
       background: var(--pillBg);
       border-bottom: 1px solid var(--pillBorder);
     }
-    .sponsoredLabel {
-      font-size: 10.5px;
-      font-weight: 900;
-      letter-spacing: .1em;
-      text-transform: uppercase;
+    .featuredStar { font-size: 12px; color: var(--brand1); }
+    .featuredLabel {
+      font-size: 10.5px; font-weight: 900;
+      letter-spacing: .1em; text-transform: uppercase;
       color: var(--brand1);
     }
-    .sponsoredTag {
-      font-size: 10.5px;
-      font-weight: 700;
-      color: var(--muted);
-      letter-spacing: .05em;
+    .featuredTag {
+      font-size: 10.5px; font-weight: 600;
+      color: var(--muted); letter-spacing: .04em;
     }
-    .sponsoredBody {
+    .featuredBody {
       padding: 16px;
       display: grid;
       grid-template-columns: 1fr;
       gap: 12px;
     }
-    .sponsoredBody:has(.sponsoredImgWrap) {
-      grid-template-columns: 120px 1fr;
+    .featuredImg {
+      display: block; width: 100%;
+      height: 160px; object-fit: cover;
+      border-radius: 9px;
     }
-    .sponsoredImgWrap { width: 120px; flex-shrink: 0; }
-    .sponsoredImg {
-      display: block;
-      width: 120px;
-      height: 90px;
-      object-fit: cover;
-      border-radius: 8px;
+    .featuredTitle {
+      font-size: 17px; font-weight: 900;
+      color: var(--text); line-height: 1.2;
+      margin-bottom: 6px; letter-spacing: -0.2px;
     }
-    .sponsoredTitle {
-      font-size: 17px;
-      font-weight: 900;
-      color: var(--text);
-      line-height: 1.2;
-      margin-bottom: 6px;
-      letter-spacing: -0.2px;
+    .featuredDesc {
+      font-size: 13.5px; color: var(--muted);
+      line-height: 1.45; margin-bottom: 12px;
     }
-    .sponsoredDesc {
-      font-size: 13.5px;
-      color: var(--muted);
-      line-height: 1.45;
-      margin-bottom: 12px;
-    }
-    .sponsoredCta {
-      display: inline-flex;
-      align-items: center;
-      height: 36px;
-      padding: 0 16px;
+    .featuredCta {
+      display: inline-flex; align-items: center;
+      height: 38px; padding: 0 18px;
       border-radius: 999px;
-      background: var(--brand1);
-      color: var(--accentText);
-      font-size: 13px;
-      font-weight: 800;
-      text-decoration: none;
-      transition: filter 130ms;
+      background: var(--brand1); color: var(--accentText);
+      font-size: 13.5px; font-weight: 800;
+      text-decoration: none; transition: filter 130ms;
     }
-    .sponsoredCta:hover { filter: brightness(.92); }
+    .featuredCta:hover { filter: brightness(.92); }
 
     /* ══ TOPICS GRID ══ */
     .topicsGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 14px;
+      gap: 10px; margin-top: 14px;
     }
-    @media (max-width: 560px) {
-      .topicsGrid { grid-template-columns: repeat(2, 1fr); }
-    }
+    @media (max-width: 560px) { .topicsGrid { grid-template-columns: repeat(2, 1fr); } }
+
     .topicTile {
-      position: relative;
-      display: block;
-      text-decoration: none;
-      border-radius: 10px;
-      overflow: hidden;
-      aspect-ratio: 3/2;
+      position: relative; display: block;
+      text-decoration: none; border-radius: 10px;
+      overflow: hidden; aspect-ratio: 3/2;
       background: var(--surface2);
       border: 1px solid var(--border);
     }
@@ -662,128 +580,83 @@ const topics = [
       background: linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.28) 55%, transparent 100%);
     }
     .topicLabel {
-      position: absolute;
-      bottom: 10px; left: 11px; right: 11px;
+      position: absolute; bottom: 10px;
+      left: 11px; right: 11px;
       font-size: 13px; font-weight: 900;
       color: #fff; line-height: 1.2;
       text-shadow: 0 1px 6px rgba(0,0,0,.6);
     }
 
     /* ══ SIDEBAR ══ */
-    .homeRail {
-      position: sticky;
-      top: 80px;
-      display: grid;
-      gap: 20px;
-    }
+    .homeRail { position: sticky; top: 80px; display: grid; gap: 18px; }
     .railCard {
       border: 1px solid var(--border);
       background: var(--surface);
-      border-radius: 14px;
-      padding: 16px;
+      border-radius: 14px; padding: 16px;
     }
     .railHead {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 14px;
+      display: flex; justify-content: space-between;
+      align-items: baseline; margin-bottom: 14px;
     }
     .railTitle {
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .13em;
-      text-transform: uppercase;
-      color: var(--text);
+      font-size: 10.5px; font-weight: 900;
+      letter-spacing: .14em; text-transform: uppercase; color: var(--text);
     }
-    .railMore {
-      font-size: 11.5px; font-weight: 700;
-      color: var(--link); text-decoration: none;
-    }
+    .railMore { font-size: 11px; font-weight: 700; color: var(--link); text-decoration: none; }
     .railMore:hover { text-decoration: underline; }
 
-    /* Events */
     .eventList { display: grid; gap: 8px; }
     .eventRow {
-      display: grid;
-      grid-template-columns: 44px 1fr;
+      display: grid; grid-template-columns: 44px 1fr;
       gap: 10px; align-items: center;
       text-decoration: none; padding: 8px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--surface2);
-      transition: border-color 140ms;
+      border-radius: 10px; border: 1px solid var(--border);
+      background: var(--surface2); transition: border-color 140ms;
     }
     .eventRow:hover { border-color: var(--pillBorder); }
     .eventCal {
       width: 44px; height: 44px; border-radius: 10px;
       background: var(--pillBg); border: 1px solid var(--pillBorder);
-      display: grid; place-items: center;
-      text-align: center; line-height: 1;
+      display: grid; place-items: center; text-align: center; line-height: 1;
     }
     .eDow { font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
     .eDay { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 1px; }
     .eName { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.2; }
     .ePlace { font-size: 11.5px; color: var(--faint); margin-top: 2px; }
 
-    /* Display Ad Slot */
-    .displayAdSlot {
-      display: grid;
-      gap: 6px;
-    }
+    /* Display Ad */
+    .displayAdSlot { display: grid; gap: 5px; }
     .adSlotLabel {
-      font-size: 9.5px;
-      font-weight: 700;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--faint);
-      text-align: center;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--faint); text-align: center;
     }
     .displayAdCard {
-      display: block;
-      text-decoration: none;
+      display: block; text-decoration: none;
       border: 1.5px dashed var(--pillBorder);
-      border-radius: 14px;
-      overflow: hidden;
-      background: var(--pillBg);
+      border-radius: 14px; background: var(--pillBg);
       transition: border-color 140ms;
     }
     .displayAdCard:hover { border-color: var(--brand1); }
-    .displayAdPlaceholder {
-      padding: 28px 16px;
-      text-align: center;
-      display: grid;
-      gap: 6px;
-      place-items: center;
+    .displayAdInner {
+      padding: 24px 16px; text-align: center;
+      display: grid; gap: 5px; place-items: center;
     }
-    .displayAdIcon { font-size: 28px; margin-bottom: 4px; }
-    .displayAdTitle {
-      font-size: 16px;
-      font-weight: 900;
-      color: var(--text);
-    }
-    .displayAdDesc {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.35;
-    }
+    .displayAdIcon { font-size: 26px; margin-bottom: 2px; }
+    .displayAdTitle { font-size: 15px; font-weight: 900; color: var(--text); }
+    .displayAdDesc { font-size: 12.5px; color: var(--muted); line-height: 1.3; }
     .displayAdCta {
-      margin-top: 8px;
-      display: inline-flex;
-      align-items: center;
-      height: 34px;
-      padding: 0 14px;
-      border-radius: 999px;
-      background: var(--brand1);
-      color: var(--accentText);
-      font-size: 12.5px;
-      font-weight: 800;
+      margin-top: 6px;
+      display: inline-flex; align-items: center;
+      height: 32px; padding: 0 14px;
+      border-radius: 999px; background: var(--brand1);
+      color: var(--accentText); font-size: 12px; font-weight: 800;
     }
 
-    /* Guides */
     .guideList { display: grid; }
     .guideRow {
       display: block; text-decoration: none;
-      font-size: 13.5px; font-weight: 700;
+      font-size: 13px; font-weight: 700;
       color: var(--text); padding: 9px 0;
       border-bottom: 1px solid var(--border);
       line-height: 1.3; transition: color 120ms;
@@ -795,74 +668,47 @@ const topics = [
     .adBand {
       margin: 44px 0 52px;
       border-radius: 18px;
-      background: linear-gradient(135deg,
-        color-mix(in srgb, var(--brand1) 100%, #000 0%),
-        color-mix(in srgb, var(--brand2) 100%, #000 12%)
-      );
+      background: linear-gradient(135deg, var(--brand1), var(--brand2));
       padding: clamp(28px, 4vw, 52px);
-      box-shadow:
-        0 12px 40px color-mix(in srgb, var(--brand1) 40%, transparent),
-        0 2px 8px rgba(0,0,0,.15);
+      box-shadow: 0 12px 40px color-mix(in srgb, var(--brand1) 40%, transparent);
     }
     .adBandInner {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       justify-content: space-between;
-      gap: 28px;
-      flex-wrap: wrap;
+      gap: 28px; flex-wrap: wrap;
     }
     .adEyebrow {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .16em;
-      text-transform: uppercase;
-      color: var(--accentText);
-      opacity: .72;
-      margin-bottom: 8px;
+      font-size: 11px; font-weight: 800;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--accentText); opacity: .72; margin-bottom: 8px;
     }
     .adHead {
       font-size: clamp(22px, 2.5vw, 30px);
-      font-weight: 950;
-      color: var(--accentText);
-      letter-spacing: -0.4px;
-      margin-bottom: 8px;
-      line-height: 1.05;
+      font-weight: 950; color: var(--accentText);
+      letter-spacing: -0.4px; margin-bottom: 8px; line-height: 1.05;
     }
     .adDesc {
-      font-size: clamp(14px, 1.3vw, 15.5px);
-      color: var(--accentText);
-      opacity: .82;
-      line-height: 1.5;
-      max-width: 500px;
+      font-size: clamp(13.5px, 1.2vw, 15px);
+      color: var(--accentText); opacity: .82;
+      line-height: 1.5; max-width: 500px;
     }
-    .adActions {
-      display: flex;
-      gap: 12px;
-      flex-shrink: 0;
-      flex-wrap: wrap;
-    }
+    .adActions { display: flex; gap: 12px; flex-shrink: 0; flex-wrap: wrap; }
     .adBtnPrimary {
       display: inline-flex; align-items: center;
-      height: 52px; padding: 0 28px;
-      border-radius: 14px;
-      background: var(--accentText);
-      color: var(--brand1);
+      height: 52px; padding: 0 28px; border-radius: 14px;
+      background: var(--accentText); color: var(--brand1);
       font-size: 16px; font-weight: 900;
-      text-decoration: none;
-      white-space: nowrap;
+      text-decoration: none; white-space: nowrap;
       transition: opacity 140ms;
       box-shadow: 0 4px 16px rgba(0,0,0,.18);
     }
     .adBtnPrimary:hover { opacity: .88; }
     .adBtnGhost {
       display: inline-flex; align-items: center;
-      height: 52px; padding: 0 24px;
-      border-radius: 14px;
+      height: 52px; padding: 0 24px; border-radius: 14px;
       border: 2px solid rgba(255,255,255,.50);
-      color: var(--accentText);
-      font-size: 15px; font-weight: 800;
-      text-decoration: none;
-      white-space: nowrap;
+      color: var(--accentText); font-size: 15px; font-weight: 800;
+      text-decoration: none; white-space: nowrap;
       transition: border-color 140ms;
     }
     .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
