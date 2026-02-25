@@ -78,18 +78,20 @@ const topics = [
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
   <div class="pageWrap">
 
-    {/* ── NEWSLETTER BAND — vertical stack ── */}
+    {/* ── NEWSLETTER BAND — Method A: text left, image right ── */}
     <div class="nlBand">
       <div class="nlInner">
-        <div class="nlHead">Good News Daytona!</div>
-        <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong>for free.</strong></div>
-        <form class="nlForm" action="/daytona/subscribe/" method="get">
-          <div class="nlRow">
-            <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" />
-            <button class="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
-          </div>
-        </form>
-        <div class="nlFine">100% free, unsubscribe anytime.</div>
+        <div class="nlContent">
+          <div class="nlHead">Good News Daytona!</div>
+          <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong>for free.</strong></div>
+          <form class="nlForm" action="/daytona/subscribe/" method="get">
+            <div class="nlRow">
+              <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" />
+              <button class="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
+            </div>
+          </form>
+          <div class="nlFine">100% free, unsubscribe anytime.</div>
+        </div>
       </div>
     </div>
 
@@ -257,69 +259,104 @@ const topics = [
     }
 
     /* ── Newsletter — vertical stack, skyline bg, 65% dark overlay ── */
+    /* ── Newsletter — Method A: solid left / image right ── */
     .nlBand {
       position: relative;
-      background:
-        linear-gradient(rgba(0,0,0,.65), rgba(0,0,0,.65)),
-        url('/images/gododaytona-bg.png') center/cover no-repeat;
-      /* Fallback to brand color if image missing */
-      background-color: var(--brand1);
-      padding: clamp(28px, 3.5vw, 44px) 0;
       margin-top: 16px;
+      overflow: hidden;
+      /* Right half: postcard image fading in from center */
+      background:
+        /* Left solid zone — site background color, fully opaque */
+        linear-gradient(
+          to right,
+          var(--brand1) 0%,
+          var(--brand1) 48%,
+          transparent 72%
+        ),
+        /* Postcard image fills full band, only visible on right */
+        url('/images/gododaytona-bg.png') right center / cover no-repeat;
+      background-color: var(--brand1);
     }
     .nlInner {
-      max-width: 600px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 0 2rem;
+      padding: clamp(28px, 3.5vw, 48px) 3rem;
+      /* Align content to left half only */
+      display: flex;
+      align-items: flex-start;
+    }
+    .nlContent {
+      /* Constrain text block to left 50% max */
+      max-width: 520px;
+      width: 100%;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      text-align: center;
-      gap: 10px;
+      gap: 12px;
     }
     .nlHead {
-      font-size: clamp(28px, 3.5vw, 42px);
-      font-weight: 950; color: #fff;
-      line-height: 1.05; letter-spacing: -0.5px;
-      margin-bottom: 0;
+      font-size: clamp(26px, 3vw, 40px);
+      font-weight: 950;
+      color: var(--accentText);
+      line-height: 1.05;
+      letter-spacing: -0.5px;
     }
     .nlSub {
-      font-size: clamp(13px, 1.2vw, 16px);
-      color: rgba(255,255,255,.88); line-height: 1.4;
+      font-size: clamp(13px, 1.1vw, 15px);
+      color: var(--accentText);
+      opacity: .9;
+      line-height: 1.4;
     }
-    .nlSub strong { font-weight: 900; color: #fff; }
-    .nlForm { width: 100%; max-width: 520px; }
-    .nlRow { display: flex; height: 50px; width: 100%; }
+    .nlSub strong { font-weight: 900; opacity: 1; }
+    .nlForm { width: 100%; }
+    .nlRow { display: flex; height: 52px; width: 100%; }
     .nlInput {
       flex: 1; min-width: 0;
       border-radius: 10px 0 0 10px;
-      border: 2px solid rgba(0,0,0,.12); border-right: none;
+      /* High-contrast border so it's obvious where to click */
+      border: 2.5px solid rgba(0,0,0,.35);
+      border-right: none;
       background: #fff; color: #111;
       padding: 0 16px; font-size: 15px; font-weight: 500;
       outline: none;
+      transition: border-color 150ms;
     }
-    .nlInput::placeholder { color: #999; }
-    .nlInput:focus { border-color: rgba(0,0,0,.3); }
+    .nlInput::placeholder { color: #888; }
+    .nlInput:focus { border-color: rgba(0,0,0,.7); }
     .nlBtn {
-      flex-shrink: 0; padding: 0 20px;
+      flex-shrink: 0; padding: 0 22px;
       border-radius: 0 10px 10px 0;
-      border: 2px solid rgba(0,0,0,.28);
-      background: rgba(0,0,0,.20); color: var(--accentText);
+      /* Brand yellow button, black text — maximum contrast */
+      border: 2.5px solid rgba(0,0,0,.2);
+      background: var(--brand1);
+      color: #000;
       font-weight: 900; font-size: 14px; cursor: pointer;
-      white-space: nowrap; transition: background 140ms;
-      letter-spacing: .02em;
+      white-space: nowrap;
+      letter-spacing: .04em;
+      transition: filter 150ms;
     }
-    .nlBtn:hover { background: rgba(0,0,0,.34); }
-    /* Dark charcoal fine print — readable against yellow, not white/transparent */
+    .nlBtn:hover { filter: brightness(1.1); }
     .nlFine {
       font-size: 11.5px; font-weight: 500;
-      color: rgba(0,0,0,.55);
+      color: var(--accentText);
+      opacity: .6;
       font-style: italic;
     }
-    @media (max-width: 600px) {
+    /* Mobile: stack vertically, image becomes subtle bg */
+    @media (max-width: 700px) {
+      .nlBand {
+        background:
+          linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.75)),
+          url('/images/gododaytona-bg.png') center/cover no-repeat;
+        background-color: var(--brand1);
+      }
+      .nlInner { padding: 28px 1.5rem; }
+      .nlContent { max-width: 100%; }
+      .nlHead { color: #fff; }
+      .nlSub { color: rgba(255,255,255,.88); }
+      .nlFine { color: rgba(255,255,255,.6); }
       .nlRow { flex-direction: column; height: auto; gap: 8px; }
-      .nlInput { border-radius: 10px; border-right: 2px solid rgba(0,0,0,.12); height: 48px; }
-      .nlBtn { border-radius: 10px; height: 48px; }
+      .nlInput { border-radius: 10px; border-right: 2.5px solid rgba(0,0,0,.35); height: 50px; }
+      .nlBtn { border-radius: 10px; height: 50px; }
     }
 
     /* ── Home grid 75/25, sidebar aligns top with hero ── */
