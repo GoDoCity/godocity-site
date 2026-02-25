@@ -42,10 +42,6 @@ const hero = posts.find(isFeatured) ?? posts[0] ?? null;
 const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 const latest = feed.slice(0, 3);
 
-/* ── FEATURED (PAID) AD CONTENT ───────────────────────
-   Swap in real advertiser info here when you have a client.
-   No coding needed — just update these values.
-──────────────────────────────────────────────────── */
 const featuredAd = {
   tag: "Featured Business",
   title: "Your Business Name Here — Reach Daytona Locals",
@@ -71,42 +67,27 @@ const topics = [
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
   <div class="pageWrap">
 
-    {/* ══ NEWSLETTER BAND — compact but bold ══ */}
     <div class="nlBand">
       <div class="nlInner">
-
-        {/* LEFT: copy */}
         <div class="nlCopy">
           <div class="nlHead">Good news for Daytona.</div>
           <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong>for free.</strong></div>
         </div>
-
-        {/* RIGHT: form */}
         <form class="nlForm" action="/daytona/subscribe/" method="get">
           <div class="nlRow">
-            <input
-              class="nlInput"
-              type="email"
-              name="email"
-              placeholder="Enter your email address"
-              aria-label="Email address"
-            />
+            <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" />
             <button class="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
           </div>
           <div class="nlFine">100% free, unsubscribe anytime.</div>
         </form>
-
       </div>
     </div>
 
-    {/* ══ MAIN CONTENT ══ */}
     <div class="container">
       <div class="homeGrid">
 
-        {/* ── LEFT: FEED ── */}
         <main class="homeMain">
 
-          {/* HERO — side by side like Nooga */}
           {hero && (
             <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
               <div class="heroImgWrap">
@@ -124,10 +105,8 @@ const topics = [
             </a>
           )}
 
-          {/* LATEST */}
           <div class="sectionHead">
             <span class="sectionLabel">Latest</span>
-            <a class="viewAll" href="/daytona/posts/">View all →</a>
           </div>
 
           <div class="feedList">
@@ -148,7 +127,6 @@ const topics = [
                   </div>
                 </a>
 
-                {/* FEATURED AD — after article #2, labeled "Featured" not "Sponsored" */}
                 {i === 1 && (
                   <div class="featuredCard">
                     <div class="featuredHeader">
@@ -163,9 +141,7 @@ const topics = [
                       <div class="featuredText">
                         <div class="featuredTitle">{featuredAd.title}</div>
                         <div class="featuredDesc">{featuredAd.description}</div>
-                        <a class="featuredCta" href={featuredAd.ctaHref}>
-                          {featuredAd.ctaText} →
-                        </a>
+                        <a class="featuredCta" href={featuredAd.ctaHref}>{featuredAd.ctaText} →</a>
                       </div>
                     </div>
                   </div>
@@ -174,7 +150,10 @@ const topics = [
             ))}
           </div>
 
-          {/* TOPICS */}
+          <div class="viewAllRow">
+            <a class="viewAllBottom" href="/daytona/posts/">View all stories →</a>
+          </div>
+
           <div class="sectionHead" style="margin-top:36px">
             <span class="sectionLabel">Topics</span>
           </div>
@@ -190,10 +169,8 @@ const topics = [
 
         </main>
 
-        {/* ── RIGHT: SIDEBAR ── */}
         <aside class="homeRail">
 
-          {/* EVENTS */}
           <div class="railCard">
             <div class="railHead">
               <span class="railTitle">Upcoming Events</span>
@@ -211,7 +188,6 @@ const topics = [
             </div>
           </div>
 
-          {/* DISPLAY AD SLOT */}
           <div class="displayAdSlot">
             <div class="adSlotLabel">Advertisement</div>
             <a class="displayAdCard" href="/daytona/advertise/">
@@ -224,7 +200,6 @@ const topics = [
             </a>
           </div>
 
-          {/* CITY GUIDES */}
           <div class="railCard">
             <div class="railHead">
               <span class="railTitle">City Guides</span>
@@ -240,7 +215,6 @@ const topics = [
         </aside>
       </div>
 
-      {/* ══ ADVERTISE BAND ══ */}
       <div class="adBand">
         <div class="adBandInner">
           <div class="adCopy">
@@ -268,7 +242,6 @@ const topics = [
       padding-right: clamp(16px, 2.5vw, 32px);
     }
 
-    /* ══ NEWSLETTER BAND — compact, Nooga-style ══ */
     .nlBand {
       background: var(--brand1);
       padding: clamp(18px, 2.5vw, 28px) 0;
@@ -283,7 +256,6 @@ const topics = [
       gap: clamp(24px, 4vw, 64px);
       align-items: center;
     }
-    .nlCopy { min-width: 0; }
     .nlHead {
       font-size: clamp(20px, 2.2vw, 26px);
       font-weight: 950;
@@ -300,8 +272,6 @@ const topics = [
       line-height: 1.4;
     }
     .nlSub strong { font-weight: 900; opacity: 1; }
-
-    .nlForm { min-width: 0; }
     .nlRow {
       display: flex;
       gap: 0;
@@ -354,7 +324,6 @@ const topics = [
       .nlBtn { border-radius: 12px; height: 52px; }
     }
 
-    /* ══ HOME GRID 75/25 ══ */
     .homeGrid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 290px;
@@ -368,10 +337,9 @@ const topics = [
       .homeRail { order: 2; }
     }
 
-    /* ══ HERO — side by side like Nooga ══ */
     .heroCard {
       display: grid;
-      grid-template-columns: 1fr 1fr; /* 50/50 image + text */
+      grid-template-columns: 1fr 1fr;
       gap: 20px;
       align-items: start;
       text-decoration: none;
@@ -379,55 +347,37 @@ const topics = [
       padding-bottom: 24px;
       border-bottom: 2px solid var(--brand1);
     }
-    @media (max-width: 640px) {
-      .heroCard { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 640px) { .heroCard { grid-template-columns: 1fr; } }
 
-    .heroImgWrap {
-      border-radius: 12px;
-      overflow: hidden;
-    }
+    .heroImgWrap { border-radius: 12px; overflow: hidden; }
     .heroImg {
-      display: block;
-      width: 100%;
-      aspect-ratio: 4/3;
-      object-fit: cover;
+      display: block; width: 100%;
+      aspect-ratio: 4/3; object-fit: cover;
       background: var(--surface);
     }
-    .heroFallback {
-      aspect-ratio: 4/3;
-      background: var(--surface2);
-    }
+    .heroFallback { aspect-ratio: 4/3; background: var(--surface2); }
     .heroKicker {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .09em;
-      text-transform: uppercase;
-      color: var(--brand1);
-      margin-bottom: 8px;
+      font-size: 11px; font-weight: 800;
+      letter-spacing: .09em; text-transform: uppercase;
+      color: var(--brand1); margin-bottom: 8px;
     }
     .heroTitle {
       font-size: clamp(20px, 2.2vw, 28px);
-      font-weight: 950;
-      line-height: 1.1;
-      letter-spacing: -0.4px;
-      color: var(--text);
+      font-weight: 950; line-height: 1.1;
+      letter-spacing: -0.4px; color: var(--text);
       margin: 0 0 10px;
+      transition: color 130ms ease;
     }
     .heroCard:hover .heroTitle { color: var(--link); }
     .heroDesc {
       color: var(--muted);
       font-size: clamp(13.5px, 1.2vw, 15px);
-      line-height: 1.55;
-      margin: 0 0 12px;
-      display: -webkit-box;
-      -webkit-line-clamp: 4;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      line-height: 1.55; margin: 0 0 12px;
+      display: -webkit-box; -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical; overflow: hidden;
     }
     .heroMeta { font-size: 12.5px; color: var(--faint); }
 
-    /* ══ SECTION HEAD ══ */
     .sectionHead {
       display: flex;
       align-items: baseline;
@@ -437,31 +387,21 @@ const topics = [
       border-bottom: 2px solid var(--brand1);
     }
     .sectionLabel {
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .15em;
-      text-transform: uppercase;
+      font-size: 11px; font-weight: 900;
+      letter-spacing: .15em; text-transform: uppercase;
       color: var(--text);
     }
-    .viewAll {
-      font-size: 12px; font-weight: 700;
-      color: var(--link); text-decoration: none;
-    }
-    .viewAll:hover { text-decoration: underline; }
 
-    /* ══ FEED ROWS ══ */
     .feedList { margin-bottom: 0; }
     .feedRow {
       display: grid;
       grid-template-columns: 1fr 130px;
-      gap: 16px;
-      align-items: start;
+      gap: 16px; align-items: start;
       padding: 18px 0;
       border-bottom: 1px solid var(--border);
       text-decoration: none;
     }
     .feedRow:hover .feedRowTitle { color: var(--link); }
-
     .feedKicker {
       font-size: 10.5px; font-weight: 800;
       letter-spacing: .08em; text-transform: uppercase;
@@ -490,26 +430,32 @@ const topics = [
       background: var(--surface);
     }
     .feedThumbFallback { background: var(--surface2); }
-
     @media (max-width: 500px) {
       .feedRow { grid-template-columns: 1fr 90px; gap: 12px; }
       .feedThumbWrap { width: 90px; }
       .feedThumb { width: 90px; height: 68px; }
     }
 
-    /* ══ FEATURED AD (labeled "Featured", not "Sponsored") ══ */
+    .viewAllRow { padding: 16px 0 4px; text-align: center; }
+    .viewAllBottom {
+      font-size: 14px; font-weight: 800;
+      color: var(--link); text-decoration: none;
+      border: 1px solid var(--pillBorder);
+      background: var(--pillBg);
+      padding: 10px 24px; border-radius: 999px;
+      display: inline-flex; align-items: center;
+    }
+    .viewAllBottom:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
+
     .featuredCard {
       margin: 4px 0;
       border: 1.5px solid var(--pillBorder);
       background: var(--surface);
-      border-radius: 14px;
-      overflow: hidden;
+      border-radius: 14px; overflow: hidden;
     }
     .featuredHeader {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      padding: 7px 14px;
+      display: flex; align-items: center;
+      gap: 7px; padding: 7px 14px;
       background: var(--pillBg);
       border-bottom: 1px solid var(--pillBorder);
     }
@@ -519,54 +465,38 @@ const topics = [
       letter-spacing: .1em; text-transform: uppercase;
       color: var(--brand1);
     }
-    .featuredTag {
-      font-size: 10.5px; font-weight: 600;
-      color: var(--muted); letter-spacing: .04em;
-    }
-    .featuredBody {
-      padding: 16px;
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
-    }
+    .featuredTag { font-size: 10.5px; font-weight: 600; color: var(--muted); }
+    .featuredBody { padding: 16px; display: grid; gap: 12px; }
     .featuredImg {
       display: block; width: 100%;
-      height: 160px; object-fit: cover;
-      border-radius: 9px;
+      height: 160px; object-fit: cover; border-radius: 9px;
     }
     .featuredTitle {
       font-size: 17px; font-weight: 900;
       color: var(--text); line-height: 1.2;
       margin-bottom: 6px; letter-spacing: -0.2px;
     }
-    .featuredDesc {
-      font-size: 13.5px; color: var(--muted);
-      line-height: 1.45; margin-bottom: 12px;
-    }
+    .featuredDesc { font-size: 13.5px; color: var(--muted); line-height: 1.45; margin-bottom: 12px; }
     .featuredCta {
       display: inline-flex; align-items: center;
-      height: 38px; padding: 0 18px;
-      border-radius: 999px;
+      height: 38px; padding: 0 18px; border-radius: 999px;
       background: var(--brand1); color: var(--accentText);
       font-size: 13.5px; font-weight: 800;
       text-decoration: none; transition: filter 130ms;
     }
     .featuredCta:hover { filter: brightness(.92); }
 
-    /* ══ TOPICS GRID ══ */
     .topicsGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 10px; margin-top: 14px;
     }
     @media (max-width: 560px) { .topicsGrid { grid-template-columns: repeat(2, 1fr); } }
-
     .topicTile {
       position: relative; display: block;
       text-decoration: none; border-radius: 10px;
       overflow: hidden; aspect-ratio: 3/2;
-      background: var(--surface2);
-      border: 1px solid var(--border);
+      background: var(--surface2); border: 1px solid var(--border);
     }
     .topicImg {
       position: absolute; inset: 0;
@@ -580,14 +510,11 @@ const topics = [
       background: linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.28) 55%, transparent 100%);
     }
     .topicLabel {
-      position: absolute; bottom: 10px;
-      left: 11px; right: 11px;
-      font-size: 13px; font-weight: 900;
-      color: #fff; line-height: 1.2;
-      text-shadow: 0 1px 6px rgba(0,0,0,.6);
+      position: absolute; bottom: 10px; left: 11px; right: 11px;
+      font-size: 13px; font-weight: 900; color: #fff;
+      line-height: 1.2; text-shadow: 0 1px 6px rgba(0,0,0,.6);
     }
 
-    /* ══ SIDEBAR ══ */
     .homeRail { position: sticky; top: 80px; display: grid; gap: 18px; }
     .railCard {
       border: 1px solid var(--border);
@@ -604,13 +531,12 @@ const topics = [
     }
     .railMore { font-size: 11px; font-weight: 700; color: var(--link); text-decoration: none; }
     .railMore:hover { text-decoration: underline; }
-
     .eventList { display: grid; gap: 8px; }
     .eventRow {
       display: grid; grid-template-columns: 44px 1fr;
-      gap: 10px; align-items: center;
-      text-decoration: none; padding: 8px;
-      border-radius: 10px; border: 1px solid var(--border);
+      gap: 10px; align-items: center; text-decoration: none;
+      padding: 8px; border-radius: 10px;
+      border: 1px solid var(--border);
       background: var(--surface2); transition: border-color 140ms;
     }
     .eventRow:hover { border-color: var(--pillBorder); }
@@ -624,7 +550,6 @@ const topics = [
     .eName { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.2; }
     .ePlace { font-size: 11.5px; color: var(--faint); margin-top: 2px; }
 
-    /* Display Ad */
     .displayAdSlot { display: grid; gap: 5px; }
     .adSlotLabel {
       font-size: 9px; font-weight: 700;
@@ -638,33 +563,27 @@ const topics = [
       transition: border-color 140ms;
     }
     .displayAdCard:hover { border-color: var(--brand1); }
-    .displayAdInner {
-      padding: 24px 16px; text-align: center;
-      display: grid; gap: 5px; place-items: center;
-    }
+    .displayAdInner { padding: 24px 16px; text-align: center; display: grid; gap: 5px; place-items: center; }
     .displayAdIcon { font-size: 26px; margin-bottom: 2px; }
     .displayAdTitle { font-size: 15px; font-weight: 900; color: var(--text); }
     .displayAdDesc { font-size: 12.5px; color: var(--muted); line-height: 1.3; }
     .displayAdCta {
-      margin-top: 6px;
-      display: inline-flex; align-items: center;
-      height: 32px; padding: 0 14px;
-      border-radius: 999px; background: var(--brand1);
-      color: var(--accentText); font-size: 12px; font-weight: 800;
+      margin-top: 6px; display: inline-flex; align-items: center;
+      height: 32px; padding: 0 14px; border-radius: 999px;
+      background: var(--brand1); color: var(--accentText);
+      font-size: 12px; font-weight: 800;
     }
 
     .guideList { display: grid; }
     .guideRow {
       display: block; text-decoration: none;
-      font-size: 13px; font-weight: 700;
-      color: var(--text); padding: 9px 0;
-      border-bottom: 1px solid var(--border);
+      font-size: 13px; font-weight: 700; color: var(--text);
+      padding: 9px 0; border-bottom: 1px solid var(--border);
       line-height: 1.3; transition: color 120ms;
     }
     .guideRow:last-child { border-bottom: none; }
     .guideRow:hover { color: var(--link); }
 
-    /* ══ ADVERTISE BAND ══ */
     .adBand {
       margin: 44px 0 52px;
       border-radius: 18px;
@@ -674,8 +593,7 @@ const topics = [
     }
     .adBandInner {
       display: flex; align-items: center;
-      justify-content: space-between;
-      gap: 28px; flex-wrap: wrap;
+      justify-content: space-between; gap: 28px; flex-wrap: wrap;
     }
     .adEyebrow {
       font-size: 11px; font-weight: 800;
@@ -697,9 +615,8 @@ const topics = [
       display: inline-flex; align-items: center;
       height: 52px; padding: 0 28px; border-radius: 14px;
       background: var(--accentText); color: var(--brand1);
-      font-size: 16px; font-weight: 900;
-      text-decoration: none; white-space: nowrap;
-      transition: opacity 140ms;
+      font-size: 16px; font-weight: 900; text-decoration: none;
+      white-space: nowrap; transition: opacity 140ms;
       box-shadow: 0 4px 16px rgba(0,0,0,.18);
     }
     .adBtnPrimary:hover { opacity: .88; }
@@ -708,8 +625,7 @@ const topics = [
       height: 52px; padding: 0 24px; border-radius: 14px;
       border: 2px solid rgba(255,255,255,.50);
       color: var(--accentText); font-size: 15px; font-weight: 800;
-      text-decoration: none; white-space: nowrap;
-      transition: border-color 140ms;
+      text-decoration: none; white-space: nowrap; transition: border-color 140ms;
     }
     .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
 
