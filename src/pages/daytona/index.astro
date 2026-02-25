@@ -52,16 +52,27 @@ const featuredAd = {
 };
 
 const topics = [
-  { label: "Business",          slug: "biz",             img: "/images/topics/business.jpg" },
-  { label: "City",              slug: "city",             img: "/images/topics/city.jpg" },
-  { label: "Culture",           slug: "culture",          img: "/images/topics/culture.jpg" },
-  { label: "Events",            slug: "events",           img: "/images/topics/events.jpg" },
-  { label: "Food",              slug: "food",             img: "/images/topics/food.jpg" },
-  { label: "History",           slug: "history",          img: "/images/topics/history.jpg" },
-  { label: "Real Estate",       slug: "real-estate",      img: "/images/topics/real-estate.jpg" },
-  { label: "Sports",            slug: "sports",           img: "/images/topics/sports.jpg" },
-  { label: "Travel + Outdoors", slug: "travel-outdoors",  img: "/images/topics/travel-outdoors.jpg" },
+  { label: "Biz",              slug: "biz",             img: "/images/topics/biz.jpg" },
+  { label: "City",             slug: "city",             img: "/images/topics/city.jpg" },
+  { label: "Culture",          slug: "culture",          img: "/images/topics/culture.jpg" },
+  { label: "Events",           slug: "events",           img: "/images/topics/events.jpg" },
+  { label: "Food",             slug: "food",             img: "/images/topics/food.jpg" },
+  { label: "History",          slug: "history",          img: "/images/topics/history.jpg" },
+  { label: "Real Estate",      slug: "real-estate",      img: "/images/topics/real-estate.jpg" },
+  { label: "Sports",           slug: "sports",           img: "/images/topics/sports.jpg" },
+  { label: "Travel & Outdoors",slug: "travel-outdoors",  img: "/images/topics/travel-outdoors.jpg" },
 ];
+/* ── TOPIC IMAGE GUIDE (save to /public/images/topics/) ──────────────
+   biz.jpg           → Local storefronts, Main Street Daytona
+   city.jpg          → Aerial/drone shot of Daytona Beach coastline
+   culture.jpg       → Neon lights from a local music venue or colorful mural
+   events.jpg        → Crowds at Bike Week or Daytona 500 grandstands
+   food.jpg          → Close-up burger or cocktail with condensation
+   history.jpg       → Historic Daytona boardwalk or vintage race photo
+   real-estate.jpg   → Modern beachfront balcony or historic Daytona home
+   sports.jpg        → Motion-blurred race car or stadium lights at night
+   travel-outdoors.jpg → Cinematic sunrise over Daytona pier or surfboard in sand
+────────────────────────────────────────────────────────────────────── */
 ---
 
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
@@ -236,12 +247,12 @@ const topics = [
   <style>
     .pageWrap { min-height: 100vh; }
 
-    /* ── 1550px container, 1.5rem gutters ── */
+    /* ── Island-style layout: 1400px centered, 3rem generous frame ── */
     :global(.container) {
-      max-width: 1550px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding-left: 3.5rem;
-      padding-right: 3.5rem;
+      padding-left: 3rem;
+      padding-right: 3rem;
     }
     @media (max-width: 600px) {
       :global(.container) { padding-left: 1rem; padding-right: 1rem; }
@@ -254,9 +265,9 @@ const topics = [
       margin-top: 16px;
     }
     .nlInner {
-      max-width: 1550px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 0 3.5rem;
+      padding: 0 3rem;
       display: grid;
       grid-template-columns: auto 1fr;
       gap: clamp(24px, 4vw, 72px);
@@ -438,7 +449,7 @@ const topics = [
       color: var(--brand1); margin-bottom: 5px;
     }
     .cardTitle {
-      font-size: clamp(14px, 1.2vw, 17px);
+      font-size: 22px;
       font-weight: 900; line-height: 1.2;
       letter-spacing: -0.2px; color: var(--text); margin-bottom: 6px;
       display: -webkit-box; -webkit-line-clamp: 3;
@@ -447,7 +458,8 @@ const topics = [
     }
     .articleCard:hover .cardTitle { color: var(--link); }
     .cardDesc {
-      font-size: 12.5px; color: var(--muted); line-height: 1.4; margin-bottom: 7px;
+      font-size: 18px; font-weight: 500;
+      color: var(--muted); line-height: 1.45; margin-bottom: 7px;
       display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
     }
@@ -500,14 +512,14 @@ const topics = [
     /* Topics */
     .topicsHead { padding-bottom: 10px; border-bottom: 2px solid var(--brand1); margin-bottom: 13px; }
     .topicsLabel {
-      font-size: 10.5px; font-weight: 900;
-      letter-spacing: .15em; text-transform: uppercase; color: var(--text);
+      font-size: 14px; font-weight: 900;
+      letter-spacing: .2em; text-transform: uppercase; color: var(--text);
     }
-    .topicsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .topicsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     @media (max-width: 560px) { .topicsGrid { grid-template-columns: repeat(2, 1fr); } }
     .topicTile {
       position: relative; display: block; text-decoration: none;
-      border-radius: 10px; overflow: hidden; aspect-ratio: 3/2;
+      border-radius: 12px; overflow: hidden; aspect-ratio: 3/2;
       background: var(--surface2); border: 1px solid var(--border);
     }
     .topicImg {
@@ -517,12 +529,24 @@ const topics = [
     .topicTile:hover .topicImg { transform: scale(1.05); }
     .topicGrad {
       position: absolute; inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.28) 55%, transparent 100%);
+      /* 50% black overlay as specified — legibility over any image */
+      background: rgba(0,0,0,.50);
     }
     .topicLabel {
-      position: absolute; bottom: 10px; left: 11px; right: 11px;
-      font-size: 13px; font-weight: 900; color: #fff;
-      line-height: 1.2; text-shadow: 0 1px 6px rgba(0,0,0,.6);
+      /* Centered in tile, 24pt bold all-caps white */
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 900;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      text-align: center;
+      padding: 8px;
+      text-shadow: 0 2px 12px rgba(0,0,0,.7);
     }
 
     /* ── SIDEBAR — sticky, top-aligned with hero, borderless ── */
