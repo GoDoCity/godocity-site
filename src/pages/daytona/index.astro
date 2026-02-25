@@ -259,34 +259,33 @@ const topics = [
     }
 
     /* ── Newsletter — vertical stack, skyline bg, 65% dark overlay ── */
-    /* ── Newsletter — Method A: solid left / image right ── */
+    /* ── Newsletter — image LEFT, text RIGHT, gradient fades left→right ── */
     .nlBand {
       position: relative;
       margin-top: 16px;
       overflow: hidden;
-      /* Right half: postcard image fading in from center */
       background:
-        /* Left solid zone — site background color, fully opaque */
+        /* Right solid zone — brand color fades in from center-right */
         linear-gradient(
-          to right,
+          to left,
           var(--brand1) 0%,
           var(--brand1) 48%,
           transparent 72%
         ),
-        /* Postcard image fills full band, only visible on right */
-        url('/images/gododaytona-bg.png') right center / cover no-repeat;
+        /* Postcard image anchored LEFT so "Daytona Beach" signage is visible */
+        url('/images/gododaytona-bg.png') left center / cover no-repeat;
       background-color: var(--brand1);
     }
     .nlInner {
       max-width: 1400px;
       margin: 0 auto;
       padding: clamp(28px, 3.5vw, 48px) 3rem;
-      /* Align content to left half only */
+      /* Push content to RIGHT half */
       display: flex;
       align-items: flex-start;
+      justify-content: flex-end;
     }
     .nlContent {
-      /* Constrain text block to left 50% max */
       max-width: 520px;
       width: 100%;
       display: flex;
@@ -301,7 +300,8 @@ const topics = [
       letter-spacing: -0.5px;
     }
     .nlSub {
-      font-size: clamp(13px, 1.1vw, 15px);
+      /* +3pt from previous 15px → 18px */
+      font-size: clamp(15px, 1.3vw, 18px);
       color: var(--accentText);
       opacity: .9;
       line-height: 1.4;
@@ -312,8 +312,7 @@ const topics = [
     .nlInput {
       flex: 1; min-width: 0;
       border-radius: 10px 0 0 10px;
-      /* High-contrast border so it's obvious where to click */
-      border: 2.5px solid rgba(0,0,0,.35);
+      border: 2.5px solid rgba(0,0,0,.4);
       border-right: none;
       background: #fff; color: #111;
       padding: 0 16px; font-size: 15px; font-weight: 500;
@@ -321,12 +320,12 @@ const topics = [
       transition: border-color 150ms;
     }
     .nlInput::placeholder { color: #888; }
-    .nlInput:focus { border-color: rgba(0,0,0,.7); }
+    .nlInput:focus { border-color: rgba(0,0,0,.75); }
     .nlBtn {
       flex-shrink: 0; padding: 0 22px;
       border-radius: 0 10px 10px 0;
-      /* Brand yellow button, black text — maximum contrast */
-      border: 2.5px solid rgba(0,0,0,.2);
+      border: none;
+      /* Brand yellow, bold black text — high contrast conversion magnet */
       background: var(--brand1);
       color: #000;
       font-weight: 900; font-size: 14px; cursor: pointer;
@@ -334,28 +333,28 @@ const topics = [
       letter-spacing: .04em;
       transition: filter 150ms;
     }
-    .nlBtn:hover { filter: brightness(1.1); }
+    .nlBtn:hover { filter: brightness(1.12); }
     .nlFine {
       font-size: 11.5px; font-weight: 500;
       color: var(--accentText);
       opacity: .6;
       font-style: italic;
     }
-    /* Mobile: stack vertically, image becomes subtle bg */
+    /* Mobile: full-bleed image with dark overlay, stack vertically */
     @media (max-width: 700px) {
       .nlBand {
         background:
-          linear-gradient(rgba(0,0,0,.75), rgba(0,0,0,.75)),
+          linear-gradient(rgba(0,0,0,.72), rgba(0,0,0,.72)),
           url('/images/gododaytona-bg.png') center/cover no-repeat;
         background-color: var(--brand1);
       }
-      .nlInner { padding: 28px 1.5rem; }
+      .nlInner { padding: 28px 1.5rem; justify-content: flex-start; }
       .nlContent { max-width: 100%; }
       .nlHead { color: #fff; }
       .nlSub { color: rgba(255,255,255,.88); }
       .nlFine { color: rgba(255,255,255,.6); }
       .nlRow { flex-direction: column; height: auto; gap: 8px; }
-      .nlInput { border-radius: 10px; border-right: 2.5px solid rgba(0,0,0,.35); height: 50px; }
+      .nlInput { border-radius: 10px; border-right: 2.5px solid rgba(0,0,0,.4); height: 50px; }
       .nlBtn { border-radius: 10px; height: 50px; }
     }
 
