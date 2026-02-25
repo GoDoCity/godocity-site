@@ -4,38 +4,40 @@
  * Topics: 2-column pill grid dropdown
  * Guides: simple 3-item dropdown
  * Hover on desktop opens dropdown; click also toggles (JS inline)
+ * Fix: invisible padding bridge on dropdown prevents gap-flicker
+ * Fix: 100ms close delay so pills are clickable before menu hides
  */
 const base = Astro.props?.cityBase ? `/${Astro.props.cityBase}` : "";
 const cityBase = base || "/daytona";
 
 const topicItems = [
-  { label: "Biz",              href: `${cityBase}/topics/biz/` },
-  { label: "City",             href: `${cityBase}/topics/city/` },
-  { label: "Culture",          href: `${cityBase}/topics/culture/` },
-  { label: "Events",           href: `${cityBase}/topics/events/` },
-  { label: "Food",             href: `${cityBase}/topics/food/` },
-  { label: "History",          href: `${cityBase}/topics/history/` },
-  { label: "Real Estate",      href: `${cityBase}/topics/real-estate/` },
-  { label: "Sports",           href: `${cityBase}/topics/sports/` },
-  { label: "Travel & Outdoors",href: `${cityBase}/topics/travel-outdoors/` },
-  { label: "Wellness",         href: `${cityBase}/topics/wellness/` },
+  { label: "Biz",               href: `${cityBase}/topics/biz/` },
+  { label: "City",              href: `${cityBase}/topics/city/` },
+  { label: "Culture",           href: `${cityBase}/topics/culture/` },
+  { label: "Events",            href: `${cityBase}/topics/events/` },
+  { label: "Food",              href: `${cityBase}/topics/food/` },
+  { label: "History",           href: `${cityBase}/topics/history/` },
+  { label: "Real Estate",       href: `${cityBase}/topics/real-estate/` },
+  { label: "Sports",            href: `${cityBase}/topics/sports/` },
+  { label: "Travel & Outdoors", href: `${cityBase}/topics/travel-outdoors/` },
+  { label: "Wellness",          href: `${cityBase}/topics/wellness/` },
 ];
 
 const guideItems = [
-  { label: "Live",  href: `${cityBase}/guides/live/` },
-  { label: "Work",  href: `${cityBase}/guides/work/` },
-  { label: "Play",  href: `${cityBase}/guides/play/` },
+  { label: "Live", emoji: "🏠", href: `${cityBase}/guides/live/` },
+  { label: "Work", emoji: "💼", href: `${cityBase}/guides/work/` },
+  { label: "Play", emoji: "🎉", href: `${cityBase}/guides/play/` },
 ];
 
 const pills = [
-  { label: "Home",      href: `${cityBase}/`,          dropdown: null },
-  { label: "Topics",    href: `${cityBase}/topics/`,   dropdown: "topics" },
-  { label: "Guides",    href: `${cityBase}/guides/`,   dropdown: "guides" },
-  { label: "Events",    href: `${cityBase}/events/`,   dropdown: null },
-  { label: "Jobs",      href: `${cityBase}/jobs/`,     dropdown: null },
-  { label: "Games",     href: `${cityBase}/games/`,    dropdown: null },
-  { label: "The Buy",   href: `${cityBase}/buy/`,      dropdown: null },
-  { label: "Advertise", href: `${cityBase}/advertise/`,dropdown: null },
+  { label: "Home",      href: `${cityBase}/`,           dropdown: null },
+  { label: "Topics",    href: `${cityBase}/topics/`,    dropdown: "topics" },
+  { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides" },
+  { label: "Events",    href: `${cityBase}/events/`,    dropdown: null },
+  { label: "Jobs",      href: `${cityBase}/jobs/`,      dropdown: null },
+  { label: "Games",     href: `${cityBase}/games/`,     dropdown: null },
+  { label: "The Buy",   href: `${cityBase}/buy/`,       dropdown: null },
+  { label: "Advertise", href: `${cityBase}/advertise/`, dropdown: null },
 ];
 ---
 
@@ -54,28 +56,33 @@ const pills = [
 
           {p.dropdown === "topics" && (
             <div class="dropdown topicsDropdown" role="menu">
-              <div class="dropGrid">
-                {topicItems.map((t) => (
-                  <a class="dropPill" href={t.href} role="menuitem">{t.label}</a>
-                ))}
+              {/* Invisible bridge fills the gap so cursor stays in hover zone */}
+              <div class="dropBridge" aria-hidden="true"></div>
+              <div class="dropInner">
+                <div class="dropGrid">
+                  {topicItems.map((t) => (
+                    <a class="dropPill" href={t.href} role="menuitem">{t.label}</a>
+                  ))}
+                </div>
+                <a class="dropFooter" href={`${cityBase}/topics/`}>Browse all topics →</a>
               </div>
-              <a class="dropFooter" href={`${cityBase}/topics/`}>Browse all topics →</a>
             </div>
           )}
 
           {p.dropdown === "guides" && (
             <div class="dropdown guidesDropdown" role="menu">
-              <div class="guideList">
-                {guideItems.map((g) => (
-                  <a class="guideDropItem" href={g.href} role="menuitem">
-                    <span class="guideIcon">
-                      {g.label === "Live" ? "🏠" : g.label === "Work" ? "💼" : "🎉"}
-                    </span>
-                    <span class="guideItemLabel">{g.label}</span>
-                  </a>
-                ))}
+              <div class="dropBridge" aria-hidden="true"></div>
+              <div class="dropInner">
+                <div class="guideList">
+                  {guideItems.map((g) => (
+                    <a class="guideDropItem" href={g.href} role="menuitem">
+                      <span class="guideIcon">{g.emoji}</span>
+                      <span class="guideItemLabel">{g.label}</span>
+                    </a>
+                  ))}
+                </div>
+                <a class="dropFooter" href={`${cityBase}/guides/`}>All city guides →</a>
               </div>
-              <a class="dropFooter" href={`${cityBase}/guides/`}>All city guides →</a>
             </div>
           )}
         </div>
@@ -99,11 +106,8 @@ const pills = [
       <div class="drawerTitle">Menu</div>
       <label class="closeBtn" for="navToggle" aria-label="Close menu">✕</label>
     </div>
-
     <div class="drawerLinks">
       <a class="drawerLink" href={`${cityBase}/`}>Home</a>
-
-      <!-- Topics section -->
       <div class="drawerSection">
         <div class="drawerSectionLabel">Topics</div>
         <div class="drawerPillGrid">
@@ -112,15 +116,12 @@ const pills = [
           ))}
         </div>
       </div>
-
-      <!-- Guides section -->
       <div class="drawerSection">
         <div class="drawerSectionLabel">Guides</div>
         {guideItems.map((g) => (
-          <a class="drawerLink" href={g.href}>{g.label}</a>
+          <a class="drawerLink" href={g.href}>{g.emoji} {g.label}</a>
         ))}
       </div>
-
       <a class="drawerLink" href={`${cityBase}/events/`}>Events</a>
       <a class="drawerLink" href={`${cityBase}/jobs/`}>Jobs</a>
       <a class="drawerLink" href={`${cityBase}/games/`}>Games</a>
@@ -130,37 +131,69 @@ const pills = [
   </aside>
 </nav>
 
-<!-- Hover + click both work via tiny inline script -->
 <script is:inline>
 (function () {
   function init() {
+    var closeTimers = {};
+
     document.querySelectorAll(".dropWrap").forEach(function (wrap) {
+      var key = wrap.dataset.drop;
       var pill = wrap.querySelector(".pillDrop");
 
-      // Click toggles open/close
+      function openWrap() {
+        clearTimeout(closeTimers[key]);
+        closeAll(key);
+        wrap.classList.add("open");
+        pill.setAttribute("aria-expanded", "true");
+      }
+
+      function scheduleClose() {
+        /* 100ms delay — gives user time to move into the dropdown */
+        closeTimers[key] = setTimeout(function () {
+          wrap.classList.remove("open");
+          pill.setAttribute("aria-expanded", "false");
+        }, 100);
+      }
+
+      function cancelClose() {
+        clearTimeout(closeTimers[key]);
+      }
+
+      /* Hover */
+      wrap.addEventListener("mouseenter", openWrap);
+      wrap.addEventListener("mouseleave", scheduleClose);
+
+      var drop = wrap.querySelector(".dropdown");
+      if (drop) {
+        drop.addEventListener("mouseenter", cancelClose);
+        drop.addEventListener("mouseleave", scheduleClose);
+      }
+
+      /* Click toggle */
       pill.addEventListener("click", function (e) {
-        var isOpen = wrap.classList.contains("open");
-        closeAll();
-        if (!isOpen) {
-          wrap.classList.add("open");
-          pill.setAttribute("aria-expanded", "true");
+        e.preventDefault();
+        if (wrap.classList.contains("open")) {
+          wrap.classList.remove("open");
+          pill.setAttribute("aria-expanded", "false");
+        } else {
+          openWrap();
         }
-        e.preventDefault(); // prevent nav on click; user can use Browse all link inside
       });
     });
 
-    // Close on outside click
+    /* Close on outside click */
     document.addEventListener("click", function (e) {
       if (!e.target.closest(".dropWrap")) closeAll();
     });
 
-    // Close on Escape
+    /* Close on Escape */
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") closeAll();
     });
 
-    function closeAll() {
+    function closeAll(except) {
       document.querySelectorAll(".dropWrap.open").forEach(function (w) {
+        if (w.dataset.drop === except) return;
         w.classList.remove("open");
         var p = w.querySelector(".pillDrop");
         if (p) p.setAttribute("aria-expanded", "false");
@@ -184,7 +217,6 @@ const pills = [
     width: 100%;
   }
 
-  /* ── Pill row ── */
   .pillRow {
     display: flex;
     gap: 10px;
@@ -222,11 +254,9 @@ const pills = [
   }
 
   /* ── Dropdown wrapper ── */
-  .dropWrap {
-    position: relative;
-  }
+  .dropWrap { position: relative; }
 
-  /* Hover open on desktop */
+  /* Hover open */
   @media (hover: hover) {
     .dropWrap:hover > .dropdown {
       opacity: 1;
@@ -239,7 +269,7 @@ const pills = [
     }
   }
 
-  /* Click open (JS adds .open class) */
+  /* JS .open class */
   .dropWrap.open > .dropdown {
     opacity: 1;
     transform: translateY(0);
@@ -253,23 +283,36 @@ const pills = [
   /* ── Dropdown panel ── */
   .dropdown {
     position: absolute;
-    top: calc(100% + 10px);
+    top: 100%;           /* flush to pill — NO gap */
     left: 50%;
-    transform: translateX(-50%) translateY(-6px);
-    background: var(--bg, #0b0d10);
-    border: 1px solid var(--border, rgba(255,255,255,.12));
-    border-radius: 16px;
-    box-shadow: 0 16px 48px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
+    transform: translateX(-50%) translateY(-4px);
     z-index: 200;
     opacity: 0;
     pointer-events: none;
     visibility: hidden;
     transition: opacity 180ms ease, transform 180ms ease;
     min-width: 280px;
+    /* Padding-top acts as invisible hover bridge over the 0px gap */
+    padding-top: 8px;
+  }
+
+  /* The visible panel lives inside dropInner */
+  .dropInner {
+    background: var(--bg, #0b0d10);
+    border: 1px solid var(--border, rgba(255,255,255,.12));
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
     overflow: hidden;
   }
 
-  /* Topics: 2-column pill grid */
+  /* Invisible bridge: fills the padding-top area so hover is continuous */
+  .dropBridge {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px; /* matches padding-top */
+    background: transparent;
+  }
+
   .topicsDropdown { min-width: 340px; }
   .dropGrid {
     display: grid;
@@ -298,122 +341,81 @@ const pills = [
     background: color-mix(in srgb, var(--brand1) 14%, transparent);
   }
 
-  /* Guides: simple list */
   .guidesDropdown { min-width: 200px; }
-  .guideList {
-    padding: 12px 12px 8px;
-    display: grid;
-    gap: 4px;
-  }
+  .guideList { padding: 12px 12px 8px; display: grid; gap: 4px; }
   .guideDropItem {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
-    text-decoration: none;
-    color: var(--text);
-    font-size: 15px;
-    font-weight: 800;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    text-decoration: none; color: var(--text);
+    font-size: 15px; font-weight: 800;
     transition: background 140ms;
   }
-  .guideDropItem:hover {
-    background: var(--pillBg);
-    color: var(--brand1);
-  }
+  .guideDropItem:hover { background: var(--pillBg); color: var(--brand1); }
   .guideIcon { font-size: 18px; flex-shrink: 0; }
-  .guideItemLabel {}
 
-  /* Footer link at bottom of dropdown */
   .dropFooter {
     display: block;
     padding: 10px 16px;
     border-top: 1px solid var(--border, rgba(255,255,255,.08));
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--brand1);
-    text-decoration: none;
-    text-align: center;
-    transition: background 140ms;
+    font-size: 12.5px; font-weight: 700;
+    color: var(--brand1); text-decoration: none;
+    text-align: center; transition: background 140ms;
   }
   .dropFooter:hover { background: var(--pillBg); }
 
   /* ── Hamburger ── */
   .menuBtn {
     display: none;
-    align-items: center;
-    gap: 8px;
-    border-radius: 12px;
-    padding: 8px 10px;
+    align-items: center; gap: 8px;
+    border-radius: 12px; padding: 8px 10px;
     border: 1px solid var(--pillBorder);
-    background: var(--pillBg);
-    color: var(--text);
-    font-weight: 900;
-    cursor: pointer;
-    user-select: none;
-    flex-shrink: 0;
+    background: var(--pillBg); color: var(--text);
+    font-weight: 900; cursor: pointer;
+    user-select: none; flex-shrink: 0;
   }
   .menuText { font-size: 12.5px; }
-  .burger {
-    width: 18px; height: 12px;
-    position: relative;
-    display: inline-block;
-  }
+  .burger { width: 18px; height: 12px; position: relative; display: inline-block; }
   .burger::before, .burger::after, .burger span {
-    content: "";
-    position: absolute;
+    content: ""; position: absolute;
     left: 0; right: 0; height: 2px;
-    border-radius: 2px;
-    background: var(--text);
+    border-radius: 2px; background: var(--text);
   }
   .burger::before { top: 0; }
   .burger span { top: 5px; }
   .burger::after { bottom: 0; }
 
   .navToggle {
-    position: absolute;
-    width: 1px; height: 1px;
+    position: absolute; width: 1px; height: 1px;
     opacity: 0; pointer-events: none;
   }
 
-  /* ── Backdrop ── */
   .backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
+    display: none; position: fixed; inset: 0;
     background: rgba(0,0,0,.55);
-    backdrop-filter: blur(2px);
-    z-index: 90;
+    backdrop-filter: blur(2px); z-index: 90;
   }
 
-  /* ── Drawer ── */
   .drawer {
-    position: fixed;
-    top: 0; right: 0;
-    height: 100dvh;
-    width: min(86vw, 320px);
+    position: fixed; top: 0; right: 0;
+    height: 100dvh; width: min(86vw, 320px);
     background: var(--bg, #0b0d10);
     border-left: 1px solid var(--border, rgba(255,255,255,.10));
     box-shadow: -20px 0 60px rgba(0,0,0,.45);
     transform: translateX(110%);
     transition: transform 220ms ease;
     z-index: 100;
-    display: grid;
-    grid-template-rows: auto 1fr;
+    display: grid; grid-template-rows: auto 1fr;
     visibility: hidden;
   }
   .drawerHead {
     padding: 14px 14px 12px;
     border-bottom: 1px solid rgba(255,255,255,.08);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 10px;
   }
   .drawerTitle { font-weight: 950; color: var(--text); }
   .closeBtn {
-    width: 34px; height: 34px;
-    border-radius: 10px;
+    width: 34px; height: 34px; border-radius: 10px;
     display: grid; place-items: center;
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(255,255,255,.03);
@@ -421,94 +423,53 @@ const pills = [
   }
   .drawerLinks {
     padding: 12px 14px 24px;
-    display: grid;
-    gap: 6px;
-    overflow-y: auto;
-    align-content: start;
+    display: grid; gap: 6px;
+    overflow-y: auto; align-content: start;
   }
   .drawerLink {
-    display: flex;
-    align-items: center;
-    text-decoration: none;
-    color: var(--text);
+    display: flex; align-items: center;
+    text-decoration: none; color: var(--text);
     border: 1px solid rgba(255,255,255,.10);
     background: rgba(255,255,255,.02);
-    border-radius: 12px;
-    padding: 12px;
+    border-radius: 12px; padding: 12px;
     font-weight: 700;
     transition: border-color 140ms, background 140ms;
   }
-  .drawerLink:hover {
-    border-color: var(--pillBorder);
-    background: var(--pillBg);
-  }
+  .drawerLink:hover { border-color: var(--pillBorder); background: var(--pillBg); }
   .drawerAdvertise {
-    background: var(--pillBg);
-    border-color: var(--pillBorder);
-    color: var(--brand1);
-    font-weight: 900;
-    margin-top: 4px;
+    background: var(--pillBg); border-color: var(--pillBorder);
+    color: var(--brand1); font-weight: 900; margin-top: 4px;
   }
-
-  /* Drawer sections (Topics, Guides) */
-  .drawerSection {
-    display: grid;
-    gap: 6px;
-    padding: 10px 0 4px;
-    border-top: 1px solid rgba(255,255,255,.07);
-  }
+  .drawerSection { display: grid; gap: 6px; padding: 10px 0 4px; border-top: 1px solid rgba(255,255,255,.07); }
   .drawerSectionLabel {
-    font-size: 10px;
-    font-weight: 900;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--brand1);
-    padding: 0 2px;
+    font-size: 10px; font-weight: 900;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--brand1); padding: 0 2px;
   }
-  .drawerPillGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-  }
+  .drawerPillGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   .drawerPill {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 34px;
-    border-radius: 999px;
-    border: 1px solid var(--pillBorder);
-    background: var(--pillBg);
-    color: var(--brand1);
-    font-size: 12.5px;
-    font-weight: 800;
-    text-decoration: none;
-    text-align: center;
+    display: flex; align-items: center; justify-content: center;
+    height: 34px; border-radius: 999px;
+    border: 1px solid var(--pillBorder); background: var(--pillBg);
+    color: var(--brand1); font-size: 12.5px; font-weight: 800;
+    text-decoration: none; text-align: center;
     transition: background 140ms;
   }
   .drawerPill:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
 
-  /* ── Mobile ── */
   @media (max-width: 760px) {
     .menuBtn { display: inline-flex; }
     .pillRow {
-      gap: 6px;
-      overflow-x: auto;
-      overflow-y: visible;
+      gap: 6px; overflow-x: auto; overflow-y: visible;
       -webkit-overflow-scrolling: touch;
-      padding-bottom: 2px;
-      scrollbar-width: none;
+      padding-bottom: 2px; scrollbar-width: none;
       justify-content: flex-start;
     }
     .pillRow::-webkit-scrollbar { display: none; }
     .pill { height: 36px; padding: 0 14px; font-size: 13px; }
-    /* Dropdowns disabled on mobile — drawer handles it */
     .dropdown { display: none; }
   }
 
-  /* ── Drawer open state ── */
   .navToggle:checked ~ .backdrop { display: block; }
-  .navToggle:checked ~ .drawer {
-    transform: translateX(0);
-    visibility: visible;
-  }
+  .navToggle:checked ~ .drawer { transform: translateX(0); visibility: visible; }
 </style>
