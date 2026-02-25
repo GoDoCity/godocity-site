@@ -67,6 +67,7 @@ const topics = [
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
   <div class="pageWrap">
 
+    {/* ── NEWSLETTER BAND ── */}
     <div class="nlBand">
       <div class="nlInner">
         <div class="nlCopy">
@@ -86,8 +87,10 @@ const topics = [
     <div class="container">
       <div class="homeGrid">
 
+        {/* ── MAIN FEED ── */}
         <main class="homeMain">
 
+          {/* HERO — image left, text right */}
           {hero && (
             <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
               <div class="heroImgWrap">
@@ -105,54 +108,56 @@ const topics = [
             </a>
           )}
 
-      
-          <div class="feedList">
-            {latest.map((p, i) => (
-              <>
-                <a class="feedRow" href={`/daytona/posts/${p.slug}/`}>
-                  <div class="feedText">
-                    {primaryTag(p) && <div class="feedKicker">{primaryTag(p)}</div>}
-                    <div class="feedRowTitle">{p.data.title ?? p.slug}</div>
-                    {excerpt(p) && <div class="feedRowDesc">{excerpt(p)}</div>}
-                    <div class="feedMeta">{dateText(p)}</div>
-                  </div>
-                  <div class="feedThumbWrap">
-                    {heroImage(p)
-                      ? <img class="feedThumb" src={heroImage(p)} alt="" loading="lazy" decoding="async" />
-                      : <div class="feedThumb feedThumbFallback" aria-hidden="true" />
-                    }
-                  </div>
-                </a>
+          {/* DIVIDER — single clean line between hero and cards */}
+          <div class="feedDivider"></div>
 
-                {i === 1 && (
-                  <div class="featuredCard">
-                    <div class="featuredHeader">
-                      <span class="featuredStar">★</span>
-                      <span class="featuredLabel">Featured</span>
-                      <span class="featuredTag">{featuredAd.tag}</span>
-                    </div>
-                    <div class="featuredBody">
-                      {featuredAd.img && (
-                        <img class="featuredImg" src={featuredAd.img} alt="" loading="lazy" />
-                      )}
-                      <div class="featuredText">
-                        <div class="featuredTitle">{featuredAd.title}</div>
-                        <div class="featuredDesc">{featuredAd.description}</div>
-                        <a class="featuredCta" href={featuredAd.ctaHref}>{featuredAd.ctaText} →</a>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </>
+          {/* 3 CARDS SIDE BY SIDE — like Nooga's bottom row */}
+          <div class="cardGrid">
+            {latest.map((p) => (
+              <a class="articleCard" href={`/daytona/posts/${p.slug}/`}>
+                <div class="cardImgWrap">
+                  {heroImage(p)
+                    ? <img class="cardImg" src={heroImage(p)} alt="" loading="lazy" decoding="async" />
+                    : <div class="cardImg cardImgFallback" aria-hidden="true" />
+                  }
+                </div>
+                <div class="cardBody">
+                  {primaryTag(p) && <div class="cardKicker">{primaryTag(p)}</div>}
+                  <div class="cardTitle">{p.data.title ?? p.slug}</div>
+                  {excerpt(p) && <div class="cardDesc">{excerpt(p)}</div>}
+                  <div class="cardMeta">{dateText(p)}</div>
+                </div>
+              </a>
             ))}
           </div>
 
-          <div class="viewAllRow">
-            <a class="viewAllBottom" href="/daytona/posts/">View all stories →</a>
+          {/* FEATURED AD — below the 3 cards */}
+          <div class="featuredCard">
+            <div class="featuredHeader">
+              <span class="featuredStar">★</span>
+              <span class="featuredLabel">Featured</span>
+              <span class="featuredTag">{featuredAd.tag}</span>
+            </div>
+            <div class="featuredBody">
+              {featuredAd.img && (
+                <img class="featuredImg" src={featuredAd.img} alt="" loading="lazy" />
+              )}
+              <div class="featuredText">
+                <div class="featuredTitle">{featuredAd.title}</div>
+                <div class="featuredDesc">{featuredAd.description}</div>
+                <a class="featuredCta" href={featuredAd.ctaHref}>{featuredAd.ctaText} →</a>
+              </div>
+            </div>
           </div>
 
-          <div class="sectionHead" style="margin-top:36px">
-            <span class="sectionLabel">Topics</span>
+          {/* VIEW ALL */}
+          <div class="viewAllRow">
+            <a class="viewAllBtn" href="/daytona/posts/">View all stories →</a>
+          </div>
+
+          {/* TOPICS GRID */}
+          <div class="topicsHead">
+            <span class="topicsLabel">Topics</span>
           </div>
           <div class="topicsGrid">
             {topics.map((t) => (
@@ -166,6 +171,7 @@ const topics = [
 
         </main>
 
+        {/* ── SIDEBAR ── */}
         <aside class="homeRail">
 
           <div class="railCard">
@@ -212,6 +218,7 @@ const topics = [
         </aside>
       </div>
 
+      {/* ── ADVERTISE BAND ── */}
       <div class="adBand">
         <div class="adBandInner">
           <div class="adCopy">
@@ -239,6 +246,7 @@ const topics = [
       padding-right: clamp(16px, 2.5vw, 32px);
     }
 
+    /* ── Newsletter ── */
     .nlBand {
       background: var(--brand1);
       padding: clamp(18px, 2.5vw, 28px) 0;
@@ -271,24 +279,19 @@ const topics = [
     .nlSub strong { font-weight: 900; opacity: 1; }
     .nlRow {
       display: flex;
-      gap: 0;
-      align-items: stretch;
       height: 52px;
     }
     .nlInput {
-      flex: 1;
-      min-width: 0;
+      flex: 1; min-width: 0;
       border-radius: 12px 0 0 12px;
       border: 2px solid rgba(0,0,0,.12);
       border-right: none;
-      background: #fff;
-      color: #111;
+      background: #fff; color: #111;
       padding: 0 18px;
-      font-size: 16px;
-      font-weight: 500;
+      font-size: 16px; font-weight: 500;
       outline: none;
     }
-    .nlInput::placeholder { color: #999; font-weight: 400; }
+    .nlInput::placeholder { color: #999; }
     .nlInput:focus { border-color: rgba(0,0,0,.3); }
     .nlBtn {
       flex-shrink: 0;
@@ -297,22 +300,17 @@ const topics = [
       border: 2px solid rgba(0,0,0,.30);
       background: rgba(0,0,0,.22);
       color: var(--accentText);
-      font-weight: 900;
-      font-size: 15px;
-      cursor: pointer;
-      white-space: nowrap;
+      font-weight: 900; font-size: 15px;
+      cursor: pointer; white-space: nowrap;
       transition: background 140ms;
       letter-spacing: .02em;
     }
     .nlBtn:hover { background: rgba(0,0,0,.36); }
     .nlFine {
-      margin-top: 7px;
-      font-size: 12px;
-      color: var(--accentText);
-      opacity: .65;
+      margin-top: 7px; font-size: 12px;
+      color: var(--accentText); opacity: .65;
       font-style: italic;
     }
-
     @media (max-width: 700px) {
       .nlInner { grid-template-columns: 1fr; gap: 14px; }
       .nlHead { white-space: normal; }
@@ -321,6 +319,7 @@ const topics = [
       .nlBtn { border-radius: 12px; height: 52px; }
     }
 
+    /* ── Layout ── */
     .homeGrid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 290px;
@@ -334,15 +333,15 @@ const topics = [
       .homeRail { order: 2; }
     }
 
+    /* ── Hero — side by side ── */
     .heroCard {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
       align-items: start;
       text-decoration: none;
-      margin-bottom: 24px;
-      padding-bottom: 24px;
-      border-bottom: 2px solid var(--brand1);
+      padding-bottom: 20px;
+      /* NO border-bottom here — divider handles it */
     }
     @media (max-width: 640px) { .heroCard { grid-template-columns: 1fr; } }
 
@@ -353,6 +352,7 @@ const topics = [
       background: var(--surface);
     }
     .heroFallback { aspect-ratio: 4/3; background: var(--surface2); }
+
     .heroKicker {
       font-size: 11px; font-weight: 800;
       letter-spacing: .09em; text-transform: uppercase;
@@ -375,77 +375,94 @@ const topics = [
     }
     .heroMeta { font-size: 12.5px; color: var(--faint); }
 
-    .sectionHead {
-      display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 12px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid var(--brand1);
-    }
-    .sectionLabel {
-      font-size: 11px; font-weight: 900;
-      letter-spacing: .15em; text-transform: uppercase;
-      color: var(--text);
+    /* ── Single divider line — replaces the double yellow ── */
+    .feedDivider {
+      height: 2px;
+      background: var(--brand1);
+      margin: 0 0 20px;
     }
 
-    .feedList { margin-bottom: 0; border-top: 2px solid var(--brand1); }
-    .feedRow {
+    /* ── 3 cards side by side — Nooga style ── */
+    .cardGrid {
       display: grid;
-      grid-template-columns: 1fr 130px;
-      gap: 16px; align-items: start;
-      padding: 18px 0;
-      border-bottom: 1px solid var(--border);
-      text-decoration: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      margin-bottom: 20px;
     }
-    .feedRow:hover .feedRowTitle { color: var(--link); }
-    .feedKicker {
+    @media (max-width: 640px) {
+      .cardGrid { grid-template-columns: 1fr; gap: 0; }
+    }
+
+    .articleCard {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    /* On mobile stack as rows like before */
+    @media (max-width: 640px) {
+      .articleCard {
+        display: grid;
+        grid-template-columns: 1fr 100px;
+        gap: 12px;
+        align-items: start;
+        padding: 16px 0;
+        flex-direction: unset;
+      }
+    }
+
+    .cardImgWrap {
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 640px) {
+      .cardImgWrap { margin-bottom: 0; order: 2; }
+    }
+
+    .cardImg {
+      display: block; width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      background: var(--surface);
+      transition: transform 280ms ease;
+    }
+    .articleCard:hover .cardImg { transform: scale(1.03); }
+    .cardImgFallback { aspect-ratio: 4/3; background: var(--surface2); }
+
+    @media (max-width: 640px) {
+      .cardImg { aspect-ratio: unset; width: 100px; height: 74px; border-radius: 8px; }
+      .cardImgFallback { width: 100px; height: 74px; }
+    }
+
+    .cardBody { flex: 1; }
+    .cardKicker {
       font-size: 10.5px; font-weight: 800;
       letter-spacing: .08em; text-transform: uppercase;
       color: var(--brand1); margin-bottom: 5px;
     }
-    .feedRowTitle {
-      font-size: clamp(17px, 1.7vw, 21px);
-      font-weight: 900; line-height: 1.15;
-      letter-spacing: -0.25px; color: var(--text);
+    .cardTitle {
+      font-size: clamp(15px, 1.4vw, 17px);
+      font-weight: 900; line-height: 1.2;
+      letter-spacing: -0.2px; color: var(--text);
       margin-bottom: 6px;
       display: -webkit-box; -webkit-line-clamp: 3;
       -webkit-box-orient: vertical; overflow: hidden;
       transition: color 130ms ease;
     }
-    .feedRowDesc {
-      font-size: 13.5px; color: var(--muted);
-      line-height: 1.45; margin-bottom: 7px;
+    .articleCard:hover .cardTitle { color: var(--link); }
+    .cardDesc {
+      font-size: 13px; color: var(--muted);
+      line-height: 1.4; margin-bottom: 8px;
       display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
     }
-    .feedMeta { font-size: 12px; color: var(--faint); }
-    .feedThumbWrap { width: 150px; flex-shrink: 0; }
-    .feedThumb {
-      display: block; width: 150px; height: 110px;
-      object-fit: cover; border-radius: 9px;
-      background: var(--surface);
-    }
-    .feedThumbFallback { background: var(--surface2); }
-    @media (max-width: 500px) {
-      .feedRow { grid-template-columns: 1fr 90px; gap: 12px; }
-      .feedThumbWrap { width: 90px; }
-      .feedThumb { width: 90px; height: 68px; }
-    }
+    .cardMeta { font-size: 12px; color: var(--faint); }
 
-    .viewAllRow { padding: 16px 0 4px; text-align: center; }
-    .viewAllBottom {
-      font-size: 14px; font-weight: 800;
-      color: var(--link); text-decoration: none;
-      border: 1px solid var(--pillBorder);
-      background: var(--pillBg);
-      padding: 10px 24px; border-radius: 999px;
-      display: inline-flex; align-items: center;
-    }
-    .viewAllBottom:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
-
+    /* ── Featured ad ── */
     .featuredCard {
-      margin: 4px 0;
+      margin: 4px 0 20px;
       border: 1.5px solid var(--pillBorder);
       background: var(--surface);
       border-radius: 14px; overflow: hidden;
@@ -483,10 +500,33 @@ const topics = [
     }
     .featuredCta:hover { filter: brightness(.92); }
 
+    /* ── View all ── */
+    .viewAllRow { padding: 4px 0 20px; text-align: center; }
+    .viewAllBtn {
+      font-size: 14px; font-weight: 800;
+      color: var(--link); text-decoration: none;
+      border: 1px solid var(--pillBorder);
+      background: var(--pillBg);
+      padding: 10px 24px; border-radius: 999px;
+      display: inline-flex; align-items: center;
+    }
+    .viewAllBtn:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
+
+    /* ── Topics ── */
+    .topicsHead {
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--brand1);
+      margin-bottom: 14px;
+    }
+    .topicsLabel {
+      font-size: 11px; font-weight: 900;
+      letter-spacing: .15em; text-transform: uppercase;
+      color: var(--text);
+    }
     .topicsGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px; margin-top: 14px;
+      gap: 10px;
     }
     @media (max-width: 560px) { .topicsGrid { grid-template-columns: repeat(2, 1fr); } }
     .topicTile {
@@ -512,6 +552,7 @@ const topics = [
       line-height: 1.2; text-shadow: 0 1px 6px rgba(0,0,0,.6);
     }
 
+    /* ── Sidebar ── */
     .homeRail { position: sticky; top: 80px; display: grid; gap: 18px; }
     .railCard {
       border: 1px solid var(--border);
@@ -528,6 +569,7 @@ const topics = [
     }
     .railMore { font-size: 11px; font-weight: 700; color: var(--link); text-decoration: none; }
     .railMore:hover { text-decoration: underline; }
+
     .eventList { display: grid; gap: 8px; }
     .eventRow {
       display: grid; grid-template-columns: 44px 1fr;
@@ -581,6 +623,7 @@ const topics = [
     .guideRow:last-child { border-bottom: none; }
     .guideRow:hover { color: var(--link); }
 
+    /* ── Advertise band ── */
     .adBand {
       margin: 44px 0 52px;
       border-radius: 18px;
@@ -625,7 +668,6 @@ const topics = [
       text-decoration: none; white-space: nowrap; transition: border-color 140ms;
     }
     .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
-
     @media (max-width: 640px) {
       .adBandInner { flex-direction: column; align-items: flex-start; }
       .adActions { width: 100%; }
