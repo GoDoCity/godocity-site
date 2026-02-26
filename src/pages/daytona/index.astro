@@ -258,20 +258,11 @@ const topics = [
       :global(.container) { padding-left: 1rem; padding-right: 1rem; }
     }
 
-    /* ── Newsletter — vertical stack, skyline bg, 65% dark overlay ── */
-    /* ── Newsletter — full postcard image, DAYTONA BEACH fully readable ── */
+    /* ── Newsletter — compact solid yellow utility strip ── */
     .nlBand {
-      position: relative;
+      background: var(--brand1);
       margin-top: 16px;
-      overflow: hidden;
-      background:
-        /* Dark overlay so white text stays legible over the bright postcard */
-        linear-gradient(rgba(0,0,0,.58), rgba(0,0,0,.58)),
-        /* 100% width ensures full "DAYTONA BEACH" is always visible */
-        url('/images/gododaytona-bg.png') center center / 100% auto no-repeat;
-      background-color: var(--brand1);
-      /* Taller banner so the full lettering shows below the text */
-      padding: clamp(40px, 5vw, 70px) 0;
+      padding: clamp(14px, 1.8vw, 20px) 0;
     }
     .nlInner {
       max-width: 1400px;
@@ -288,144 +279,57 @@ const topics = [
       flex-direction: column;
       align-items: center;
       text-align: center;
-      gap: 14px;
+      gap: 8px;
     }
     .nlHead {
-      font-size: clamp(28px, 3.2vw, 44px);
+      font-size: clamp(18px, 2vw, 24px);
       font-weight: 950;
-      /* Black text punches through the dark overlay cleanly */
-      color: #fff;
+      color: #000;
       line-height: 1.05;
-      letter-spacing: -0.5px;
-      text-shadow: 0 2px 16px rgba(0,0,0,.6);
+      letter-spacing: -0.3px;
     }
     .nlSub {
-      /* +3pt from 15px → 18px */
-      font-size: clamp(15px, 1.3vw, 18px);
-      color: rgba(255,255,255,.92);
-      line-height: 1.45;
-      text-shadow: 0 1px 8px rgba(0,0,0,.5);
+      font-size: clamp(13px, 1.2vw, 16px);
+      color: rgba(0,0,0,.72);
+      line-height: 1.35;
     }
-    .nlSub strong { font-weight: 900; color: #fff; }
-    .nlForm { width: 100%; max-width: 480px; }
-    .nlRow { display: flex; height: 52px; width: 100%; }
+    .nlSub strong { font-weight: 900; color: #000; }
+    .nlForm { width: 100%; max-width: 460px; }
+    .nlRow { display: flex; height: 46px; width: 100%; }
     .nlInput {
       flex: 1; min-width: 0;
       border-radius: 10px 0 0 10px;
-      border: 2.5px solid rgba(255,255,255,.5);
+      border: 2px solid rgba(0,0,0,.45);
       border-right: none;
-      background: rgba(255,255,255,.95); color: #111;
-      padding: 0 16px; font-size: 15px; font-weight: 500;
+      background: #fff; color: #111;
+      padding: 0 14px; font-size: 14px; font-weight: 500;
       outline: none;
       transition: border-color 150ms;
     }
-    .nlInput::placeholder { color: #888; }
-    .nlInput:focus { border-color: #fff; }
+    .nlInput::placeholder { color: #999; }
+    .nlInput:focus { border-color: rgba(0,0,0,.8); }
     .nlBtn {
-      flex-shrink: 0; padding: 0 22px;
+      flex-shrink: 0; padding: 0 18px;
       border-radius: 0 10px 10px 0;
       border: none;
-      /* Brand yellow, bold black — max contrast conversion magnet */
-      background: var(--brand1);
-      color: #000;
-      font-weight: 900; font-size: 14px; cursor: pointer;
-      white-space: nowrap;
-      letter-spacing: .04em;
-      transition: filter 150ms;
+      background: #000;
+      color: #fff;
+      font-weight: 900; font-size: 13px; cursor: pointer;
+      white-space: nowrap; letter-spacing: .04em;
+      transition: background 140ms;
     }
-    .nlBtn:hover { filter: brightness(1.1); }
+    .nlBtn:hover { background: #222; }
     .nlFine {
-      font-size: 12px; font-weight: 500;
-      color: rgba(255,255,255,.65);
+      font-size: 11px; font-weight: 500;
+      color: rgba(0,0,0,.48);
       font-style: italic;
     }
     @media (max-width: 700px) {
-      .nlBand { background-size: 200% auto; }
       .nlInner { padding: 0 1.5rem; }
       .nlContent { max-width: 100%; }
       .nlRow { flex-direction: column; height: auto; gap: 8px; }
-      .nlInput { border-radius: 10px; border-right: 2.5px solid rgba(255,255,255,.5); height: 50px; }
-      .nlBtn { border-radius: 10px; height: 50px; }
-    }
-    .nlInner {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: clamp(28px, 3.5vw, 48px) 3rem;
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-end;
-    }
-    .nlContent {
-      max-width: 520px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .nlHead {
-      font-size: clamp(26px, 3vw, 40px);
-      font-weight: 950;
-      color: var(--accentText);
-      line-height: 1.05;
-      letter-spacing: -0.5px;
-    }
-    .nlSub {
-      font-size: clamp(15px, 1.3vw, 18px);
-      color: var(--accentText);
-      opacity: .9;
-      line-height: 1.4;
-    }
-    .nlSub strong { font-weight: 900; opacity: 1; }
-    .nlForm { width: 100%; }
-    .nlRow { display: flex; height: 52px; width: 100%; }
-    .nlInput {
-      flex: 1; min-width: 0;
-      border-radius: 10px 0 0 10px;
-      /* Darker border — obvious click target on yellow bg */
-      border: 2.5px solid rgba(0,0,0,.5);
-      border-right: none;
-      background: #fff; color: #111;
-      padding: 0 16px; font-size: 15px; font-weight: 500;
-      outline: none;
-      transition: border-color 150ms;
-    }
-    .nlInput::placeholder { color: #888; }
-    .nlInput:focus { border-color: rgba(0,0,0,.8); }
-    .nlBtn {
-      flex-shrink: 0; padding: 0 22px;
-      border-radius: 0 10px 10px 0;
-      border: none;
-      /* Dark button — high contrast against yellow banner */
-      background: #111;
-      color: #fff;
-      font-weight: 900; font-size: 14px; cursor: pointer;
-      white-space: nowrap;
-      letter-spacing: .04em;
-      transition: background 150ms;
-    }
-    .nlBtn:hover { background: #333; }
-    .nlFine {
-      font-size: 11.5px; font-weight: 500;
-      color: var(--accentText);
-      opacity: .6;
-      font-style: italic;
-    }
-    /* Mobile: full-bleed with dark overlay */
-    @media (max-width: 700px) {
-      .nlBand {
-        background:
-          linear-gradient(rgba(0,0,0,.72), rgba(0,0,0,.72)),
-          url('/images/gododaytona-bg.png') center/cover no-repeat;
-        background-color: var(--brand1);
-      }
-      .nlInner { padding: 28px 1.5rem; justify-content: flex-start; }
-      .nlContent { max-width: 100%; }
-      .nlHead { color: #fff; }
-      .nlSub { color: rgba(255,255,255,.88); }
-      .nlFine { color: rgba(255,255,255,.6); }
-      .nlRow { flex-direction: column; height: auto; gap: 8px; }
-      .nlInput { border-radius: 10px; border-right: 2.5px solid rgba(0,0,0,.5); height: 50px; }
-      .nlBtn { border-radius: 10px; height: 50px; }
+      .nlInput { border-radius: 10px; border-right: 2px solid rgba(0,0,0,.45); height: 46px; }
+      .nlBtn { border-radius: 10px; height: 46px; }
     }
 
     /* ── Home grid 75/25, sidebar aligns top with hero ── */
@@ -443,11 +347,11 @@ const topics = [
       .homeRail { order: 2; }
     }
 
-    /* ── HERO — 40/60 split like Nooga, image constrained to 300px ── */
+    /* ── HERO — wider image (3fr), narrower text column (2fr) ── */
     .heroCard {
       display: grid;
-      grid-template-columns: 2fr 3fr;
-      gap: 22px;
+      grid-template-columns: 3fr 2fr;
+      gap: 28px;
       align-items: start;
       text-decoration: none;
       padding-bottom: 18px;
@@ -457,21 +361,25 @@ const topics = [
     .heroImgWrap {
       border-radius: 12px;
       overflow: hidden;
-      max-height: 285px;
+      max-height: 242px; /* 285px × 0.85 — 15% shorter as requested */
     }
     .heroImg {
       display: block;
       width: 100%;
-      height: 285px;
-      max-height: 285px;
+      height: 242px;
+      max-height: 242px;
       object-fit: cover;
       object-position: center;
       background: var(--surface);
     }
     .heroFallback {
-      height: 240px;
-      max-height: 285px;
+      height: 210px;
+      max-height: 242px;
       background: var(--surface2);
+    }
+    /* Narrow text block — prevents lines stretching too wide */
+    .heroCopy {
+      max-width: 420px;
     }
 
     .heroKicker {
@@ -513,12 +421,12 @@ const topics = [
       margin: 0 0 40px;
     }
 
-    /* ── 3-column cards ── */
+    /* ── 3-column cards — more breathing room between each card ── */
     .cardGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-      margin-bottom: 22px;
+      gap: 32px;
+      margin-bottom: 28px;
     }
     @media (max-width: 640px) { .cardGrid { grid-template-columns: 1fr; gap: 0; } }
 
@@ -671,30 +579,30 @@ const topics = [
       padding-bottom: 10px; border-bottom: 2px solid var(--brand1);
     }
     .railTitle {
-      font-size: 10px; font-weight: 900;
+      font-size: 12px; font-weight: 900;
       letter-spacing: .14em; text-transform: uppercase; color: var(--text);
     }
-    .railMore { font-size: 10.5px; font-weight: 700; color: var(--link); text-decoration: none; }
+    .railMore { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
     .railMore:hover { text-decoration: underline; }
 
     /* Events — dividers only, no boxes */
     .eventList { display: grid; }
     .eventRow {
-      display: grid; grid-template-columns: 44px 1fr;
+      display: grid; grid-template-columns: 48px 1fr;
       gap: 12px; align-items: center; text-decoration: none;
-      padding: 11px 0; border-bottom: 1px solid var(--border);
+      padding: 13px 0; border-bottom: 1px solid var(--border);
       transition: opacity 140ms;
     }
     .eventRow:hover { opacity: .76; }
     .eventCal {
-      width: 44px; height: 44px; border-radius: 10px;
+      width: 48px; height: 48px; border-radius: 10px;
       background: var(--pillBg); border: 1px solid var(--pillBorder);
       display: grid; place-items: center; text-align: center; line-height: 1;
     }
-    .eDow { font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
-    .eDay { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 1px; }
-    .eName { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.2; }
-    .ePlace { font-size: 11px; color: var(--faint); margin-top: 2px; }
+    .eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
+    .eDay { font-size: 19px; font-weight: 900; color: var(--text); margin-top: 1px; }
+    .eName { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
+    .ePlace { font-size: 13px; color: var(--faint); margin-top: 2px; }
 
     /* Display ad */
     .displayAdSlot { display: grid; gap: 5px; }
@@ -711,8 +619,8 @@ const topics = [
     .displayAdCard:hover { border-color: var(--brand1); }
     .displayAdInner { padding: 22px 14px; text-align: center; display: grid; gap: 5px; place-items: center; }
     .displayAdIcon { font-size: 24px; margin-bottom: 2px; }
-    .displayAdTitle { font-size: 14.5px; font-weight: 900; color: var(--text); }
-    .displayAdDesc { font-size: 12px; color: var(--muted); line-height: 1.3; }
+    .displayAdTitle { font-size: 16px; font-weight: 900; color: var(--text); }
+    .displayAdDesc { font-size: 14px; color: var(--muted); line-height: 1.3; }
     .displayAdCta {
       margin-top: 6px; display: inline-flex; align-items: center;
       height: 30px; padding: 0 13px; border-radius: 999px;
@@ -724,8 +632,8 @@ const topics = [
     .guideList { display: grid; }
     .guideRow {
       display: block; text-decoration: none;
-      font-size: 13px; font-weight: 700; color: var(--text);
-      padding: 10px 0; border-bottom: 1px solid var(--border);
+      font-size: 15px; font-weight: 700; color: var(--text);
+      padding: 11px 0; border-bottom: 1px solid var(--border);
       line-height: 1.3; transition: color 120ms;
     }
     .guideRow:last-child { border-bottom: none; }
