@@ -259,18 +259,19 @@ const topics = [
     }
 
     /* ── Newsletter — vertical stack, skyline bg, 65% dark overlay ── */
-    /* ── Newsletter — cinematic: centered image 125%, radial overlay, centered text ── */
+    /* ── Newsletter — full postcard image, DAYTONA BEACH fully readable ── */
     .nlBand {
       position: relative;
       margin-top: 16px;
       overflow: hidden;
       background:
-        /* Radial gradient: dark in center where text lives, fades to transparent edges */
-        radial-gradient(ellipse at center, rgba(0,0,0,.72) 0%, rgba(0,0,0,.45) 50%, rgba(0,0,0,.15) 100%),
-        /* Image scaled to 125% and centered so pier/lettering shows on sides */
-        url('/images/gododaytona-bg.png') center center / 125% auto no-repeat;
+        /* Dark overlay so white text stays legible over the bright postcard */
+        linear-gradient(rgba(0,0,0,.58), rgba(0,0,0,.58)),
+        /* 100% width ensures full "DAYTONA BEACH" is always visible */
+        url('/images/gododaytona-bg.png') center center / 100% auto no-repeat;
       background-color: var(--brand1);
-      padding: clamp(36px, 4.5vw, 60px) 0;
+      /* Taller banner so the full lettering shows below the text */
+      padding: clamp(40px, 5vw, 70px) 0;
     }
     .nlInner {
       max-width: 1400px;
