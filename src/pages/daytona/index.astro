@@ -278,10 +278,10 @@ const topics = [
       :global(.container) { padding-left: 1rem; padding-right: 1rem; }
     }
 
-    /* ── Newsletter — flat strip inside 1280px container, centered content ── */
+    /* ── Newsletter — 60px breath gap below ── */
     .nlBand {
       background: var(--brand1);
-      margin: 16px 0 40px;
+      margin: 16px 0 60px;
       height: auto;
       display: flex;
       align-items: stretch;
@@ -315,11 +315,11 @@ const topics = [
       letter-spacing: -0.04em;
     }
     .nlSub {
-      /* Bold, larger — Nooga-scale tagline */
-      font-size: clamp(16px, 1.6vw, 20px);
+      /* High-impact bold tagline — spans significant banner width */
+      font-size: clamp(18px, 2vw, 26px);
       font-weight: 700;
-      color: rgba(0,0,0,.80);
-      line-height: 1.3;
+      color: rgba(0,0,0,.82);
+      line-height: 1.25;
     }
     .nlSub strong { font-weight: 900; color: #000; }
     .nlForm { width: 100%; max-width: 480px; }
@@ -386,10 +386,10 @@ const topics = [
       .homeRail { order: 2; }
     }
 
-    /* ── HERO — strict 315×178px (8.3cm × 4.7cm), dominant over secondary cards ── */
+    /* ── HERO — 315×178 scaled ×1.20 = 378×214px — Alpha status over secondary cards ── */
     .heroCard {
       display: grid;
-      grid-template-columns: 315px 1fr;
+      grid-template-columns: 378px 1fr;
       gap: 24px;
       align-items: start;
       text-decoration: none;
@@ -400,27 +400,24 @@ const topics = [
     .heroImgWrap {
       border-radius: 12px;
       overflow: hidden;
-      width: 315px;
-      height: 178px;
+      width: 378px;
+      height: 214px;
       flex-shrink: 0;
     }
     .heroImg {
       display: block;
-      width: 315px;
-      height: 178px;
+      width: 378px;
+      height: 214px;
       object-fit: cover;
       object-position: center;
       background: var(--surface);
     }
     .heroFallback {
-      width: 315px;
-      height: 178px;
+      width: 378px;
+      height: 214px;
       background: var(--surface2);
     }
-    /* Text tucked tight to right of photo, constrained for readability */
-    .heroCopy {
-      max-width: 400px;
-    }
+    .heroCopy { max-width: 400px; }
 
     .heroKicker {
       font-size: 10.5px; font-weight: 800;
@@ -566,7 +563,7 @@ const topics = [
     .viewAllBtn:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
 
     /* Topics */
-    .topicsHead { padding-bottom: 10px; border-bottom: 2px solid var(--brand1); margin-bottom: 13px; }
+    .topicsHead { padding-bottom: 10px; border-bottom: 2px solid var(--brand1); margin-bottom: 13px; margin-top: 60px; }
     .topicsLabel {
       /* 2× from 14px → 28px, Extra Bold Century Gothic */
       font-size: 28px; font-weight: 900;
