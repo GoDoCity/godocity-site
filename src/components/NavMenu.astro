@@ -1,734 +1,473 @@
 ---
-import Base from "../../layouts/Base.astro";
-import { getCollection } from "astro:content";
+/**
+ * NavMenu — pills + dropdowns + mobile drawer
+ * Topics: 2-column pill grid dropdown
+ * Guides: simple 3-item dropdown
+ * Hover on desktop opens dropdown; click also toggles (JS inline)
+ * Fix: invisible padding bridge on dropdown prevents gap-flicker
+ * Fix: 100ms close delay so pills are clickable before menu hides
+ */
+const base = Astro.props?.cityBase ? `/${Astro.props.cityBase}` : "";
+const cityBase = base || "/daytona";
 
-function isDaytonaPost(post) {
-  const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
-  if (city === "daytona") return true;
-  return typeof post?.id === "string" && post.id.startsWith("daytona/");
-}
-function isFeatured(post) {
-  const v = post?.data?.featured;
-  if (v === true) return true;
-  if (v === 1) return true;
-  return ["true","yes","1"].includes(String(v ?? "").toLowerCase().trim());
-}
-function getPostDate(post) {
-  return post?.data?.pubDate ?? post?.data?.date ?? post?.data?.published ?? post?.data?.updated ?? null;
-}
-function sortNewestFirst(a, b) {
-  return new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime();
-}
-function dateText(post) {
-  const d = getPostDate(post);
-  return d ? new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "";
-}
-function excerpt(post) { return post?.data?.description ?? ""; }
-function heroImage(post) {
-  const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.thumbnail ?? post?.data?.cover ?? "";
-  return typeof v === "string" ? v.trim() : "";
-}
-function primaryTag(post) {
-  const tags = post?.data?.tags;
-  if (Array.isArray(tags) && tags.length) return String(tags[0]).trim();
-  if (typeof post?.data?.topic === "string") return post.data.topic.trim();
-  if (typeof post?.data?.category === "string") return post.data.category.trim();
-  return "";
-}
-
-const all = await getCollection("posts");
-const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
-const hero = posts.find(isFeatured) ?? posts[0] ?? null;
-const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
-const latest = feed.slice(0, 3);
-
-const featuredAd = {
-  tag: "Featured Business",
-  title: "Your Business Name Here — Reach Daytona Locals",
-  description: "This is where your featured story goes. Up to 75 words, written by our team. Drives real traffic from an engaged local audience who already love Daytona.",
-  ctaText: "Learn More",
-  ctaHref: "/daytona/advertise/",
-  img: "",
-};
-
-const topics = [
-  { label: "Biz",                     slug: "biz",              img: "/images/topics/biz.jpg" },
-  { label: "City",                    slug: "city",             img: "/images/topics/city.jpg" },
-  { label: "Culture",                 slug: "culture",          img: "/images/topics/culture.jpg" },
-  { label: "Events",                  slug: "events",           img: "/images/topics/events.jpg" },
-  { label: "Food",                    slug: "food",             img: "/images/topics/food.jpg" },
-  { label: "History",                 slug: "history",          img: "/images/topics/history.jpg" },
-  { label: "Real Estate",             slug: "real-estate",      img: "/images/topics/real-estate.jpg" },
-  { label: "Sports, Travel & Outdoors", slug: "sports-travel-outdoors", img: "/images/topics/sports-travel-outdoors.jpg" },
-  { label: "DIY",                     slug: "diy",              img: "/images/topics/diy.jpg" },
+const topicItems = [
+  { label: "Biz",               href: `${cityBase}/topics/biz/` },
+  { label: "City",              href: `${cityBase}/topics/city/` },
+  { label: "Culture",           href: `${cityBase}/topics/culture/` },
+  { label: "Events",            href: `${cityBase}/topics/events/` },
+  { label: "Food",              href: `${cityBase}/topics/food/` },
+  { label: "History",           href: `${cityBase}/topics/history/` },
+  { label: "Real Estate",       href: `${cityBase}/topics/real-estate/` },
+  { label: "Sports",            href: `${cityBase}/topics/sports/` },
+  { label: "Travel & Outdoors", href: `${cityBase}/topics/travel-outdoors/` },
+  { label: "Wellness",          href: `${cityBase}/topics/wellness/` },
 ];
-/* ── TOPIC IMAGE GUIDE (save to /public/images/topics/) ──────────────
-   biz.jpg                   → Local storefronts, Main Street Daytona
-   city.jpg                  → Aerial/drone shot of Daytona Beach coastline
-   culture.jpg               → Neon lights from a local music venue or colorful mural
-   events.jpg                → Crowds at Bike Week or Daytona 500 grandstands
-   food.jpg                  → Close-up burger or cocktail with condensation
-   history.jpg               → Historic Daytona boardwalk or vintage race photo
-   real-estate.jpg           → Modern beachfront balcony or historic Daytona home
-   sports-travel-outdoors.jpg→ Motion-blur race car + pier sunrise composite
-   diy.jpg                   → Tools, home project, hands-on Daytona local scene
-────────────────────────────────────────────────────────────────────── */
+
+const guideItems = [
+  { label: "Live", emoji: "🏠", href: `${cityBase}/guides/live/` },
+  { label: "Work", emoji: "💼", href: `${cityBase}/guides/work/` },
+  { label: "Play", emoji: "🎉", href: `${cityBase}/guides/play/` },
+];
+
+const pills = [
+  { label: "Home",      href: `${cityBase}/`,           dropdown: null },
+  { label: "Topics",    href: `${cityBase}/topics/`,    dropdown: "topics" },
+  { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides" },
+  { label: "Events",    href: `${cityBase}/events/`,    dropdown: null },
+  { label: "Jobs",      href: `${cityBase}/jobs/`,      dropdown: null },
+  { label: "Advertise", href: `${cityBase}/advertise/`, dropdown: null },
+];
 ---
 
-<Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
-  <div class="pageWrap">
+<nav class="navMenu" aria-label="Primary navigation">
 
-    {/* ── NEWSLETTER BAND — 160px compact utility strip ── */}
-    <div class="nlBand" id="nlBand">
-      <div class="nlInner">
-        <div class="nlContent" id="nlContent">
-          <div class="nlHead">Good News Daytona!</div>
-          <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong>for free.</strong></div>
-          <form class="nlForm" id="nlForm" action="/daytona/subscribe/" method="get">
-            <div class="nlRow">
-              <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" />
-              <button class="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
+  <div class="pillRow" role="navigation" aria-label="Site sections">
+    {pills.map((p) => (
+      p.dropdown ? (
+        <div class="dropWrap" data-drop={p.dropdown}>
+          <a class="pill pillDrop" href={p.href} aria-haspopup="true" aria-expanded="false">
+            {p.label}
+            <svg class="dropArrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
+              <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+          </a>
+
+          {p.dropdown === "topics" && (
+            <div class="dropdown topicsDropdown" role="menu">
+              {/* Invisible bridge fills the gap so cursor stays in hover zone */}
+              <div class="dropBridge" aria-hidden="true"></div>
+              <div class="dropInner">
+                <div class="dropGrid">
+                  {topicItems.map((t) => (
+                    <a class="dropPill" href={t.href} role="menuitem">{t.label}</a>
+                  ))}
+                </div>
+                <a class="dropFooter" href={`${cityBase}/topics/`}>Browse all topics →</a>
+              </div>
             </div>
-          </form>
-          <div class="nlFine">100% free, unsubscribe anytime.</div>
-        </div>
-        <div class="nlThanks" id="nlThanks" aria-live="polite">Thank you! You're on the list. ✓</div>
-      </div>
-    </div>
-    <script is:inline>
-    (function(){
-      var form = document.getElementById('nlForm');
-      var band = document.getElementById('nlBand');
-      var content = document.getElementById('nlContent');
-      var thanks = document.getElementById('nlThanks');
-      if (!form) return;
-      form.addEventListener('submit', function(e){
-        e.preventDefault();
-        content.style.display = 'none';
-        thanks.style.display = 'flex';
-        /* height: auto — banner shrinks naturally to thank-you text */
-      });
-    })();
-    </script>
-
-    <div class="container">
-      <div class="homeGrid">
-
-        <main class="homeMain">
-
-          {/* ── HERO — cinematic wide crop, anchored to sidebar height ── */}
-          {hero && (
-            <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
-              <div class="heroImgWrap">
-                {heroImage(hero)
-                  ? <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="eager" decoding="async" />
-                  : <div class="heroImg heroFallback" aria-hidden="true" />
-                }
-              </div>
-              <div class="heroCopy">
-                {primaryTag(hero) && <div class="heroKicker">{primaryTag(hero)}</div>}
-                <h2 class="heroTitle">{hero.data.title ?? hero.slug}</h2>
-                {excerpt(hero) && <p class="heroDesc">{excerpt(hero)}</p>}
-                <div class="heroMeta">{dateText(hero)}</div>
-              </div>
-            </a>
           )}
 
-          <div class="feedDivider"></div>
-
-          {/* ── 3 CARDS SIDE BY SIDE ── */}
-          <div class="cardGrid">
-            {latest.map((p) => (
-              <a class="articleCard" href={`/daytona/posts/${p.slug}/`}>
-                <div class="cardImgWrap">
-                  {heroImage(p)
-                    ? <img class="cardImg" src={heroImage(p)} alt="" loading="lazy" decoding="async" />
-                    : <div class="cardImg cardImgFallback" aria-hidden="true" />
-                  }
+          {p.dropdown === "guides" && (
+            <div class="dropdown guidesDropdown" role="menu">
+              <div class="dropBridge" aria-hidden="true"></div>
+              <div class="dropInner">
+                <div class="guideList">
+                  {guideItems.map((g) => (
+                    <a class="guideDropItem" href={g.href} role="menuitem">
+                      <span class="guideIcon">{g.emoji}</span>
+                      <span class="guideItemLabel">{g.label}</span>
+                    </a>
+                  ))}
                 </div>
-                <div class="cardBody">
-                  {primaryTag(p) && <div class="cardKicker">{primaryTag(p)}</div>}
-                  <div class="cardTitle">{p.data.title ?? p.slug}</div>
-                  {excerpt(p) && <div class="cardDesc">{excerpt(p)}</div>}
-                  <div class="cardMeta">{dateText(p)}</div>
-                </div>
-              </a>
-            ))}
-          </div>
-
-          {/* ── FEATURED AD — "FEATURED" label, never "Sponsored" ── */}
-          <div class="featuredCard">
-            <div class="featuredHeader">
-              <span class="featuredStar">★</span>
-              <span class="featuredLabel">FEATURED</span>
-              <span class="featuredTag">{featuredAd.tag}</span>
-            </div>
-            <div class="featuredBody">
-              {featuredAd.img && (
-                <img class="featuredImg" src={featuredAd.img} alt="" loading="lazy" />
-              )}
-              <div class="featuredText">
-                <div class="featuredTitle">{featuredAd.title}</div>
-                <div class="featuredDesc">{featuredAd.description}</div>
-                <a class="featuredCta" href={featuredAd.ctaHref}>{featuredAd.ctaText} →</a>
+                <a class="dropFooter" href={`${cityBase}/guides/`}>All city guides →</a>
               </div>
             </div>
-          </div>
-
-          <div class="viewAllRow">
-            <a class="viewAllBtn" href="/daytona/posts/">View all stories →</a>
-          </div>
-
-          {/* ── TOPICS ── */}
-          <div class="topicsHead">
-            <span class="topicsLabel">Topics</span>
-          </div>
-          <div class="topicsGrid">
-            {topics.map((t) => (
-              <a class="topicTile" href={`/daytona/topics/${t.slug}/`}>
-                <img class="topicImg" src={t.img} alt={t.label} loading="lazy" decoding="async" onerror="this.style.opacity='0'" />
-                <div class="topicGrad" aria-hidden="true" />
-                <span class="topicLabel">{t.label}</span>
-              </a>
-            ))}
-          </div>
-
-        </main>
-
-        {/* ── SIDEBAR — aligns top with hero, borderless ── */}
-        <aside class="homeRail">
-
-          <div class="railSection">
-            <div class="railHead">
-              <span class="railTitle">Upcoming Events</span>
-              <a class="railMore" href="/daytona/events/">See all</a>
-            </div>
-            <div class="eventList">
-              <a class="eventRow" href="/daytona/events/">
-                <div class="eventCal"><div class="eDow">SAT</div><div class="eDay">15</div></div>
-                <div class="eventInfo"><div class="eName">Add your first event</div><div class="ePlace">Daytona Beach</div></div>
-              </a>
-              <a class="eventRow" href="/daytona/events/">
-                <div class="eventCal"><div class="eDow">SUN</div><div class="eDay">16</div></div>
-                <div class="eventInfo"><div class="eName">Second event placeholder</div><div class="ePlace">Ormond Beach</div></div>
-              </a>
-            </div>
-          </div>
-
-          <div class="displayAdSlot">
-            <div class="adSlotLabel">Advertisement</div>
-            <a class="displayAdCard" href="/daytona/advertise/">
-              <div class="displayAdInner">
-                <div class="displayAdIcon">📢</div>
-                <div class="displayAdTitle">Your Ad Here</div>
-                <div class="displayAdDesc">Reach thousands of Daytona locals</div>
-                <div class="displayAdCta">Advertise with us →</div>
-              </div>
-            </a>
-          </div>
-
-          <div class="railSection">
-            <div class="railHead">
-              <span class="railTitle">City Guides</span>
-              <a class="railMore" href="/daytona/guides/">See all</a>
-            </div>
-            <div class="guideList">
-              <a class="guideRow" href="/daytona/guides/live/">🏠 Live in Daytona</a>
-              <a class="guideRow" href="/daytona/guides/work/">💼 Work in Daytona</a>
-              <a class="guideRow" href="/daytona/guides/play/">🎉 Play in Daytona</a>
-            </div>
-          </div>
-
-        </aside>
-      </div>
-
-      {/* ── ADVERTISE BAND ── */}
-      <div class="adBand">
-        <div class="adBandInner">
-          <div class="adCopy">
-            <div class="adEyebrow">Grow your business</div>
-            <div class="adHead">Advertise with GoDo Daytona.</div>
-            <div class="adDesc">Reach thousands of engaged Daytona locals every day. Featured stories, display ads, event promotion, and newsletter placements — built for local businesses that want real results.</div>
-          </div>
-          <div class="adActions">
-            <a class="adBtnPrimary" href="/daytona/advertise/">Get started →</a>
-            <a class="adBtnGhost" href="/daytona/advertise/">See our rates</a>
-          </div>
+          )}
         </div>
-      </div>
-
-    </div>
+      ) : (
+        <a class="pill" href={p.href}>{p.label}</a>
+      )
+    ))}
   </div>
 
-  <style>
-    /* ── Century Gothic / Arial fallback across entire site ── */
-    :global(html), :global(body) {
-      font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
-    }
-    .pageWrap { min-height: 100vh; }
+  <!-- Mobile hamburger -->
+  <input id="navToggle" class="navToggle" type="checkbox" />
+  <label class="menuBtn" for="navToggle" aria-label="Open menu">
+    <span class="burger" aria-hidden="true"><span></span></span>
+    <span class="menuText">Menu</span>
+  </label>
 
-    /* ── Island-style layout: 1400px centered, 3rem generous frame ── */
-    :global(.container) {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding-left: 3rem;
-      padding-right: 3rem;
-    }
-    @media (max-width: 600px) {
-      :global(.container) { padding-left: 1rem; padding-right: 1rem; }
-    }
+  <label class="backdrop" for="navToggle" aria-hidden="true"></label>
 
-    /* ── Newsletter — flat full-width strip, left-aligned, Nooga style ── */
-    .nlBand {
-      background: var(--brand1);
-      margin: 16px 0 40px;       /* 40px gap below to hero */
-      border-radius: 0;           /* flat rectangular strip — no box */
-      height: auto;
-      display: flex;
-      align-items: stretch;
-      overflow: hidden;
-      transition: height 350ms ease;
-    }
-    .nlInner {
-      width: 100%;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 28px 3rem 28px 40px;  /* 40px left padding, content away from edge */
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 32px;
-    }
-    .nlContent {
-      max-width: 640px;
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;    /* left-aligned */
-      text-align: left;
-      gap: 6px;
-    }
-    .nlHead {
-      /* −20% from clamp(36→48px) = clamp(29→38px) */
-      font-size: clamp(29px, 3.2vw, 38px);
-      font-weight: 900;
-      color: #000;
-      line-height: 1.0;
-      letter-spacing: -0.04em;
-    }
-    .nlSub {
-      font-size: clamp(14px, 1.4vw, 18px);  /* clear readable tagline line */
-      color: rgba(0,0,0,.72);
-      line-height: 1.3;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .nlSub strong { font-weight: 700; color: rgba(0,0,0,.88); }
-    .nlForm { width: 100%; max-width: 480px; }
-    .nlRow { display: flex; height: 48px; width: 100%; }
-    .nlInput {
-      flex: 1; min-width: 0;
-      border-radius: 8px 0 0 8px;
-      border: 2px solid rgba(0,0,0,.4);
-      border-right: none;
-      background: #fff; color: #111;
-      padding: 0 14px; font-size: 15px; font-weight: 500;
-      outline: none;
-      transition: border-color 150ms;
-    }
-    .nlInput::placeholder { color: #999; }
-    .nlInput:focus { border-color: rgba(0,0,0,.75); }
-    .nlBtn {
-      flex-shrink: 0; padding: 0 20px;
-      border-radius: 0 8px 8px 0;
-      border: none;
-      background: #000;
-      color: #fff;
-      font-weight: 900; font-size: 14px; cursor: pointer;
-      white-space: nowrap; letter-spacing: .03em;
-      transition: background 140ms;
-    }
-    .nlBtn:hover { background: #222; }
-    .nlFine {
-      font-size: 12px; font-weight: 500;
-      color: rgba(0,0,0,.48);
-      font-style: italic;
-      white-space: nowrap;
-    }
-    /* Success state */
-    .nlThanks {
-      display: none;
-      align-items: center;
-      font-size: clamp(29px, 3.2vw, 38px);  /* matches reduced headline */
-      font-weight: 900;
-      color: #000;
-      white-space: nowrap;
-      padding: 28px 40px;
-      width: 100%;
-    }
-    @media (max-width: 700px) {
-      .nlInner { padding: 20px 1.5rem; flex-direction: column; gap: 16px; }
-      .nlContent { max-width: 100%; }
-      .nlSub { white-space: normal; }
-      .nlRow { flex-direction: column; height: auto; gap: 8px; }
-      .nlInput { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
-      .nlBtn { border-radius: 8px; height: 46px; }
-    }
+  <aside class="drawer" aria-label="Site menu">
+    <div class="drawerHead">
+      <div class="drawerTitle">Menu</div>
+      <label class="closeBtn" for="navToggle" aria-label="Close menu">✕</label>
+    </div>
+    <div class="drawerLinks">
+      <a class="drawerLink" href={`${cityBase}/`}>Home</a>
+      <div class="drawerSection">
+        <div class="drawerSectionLabel">Topics</div>
+        <div class="drawerPillGrid">
+          {topicItems.map((t) => (
+            <a class="drawerPill" href={t.href}>{t.label}</a>
+          ))}
+        </div>
+      </div>
+      <div class="drawerSection">
+        <div class="drawerSectionLabel">Guides</div>
+        {guideItems.map((g) => (
+          <a class="drawerLink" href={g.href}>{g.emoji} {g.label}</a>
+        ))}
+      </div>
+      <a class="drawerLink" href={`${cityBase}/events/`}>Events</a>
+      <a class="drawerLink" href={`${cityBase}/jobs/`}>Jobs</a>
+      <a class="drawerLink drawerAdvertise" href={`${cityBase}/advertise/`}>Advertise</a>
+    </div>
+  </aside>
+</nav>
 
-    /* ── Home grid 75/25, sidebar aligns top with hero ── */
-    .homeGrid {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) 290px;
-      gap: clamp(48px, 4vw, 64px);
-      align-items: start;
-      padding-top: 0;
-      padding-bottom: 12px;
-    }
-    @media (max-width: 980px) {
-      .homeGrid { grid-template-columns: 1fr; }
-      .homeRail { order: 2; }
-    }
+<script is:inline>
+(function () {
+  function init() {
+    var closeTimers = {};
 
-    /* ── HERO — strict 315×178px (8.3cm × 4.7cm), dominant over secondary cards ── */
-    .heroCard {
-      display: grid;
-      grid-template-columns: 315px 1fr;
-      gap: 24px;
-      align-items: start;
-      text-decoration: none;
-      padding-bottom: 18px;
-    }
-    @media (max-width: 640px) { .heroCard { grid-template-columns: 1fr; } }
+    document.querySelectorAll(".dropWrap").forEach(function (wrap) {
+      var key = wrap.dataset.drop;
+      var pill = wrap.querySelector(".pillDrop");
 
-    .heroImgWrap {
-      border-radius: 12px;
-      overflow: hidden;
-      width: 315px;
-      height: 178px;
-      flex-shrink: 0;
-    }
-    .heroImg {
-      display: block;
-      width: 315px;
-      height: 178px;
-      object-fit: cover;
-      object-position: center;
-      background: var(--surface);
-    }
-    .heroFallback {
-      width: 315px;
-      height: 178px;
-      background: var(--surface2);
-    }
-    /* Text tucked tight to right of photo, constrained for readability */
-    .heroCopy {
-      max-width: 400px;
-    }
-
-    .heroKicker {
-      font-size: 10.5px; font-weight: 800;
-      letter-spacing: .1em; text-transform: uppercase;
-      color: var(--brand1); margin-bottom: 9px;
-    }
-    .heroTitle {
-      /* Reduced another 10% from previous — matches Nooga's lighter touch */
-      font-size: clamp(20px, 2.1vw, 30px);
-      font-weight: 800;
-      line-height: 1.09;
-      letter-spacing: -0.5px;
-      color: var(--text);
-      margin: 0 0 11px;
-      transition: color 130ms ease;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .heroCard:hover .heroTitle { color: var(--link); }
-    .heroDesc {
-      color: var(--muted);
-      font-size: 18px;
-      font-weight: 500;
-      line-height: 1.55; margin: 0 0 13px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .heroMeta { font-size: 12.5px; color: var(--faint); }
-
-    /* Single divider + 40px editorial breathing room above triple-threat */
-    .feedDivider {
-      height: 2px;
-      background: var(--brand1);
-      margin: 0 0 40px;
-    }
-
-    /* ── 3-column cards — +15% breathing room ── */
-    .cardGrid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 37px;
-      margin-bottom: 32px;
-    }
-    @media (max-width: 640px) { .cardGrid { grid-template-columns: 1fr; gap: 0; } }
-
-    .articleCard {
-      display: flex; flex-direction: column; text-decoration: none;
-    }
-    @media (max-width: 640px) {
-      .articleCard {
-        display: grid; grid-template-columns: 1fr 100px;
-        gap: 12px; align-items: start;
-        padding: 16px 0; border-bottom: 1px solid var(--border);
+      function openWrap() {
+        clearTimeout(closeTimers[key]);
+        closeAll(key);
+        wrap.classList.add("open");
+        pill.setAttribute("aria-expanded", "true");
       }
-    }
-    .cardImgWrap {
-      border-radius: 11px; overflow: hidden; margin-bottom: 11px;
-    }
-    @media (max-width: 640px) {
-      .cardImgWrap { margin-bottom: 0; order: 2; border-radius: 8px; }
-    }
-    .cardImg {
-      display: block; width: 100%;
-      aspect-ratio: 16/10;
-      object-fit: cover; background: var(--surface);
-      transition: transform 280ms ease;
-    }
-    .articleCard:hover .cardImg { transform: scale(1.03); }
-    .cardImgFallback { aspect-ratio: 16/10; background: var(--surface2); }
-    @media (max-width: 640px) {
-      .cardImg { aspect-ratio: unset; width: 100px; height: 74px; }
-      .cardImgFallback { width: 100px; height: 74px; }
-    }
-    .cardBody { flex: 1; }
-    .cardKicker {
-      font-size: 10px; font-weight: 800;
-      letter-spacing: .08em; text-transform: uppercase;
-      color: var(--brand1); margin-bottom: 5px;
-    }
-    .cardTitle {
-      font-size: 22px;
-      font-weight: 900; line-height: 1.2;
-      letter-spacing: -0.2px; color: var(--text); margin-bottom: 6px;
-      display: -webkit-box; -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical; overflow: hidden;
-      transition: color 130ms ease;
-    }
-    .articleCard:hover .cardTitle { color: var(--link); }
-    .cardDesc {
-      font-size: 16px; font-weight: 500;
-      color: var(--muted); line-height: 1.45; margin-bottom: 7px;
-      display: -webkit-box; -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical; overflow: hidden;
-    }
-    .cardMeta { font-size: 11.5px; color: var(--faint); }
 
-    /* ── FEATURED ad — "FEATURED" all-caps label ── */
-    .featuredCard {
-      margin: 0 0 20px;
-      border: 1.5px solid var(--pillBorder);
-      background: var(--surface); border-radius: 14px; overflow: hidden;
-    }
-    .featuredHeader {
-      display: flex; align-items: center; gap: 7px;
-      padding: 6px 14px; background: var(--pillBg);
-      border-bottom: 1px solid var(--pillBorder);
-    }
-    .featuredStar { font-size: 11px; color: var(--brand1); }
-    .featuredLabel {
-      /* All-caps FEATURED — never "Sponsored" */
-      font-size: 10px; font-weight: 900;
-      letter-spacing: .14em; text-transform: uppercase; color: var(--brand1);
-    }
-    .featuredTag { font-size: 10px; font-weight: 600; color: var(--muted); letter-spacing: .04em; }
-    .featuredBody { padding: 14px 16px; display: grid; gap: 10px; }
-    .featuredImg { display: block; width: 100%; height: 150px; object-fit: cover; border-radius: 9px; }
-    .featuredTitle {
-      font-size: 16.5px; font-weight: 900; color: var(--text);
-      line-height: 1.2; margin-bottom: 5px; letter-spacing: -0.2px;
-    }
-    .featuredDesc { font-size: 13px; color: var(--muted); line-height: 1.45; margin-bottom: 12px; }
-    .featuredCta {
-      display: inline-flex; align-items: center;
-      height: 36px; padding: 0 16px; border-radius: 999px;
-      background: var(--brand1); color: var(--accentText);
-      font-size: 13px; font-weight: 800;
-      text-decoration: none; transition: filter 130ms;
-    }
-    .featuredCta:hover { filter: brightness(.92); }
+      function scheduleClose() {
+        /* 100ms delay — gives user time to move into the dropdown */
+        closeTimers[key] = setTimeout(function () {
+          wrap.classList.remove("open");
+          pill.setAttribute("aria-expanded", "false");
+        }, 100);
+      }
 
-    /* View all */
-    .viewAllRow { padding: 4px 0 24px; text-align: center; }
-    .viewAllBtn {
-      font-size: 13.5px; font-weight: 800; color: var(--link);
-      text-decoration: none; border: 1px solid var(--pillBorder);
-      background: var(--pillBg); padding: 9px 22px;
-      border-radius: 999px; display: inline-flex; align-items: center;
-    }
-    .viewAllBtn:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
+      function cancelClose() {
+        clearTimeout(closeTimers[key]);
+      }
 
-    /* Topics */
-    .topicsHead { padding-bottom: 10px; border-bottom: 2px solid var(--brand1); margin-bottom: 13px; }
-    .topicsLabel {
-      font-size: 14px; font-weight: 900;
-      letter-spacing: .2em; text-transform: uppercase; color: var(--text);
-    }
-    .topicsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    @media (max-width: 560px) { .topicsGrid { grid-template-columns: repeat(2, 1fr); } }
-    .topicTile {
-      position: relative; display: block; text-decoration: none;
-      border-radius: 12px; overflow: hidden; aspect-ratio: 3/2;
-      background: var(--surface2); border: 1px solid var(--border);
-    }
-    .topicImg {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      object-fit: cover; display: block; transition: transform 320ms ease;
-    }
-    .topicTile:hover .topicImg { transform: scale(1.05); }
-    .topicGrad {
-      position: absolute; inset: 0;
-      /* 50% black overlay as specified — legibility over any image */
-      background: rgba(0,0,0,.50);
-    }
-    .topicLabel {
-      /* Centered in tile, 24pt bold all-caps white, Century Gothic */
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: 24px;
-      font-weight: 900;
-      color: #fff;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      text-align: center;
-      padding: 8px;
-      text-shadow: 0 2px 12px rgba(0,0,0,.7);
-    }
+      /* Hover */
+      wrap.addEventListener("mouseenter", openWrap);
+      wrap.addEventListener("mouseleave", scheduleClose);
 
-    /* ── SIDEBAR — sticky, top-aligned with hero, borderless ── */
-    .homeRail {
-      position: sticky;
-      top: 80px;
-      display: grid;
-      gap: 24px;
-      align-self: start; /* ensures it doesn't stretch past its content */
-    }
-    .railSection { display: grid; gap: 0; }
-    .railHead {
-      display: flex; justify-content: space-between; align-items: baseline;
-      padding-bottom: 10px; border-bottom: 2px solid var(--brand1);
-    }
-    .railTitle {
-      font-size: 12px; font-weight: 900;
-      letter-spacing: .14em; text-transform: uppercase; color: var(--text);
-    }
-    .railMore { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
-    .railMore:hover { text-decoration: underline; }
+      var drop = wrap.querySelector(".dropdown");
+      if (drop) {
+        drop.addEventListener("mouseenter", cancelClose);
+        drop.addEventListener("mouseleave", scheduleClose);
+      }
 
-    /* Events — dividers only, no boxes */
-    .eventList { display: grid; }
-    .eventRow {
-      display: grid; grid-template-columns: 48px 1fr;
-      gap: 12px; align-items: center; text-decoration: none;
-      padding: 13px 0; border-bottom: 1px solid var(--border);
-      transition: opacity 140ms;
-    }
-    .eventRow:hover { opacity: .76; }
-    .eventCal {
-      width: 48px; height: 48px; border-radius: 10px;
-      background: var(--pillBg); border: 1px solid var(--pillBorder);
-      display: grid; place-items: center; text-align: center; line-height: 1;
-    }
-    .eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
-    .eDay { font-size: 19px; font-weight: 900; color: var(--text); margin-top: 1px; }
-    .eName { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
-    .ePlace { font-size: 13px; color: var(--faint); margin-top: 2px; }
+      /* Click toggle */
+      pill.addEventListener("click", function (e) {
+        e.preventDefault();
+        if (wrap.classList.contains("open")) {
+          wrap.classList.remove("open");
+          pill.setAttribute("aria-expanded", "false");
+        } else {
+          openWrap();
+        }
+      });
+    });
 
-    /* Display ad */
-    .displayAdSlot { display: grid; gap: 5px; }
-    .adSlotLabel {
-      font-size: 8.5px; font-weight: 700; letter-spacing: .12em;
-      text-transform: uppercase; color: var(--faint); text-align: center;
-    }
-    .displayAdCard {
-      display: block; text-decoration: none;
-      border: 1.5px dashed var(--pillBorder);
-      border-radius: 13px; background: var(--pillBg);
-      transition: border-color 140ms;
-    }
-    .displayAdCard:hover { border-color: var(--brand1); }
-    .displayAdInner { padding: 22px 14px; text-align: center; display: grid; gap: 5px; place-items: center; }
-    .displayAdIcon { font-size: 24px; margin-bottom: 2px; }
-    .displayAdTitle { font-size: 16px; font-weight: 900; color: var(--text); }
-    .displayAdDesc { font-size: 14px; color: var(--muted); line-height: 1.3; }
-    .displayAdCta {
-      margin-top: 6px; display: inline-flex; align-items: center;
-      height: 30px; padding: 0 13px; border-radius: 999px;
-      background: var(--brand1); color: var(--accentText);
-      font-size: 11.5px; font-weight: 800;
-    }
+    /* Close on outside click */
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest(".dropWrap")) closeAll();
+    });
 
-    /* Guides */
-    .guideList { display: grid; }
-    .guideRow {
-      display: block; text-decoration: none;
-      font-size: 15px; font-weight: 700; color: var(--text);
-      padding: 11px 0; border-bottom: 1px solid var(--border);
-      line-height: 1.3; transition: color 120ms;
-    }
-    .guideRow:last-child { border-bottom: none; }
-    .guideRow:hover { color: var(--link); }
+    /* Close on Escape */
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeAll();
+    });
 
-    /* ── Advertise band ── */
-    .adBand {
-      margin: 40px 0 48px; border-radius: 18px;
-      background: linear-gradient(135deg, var(--brand1), var(--brand2));
-      padding: clamp(26px, 3.5vw, 48px);
-      box-shadow: 0 12px 40px color-mix(in srgb, var(--brand1) 40%, transparent);
+    function closeAll(except) {
+      document.querySelectorAll(".dropWrap.open").forEach(function (w) {
+        if (w.dataset.drop === except) return;
+        w.classList.remove("open");
+        var p = w.querySelector(".pillDrop");
+        if (p) p.setAttribute("aria-expanded", "false");
+      });
     }
-    .adBandInner {
-      display: flex; align-items: center;
-      justify-content: space-between; gap: 28px; flex-wrap: wrap;
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+<style>
+  .navMenu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+
+  .pillRow {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 999px;
+    border: 1px solid var(--pillBorder);
+    background: var(--pillBg);
+    color: var(--brand1);
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-weight: 950;
+    font-size: 14px;
+    letter-spacing: -0.02em;  /* tighter tracking for Century Gothic width */
+    text-decoration: none;
+    white-space: nowrap;
+    transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+  }
+  .pill:hover {
+    border-color: color-mix(in srgb, var(--brand2) 70%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand2) 18%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .dropArrow {
+    flex-shrink: 0;
+    transition: transform 200ms ease;
+  }
+
+  /* ── Dropdown wrapper ── */
+  .dropWrap { position: relative; }
+
+  /* Hover open */
+  @media (hover: hover) {
+    .dropWrap:hover > .dropdown {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+      visibility: visible;
     }
-    .adEyebrow {
-      font-size: 10.5px; font-weight: 800; letter-spacing: .16em;
-      text-transform: uppercase; color: var(--accentText); opacity: .72; margin-bottom: 7px;
+    .dropWrap:hover > .pillDrop .dropArrow {
+      transform: rotate(180deg);
     }
-    .adHead {
-      font-size: clamp(20px, 2.2vw, 28px); font-weight: 950;
-      color: var(--accentText); letter-spacing: -0.4px; margin-bottom: 7px; line-height: 1.05;
+  }
+
+  /* JS .open class */
+  .dropWrap.open > .dropdown {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+    visibility: visible;
+  }
+  .dropWrap.open > .pillDrop .dropArrow {
+    transform: rotate(180deg);
+  }
+
+  /* ── Dropdown panel ── */
+  .dropdown {
+    position: absolute;
+    top: 100%;           /* flush to pill — NO gap */
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    z-index: 200;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transition: opacity 180ms ease, transform 180ms ease;
+    min-width: 280px;
+    /* Padding-top acts as invisible hover bridge over the 0px gap */
+    padding-top: 8px;
+  }
+
+  /* The visible panel lives inside dropInner */
+  .dropInner {
+    background: var(--bg, #0b0d10);
+    border: 1px solid var(--border, rgba(255,255,255,.12));
+    border-radius: 16px;
+    box-shadow: 0 16px 48px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
+    overflow: hidden;
+  }
+
+  /* Invisible bridge: fills the padding-top area so hover is continuous */
+  .dropBridge {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 8px; /* matches padding-top */
+    background: transparent;
+  }
+
+  .topicsDropdown { min-width: 340px; }
+  .dropGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 16px 16px 12px;
+  }
+  .dropPill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid var(--pillBorder);
+    background: var(--pillBg);
+    color: var(--brand1);
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 140ms, border-color 140ms, transform 120ms;
+  }
+  .dropPill:hover {
+    border-color: var(--brand1);
+    transform: translateY(-1px);
+    background: color-mix(in srgb, var(--brand1) 14%, transparent);
+  }
+
+  .guidesDropdown { min-width: 200px; }
+  .guideList { padding: 12px 12px 8px; display: grid; gap: 4px; }
+  .guideDropItem {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    text-decoration: none; color: var(--text);
+    font-size: 15px; font-weight: 800;
+    transition: background 140ms;
+  }
+  .guideDropItem:hover { background: var(--pillBg); color: var(--brand1); }
+  .guideIcon { font-size: 18px; flex-shrink: 0; }
+
+  .dropFooter {
+    display: block;
+    padding: 10px 16px;
+    border-top: 1px solid var(--border, rgba(255,255,255,.08));
+    font-size: 12.5px; font-weight: 700;
+    color: var(--brand1); text-decoration: none;
+    text-align: center; transition: background 140ms;
+  }
+  .dropFooter:hover { background: var(--pillBg); }
+
+  /* ── Hamburger ── */
+  .menuBtn {
+    display: none;
+    align-items: center; gap: 8px;
+    border-radius: 12px; padding: 8px 10px;
+    border: 1px solid var(--pillBorder);
+    background: var(--pillBg); color: var(--text);
+    font-weight: 900; cursor: pointer;
+    user-select: none; flex-shrink: 0;
+  }
+  .menuText { font-size: 12.5px; }
+  .burger { width: 18px; height: 12px; position: relative; display: inline-block; }
+  .burger::before, .burger::after, .burger span {
+    content: ""; position: absolute;
+    left: 0; right: 0; height: 2px;
+    border-radius: 2px; background: var(--text);
+  }
+  .burger::before { top: 0; }
+  .burger span { top: 5px; }
+  .burger::after { bottom: 0; }
+
+  .navToggle {
+    position: absolute; width: 1px; height: 1px;
+    opacity: 0; pointer-events: none;
+  }
+
+  .backdrop {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(2px); z-index: 90;
+  }
+
+  .drawer {
+    position: fixed; top: 0; right: 0;
+    height: 100dvh; width: min(86vw, 320px);
+    background: var(--bg, #0b0d10);
+    border-left: 1px solid var(--border, rgba(255,255,255,.10));
+    box-shadow: -20px 0 60px rgba(0,0,0,.45);
+    transform: translateX(110%);
+    transition: transform 220ms ease;
+    z-index: 100;
+    display: grid; grid-template-rows: auto 1fr;
+    visibility: hidden;
+  }
+  .drawerHead {
+    padding: 14px 14px 12px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    display: flex; align-items: center;
+    justify-content: space-between; gap: 10px;
+  }
+  .drawerTitle { font-weight: 950; color: var(--text); }
+  .closeBtn {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: grid; place-items: center;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.03);
+    color: var(--text); cursor: pointer; user-select: none;
+  }
+  .drawerLinks {
+    padding: 12px 14px 24px;
+    display: grid; gap: 6px;
+    overflow-y: auto; align-content: start;
+  }
+  .drawerLink {
+    display: flex; align-items: center;
+    text-decoration: none; color: var(--text);
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.02);
+    border-radius: 12px; padding: 12px;
+    font-weight: 700;
+    transition: border-color 140ms, background 140ms;
+  }
+  .drawerLink:hover { border-color: var(--pillBorder); background: var(--pillBg); }
+  .drawerAdvertise {
+    background: var(--pillBg); border-color: var(--pillBorder);
+    color: var(--brand1); font-weight: 900; margin-top: 4px;
+  }
+  .drawerSection { display: grid; gap: 6px; padding: 10px 0 4px; border-top: 1px solid rgba(255,255,255,.07); }
+  .drawerSectionLabel {
+    font-size: 10px; font-weight: 900;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--brand1); padding: 0 2px;
+  }
+  .drawerPillGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .drawerPill {
+    display: flex; align-items: center; justify-content: center;
+    height: 34px; border-radius: 999px;
+    border: 1px solid var(--pillBorder); background: var(--pillBg);
+    color: var(--brand1); font-size: 12.5px; font-weight: 800;
+    text-decoration: none; text-align: center;
+    transition: background 140ms;
+  }
+  .drawerPill:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
+
+  @media (max-width: 760px) {
+    .menuBtn { display: inline-flex; }
+    .pillRow {
+      gap: 6px; overflow-x: auto; overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 2px; scrollbar-width: none;
+      justify-content: flex-start;
     }
-    .adDesc {
-      font-size: clamp(13px, 1.1vw, 14.5px); color: var(--accentText);
-      opacity: .82; line-height: 1.5; max-width: 500px;
-    }
-    .adActions { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
-    .adBtnPrimary {
-      display: inline-flex; align-items: center;
-      height: 50px; padding: 0 26px; border-radius: 13px;
-      background: var(--accentText); color: var(--brand1);
-      font-size: 15px; font-weight: 900; text-decoration: none;
-      white-space: nowrap; transition: opacity 140ms;
-      box-shadow: 0 4px 16px rgba(0,0,0,.18);
-    }
-    .adBtnPrimary:hover { opacity: .88; }
-    .adBtnGhost {
-      display: inline-flex; align-items: center;
-      height: 50px; padding: 0 22px; border-radius: 13px;
-      border: 2px solid rgba(255,255,255,.48);
-      color: var(--accentText); font-size: 14px; font-weight: 800;
-      text-decoration: none; white-space: nowrap; transition: border-color 140ms;
-    }
-    .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
-    @media (max-width: 640px) {
-      .adBandInner { flex-direction: column; align-items: flex-start; }
-      .adActions { width: 100%; }
-      .adBtnPrimary, .adBtnGhost { flex: 1; justify-content: center; }
-    }
-  </style>
-</Base>
+    .pillRow::-webkit-scrollbar { display: none; }
+    .pill { height: 36px; padding: 0 14px; font-size: 13px; }
+    .dropdown { display: none; }
+  }
+
+  .navToggle:checked ~ .backdrop { display: block; }
+  .navToggle:checked ~ .drawer { transform: translateX(0); visibility: visible; }
+</style>
