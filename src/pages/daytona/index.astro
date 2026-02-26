@@ -389,10 +389,10 @@ const topics = [
       .homeRail { order: 2; }
     }
 
-    /* ── HERO — 315×178 ×1.20 = 378×214px — maintains 8.3×4.7cm ratio, 60px breath above ── */
+    /* ── HERO — 315×178 ×1.32 = 416×235px — 8.3×4.7cm ratio locked, 60px breath above ── */
     .heroCard {
       display: grid;
-      grid-template-columns: 378px 1fr;
+      grid-template-columns: 416px 1fr;
       gap: 24px;
       align-items: start;
       text-decoration: none;
@@ -403,21 +403,21 @@ const topics = [
     .heroImgWrap {
       border-radius: 12px;
       overflow: hidden;
-      width: 378px;
-      height: 214px;
+      width: 416px;
+      height: 235px;
       flex-shrink: 0;
     }
     .heroImg {
       display: block;
-      width: 378px;
-      height: 214px;
+      width: 416px;
+      height: 235px;
       object-fit: cover;
       object-position: center;
       background: var(--surface);
     }
     .heroFallback {
-      width: 378px;
-      height: 214px;
+      width: 416px;
+      height: 235px;
       background: var(--surface2);
     }
     .heroCopy { max-width: 400px; }
@@ -461,11 +461,11 @@ const topics = [
       margin: 0 0 40px;
     }
 
-    /* ── 3-column cards — +15% breathing room ── */
+    /* ── 3-column cards — +10% taller images, gap tightened −25% ── */
     .cardGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 37px;
+      gap: 28px;       /* 37px × 0.75 = 27.75 ≈ 28px */
       margin-bottom: 32px;
     }
     @media (max-width: 640px) { .cardGrid { grid-template-columns: 1fr; gap: 0; } }
@@ -488,12 +488,12 @@ const topics = [
     }
     .cardImg {
       display: block; width: 100%;
-      aspect-ratio: 16/10;
+      aspect-ratio: 16/11;   /* +10% taller than previous 16/10 */
       object-fit: cover; background: var(--surface);
       transition: transform 280ms ease;
     }
     .articleCard:hover .cardImg { transform: scale(1.03); }
-    .cardImgFallback { aspect-ratio: 16/10; background: var(--surface2); }
+    .cardImgFallback { aspect-ratio: 16/11; background: var(--surface2); }
     @media (max-width: 640px) {
       .cardImg { aspect-ratio: unset; width: 100px; height: 74px; }
       .cardImgFallback { width: 100px; height: 74px; }
