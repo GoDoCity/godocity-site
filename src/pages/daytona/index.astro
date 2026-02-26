@@ -259,21 +259,20 @@ const topics = [
     }
 
     /* ── Newsletter — vertical stack, skyline bg, 65% dark overlay ── */
-    /* ── Newsletter — image LEFT (35% wide), text RIGHT, gradient fades left→right ── */
+    /* ── Newsletter — image LEFT scaled to show full "DAYTONA BEACH", text RIGHT ── */
     .nlBand {
       position: relative;
       margin-top: 16px;
       overflow: hidden;
       background:
-        /* Solid yellow starts at 35% — image visible only in left ~35% of banner */
         linear-gradient(
           to left,
           var(--brand1) 0%,
-          var(--brand1) 35%,
-          transparent 58%
+          var(--brand1) 48%,
+          transparent 72%
         ),
-        /* Postcard anchored left — "DAY BEA" lettering stays fully visible */
-        url('/images/gododaytona-bg.png') left center / cover no-repeat;
+        /* background-size: auto 85% zooms OUT ~30% vs cover — shows more lettering */
+        url('/images/gododaytona-bg.png') left center / auto 85% no-repeat;
       background-color: var(--brand1);
     }
     .nlInner {
