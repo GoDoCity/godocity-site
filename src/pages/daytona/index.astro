@@ -281,7 +281,7 @@ const topics = [
     /* ── Newsletter — 60px breath gap below ── */
     .nlBand {
       background: var(--brand1);
-      margin: 16px 0 60px;
+      margin: 16px 0 60px;       /* 60px breath gap below */
       height: auto;
       display: flex;
       align-items: stretch;
@@ -292,22 +292,22 @@ const topics = [
       width: 100%;
       max-width: 1280px;
       margin: 0 auto;
-      padding: 28px 2.5rem;
+      /* Slimmer vertical padding — compressed to match one-line tagline */
+      padding: 18px 2.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
     }
     .nlContent {
-      max-width: 620px;
+      max-width: 680px;
       width: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      gap: 8px;
+      gap: 6px;
     }
     .nlHead {
-      /* −20% from clamp(36→48px) = clamp(29→38px) */
       font-size: clamp(29px, 3.2vw, 38px);
       font-weight: 900;
       color: #000;
@@ -315,12 +315,14 @@ const topics = [
       letter-spacing: -0.04em;
     }
     .nlSub {
-      /* High-impact bold tagline — spans significant banner width */
-      font-size: clamp(18px, 2vw, 26px);
+      /* Single-line, 18px, bold Century Gothic — clearly secondary to headline */
+      font-size: 18px;
       font-weight: 700;
-      color: rgba(0,0,0,.82);
-      line-height: 1.25;
+      color: rgba(0,0,0,.80);
+      line-height: 1.2;
+      white-space: nowrap;
     }
+    /* "for free." extra-bold — emphasises value */
     .nlSub strong { font-weight: 900; color: #000; }
     .nlForm { width: 100%; max-width: 480px; }
     .nlRow { display: flex; height: 48px; width: 100%; }
@@ -365,8 +367,9 @@ const topics = [
       width: 100%;
     }
     @media (max-width: 700px) {
-      .nlInner { padding: 20px 1.5rem; }
+      .nlInner { padding: 16px 1.5rem; }
       .nlContent { max-width: 100%; }
+      .nlSub { white-space: normal; font-size: 15px; }
       .nlRow { flex-direction: column; height: auto; gap: 8px; }
       .nlInput { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
       .nlBtn { border-radius: 8px; height: 46px; }
@@ -386,7 +389,7 @@ const topics = [
       .homeRail { order: 2; }
     }
 
-    /* ── HERO — 315×178 scaled ×1.20 = 378×214px — Alpha status over secondary cards ── */
+    /* ── HERO — 315×178 ×1.20 = 378×214px — maintains 8.3×4.7cm ratio, 60px breath above ── */
     .heroCard {
       display: grid;
       grid-template-columns: 378px 1fr;
