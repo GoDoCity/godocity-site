@@ -259,20 +259,20 @@ const topics = [
     }
 
     /* ── Newsletter — vertical stack, skyline bg, 65% dark overlay ── */
-    /* ── Newsletter — image LEFT, text RIGHT, gradient fades left→right ── */
+    /* ── Newsletter — image LEFT (35% wide), text RIGHT, gradient fades left→right ── */
     .nlBand {
       position: relative;
       margin-top: 16px;
       overflow: hidden;
       background:
-        /* Right solid zone — brand color fades in from center-right */
+        /* Solid yellow starts at 35% — image visible only in left ~35% of banner */
         linear-gradient(
           to left,
           var(--brand1) 0%,
-          var(--brand1) 48%,
-          transparent 72%
+          var(--brand1) 35%,
+          transparent 58%
         ),
-        /* Postcard image anchored LEFT so "Daytona Beach" signage is visible */
+        /* Postcard anchored left — "DAY BEA" lettering stays fully visible */
         url('/images/gododaytona-bg.png') left center / cover no-repeat;
       background-color: var(--brand1);
     }
@@ -280,7 +280,6 @@ const topics = [
       max-width: 1400px;
       margin: 0 auto;
       padding: clamp(28px, 3.5vw, 48px) 3rem;
-      /* Push content to RIGHT half */
       display: flex;
       align-items: flex-start;
       justify-content: flex-end;
@@ -300,7 +299,6 @@ const topics = [
       letter-spacing: -0.5px;
     }
     .nlSub {
-      /* +3pt from previous 15px → 18px */
       font-size: clamp(15px, 1.3vw, 18px);
       color: var(--accentText);
       opacity: .9;
@@ -312,7 +310,8 @@ const topics = [
     .nlInput {
       flex: 1; min-width: 0;
       border-radius: 10px 0 0 10px;
-      border: 2.5px solid rgba(0,0,0,.4);
+      /* Darker border — obvious click target on yellow bg */
+      border: 2.5px solid rgba(0,0,0,.5);
       border-right: none;
       background: #fff; color: #111;
       padding: 0 16px; font-size: 15px; font-weight: 500;
@@ -320,27 +319,27 @@ const topics = [
       transition: border-color 150ms;
     }
     .nlInput::placeholder { color: #888; }
-    .nlInput:focus { border-color: rgba(0,0,0,.75); }
+    .nlInput:focus { border-color: rgba(0,0,0,.8); }
     .nlBtn {
       flex-shrink: 0; padding: 0 22px;
       border-radius: 0 10px 10px 0;
       border: none;
-      /* Brand yellow, bold black text — high contrast conversion magnet */
-      background: var(--brand1);
-      color: #000;
+      /* Dark button — high contrast against yellow banner */
+      background: #111;
+      color: #fff;
       font-weight: 900; font-size: 14px; cursor: pointer;
       white-space: nowrap;
       letter-spacing: .04em;
-      transition: filter 150ms;
+      transition: background 150ms;
     }
-    .nlBtn:hover { filter: brightness(1.12); }
+    .nlBtn:hover { background: #333; }
     .nlFine {
       font-size: 11.5px; font-weight: 500;
       color: var(--accentText);
       opacity: .6;
       font-style: italic;
     }
-    /* Mobile: full-bleed image with dark overlay, stack vertically */
+    /* Mobile: full-bleed with dark overlay */
     @media (max-width: 700px) {
       .nlBand {
         background:
@@ -354,7 +353,7 @@ const topics = [
       .nlSub { color: rgba(255,255,255,.88); }
       .nlFine { color: rgba(255,255,255,.6); }
       .nlRow { flex-direction: column; height: auto; gap: 8px; }
-      .nlInput { border-radius: 10px; border-right: 2.5px solid rgba(0,0,0,.4); height: 50px; }
+      .nlInput { border-radius: 10px; border-right: 2.5px solid rgba(0,0,0,.5); height: 50px; }
       .nlBtn { border-radius: 10px; height: 50px; }
     }
 
