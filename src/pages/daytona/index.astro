@@ -43,6 +43,12 @@ function primaryTag(post) {
   if (typeof post?.data?.category === "string") return post.data.category.trim();
   return "";
 }
+function excerpt(post) {
+  const v = post?.data?.description ?? post?.data?.excerpt ?? post?.data?.summary ?? post?.data?.intro ?? post?.body ?? "";
+  if (typeof v !== "string" || !v.trim()) return "";
+  const clean = v.replace(/[#*_`>\[\]]/g, " ").replace(/\s+/g, " ").trim();
+  return clean.length > 160 ? clean.slice(0, 157).trimEnd() + "…" : clean;
+}
 
 const all = await getCollection("posts");
 const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
