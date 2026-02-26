@@ -259,21 +259,92 @@ const topics = [
     }
 
     /* ── Newsletter — vertical stack, skyline bg, 65% dark overlay ── */
-    /* ── Newsletter — image LEFT scaled to show full "DAYTONA BEACH", text RIGHT ── */
+    /* ── Newsletter — cinematic: centered image 125%, radial overlay, centered text ── */
     .nlBand {
       position: relative;
       margin-top: 16px;
       overflow: hidden;
       background:
-        linear-gradient(
-          to left,
-          var(--brand1) 0%,
-          var(--brand1) 48%,
-          transparent 72%
-        ),
-        /* background-size: auto 85% zooms OUT ~30% vs cover — shows more lettering */
-        url('/images/gododaytona-bg.png') left center / auto 85% no-repeat;
+        /* Radial gradient: dark in center where text lives, fades to transparent edges */
+        radial-gradient(ellipse at center, rgba(0,0,0,.72) 0%, rgba(0,0,0,.45) 50%, rgba(0,0,0,.15) 100%),
+        /* Image scaled to 125% and centered so pier/lettering shows on sides */
+        url('/images/gododaytona-bg.png') center center / 125% auto no-repeat;
       background-color: var(--brand1);
+      padding: clamp(36px, 4.5vw, 60px) 0;
+    }
+    .nlInner {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nlContent {
+      max-width: 560px;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 14px;
+    }
+    .nlHead {
+      font-size: clamp(28px, 3.2vw, 44px);
+      font-weight: 950;
+      /* Black text punches through the dark overlay cleanly */
+      color: #fff;
+      line-height: 1.05;
+      letter-spacing: -0.5px;
+      text-shadow: 0 2px 16px rgba(0,0,0,.6);
+    }
+    .nlSub {
+      /* +3pt from 15px → 18px */
+      font-size: clamp(15px, 1.3vw, 18px);
+      color: rgba(255,255,255,.92);
+      line-height: 1.45;
+      text-shadow: 0 1px 8px rgba(0,0,0,.5);
+    }
+    .nlSub strong { font-weight: 900; color: #fff; }
+    .nlForm { width: 100%; max-width: 480px; }
+    .nlRow { display: flex; height: 52px; width: 100%; }
+    .nlInput {
+      flex: 1; min-width: 0;
+      border-radius: 10px 0 0 10px;
+      border: 2.5px solid rgba(255,255,255,.5);
+      border-right: none;
+      background: rgba(255,255,255,.95); color: #111;
+      padding: 0 16px; font-size: 15px; font-weight: 500;
+      outline: none;
+      transition: border-color 150ms;
+    }
+    .nlInput::placeholder { color: #888; }
+    .nlInput:focus { border-color: #fff; }
+    .nlBtn {
+      flex-shrink: 0; padding: 0 22px;
+      border-radius: 0 10px 10px 0;
+      border: none;
+      /* Brand yellow, bold black — max contrast conversion magnet */
+      background: var(--brand1);
+      color: #000;
+      font-weight: 900; font-size: 14px; cursor: pointer;
+      white-space: nowrap;
+      letter-spacing: .04em;
+      transition: filter 150ms;
+    }
+    .nlBtn:hover { filter: brightness(1.1); }
+    .nlFine {
+      font-size: 12px; font-weight: 500;
+      color: rgba(255,255,255,.65);
+      font-style: italic;
+    }
+    @media (max-width: 700px) {
+      .nlBand { background-size: 200% auto; }
+      .nlInner { padding: 0 1.5rem; }
+      .nlContent { max-width: 100%; }
+      .nlRow { flex-direction: column; height: auto; gap: 8px; }
+      .nlInput { border-radius: 10px; border-right: 2.5px solid rgba(255,255,255,.5); height: 50px; }
+      .nlBtn { border-radius: 10px; height: 50px; }
     }
     .nlInner {
       max-width: 1400px;
