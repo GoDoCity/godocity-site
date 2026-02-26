@@ -106,7 +106,7 @@ const topics = [
         e.preventDefault();
         content.style.display = 'none';
         thanks.style.display = 'flex';
-        band.style.height = '120px'; /* shrinks 25%: 160px → 120px */
+        band.style.height = '148px'; /* shrinks 25%: 198px → 148px */
       });
     })();
     </script>
@@ -274,11 +274,11 @@ const topics = [
       :global(.container) { padding-left: 1rem; padding-right: 1rem; }
     }
 
-    /* ── Newsletter — exact 160px compact yellow utility strip ── */
+    /* ── Newsletter — 198px compact yellow utility strip ── */
     .nlBand {
       background: var(--brand1);
       margin-top: 16px;
-      height: 160px;
+      height: 198px;
       display: flex;
       align-items: center;
       overflow: hidden;
@@ -390,26 +390,27 @@ const topics = [
     }
     @media (max-width: 640px) { .heroCard { grid-template-columns: 1fr; } }
 
+    /* ── HERO — fixed 315×178px rectangular crop ── */
     .heroImgWrap {
       border-radius: 12px;
       overflow: hidden;
       width: 315px;
-      max-height: 242px;
+      max-height: 178px;
       flex-shrink: 0;
     }
     .heroImg {
       display: block;
       width: 315px;
-      height: 242px;
-      max-height: 242px;
+      height: 178px;
+      max-height: 178px;
       object-fit: cover;
       object-position: center;
       background: var(--surface);
     }
     .heroFallback {
       width: 315px;
-      height: 210px;
-      max-height: 242px;
+      height: 178px;
+      max-height: 178px;
       background: var(--surface2);
     }
     /* Text block max-width matches image width for columnar feel */
@@ -509,7 +510,7 @@ const topics = [
     }
     .articleCard:hover .cardTitle { color: var(--link); }
     .cardDesc {
-      font-size: 18px; font-weight: 500;
+      font-size: 16px; font-weight: 500;
       color: var(--muted); line-height: 1.45; margin-bottom: 7px;
       display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
