@@ -278,19 +278,18 @@ const pills = [
     transform: rotate(180deg);
   }
 
-  /* ── Dropdown panel ── */
+  /* ── Dropdown panel — left-edge anchored to pill ── */
   .dropdown {
     position: absolute;
-    top: 100%;           /* flush to pill — NO gap */
-    left: 50%;
-    transform: translateX(-50%) translateY(-4px);
+    top: 100%;           /* flush below pill */
+    left: 0;             /* anchors to left edge of pill — no centre-drift */
+    transform: translateY(-4px);
     z-index: 200;
     opacity: 0;
     pointer-events: none;
     visibility: hidden;
     transition: opacity 180ms ease, transform 180ms ease;
     min-width: 280px;
-    /* Padding-top acts as invisible hover bridge over the 0px gap */
     padding-top: 8px;
   }
 
