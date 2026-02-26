@@ -52,39 +52,39 @@ const featuredAd = {
 };
 
 const topics = [
-  { label: "Biz",              slug: "biz",             img: "/images/topics/biz.jpg" },
-  { label: "City",             slug: "city",             img: "/images/topics/city.jpg" },
-  { label: "Culture",          slug: "culture",          img: "/images/topics/culture.jpg" },
-  { label: "Events",           slug: "events",           img: "/images/topics/events.jpg" },
-  { label: "Food",             slug: "food",             img: "/images/topics/food.jpg" },
-  { label: "History",          slug: "history",          img: "/images/topics/history.jpg" },
-  { label: "Real Estate",      slug: "real-estate",      img: "/images/topics/real-estate.jpg" },
-  { label: "Sports",           slug: "sports",           img: "/images/topics/sports.jpg" },
-  { label: "Travel & Outdoors",slug: "travel-outdoors",  img: "/images/topics/travel-outdoors.jpg" },
+  { label: "Biz",                     slug: "biz",              img: "/images/topics/biz.jpg" },
+  { label: "City",                    slug: "city",             img: "/images/topics/city.jpg" },
+  { label: "Culture",                 slug: "culture",          img: "/images/topics/culture.jpg" },
+  { label: "Events",                  slug: "events",           img: "/images/topics/events.jpg" },
+  { label: "Food",                    slug: "food",             img: "/images/topics/food.jpg" },
+  { label: "History",                 slug: "history",          img: "/images/topics/history.jpg" },
+  { label: "Real Estate",             slug: "real-estate",      img: "/images/topics/real-estate.jpg" },
+  { label: "Sports, Travel & Outdoors", slug: "sports-travel-outdoors", img: "/images/topics/sports-travel-outdoors.jpg" },
+  { label: "DIY",                     slug: "diy",              img: "/images/topics/diy.jpg" },
 ];
 /* ── TOPIC IMAGE GUIDE (save to /public/images/topics/) ──────────────
-   biz.jpg           → Local storefronts, Main Street Daytona
-   city.jpg          → Aerial/drone shot of Daytona Beach coastline
-   culture.jpg       → Neon lights from a local music venue or colorful mural
-   events.jpg        → Crowds at Bike Week or Daytona 500 grandstands
-   food.jpg          → Close-up burger or cocktail with condensation
-   history.jpg       → Historic Daytona boardwalk or vintage race photo
-   real-estate.jpg   → Modern beachfront balcony or historic Daytona home
-   sports.jpg        → Motion-blurred race car or stadium lights at night
-   travel-outdoors.jpg → Cinematic sunrise over Daytona pier or surfboard in sand
+   biz.jpg                   → Local storefronts, Main Street Daytona
+   city.jpg                  → Aerial/drone shot of Daytona Beach coastline
+   culture.jpg               → Neon lights from a local music venue or colorful mural
+   events.jpg                → Crowds at Bike Week or Daytona 500 grandstands
+   food.jpg                  → Close-up burger or cocktail with condensation
+   history.jpg               → Historic Daytona boardwalk or vintage race photo
+   real-estate.jpg           → Modern beachfront balcony or historic Daytona home
+   sports-travel-outdoors.jpg→ Motion-blur race car + pier sunrise composite
+   diy.jpg                   → Tools, home project, hands-on Daytona local scene
 ────────────────────────────────────────────────────────────────────── */
 ---
 
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
   <div class="pageWrap">
 
-    {/* ── NEWSLETTER BAND — Method A: text left, image right ── */}
-    <div class="nlBand">
+    {/* ── NEWSLETTER BAND — 160px compact utility strip ── */}
+    <div class="nlBand" id="nlBand">
       <div class="nlInner">
-        <div class="nlContent">
+        <div class="nlContent" id="nlContent">
           <div class="nlHead">Good News Daytona!</div>
           <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong>for free.</strong></div>
-          <form class="nlForm" action="/daytona/subscribe/" method="get">
+          <form class="nlForm" id="nlForm" action="/daytona/subscribe/" method="get">
             <div class="nlRow">
               <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" />
               <button class="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
@@ -92,8 +92,24 @@ const topics = [
           </form>
           <div class="nlFine">100% free, unsubscribe anytime.</div>
         </div>
+        <div class="nlThanks" id="nlThanks" aria-live="polite">Thank you! You're on the list. ✓</div>
       </div>
     </div>
+    <script is:inline>
+    (function(){
+      var form = document.getElementById('nlForm');
+      var band = document.getElementById('nlBand');
+      var content = document.getElementById('nlContent');
+      var thanks = document.getElementById('nlThanks');
+      if (!form) return;
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        content.style.display = 'none';
+        thanks.style.display = 'flex';
+        band.style.height = '120px'; /* shrinks 25%: 160px → 120px */
+      });
+    })();
+    </script>
 
     <div class="container">
       <div class="homeGrid">
@@ -258,11 +274,15 @@ const topics = [
       :global(.container) { padding-left: 1rem; padding-right: 1rem; }
     }
 
-    /* ── Newsletter — compact solid yellow utility strip ── */
+    /* ── Newsletter — exact 160px compact yellow utility strip ── */
     .nlBand {
       background: var(--brand1);
       margin-top: 16px;
-      padding: clamp(14px, 1.8vw, 20px) 0;
+      height: 160px;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      transition: height 350ms ease;
     }
     .nlInner {
       max-width: 1400px;
@@ -324,6 +344,17 @@ const topics = [
       color: rgba(0,0,0,.48);
       font-style: italic;
     }
+    /* Success state — hidden until form submitted */
+    .nlThanks {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      font-weight: 900;
+      color: #000;
+      text-align: center;
+      width: 100%;
+    }
     @media (max-width: 700px) {
       .nlInner { padding: 0 1.5rem; }
       .nlContent { max-width: 100%; }
@@ -348,9 +379,10 @@ const topics = [
     }
 
     /* ── HERO — wider image (3fr), narrower text column (2fr) ── */
+    /* ── HERO — fixed 315px image, narrower text column ── */
     .heroCard {
       display: grid;
-      grid-template-columns: 3fr 2fr;
+      grid-template-columns: 315px 1fr;
       gap: 28px;
       align-items: start;
       text-decoration: none;
@@ -361,11 +393,13 @@ const topics = [
     .heroImgWrap {
       border-radius: 12px;
       overflow: hidden;
-      max-height: 242px; /* 285px × 0.85 — 15% shorter as requested */
+      width: 315px;
+      max-height: 242px;
+      flex-shrink: 0;
     }
     .heroImg {
       display: block;
-      width: 100%;
+      width: 315px;
       height: 242px;
       max-height: 242px;
       object-fit: cover;
@@ -373,11 +407,12 @@ const topics = [
       background: var(--surface);
     }
     .heroFallback {
+      width: 315px;
       height: 210px;
       max-height: 242px;
       background: var(--surface2);
     }
-    /* Narrow text block — prevents lines stretching too wide */
+    /* Text block max-width matches image width for columnar feel */
     .heroCopy {
       max-width: 420px;
     }
@@ -421,12 +456,12 @@ const topics = [
       margin: 0 0 40px;
     }
 
-    /* ── 3-column cards — more breathing room between each card ── */
+    /* ── 3-column cards — +15% breathing room ── */
     .cardGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 32px;
-      margin-bottom: 28px;
+      gap: 37px;
+      margin-bottom: 32px;
     }
     @media (max-width: 640px) { .cardGrid { grid-template-columns: 1fr; gap: 0; } }
 
