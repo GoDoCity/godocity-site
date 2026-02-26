@@ -267,22 +267,21 @@ const topics = [
     }
     .pageWrap { min-height: 100vh; }
 
-    /* ── Island-style layout: 1400px centered, 3rem generous frame ── */
+    /* ── 1280px breath container — equal space both sides on any monitor ── */
     :global(.container) {
-      max-width: 1400px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding-left: 3rem;
-      padding-right: 3rem;
+      padding-left: 2.5rem;
+      padding-right: 2.5rem;
     }
     @media (max-width: 600px) {
       :global(.container) { padding-left: 1rem; padding-right: 1rem; }
     }
 
-    /* ── Newsletter — flat full-width strip, left-aligned, Nooga style ── */
+    /* ── Newsletter — flat strip inside 1280px container, centered content ── */
     .nlBand {
       background: var(--brand1);
-      margin: 16px 0 40px;       /* 40px gap below to hero */
-      border-radius: 0;           /* flat rectangular strip — no box */
+      margin: 16px 0 40px;
       height: auto;
       display: flex;
       align-items: stretch;
@@ -291,22 +290,21 @@ const topics = [
     }
     .nlInner {
       width: 100%;
-      max-width: 1400px;
+      max-width: 1280px;
       margin: 0 auto;
-      padding: 28px 3rem 28px 40px;  /* 40px left padding, content away from edge */
+      padding: 28px 2.5rem;
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 32px;
+      align-items: center;
+      justify-content: center;
     }
     .nlContent {
-      max-width: 640px;
+      max-width: 620px;
       width: 100%;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;    /* left-aligned */
-      text-align: left;
-      gap: 6px;
+      align-items: center;
+      text-align: center;
+      gap: 8px;
     }
     .nlHead {
       /* −20% from clamp(36→48px) = clamp(29→38px) */
@@ -317,14 +315,13 @@ const topics = [
       letter-spacing: -0.04em;
     }
     .nlSub {
-      font-size: clamp(14px, 1.4vw, 18px);  /* clear readable tagline line */
-      color: rgba(0,0,0,.72);
+      /* Bold, larger — Nooga-scale tagline */
+      font-size: clamp(16px, 1.6vw, 20px);
+      font-weight: 700;
+      color: rgba(0,0,0,.80);
       line-height: 1.3;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
-    .nlSub strong { font-weight: 700; color: rgba(0,0,0,.88); }
+    .nlSub strong { font-weight: 900; color: #000; }
     .nlForm { width: 100%; max-width: 480px; }
     .nlRow { display: flex; height: 48px; width: 100%; }
     .nlInput {
@@ -354,33 +351,32 @@ const topics = [
       font-size: 12px; font-weight: 500;
       color: rgba(0,0,0,.48);
       font-style: italic;
-      white-space: nowrap;
     }
     /* Success state */
     .nlThanks {
       display: none;
       align-items: center;
-      font-size: clamp(29px, 3.2vw, 38px);  /* matches reduced headline */
+      justify-content: center;
+      font-size: clamp(29px, 3.2vw, 38px);
       font-weight: 900;
       color: #000;
-      white-space: nowrap;
-      padding: 28px 40px;
+      text-align: center;
+      padding: 28px 2.5rem;
       width: 100%;
     }
     @media (max-width: 700px) {
-      .nlInner { padding: 20px 1.5rem; flex-direction: column; gap: 16px; }
+      .nlInner { padding: 20px 1.5rem; }
       .nlContent { max-width: 100%; }
-      .nlSub { white-space: normal; }
       .nlRow { flex-direction: column; height: auto; gap: 8px; }
       .nlInput { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
       .nlBtn { border-radius: 8px; height: 46px; }
     }
 
-    /* ── Home grid 75/25, sidebar aligns top with hero ── */
+    /* ── Home grid 75/25 inside 1280px container ── */
     .homeGrid {
       display: grid;
       grid-template-columns: minmax(0, 1fr) 290px;
-      gap: clamp(48px, 4vw, 64px);
+      gap: clamp(40px, 4vw, 56px);
       align-items: start;
       padding-top: 0;
       padding-bottom: 12px;
@@ -572,14 +568,17 @@ const topics = [
     /* Topics */
     .topicsHead { padding-bottom: 10px; border-bottom: 2px solid var(--brand1); margin-bottom: 13px; }
     .topicsLabel {
-      font-size: 14px; font-weight: 900;
-      letter-spacing: .2em; text-transform: uppercase; color: var(--text);
+      /* 2× from 14px → 28px, Extra Bold Century Gothic */
+      font-size: 28px; font-weight: 900;
+      letter-spacing: .12em; text-transform: uppercase; color: var(--text);
     }
     .topicsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
     @media (max-width: 560px) { .topicsGrid { grid-template-columns: repeat(2, 1fr); } }
     .topicTile {
       position: relative; display: block; text-decoration: none;
-      border-radius: 12px; overflow: hidden; aspect-ratio: 3/2;
+      border-radius: 12px; overflow: hidden;
+      /* aspect-ratio 3/2 × 1.2 height ≈ 5/2 → use 5/3 for +20% taller tiles */
+      aspect-ratio: 5/3;
       background: var(--surface2); border: 1px solid var(--border);
     }
     .topicImg {
@@ -589,25 +588,26 @@ const topics = [
     .topicTile:hover .topicImg { transform: scale(1.05); }
     .topicGrad {
       position: absolute; inset: 0;
-      /* 50% black overlay as specified — legibility over any image */
       background: rgba(0,0,0,.50);
     }
     .topicLabel {
-      /* Centered in tile, 24pt bold all-caps white, Century Gothic */
       position: absolute;
       inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: 24px;
+      /* 32px+ Heavy Bold as specified */
+      font-size: 32px;
       font-weight: 900;
       color: #fff;
       text-transform: uppercase;
-      letter-spacing: .08em;
+      letter-spacing: .06em;
       text-align: center;
       padding: 8px;
-      text-shadow: 0 2px 12px rgba(0,0,0,.7);
+      text-shadow: 0 2px 14px rgba(0,0,0,.75);
+      /* Wrap long labels like "SPORTS, TRAVEL & OUTDOORS" */
+      line-height: 1.15;
     }
 
     /* ── SIDEBAR — sticky, top-aligned with hero, borderless ── */
@@ -700,12 +700,15 @@ const topics = [
       text-transform: uppercase; color: var(--accentText); opacity: .72; margin-bottom: 7px;
     }
     .adHead {
-      font-size: clamp(20px, 2.2vw, 28px); font-weight: 950;
+      /* +20%: clamp(20→28px) × 1.2 = clamp(24→34px) */
+      font-size: clamp(24px, 2.6vw, 34px); font-weight: 950;
       color: var(--accentText); letter-spacing: -0.4px; margin-bottom: 7px; line-height: 1.05;
     }
     .adDesc {
-      font-size: clamp(13px, 1.1vw, 14.5px); color: var(--accentText);
-      opacity: .82; line-height: 1.5; max-width: 500px;
+      /* +2pt: clamp(13→14.5px) → clamp(15→16.5px), semi-bold */
+      font-size: clamp(15px, 1.3vw, 16.5px); font-weight: 600;
+      color: var(--accentText);
+      opacity: .88; line-height: 1.5; max-width: 500px;
     }
     .adActions { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
     .adBtnPrimary {
