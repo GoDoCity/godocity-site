@@ -261,6 +261,10 @@ const topics = [
   </div>
 
   <style>
+    /* ── Century Gothic as primary site typeface ── */
+    :global(html), :global(body) {
+      font-family: "Century Gothic", AppleGothic, "Gill Sans", "Gill Sans MT", Calibri, sans-serif;
+    }
     .pageWrap { min-height: 100vh; }
 
     /* ── Island-style layout: 1400px centered, 3rem generous frame ── */
@@ -274,10 +278,12 @@ const topics = [
       :global(.container) { padding-left: 1rem; padding-right: 1rem; }
     }
 
-    /* ── Newsletter — tall enough for 2× typography ── */
+    /* ── Newsletter — 1200px box, centered, 40px gap to hero below ── */
     .nlBand {
       background: var(--brand1);
-      margin-top: 16px;
+      margin: 16px auto 40px;
+      max-width: 1200px;
+      border-radius: 16px;
       height: 260px;
       display: flex;
       align-items: center;
@@ -285,8 +291,7 @@ const topics = [
       transition: height 350ms ease;
     }
     .nlInner {
-      max-width: 1400px;
-      margin: 0 auto;
+      width: 100%;
       padding: 0 3rem;
       display: flex;
       align-items: center;
@@ -302,18 +307,21 @@ const topics = [
       gap: 8px;
     }
     .nlHead {
-      font-size: clamp(36px, 4vw, 48px);  /* 2× previous clamp(18→24px) */
-      font-weight: 950;
+      font-size: clamp(36px, 4vw, 48px);
+      font-weight: 900;
       color: #000;
-      line-height: 1.05;
-      letter-spacing: -0.5px;
+      line-height: 1.0;
+      letter-spacing: -0.04em;  /* punchy tight tracking for Century Gothic */
     }
     .nlSub {
-      font-size: clamp(26px, 2.4vw, 32px);  /* 2× previous clamp(13→16px) */
-      color: rgba(0,0,0,.72);
-      line-height: 1.3;
+      font-size: 16px;           /* clean tagline — NOT 2× — single understated line */
+      color: rgba(0,0,0,.65);
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
-    .nlSub strong { font-weight: 900; color: #000; }
+    .nlSub strong { font-weight: 700; color: rgba(0,0,0,.85); }
     .nlForm { width: 100%; max-width: 560px; }
     .nlRow { display: flex; height: 52px; width: 100%; }
     .nlInput {
@@ -340,19 +348,22 @@ const topics = [
     }
     .nlBtn:hover { background: #222; }
     .nlFine {
-      font-size: 16.5px; font-weight: 500;  /* 1.5× previous 11px */
+      font-size: 16.5px; font-weight: 500;  /* 1.5× 11px original */
       color: rgba(0,0,0,.48);
       font-style: italic;
+      white-space: nowrap;
+      overflow: hidden;
     }
-    /* Success state — 2× headline size, bold black */
+    /* Success state — 2× headline size, bold black, Century Gothic via body inherit */
     .nlThanks {
       display: none;
       align-items: center;
       justify-content: center;
-      font-size: clamp(36px, 4vw, 48px);  /* matches 2× nlHead */
+      font-size: clamp(36px, 4vw, 48px);
       font-weight: 900;
       color: #000;
       text-align: center;
+      white-space: nowrap;
       width: 100%;
     }
     @media (max-width: 700px) {
@@ -368,9 +379,8 @@ const topics = [
       display: grid;
       grid-template-columns: minmax(0, 1fr) 290px;
       gap: clamp(48px, 4vw, 64px);
-      /* align-items: start keeps both columns top-aligned */
       align-items: start;
-      padding-top: 22px;
+      padding-top: 0;
       padding-bottom: 12px;
     }
     @media (max-width: 980px) {
@@ -378,12 +388,11 @@ const topics = [
       .homeRail { order: 2; }
     }
 
-    /* ── HERO — wider image (3fr), narrower text column (2fr) ── */
-    /* ── HERO — 315×178 scaled +30% = 410×231px, maintains aspect ratio ── */
+    /* ── HERO — strict 315×178px (8.3cm × 4.7cm), dominant over secondary cards ── */
     .heroCard {
       display: grid;
-      grid-template-columns: 410px 1fr;
-      gap: 28px;
+      grid-template-columns: 315px 1fr;
+      gap: 24px;
       align-items: start;
       text-decoration: none;
       padding-bottom: 18px;
@@ -393,28 +402,26 @@ const topics = [
     .heroImgWrap {
       border-radius: 12px;
       overflow: hidden;
-      width: 410px;
-      max-height: 231px;
+      width: 315px;
+      height: 178px;
       flex-shrink: 0;
     }
     .heroImg {
       display: block;
-      width: 410px;
-      height: 231px;
-      max-height: 231px;
+      width: 315px;
+      height: 178px;
       object-fit: cover;
       object-position: center;
       background: var(--surface);
     }
     .heroFallback {
-      width: 410px;
-      height: 231px;
-      max-height: 231px;
+      width: 315px;
+      height: 178px;
       background: var(--surface2);
     }
-    /* Text block max-width matches image width for columnar feel */
+    /* Text tucked tight to right of photo, constrained for readability */
     .heroCopy {
-      max-width: 420px;
+      max-width: 400px;
     }
 
     .heroKicker {
@@ -584,12 +591,13 @@ const topics = [
       background: rgba(0,0,0,.50);
     }
     .topicLabel {
-      /* Centered in tile, 24pt bold all-caps white */
+      /* Centered in tile, 24pt bold all-caps white, Century Gothic */
       position: absolute;
       inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-family: "Century Gothic", AppleGothic, "Gill Sans", "Gill Sans MT", Calibri, sans-serif;
       font-size: 24px;
       font-weight: 900;
       color: #fff;
