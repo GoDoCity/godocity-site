@@ -111,8 +111,32 @@ const topics = [
     </div>
     <script is:inline>
     (function(){
+      /* ── Full-bleed fix for nlBand ──────────────────────────────────────
+         Reads the actual left offset of the band from the viewport and
+         applies negative margin + extra width to reach true screen edges.
+         Works regardless of Base.astro's wrapper structure or overflow.   */
+      function bleedFix() {
+        var band = document.getElementById('nlBand');
+        if (!band) return;
+        // Reset so we get fresh measurements
+        band.style.marginLeft = '';
+        band.style.width = '';
+        var rect = band.getBoundingClientRect();
+        var leftOffset = rect.left;  // pixels from left edge of viewport
+        var rightGap = window.innerWidth - rect.right; // pixels from right edge
+        if (leftOffset > 0 || rightGap > 0) {
+          band.style.marginLeft = '-' + leftOffset + 'px';
+          band.style.width = 'calc(100% + ' + (leftOffset + rightGap) + 'px)';
+        }
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bleedFix);
+      } else {
+        bleedFix();
+      }
+      window.addEventListener('resize', bleedFix);
+
       var form = document.getElementById('nlForm');
-      var band = document.getElementById('nlBand');
       var content = document.getElementById('nlContent');
       var thanks = document.getElementById('nlThanks');
       if (!form) return;
@@ -414,16 +438,7 @@ const topics = [
       width: 100%;
     }
     @media (max-width: 700px) {
-      /* position+transform: mathematically guaranteed to hit screen edges
-         regardless of how many nested padded containers wrap this element */
-      .nlBand {
-        position: relative;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100vw;
-        margin-top: 16px;
-        margin-bottom: 32px;
-      }
+      .nlBand { margin-top: 16px; margin-bottom: 32px; }
       .nlInner { padding: 20px 1.25rem; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
       .nlSub { white-space: normal; font-size: 15px; text-align: center; }
@@ -826,15 +841,13 @@ const topics = [
 
     /* ── Advertise band ── */
     .adBand {
-      margin: 0; border-radius: 0;
+      margin: 44px 2.5rem 52px;
+      border-radius: 18px;
       background: linear-gradient(135deg, var(--brand1), var(--brand2));
-      padding: 0;
+      padding: clamp(26px, 3.5vw, 48px);
       box-shadow: 0 12px 40px color-mix(in srgb, var(--brand1) 40%, transparent);
     }
     .adBandInner {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: clamp(26px, 3.5vw, 48px) 2.5rem;
       display: flex; align-items: center;
       justify-content: space-between; gap: 28px; flex-wrap: wrap;
     }
@@ -871,15 +884,11 @@ const topics = [
     .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
     @media (max-width: 640px) {
       .adBand {
-        position: relative;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 100vw;
-        border-radius: 0;
-        margin-top: 16px;
-        margin-bottom: 0;
+        margin: 24px 0 32px;
+        border-radius: 14px;
+        padding: 24px 1.25rem;
       }
-      .adBandInner { flex-direction: column; align-items: center; text-align: center; gap: 16px; padding: 28px 1.25rem; }
+      .adBandInner { flex-direction: column; align-items: center; text-align: center; gap: 16px; }
       .adCopy { display: flex; flex-direction: column; align-items: center; text-align: center; }
       .adEyebrow, .adHead, .adDesc { text-align: center; }
       .adDesc { max-width: 100%; }
