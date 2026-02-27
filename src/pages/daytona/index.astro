@@ -66,27 +66,32 @@ const featuredAd = {
   img: "",
 };
 
+/* ── 3×3 Topics Grid — strict 9 tiles, no overflow ─────────────────
+   Row 1: Biz · City · Culture
+   Row 2: Events · Food · History
+   Row 3: Real Estate · Sports · Wellness
+──────────────────────────────────────────────────────────────────── */
 const topics = [
-  { label: "Biz",                     slug: "biz",              img: "/images/topics/biz.jpg" },
-  { label: "City",                    slug: "city",             img: "/images/topics/city.jpg" },
-  { label: "Culture",                 slug: "culture",          img: "/images/topics/culture.jpg" },
-  { label: "Events",                  slug: "events",           img: "/images/topics/events.jpg" },
-  { label: "Food",                    slug: "food",             img: "/images/topics/food.jpg" },
-  { label: "History",                 slug: "history",          img: "/images/topics/history.jpg" },
-  { label: "Real Estate",             slug: "real-estate",      img: "/images/topics/real-estate.jpg" },
-  { label: "Sports, Travel & Outdoors", slug: "sports-travel-outdoors", img: "/images/topics/sports-travel-outdoors.jpg" },
-  { label: "DIY",                     slug: "diy",              img: "/images/topics/diy.jpg" },
+  { label: "Biz",         slug: "biz",         img: "/images/topics/biz.jpg" },
+  { label: "City",        slug: "city",         img: "/images/topics/city.jpg" },
+  { label: "Culture",     slug: "culture",      img: "/images/topics/culture.jpg" },
+  { label: "Events",      slug: "events",       img: "/images/topics/events.jpg" },
+  { label: "Food",        slug: "food",         img: "/images/topics/food.jpg" },
+  { label: "History",     slug: "history",      img: "/images/topics/history.jpg" },
+  { label: "Real Estate", slug: "real-estate",  img: "/images/topics/real-estate.jpg" },
+  { label: "Sports",      slug: "sports",       img: "/images/topics/sports.jpg" },
+  { label: "Wellness",    slug: "wellness",     img: "/images/topics/wellness.jpg" },
 ];
 /* ── TOPIC IMAGE GUIDE (save to /public/images/topics/) ──────────────
-   biz.jpg                   → Local storefronts, Main Street Daytona
-   city.jpg                  → Aerial/drone shot of Daytona Beach coastline
-   culture.jpg               → Neon lights from a local music venue or colorful mural
-   events.jpg                → Crowds at Bike Week or Daytona 500 grandstands
-   food.jpg                  → Close-up burger or cocktail with condensation
-   history.jpg               → Historic Daytona boardwalk or vintage race photo
-   real-estate.jpg           → Modern beachfront balcony or historic Daytona home
-   sports-travel-outdoors.jpg→ Motion-blur race car + pier sunrise composite
-   diy.jpg                   → Tools, home project, hands-on Daytona local scene
+   biz.jpg         → Local storefronts or Main Street Daytona aerial
+   city.jpg        → Drone shot of Daytona Beach coastline at golden hour
+   culture.jpg     → Neon lights of a local music venue or bold street mural
+   events.jpg      → Packed grandstands at Daytona 500 or Bike Week crowd
+   food.jpg        → Close-up burger / plated dish / condensation cocktail
+   history.jpg     → Historic Daytona boardwalk or vintage B&W race photo
+   real-estate.jpg → Modern beachfront balcony or charming historic home
+   sports.jpg      → Motion-blur race car or surfer at New Smyrna Beach
+   wellness.jpg    → Yoga on the beach, sunrise run, or spa interior
 ────────────────────────────────────────────────────────────────────── */
 ---
 
@@ -885,64 +890,77 @@ const topics = [
       font-size: 28px; font-weight: 900;
       letter-spacing: .12em; text-transform: uppercase; color: var(--text);
     }
-    .topicsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .topicsGrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);   /* strict 3 columns — always 3×3 */
+      gap: 10px;
+    }
     .topicTile {
-      position: relative; display: block; text-decoration: none;
-      border-radius: 12px; overflow: hidden;
-      aspect-ratio: 5/3;
-      background: var(--surface2); border: 1px solid var(--border);
+      position: relative;
+      display: block;
+      text-decoration: none;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 4/3;                        /* tighter square feel than 5/3 */
+      background: var(--surface2);
+      border: 1px solid var(--border);
     }
     .topicImg {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-      object-fit: cover; display: block; transition: transform 320ms ease;
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 360ms ease;         /* smooth zoom on hover */
+      will-change: transform;
     }
-    .topicTile:hover .topicImg { transform: scale(1.05); }
+    /* Image zooms in — text wrapper stays perfectly static */
+    .topicTile:hover .topicImg { transform: scale(1.07); }
     .topicGrad {
       position: absolute; inset: 0;
-      background: rgba(0,0,0,.50);
+      background: rgba(0,0,0,.50);              /* 50% dark overlay per spec */
+      /* grad does NOT transition — keeps text contrast constant during zoom */
     }
     .topicLabel {
-      position: absolute;
-      inset: 0;
+      position: absolute; inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: 32px;
+      font-size: 32px;                          /* 32pt Heavy Bold Century Gothic */
       font-weight: 900;
       color: #fff;
       text-transform: uppercase;
       letter-spacing: .06em;
       text-align: center;
-      padding: 8px;
-      text-shadow: 0 2px 14px rgba(0,0,0,.75);
-      line-height: 1.15;
+      padding: 10px;
+      text-shadow: 0 2px 16px rgba(0,0,0,.85);
+      line-height: 1.1;
+      /* No transform on label — stays locked while image zooms behind it */
     }
-    /* ── Nooga-style mobile topics: full-width vertical stack ── */
+    /* ── Nooga-style mobile topics: full-width edge-to-edge vertical stack ── */
     @media (max-width: 600px) {
       .topicsGrid {
         grid-template-columns: 1fr;
         gap: 0;
-        width: 100%;              /* constrain before the bleed margin is applied */
         box-sizing: border-box;
-        margin-left: -1.25rem;    /* matches new container padding exactly */
+        margin-left: -1.25rem;       /* matches container padding exactly */
         margin-right: -1.25rem;
         width: calc(100% + 2.5rem);
       }
       .topicTile {
         aspect-ratio: unset;
-        height: 110px;                 /* tall enough to read as a navigation band */
+        height: 165px;               /* 150–200px spec — 165px hits both legibility and density */
         border-radius: 0;
         border-left: none;
         border-right: none;
         border-top: none;
-        border-bottom: 1px solid rgba(255,255,255,.08);
+        border-bottom: 1px solid rgba(255,255,255,.09);
       }
       .topicTile:last-child { border-bottom: none; }
       .topicLabel {
-        font-size: 32px;               /* restored to 32pt Heavy Bold per spec */
-        letter-spacing: .06em;
-        text-shadow: 0 2px 16px rgba(0,0,0,.9);
+        font-size: 26px;             /* scaled down for mobile per spec (24–28pt) */
+        letter-spacing: .08em;
+        text-shadow: 0 2px 18px rgba(0,0,0,.92);
       }
     }
 
