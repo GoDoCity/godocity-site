@@ -128,6 +128,22 @@ const topics = [
           band.style.marginLeft = '-' + leftOffset + 'px';
           band.style.width = 'calc(100% + ' + (leftOffset + rightGap) + 'px)';
         }
+
+        /* ── Ad band: same measurement, keep it as a centered card ── */
+        var ad = document.getElementById('adBand');
+        if (!ad) return;
+        ad.style.marginLeft = '';
+        ad.style.marginRight = '';
+        ad.style.width = '';
+        var adRect = ad.getBoundingClientRect();
+        var adLeft = adRect.left;
+        var adRight = window.innerWidth - adRect.right;
+        /* If parent is offset, shift it left by the same amount to re-center */
+        if (Math.abs(adLeft - adRight) > 2) {
+          var correction = (adLeft - adRight) / 2;
+          ad.style.marginLeft = 'calc(' + (-correction) + 'px)';
+          ad.style.marginRight = 'calc(' + correction + 'px)';
+        }
       }
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', bleedFix);
@@ -310,7 +326,7 @@ const topics = [
     </div>{/* end .container */}
 
     {/* ── ADVERTISE BAND — outside container so it can go full-width ── */}
-    <div class="adBand">
+    <div class="adBand" id="adBand">
       <div class="adBandInner">
         <div class="adCopy">
           <div class="adEyebrow">Grow your business</div>
