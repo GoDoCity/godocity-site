@@ -777,35 +777,57 @@ const topics = [
       line-height: 1;
     }
 
-    /* ── Mobile: snap-back fix — width contained, thumb shrinks to 80px ── */
-    @media (max-width: 640px) {
+    /* ─────────────────────────────────────────────────────────────────────
+       MOBILE SNAP-BACK  (max-width: 768px)
+       Switch from grid to flex so we can use flex: 1 1 0 + min-width: 0
+       on the text block — the only reliable way to force long headlines to
+       wrap instead of pushing the container wider than the viewport.
+    ───────────────────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      /* Outer feed wrapper — sealed box, no escape */
       .latestFeed {
         width: 100%;
+        max-width: 100%;
         box-sizing: border-box;
-        overflow: hidden;        /* hard guard against any child overflow */
+        overflow: hidden;
       }
+
+      /* Row switches from grid to flex for reliable text-wrap control */
       .latestRow {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: 12px;
         width: 100%;
+        max-width: 100%;
         box-sizing: border-box;
-        grid-template-columns: 80px 1fr;  /* explicit 80px col — no blowout */
-        gap: 13px;
+        overflow: hidden;
         padding: 20px 0;
       }
+
+      /* Thumb: fixed 72px, never shrinks, never grows */
       .latestThumbWrap {
-        width: 80px;
-        height: 60px;
-        flex-shrink: 1;          /* allow shrink if grid squeezes */
+        flex: 0 0 72px;
+        width: 72px;
+        height: 54px;
         border-radius: 7px;
       }
       .latestThumb {
-        width: 80px;
-        height: 60px;
+        width: 72px;
+        height: 54px;
       }
+
+      /* Magic combo — forces text to wrap inside remaining space */
       .latestText {
-        min-width: 0;            /* re-affirm — prevents text from pushing grid */
+        flex: 1 1 0;
+        min-width: 0;
         overflow: hidden;
       }
-      .latestTitle { font-size: 17px; }
+
+      .latestTitle {
+        font-size: 16px;
+        word-break: break-word;
+      }
       .latestLabel { font-size: 22px; }
     }
 
