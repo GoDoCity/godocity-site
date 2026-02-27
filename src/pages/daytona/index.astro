@@ -116,34 +116,22 @@ const topics = [
          applies negative margin + extra width to reach true screen edges.
          Works regardless of Base.astro's wrapper structure or overflow.   */
       function bleedFix() {
-        var band = document.getElementById('nlBand');
-        if (!band) return;
-        // Reset so we get fresh measurements
-        band.style.marginLeft = '';
-        band.style.width = '';
-        var rect = band.getBoundingClientRect();
-        var leftOffset = rect.left;  // pixels from left edge of viewport
-        var rightGap = window.innerWidth - rect.right; // pixels from right edge
-        if (leftOffset > 0 || rightGap > 0) {
-          band.style.marginLeft = '-' + leftOffset + 'px';
-          band.style.width = 'calc(100% + ' + (leftOffset + rightGap) + 'px)';
+        /* Apply full-bleed to any element that should span screen edges.
+           Reads actual pixel offset from viewport and compensates exactly. */
+        function makeBleed(el) {
+          if (!el) return;
+          el.style.marginLeft = '';
+          el.style.width = '';
+          var rect = el.getBoundingClientRect();
+          var leftOffset = rect.left;
+          var rightGap = window.innerWidth - rect.right;
+          if (leftOffset > 0 || rightGap > 0) {
+            el.style.marginLeft = '-' + leftOffset + 'px';
+            el.style.width = 'calc(100% + ' + (leftOffset + rightGap) + 'px)';
+          }
         }
-
-        /* ── Ad band: same measurement, keep it as a centered card ── */
-        var ad = document.getElementById('adBand');
-        if (!ad) return;
-        ad.style.marginLeft = '';
-        ad.style.marginRight = '';
-        ad.style.width = '';
-        var adRect = ad.getBoundingClientRect();
-        var adLeft = adRect.left;
-        var adRight = window.innerWidth - adRect.right;
-        /* If parent is offset, shift it left by the same amount to re-center */
-        if (Math.abs(adLeft - adRight) > 2) {
-          var correction = (adLeft - adRight) / 2;
-          ad.style.marginLeft = 'calc(' + (-correction) + 'px)';
-          ad.style.marginRight = 'calc(' + correction + 'px)';
-        }
+        makeBleed(document.getElementById('nlBand'));
+        makeBleed(document.getElementById('adBand'));
       }
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', bleedFix);
@@ -857,13 +845,19 @@ const topics = [
 
     /* ── Advertise band ── */
     .adBand {
-      margin: 44px 5rem 52px;
+      /* transparent full-width shell — bleedFix JS stretches it to screen edges */
+      width: 100%;
+      margin: 0;
+      padding: 44px 0 52px;
+    }
+    .adBandInner {
+      /* THIS is the visual card — centered inside the full-width shell */
+      max-width: calc(100% - 10rem);
+      margin: 0 auto;
       border-radius: 18px;
       background: linear-gradient(135deg, var(--brand1), var(--brand2));
       padding: clamp(18px, 2.5vw, 32px) clamp(22px, 3vw, 40px);
       box-shadow: 0 12px 40px color-mix(in srgb, var(--brand1) 40%, transparent);
-    }
-    .adBandInner {
       display: flex; align-items: center;
       justify-content: space-between; gap: 28px; flex-wrap: wrap;
     }
@@ -899,20 +893,18 @@ const topics = [
     }
     .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
     @media (max-width: 640px) {
-      .adBand {
-        margin: 24px 0 32px;
+      .adBand { padding: 16px 0 24px; }
+      .adBandInner {
+        max-width: calc(100% - 2rem);
         border-radius: 14px;
         padding: 20px 1.25rem;
+        flex-direction: column; align-items: center; text-align: center; gap: 12px;
       }
-      .adBandInner { flex-direction: column; align-items: center; text-align: center; gap: 12px; }
       .adCopy { display: flex; flex-direction: column; align-items: center; text-align: center; }
-      .adEyebrow { font-size: 10px; margin-bottom: 4px; }
-      .adHead { font-size: 20px; margin-bottom: 4px; }
-      .adDesc { font-size: 13px; max-width: 100%; opacity: .82; }
+      .adEyebrow, .adHead, .adDesc { text-align: center; }
+      .adDesc { max-width: 100%; }
       .adActions { width: 100%; justify-content: center; gap: 8px; margin-top: 4px; }
-      .adBtnPrimary { height: 42px; font-size: 13px; padding: 0 18px; }
-      .adBtnGhost { height: 42px; font-size: 13px; padding: 0 16px; flex: 1; justify-content: center; }
-      .adBtnPrimary { flex: 1; justify-content: center; }
+      .adBtnPrimary, .adBtnGhost { flex: 1; justify-content: center; }
     }
   </style>
 </Base>
