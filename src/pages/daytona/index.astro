@@ -414,17 +414,11 @@ const topics = [
       width: 100%;
     }
     @media (max-width: 700px) {
-      /* Full-bleed: works regardless of parent padding depth */
-      .nlBand {
-        margin-left: calc(50% - 50vw);
-        margin-right: calc(50% - 50vw);
-        width: 100vw;
-        border-radius: 0;
-      }
-      .nlInner { padding: 20px 1.25rem; }
-      .nlContent { max-width: 100%; }
-      .nlSub { white-space: normal; font-size: 15px; }
-      .nlRow { flex-direction: column; height: auto; gap: 8px; }
+      .nlBand { width: 100%; margin-left: 0; margin-right: 0; border-radius: 0; }
+      .nlInner { padding: 20px 1.25rem; justify-content: center; text-align: center; }
+      .nlContent { max-width: 100%; align-items: center; text-align: center; }
+      .nlSub { white-space: normal; font-size: 15px; text-align: center; }
+      .nlRow { flex-direction: column; height: auto; gap: 8px; align-items: center; }
       .nlInput { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
       .nlBtn { border-radius: 8px; height: 46px; width: 100%; }
     }
@@ -824,15 +818,6 @@ const topics = [
     /* ── Advertise band ── */
     .adBand {
       margin: 40px 0 48px; border-radius: 18px;
-      background: var(--brand1);
-      padding: clamp(26px, 3.5vw, 48px);
-    }
-    .adBandInner {
-      display: flex; align-items: center;
-      justify-content: space-between; gap: 28px; flex-wrap: wrap;
-    }
-    .adBand {
-      margin: 40px 0 48px; border-radius: 18px;
       background: linear-gradient(135deg, var(--brand1), var(--brand2));
       padding: clamp(26px, 3.5vw, 48px);
       box-shadow: 0 12px 40px color-mix(in srgb, var(--brand1) 40%, transparent);
@@ -858,7 +843,7 @@ const topics = [
     .adBtnPrimary {
       display: inline-flex; align-items: center;
       height: 50px; padding: 0 26px; border-radius: 13px;
-      background: var(--accentText); color: var(--brand1);
+      background: #ffffff; color: #111111;
       font-size: 15px; font-weight: 900; text-decoration: none;
       white-space: nowrap; transition: opacity 140ms;
       box-shadow: 0 4px 16px rgba(0,0,0,.18);
@@ -873,19 +858,12 @@ const topics = [
     }
     .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
     @media (max-width: 640px) {
-      .adBand {
-        /* Full-bleed: works regardless of container padding */
-        margin-left: calc(50% - 50vw);
-        margin-right: calc(50% - 50vw);
-        width: 100vw;
-        border-radius: 0;
-        margin-top: 24px;
-        margin-bottom: 32px;
-      }
-      .adBandInner { flex-direction: column; align-items: center; text-align: center; }
-      .adCopy { display: flex; flex-direction: column; align-items: center; }
-      .adDesc { text-align: center; }
-      .adActions { width: 100%; justify-content: center; }
+      .adBand { width: 100%; margin-left: 0; margin-right: 0; border-radius: 12px; margin-top: 24px; margin-bottom: 0; }
+      .adBandInner { flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+      .adCopy { display: flex; flex-direction: column; align-items: center; text-align: center; }
+      .adEyebrow, .adHead, .adDesc { text-align: center; }
+      .adDesc { max-width: 100%; }
+      .adActions { width: 100%; justify-content: center; gap: 8px; }
       .adBtnPrimary, .adBtnGhost { flex: 1; justify-content: center; }
     }
   </style>
