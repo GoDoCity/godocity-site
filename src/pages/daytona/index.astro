@@ -55,7 +55,7 @@ const posts = all.filter(isDaytonaPost).sort(sortNewestFirst);
 const hero = posts.find(isFeatured) ?? posts[0] ?? null;
 const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 const latest = feed.slice(0, 3);
-const listFeed = feed.slice(3, 12); /* ── Latest Feed — up to 9 rows below the 3-card grid ── */
+const listFeed = feed.slice(3, 7);  /* ── Latest Feed — exactly 4 rows below the 3-card grid (Rule of 4) ── */
 
 const featuredAd = {
   tag: "Featured Business",
@@ -777,21 +777,33 @@ const topics = [
       line-height: 1;
     }
 
-    /* ── Mobile: thumbnail shrinks, gap tightens ── */
+    /* ── Mobile: snap-back fix — width contained, thumb shrinks to 80px ── */
     @media (max-width: 640px) {
+      .latestFeed {
+        width: 100%;
+        box-sizing: border-box;
+        overflow: hidden;        /* hard guard against any child overflow */
+      }
       .latestRow {
-        grid-template-columns: 80px 1fr;
+        width: 100%;
+        box-sizing: border-box;
+        grid-template-columns: 80px 1fr;  /* explicit 80px col — no blowout */
         gap: 13px;
         padding: 20px 0;
       }
       .latestThumbWrap {
         width: 80px;
         height: 60px;
+        flex-shrink: 1;          /* allow shrink if grid squeezes */
         border-radius: 7px;
       }
       .latestThumb {
         width: 80px;
         height: 60px;
+      }
+      .latestText {
+        min-width: 0;            /* re-affirm — prevents text from pushing grid */
+        overflow: hidden;
       }
       .latestTitle { font-size: 17px; }
       .latestLabel { font-size: 22px; }
@@ -840,21 +852,26 @@ const topics = [
     /* ── Nooga-style mobile topics: full-width vertical stack ── */
     @media (max-width: 600px) {
       .topicsGrid {
-        grid-template-columns: 1fr;
-        gap: 10px;
-        /* Break out of container padding — edge-to-edge */
+        grid-template-columns: 1fr;   /* one per row — true vertical stack */
+        gap: 0;                        /* butted together for the banner-strip feel */
         margin-left: -1rem;
         margin-right: -1rem;
         width: calc(100% + 2rem);
       }
       .topicTile {
         aspect-ratio: unset;
-        height: 88px;
+        height: 110px;                 /* tall enough to read as a navigation band */
         border-radius: 0;
+        border-left: none;
+        border-right: none;
+        border-top: none;
+        border-bottom: 1px solid rgba(255,255,255,.08);
       }
+      .topicTile:last-child { border-bottom: none; }
       .topicLabel {
-        font-size: 26px;
-        letter-spacing: .08em;
+        font-size: 32px;               /* restored to 32pt Heavy Bold per spec */
+        letter-spacing: .06em;
+        text-shadow: 0 2px 16px rgba(0,0,0,.9);
       }
     }
 
