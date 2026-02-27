@@ -414,12 +414,19 @@ const topics = [
       width: 100%;
     }
     @media (max-width: 700px) {
-      .nlInner { padding: 16px 1.5rem; }
+      /* Edge-to-edge yellow — break out of container padding */
+      .nlBand {
+        margin-left: calc(-1rem);
+        margin-right: calc(-1rem);
+        width: 100vw;
+        border-radius: 0;
+      }
+      .nlInner { padding: 20px 1.25rem; }
       .nlContent { max-width: 100%; }
       .nlSub { white-space: normal; font-size: 15px; }
       .nlRow { flex-direction: column; height: auto; gap: 8px; }
       .nlInput { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
-      .nlBtn { border-radius: 8px; height: 46px; }
+      .nlBtn { border-radius: 8px; height: 46px; width: 100%; }
     }
 
     /* ── Home grid 75/25 inside 1280px container ── */
@@ -620,7 +627,22 @@ const topics = [
       letter-spacing: .12em; text-transform: uppercase; color: var(--text);
     }
     .topicsGrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    @media (max-width: 560px) { .topicsGrid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 560px) {
+      /* Nooga-style: single column vertical stack, full-width rectangles */
+      .topicsGrid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+      .topicTile {
+        aspect-ratio: unset;
+        height: 72px;
+        border-radius: 10px;
+      }
+      .topicLabel {
+        font-size: 22px;
+        letter-spacing: .1em;
+      }
+    }
     .topicTile {
       position: relative; display: block; text-decoration: none;
       border-radius: 12px; overflow: hidden;
@@ -842,8 +864,9 @@ const topics = [
     }
     .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
     @media (max-width: 640px) {
-      .adBandInner { flex-direction: column; align-items: flex-start; }
-      .adActions { width: 100%; }
+      .adBandInner { flex-direction: column; align-items: center; text-align: center; }
+      .adCopy { display: flex; flex-direction: column; align-items: center; }
+      .adActions { width: 100%; justify-content: center; }
       .adBtnPrimary, .adBtnGhost { flex: 1; justify-content: center; }
     }
   </style>
