@@ -831,33 +831,42 @@ const topics = [
 
     /* ─────────────────────────────────────────────────────────────────────
        MOBILE SNAP-BACK  (max-width: 768px)
-       Switch from grid to flex so we can use flex: 1 1 0 + min-width: 0
-       on the text block — the only reliable way to force long headlines to
-       wrap instead of pushing the container wider than the viewport.
+
+       CLIP ARCHITECTURE — one guard, not many:
+         .latestFeed  → overflow: hidden  ← THE ONLY CLIPPER
+         .latestRow   → no overflow       ← safe zone padding protects tags
+         .latestText  → no overflow       ← text visible within safe zone
+         html/body    → overflow-x hidden ← page-level backstop
+
+       Previous bug: overflow:hidden on .latestRow with padding:20px 0
+       (zero horizontal clearance) clipped the kicker right at the flex
+       boundary. Fix: move all clipping responsibility to .latestFeed,
+       give the row 20px horizontal padding as a "safety zone" buffer.
     ───────────────────────────────────────────────────────────────────── */
     @media (max-width: 768px) {
-      /* Outer feed wrapper — sealed box, no escape */
+
+      /* Single outer guard — the only element that clips */
       .latestFeed {
         width: 100%;
         max-width: 100%;
         box-sizing: border-box;
-        overflow: hidden;
+        overflow: hidden;           /* ← sole clipper for the entire feed    */
       }
 
-      /* Row switches from grid to flex for reliable text-wrap control */
+      /* Row: safety-zone padding keeps tags 20px from the glass edge.
+         No overflow set — clipping is .latestFeed's job, not the row's. */
       .latestRow {
         display: flex;
         flex-direction: row;
         align-items: flex-start;
         gap: 12px;
         width: 100%;
-        max-width: 100%;
         box-sizing: border-box;
-        overflow: hidden;
-        padding: 20px 0;
+        padding: 20px 0;            /* vertical rhythm; horizontal = container */
+        /* overflow intentionally omitted — row must NOT clip its children */
       }
 
-      /* Thumb: fixed 72px, never shrinks, never grows */
+      /* Thumb: hard-fixed 72px, never participates in flex shrink */
       .latestThumbWrap {
         flex: 0 0 72px;
         width: 72px;
@@ -869,24 +878,21 @@ const topics = [
         height: 54px;
       }
 
-      /* Magic combo — forces text to wrap inside remaining space.
-         overflow is visible here — .latestRow above is the sealed guard.
-         Setting overflow:hidden on the text block itself was clipping the
-         brand1 kicker tags at the left edge. */
+      /* Text block: grows to fill remaining space, text wraps naturally.
+         No padding-left offset needed — container provides the margin.
+         No overflow — .latestFeed above is the sealed boundary. */
       .latestText {
         flex: 1 1 0;
-        min-width: 0;
-        overflow: visible;          /* kickers breathe — row is still sealed  */
-        padding-left: 4px;          /* 4px nudge so tags clear the row edge   */
+        min-width: 0;               /* prevents flex blowout on long words    */
+        /* overflow intentionally omitted — kickers must render fully visible */
       }
 
-      /* Kicker: tighten tracking on mobile so "Motor Sports" stays one line */
+      /* Kicker: tighter tracking so "Motor Sports" stays single-line */
       .latestKicker {
-        font-size: 10px;            /* same as desktop — already compact       */
-        letter-spacing: .05em;      /* tighter than desktop .09em              */
-        white-space: nowrap;        /* never wraps — truncates if truly needed */
-        overflow: hidden;
-        text-overflow: ellipsis;
+        font-size: 10px;
+        letter-spacing: .05em;      /* tighter than desktop .09em             */
+        white-space: nowrap;        /* single line always                     */
+        /* no overflow:hidden here — .latestFeed is the guard               */
       }
 
       .latestTitle {
