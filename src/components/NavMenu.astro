@@ -457,13 +457,20 @@ const pills = [
   @media (max-width: 760px) {
     .menuBtn { display: inline-flex; }
     .pillRow {
-      gap: 6px; overflow-x: auto; overflow-y: visible;
+      gap: 4px; overflow-x: auto; overflow-y: visible;
       -webkit-overflow-scrolling: touch;
       padding-bottom: 2px; scrollbar-width: none;
-      justify-content: flex-start;
+      justify-content: space-between;
+      flex: 1;
     }
     .pillRow::-webkit-scrollbar { display: none; }
-    .pill { height: 36px; padding: 0 14px; font-size: 13px; }
+    .pill {
+      height: 36px;
+      padding: 0 10px;
+      font-size: 12px;
+      flex: 1;                    /* each pill stretches equally */
+      justify-content: center;
+    }
     .dropdown { display: none; }
   }
 
