@@ -414,11 +414,11 @@ const topics = [
       width: 100%;
     }
     @media (max-width: 700px) {
-      /* Edge-to-edge: break out of 1rem container padding on both sides */
+      /* Full-bleed: works regardless of parent padding depth */
       .nlBand {
-        margin-left: -1rem;
-        margin-right: -1rem;
-        width: calc(100% + 2rem);
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        width: 100vw;
         border-radius: 0;
       }
       .nlInner { padding: 20px 1.25rem; }
@@ -824,9 +824,8 @@ const topics = [
     /* ── Advertise band ── */
     .adBand {
       margin: 40px 0 48px; border-radius: 18px;
-      background: linear-gradient(135deg, var(--brand1), var(--brand2));
+      background: var(--brand1);
       padding: clamp(26px, 3.5vw, 48px);
-      box-shadow: 0 12px 40px color-mix(in srgb, var(--brand1) 40%, transparent);
     }
     .adBandInner {
       display: flex; align-items: center;
@@ -834,42 +833,43 @@ const topics = [
     }
     .adEyebrow {
       font-size: 13.5px; font-weight: 800; letter-spacing: .16em;
-      text-transform: uppercase; color: var(--accentText); opacity: .82; margin-bottom: 7px;
+      text-transform: uppercase; color: rgba(0,0,0,.65); margin-bottom: 7px;
     }
     .adHead {
       font-size: clamp(24px, 2.6vw, 34px); font-weight: 950;
-      color: var(--accentText); letter-spacing: -0.4px; margin-bottom: 7px; line-height: 1.05;
+      color: #000; letter-spacing: -0.4px; margin-bottom: 7px; line-height: 1.05;
     }
     .adDesc {
-      /* Normal weight — removed bold per spec */
       font-size: clamp(15px, 1.3vw, 16.5px); font-weight: 400;
-      color: var(--accentText);
-      opacity: .88; line-height: 1.5; max-width: 500px;
+      color: rgba(0,0,0,.75);
+      line-height: 1.5; max-width: 500px;
     }
     .adActions { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
     .adBtnPrimary {
       display: inline-flex; align-items: center;
       height: 50px; padding: 0 26px; border-radius: 13px;
-      background: var(--accentText); color: var(--brand1);
+      background: #000; color: #fff;
       font-size: 15px; font-weight: 900; text-decoration: none;
       white-space: nowrap; transition: opacity 140ms;
-      box-shadow: 0 4px 16px rgba(0,0,0,.18);
     }
-    .adBtnPrimary:hover { opacity: .88; }
+    .adBtnPrimary:hover { opacity: .82; }
     .adBtnGhost {
       display: inline-flex; align-items: center;
       height: 50px; padding: 0 22px; border-radius: 13px;
-      border: 2px solid rgba(255,255,255,.48);
-      color: var(--accentText); font-size: 14px; font-weight: 800;
+      border: 2px solid rgba(0,0,0,.35);
+      color: #000; font-size: 14px; font-weight: 800;
       text-decoration: none; white-space: nowrap; transition: border-color 140ms;
     }
-    .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
+    .adBtnGhost:hover { border-color: #000; }
     @media (max-width: 640px) {
       .adBand {
-        margin-left: -1rem;
-        margin-right: -1rem;
-        width: calc(100% + 2rem);
+        /* Full-bleed: works regardless of container padding */
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        width: 100vw;
         border-radius: 0;
+        margin-top: 24px;
+        margin-bottom: 32px;
       }
       .adBandInner { flex-direction: column; align-items: center; text-align: center; }
       .adCopy { display: flex; flex-direction: column; align-items: center; }
