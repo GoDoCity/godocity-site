@@ -361,8 +361,17 @@ const topics = [
     /* ── Century Gothic / Arial fallback across entire site ── */
     :global(html), :global(body) {
       font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+      /* Hard reset — nothing escapes the glass */
+      overflow-x: hidden;
+      width: 100%;
+      position: relative;
     }
-    .pageWrap { min-height: 100vh; overflow-x: hidden; }
+    .pageWrap {
+      min-height: 100vh;
+      overflow-x: hidden;
+      width: 100%;
+      position: relative;
+    }
 
     /* ── 1280px breath container — equal space both sides on any monitor ── */
     :global(.container) {
@@ -371,8 +380,12 @@ const topics = [
       padding-left: 2.5rem;
       padding-right: 2.5rem;
     }
-    @media (max-width: 600px) {
-      :global(.container) { padding-left: 1rem; padding-right: 1rem; }
+    @media (max-width: 768px) {
+      :global(.container) {
+        max-width: 100%;          /* never wider than the viewport */
+        padding-left: 1.25rem;    /* 20px each side as specified   */
+        padding-right: 1.25rem;
+      }
     }
 
     /* ── Newsletter — breathing room above, 60px below ── */
@@ -524,6 +537,40 @@ const topics = [
       background: var(--surface2);
     }
     .heroCopy { max-width: 400px; }
+
+    /* ── Hero mobile: fluid image, text wrapping locked ── */
+    @media (max-width: 640px) {
+      .heroImgWrap {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16/9;
+      }
+      .heroImg {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16/9;
+      }
+      .heroFallback {
+        width: 100%;
+        height: 180px;
+      }
+      .heroCopy {
+        max-width: 100%;
+        min-width: 0;
+        flex-shrink: 1;
+      }
+      .heroTitle {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+      }
+      .heroDesc {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        white-space: normal;
+        font-size: 15px;
+      }
+    }
 
     .heroKicker {
       font-size: 10.5px; font-weight: 800;
@@ -874,11 +921,13 @@ const topics = [
     /* ── Nooga-style mobile topics: full-width vertical stack ── */
     @media (max-width: 600px) {
       .topicsGrid {
-        grid-template-columns: 1fr;   /* one per row — true vertical stack */
-        gap: 0;                        /* butted together for the banner-strip feel */
-        margin-left: -1rem;
-        margin-right: -1rem;
-        width: calc(100% + 2rem);
+        grid-template-columns: 1fr;
+        gap: 0;
+        width: 100%;              /* constrain before the bleed margin is applied */
+        box-sizing: border-box;
+        margin-left: -1.25rem;    /* matches new container padding exactly */
+        margin-right: -1.25rem;
+        width: calc(100% + 2.5rem);
       }
       .topicTile {
         aspect-ratio: unset;
