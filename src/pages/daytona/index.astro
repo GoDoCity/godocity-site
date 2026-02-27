@@ -869,11 +869,24 @@ const topics = [
         height: 54px;
       }
 
-      /* Magic combo — forces text to wrap inside remaining space */
+      /* Magic combo — forces text to wrap inside remaining space.
+         overflow is visible here — .latestRow above is the sealed guard.
+         Setting overflow:hidden on the text block itself was clipping the
+         brand1 kicker tags at the left edge. */
       .latestText {
         flex: 1 1 0;
         min-width: 0;
+        overflow: visible;          /* kickers breathe — row is still sealed  */
+        padding-left: 4px;          /* 4px nudge so tags clear the row edge   */
+      }
+
+      /* Kicker: tighten tracking on mobile so "Motor Sports" stays one line */
+      .latestKicker {
+        font-size: 10px;            /* same as desktop — already compact       */
+        letter-spacing: .05em;      /* tighter than desktop .09em              */
+        white-space: nowrap;        /* never wraps — truncates if truly needed */
         overflow: hidden;
+        text-overflow: ellipsis;
       }
 
       .latestTitle {
