@@ -902,14 +902,17 @@ const topics = [
       .adBand {
         margin: 24px 0 32px;
         border-radius: 14px;
-        padding: 24px 1.25rem;
+        padding: 20px 1.25rem;
       }
-      .adBandInner { flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+      .adBandInner { flex-direction: column; align-items: center; text-align: center; gap: 12px; }
       .adCopy { display: flex; flex-direction: column; align-items: center; text-align: center; }
-      .adEyebrow, .adHead, .adDesc { text-align: center; }
-      .adDesc { max-width: 100%; }
-      .adActions { width: 100%; justify-content: center; gap: 8px; }
-      .adBtnPrimary, .adBtnGhost { flex: 1; justify-content: center; }
+      .adEyebrow { font-size: 10px; margin-bottom: 4px; }
+      .adHead { font-size: 20px; margin-bottom: 4px; }
+      .adDesc { font-size: 13px; max-width: 100%; opacity: .82; }
+      .adActions { width: 100%; justify-content: center; gap: 8px; margin-top: 4px; }
+      .adBtnPrimary { height: 42px; font-size: 13px; padding: 0 18px; }
+      .adBtnGhost { height: 42px; font-size: 13px; padding: 0 16px; flex: 1; justify-content: center; }
+      .adBtnPrimary { flex: 1; justify-content: center; }
     }
   </style>
 </Base>
