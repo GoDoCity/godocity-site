@@ -283,23 +283,24 @@ const topics = [
         </aside>
       </div>
 
-      {/* ── ADVERTISE BAND ── */}
-      <div class="adBand">
-        <div class="adBandInner">
-          <div class="adCopy">
-            <div class="adEyebrow">Grow your business</div>
-            <div class="adHead">Advertise with GoDo Daytona.</div>
-            <div class="adDesc">Reach thousands of engaged Daytona locals every day. Featured stories, display ads, event promotion, and newsletter placements — built for local businesses that want real results.</div>
-          </div>
-          <div class="adActions">
-            <a class="adBtnPrimary" href="/daytona/advertise/">Get started →</a>
-            <a class="adBtnGhost" href="/daytona/advertise/">See our rates</a>
-          </div>
+    </div>{/* end .container */}
+
+    {/* ── ADVERTISE BAND — outside container so it can go full-width ── */}
+    <div class="adBand">
+      <div class="adBandInner">
+        <div class="adCopy">
+          <div class="adEyebrow">Grow your business</div>
+          <div class="adHead">Advertise with GoDo Daytona.</div>
+          <div class="adDesc">Reach thousands of engaged Daytona locals every day. Featured stories, display ads, event promotion, and newsletter placements — built for local businesses that want real results.</div>
+        </div>
+        <div class="adActions">
+          <a class="adBtnPrimary" href="/daytona/advertise/">Get started →</a>
+          <a class="adBtnGhost" href="/daytona/advertise/">See our rates</a>
         </div>
       </div>
-
     </div>
-  </div>
+
+  </div>{/* end .pageWrap */}
 
   <style>
     /* ── Century Gothic / Arial fallback across entire site ── */
@@ -322,8 +323,8 @@ const topics = [
     /* ── Newsletter — 60px breath gap below ── */
     .nlBand {
       background: var(--brand1);
-      margin: 16px 0 60px;       /* 60px breath gap below */
-      height: auto;
+      margin: 0 0 60px;
+      width: 100%;
       display: flex;
       align-items: stretch;
       overflow: hidden;
@@ -333,7 +334,6 @@ const topics = [
       width: 100%;
       max-width: 1280px;
       margin: 0 auto;
-      /* +12px vertical breathing room for new text size */
       padding: 24px 2.5rem;
       display: flex;
       align-items: center;
@@ -414,7 +414,6 @@ const topics = [
       width: 100%;
     }
     @media (max-width: 700px) {
-      .nlBand { width: 100%; margin-left: 0; margin-right: 0; border-radius: 0; }
       .nlInner { padding: 20px 1.25rem; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
       .nlSub { white-space: normal; font-size: 15px; text-align: center; }
@@ -817,12 +816,15 @@ const topics = [
 
     /* ── Advertise band ── */
     .adBand {
-      margin: 40px 0 48px; border-radius: 18px;
+      margin: 0; border-radius: 0;
       background: linear-gradient(135deg, var(--brand1), var(--brand2));
-      padding: clamp(26px, 3.5vw, 48px);
+      padding: 0;
       box-shadow: 0 12px 40px color-mix(in srgb, var(--brand1) 40%, transparent);
     }
     .adBandInner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: clamp(26px, 3.5vw, 48px) 2.5rem;
       display: flex; align-items: center;
       justify-content: space-between; gap: 28px; flex-wrap: wrap;
     }
@@ -858,8 +860,7 @@ const topics = [
     }
     .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
     @media (max-width: 640px) {
-      .adBand { width: 100%; margin-left: 0; margin-right: 0; border-radius: 12px; margin-top: 24px; margin-bottom: 0; }
-      .adBandInner { flex-direction: column; align-items: center; text-align: center; gap: 16px; }
+      .adBandInner { flex-direction: column; align-items: center; text-align: center; gap: 16px; padding: 28px 1.25rem; }
       .adCopy { display: flex; flex-direction: column; align-items: center; text-align: center; }
       .adEyebrow, .adHead, .adDesc { text-align: center; }
       .adDesc { max-width: 100%; }
