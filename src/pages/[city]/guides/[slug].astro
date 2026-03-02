@@ -19,7 +19,9 @@ import { getCollection, render } from "astro:content";
 /* ── Build all static paths from the guides collection ─────────────────── */
 export async function getStaticPaths() {
   const guides = await getCollection("guides");
-  return guides.map((guide) => ({
+  return guides
+    .filter((guide) => Array.isArray(guide.data.items) && guide.data.items.length > 0)
+    .map((guide) => ({
     params: {
       city: guide.data.city,          // "daytona"  → from frontmatter
       slug: guide.slug.split("/").pop(), // "best-restaurants" → from filename
