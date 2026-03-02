@@ -1,13 +1,62 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="noindex" />
-    <title>GoDoCity CMS</title>
-  </head>
-  <body>
-    <div id="nc-root"></div>
-    <script defer src="https://unpkg.com/decap-cms@3.3.3/dist/decap-cms.js"></script>
-  </body>
-</html>
+# public/admin/config.yml
+# BARE MINIMUM — confirm this loads before adding anything else.
+
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "daytona-news"
+    label: "Daytona - News"
+    label_singular: "Article"
+    folder: "src/content/posts/daytona"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    fields:
+      - label: "Headline"
+        name: "title"
+        widget: "string"
+      - label: "Publish Date"
+        name: "pubDate"
+        widget: "datetime"
+        required: false
+        date_format: "YYYY-MM-DD"
+        time_format: false
+      - label: "Author"
+        name: "author"
+        widget: "string"
+        required: false
+        default: "Charles King"
+      - label: "Body"
+        name: "body"
+        widget: "markdown"
+
+  - name: "global-sponsors"
+    label: "Global Sponsors"
+    label_singular: "Sponsor Campaign"
+    folder: "src/content/globalSponsors"
+    create: true
+    delete: true
+    slug: "{{brand}}-campaign"
+    fields:
+      - label: "Active"
+        name: "active"
+        widget: "boolean"
+        default: true
+        hint: "ON = running everywhere. OFF = paused instantly."
+      - label: "Brand Name"
+        name: "brand"
+        widget: "string"
+      - label: "Tagline"
+        name: "tagline"
+        widget: "string"
+      - label: "Body Copy"
+        name: "body"
+        widget: "text"
+      - label: "CTA Link URL"
+        name: "ctaHref"
+        widget: "string"
