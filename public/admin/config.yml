@@ -1,6 +1,6 @@
 # public/admin/config.yml
-# Decap CMS — GoDoCity Multi-City Configuration
-# Hard-reset version: 2-space indents, no duplicate field names.
+# Decap CMS 3.x — GoDoCity MINIMUM VIABLE CONFIG
+# Get this loading first. Complex fields come after.
 
 backend:
   name: git-gateway
@@ -11,7 +11,6 @@ public_folder: "/images/uploads"
 
 collections:
 
-  # 1. DAYTONA — NEWS & ARTICLES
   - name: "daytona-news"
     label: "Daytona - News"
     label_singular: "Article"
@@ -19,39 +18,33 @@ collections:
     create: true
     delete: true
     slug: "{{slug}}"
-    summary: "{{title}} - {{pubDate}}"
-    media_folder: "/public/images/posts/daytona"
-    public_folder: "/images/posts/daytona"
     fields:
       - label: "Headline"
         name: "title"
         widget: "string"
-        hint: "Article headline. Keep under 80 characters."
       - label: "Standfirst"
         name: "description"
         widget: "text"
-        required: "false"
-        hint: "1-2 sentence summary shown below the headline."
+        required: false
       - label: "Publish Date"
         name: "pubDate"
         widget: "datetime"
-        required: "false"
+        required: false
         date_format: "YYYY-MM-DD"
-        time_format: "false"
+        time_format: false
       - label: "Author"
         name: "author"
         widget: "string"
-        required: "false"
+        required: false
         default: "Charles King"
       - label: "Hero Image"
         name: "heroImage"
         widget: "image"
-        required: "false"
-        hint: "Min 1200px wide. Displays at 16:9."
+        required: false
       - label: "Category"
         name: "category"
         widget: "select"
-        required: "false"
+        required: false
         options:
           - {label: "Sports", value: "Sports"}
           - {label: "Food & Drink", value: "Food & Drink"}
@@ -66,8 +59,7 @@ collections:
       - label: "Tags"
         name: "tags"
         widget: "list"
-        required: "false"
-        hint: "First tag used as category pill if Category is blank."
+        required: false
       - label: "City"
         name: "city"
         widget: "hidden"
@@ -75,15 +67,12 @@ collections:
       - label: "Featured"
         name: "featured"
         widget: "boolean"
-        required: "false"
-        default: "false"
-        hint: "ON = eligible for homepage hero slots."
+        required: false
+        default: false
       - label: "Body"
         name: "body"
         widget: "markdown"
-        hint: "Full article body."
 
-  # 2. DAYTONA — CITY GUIDES
   - name: "daytona-guides"
     label: "Daytona - City Guides"
     label_singular: "Guide"
@@ -91,9 +80,6 @@ collections:
     create: true
     delete: true
     slug: "{{slug}}"
-    summary: "{{title}}"
-    media_folder: "/public/images/guides"
-    public_folder: "/images/guides"
     fields:
       - label: "Guide Title"
         name: "title"
@@ -101,12 +87,11 @@ collections:
       - label: "Intro"
         name: "intro"
         widget: "text"
-        required: "false"
-        hint: "2-3 sentences shown in the guide hero."
+        required: false
       - label: "Category"
         name: "category"
         widget: "select"
-        required: "false"
+        required: false
         default: "City Guide"
         options:
           - {label: "Food & Drink", value: "Food & Drink"}
@@ -119,92 +104,79 @@ collections:
       - label: "Author"
         name: "author"
         widget: "string"
-        required: "false"
+        required: false
         default: "Charles King"
       - label: "Author Role"
         name: "role"
         widget: "string"
-        required: "false"
+        required: false
         default: "Newsletter Editor"
       - label: "Publish Date"
         name: "pubDate"
         widget: "datetime"
-        required: "false"
+        required: false
         date_format: "YYYY-MM-DD"
-        time_format: "false"
+        time_format: false
       - label: "Hero Image"
         name: "heroImage"
         widget: "image"
-        required: "false"
-        hint: "Optional full-width banner."
+        required: false
       - label: "City"
         name: "city"
         widget: "hidden"
         default: "daytona"
-      - label: "List Items (Ranked Spots)"
+      - label: "List Items"
         name: "items"
         widget: "list"
         label_singular: "Spot"
-        min: 1
-        max: 20
-        summary: "#{{fields.rank}} - {{fields.title}}"
-        hint: "Add 1-10 spots. Sponsor card auto-injects between spots 3 and 4."
         fields:
           - label: "Rank"
             name: "rank"
             widget: "number"
-            value_type: "int"
+            value_type: int
             min: 1
             max: 20
-            hint: "1 = top of list."
-          - label: "Tag / Type"
+          - label: "Tag"
             name: "tag"
             widget: "string"
-            required: "false"
-            hint: "e.g. Fine Dining"
+            required: false
           - label: "Spot Name"
             name: "title"
             widget: "string"
-            hint: "Keep under 60 characters."
           - label: "Description"
             name: "body"
             widget: "text"
-            hint: "2-4 sentences. Be specific."
           - label: "Photo"
             name: "img"
             widget: "image"
             required: false
-            hint: "Wide crop, min 800px."
             media_folder: "/public/images/guides/best"
             public_folder: "/images/guides/best"
           - label: "Photo Alt Text"
             name: "imgAlt"
             widget: "string"
-            required: "false"
+            required: false
           - label: "Link URL"
             name: "href"
             widget: "string"
-            required: "false"
-            hint: "e.g. /daytona/food/ or https://restaurant.com"
-      - label: "Local Sponsor (optional - overrides global)"
+            required: false
+      - label: "Local Sponsor"
         name: "localSponsor"
         widget: "object"
         collapsed: true
-        hint: "Fill this when you sell the slot to a local business. Leave blank for the global campaign."
         fields:
           - label: "Brand Name"
             name: "brand"
             widget: "string"
-            required: "false"
+            required: false
           - label: "Tagline"
             name: "tagline"
             widget: "string"
-            required: "false"
+            required: false
           - label: "Description"
-            name: "body"
+            name: "sponsorBody"
             widget: "text"
-            required: "false"
-            hint: "1-2 sentences inside the sponsor card."
+            required: false
           - label: "Logo"
             name: "logo"
             widget: "image"
@@ -215,86 +187,76 @@ collections:
             name: "img"
             widget: "image"
             required: false
-            hint: "Portrait crop 3:4."
             media_folder: "/public/images/sponsors"
             public_folder: "/images/sponsors"
           - label: "Image Alt Text"
             name: "imgAlt"
             widget: "string"
-            required: "false"
+            required: false
           - label: "CTA Button Text"
             name: "ctaText"
             widget: "string"
-            required: "false"
+            required: false
             default: "Learn more"
           - label: "CTA Link URL"
             name: "ctaHref"
             widget: "string"
-            required: "false"
+            required: false
       - label: "Editorial Note"
         name: "body"
         widget: "markdown"
-        required: "false"
-        hint: "Optional note below the list. Not required."
+        required: false
 
-  # 3. GLOBAL SPONSORS
   - name: "global-sponsors"
     label: "Global Sponsors"
     label_singular: "Sponsor Campaign"
     folder: "src/content/globalSponsors"
     create: true
     delete: true
-    slug: "{{brand | slugify}}"
-    summary: "{{brand}} - {{tagline}} (Active: {{active}})"
+    slug: "{{brand}}-campaign"
     fields:
       - label: "Active"
         name: "active"
         widget: "boolean"
         default: true
-        hint: "ON = running network-wide. OFF = paused everywhere instantly."
+        hint: "ON = running everywhere. OFF = paused instantly."
       - label: "Brand Name"
         name: "brand"
         widget: "string"
-        hint: "e.g. Nike"
       - label: "Campaign Start Date"
         name: "pubDate"
         widget: "datetime"
-        required: "false"
+        required: false
         date_format: "YYYY-MM-DD"
-        time_format: "false"
-        hint: "Most recent active date wins when multiple campaigns exist."
+        time_format: false
       - label: "Tagline"
         name: "tagline"
         widget: "string"
-        hint: "Main headline in the sponsor card."
       - label: "Body Copy"
         name: "body"
         widget: "text"
-        hint: "1-2 sentences. Renders at 14px."
+        hint: "1-2 sentences."
       - label: "Logo"
         name: "logo"
         widget: "image"
         required: false
-        hint: "Transparent PNG or SVG. 28px tall."
         media_folder: "/public/images/sponsors"
         public_folder: "/images/sponsors"
       - label: "Campaign Image"
         name: "img"
         widget: "image"
         required: false
-        hint: "16:10 landscape. Min 800px wide."
         media_folder: "/public/images/sponsors"
         public_folder: "/images/sponsors"
       - label: "Image Alt Text"
         name: "imgAlt"
         widget: "string"
-        required: "false"
+        required: false
       - label: "CTA Button Text"
         name: "ctaText"
         widget: "string"
-        required: "false"
+        required: false
         default: "Learn more"
       - label: "CTA Link URL"
         name: "ctaHref"
         widget: "string"
-        hint: "Full URL. Gets rel=noopener sponsored."
