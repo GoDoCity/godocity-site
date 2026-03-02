@@ -28,10 +28,10 @@ const guides = defineCollection({
   type: "content",
   schema: z.object({
 
-    /* Required */
-    city:     z.string(),          // "daytona" — used in URL and breadcrumb
-    title:    z.string(),          // "The 10 Best Restaurants in Daytona Beach"
-    intro:    z.string(),          // Lead paragraph shown in hero
+ /* Required */
+    city:     z.string(),
+    title:    z.string(),
+    intro:    z.string().optional(),
 
     /* Optional meta */
     category: z.string().optional().default("City Guide"),
@@ -41,17 +41,17 @@ const guides = defineCollection({
     heroImage:z.string().optional(), // optional banner image above the list
 
     /* The ranked list — each item is one entry */
-    items: z.array(
+   items: z.array(
       z.object({
         rank:   z.number().int().min(1).max(20),
-        tag:    z.string().optional(),          // "Fine Dining", "Seafood" …
+        tag:    z.string().optional(),
         title:  z.string(),
         body:   z.string(),
         img:    z.string().optional().default(""),
         imgAlt: z.string().optional().default(""),
         href:   z.string().optional().default(""),
       })
-    ).min(1).max(20),
+    ).min(1).max(20).optional(),
 
     /* "See More Guides" footer cards — override per guide if needed */
     moreGuides: z.array(
