@@ -1,46 +1,477 @@
-backend:
-  name: github
-  repo: GoDoCity/godocity-site
-  branch: main
-  base_url: https://godocity-site.pages.dev
-  auth_endpoint: /auth
-  app_id: Ov23linwsFTCPx6mEIYP
+# =============================================================================
+# public/admin/config.yml
+# Decap CMS (formerly Netlify CMS) — GoDoCity Multi-City Configuration
+# =============================================================================
+#
+# SETUP CHECKLIST (do once):
+#   1. Drop this file at:  public/admin/config.yml
+#   2. Create the admin entry point: public/admin/index.html  (see bottom of file)
+#   3. Enable Identity + Git Gateway in your Netlify/Cloudflare dashboard
+#   4. Invite editors via: Site Settings → Identity → Invite Users
+#
+# ACCESS:  https://yoursite.com/admin/
+# =============================================================================
 
+backend:
+  name: git-gateway
+  branch: main          # change to "master" if your default branch is master
+
+# Where uploaded images are stored and the URL they get in content
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
-publish_mode: editorial_workflow
+# Show a live preview pane in the editor (optional — remove if unused)
+# preview:
+#   url: https://yoursite.com
 
-slug:
-  encoding: "ascii"
-  clean_accents: true
-  sanitize_replacement: "-"
+# =============================================================================
+# COLLECTIONS
+# =============================================================================
+# Folder layout mirrors Astro content collections exactly:
+#
+#   src/content/posts/daytona/      → "Daytona — News & Articles"
+#   src/content/guides/daytona/     → "Daytona — City Guides"
+#   src/content/globalSponsors/     → "Global Sponsors"
+#
+# Adding a new city in the future:
+#   Duplicate the daytona-news and daytona-guides blocks below,
+#   change the folder paths, and update the hidden `city` default value.
+# =============================================================================
 
 collections:
-  - name: "posts"
-    label: "Posts"
-    folder: "src/content/posts"
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 1. DAYTONA — NEWS & ARTICLES
+  #    Maps to: src/pages/[city]/[slug].astro
+  #    Schema:  posts collection in config.ts
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "daytona-news"
+    label: "📰 Daytona — News"
+    label_singular: "Article"
+    folder: "src/content/posts/daytona"
     create: true
-    format: "frontmatter"
-    extension: "md"
-    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    delete: true
+    slug: "{{slug}}"
+    summary: "{{title}} — {{pubDate}}"
+    sortable_fields: ["pubDate", "title", "author"]
+    view_filters:
+      - label: "Featured"
+        field: featured
+        pattern: true
+    media_folder: "/public/images/posts/daytona"
+    public_folder: "/images/posts/daytona"
+
     fields:
-      - { label: "Title", name: "title", widget: "string" }
-      - { label: "Description", name: "description", widget: "string", required: false }
-      - { label: "City", name: "city", widget: "select", options: ["daytona"], default: "daytona" }
+
+      # Required — maps to: data.title → <h1 class="articleTitle">
+      - label: "Headline"
+        name: "title"
+        widget: "string"
+        hint: "32px Century Gothic on the article page. Keep under 80 characters."
+
+      # Maps to: data.description → <p class="articleDesc"> (standfirst)
+      - label: "Standfirst"
+        name: "description"
+        widget: "text"
+        required: false
+        hint: "1–2 sentence summary shown below the headline and on article cards."
+
+      # Maps to: dateText(data) → byline "February 10, 2026 · Charles King"
+      - label: "Publish Date"
+        name: "pubDate"
+        widget: "datetime"
+        required: false
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        hint: "Controls the Date · Author byline and sort order on the homepage feed."
+
+      # Maps to: authorText(data) → byline fallback is "Charles King"
+      - label: "Author"
+        name: "author"
+        widget: "string"
+        required: false
+        default: "Charles King"
+        hint: "Leave blank to default to Charles King."
+
+      # Maps to: heroImg → <div class="heroWrap"> 16/9 image
+      - label: "Hero Image"
+        name: "heroImage"
+        widget: "image"
+        required: false
+        hint: "Displays at 16:9 ratio at the top of the article. Min 1200px wide."
+
+      # Maps to: primaryTag(data) → category pill + breadcrumb
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        required: false
+        options:
+          - { label: "Sports", value: "Sports" }
+          - { label: "Food & Drink", value: "Food & Drink" }
+          - { label: "Events", value: "Events" }
+          - { label: "Business", value: "Business" }
+          - { label: "Real Estate", value: "Real Estate" }
+          - { label: "Politics", value: "Politics" }
+          - { label: "Community", value: "Community" }
+          - { label: "Tourism", value: "Tourism" }
+          - { label: "Arts & Culture", value: "Arts & Culture" }
+          - { label: "Weather", value: "Weather" }
+        hint: "Drives the yellow category pill and the breadcrumb topic link."
+
+      # Maps to: primaryTag(data) — first tag also used as fallback for category pill
       - label: "Tags"
         name: "tags"
         widget: "list"
         required: false
-        summary: "{{fields.tag}}"
-        field:
-          label: "Tag"
-          name: "tag"
-          widget: "string"
-      - { label: "Guides", name: "guides", widget: "list", required: false }
-      - { label: "Featured", name: "featured", widget: "boolean", default: false, required: false }
-      - { label: "Publish Date", name: "pubDate", widget: "datetime" }
-      - { label: "Hero Image", name: "heroImage", widget: "image", required: false }
-      - { label: "Body", name: "body", widget: "markdown" }
-      - { label: "Source URL", name: "sourceUrl", widget: "string", required: false }
-      - { label: "Permission (has rights to publish)", name: "hasPermission", widget: "boolean", default: true }
+        hint: "Comma-separated. First tag is used as the category pill if Category is blank."
+
+      # Hidden — set automatically based on folder. Drives /{city}/ URL segment.
+      - label: "City"
+        name: "city"
+        widget: "hidden"
+        default: "daytona"
+
+      # Maps to: data.featured → homepage hero slot filter
+      - label: "Featured"
+        name: "featured"
+        widget: "boolean"
+        required: false
+        default: false
+        hint: "ON = eligible for the homepage hero and featured slots."
+
+      # Article body — rendered as <Content /> inside .articleBody.prose
+      - label: "Body"
+        name: "body"
+        widget: "markdown"
+        hint: "Full article. Use ## for section headers, **bold**, and > for pull quotes."
+
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 2. DAYTONA — CITY GUIDES  (listicle "Best of" format)
+  #    Maps to: src/pages/[city]/guides/[slug].astro
+  #    Schema:  guides collection in config.ts
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "daytona-guides"
+    label: "🗺️ Daytona — City Guides"
+    label_singular: "Guide"
+    folder: "src/content/guides/daytona"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    sortable_fields: ["title", "pubDate"]
+    media_folder: "/public/images/guides"
+    public_folder: "/images/guides"
+
+    fields:
+
+      # Required — maps to: <h1 class="guideTitle">
+      - label: "Guide Title"
+        name: "title"
+        widget: "string"
+        hint: "e.g. 'The 10 Best Restaurants in Daytona Beach'"
+
+      # Required — maps to: <p class="guideIntro"> hero paragraph
+      - label: "Intro Paragraph"
+        name: "intro"
+        widget: "text"
+        hint: "2–3 sentences shown beneath the title in the guide hero. Editorial voice."
+
+      # Maps to: kPill category label
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        required: false
+        default: "City Guide"
+        options:
+          - { label: "Food & Drink", value: "Food & Drink" }
+          - { label: "Nightlife", value: "Nightlife" }
+          - { label: "Shopping", value: "Shopping" }
+          - { label: "Outdoors", value: "Outdoors" }
+          - { label: "Arts & Culture", value: "Arts & Culture" }
+          - { label: "Health & Wellness", value: "Health & Wellness" }
+          - { label: "City Guide", value: "City Guide" }
+
+      # Maps to: data.author → byline + CK sidebar block name
+      - label: "Author"
+        name: "author"
+        widget: "string"
+        required: false
+        default: "Charles King"
+
+      # Maps to: data.role → CK sidebar block subtitle
+      - label: "Author Role"
+        name: "role"
+        widget: "string"
+        required: false
+        default: "Newsletter Editor"
+
+      # Maps to: pubDateStr → guide hero byline date
+      - label: "Publish Date"
+        name: "pubDate"
+        widget: "datetime"
+        required: false
+        date_format: "YYYY-MM-DD"
+        time_format: false
+
+      # Maps to: data.heroImage (optional banner above list — not currently rendered,
+      #   reserved for future full-bleed header variant)
+      - label: "Hero Image (optional)"
+        name: "heroImage"
+        widget: "image"
+        required: false
+        hint: "Optional full-width banner. Leave blank for the standard text hero."
+
+      # Hidden city — drives /{city}/guides/{slug}/ URL
+      - label: "City"
+        name: "city"
+        widget: "hidden"
+        default: "daytona"
+
+      # ── THE RANKED LIST ─────────────────────────────────────────────────
+      # Maps to: data.items → items array sorted by rank
+      # Each entry renders as a full list item with rank badge, headline,
+      # photo, body copy, and optional CTA link.
+      # The sponsor card is injected automatically between items #3 and #4.
+      # ─────────────────────────────────────────────────────────────────────
+      - label: "List Items (Ranked Spots)"
+        name: "items"
+        widget: "list"
+        label_singular: "Spot"
+        min: 1
+        max: 20
+        summary: "#{{fields.rank}} — {{fields.title}}"
+        hint: "Add 1–10 spots. The sponsor card inserts automatically between #3 and #4."
+        fields:
+
+          # Maps to: item.rank → .rankBadge number (yellow square)
+          - label: "Rank #"
+            name: "rank"
+            widget: "number"
+            value_type: "int"
+            min: 1
+            max: 20
+            hint: "Display order. Lower = higher on the page."
+
+          # Maps to: item.tag → .iTag category label (e.g. "Fine Dining")
+          - label: "Tag / Type"
+            name: "tag"
+            widget: "string"
+            required: false
+            hint: "Short category shown above the headline. e.g. 'Fine Dining', 'Seafood'"
+
+          # Maps to: item.title → <h2 class="iTitle"> (24px Bold Century Gothic)
+          - label: "Spot Name"
+            name: "title"
+            widget: "string"
+            hint: "Renders at 24px Bold Century Gothic. Keep under 60 characters."
+
+          # Maps to: item.body → <p class="iBody"> (16px reading text)
+          - label: "Description"
+            name: "body"
+            widget: "text"
+            hint: "2–4 sentences. Renders at 16px. Editorial voice — be specific."
+
+          # Maps to: item.img → .imgWrap photo (16:8 wide editorial crop)
+          - label: "Photo"
+            name: "img"
+            widget: "image"
+            required: false
+            hint: "Wide crop preferred (16:8 or 2:1). Min 800px wide. Shows 'Photo coming soon' if blank."
+            media_folder: "/public/images/guides/best"
+            public_folder: "/images/guides/best"
+
+          # Maps to: item.imgAlt → img alt attribute (accessibility)
+          - label: "Photo Alt Text"
+            name: "imgAlt"
+            widget: "string"
+            required: false
+            hint: "Describe the photo for screen readers. e.g. 'Grouper sandwich at Racing's North Turn'"
+
+          # Maps to: item.href → .iLink and .iCta "Learn more →"
+          - label: "Link URL"
+            name: "href"
+            widget: "string"
+            required: false
+            hint: "Optional. e.g. /daytona/food/ or https://restaurant.com. Leave blank for no link."
+
+      # ── LOCAL SPONSOR OVERRIDE ──────────────────────────────────────────
+      # Maps to: data.localSponsor → sponsor card between items #3 and #4
+      # When filled, this beats the global Nike campaign for THIS guide only.
+      # Leave all fields blank to use the global sponsor.
+      # ─────────────────────────────────────────────────────────────────────
+      - label: "Local Sponsor (optional — overrides global)"
+        name: "localSponsor"
+        widget: "object"
+        required: false
+        collapsed: true
+        hint: "Fill this in when you sell the #3/#4 slot to a local business. Leave blank for the global campaign."
+        fields:
+
+          - label: "Brand Name"
+            name: "brand"
+            widget: "string"
+            required: false
+            hint: "e.g. 'Aunt Catfish's on the River'"
+
+          - label: "Tagline"
+            name: "tagline"
+            widget: "string"
+            required: false
+            hint: "Short punchy line. e.g. 'Daytona's most legendary table.'"
+
+          - label: "Description"
+            name: "body"
+            widget: "text"
+            required: false
+            hint: "1–2 sentences about the sponsor. Renders at 14px inside the card."
+
+          - label: "Logo"
+            name: "logo"
+            widget: "image"
+            required: false
+            hint: "Transparent PNG or SVG preferred. Displayed at 28px height."
+            media_folder: "/public/images/sponsors"
+            public_folder: "/images/sponsors"
+
+          - label: "Card Image"
+            name: "img"
+            widget: "image"
+            required: false
+            hint: "Portrait crop (3:4 ratio). Shows on the left side of the sponsor card."
+            media_folder: "/public/images/sponsors"
+            public_folder: "/images/sponsors"
+
+          - label: "Image Alt Text"
+            name: "imgAlt"
+            widget: "string"
+            required: false
+
+          - label: "CTA Button Text"
+            name: "ctaText"
+            widget: "string"
+            required: false
+            default: "Learn more"
+            hint: "Text on the yellow button. e.g. 'Make a reservation'"
+
+          - label: "CTA Link URL"
+            name: "ctaHref"
+            widget: "string"
+            required: false
+            hint: "Where the CTA button goes. Full URL or internal path."
+
+      # Body markdown — editorial note rendered below the final list item
+      - label: "Editorial Note (optional)"
+        name: "body"
+        widget: "markdown"
+        required: false
+        hint: "Appears below spot #10. Good for disclosure copy, update dates, or a byline note."
+
+
+  # ─────────────────────────────────────────────────────────────────────────
+  # 3. GLOBAL SPONSORS
+  #    Maps to: src/content/globalSponsors/
+  #    Schema:  globalSponsors collection in config.ts
+  #
+  #    PRIORITY LOGIC (reminder):
+  #      Guide has localSponsor: set  → local wins, global is ignored
+  #      Guide has no localSponsor:   → newest active global campaign shows
+  #      No active global campaigns   → slot hidden, no whitespace
+  #
+  #    TO SWAP CAMPAIGNS: set Active to OFF on old file, create new file.
+  # ─────────────────────────────────────────────────────────────────────────
+  - name: "global-sponsors"
+    label: "🌐 Global Sponsors"
+    label_singular: "Sponsor Campaign"
+    folder: "src/content/globalSponsors"
+    create: true
+    delete: true
+    slug: "{{brand | slugify}}-{{pubDate}}"
+    summary: "{{brand}} — {{tagline}} (Active: {{active}})"
+    sortable_fields: ["pubDate", "brand", "active"]
+
+    fields:
+
+      # ── THE MASTER TOGGLE ──────────────────────────────────────────────
+      # Maps to: s.data.active !== false → filter in getCollection query
+      # OFF = campaign instantly disappears from every guide and article
+      # ON  = campaign runs network-wide (unless a guide has localSponsor)
+      # ──────────────────────────────────────────────────────────────────
+      - label: "Active"
+        name: "active"
+        widget: "boolean"
+        default: true
+        hint: "▶ ON = running network-wide on all guides and articles.  ⏸ OFF = paused instantly everywhere. No redeploy needed for guides (static build) — toggle and commit."
+
+      # Maps to: sponsor.brand → .aSponsorBrand label text
+      - label: "Brand Name"
+        name: "brand"
+        widget: "string"
+        hint: "e.g. 'Nike' — shown in small caps above the tagline."
+
+      # Maps to: pubDate → sort order (newest active campaign wins)
+      - label: "Campaign Start Date"
+        name: "pubDate"
+        widget: "datetime"
+        required: false
+        date_format: "YYYY-MM-DD"
+        time_format: false
+        hint: "When multiple campaigns are active, the most recent date wins. Use this to schedule a handover."
+
+      # Maps to: sponsor.tagline → .aSponsorTagline (22px Century Gothic headline)
+      - label: "Tagline"
+        name: "tagline"
+        widget: "string"
+        hint: "Main headline inside the sponsor card. 22px Bold. e.g. 'Built for Daytona. Built to last.'"
+
+      # Maps to: sponsor.body → .aSponsorText (14px copy)
+      - label: "Body Copy"
+        name: "body"
+        widget: "text"
+        hint: "1–2 sentences. Renders at 14px. Keep punchy."
+
+      # Maps to: sponsor.logo → .aSponsorLogo (28px tall)
+      - label: "Logo"
+        name: "logo"
+        widget: "image"
+        required: false
+        hint: "Transparent PNG or SVG. Displayed at 28px height beside the brand name."
+        media_folder: "/public/images/sponsors"
+        public_folder: "/images/sponsors"
+
+      # Maps to: sponsor.img → .aSponsorImgWrap (16:10 landscape on articles, 3:4 portrait on guides)
+      - label: "Campaign Image"
+        name: "img"
+        widget: "image"
+        required: false
+        hint: "Shows on the left of the sponsor card. 16:10 landscape works for both article and guide placements. Min 800px wide."
+        media_folder: "/public/images/sponsors"
+        public_folder: "/images/sponsors"
+
+      # Maps to: sponsor.imgAlt → img alt attribute
+      - label: "Image Alt Text"
+        name: "imgAlt"
+        widget: "string"
+        required: false
+
+      # Maps to: sponsor.ctaText → button text on yellow CTA
+      - label: "CTA Button Text"
+        name: "ctaText"
+        widget: "string"
+        required: false
+        default: "Learn more"
+        hint: "e.g. 'Shop the collection', 'Book a table', 'Learn more'"
+
+      # Maps to: sponsor.ctaHref → CTA button destination (rel=noopener sponsored)
+      - label: "CTA Link URL"
+        name: "ctaHref"
+        widget: "string"
+        hint: "Full URL including https://. This link gets rel='noopener sponsored' per Google guidelines."
+
+      # Body is intentionally unused for sponsors — but Decap requires a body
+      # field for folder collections. Leave blank — the template ignores it.
+      - label: "Notes (internal only — not published)"
+        name: "body"
+        widget: "markdown"
+        required: false
+        hint: "Internal notes only. Not rendered on any page."
