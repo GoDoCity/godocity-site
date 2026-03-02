@@ -81,7 +81,6 @@ const guides = defineCollection({
   }),
 });
 
-export const collections = { posts, guides, globalSponsors };
 
 /* ─────────────────────────────────────────────────────────────────────────────
    globalSponsors collection
@@ -112,3 +111,5 @@ const globalSponsors = defineCollection({
     pubDate:     z.coerce.date().optional(),      // used to pick newest-first
   }),
 });
+
+export const collections = { posts, guides, globalSponsors };
