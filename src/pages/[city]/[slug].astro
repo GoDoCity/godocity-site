@@ -1,0 +1,670 @@
+---
+/**
+ * src/pages/[city]/[slug].astro
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Dynamic Article Template — GoDoCity news & editorial posts
+ *
+ * URL pattern:  /daytona/city-council-vote-2026/
+ *               /austin/sxsw-2026-preview/
+ *
+ * Content:      src/content/posts/[city]/[slug].md
+ * Schema:       src/content/config.ts  (posts collection)
+ *
+ * Layout:       75/25 — article body left, sticky sidebar right
+ * Sidebar:      Charles King · Upcoming Events · Display Ad · City Guides
+ * Sponsor:      Global sponsor banner at bottom of every article
+ * Typography:   32px Bold Century Gothic headline · 16px body · Date • Author byline
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+import Base from "../../layouts/Base.astro";
+import { getCollection, render } from "astro:content";
+
+/* ── Static path generation ─────────────────────────────────────────────── */
+export async function getStaticPaths() {
+  const posts = await getCollection("posts");
+
+  return posts
+    .filter((post) => {
+      /* Must have a determinable city — either frontmatter or folder prefix */
+      const city = post.data.city ?? post.slug.split("/")[0];
+      return typeof city === "string" && city.length > 0;
+    })
+    .map((post) => {
+      const city = post.data.city ?? post.slug.split("/")[0];
+      const slug = post.slug.split("/").pop(); // last path segment = article slug
+      return { params: { city, slug }, props: { post } };
+    });
+}
+
+/* ── Per-page data ──────────────────────────────────────────────────────── */
+const { post }    = Astro.props;
+const { data }    = post;
+const { Content } = await render(post);
+
+/* City string — drives all dynamic hrefs */
+const city    = data.city ?? post.slug.split("/")[0];
+const cityCap = city.charAt(0).toUpperCase() + city.slice(1);
+
+/* ── Byline helpers (mirrors index.astro — audited Date • Author logic) ── */
+function getPostDate(d) {
+  return d?.pubDate ?? d?.date ?? d?.published ?? d?.updated ?? null;
+}
+function dateText(d) {
+  const raw = getPostDate(d);
+  return raw
+    ? new Date(raw).toLocaleDateString("en-US", {
+        month: "long", day: "numeric", year: "numeric",
+      })
+    : "";
+}
+function authorText(d) {
+  const a = d?.author ?? d?.authorName ?? d?.by ?? "";
+  return typeof a === "string" && a.trim() ? a.trim() : "Charles King";
+}
+function byline(d) {
+  const date   = dateText(d);
+  const author = authorText(d);
+  return date ? `${date} · ${author}` : author;
+}
+
+/* Hero image — checks every field name writers might use */
+const heroImg = (
+  data.heroImage ?? data.heroimage ?? data.image ??
+  data.thumbnail ?? data.cover ?? ""
+);
+
+/* Primary tag — first tag, or category, or topic */
+function primaryTag(d) {
+  if (Array.isArray(d.tags) && d.tags.length) return String(d.tags[0]).trim();
+  if (d.category) return d.category;
+  if (d.topic)    return d.topic;
+  return "";
+}
+const tag = primaryTag(data);
+
+/* ── Global sponsor resolution ──────────────────────────────────────────────
+   Articles do not support localSponsor overrides — the global campaign
+   runs on every article page to ensure every read is monetised.
+   Placement: full-width banner below the article body, above the footer.
+────────────────────────────────────────────────────────────────────────────── */
+let sponsor: {
+  brand: string; tagline: string; body: string;
+  logo?: string; img?: string; imgAlt?: string;
+  ctaText?: string; ctaHref: string;
+} | null = null;
+
+const allGlobal = await getCollection("globalSponsors");
+const activeSponsor = allGlobal
+  .filter((s) => s.data.active !== false)
+  .sort((a, b) =>
+    new Date(b.data.pubDate ?? 0).getTime() -
+    new Date(a.data.pubDate ?? 0).getTime()
+  );
+if (activeSponsor.length > 0) {
+  sponsor = activeSponsor[0].data;
+}
+
+/* Charles King headshot — base64 inline, renders before CDN */
+const CK_SRC = "data:image/jpeg;base64,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";
+---
+
+<Base
+  title={`${data.title} | GoDo ${cityCap}`}
+  subtitle={`Good news for ${cityCap}`}
+  cityBase={city}
+>
+<div class="pageWrap">
+  <div class="container">
+    <div class="homeGrid">
+
+      {/* ════════ ARTICLE MAIN ════════ */}
+      <main class="articleMain">
+
+        {/* ── ARTICLE HEADER ── */}
+        <header class="articleHeader">
+
+          {/* Breadcrumb */}
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            <a class="bcLink" href={`/${city}/`}>{cityCap}</a>
+            <span class="bcSep" aria-hidden="true">/</span>
+            {tag && <a class="bcLink" href={`/${city}/topics/${tag.toLowerCase()}/`}>{tag}</a>}
+            {tag && <span class="bcSep" aria-hidden="true">/</span>}
+            <span class="bcCurrent" aria-current="page">{data.title}</span>
+          </nav>
+
+          {/* Category pill */}
+          {tag && <div class="articleTag">{tag}</div>}
+
+          {/* Headline — 32px Bold Century Gothic per spec */}
+          <h1 class="articleTitle">{data.title}</h1>
+
+          {/* Byline — audited Date • Author pattern */}
+          <div class="articleByline" aria-label="Article byline">
+            <span class="bylineDate">{dateText(data)}</span>
+            {dateText(data) && <span class="bylineSep" aria-hidden="true">·</span>}
+            <span class="bylineAuthor">{authorText(data)}</span>
+          </div>
+
+          {/* Description / standfirst */}
+          {data.description && (
+            <p class="articleDesc">{data.description}</p>
+          )}
+
+        </header>
+
+        {/* ── HERO IMAGE ── */}
+        {heroImg && (
+          <div class="heroWrap">
+            <img
+              class="heroImg"
+              src={heroImg}
+              alt={data.title}
+              loading="eager"
+              decoding="async"
+              onerror="this.closest('.heroWrap').style.display='none'"
+            />
+          </div>
+        )}
+
+        {/* ── ARTICLE BODY — rendered markdown ── */}
+        <div class="articleBody prose">
+          <Content />
+        </div>
+
+        {/* ── GLOBAL SPONSOR BANNER — bottom of every article ────────────
+            Monetises every read. No local override — global campaign only.
+            Renders nothing (no whitespace) if no active sponsors exist.
+        ──────────────────────────────────────────────────────────────── */}
+        {sponsor && (
+          <div class="articleSponsor" role="complementary"
+            aria-label={`Presented by ${sponsor.brand}`}>
+            <div class="aSponsorLabel">
+              <span class="aSponsorLabelText">Presented by</span>
+            </div>
+            <div class="aSponsorCard">
+              {sponsor.img && (
+                <div class="aSponsorImgWrap">
+                  <img class="aSponsorImg" src={sponsor.img}
+                    alt={sponsor.imgAlt || sponsor.brand}
+                    loading="lazy" decoding="async" />
+                </div>
+              )}
+              <div class="aSponsorBody">
+                <div class="aSponsorMeta">
+                  {sponsor.logo && (
+                    <img class="aSponsorLogo" src={sponsor.logo}
+                      alt={`${sponsor.brand} logo`} loading="lazy" />
+                  )}
+                  <span class="aSponsorBrand">{sponsor.brand}</span>
+                </div>
+                <div class="aSponsorTagline">{sponsor.tagline}</div>
+                <p class="aSponsorText">{sponsor.body}</p>
+                <a class="aSponsorCta" href={sponsor.ctaHref}
+                  target="_blank" rel="noopener sponsored">
+                  {sponsor.ctaText ?? "Learn more"} →
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── RELATED ARTICLES PLACEHOLDER ── */}
+        <div class="relatedSection">
+          <div class="relatedHead">More from {cityCap}</div>
+          <a class="relatedBack" href={`/${city}/`}>← Back to {cityCap} news</a>
+        </div>
+
+      </main>
+
+      {/* ════════ SIDEBAR ════════ */}
+      <aside class="homeRail">
+
+        {/* Charles King — GoDoCity Editorial Team */}
+        <div class="editTeamSection">
+          <div class="railHead">
+            <span class="railTitle editTeamTitle">GoDoCity Editorial Team</span>
+          </div>
+          <div class="editTeamRow">
+            <img
+              class="editHeadshot"
+              src={CK_SRC}
+              alt="Charles King"
+              width="80" height="80"
+              loading="eager"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+            />
+            <div class="editHeadshotFallback" aria-hidden="true">CK</div>
+            <div class="editTeamInfo">
+              <div class="editName">Charles King</div>
+              <div class="editTitle">Newsletter Editor</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Upcoming Events */}
+        <div class="railSection">
+          <div class="railHead">
+            <span class="railTitle">Upcoming Events</span>
+            <a class="railMore" href={`/${city}/events/`}>See all</a>
+          </div>
+          <div class="eventList">
+            <a class="eventRow" href={`/${city}/events/`}>
+              <div class="eventCal">
+                <div class="eDow">SAT</div>
+                <div class="eDay">15</div>
+              </div>
+              <div class="eventInfo">
+                <div class="eName">Add your first event</div>
+                <div class="ePlace">{cityCap} Beach</div>
+              </div>
+            </a>
+            <a class="eventRow" href={`/${city}/events/`}>
+              <div class="eventCal">
+                <div class="eDow">SUN</div>
+                <div class="eDay">16</div>
+              </div>
+              <div class="eventInfo">
+                <div class="eName">Second event placeholder</div>
+                <div class="ePlace">Ormond Beach</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        {/* Display ad slot */}
+        <div class="displayAdSlot">
+          <div class="adSlotLabel">Advertisement</div>
+          <a class="displayAdCard" href={`/${city}/advertise/`}>
+            <div class="displayAdInner">
+              <div class="displayAdIcon">📢</div>
+              <div class="displayAdTitle">Your Ad Here</div>
+              <div class="displayAdDesc">Reach thousands of {cityCap} locals</div>
+              <div class="displayAdCta">Advertise with us →</div>
+            </div>
+          </a>
+        </div>
+
+        {/* City Guides */}
+        <div class="railSection">
+          <div class="railHead">
+            <span class="railTitle">City Guides</span>
+            <a class="railMore" href={`/${city}/guides/`}>See all</a>
+          </div>
+          <div class="guideList">
+            <a class="guideRow" href={`/${city}/guides/live/`}>🏠 Live in {cityCap}</a>
+            <a class="guideRow" href={`/${city}/guides/work/`}>💼 Work in {cityCap}</a>
+            <a class="guideRow" href={`/${city}/guides/play/`}>🎉 Play in {cityCap}</a>
+            <a class="guideRow" href={`/${city}/guides/best-restaurants/`}>🍽️ Best Restaurants</a>
+          </div>
+        </div>
+
+        {/* Newsletter CTA */}
+        <div class="nlBox">
+          <div class="nlBoxHead">
+            <em>Good News <strong>{cityCap}!</strong></em>
+          </div>
+          <div class="nlBoxSub">Free local news in your inbox every morning.</div>
+          <a class="nlBoxBtn" href={`/${city}/subscribe/`}>Subscribe free →</a>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+</div>{/* end .pageWrap */}
+
+<style>
+  /* ── Base resets ── */
+  :global(html), :global(body) { overflow-x: hidden; width: 100%; position: relative; }
+  .pageWrap { min-height: 100vh; overflow-x: hidden; width: 100%; }
+
+  :global(.container) {
+    max-width: 1280px; margin: 0 auto; padding: 0 2.5rem;
+  }
+  @media (max-width: 768px) {
+    :global(.container) { max-width: 100%; padding: 0 1.25rem; }
+  }
+
+  /* ════ 75/25 GRID — mirrors homepage exactly ════ */
+  .homeGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 290px;
+    gap: clamp(40px, 4vw, 56px);
+    align-items: start;
+    padding: 40px 0 56px;
+  }
+  @media (max-width: 980px) {
+    .homeGrid { grid-template-columns: 1fr; }
+    .homeRail { order: 2; }
+  }
+
+  /* ════ ARTICLE HEADER ════ */
+
+  /* Breadcrumb */
+  .breadcrumb {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: 4px; margin-bottom: 16px;
+    font-size: 12.5px; font-weight: 600; color: var(--faint);
+  }
+  .bcLink {
+    color: var(--link); text-decoration: none;
+    transition: opacity 120ms;
+    white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; max-width: 160px;
+  }
+  .bcLink:hover { opacity: .75; }
+  .bcSep { color: var(--border); }
+  .bcCurrent {
+    color: var(--faint); white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; max-width: 240px;
+  }
+
+  /* Category pill */
+  .articleTag {
+    display: inline-block; margin-bottom: 12px;
+    font-size: 10.5px; font-weight: 800; letter-spacing: .11em;
+    text-transform: uppercase; padding: 3px 10px; border-radius: 999px;
+    background: var(--brand1); color: var(--accentText);
+  }
+
+  /* Headline — 32px Bold Century Gothic per spec */
+  .articleTitle {
+    font-size: clamp(26px, 3.2vw, 32px);
+    font-weight: 900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    line-height: 1.1;
+    letter-spacing: -0.5px;
+    color: var(--text);
+    margin: 0 0 14px;
+    max-width: 720px;
+  }
+
+  /* Byline — Date · Author (audited pattern) */
+  .articleByline {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 13px; color: var(--faint); margin-bottom: 16px;
+  }
+  .bylineDate   { font-weight: 500; }
+  .bylineSep    { opacity: .45; }
+  .bylineAuthor { font-weight: 700; color: var(--text); }
+
+  /* Standfirst / description */
+  .articleDesc {
+    font-size: clamp(15px, 1.15vw, 17px);
+    color: var(--muted); line-height: 1.65;
+    border-left: 3px solid var(--brand1);
+    padding-left: 16px; margin: 0 0 28px;
+    max-width: 660px;
+  }
+
+  /* ════ HERO IMAGE ════ */
+  .heroWrap {
+    width: 100%; aspect-ratio: 16/9;
+    border-radius: 14px; overflow: hidden;
+    background: var(--surface2); margin-bottom: 32px;
+  }
+  .heroImg {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+
+  /* ════ ARTICLE BODY — prose ════ */
+  .articleBody {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--muted);
+    max-width: 680px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Prose typography resets — applied with :global since Content is Astro-rendered */
+  .articleBody :global(h2) {
+    font-size: 22px; font-weight: 900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    color: var(--text); margin: 36px 0 12px; line-height: 1.15;
+  }
+  .articleBody :global(h3) {
+    font-size: 18px; font-weight: 800;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    color: var(--text); margin: 28px 0 10px; line-height: 1.2;
+  }
+  .articleBody :global(p)          { margin: 0 0 1.4em; }
+  .articleBody :global(a)          { color: var(--link); text-decoration: underline; }
+  .articleBody :global(strong)     { font-weight: 800; color: var(--text); }
+  .articleBody :global(ul),
+  .articleBody :global(ol)         { padding-left: 1.4em; margin: 0 0 1.4em; }
+  .articleBody :global(li)         { margin-bottom: .5em; }
+  .articleBody :global(blockquote) {
+    border-left: 3px solid var(--brand1);
+    margin: 1.6em 0; padding: .6em 1em;
+    color: var(--text); font-style: italic; font-size: 17px;
+  }
+  .articleBody :global(img) {
+    width: 100%; border-radius: 10px; margin: 1.4em 0; display: block;
+  }
+  .articleBody :global(hr) {
+    border: none; border-top: 1px solid var(--border); margin: 2em 0;
+  }
+
+  /* ════ GLOBAL SPONSOR BANNER — bottom of article ════ */
+  .articleSponsor { margin: 40px 0 8px; }
+
+  /* Centred rule label */
+  .aSponsorLabel {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .aSponsorLabel::before, .aSponsorLabel::after {
+    content: ""; flex: 1; height: 1px; background: var(--border);
+  }
+  .aSponsorLabelText {
+    font-size: 9.5px; font-weight: 800; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--faint);
+    white-space: nowrap; padding: 0 6px;
+  }
+
+  /* Card — image left, copy right */
+  .aSponsorCard {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 0;
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    background: var(--pillBg);
+    transition: border-color 200ms;
+  }
+  .aSponsorCard:hover { border-color: var(--brand1); }
+
+  .aSponsorImgWrap { width: 240px; aspect-ratio: 16/10; overflow: hidden; }
+  .aSponsorImg {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 360ms ease; will-change: transform;
+  }
+  .aSponsorCard:hover .aSponsorImg { transform: scale(1.04); }
+
+  .aSponsorBody {
+    padding: 28px 30px; display: flex;
+    flex-direction: column; gap: 9px; justify-content: center;
+  }
+  .aSponsorMeta { display: flex; align-items: center; gap: 10px; }
+  .aSponsorLogo { height: 28px; width: auto; object-fit: contain; }
+  .aSponsorBrand {
+    font-size: 11px; font-weight: 800;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--faint);
+  }
+  .aSponsorTagline {
+    font-size: 22px; font-weight: 900; line-height: 1.12;
+    letter-spacing: -0.3px; color: var(--text);
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+  }
+  .aSponsorText {
+    font-size: 14px; color: var(--muted);
+    line-height: 1.6; margin: 0; max-width: 440px;
+  }
+  .aSponsorCta {
+    display: inline-flex; align-items: center; align-self: flex-start;
+    margin-top: 4px; height: 40px; padding: 0 20px; border-radius: 999px;
+    background: var(--brand1); color: var(--accentText);
+    font-size: 13px; font-weight: 800; text-decoration: none;
+    transition: opacity 150ms;
+  }
+  .aSponsorCta:hover { opacity: .86; }
+
+  /* No-image: body fills full width */
+  .aSponsorCard:not(:has(.aSponsorImgWrap)) { grid-template-columns: 1fr; }
+  .aSponsorCard:not(:has(.aSponsorImgWrap)) .aSponsorBody { padding: 24px 26px; }
+
+  /* ════ RELATED / BACK LINK ════ */
+  .relatedSection {
+    margin-top: 36px; padding-top: 28px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .relatedHead {
+    font-size: 16px; font-weight: 900;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--text);
+  }
+  .relatedBack {
+    font-size: 13.5px; font-weight: 700;
+    color: var(--link); text-decoration: none;
+    border-bottom: 1.5px solid transparent;
+    transition: border-color 140ms; padding-bottom: 1px;
+  }
+  .relatedBack:hover { border-color: var(--link); }
+
+  /* ════ SIDEBAR — tokens inherited from homepage ════ */
+  .homeRail {
+    position: sticky; top: 80px;
+    display: grid; gap: 24px; align-self: start;
+  }
+  .railSection { display: grid; gap: 0; }
+  .railHead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 10px; border-bottom: 2px solid var(--brand1);
+  }
+  .railTitle {
+    font-size: 16px; font-weight: 900;
+    letter-spacing: .08em; text-transform: uppercase; color: var(--text);
+  }
+  .editTeamTitle { white-space: nowrap; letter-spacing: -0.02em; }
+  .railMore {
+    font-size: 13px; font-weight: 700;
+    color: var(--link); text-decoration: none;
+  }
+  .railMore:hover { text-decoration: underline; }
+
+  /* CK block */
+  .editTeamSection { display: grid; gap: 0; }
+  .editTeamRow { display: flex; align-items: center; padding-top: 12px; }
+  .editHeadshot {
+    width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+    flex-shrink: 0; margin-right: 15px;
+    background: var(--surface2); border: 2px solid var(--border);
+  }
+  .editHeadshotFallback {
+    display: none; width: 80px; height: 80px; border-radius: 50%;
+    background: var(--brand1); color: #000;
+    font-size: 22px; font-weight: 900;
+    align-items: center; justify-content: center;
+    flex-shrink: 0; margin-right: 15px; border: 2px solid var(--border);
+  }
+  .editTeamInfo { display: flex; flex-direction: column; justify-content: center; gap: 3px; }
+  .editName { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.2; }
+  .editTitle { font-size: 14px; color: var(--faint); line-height: 1.3; }
+
+  /* Events */
+  .eventList { display: grid; }
+  .eventRow {
+    display: grid; grid-template-columns: 48px 1fr;
+    gap: 12px; align-items: center; text-decoration: none;
+    padding: 13px 0; border-bottom: 1px solid var(--border);
+    transition: opacity 140ms;
+  }
+  .eventRow:last-child { border-bottom: none; }
+  .eventRow:hover { opacity: .76; }
+  .eventCal {
+    width: 48px; height: 48px; border-radius: 10px;
+    background: var(--pillBg); border: 1px solid var(--pillBorder);
+    display: grid; place-items: center; text-align: center; line-height: 1;
+  }
+  .eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
+  .eDay { font-size: 19px; font-weight: 900; color: var(--text); margin-top: 1px; }
+  .eventInfo { display: flex; flex-direction: column; gap: 2px; }
+  .eName  { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
+  .ePlace { font-size: 13px; color: var(--faint); }
+
+  /* Display ad */
+  .displayAdSlot { display: grid; gap: 5px; }
+  .adSlotLabel {
+    font-size: 8.5px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--faint); text-align: center;
+  }
+  .displayAdCard {
+    display: block; text-decoration: none;
+    border: 1.5px dashed var(--pillBorder);
+    border-radius: 13px; background: var(--pillBg);
+    transition: border-color 140ms;
+  }
+  .displayAdCard:hover { border-color: var(--brand1); }
+  .displayAdInner { padding: 22px 14px; text-align: center; display: grid; gap: 5px; place-items: center; }
+  .displayAdIcon  { font-size: 24px; margin-bottom: 2px; }
+  .displayAdTitle { font-size: 16px; font-weight: 900; color: var(--text); }
+  .displayAdDesc  { font-size: 14px; color: var(--muted); line-height: 1.3; }
+  .displayAdCta   {
+    margin-top: 6px; display: inline-flex; align-items: center;
+    height: 30px; padding: 0 13px; border-radius: 999px;
+    background: var(--brand1); color: var(--accentText);
+    font-size: 11.5px; font-weight: 800;
+  }
+
+  /* Guide links */
+  .guideList { display: grid; }
+  .guideRow {
+    display: block; text-decoration: none;
+    font-size: 15px; font-weight: 700; color: var(--text);
+    padding: 11px 0; border-bottom: 1px solid var(--border);
+    line-height: 1.3; transition: color 120ms;
+  }
+  .guideRow:last-child { border-bottom: none; }
+  .guideRow:hover { color: var(--link); }
+
+  /* Newsletter CTA */
+  .nlBox {
+    padding: 18px 16px; border-radius: 14px;
+    background: var(--brand1); display: flex; flex-direction: column; gap: 7px;
+  }
+  .nlBoxHead {
+    font-size: 18px; font-weight: 900; font-style: italic;
+    color: #000; line-height: 1.1; letter-spacing: -0.03em;
+  }
+  .nlBoxHead strong { font-weight: 900; }
+  .nlBoxSub { font-size: 13px; color: rgba(0,0,0,.7); line-height: 1.35; }
+  .nlBoxBtn {
+    display: inline-flex; align-items: center; height: 36px; padding: 0 14px;
+    border-radius: 999px; background: #000; color: #fff;
+    font-size: 12.5px; font-weight: 800; text-decoration: none;
+    align-self: flex-start; margin-top: 2px; transition: opacity 140ms;
+  }
+  .nlBoxBtn:hover { opacity: .82; }
+
+  /* ════ MOBILE ════ */
+  @media (max-width: 768px) {
+    .homeGrid   { padding: 24px 0 40px; }
+    .articleTitle { letter-spacing: -0.3px; }
+    .heroWrap   { border-radius: 10px; margin-bottom: 24px; }
+    .articleBody { font-size: 15px; max-width: 100%; }
+    .articleDesc { font-size: 15px; }
+
+    /* Sponsor card stacks on mobile */
+    .aSponsorCard { grid-template-columns: 1fr; }
+    .aSponsorImgWrap { width: 100%; aspect-ratio: 16/9; }
+    .aSponsorBody { padding: 20px 22px; }
+    .aSponsorTagline { font-size: 18px; }
+  }
+  @media (max-width: 480px) {
+    .articleTitle { font-size: 22px; }
+    .breadcrumb   { font-size: 11px; }
+    .bcCurrent    { max-width: 140px; }
+  }
+</style>
+</Base>
