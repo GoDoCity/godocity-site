@@ -28,10 +28,12 @@ const guides = defineCollection({
   type: "content",
   schema: z.object({
 
- /* Required */
-    city:     z.string(),
-    title:    z.string(),
-    intro:    z.string().optional(),
+    /* Required */
+    city:     z.string(),          // "daytona" — used in URL and breadcrumb
+    title:    z.string(),          // "The 10 Best Restaurants in Daytona Beach"
+
+    /* Optional — present on listicles, absent on hub pages (live/play/work) */
+    intro:    z.string().optional(),  // Lead paragraph shown in hero
 
     /* Optional meta */
     category: z.string().optional().default("City Guide"),
@@ -40,8 +42,10 @@ const guides = defineCollection({
     pubDate:  z.coerce.date().optional(),
     heroImage:z.string().optional(), // optional banner image above the list
 
-    /* The ranked list — each item is one entry */
-   items: z.array(
+    /* The ranked list — each item is one entry.
+       Optional: hub pages (live/play/work) have no items array.
+       getStaticPaths filters to only render pages that have items. */
+    items: z.array(
       z.object({
         rank:   z.number().int().min(1).max(20),
         tag:    z.string().optional(),
@@ -81,6 +85,7 @@ const guides = defineCollection({
   }),
 });
 
+export const collections = { posts, guides, globalSponsors };
 
 /* ─────────────────────────────────────────────────────────────────────────────
    globalSponsors collection
@@ -99,17 +104,15 @@ const guides = defineCollection({
 const globalSponsors = defineCollection({
   type: "content",
   schema: z.object({
-    active:      z.boolean().default(true),       // false = paused, hidden everywhere
-    brand:       z.string(),                      // "Nike"
-    tagline:     z.string(),                      // "Just Do It — Daytona style."
-    body:        z.string(),                      // 1–2 sentence sponsor message
-    logo:        z.string().optional(),           // "/images/sponsors/nike-logo.svg"
-    img:         z.string().optional(),           // "/images/sponsors/nike-daytona.jpg"
-    imgAlt:      z.string().optional().default(""),
-    ctaText:     z.string().optional().default("Learn more"),
-    ctaHref:     z.string(),                      // destination URL
-    pubDate:     z.coerce.date().optional(),      // used to pick newest-first
+    active:   z.boolean().default(true),           // false = paused everywhere
+    brand:    z.string().optional().default(""),   // "Nike"
+    tagline:  z.string().optional().default(""),   // "Just Do It — Daytona style."
+    body:     z.string().optional().default(""),   // 1–2 sentence sponsor message
+    logo:     z.string().optional(),               // "/images/sponsors/nike-logo.svg"
+    img:      z.string().optional(),               // "/images/sponsors/nike-daytona.jpg"
+    imgAlt:   z.string().optional().default(""),
+    ctaText:  z.string().optional().default("Learn more"),
+    ctaHref:  z.string().optional().default(""),   // destination URL
+    pubDate:  z.coerce.date().optional(),          // used to pick newest-first
   }),
 });
-
-export const collections = { posts, guides, globalSponsors };
