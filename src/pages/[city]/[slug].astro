@@ -93,15 +93,25 @@ let sponsor: {
   ctaText?: string; ctaHref: string;
 } | null = null;
 
-const allGlobal = await getCollection("globalSponsors");
-const activeSponsor = allGlobal
-  .filter((s) => s.data.active !== false)
-  .sort((a, b) =>
-    new Date(b.data.pubDate ?? 0).getTime() -
-    new Date(a.data.pubDate ?? 0).getTime()
-  );
-if (activeSponsor.length > 0) {
-  sponsor = activeSponsor[0].data;
+/* Fall back to the global network: most recent active campaign.
+   Wrapped in try/catch — getCollection throws (not returns []) if the
+   globalSponsors folder doesn't exist yet on a fresh repo. */
+try {
+  const allGlobal = await getCollection("globalSponsors");
+  const activeSponsor = allGlobal
+    .filter((s) => s.data.active !== false)
+    .filter((s) => s.data.brand)                // skip incomplete drafts
+    .sort((a, b) =>
+      new Date(b.data.pubDate ?? 0).getTime() -
+      new Date(a.data.pubDate ?? 0).getTime()
+    );
+  if (activeSponsor.length > 0) {
+    sponsor = activeSponsor[0].data;
+  }
+  // activeSponsor.length === 0 → sponsor stays null → banner not rendered
+} catch {
+  // Collection missing entirely → render article without sponsor banner
+  sponsor = null;
 }
 
 /* Charles King headshot — base64 inline, renders before CDN */
