@@ -303,7 +303,6 @@ collections:
       - label: "Local Sponsor (optional — overrides global)"
         name: "localSponsor"
         widget: "object"
-        required: false
         collapsed: true
         hint: "Fill this in when you sell the #3/#4 slot to a local business. Leave blank for the global campaign."
         fields:
@@ -386,7 +385,7 @@ collections:
     folder: "src/content/globalSponsors"
     create: true
     delete: true
-    slug: "{{brand | slugify}}-{{pubDate}}"
+    slug: "{{brand | slugify}}"
     summary: "{{brand}} — {{tagline}} (Active: {{active}})"
     sortable_fields: ["pubDate", "brand", "active"]
 
