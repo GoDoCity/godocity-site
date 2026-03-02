@@ -1,4 +1,3 @@
-
 ---
 /**
  * src/pages/[city]/guides/[slug].astro
@@ -19,9 +18,7 @@ import { getCollection, render } from "astro:content";
 /* ── Build all static paths from the guides collection ─────────────────── */
 export async function getStaticPaths() {
   const guides = await getCollection("guides");
-  return guides
-    .filter((guide) => Array.isArray(guide.data.items) && guide.data.items.length > 0)
-    .map((guide) => ({
+  return guides.map((guide) => ({
     params: {
       city: guide.data.city,          // "daytona"  → from frontmatter
       slug: guide.slug.split("/").pop(), // "best-restaurants" → from filename
@@ -58,16 +55,25 @@ if (data.localSponsor) {
   /* Local sponsor wins — sold directly to a city business */
   sponsor = { ...data.localSponsor, isLocal: true };
 } else {
-  /* Fall back to the global network: most recent active campaign */
-  const allGlobal = await getCollection("globalSponsors");
-  const active = allGlobal
-    .filter((s) => s.data.active !== false)
-    .sort((a, b) =>
-      new Date(b.data.pubDate ?? 0).getTime() -
-      new Date(a.data.pubDate ?? 0).getTime()
-    );
-  if (active.length > 0) {
-    sponsor = { ...active[0].data, isLocal: false };
+  /* Fall back to the global network: most recent active campaign.
+     Wrapped in try/catch — getCollection throws (not returns []) if the
+     globalSponsors folder doesn't exist yet on a fresh repo. */
+  try {
+    const allGlobal = await getCollection("globalSponsors");
+    const active = allGlobal
+      .filter((s) => s.data.active !== false)
+      .filter((s) => s.data.brand)              // skip incomplete drafts
+      .sort((a, b) =>
+        new Date(b.data.pubDate ?? 0).getTime() -
+        new Date(a.data.pubDate ?? 0).getTime()
+      );
+    if (active.length > 0) {
+      sponsor = { ...active[0].data, isLocal: false };
+    }
+    // active.length === 0 → sponsor stays null → slot renders nothing
+  } catch {
+    // Collection missing entirely → render page without sponsor slot
+    sponsor = null;
   }
 }
 
