@@ -150,6 +150,15 @@ collections:
   # 2. DAYTONA — CITY GUIDES  (listicle "Best of" format)
   #    Maps to: src/pages/[city]/guides/[slug].astro
   #    Schema:  guides collection in config.ts
+  #
+  #    INDENTATION RULE: every level = 2 spaces.
+  #      collection props      → 4 sp  (2 + 2 for list dash)
+  #      top-level fields list → 4 sp  (field dash at col 4)
+  #      field props           → 6 sp
+  #      items sub-fields list → 8 sp  (field dash at col 8)
+  #      items sub-field props → 10 sp
+  #      localSponsor fields   → 8 sp  (field dash at col 8)
+  #      localSponsor props    → 10 sp
   # ─────────────────────────────────────────────────────────────────────────
   - name: "daytona-guides"
     label: "🗺️ Daytona — City Guides"
@@ -162,78 +171,57 @@ collections:
     sortable_fields: ["title", "pubDate"]
     media_folder: "/public/images/guides"
     public_folder: "/images/guides"
-
     fields:
-
-      # Required — maps to: <h1 class="guideTitle">
       - label: "Guide Title"
         name: "title"
         widget: "string"
         hint: "e.g. 'The 10 Best Restaurants in Daytona Beach'"
-
-      # Required — maps to: <p class="guideIntro"> hero paragraph
       - label: "Intro Paragraph"
         name: "intro"
         widget: "text"
-        hint: "2–3 sentences shown beneath the title in the guide hero. Editorial voice."
-
-      # Maps to: kPill category label
+        required: false
+        hint: "2–3 sentences shown beneath the title in the guide hero."
       - label: "Category"
         name: "category"
         widget: "select"
         required: false
         default: "City Guide"
         options:
-          - { label: "Food & Drink", value: "Food & Drink" }
-          - { label: "Nightlife", value: "Nightlife" }
-          - { label: "Shopping", value: "Shopping" }
-          - { label: "Outdoors", value: "Outdoors" }
-          - { label: "Arts & Culture", value: "Arts & Culture" }
-          - { label: "Health & Wellness", value: "Health & Wellness" }
-          - { label: "City Guide", value: "City Guide" }
-
-      # Maps to: data.author → byline + CK sidebar block name
+          - {label: "Food & Drink", value: "Food & Drink"}
+          - {label: "Nightlife", value: "Nightlife"}
+          - {label: "Shopping", value: "Shopping"}
+          - {label: "Outdoors", value: "Outdoors"}
+          - {label: "Arts & Culture", value: "Arts & Culture"}
+          - {label: "Health & Wellness", value: "Health & Wellness"}
+          - {label: "City Guide", value: "City Guide"}
       - label: "Author"
         name: "author"
         widget: "string"
         required: false
         default: "Charles King"
-
-      # Maps to: data.role → CK sidebar block subtitle
       - label: "Author Role"
         name: "role"
         widget: "string"
         required: false
         default: "Newsletter Editor"
-
-      # Maps to: pubDateStr → guide hero byline date
       - label: "Publish Date"
         name: "pubDate"
         widget: "datetime"
         required: false
         date_format: "YYYY-MM-DD"
         time_format: false
-
-      # Maps to: data.heroImage (optional banner above list — not currently rendered,
-      #   reserved for future full-bleed header variant)
       - label: "Hero Image (optional)"
         name: "heroImage"
         widget: "image"
         required: false
         hint: "Optional full-width banner. Leave blank for the standard text hero."
-
-      # Hidden city — drives /{city}/guides/{slug}/ URL
       - label: "City"
         name: "city"
         widget: "hidden"
         default: "daytona"
-
-      # ── THE RANKED LIST ─────────────────────────────────────────────────
-      # Maps to: data.items → items array sorted by rank
-      # Each entry renders as a full list item with rank badge, headline,
-      # photo, body copy, and optional CTA link.
-      # The sponsor card is injected automatically between items #3 and #4.
-      # ─────────────────────────────────────────────────────────────────────
+      # ── RANKED LIST ────────────────────────────────────────────────────
+      # Sponsor card injects automatically between items #3 and #4.
+      # ───────────────────────────────────────────────────────────────────
       - label: "List Items (Ranked Spots)"
         name: "items"
         widget: "list"
@@ -241,130 +229,103 @@ collections:
         min: 1
         max: 20
         summary: "#{{fields.rank}} — {{fields.title}}"
-        hint: "Add 1–10 spots. The sponsor card inserts automatically between #3 and #4."
+        hint: "Add 1–10 spots. Sponsor card auto-injects between #3 and #4."
         fields:
-
-          # Maps to: item.rank → .rankBadge number (yellow square)
           - label: "Rank #"
             name: "rank"
             widget: "number"
             value_type: "int"
             min: 1
             max: 20
-            hint: "Display order. Lower = higher on the page."
-
-          # Maps to: item.tag → .iTag category label (e.g. "Fine Dining")
+            hint: "Display order. 1 = top of the list."
           - label: "Tag / Type"
             name: "tag"
             widget: "string"
             required: false
-            hint: "Short category shown above the headline. e.g. 'Fine Dining', 'Seafood'"
-
-          # Maps to: item.title → <h2 class="iTitle"> (24px Bold Century Gothic)
+            hint: "e.g. 'Fine Dining' — shown above the spot name."
           - label: "Spot Name"
             name: "title"
             widget: "string"
-            hint: "Renders at 24px Bold Century Gothic. Keep under 60 characters."
-
-          # Maps to: item.body → <p class="iBody"> (16px reading text)
+            hint: "24px Bold Century Gothic. Keep under 60 characters."
           - label: "Description"
             name: "body"
             widget: "text"
-            hint: "2–4 sentences. Renders at 16px. Editorial voice — be specific."
-
-          # Maps to: item.img → .imgWrap photo (16:8 wide editorial crop)
+            hint: "2–4 sentences at 16px. Be specific — no generic copy."
           - label: "Photo"
             name: "img"
             widget: "image"
             required: false
-            hint: "Wide crop preferred (16:8 or 2:1). Min 800px wide. Shows 'Photo coming soon' if blank."
+            hint: "Wide crop (16:8 or 2:1). Min 800px wide."
             media_folder: "/public/images/guides/best"
             public_folder: "/images/guides/best"
-
-          # Maps to: item.imgAlt → img alt attribute (accessibility)
           - label: "Photo Alt Text"
             name: "imgAlt"
             widget: "string"
             required: false
-            hint: "Describe the photo for screen readers. e.g. 'Grouper sandwich at Racing's North Turn'"
-
-          # Maps to: item.href → .iLink and .iCta "Learn more →"
+            hint: "e.g. 'Grouper sandwich at Racing North Turn'"
           - label: "Link URL"
             name: "href"
             widget: "string"
             required: false
-            hint: "Optional. e.g. /daytona/food/ or https://restaurant.com. Leave blank for no link."
-
-      # ── LOCAL SPONSOR OVERRIDE ──────────────────────────────────────────
-      # Maps to: data.localSponsor → sponsor card between items #3 and #4
-      # When filled, this beats the global Nike campaign for THIS guide only.
-      # Leave all fields blank to use the global sponsor.
-      # ─────────────────────────────────────────────────────────────────────
+            hint: "e.g. /daytona/food/ or https://restaurant.com"
+      # ── LOCAL SPONSOR OVERRIDE ─────────────────────────────────────────
+      # Overrides the global Nike campaign for THIS guide only.
+      # Leave collapsed/blank to keep the global campaign running.
+      # ───────────────────────────────────────────────────────────────────
       - label: "Local Sponsor (optional — overrides global)"
         name: "localSponsor"
         widget: "object"
         collapsed: true
-        hint: "Fill this in when you sell the #3/#4 slot to a local business. Leave blank for the global campaign."
+        hint: "Fill when you sell the #3/#4 slot locally. Leave blank for global."
         fields:
-
           - label: "Brand Name"
             name: "brand"
             widget: "string"
             required: false
             hint: "e.g. 'Aunt Catfish's on the River'"
-
           - label: "Tagline"
             name: "tagline"
             widget: "string"
             required: false
-            hint: "Short punchy line. e.g. 'Daytona's most legendary table.'"
-
+            hint: "e.g. 'Daytona's most legendary table.'"
           - label: "Description"
             name: "body"
             widget: "text"
             required: false
-            hint: "1–2 sentences about the sponsor. Renders at 14px inside the card."
-
+            hint: "1–2 sentences. Renders at 14px inside the sponsor card."
           - label: "Logo"
             name: "logo"
             widget: "image"
             required: false
-            hint: "Transparent PNG or SVG preferred. Displayed at 28px height."
+            hint: "Transparent PNG or SVG. Displayed at 28px height."
             media_folder: "/public/images/sponsors"
             public_folder: "/images/sponsors"
-
           - label: "Card Image"
             name: "img"
             widget: "image"
             required: false
-            hint: "Portrait crop (3:4 ratio). Shows on the left side of the sponsor card."
+            hint: "Portrait crop (3:4). Left side of the sponsor card."
             media_folder: "/public/images/sponsors"
             public_folder: "/images/sponsors"
-
           - label: "Image Alt Text"
             name: "imgAlt"
             widget: "string"
             required: false
-
           - label: "CTA Button Text"
             name: "ctaText"
             widget: "string"
             required: false
             default: "Learn more"
-            hint: "Text on the yellow button. e.g. 'Make a reservation'"
-
           - label: "CTA Link URL"
             name: "ctaHref"
             widget: "string"
             required: false
-            hint: "Where the CTA button goes. Full URL or internal path."
-
-      # Body markdown — editorial note rendered below the final list item
+            hint: "Full URL or internal path."
       - label: "Editorial Note (optional)"
         name: "body"
         widget: "markdown"
         required: false
-        hint: "Appears below spot #10. Good for disclosure copy, update dates, or a byline note."
+        hint: "Appears below the final spot. Good for bylines and disclosure copy."
 
 
   # ─────────────────────────────────────────────────────────────────────────
