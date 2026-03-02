@@ -8,6 +8,8 @@ tags:
   - food
   - best
 ---
+![](/images/uploads/burger.webp)
+
 Skip the neon signs and fried-everything. These five local secrets offer fresh flavors and authentic vibes without the "Spring Break" price tag or gimmicks.
 
 
@@ -53,6 +55,8 @@ Wait—isn't this a tourist spot? Technically, yes. But the downstairs beach bar
 
 
 ## **The GoDoDaytona Cheat Sheet**
+
+![]()
 
 The "I'm in a Rush" Move: Call ahead to Bethune Grill. The line is real.
 
