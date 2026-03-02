@@ -7,17 +7,6 @@
     <title>GoDoCity CMS</title>
   </head>
   <body>
-    <div id="nc-root"></div>
     <script src="https://unpkg.com/decap-cms@3.3.3/dist/decap-cms.js"></script>
-    <script>
-      // Explicit init — tells Decap exactly where the config lives.
-      // Avoids race conditions from defer and path-guessing failures.
-      CMS.init({
-        config: {
-          load_config_file: true,
-          config_file: '/admin/config.yml'
-        }
-      });
-    </script>
   </body>
 </html>
