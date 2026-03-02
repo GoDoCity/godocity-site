@@ -1,9 +1,10 @@
 # public/admin/config.yml
-# BARE MINIMUM — confirm this loads before adding anything else.
-
 backend:
-  name: git-gateway
+  name: github
+  repo: GoDoCity/godocity-site
   branch: main
+  auth_type: implicit
+  app_id: Ov23lizuiLRTW8pIf2PO
 
 media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
