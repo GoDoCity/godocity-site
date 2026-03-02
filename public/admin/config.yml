@@ -1,6 +1,6 @@
 # public/admin/config.yml
-# Decap CMS 3.x — GoDoCity MINIMUM VIABLE CONFIG
-# Get this loading first. Complex fields come after.
+# SAFE MODE — News + Global Sponsors only.
+# Add Guides collection back once login screen confirms CMS is loading.
 
 backend:
   name: git-gateway
@@ -73,140 +73,6 @@ collections:
         name: "body"
         widget: "markdown"
 
-  - name: "daytona-guides"
-    label: "Daytona - City Guides"
-    label_singular: "Guide"
-    folder: "src/content/guides/daytona"
-    create: true
-    delete: true
-    slug: "{{slug}}"
-    fields:
-      - label: "Guide Title"
-        name: "title"
-        widget: "string"
-      - label: "Intro"
-        name: "intro"
-        widget: "text"
-        required: false
-      - label: "Category"
-        name: "category"
-        widget: "select"
-        required: false
-        default: "City Guide"
-        options:
-          - {label: "Food & Drink", value: "Food & Drink"}
-          - {label: "Nightlife", value: "Nightlife"}
-          - {label: "Shopping", value: "Shopping"}
-          - {label: "Outdoors", value: "Outdoors"}
-          - {label: "Arts & Culture", value: "Arts & Culture"}
-          - {label: "Health & Wellness", value: "Health & Wellness"}
-          - {label: "City Guide", value: "City Guide"}
-      - label: "Author"
-        name: "author"
-        widget: "string"
-        required: false
-        default: "Charles King"
-      - label: "Author Role"
-        name: "role"
-        widget: "string"
-        required: false
-        default: "Newsletter Editor"
-      - label: "Publish Date"
-        name: "pubDate"
-        widget: "datetime"
-        required: false
-        date_format: "YYYY-MM-DD"
-        time_format: false
-      - label: "Hero Image"
-        name: "heroImage"
-        widget: "image"
-        required: false
-      - label: "City"
-        name: "city"
-        widget: "hidden"
-        default: "daytona"
-      - label: "List Items"
-        name: "items"
-        widget: "list"
-        label_singular: "Spot"
-        fields:
-          - label: "Rank"
-            name: "rank"
-            widget: "number"
-            value_type: int
-            min: 1
-            max: 20
-          - label: "Tag"
-            name: "tag"
-            widget: "string"
-            required: false
-          - label: "Spot Name"
-            name: "title"
-            widget: "string"
-          - label: "Description"
-            name: "body"
-            widget: "text"
-          - label: "Photo"
-            name: "img"
-            widget: "image"
-            required: false
-            media_folder: "/public/images/guides/best"
-            public_folder: "/images/guides/best"
-          - label: "Photo Alt Text"
-            name: "imgAlt"
-            widget: "string"
-            required: false
-          - label: "Link URL"
-            name: "href"
-            widget: "string"
-            required: false
-      - label: "Local Sponsor"
-        name: "localSponsor"
-        widget: "object"
-        collapsed: true
-        fields:
-          - label: "Brand Name"
-            name: "brand"
-            widget: "string"
-            required: false
-          - label: "Tagline"
-            name: "tagline"
-            widget: "string"
-            required: false
-          - label: "Description"
-            name: "sponsorBody"
-            widget: "text"
-            required: false
-          - label: "Logo"
-            name: "logo"
-            widget: "image"
-            required: false
-            media_folder: "/public/images/sponsors"
-            public_folder: "/images/sponsors"
-          - label: "Card Image"
-            name: "img"
-            widget: "image"
-            required: false
-            media_folder: "/public/images/sponsors"
-            public_folder: "/images/sponsors"
-          - label: "Image Alt Text"
-            name: "imgAlt"
-            widget: "string"
-            required: false
-          - label: "CTA Button Text"
-            name: "ctaText"
-            widget: "string"
-            required: false
-            default: "Learn more"
-          - label: "CTA Link URL"
-            name: "ctaHref"
-            widget: "string"
-            required: false
-      - label: "Editorial Note"
-        name: "body"
-        widget: "markdown"
-        required: false
-
   - name: "global-sponsors"
     label: "Global Sponsors"
     label_singular: "Sponsor Campaign"
@@ -235,7 +101,6 @@ collections:
       - label: "Body Copy"
         name: "body"
         widget: "text"
-        hint: "1-2 sentences."
       - label: "Logo"
         name: "logo"
         widget: "image"
