@@ -24,7 +24,7 @@ const posts = defineCollection({
     description: z.string().optional(),
     pubDate:     z.coerce.date().optional(),
     author:      z.string().optional(),
-    heroImage:   z.string().optional(),
+    heroImage:   z.string().optional().transform(v => v === "" ? undefined : v),
     tags:        z.array(z.string()).optional(),
     category:    z.string().optional(),
     city:        z.string().optional(),
