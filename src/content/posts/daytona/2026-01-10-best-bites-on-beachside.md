@@ -8,7 +8,7 @@ tags:
   - food
   - best
 ---
-![](/images/uploads/burger.webp)
+<img src="/images/uploads/burger.webp" alt="burger" />
 
 Skip the neon signs and fried-everything. These five local secrets offer fresh flavors and authentic vibes without the "Spring Break" price tag or gimmicks.
 
