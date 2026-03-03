@@ -15,7 +15,7 @@ description: Start times, road closures, parking lots that won't drain your
   years running.
 category: Sports
 ---
-![](/images/uploads/daytona-international-speedway-nascar-xfinity-series-daytona-500.jpg-1.jpg)
+<img src="/images/uploads/yourfile.jpg" alt="describe it" style="width:100%;max-width:100%;height:300px;object-fit:cover;border-radius:12px;margin:1.5rem 0;" />
 
 Race Week is back. The 68th running of the Daytona 500 drops the green flag on Sunday, February 16th — and if you've never experienced it from inside the track, this is the year to go.
 
