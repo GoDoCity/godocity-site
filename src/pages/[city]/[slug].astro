@@ -342,6 +342,11 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     align-items: start;
     padding: 40px 0 56px;
   }
+  /* Grid items must have min-width: 0 or they ignore column constraints */
+  .homeGrid > * {
+    min-width: 0;
+    overflow: hidden;
+  }
   @media (max-width: 980px) {
     .homeGrid { grid-template-columns: 1fr; }
     .homeRail { order: 2; }
