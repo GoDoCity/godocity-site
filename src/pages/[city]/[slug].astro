@@ -261,34 +261,38 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
         </div>
 
         {/* Upcoming Events */}
-        <div class="railSection">
-          <div class="railHead">
-            <span class="railTitle">Upcoming Events</span>
-            <a class="railMore" href={`/${city}/events/`}>See all</a>
+<div class="railSection">
+  <div class="railHead">
+    <span class="railTitle">Upcoming Events</span>
+    <a class="railMore" href={`/${city}/events/`}>See all</a>
+  </div>
+  <div class="eventList">
+    {upcomingEvents.length > 0 ? upcomingEvents.map(e => {
+      const d   = new Date(e.data.eventDate);
+      const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+      const day = d.getDate();
+      const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+      return (
+        <a class="eventRow"
+           href={e.data.url ?? `/${city}/events/`}
+           target={e.data.url ? "_blank" : "_self"}
+           rel={e.data.url ? "noopener" : ""}>
+          <div class="eventCal">
+            <div class="eDow">{dow}</div>
+            <div class="eDay">{day}</div>
+            <div class="eMon">{mon}</div>
           </div>
-          <div class="eventList">
-            <a class="eventRow" href={`/${city}/events/`}>
-              <div class="eventCal">
-                <div class="eDow">SAT</div>
-                <div class="eDay">15</div>
-              </div>
-              <div class="eventInfo">
-                <div class="eName">Add your first event</div>
-                <div class="ePlace">{cityCap} Beach</div>
-              </div>
-            </a>
-            <a class="eventRow" href={`/${city}/events/`}>
-              <div class="eventCal">
-                <div class="eDow">SUN</div>
-                <div class="eDay">16</div>
-              </div>
-              <div class="eventInfo">
-                <div class="eName">Second event placeholder</div>
-                <div class="ePlace">Ormond Beach</div>
-              </div>
-            </a>
+          <div class="eventInfo">
+            <div class="eName">{e.data.title}</div>
+            <div class="ePlace">{e.data.location}</div>
           </div>
-        </div>
+        </a>
+      );
+    }) : (
+      <p class="noEvents">No upcoming events.</p>
+    )}
+  </div>
+</div>
 
         {/* Display ad slot */}
         <div class="displayAdSlot">
