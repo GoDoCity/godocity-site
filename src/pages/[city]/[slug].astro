@@ -118,8 +118,9 @@ const today = new Date();
 today.setHours(0, 0, 0, 0);
 const upcomingEvents = (await getCollection("events"))
   .filter(e => {
-    const evCity = e.data.city ?? e.slug.split("/")[0];
-    return evCity === city && new Date(e.data.eventDate) >= today;
+    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+    const pageCity = city.toLowerCase().trim();
+    return evCity === pageCity && new Date(e.data.eventDate) >= today;
   })
   .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
   .slice(0, 4);
@@ -489,7 +490,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     color: var(--text); font-style: italic; font-size: 17px;
   }
   .articleBody :global(img) {
-    width: 100%; border-radius: 10px; margin: 1.4em 0; display: block;
+    width: 100%; max-width: 100%; height: auto;
+    border-radius: 10px; margin: 1.4em 0; display: block;
   }
   .articleBody :global(hr) {
     border: none; border-top: 1px solid var(--border); margin: 2em 0;
@@ -639,6 +641,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   }
   .eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
   .eDay { font-size: 19px; font-weight: 900; color: var(--text); margin-top: 1px; }
+  .eMon { font-size: 8px; font-weight: 700; letter-spacing: .08em; color: var(--faint); text-transform: uppercase; }
   .eventInfo { display: flex; flex-direction: column; gap: 2px; }
   .eName  { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
   .ePlace { font-size: 13px; color: var(--faint); }
