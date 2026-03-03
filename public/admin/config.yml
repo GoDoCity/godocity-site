@@ -1,4 +1,3 @@
-# public/admin/config.yml
 backend:
   name: github
   repo: GoDoCity/godocity-site
@@ -10,6 +9,7 @@ media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
 collections:
+
   - name: "daytona-news"
     label: "Daytona - News"
     label_singular: "Article"
@@ -18,23 +18,64 @@ collections:
     delete: true
     slug: "{{slug}}"
     fields:
-      - label: "Headline"
-        name: "title"
-        widget: "string"
-      - label: "Publish Date"
-        name: "pubDate"
-        widget: "datetime"
+      - {label: "Headline", name: "title", widget: "string"}
+      - {label: "Publish Date", name: "pubDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false}
+      - {label: "Author", name: "author", widget: "string", required: false, default: "Charles King"}
+      - label: "Category"
+        name: "category"
+        widget: "select"
         required: false
-        date_format: "YYYY-MM-DD"
-        time_format: false
-      - label: "Author"
-        name: "author"
-        widget: "string"
+        options:
+          - {label: "Sports", value: "Sports"}
+          - {label: "Food & Drink", value: "Food & Drink"}
+          - {label: "Events", value: "Events"}
+          - {label: "Business", value: "Business"}
+          - {label: "Real Estate", value: "Real Estate"}
+          - {label: "Politics", value: "Politics"}
+          - {label: "Community", value: "Community"}
+          - {label: "Tourism", value: "Tourism"}
+          - {label: "Arts & Culture", value: "Arts & Culture"}
+          - {label: "Weather", value: "Weather"}
+      - {label: "Tags", name: "tags", widget: "list", required: false}
+      - {label: "Description", name: "description", widget: "text", required: false}
+      - {label: "Hero Image", name: "heroImage", widget: "image", required: false}
+      - {label: "City", name: "city", widget: "hidden", default: "daytona"}
+      - {label: "Featured", name: "featured", widget: "boolean", required: false, default: false}
+      - {label: "Body", name: "body", widget: "markdown"}
+
+  - name: "daytona-events"
+    label: "Daytona - Events"
+    label_singular: "Event"
+    folder: "src/content/events/daytona"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    summary: "{{title}} - {{eventDate}}"
+    fields:
+      - {label: "Event Name", name: "title", widget: "string"}
+      - {label: "Event Date", name: "eventDate", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false, hint: "Past events hide automatically."}
+      - {label: "End Date", name: "endDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false, hint: "Multi-day events only."}
+      - {label: "Location / Venue", name: "location", widget: "string", hint: "e.g. Daytona International Speedway"}
+      - {label: "Address", name: "address", widget: "string", required: false}
+      - {label: "City", name: "city", widget: "hidden", default: "daytona"}
+      - label: "Category"
+        name: "category"
+        widget: "select"
         required: false
-        default: "Charles King"
-      - label: "Body"
-        name: "body"
-        widget: "markdown"
+        options:
+          - {label: "Sports", value: "Sports"}
+          - {label: "Music", value: "Music"}
+          - {label: "Food & Drink", value: "Food & Drink"}
+          - {label: "Arts & Culture", value: "Arts & Culture"}
+          - {label: "Community", value: "Community"}
+          - {label: "Outdoors", value: "Outdoors"}
+          - {label: "Family", value: "Family"}
+          - {label: "Nightlife", value: "Nightlife"}
+      - {label: "Short Description", name: "description", widget: "text", required: false}
+      - {label: "Ticket / Info URL", name: "url", widget: "string", required: false, hint: "Leave blank to link to events page."}
+      - {label: "Event Image", name: "image", widget: "image", required: false}
+      - {label: "Featured", name: "featured", widget: "boolean", required: false, default: false, hint: "ON = pinned to top of events list."}
+      - {label: "Body", name: "body", widget: "markdown", required: false}
 
   - name: "global-sponsors"
     label: "Global Sponsors"
@@ -44,20 +85,13 @@ collections:
     delete: true
     slug: "{{brand}}-campaign"
     fields:
-      - label: "Active"
-        name: "active"
-        widget: "boolean"
-        default: true
-        hint: "ON = running everywhere. OFF = paused instantly."
-      - label: "Brand Name"
-        name: "brand"
-        widget: "string"
-      - label: "Tagline"
-        name: "tagline"
-        widget: "string"
-      - label: "Body Copy"
-        name: "body"
-        widget: "text"
-      - label: "CTA Link URL"
-        name: "ctaHref"
-        widget: "string"
+      - {label: "Active", name: "active", widget: "boolean", default: true, hint: "ON = running everywhere. OFF = paused instantly."}
+      - {label: "Brand Name", name: "brand", widget: "string"}
+      - {label: "Campaign Start Date", name: "pubDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false}
+      - {label: "Tagline", name: "tagline", widget: "string"}
+      - {label: "Body Copy", name: "body", widget: "text"}
+      - {label: "Logo", name: "logo", widget: "image", required: false, media_folder: "/public/images/sponsors", public_folder: "/images/sponsors"}
+      - {label: "Campaign Image", name: "img", widget: "image", required: false, media_folder: "/public/images/sponsors", public_folder: "/images/sponsors"}
+      - {label: "Image Alt Text", name: "imgAlt", widget: "string", required: false}
+      - {label: "CTA Button Text", name: "ctaText", widget: "string", required: false, default: "Learn more"}
+      - {label: "CTA Link URL", name: "ctaHref", widget: "string"}
