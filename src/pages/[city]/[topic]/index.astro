@@ -29,17 +29,24 @@ function dateText(post) {
 }
 function excerpt(post) { return post?.data?.description ?? ""; }
 
-/* Returns the most specific tag that isn't the current topic — shown as kicker */
+/* Returns the subtopic label shown as a kicker above the headline.
+   Priority: explicit frontmatter `subtopic` field → `category` (if different
+   from the current topic page) → first non-current tag. */
 function subtopic(post, currentTopicSlug) {
+  const explicit = typeof post.data.subtopic === "string" ? post.data.subtopic.trim() : "";
+  if (explicit) return explicit;
+  const cat = typeof post.data.category === "string" ? post.data.category.trim() : "";
+  if (cat && tagSlug(tagKey(cat)) !== currentTopicSlug) return cat;
   const tags = Array.isArray(post.data.tags) ? post.data.tags : [];
   const other = tags.find(t => tagSlug(tagKey(t)) !== currentTopicSlug);
-  if (other) return tagLabel(tagKey(other));
-  return typeof post.data.category === "string" ? post.data.category.trim() : "";
+  return other ? tagLabel(tagKey(other)) : "";
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
    getStaticPaths
-   Builds one page per (city, topic) pair found in the posts collection.
+   Always generates the 9 canonical topic pages for every city that has posts,
+   so /daytona/biz/ exists even when no posts are tagged "biz" yet.
+   Tag-derived topics beyond the known list are also included.
    "events" is excluded — that segment is owned by [city]/events/index.astro.
 ──────────────────────────────────────────────────────────────────────────── */
 export async function getStaticPaths() {
@@ -48,15 +55,42 @@ export async function getStaticPaths() {
   const _tagKey  = (raw) => String(raw ?? "").toLowerCase().trim().replace(/[-_]+/g, " ").replace(/\s+/g, " ");
   const _tagSlug = (key) => String(key ?? "").toLowerCase().trim().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-  /* Map: "city|||topicSlug" → topicKey (the normalized tag text) */
+  /* Canonical nav topics — always built for every city with posts */
+  const KNOWN = [
+    { slug: "biz",             key: "biz" },
+    { slug: "city",            key: "city" },
+    { slug: "culture",         key: "culture" },
+    { slug: "food",            key: "food" },
+    { slug: "history",         key: "history" },
+    { slug: "real-estate",     key: "real estate" },
+    { slug: "sports",          key: "sports" },
+    { slug: "travel-outdoors", key: "travel outdoors" },
+    { slug: "wellness",        key: "wellness" },
+  ];
+
+  /* Collect all cities that have at least one post */
+  const cities = new Set();
+  for (const post of all) {
+    const city = (post.data.city ?? post.id?.split("/")[0] ?? "").toLowerCase().trim();
+    if (city) cities.add(city);
+  }
+
+  /* Seed with known topics × all cities */
   const map = new Map();
+  for (const city of cities) {
+    for (const t of KNOWN) map.set(`${city}|||${t.slug}`, t.key);
+  }
+
+  /* Add any additional tag-derived topics not already in the map */
   for (const post of all) {
     const city = (post.data.city ?? post.id?.split("/")[0] ?? "").toLowerCase().trim();
     if (!city) continue;
     for (const tag of (Array.isArray(post.data.tags) ? post.data.tags : [])) {
       const key  = _tagKey(tag);
       const slug = _tagSlug(key);
-      if (slug && slug !== "events") map.set(`${city}|||${slug}`, key);
+      if (slug && slug !== "events" && !map.has(`${city}|||${slug}`)) {
+        map.set(`${city}|||${slug}`, key);
+      }
     }
   }
 
