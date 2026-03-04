@@ -59,7 +59,7 @@ for (const event of upcomingEvents) {
               const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
               const day = d.getDate();
               const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              const href = e.data.url ?? `/daytona/events/`;
+              const href = e.data.url ?? `/daytona/events/${e.slug}/`;
               const isExternal = !!e.data.url;
               return (
                 <a

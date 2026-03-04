@@ -1,0 +1,143 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const events = await getCollection("events");
+  return events.map(e => ({ params: { slug: e.slug }, props: { event: e } }));
+}
+
+const { event } = Astro.props;
+const { data } = event;
+
+const d = new Date(data.eventDate);
+const dateLabel = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+
+let endLabel = "";
+if (data.endDate) {
+  const end = new Date(data.endDate);
+  if (end.toDateString() !== d.toDateString()) {
+    endLabel = end.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  }
+}
+
+const { Content } = await event.render();
+---
+
+<Base title={data.title} subtitle={data.description ?? `${data.title} — GoDo Daytona`} cityBase="daytona">
+  <section class="section">
+    <div class="container">
+      <div class="eventDetail">
+
+        <div class="eventHeader">
+          {data.category && <span class="catPill">{data.category}</span>}
+          <h1 class="eventTitle">{data.title}</h1>
+          {data.description && <p class="eventDesc">{data.description}</p>}
+        </div>
+
+        <div class="eventMeta">
+          <div class="metaRow">
+            <span class="metaIcon">📅</span>
+            <span>{dateLabel}{endLabel ? ` – ${endLabel}` : ""}</span>
+          </div>
+          <div class="metaRow">
+            <span class="metaIcon">📍</span>
+            <span>{data.location}{data.address ? `, ${data.address}` : ""}</span>
+          </div>
+          {data.url && (
+            <div class="metaRow">
+              <span class="metaIcon">🔗</span>
+              <a class="metaLink" href={data.url} target="_blank" rel="noopener noreferrer">More info ↗</a>
+            </div>
+          )}
+        </div>
+
+        <article class="eventBody">
+          <Content />
+        </article>
+
+        <p class="backLink">
+          <a class="pill" href="/daytona/events/">← All events</a>
+        </p>
+
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .eventDetail {
+    max-width: 680px;
+    padding-top: 16px;
+  }
+
+  .catPill {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: rgba(255,212,74,.12);
+    color: var(--accent);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .eventTitle {
+    font-size: clamp(24px, 3vw, 38px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin: 0 0 10px;
+  }
+
+  .eventDesc {
+    font-size: 17px;
+    color: var(--muted);
+    margin: 0 0 24px;
+    line-height: 1.5;
+  }
+
+  .eventMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 28px;
+    padding: 18px 20px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.03);
+  }
+
+  .metaRow {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .metaIcon {
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .metaLink {
+    color: var(--link);
+    text-decoration: none;
+    font-weight: 700;
+  }
+  .metaLink:hover { text-decoration: underline; }
+
+  .eventBody {
+    line-height: 1.65;
+    font-size: 16px;
+    margin-bottom: 28px;
+  }
+
+  .backLink {
+    margin-top: 8px;
+    display: flex;
+    gap: 10px;
+  }
+</style>
