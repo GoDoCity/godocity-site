@@ -1,13 +1,213 @@
 ---
 import Base from "../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
 const title = "Events";
 const subtitle = "GoDoDaytona — local events worth knowing about.";
----
-<Base title={title} subtitle={subtitle} cityBase="daytona" />
 
-<section class="section">
-  <div class="container">
-    <h1 class="h1">Events</h1>
-    <p class="lede">Coming soon. Festivals, shows, markets, and what’s happening in Daytona Beach.</p>
-  </div>
-</section>
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+let allEvents = [];
+let collectErr = "";
+try { allEvents = await getCollection("events"); } catch(err) { collectErr = String(err); allEvents = []; }
+
+const debugMsg = `[DEBUG] Total events: ${allEvents.length} | Upcoming (daytona): ${
+  allEvents.filter(e => {
+    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+    const evDate = new Date(e.data.eventDate);
+    evDate.setHours(0,0,0,0);
+    const t = new Date(); t.setHours(0,0,0,0);
+    return evCity === "daytona" && evDate >= t;
+  }).length
+}${collectErr ? " | ERROR: " + collectErr : ""}`;
+
+const upcomingEvents = allEvents
+  .filter(e => {
+    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+    const evDate = new Date(e.data.eventDate);
+    evDate.setHours(0, 0, 0, 0);
+    return evCity === "daytona" && evDate >= today;
+  })
+  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime());
+
+// Group events by "Month Year" label
+function monthLabel(date) {
+  return new Date(date).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+}
+
+const grouped = [];
+for (const event of upcomingEvents) {
+  const label = monthLabel(event.data.eventDate);
+  const last = grouped[grouped.length - 1];
+  if (last && last.label === label) {
+    last.events.push(event);
+  } else {
+    grouped.push({ label, events: [event] });
+  }
+}
+---
+
+<Base title={title} subtitle={subtitle} cityBase="daytona">
+  <section class="section">
+    <div class="container">
+
+      <p style="font-size:11px;color:red;margin:0 0 12px">{debugMsg}</p>
+
+      <div class="eventsHeader">
+        <h1 class="h1">Events</h1>
+        <p class="lede">Festivals, shows, markets, and what's happening in Daytona Beach.</p>
+      </div>
+
+      {upcomingEvents.length === 0 ? (
+        <p class="noEvents">No upcoming events right now — check back soon.</p>
+      ) : grouped.map(group => (
+        <div class="monthGroup">
+          <h2 class="monthLabel">{group.label}</h2>
+          <div class="eventList">
+            {group.events.map(e => {
+              const d   = new Date(e.data.eventDate);
+              const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+              const day = d.getDate();
+              const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const href = e.data.url ?? `/daytona/events/`;
+              const isExternal = !!e.data.url;
+              return (
+                <a
+                  class="eventCard"
+                  href={href}
+                  target={isExternal ? "_blank" : "_self"}
+                  rel={isExternal ? "noopener noreferrer" : ""}
+                >
+                  <div class="eventCal">
+                    <div class="eDow">{dow}</div>
+                    <div class="eDay">{day}</div>
+                    <div class="eMon">{mon}</div>
+                  </div>
+                  <div class="eventInfo">
+                    <div class="eName">{e.data.title}</div>
+                    <div class="eMeta">
+                      <span class="ePlace">{e.data.location}</span>
+                      {e.data.address && <span class="eAddress">{e.data.address}</span>}
+                    </div>
+                    {e.data.category && <span class="eCat">{e.data.category}</span>}
+                  </div>
+                  {isExternal && <span class="eExtIcon" aria-hidden="true">↗</span>}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+
+    </div>
+  </section>
+</Base>
+
+<style>
+  .eventsHeader {
+    padding: 12px 0 24px;
+  }
+
+  .noEvents {
+    color: var(--muted);
+    font-size: 16px;
+    padding: 32px 0;
+  }
+
+  .monthGroup {
+    margin-bottom: 36px;
+  }
+
+  .monthLabel {
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--muted);
+    margin: 0 0 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+
+  .eventList {
+    display: grid;
+    gap: 4px;
+  }
+
+  .eventCard {
+    display: grid;
+    grid-template-columns: 56px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    text-decoration: none;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.07);
+    background: rgba(255,255,255,.02);
+    transition: border-color 140ms, background 140ms;
+  }
+  .eventCard:hover {
+    border-color: rgba(255,255,255,.15);
+    background: rgba(255,255,255,.05);
+  }
+
+  .eventCal {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    background: rgba(255,255,255,.06);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .eDow { font-size: 9px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
+  .eDay { font-size: 20px; font-weight: 900; color: var(--text); margin: 1px 0; }
+  .eMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+
+  .eventInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+  .eName {
+    font-weight: 800;
+    font-size: 16px;
+    color: var(--text);
+    line-height: 1.2;
+  }
+  .eMeta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 8px;
+    font-size: 13px;
+    color: var(--faint);
+  }
+  .eAddress::before { content: "·  "; }
+  .eCat {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(255,212,74,.12);
+    color: var(--accent);
+    width: fit-content;
+    margin-top: 2px;
+  }
+
+  .eExtIcon {
+    font-size: 14px;
+    color: var(--muted);
+    opacity: .6;
+    align-self: center;
+  }
+
+  @media (max-width: 520px) {
+    .eventCard { grid-template-columns: 56px 1fr; padding: 12px; }
+    .eExtIcon { display: none; }
+  }
+</style>
