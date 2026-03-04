@@ -12,15 +12,6 @@ let allEvents = [];
 let collectErr = "";
 try { allEvents = await getCollection("events"); } catch(err) { collectErr = String(err); allEvents = []; }
 
-const debugMsg = `[DEBUG] Total events: ${allEvents.length} | Upcoming (daytona): ${
-  allEvents.filter(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    const evDate = new Date(e.data.eventDate);
-    evDate.setHours(0,0,0,0);
-    const t = new Date(); t.setHours(0,0,0,0);
-    return evCity === "daytona" && evDate >= t;
-  }).length
-}${collectErr ? " | ERROR: " + collectErr : ""}`;
 
 const upcomingEvents = allEvents
   .filter(e => {
@@ -52,9 +43,7 @@ for (const event of upcomingEvents) {
   <section class="section">
     <div class="container">
 
-      <p style="font-size:11px;color:red;margin:0 0 12px">{debugMsg}</p>
-
-      <div class="eventsHeader">
+<div class="eventsHeader">
         <h1 class="h1">Events</h1>
         <p class="lede">Festivals, shows, markets, and what's happening in Daytona Beach.</p>
       </div>
