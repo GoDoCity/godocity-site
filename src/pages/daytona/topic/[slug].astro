@@ -130,6 +130,21 @@ export async function getStaticPaths() {
 
 /** Page data */
 const { topicKey } = Astro.props;
+
+/* Live upcoming events for sidebar */
+const sidebarToday = new Date();
+sidebarToday.setHours(0, 0, 0, 0);
+let allEvents = [];
+try { allEvents = await getCollection("events"); } catch { allEvents = []; }
+const sidebarEvents = allEvents
+  .filter(e => {
+    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+    const evDate = new Date(e.data.eventDate);
+    evDate.setHours(0, 0, 0, 0);
+    return evCity === "daytona" && evDate >= sidebarToday;
+  })
+  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
+  .slice(0, 3);
 const topicLabel = tagLabelFromKey(topicKey);
 
 const all = await getCollection("posts");
@@ -232,32 +247,39 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
         <div class="moduleCard eventsCard">
           <div class="moduleTitle">Upcoming Events</div>
-
-          <div class="eventsList" role="list">
-            <div class="eventRow" role="listitem">
-              <div class="eventDate">
-                <div class="eventDay">SAT</div>
-                <div class="eventNum">15</div>
-              </div>
-              <div class="eventInfo">
-                <div class="eventName">Add your first event</div>
-                <div class="eventPlace">Daytona Beach</div>
-              </div>
+          {sidebarEvents.length > 0 ? (
+            <div class="eventsList" role="list">
+              {sidebarEvents.map((e, i) => {
+                const d   = new Date(e.data.eventDate);
+                const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                const day = d.getDate();
+                const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const evSlug = e.slug.split("/").pop();
+                return (
+                  <>
+                    {i > 0 && <div class="eventDivider" aria-hidden="true"></div>}
+                    <a class="eventRow" role="listitem"
+                       href={e.data.url ?? `/daytona/events/${evSlug}/`}
+                       target={e.data.url ? "_blank" : "_self"}
+                       rel={e.data.url ? "noopener" : ""}>
+                      <div class="eventDate">
+                        <div class="eventDay">{dow}</div>
+                        <div class="eventNum">{day}</div>
+                        <div class="eventMon">{mon}</div>
+                      </div>
+                      <div class="eventInfo">
+                        <div class="eventName">{e.data.title}</div>
+                        <div class="eventPlace">{e.data.location}</div>
+                      </div>
+                    </a>
+                  </>
+                );
+              })}
             </div>
-
-            <div class="eventDivider" aria-hidden="true"></div>
-
-            <div class="eventRow" role="listitem">
-              <div class="eventDate">
-                <div class="eventDay">SUN</div>
-                <div class="eventNum">16</div>
-              </div>
-              <div class="eventInfo">
-                <div class="eventName">Second event placeholder</div>
-                <div class="eventPlace">Ormond Beach</div>
-              </div>
-            </div>
-          </div>
+          ) : (
+            <p class="noEvents">No upcoming events — check back soon.</p>
+          )}
+          <a class="eventsLink" href="/daytona/events/">See all events →</a>
         </div>
       </aside>
 
@@ -624,4 +646,9 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     border-radius: 999px;
     margin: 2px 0;
   }
+  .eventMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+  .noEvents { font-size: 13px; color: var(--faint); padding: 10px 0 4px; margin: 0; }
+  .eventsLink { display: block; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
+  .eventsLink:hover { text-decoration: underline; }
+  .eventRow { text-decoration: none; }
 </style>
