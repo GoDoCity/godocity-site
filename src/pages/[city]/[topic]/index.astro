@@ -29,6 +29,14 @@ function dateText(post) {
 }
 function excerpt(post) { return post?.data?.description ?? ""; }
 
+/* Returns the most specific tag that isn't the current topic — shown as kicker */
+function subtopic(post, currentTopicSlug) {
+  const tags = Array.isArray(post.data.tags) ? post.data.tags : [];
+  const other = tags.find(t => tagSlug(tagKey(t)) !== currentTopicSlug);
+  if (other) return tagLabel(tagKey(other));
+  return typeof post.data.category === "string" ? post.data.category.trim() : "";
+}
+
 /* ────────────────────────────────────────────────────────────────────────────
    getStaticPaths
    Builds one page per (city, topic) pair found in the posts collection.
@@ -112,7 +120,11 @@ const upcomingEvents = allEvents
                 </div>
               )}
               <div class="heroBody">
-                <div class="heroKicker">{isFeatured(hero) ? "FEATURED" : "TOP STORY"}</div>
+                {(subtopic(hero, topic) || isFeatured(hero)) && (
+                  <div class="heroKicker">
+                    {subtopic(hero, topic) || "FEATURED"}
+                  </div>
+                )}
                 <div class="heroTitle">{hero.data.title}</div>
                 {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
                 <div class="heroMeta">{dateText(hero)}</div>
@@ -132,6 +144,7 @@ const upcomingEvents = allEvents
                     <div class="rowThumbWrap isEmpty" aria-hidden="true"></div>
                   )}
                   <div class="rowText">
+                    {subtopic(p, topic) && <div class="rowKicker">{subtopic(p, topic)}</div>}
                     <div class="rowTitle">{p.data.title ?? p.slug}</div>
                     {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
                     <div class="rowMeta">{dateText(p)}</div>
@@ -315,6 +328,11 @@ const upcomingEvents = allEvents
     text-decoration: none;
   }
   .rowText { min-width: 0; }
+  .rowKicker {
+    font-size: 10px; font-weight: 800;
+    letter-spacing: .10em; text-transform: uppercase;
+    color: var(--brand1); margin-bottom: 4px; line-height: 1;
+  }
   .rowTitle { font-weight: 900; font-size: 17px; line-height: 1.18; letter-spacing: -0.01em; }
   .rowDesc {
     margin-top: 7px; opacity: .84; font-size: 14px; line-height: 1.45;

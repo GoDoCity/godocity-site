@@ -277,7 +277,7 @@ const topics = [
           </div>
           <div class="topicsGrid">
             {topics.map((t) => (
-              <a class="topicTile" href={`/daytona/topics/${t.slug}/`}>
+              <a class="topicTile" href={t.slug === "events" ? `/daytona/events/` : `/daytona/${t.slug}/`}>
                 <img class="topicImg" src={t.img} alt={t.label} loading="lazy" decoding="async" onerror="this.style.opacity='0'" />
                 <div class="topicGrad" aria-hidden="true" />
                 <span class="topicLabel">{t.label}</span>
