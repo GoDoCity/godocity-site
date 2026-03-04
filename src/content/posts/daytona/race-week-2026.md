@@ -1,10 +1,8 @@
 ---
-heroImage: /images/posts/daytona/race-week-2026-hero.jpg
-pubDate: 2026-02-10
-city: daytona
-author: Charles King
-featured: true
 title: "Race Week 2026: Everything You Need to Know Before the 500"
+pubDate: 2026-02-10
+author: Charles King
+category: Sports
 tags:
   - Sports
   - Daytona 500
@@ -13,7 +11,9 @@ tags:
 description: Start times, road closures, parking lots that won't drain your
   wallet, and the one grandstand section Charles King has sat in for eleven
   years running.
-category: Sports
+heroImage: /images/uploads/daytona-international-speedway-nascar-xfinity-series-daytona-500.jpg-1.jpg
+city: daytona
+featured: true
 ---
 <img src="/images/uploads/yourfile.jpg" alt="describe it" style="width:100%;max-width:100%;height:300px;object-fit:cover;border-radius:12px;margin:1.5rem 0;" />
 
