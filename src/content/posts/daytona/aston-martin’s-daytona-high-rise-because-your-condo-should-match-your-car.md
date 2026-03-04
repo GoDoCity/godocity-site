@@ -3,9 +3,8 @@ title: "Aston Martin’s Daytona High-Rise: Because Your Condo Should Match Your
 pubDate: 2026-03-04
 author: Charles King
 category: Real Estate
-subtopic: Luxury Development
-tags:
-  - "#AstonMartin #LuxuryLiving #Beachside #DaytonaGlowUp"
+subtopic: Development
+tags: []
 description: Automotive luxury meets high-rise living as Aston Martin breaks
   ground on an 18-story tower, proving Daytona is traded its spring-break
   reputation for something much more... expensive.
