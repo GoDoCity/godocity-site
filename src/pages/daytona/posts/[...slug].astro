@@ -84,11 +84,7 @@ export async function getStaticPaths() {
       if (city === "daytona") return true;
       return typeof post?.id === "string" && post.id.startsWith("daytona/");
     })
-  .sort((a, b) => {
-      const da = new Date(a?.data?.pubDate ?? a?.data?.date ?? a?.data?.published ?? a?.data?.updated ?? 0).getTime();
-      const db = new Date(b?.data?.pubDate ?? b?.data?.date ?? b?.data?.published ?? b?.data?.updated ?? 0).getTime();
-      return db - da;
-    });
+    .sort((a, b) => new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime());
   return daytonaPosts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
 }
 
