@@ -218,7 +218,7 @@ const upcomingEvents = allEvents
               const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
               return (
                 <a class="eventRow"
-                   href={e.data.url ?? `/daytona/events/${e.slug}/`}
+                   href={e.data.url ?? `/daytona/events/${e.slug.split("/").pop()}/`}
                    target={e.data.url ? "_blank" : "_self"}
                    rel={e.data.url ? "noopener" : ""}>
                   <div class="eventCal">
