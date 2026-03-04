@@ -13,44 +13,23 @@ function isFeatured(post) {
 
 /* Tag normalization */
 function tagKey(raw) {
-  return String(raw ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/[-_]+/g, " ")
-    .replace(/\s+/g, " ");
+  return String(raw ?? "").toLowerCase().trim().replace(/[-_]+/g, " ").replace(/\s+/g, " ");
 }
 function tagSlugFromKey(key) {
-  return String(key ?? "")
-    .toLowerCase()
-    .trim()
-    .replace(/&/g, "and")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+  return String(key ?? "").toLowerCase().trim().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 function tagLabelFromKey(key) {
   const s = String(key ?? "").trim().replace(/\s+/g, " ");
   if (!s) return "";
-  return s
-    .split(" ")
-    .filter(Boolean)
-    .map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : ""))
-    .join(" ");
+  return s.split(" ").filter(Boolean).map((w) => (w ? w.charAt(0).toUpperCase() + w.slice(1) : "")).join(" ");
 }
 
 /* Safe date getter */
 function getPostDate(post) {
-  return (
-    post?.data?.pubDate ??
-    post?.data?.date ??
-    post?.data?.published ??
-    post?.data?.updated ??
-    null
-  );
+  return post?.data?.pubDate ?? post?.data?.date ?? post?.data?.published ?? post?.data?.updated ?? null;
 }
 function sortNewestFirst(a, b) {
-  const da = new Date(getPostDate(a) ?? 0).getTime();
-  const db = new Date(getPostDate(b) ?? 0).getTime();
-  return db - da;
+  return new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime();
 }
 
 /* Hero image field */
@@ -64,8 +43,7 @@ const MAX_FEATURED_IN_RELATED = 1;
 
 function normalizeTags(post) {
   const raw = Array.isArray(post?.data?.tags) ? post.data.tags : [];
-  const keys = raw.map(tagKey).filter(Boolean);
-  return Array.from(new Set(keys));
+  return Array.from(new Set(raw.map(tagKey).filter(Boolean)));
 }
 function sharedTagScore(aKeys, bKeys) {
   if (!aKeys.length || !bKeys.length) return 0;
@@ -77,62 +55,37 @@ function sharedTagScore(aKeys, bKeys) {
 function buildRelatedPosts(currentPost, allCityPosts) {
   const currentSlug = currentPost?.slug;
   const currentKeys = normalizeTags(currentPost);
-
   const candidates = allCityPosts
     .filter((p) => p?.slug && p.slug !== currentSlug)
     .map((p) => {
       const keys = normalizeTags(p);
-      const score = sharedTagScore(currentKeys, keys);
-      const date = new Date(getPostDate(p) ?? 0).getTime();
-      return { p, score, date };
+      return { p, score: sharedTagScore(currentKeys, keys), date: new Date(getPostDate(p) ?? 0).getTime() };
     });
-
-  candidates.sort((x, y) => {
-    if (y.score !== x.score) return y.score - x.score;
-    return y.date - x.date;
-  });
-
+  candidates.sort((x, y) => y.score !== x.score ? y.score - x.score : y.date - x.date);
   const withOverlap = candidates.filter((c) => c.score > 0).map((c) => c.p);
   const withoutOverlap = candidates.filter((c) => c.score === 0).map((c) => c.p);
   const ranked = [...withOverlap, ...withoutOverlap];
-
   const featured = ranked.filter(isFeatured);
   const nonFeatured = ranked.filter((p) => !isFeatured(p));
-
   const result = [];
   result.push(...featured.slice(0, MAX_FEATURED_IN_RELATED));
   result.push(...nonFeatured.slice(0, RELATED_LIMIT - result.length));
-
   const remaining = ranked.filter((p) => !result.some((r) => r.slug === p.slug));
   result.push(...remaining.slice(0, RELATED_LIMIT - result.length));
-
   return result.slice(0, RELATED_LIMIT);
 }
 
 /* Build-safe getStaticPaths */
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
-
   const daytonaPosts = posts
     .filter((post) => {
       const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
       if (city === "daytona") return true;
       return typeof post?.id === "string" && post.id.startsWith("daytona/");
     })
-    .sort((a, b) => {
-      const da = new Date(
-        a?.data?.pubDate ?? a?.data?.date ?? a?.data?.published ?? a?.data?.updated ?? 0
-      ).getTime();
-      const db = new Date(
-        b?.data?.pubDate ?? b?.data?.date ?? b?.data?.published ?? b?.data?.updated ?? 0
-      ).getTime();
-      return db - da;
-    });
-
-  return daytonaPosts.map((post) => ({
-    params: { slug: post.slug },
-    props: { post },
-  }));
+    .sort((a, b) => new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime());
+  return daytonaPosts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
 }
 
 /* Page data */
@@ -150,36 +103,23 @@ const daytonaPosts = all
   })
   .sort(sortNewestFirst);
 
-// tags for this post
 const rawTags = Array.isArray(post.data?.tags) ? post.data.tags : [];
 const uniqueKeySet = new Set(rawTags.map(tagKey).filter(Boolean));
 const tagItems = Array.from(uniqueKeySet).map((key) => ({
-  key,
-  label: tagLabelFromKey(key),
-  slug: tagSlugFromKey(key),
+  key, label: tagLabelFromKey(key), slug: tagSlugFromKey(key),
 }));
 
-// related posts
 const relatedAll = buildRelatedPosts(post, daytonaPosts);
 const seen = new Set();
-const deduped = relatedAll.filter((p) => {
-  if (seen.has(p.slug)) return false;
-  seen.add(p.slug);
-  return true;
-});
-const relatedPosts = [
-  ...deduped.filter(isFeatured),
-  ...deduped.filter((p) => !isFeatured(p)),
-].slice(0, 3);
+const deduped = relatedAll.filter((p) => { if (seen.has(p.slug)) return false; seen.add(p.slug); return true; });
+const relatedPosts = [...deduped.filter(isFeatured), ...deduped.filter((p) => !isFeatured(p))].slice(0, 3);
 
-// date display
 const pub = getPostDate(post);
 const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
 const featured = isFeatured(post);
-
-// hero image
 const hero = heroImage(post);
-// Upcoming events
+
+/* Upcoming events */
 const todayE = new Date();
 todayE.setHours(0, 0, 0, 0);
 let allEvents = [];
@@ -202,7 +142,6 @@ const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents
       <div class="postLayout">
 
         <div class="postMain">
-
           <h1 class={`postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
           {post.data.description && <p class="postLede">{post.data.description}</p>}
 
@@ -220,13 +159,7 @@ const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents
 
           {hero && (
             <figure class="heroFigure">
-              <img
-                class="heroFull"
-                src={hero}
-                alt={post.data.title ?? "Post image"}
-                loading="eager"
-                decoding="async"
-              />
+              <img class="heroFull" src={hero} alt={post.data.title ?? "Post image"} loading="eager" decoding="async" />
             </figure>
           )}
 
@@ -270,13 +203,37 @@ const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents
             <a class="pill" href="/daytona/posts/">← All posts</a>
             <a class="pill" href="/daytona/topics/">Topics</a>
           </p>
-
         </div>
 
         <aside class="postSidebar">
+          <p style="font-size:11px;color:red;margin:0 0 8px;">{debugMsg}</p>
           <div class="sidebarCard">
             <div class="sidebarHead">Upcoming Events</div>
-            <p style="color:var(--muted);font-size:14px;margin:0">Events coming soon.</p>
+            {upcomingEvents.length > 0 ? upcomingEvents.map(e => {
+              const d = new Date(e.data.eventDate);
+              const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+              const day = d.getDate();
+              const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              return (
+                <a class="eventRow"
+                   href={e.data.url ?? "/daytona/events/"}
+                   target={e.data.url ? "_blank" : "_self"}
+                   rel={e.data.url ? "noopener" : ""}>
+                  <div class="eventCal">
+                    <div class="eDow">{dow}</div>
+                    <div class="eDay">{day}</div>
+                    <div class="eMon">{mon}</div>
+                  </div>
+                  <div class="eventInfo">
+                    <div class="eName">{e.data.title}</div>
+                    <div class="ePlace">{e.data.location}</div>
+                  </div>
+                </a>
+              );
+            }) : (
+              <p style="color:var(--muted);font-size:14px;margin:0">No upcoming events.</p>
+            )}
+            <a class="seeAll" href="/daytona/events/">See all events →</a>
           </div>
         </aside>
 
@@ -299,12 +256,7 @@ const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents
   }
 
   .postMain { min-width: 0; }
-
-  .postSidebar {
-    position: sticky;
-    top: 80px;
-    min-width: 0;
-  }
+  .postSidebar { position: sticky; top: 80px; min-width: 0; }
 
   .sidebarCard {
     border: 1px solid rgba(255,255,255,.10);
@@ -313,79 +265,55 @@ const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents
     padding: 14px;
   }
   .sidebarHead {
-    font-weight: 900;
-    font-size: 14px;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--muted);
-    margin-bottom: 10px;
+    font-weight: 900; font-size: 14px; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--muted); margin-bottom: 10px;
   }
+
+  .eventRow {
+    display: grid; grid-template-columns: 48px 1fr; gap: 10px;
+    align-items: center; text-decoration: none;
+    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  .eventRow:last-of-type { border-bottom: none; }
+  .eventCal {
+    width: 48px; height: 48px; border-radius: 10px;
+    background: rgba(255,255,255,.06);
+    display: grid; place-items: center; text-align: center; line-height: 1;
+  }
+  .eDow { font-size: 9px; font-weight: 900; color: var(--brand1); text-transform: uppercase; }
+  .eDay { font-size: 18px; font-weight: 900; color: var(--text); }
+  .eMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; }
+  .eventInfo { display: flex; flex-direction: column; gap: 2px; }
+  .eName { font-weight: 800; font-size: 14px; color: var(--text); line-height: 1.2; }
+  .ePlace { font-size: 12px; color: var(--faint); }
+  .seeAll { display: block; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
 
   .postTitle {
     margin: 0 0 8px;
     font-size: clamp(22px, 2.6vw, 34px);
-    font-weight: 800;
-    letter-spacing: -0.3px;
-    line-height: 1.1;
+    font-weight: 800; letter-spacing: -0.3px; line-height: 1.1;
   }
-
-  .postLede {
-    margin: 0 0 14px;
-    font-size: clamp(15px, 1.4vw, 18px);
-    line-height: 1.45;
-    color: var(--muted);
-  }
-
+  .postLede { margin: 0 0 14px; font-size: clamp(15px, 1.4vw, 18px); line-height: 1.45; color: var(--muted); }
   .heroFigure { margin: 0 0 18px; }
   .heroFull {
-    display: block;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
-    border-radius: 16px;
-    border: 1px solid rgba(255,255,255,.10);
+    display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover;
+    border-radius: 16px; border: 1px solid rgba(255,255,255,.10);
     box-shadow: 0 10px 26px rgba(0,0,0,.30);
   }
-
-  .postBody {
-    margin-top: 18px;
-    line-height: 1.65;
-    font-size: 16px;
-  }
-
-  .metaRow {
-    margin: 0 0 16px;
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 10px;
-    opacity: .85;
-  }
+  .postBody { margin-top: 18px; line-height: 1.65; font-size: 16px; }
+  .metaRow { margin: 0 0 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; opacity: .85; }
   .metaDate { opacity: .75; font-size: 13px; }
   .metaTags { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-
   .topicPill {
-    display: inline-flex;
-    align-items: center;
-    padding: 4px 10px;
-    border-radius: 999px;
-    font-size: 11px;
-    font-weight: 800;
-    text-decoration: none;
-    color: #111;
-    background: rgba(255,220,80,.65);
-    border: 1px solid rgba(255,220,80,.55);
+    display: inline-flex; align-items: center; padding: 4px 10px;
+    border-radius: 999px; font-size: 11px; font-weight: 800;
+    text-decoration: none; color: #111;
+    background: rgba(255,220,80,.65); border: 1px solid rgba(255,220,80,.55);
   }
-
   .featuredPill {
-    font-size: 12px;
-    font-weight: 800;
-    padding: 5px 10px;
-    border-radius: 999px;
-    border: 1px solid var(--pillBorder);
-    color: var(--brand1);
-    background: var(--pillBg);
-    white-space: nowrap;
+    font-size: 12px; font-weight: 800; padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--pillBorder); color: var(--brand1);
+    background: var(--pillBg); white-space: nowrap;
   }
   .featuredPillSmall { font-size: 11px; padding: 4px 9px; align-self: start; }
 
@@ -393,39 +321,19 @@ const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents
   .relatedHead { margin: 0 0 12px; font-size: 15px; font-weight: 800; opacity: .9; }
   .relatedList { display: grid; gap: 12px; }
   .relatedRow {
-    text-decoration: none;
-    display: grid;
-    grid-template-columns: 96px 1fr auto;
-    gap: 12px;
-    align-items: start;
-    border: 1px solid rgba(255,255,255,.10);
-    border-radius: 14px;
-    padding: 12px;
-    background: rgba(255,255,255,.03);
+    text-decoration: none; display: grid;
+    grid-template-columns: 96px 1fr auto; gap: 12px; align-items: start;
+    border: 1px solid rgba(255,255,255,.10); border-radius: 14px;
+    padding: 12px; background: rgba(255,255,255,.03);
     transition: border-color 160ms ease, box-shadow 160ms ease;
   }
-  .relatedRow:hover {
-    border-color: var(--pillBorder);
-    box-shadow: 0 0 0 1px var(--pillBg), 0 10px 26px rgba(0,0,0,.30);
-  }
+  .relatedRow:hover { border-color: var(--pillBorder); box-shadow: 0 0 0 1px var(--pillBg), 0 10px 26px rgba(0,0,0,.30); }
   .relatedThumb { width: 96px; }
-  .relatedImg {
-    width: 96px; height: 66px;
-    border-radius: 10px;
-    object-fit: cover;
-    border: 1px solid rgba(255,255,255,.10);
-    display: block;
-  }
+  .relatedImg { width: 96px; height: 66px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(255,255,255,.10); display: block; }
   .relatedFallback { background: rgba(255,255,255,.04); }
   .relatedText { min-width: 0; }
-  .relatedTitle {
-    font-weight: 800; font-size: 15px; line-height: 1.2; color: var(--text);
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  }
-  .relatedDesc {
-    margin-top: 5px; font-size: 13px; color: var(--muted); line-height: 1.35;
-    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
-  }
+  .relatedTitle { font-weight: 800; font-size: 15px; line-height: 1.2; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .relatedDesc { margin-top: 5px; font-size: 13px; color: var(--muted); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
   .relatedMeta { margin-top: 6px; font-size: 12px; color: var(--faint); }
 
   @media (max-width: 520px) {
