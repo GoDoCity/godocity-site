@@ -135,11 +135,7 @@ const upcomingEvents = allEvents
     evDate.setHours(0, 0, 0, 0);
     return evCity === "daytona" && evDate >= todayE;
   })
-  .sort((a, b) => {
-      const da = new Date(a?.data?.pubDate ?? a?.data?.date ?? a?.data?.published ?? a?.data?.updated ?? 0).getTime();
-      const db = new Date(b?.data?.pubDate ?? b?.data?.date ?? b?.data?.published ?? b?.data?.updated ?? 0).getTime();
-      return db - da;
-    })
+  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
   .slice(0, 4);
 const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents.length}`;
 ---

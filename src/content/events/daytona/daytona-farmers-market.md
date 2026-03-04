@@ -7,4 +7,3 @@ address: City Island, Daytona Beach
 city: daytona
 featured: true
 ---
--
