@@ -179,6 +179,21 @@ const featured = isFeatured(post);
 
 // hero image
 const hero = heroImage(post);
+// Upcoming events
+const todayE = new Date();
+todayE.setHours(0, 0, 0, 0);
+let allEvents = [];
+try { allEvents = await getCollection("events"); } catch { allEvents = []; }
+const upcomingEvents = allEvents
+  .filter(e => {
+    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+    const evDate = new Date(e.data.eventDate);
+    evDate.setHours(0, 0, 0, 0);
+    return evCity === "daytona" && evDate >= todayE;
+  })
+  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
+  .slice(0, 4);
+const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents.length}`;
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona">
