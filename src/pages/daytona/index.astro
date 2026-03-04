@@ -57,6 +57,20 @@ const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 const latest = feed.slice(0, 3);
 const listFeed = feed.slice(3, 7);  /* ── Latest Feed — exactly 4 rows below the 3-card grid (Rule of 4) ── */
 
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+let allEvents = [];
+try { allEvents = await getCollection("events"); } catch { allEvents = []; }
+const upcomingEvents = allEvents
+  .filter(e => {
+    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+    const evDate = new Date(e.data.eventDate);
+    evDate.setHours(0, 0, 0, 0);
+    return evCity === "daytona" && evDate >= today;
+  })
+  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
+  .slice(0, 4);
+
 const featuredAd = {
   tag: "Featured Business",
   title: "Your Business Name Here — Reach Daytona Locals",
@@ -305,14 +319,31 @@ const topics = [
               <a class="railMore" href="/daytona/events/">See all</a>
             </div>
             <div class="eventList">
-              <a class="eventRow" href="/daytona/events/">
-                <div class="eventCal"><div class="eDow">SAT</div><div class="eDay">15</div></div>
-                <div class="eventInfo"><div class="eName">Add your first event</div><div class="ePlace">Daytona Beach</div></div>
-              </a>
-              <a class="eventRow" href="/daytona/events/">
-                <div class="eventCal"><div class="eDow">SUN</div><div class="eDay">16</div></div>
-                <div class="eventInfo"><div class="eName">Second event placeholder</div><div class="ePlace">Ormond Beach</div></div>
-              </a>
+              {upcomingEvents.length > 0 ? upcomingEvents.map(e => {
+                const d   = new Date(e.data.eventDate);
+                const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                const day = d.getDate();
+                const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const evSlug = e.slug.split("/").pop();
+                return (
+                  <a class="eventRow"
+                     href={e.data.url ?? `/daytona/events/${evSlug}/`}
+                     target={e.data.url ? "_blank" : "_self"}
+                     rel={e.data.url ? "noopener" : ""}>
+                    <div class="eventCal">
+                      <div class="eDow">{dow}</div>
+                      <div class="eDay">{day}</div>
+                      <div class="eMon">{mon}</div>
+                    </div>
+                    <div class="eventInfo">
+                      <div class="eName">{e.data.title}</div>
+                      <div class="ePlace">{e.data.location}</div>
+                    </div>
+                  </a>
+                );
+              }) : (
+                <p class="noEvents">No upcoming events — check back soon.</p>
+              )}
             </div>
           </div>
 

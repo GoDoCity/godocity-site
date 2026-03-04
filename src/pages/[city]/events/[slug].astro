@@ -4,11 +4,17 @@ import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
   const events = await getCollection("events");
-  return events.map(e => ({ params: { slug: e.slug }, props: { event: e } }));
+  return events.map(e => {
+    const city = e.data.city ?? e.slug.split("/")[0];
+    const slug = e.slug.split("/").pop();
+    return { params: { city, slug }, props: { event: e } };
+  });
 }
 
 const { event } = Astro.props;
 const { data } = event;
+const city = data.city ?? event.slug.split("/")[0];
+const cityCap = city.charAt(0).toUpperCase() + city.slice(1);
 
 const d = new Date(data.eventDate);
 const dateLabel = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
@@ -24,7 +30,7 @@ if (data.endDate) {
 const { Content } = await event.render();
 ---
 
-<Base title={data.title} subtitle={data.description ?? `${data.title} — GoDo Daytona`} cityBase="daytona">
+<Base title={data.title} subtitle={data.description ?? `${data.title} — GoDo ${cityCap}`} cityBase={city}>
   <section class="section">
     <div class="container">
       <div class="eventDetail">
@@ -57,7 +63,7 @@ const { Content } = await event.render();
         </article>
 
         <p class="backLink">
-          <a class="pill" href="/daytona/events/">← All events</a>
+          <a class="pill" href={`/${city}/events/`}>← All events</a>
         </p>
 
       </div>
