@@ -137,7 +137,6 @@ const upcomingEvents = allEvents
   })
   .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
   .slice(0, 4);
-const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents.length}`;
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona">
@@ -210,7 +209,6 @@ const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents
         </div>
 
         <aside class="postSidebar">
-          <p style="font-size:11px;color:red;margin:0 0 8px;">{debugMsg}</p>
           <div class="sidebarCard">
             <div class="sidebarHead">Upcoming Events</div>
             {upcomingEvents.length > 0 ? upcomingEvents.map(e => {
@@ -220,7 +218,7 @@ const debugMsg = `[DEBUG] Total: ${allEvents.length} | Matched: ${upcomingEvents
               const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
               return (
                 <a class="eventRow"
-                   href={e.data.url ?? "/daytona/events/"}
+                   href={e.data.url ?? `/daytona/events/${e.slug.split("/").pop()}/`}
                    target={e.data.url ? "_blank" : "_self"}
                    rel={e.data.url ? "noopener" : ""}>
                   <div class="eventCal">
