@@ -36,6 +36,7 @@ collections:
           - {label: "Tourism", value: "Tourism"}
           - {label: "Arts & Culture", value: "Arts & Culture"}
           - {label: "Weather", value: "Weather"}
+      - {label: "Subtopic", name: "subtopic", widget: "string", required: false, hint: "Short kicker label shown above the headline (e.g. 'Bars', 'Small Business', 'Development')."}
       - {label: "Tags", name: "tags", widget: "list", required: false}
       - {label: "Description", name: "description", widget: "text", required: false}
       - {label: "Hero Image", name: "heroImage", widget: "image", required: false}
