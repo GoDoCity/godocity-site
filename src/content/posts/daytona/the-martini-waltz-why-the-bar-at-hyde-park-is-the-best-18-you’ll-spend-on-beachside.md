@@ -4,7 +4,7 @@ title: "The Martini Waltz: Why the Bar at Hyde Park is the Best $18 You’ll Spe
 pubDate: 2026-03-05
 author: Charles King
 category: Food
-subtopic: Bars
+subtopic: ""
 tags: []
 description: A celebration of the lost art of the truly cold martini, as served
   at the mahogany-and-leather sanctuary that is Hyde Park Prime Steakhouse.
