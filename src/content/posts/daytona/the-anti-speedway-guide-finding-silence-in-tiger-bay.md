@@ -2,7 +2,7 @@
 title: "Biohacking the Beach: Why Your Next Yoga Class Includes Red Lights"
 pubDate: 2026-03-07
 author: Deb Davis
-category: Tourism
+category: Wellness
 subtopic: Fitness
 description: The 2026 wellness wave has hit Daytona, trading standard stretches
   for AI-enhanced coaching and "hybrid yoga" that pairs breathwork with
