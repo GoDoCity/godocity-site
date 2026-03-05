@@ -2,8 +2,8 @@
 title: " 203 Steps to Zen: The Tower That Refuses to Go Dark"
 pubDate: 2026-03-06
 author: Deb Davis
-category: Arts & Culture
-subtopic: Landmarks
+category: Travel & Outdoors
+subtopic: ""
 description: Exploring the Ponce Inlet Lighthouse, a red-brick giant that
   survived the kerosene era and 1970s abandonment to become Florida’s tallest
   beacon of light.
