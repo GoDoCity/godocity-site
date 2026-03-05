@@ -1,15 +1,12 @@
 ---
-title: 'The "Anti-Speedway" Guide: Finding Silence in Tiger Bay'
-pubDate: 2026-03-08
-author: Charles King
+title: "Biohacking the Beach: Why Your Next Yoga Class Includes Red Lights"
+pubDate: 2026-03-07
+author: Deb Davis
 category: Tourism
-subtopic: "Hiking "
-description: >+2
-   Escape the roar of the engines and get lost (figuratively) in the 42 square miles of Tiger Bay State Forest’s ancient oak hammocks.
-
-
-heroImage: /images/uploads/tomoka.png
-city: daytona
-featured: false
+subtopic: Fitness
+description: The 2026 wellness wave has hit Daytona, trading standard stretches
+  for AI-enhanced coaching and "hybrid yoga" that pairs breathwork with
+  red-light therapy.
+heroImage: /images/uploads/zen.png
 ---
-Most people come to Daytona to hear things go vroom. I go to **Tiger Bay** to hear absolutely nothing. **This state forest is 42 square miles of what Florida looked like before we decided everything needed a gift shop.** Walking the trails through the Tomoka River watershed is a humbling experience—mostly because you realize that the local alligators are much better at relaxing than you are. It’s flat, it’s green, and if you bring enough bug spray, it’s the best "reboot" button in the county.
+I used to think "**wellness**" just meant not eating a whole pizza by myself. In 2026, it apparently involves **"vagal toning" and "HRV-based recovery protocols."** The local yoga scene is evolving into something that looks like a deleted scene from a sci-fi movie. We’re talking hybrid classes where you do a downward dog under **red-light therapy** lamps while an AI analyzes your posture. It sounds intense, but honestly, if a computer can tell me why my lower back hurts after a three-mile walk on the beach, I’m all in.
