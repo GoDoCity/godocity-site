@@ -3,7 +3,7 @@ title: "The Martini Waltz: Why the Bar at Hyde Park is the Best $18 You’ll Spe
   on Beachside"
 pubDate: 2026-03-05
 author: Charles King
-category: Food & Drink
+category: Food
 subtopic: Bars
 tags: []
 description: A celebration of the lost art of the truly cold martini, as served
