@@ -40,6 +40,19 @@ function thumbImage(post) {
   const v = post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.cover ?? "";
   return typeof v === "string" ? v.trim() : "";
 }
+function tagSlugFromRaw(raw) {
+  return String(raw ?? "").toLowerCase().trim()
+    .replace(/\s*&\s*/g, " ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+function kickerParts(post) {
+  const cat = typeof post.data?.category === "string" ? post.data.category.trim() : "";
+  const catSlug = cat ? tagSlugFromRaw(cat) : "";
+  const catLabel = cat ? cat.toUpperCase() : "";
+  const sub = typeof post.data?.subtopic === "string" ? post.data.subtopic.trim() : "";
+  return { catLabel, catSlug, sub };
+}
 function primaryTag(post) {
   const tags = post?.data?.tags;
   if (Array.isArray(tags) && tags.length) return String(tags[0]).trim();
@@ -192,7 +205,7 @@ const topics = [
                 }
               </div>
               <div class="heroCopy">
-                {(hero.data.subtopic || primaryTag(hero)) && <div class="heroKicker">{hero.data.subtopic || primaryTag(hero)}</div>}
+                {(() => { const { catLabel, sub } = kickerParts(hero); const label = catLabel || primaryTag(hero).toUpperCase(); return label && <div class="heroKicker">{label}{sub ? ` — ${sub}` : ""}</div>; })()}
                 <h2 class="heroTitle">{hero.data.title ?? hero.slug}</h2>
                 {excerpt(hero) && <p class="heroDesc">{excerpt(hero)}</p>}
                 <div class="heroMeta">
@@ -215,7 +228,7 @@ const topics = [
                   }
                 </div>
                 <div class="cardBody">
-                  {(p.data.subtopic || primaryTag(p)) && <div class="cardKicker">{p.data.subtopic || primaryTag(p)}</div>}
+                  {(() => { const { catLabel, sub } = kickerParts(p); const label = catLabel || primaryTag(p).toUpperCase(); return label && <div class="cardKicker">{label}{sub ? ` — ${sub}` : ""}</div>; })()}
                   <div class="cardTitle">{p.data.title ?? p.slug}</div>
                   {excerpt(p) && <div class="cardDesc">{excerpt(p)}</div>}
                   <div class="cardMeta">
@@ -253,21 +266,32 @@ const topics = [
                 <a class="latestMore" href="/daytona/posts/">View all →</a>
               </div>
 
-              {listFeed.map((p) => (
-                <a class="latestRow" href={`/daytona/posts/${p.slug}/`}>
-                  <div class="latestThumbWrap">
-                    {thumbImage(p)
-                      ? <img class="latestThumb" src={thumbImage(p)} alt="" loading="lazy" decoding="async" />
-                      : <div class="latestThumb latestThumbFallback" aria-hidden="true" />
-                    }
+              {listFeed.map((p) => {
+                const { catLabel, catSlug, sub } = kickerParts(p);
+                const kickerLabel = catLabel || primaryTag(p).toUpperCase();
+                const kickerSlug = catSlug || tagSlugFromRaw(primaryTag(p));
+                return (
+                  <div class="latestRow">
+                    <a class="latestRowLink" href={`/daytona/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
+                    <div class="latestThumbWrap">
+                      {thumbImage(p)
+                        ? <img class="latestThumb" src={thumbImage(p)} alt="" loading="lazy" decoding="async" />
+                        : <div class="latestThumb latestThumbFallback" aria-hidden="true" />
+                      }
+                    </div>
+                    <div class="latestText">
+                      {kickerLabel && (
+                        <div class="latestKicker">
+                          <a class="kickerCatLink" href={`/daytona/${kickerSlug}/`}>{kickerLabel}</a>
+                          {sub && <span class="kickerSub"> — {sub}</span>}
+                        </div>
+                      )}
+                      <div class="latestTitle">{p.data.title ?? p.slug}</div>
+                      <div class="latestByline">{byline(p)}</div>
+                    </div>
                   </div>
-                  <div class="latestText">
-                    {(p.data.subtopic || primaryTag(p)) && <div class="latestKicker">{p.data.subtopic || primaryTag(p)}</div>}
-                    <div class="latestTitle">{p.data.title ?? p.slug}</div>
-                    <div class="latestByline">{byline(p)}</div>
-                  </div>
-                </a>
-              ))}
+                );
+              })}
             </section>
           )}
 
@@ -791,23 +815,40 @@ const topics = [
 
     /* ── Each article row ── */
     .latestRow {
+      position: relative;
       display: grid;
       grid-template-columns: 1fr 2fr;
       gap: 18px;
       align-items: center;
       padding: 18px 0;
       border-bottom: 1px solid var(--border);
-      text-decoration: none;
+      cursor: pointer;
       transition: opacity 140ms ease;
     }
     .latestRow:hover { opacity: .78; }
     .latestRow:last-child { border-bottom: none; }
+    /* Stretched invisible card link */
+    .latestRowLink {
+      position: absolute; inset: 0; z-index: 0;
+      text-decoration: none;
+    }
+    /* Kicker category link — floats above the stretched link */
+    .kickerCatLink {
+      position: relative; z-index: 1;
+      color: inherit;
+      text-decoration: none;
+      font-weight: 800;
+      font-size: inherit;
+    }
+    .kickerCatLink:hover { text-decoration: underline; }
+    .kickerSub { color: inherit; }
 
     /* ── Thumbnail ── */
     .latestThumbWrap {
       aspect-ratio: 4/3;
       border-radius: 8px;
       overflow: hidden;
+      position: relative; z-index: 1;
     }
     .latestThumb {
       display: block;
@@ -828,7 +869,8 @@ const topics = [
       display: flex;
       flex-direction: column;
       gap: 5px;
-      min-width: 0;            /* prevents grid blowout on long titles */
+      min-width: 0;
+      position: relative; z-index: 1;
     }
     .latestKicker {
       font-size: 10px;
