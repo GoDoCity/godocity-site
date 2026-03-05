@@ -39,11 +39,11 @@ function dateText(post) {
 }
 function excerpt(post) { return post?.data?.description ?? ""; }
 
-/* Kicker parts: { catLabel, catSlug, sub, sponsorLabel }
-   catLabel    = UPPERCASED category (or primary tag fallback)
-   catSlug     = URL slug for the category page
-   sub         = explicit subtopic label (post.data.subtopic)
-   sponsorLabel= UPPERCASED tier if set and not "None", else "" */
+/* Kicker parts: { catLabel, catSlug, sub, isSponsored }
+   catLabel   = UPPERCASED category — always shown in kicker, even for sponsored posts
+   catSlug    = URL slug for the category topic page
+   sub        = explicit subtopic label (post.data.subtopic)
+   isSponsored= true when sponsorTier is set and not "None" (drives visual treatment only) */
 function kickerParts(post) {
   const cat = typeof post.data.category === "string" ? post.data.category.trim() : "";
   const catKey = cat ? tagKey(cat) : "";
@@ -51,8 +51,8 @@ function kickerParts(post) {
   const catLabel = cat ? cat.toUpperCase() : "";
   const sub = typeof post.data.subtopic === "string" ? post.data.subtopic.trim() : "";
   const tier = typeof post.data.sponsorTier === "string" ? post.data.sponsorTier.trim() : "";
-  const sponsorLabel = (tier && tier !== "None") ? tier.toUpperCase() : "";
-  return { catLabel, catSlug, sub, sponsorLabel };
+  const isSponsored = tier !== "" && tier !== "None";
+  return { catLabel, catSlug, sub, isSponsored };
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -176,16 +176,16 @@ const upcomingEvents = allEvents
         <div class="topicMain">
 
           {hero && (
-            <a class={`heroCard${(() => { const { sponsorLabel } = kickerParts(hero); return sponsorLabel ? " sponsoredCard" : ""; })()}`} href={`/${city}/posts/${hero.slug}/`}>
+            <a class={`heroCard${kickerParts(hero).isSponsored ? " sponsoredCard" : ""}`} href={`/${city}/posts/${hero.slug}/`}>
               {heroImage(hero) && (
                 <div class="heroMedia">
                   <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="lazy" decoding="async" />
                 </div>
               )}
               <div class="heroBody">
-                {(() => { const { catLabel, sub, sponsorLabel } = kickerParts(hero); const kl = sponsorLabel || catLabel; return (kl || isFeatured(hero)) && (
-                  <div class={`heroKicker${sponsorLabel ? " sponsorKicker" : ""}`}>
-                    {kl || "FEATURED"}{kl && sub ? ` — ${sub}` : ""}
+                {(() => { const { catLabel, sub, isSponsored } = kickerParts(hero); return (catLabel || isFeatured(hero)) && (
+                  <div class={`heroKicker${isSponsored ? " sponsorKicker" : ""}`}>
+                    {catLabel || "FEATURED"}{catLabel && sub ? ` — ${sub}` : ""}
                   </div>
                 ); })()}
                 <div class="heroTitle">{hero.data.title}</div>
@@ -198,9 +198,7 @@ const upcomingEvents = allEvents
           {rest.length > 0 && (
             <div class="list" id="articleList">
               {rest.map((p, idx) => {
-                const { catLabel, catSlug, sub, sponsorLabel } = kickerParts(p);
-                const isSponsored = !!sponsorLabel;
-                const kickerLabel = sponsorLabel || catLabel;
+                const { catLabel, catSlug, sub, isSponsored } = kickerParts(p);
                 return (
                   <div class={`row${idx >= 9 ? " rowHidden" : ""}${isSponsored ? " sponsoredRow" : ""}`}>
                     <a class="rowCardLink" href={`/${city}/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
@@ -212,12 +210,9 @@ const upcomingEvents = allEvents
                       <div class="rowThumbWrap isEmpty" aria-hidden="true"></div>
                     )}
                     <div class="rowText">
-                      {kickerLabel && (
+                      {catLabel && (
                         <div class="rowKicker">
-                          {isSponsored
-                            ? <span class="kickerSponsorBadge">{kickerLabel}</span>
-                            : <a class="kickerCatLink" href={`/${city}/${catSlug}/`}>{kickerLabel}</a>
-                          }
+                          <a class="kickerCatLink" href={`/${city}/${catSlug}/`}>{catLabel}</a>
                           {sub && <span class="kickerSub"> — {sub}</span>}
                         </div>
                       )}
