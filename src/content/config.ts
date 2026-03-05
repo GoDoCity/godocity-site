@@ -13,6 +13,7 @@ const posts = defineCollection({
     tags:        z.array(z.string()).optional(),
     category:    z.string().optional(),
     subtopic:    z.string().optional(),
+    sponsorTier: z.enum(["None", "Featured", "Spotlight", "Partner Highlight", "Local Guide"]).optional(),
     city:        z.string().optional(),
     featured:    z.boolean().optional(),
   }),

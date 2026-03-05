@@ -39,17 +39,20 @@ function dateText(post) {
 }
 function excerpt(post) { return post?.data?.description ?? ""; }
 
-/* Kicker parts: { catLabel, catSlug, sub }
-   catLabel = UPPERCASED category (or primary tag fallback)
-   catSlug  = URL slug for the category page
-   sub      = explicit subtopic label (post.data.subtopic) */
+/* Kicker parts: { catLabel, catSlug, sub, sponsorLabel }
+   catLabel    = UPPERCASED category (or primary tag fallback)
+   catSlug     = URL slug for the category page
+   sub         = explicit subtopic label (post.data.subtopic)
+   sponsorLabel= UPPERCASED tier if set and not "None", else "" */
 function kickerParts(post) {
   const cat = typeof post.data.category === "string" ? post.data.category.trim() : "";
   const catKey = cat ? tagKey(cat) : "";
   const catSlug = catKey ? tagSlug(catKey) : "";
   const catLabel = cat ? cat.toUpperCase() : "";
   const sub = typeof post.data.subtopic === "string" ? post.data.subtopic.trim() : "";
-  return { catLabel, catSlug, sub };
+  const tier = typeof post.data.sponsorTier === "string" ? post.data.sponsorTier.trim() : "";
+  const sponsorLabel = (tier && tier !== "None") ? tier.toUpperCase() : "";
+  return { catLabel, catSlug, sub, sponsorLabel };
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -173,16 +176,16 @@ const upcomingEvents = allEvents
         <div class="topicMain">
 
           {hero && (
-            <a class="heroCard" href={`/${city}/posts/${hero.slug}/`}>
+            <a class={`heroCard${(() => { const { sponsorLabel } = kickerParts(hero); return sponsorLabel ? " sponsoredCard" : ""; })()}`} href={`/${city}/posts/${hero.slug}/`}>
               {heroImage(hero) && (
                 <div class="heroMedia">
                   <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="lazy" decoding="async" />
                 </div>
               )}
               <div class="heroBody">
-                {(() => { const { catLabel, sub } = kickerParts(hero); return (catLabel || isFeatured(hero)) && (
-                  <div class="heroKicker">
-                    {catLabel || "FEATURED"}{catLabel && sub ? ` — ${sub}` : ""}
+                {(() => { const { catLabel, sub, sponsorLabel } = kickerParts(hero); const kl = sponsorLabel || catLabel; return (kl || isFeatured(hero)) && (
+                  <div class={`heroKicker${sponsorLabel ? " sponsorKicker" : ""}`}>
+                    {kl || "FEATURED"}{kl && sub ? ` — ${sub}` : ""}
                   </div>
                 ); })()}
                 <div class="heroTitle">{hero.data.title}</div>
@@ -195,9 +198,11 @@ const upcomingEvents = allEvents
           {rest.length > 0 && (
             <div class="list" id="articleList">
               {rest.map((p, idx) => {
-                const { catLabel, catSlug, sub } = kickerParts(p);
+                const { catLabel, catSlug, sub, sponsorLabel } = kickerParts(p);
+                const isSponsored = !!sponsorLabel;
+                const kickerLabel = sponsorLabel || catLabel;
                 return (
-                  <div class={`row${idx >= 9 ? " rowHidden" : ""}`}>
+                  <div class={`row${idx >= 9 ? " rowHidden" : ""}${isSponsored ? " sponsoredRow" : ""}`}>
                     <a class="rowCardLink" href={`/${city}/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
                     {thumbImage(p) ? (
                       <div class="rowThumbWrap">
@@ -207,9 +212,12 @@ const upcomingEvents = allEvents
                       <div class="rowThumbWrap isEmpty" aria-hidden="true"></div>
                     )}
                     <div class="rowText">
-                      {catLabel && (
+                      {kickerLabel && (
                         <div class="rowKicker">
-                          <a class="kickerCatLink" href={`/${city}/${catSlug}/`}>{catLabel}</a>
+                          {isSponsored
+                            ? <span class="kickerSponsorBadge">{kickerLabel}</span>
+                            : <a class="kickerCatLink" href={`/${city}/${catSlug}/`}>{kickerLabel}</a>
+                          }
                           {sub && <span class="kickerSub"> — {sub}</span>}
                         </div>
                       )}
@@ -474,6 +482,35 @@ const upcomingEvents = allEvents
     .rowThumbWrap { border-radius: 12px; }
     .row { padding: 12px; gap: 12px; }
     .rowTitle { font-size: 16px; }
+  }
+
+  /* Sponsored row/card tint */
+  .sponsoredRow {
+    background: linear-gradient(90deg, rgba(255,210,50,.07) 0%, rgba(255,220,80,.03) 100%);
+    border-left: 2px solid rgba(255,210,50,.28);
+    padding-left: calc(var(--gap) - 2px);
+  }
+  .sponsoredCard {
+    border-color: rgba(255,210,50,.28) !important;
+    background: linear-gradient(135deg, rgba(255,210,50,.09) 0%, rgba(255,220,80,.04) 100%);
+  }
+  .sponsorKicker {
+    background: rgba(255,200,30,.18);
+    color: rgba(255,210,50,1);
+    border: 1px solid rgba(255,200,30,.28);
+    border-radius: 999px;
+    padding: 2px 10px;
+    display: inline-block;
+  }
+  .kickerSponsorBadge {
+    display: inline-flex; align-items: center;
+    font-size: 9.5px; font-weight: 900; letter-spacing: .09em;
+    text-transform: uppercase;
+    background: rgba(255,200,30,.16);
+    color: rgba(255,210,50,1);
+    border: 1px solid rgba(255,200,30,.28);
+    border-radius: 999px; padding: 2px 9px;
+    position: relative; z-index: 1;
   }
 
   /* Load More */
