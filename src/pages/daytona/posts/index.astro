@@ -92,6 +92,11 @@ function formatDate(d) {
     return "";
   }
 }
+
+function thumbImage(post) {
+  const v = post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "";
+  return typeof v === "string" ? v.trim() : "";
+}
 ---
 
 <Base title="Latest Posts" subtitle="GoDo Daytona posts" cityBase="daytona">
@@ -106,36 +111,39 @@ function formatDate(d) {
           const title = post.data?.title ?? post.slug;
           const desc = post.data?.description ?? "";
           const d = getPostDate(post);
-          const dateText = formatDate(d);
+          const dateStr = formatDate(d);
           const tags = getTagItems(post);
           const url = `/daytona/posts/${post.slug}/`;
+          const img = thumbImage(post);
+          const kicker = (post.data?.subtopic && String(post.data.subtopic).trim()) ||
+            (tags.length > 0 ? tags[0].label : "");
 
           return (
             <li class="post-item">
-              {/* Stretched link makes the whole card clickable */}
               <a class="stretched-link" href={url} aria-label={`Open post: ${title}`}></a>
-
-              {/* Featured badge (clickable overlay stays behind it) */}
               {isFeatured(post) && <span class="featuredPill">FEATURED</span>}
-
-              {/* Card content is non-clickable so the stretched link wins;
-                  tags explicitly re-enable pointer events. */}
               <div class="post-content">
-                <div class="post-title">{title}</div>
-
-                <div class="metaLine">
-                  {dateText && <span class="post-date">{dateText}</span>}
-
-                  {tags.length > 0 && (
-                    <div class="tagRow">
-                      {tags.map((t) => (
-                        <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
-                      ))}
-                    </div>
-                  )}
+                <div class="postThumbWrap" aria-hidden={!img}>
+                  {img
+                    ? <img class="postThumb" src={img} alt="" loading="lazy" decoding="async" />
+                    : <div class="postThumb postThumbEmpty" />
+                  }
                 </div>
-
-                {desc && <div class="post-desc">{desc}</div>}
+                <div class="postTextBlock">
+                  {kicker && <div class="postKicker">{kicker}</div>}
+                  <div class="post-title">{title}</div>
+                  <div class="metaLine">
+                    {dateStr && <span class="post-date">{dateStr}</span>}
+                    {tags.length > 0 && (
+                      <div class="tagRow">
+                        {tags.map((t) => (
+                          <a class="topicPill" href={`/daytona/${t.slug}/`}>{t.label}</a>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  {desc && <div class="post-desc">{desc}</div>}
+                </div>
               </div>
             </li>
           );
@@ -168,7 +176,7 @@ function formatDate(d) {
       position: relative;
       border: 1px solid rgba(255,255,255,0.10);
       border-radius: 14px;
-      padding: 16px 16px;
+      padding: 14px;
       background: rgba(255,255,255,0.03);
       cursor: pointer;
       overflow: hidden;
@@ -187,19 +195,44 @@ function formatDate(d) {
       border-radius: 14px;
     }
 
-    /* Content sits above, but doesn't steal the click */
+    /* Content: thumbnail left 1/3, text right 2/3 */
     .post-content {
       position: relative;
       z-index: 2;
       pointer-events: none;
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .postThumbWrap {
+      aspect-ratio: 4/3;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.02);
+    }
+    .postThumb {
+      width: 100%; height: 100%;
+      object-fit: cover; display: block;
+    }
+    .postThumbEmpty { opacity: .20; }
+
+    .postTextBlock { min-width: 0; }
+
+    .postKicker {
+      font-size: 10px; font-weight: 800;
+      letter-spacing: .10em; text-transform: uppercase;
+      color: rgba(255,220,80,.95); margin-bottom: 5px; line-height: 1;
     }
 
     /* Title 15% larger-ish */
     .post-title {
       font-weight: 900;
-      font-size: 18.5px; /* was ~16px */
+      font-size: 17px;
       line-height: 1.15;
-      margin: 0 0 10px 0;
+      margin: 0 0 8px 0;
     }
 
     /* Date + tags inline */
@@ -267,6 +300,11 @@ function formatDate(d) {
       -webkit-box-orient: vertical;
       overflow: hidden;
       pointer-events: none;
+    }
+
+    @media (max-width: 480px) {
+      .post-content { grid-template-columns: 1fr; }
+      .postThumbWrap { aspect-ratio: 16/9; border-radius: 8px; }
     }
 
     /* Featured badge top-right; clickable overlay stays behind it */

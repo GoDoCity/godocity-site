@@ -36,6 +36,10 @@ function heroImage(post) {
   const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.thumbnail ?? post?.data?.cover ?? "";
   return typeof v === "string" ? v.trim() : "";
 }
+function thumbImage(post) {
+  const v = post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.cover ?? "";
+  return typeof v === "string" ? v.trim() : "";
+}
 function primaryTag(post) {
   const tags = post?.data?.tags;
   if (Array.isArray(tags) && tags.length) return String(tags[0]).trim();
@@ -86,7 +90,7 @@ const featuredAd = {
    Row 3: Real Estate · Sports · Wellness
 ──────────────────────────────────────────────────────────────────── */
 const topics = [
-  { label: "Biz",         slug: "biz",         img: "/images/topics/biz.jpg" },
+  { label: "Business",    slug: "business",     img: "/images/topics/business.jpg" },
   { label: "City",        slug: "city",         img: "/images/topics/city.jpg" },
   { label: "Culture",     slug: "culture",      img: "/images/topics/culture.jpg" },
   { label: "Events",      slug: "events",       img: "/images/topics/events.jpg" },
@@ -188,7 +192,7 @@ const topics = [
                 }
               </div>
               <div class="heroCopy">
-                {primaryTag(hero) && <div class="heroKicker">{primaryTag(hero)}</div>}
+                {(hero.data.subtopic || primaryTag(hero)) && <div class="heroKicker">{hero.data.subtopic || primaryTag(hero)}</div>}
                 <h2 class="heroTitle">{hero.data.title ?? hero.slug}</h2>
                 {excerpt(hero) && <p class="heroDesc">{excerpt(hero)}</p>}
                 <div class="heroMeta">
@@ -211,7 +215,7 @@ const topics = [
                   }
                 </div>
                 <div class="cardBody">
-                  {primaryTag(p) && <div class="cardKicker">{primaryTag(p)}</div>}
+                  {(p.data.subtopic || primaryTag(p)) && <div class="cardKicker">{p.data.subtopic || primaryTag(p)}</div>}
                   <div class="cardTitle">{p.data.title ?? p.slug}</div>
                   {excerpt(p) && <div class="cardDesc">{excerpt(p)}</div>}
                   <div class="cardMeta">
@@ -252,13 +256,13 @@ const topics = [
               {listFeed.map((p) => (
                 <a class="latestRow" href={`/daytona/posts/${p.slug}/`}>
                   <div class="latestThumbWrap">
-                    {heroImage(p)
-                      ? <img class="latestThumb" src={heroImage(p)} alt="" loading="lazy" decoding="async" />
+                    {thumbImage(p)
+                      ? <img class="latestThumb" src={thumbImage(p)} alt="" loading="lazy" decoding="async" />
                       : <div class="latestThumb latestThumbFallback" aria-hidden="true" />
                     }
                   </div>
                   <div class="latestText">
-                    {primaryTag(p) && <div class="latestKicker">{primaryTag(p)}</div>}
+                    {(p.data.subtopic || primaryTag(p)) && <div class="latestKicker">{p.data.subtopic || primaryTag(p)}</div>}
                     <div class="latestTitle">{p.data.title ?? p.slug}</div>
                     <div class="latestByline">{byline(p)}</div>
                   </div>
@@ -788,10 +792,10 @@ const topics = [
     /* ── Each article row ── */
     .latestRow {
       display: grid;
-      grid-template-columns: 96px 1fr;
+      grid-template-columns: 1fr 2fr;
       gap: 18px;
       align-items: center;
-      padding: 26px 0;              /* 26px top+bottom = ~52px total row height + content */
+      padding: 18px 0;
       border-bottom: 1px solid var(--border);
       text-decoration: none;
       transition: opacity 140ms ease;
@@ -801,18 +805,14 @@ const topics = [
 
     /* ── Thumbnail ── */
     .latestThumbWrap {
-      flex-shrink: 0;
-      width: 96px;
-      height: 72px;            /* ~4:3 ratio — editorial thumbnail feel */
+      aspect-ratio: 4/3;
       border-radius: 8px;
       overflow: hidden;
-      align-self: start;       /* pin to top of text block, not center */
-      margin-top: 2px;         /* optical alignment with headline cap-height */
     }
     .latestThumb {
       display: block;
-      width: 96px;
-      height: 72px;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       object-position: center;
       background: var(--surface);
@@ -884,38 +884,23 @@ const topics = [
         overflow: hidden;           /* ← sole clipper for the entire feed    */
       }
 
-      /* Row: safety-zone padding keeps tags 20px from the glass edge.
-         No overflow set — clipping is .latestFeed's job, not the row's. */
       .latestRow {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
+        display: grid;
+        grid-template-columns: 1fr 2fr;
         gap: 12px;
-        width: 100%;
-        box-sizing: border-box;
-        padding: 20px 0;            /* vertical rhythm; horizontal = container */
-        /* overflow intentionally omitted — row must NOT clip its children */
+        align-items: center;
+        padding: 14px 0;
       }
-
-      /* Thumb: hard-fixed 72px, never participates in flex shrink */
       .latestThumbWrap {
-        flex: 0 0 72px;
-        width: 72px;
-        height: 54px;
+        aspect-ratio: 4/3;
         border-radius: 7px;
       }
       .latestThumb {
-        width: 72px;
-        height: 54px;
+        width: 100%;
+        height: 100%;
       }
-
-      /* Text block: grows to fill remaining space, text wraps naturally.
-         No padding-left offset needed — container provides the margin.
-         No overflow — .latestFeed above is the sealed boundary. */
       .latestText {
-        flex: 1 1 0;
-        min-width: 0;               /* prevents flex blowout on long words    */
-        /* overflow intentionally omitted — kickers must render fully visible */
+        min-width: 0;
       }
 
       /* Kicker: tighter tracking so "Motor Sports" stays single-line */

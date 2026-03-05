@@ -55,7 +55,14 @@ function primaryTag(d) {
   if (d.topic)    return d.topic;
   return "";
 }
+function tagSlugFromRaw(raw) {
+  return String(raw ?? "").toLowerCase().trim()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 const tag = primaryTag(data);
+const tagSlug = tag ? tagSlugFromRaw(tag) : "";
 
 let sponsor: {
   brand: string; tagline: string; body: string;
@@ -117,11 +124,11 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           <nav class="breadcrumb" aria-label="Breadcrumb">
             <a class="bcLink" href={`/${city}/`}>{cityCap}</a>
             <span class="bcSep" aria-hidden="true">/</span>
-            {tag && <a class="bcLink" href={`/${city}/topics/${tag.toLowerCase()}/`}>{tag}</a>}
-            {tag && <span class="bcSep" aria-hidden="true">/</span>}
+            {tagSlug && <a class="bcLink" href={`/${city}/${tagSlug}/`}>{tag}</a>}
+            {tagSlug && <span class="bcSep" aria-hidden="true">/</span>}
             <span class="bcCurrent" aria-current="page">{data.title}</span>
           </nav>
-          {tag && <div class="articleTag">{tag}</div>}
+          {tagSlug && <a class="articleTag" href={`/${city}/${tagSlug}/`}>{tag}</a>}
           <h1 class="articleTitle">{data.title}</h1>
           <div class="articleByline" aria-label="Article byline">
             <span class="bylineDate">{dateText(data)}</span>
@@ -287,7 +294,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .bcSep { color: var(--border); }
   .bcCurrent { color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
 
-  .articleTag { display: inline-block; margin-bottom: 12px; font-size: 10.5px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; background: var(--brand1); color: var(--accentText); }
+  .articleTag { display: inline-block; margin-bottom: 12px; font-size: 10.5px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; padding: 3px 10px; border-radius: 999px; background: var(--brand1); color: var(--accentText); text-decoration: none; cursor: pointer; transition: opacity 140ms; }
+  .articleTag:hover { opacity: .82; }
 
   .articleTitle { font-size: clamp(26px, 3.2vw, 32px); font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; line-height: 1.1; letter-spacing: -0.5px; color: var(--text); margin: 0 0 14px; max-width: 720px; }
 

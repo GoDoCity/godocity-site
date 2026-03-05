@@ -9,6 +9,7 @@ const posts = defineCollection({
     pubDate:     z.coerce.date().optional(),
     author:      z.string().optional(),
     heroImage:   z.string().optional().transform(v => v === "" ? undefined : v),
+    thumbnail:   z.string().optional().transform(v => v === "" ? undefined : v),
     tags:        z.array(z.string()).optional(),
     category:    z.string().optional(),
     subtopic:    z.string().optional(),
