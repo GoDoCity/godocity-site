@@ -3,6 +3,7 @@ title: "Race Week 2026: Everything You Need to Know Before the 500"
 pubDate: 2026-02-10
 author: Charles King
 category: Sports
+subtopic: racing
 tags:
   - Sports
   - Daytona 500
