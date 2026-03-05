@@ -68,9 +68,11 @@ const subLabel = typeof data.subtopic === "string" ? data.subtopic.trim() : "";
 /* keep tag/tagSlug for breadcrumb compatibility */
 const tag = catRaw;
 const tagSlug = catSlug;
-/* Sponsorship tier — used only for visual treatment, never replaces category in kicker */
+/* Sponsorship tier — replaces category label in kicker when active */
 const tierRaw = typeof data.sponsorTier === "string" ? data.sponsorTier.trim() : "";
-const isSponsored = tierRaw !== "" && tierRaw !== "None";
+const sponsorLabel = (tierRaw && tierRaw !== "None") ? tierRaw.toUpperCase() : "";
+const kickerLabel = sponsorLabel || catLabel;
+const isSponsored = !!sponsorLabel;
 
 let sponsor: {
   brand: string; tagline: string; body: string;
@@ -136,9 +138,12 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
             {tagSlug && <span class="bcSep" aria-hidden="true">/</span>}
             <span class="bcCurrent" aria-current="page">{data.title}</span>
           </nav>
-          {catLabel && (
+          {kickerLabel && (
             <div class={`articleTag${isSponsored ? " articleTagSponsored" : ""}`}>
-              <a class="articleTagLink" href={`/${city}/${catSlug}/`}>{catLabel}</a>
+              {isSponsored
+                ? <span class="articleTagSponsorBadge">{kickerLabel}</span>
+                : <a class="articleTagLink" href={`/${city}/${catSlug}/`}>{kickerLabel}</a>
+              }
               {subLabel && <span class="articleTagSub"> — {subLabel}</span>}
             </div>
           )}
