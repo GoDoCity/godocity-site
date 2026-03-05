@@ -38,6 +38,17 @@ collections:
           - {label: "Travel & Outdoors", value: "Travel & Outdoors"}
           - {label: "Wellness", value: "Wellness"}
       - {label: "Subtopic", name: "subtopic", widget: "string", required: false, hint: "Short kicker label shown above the headline (e.g. 'Bars', 'Small Business', 'Development')."}
+      - label: "Sponsorship Tier"
+        name: "sponsorTier"
+        widget: "select"
+        required: false
+        default: "None"
+        options:
+          - {label: "None (editorial)", value: "None"}
+          - {label: "Featured", value: "Featured"}
+          - {label: "Spotlight", value: "Spotlight"}
+          - {label: "Partner Highlight", value: "Partner Highlight"}
+          - {label: "Local Guide", value: "Local Guide"}
       - {label: "Tags", name: "tags", widget: "list", required: false}
       - {label: "Description", name: "description", widget: "text", required: false}
       - {label: "Thumbnail", name: "thumbnail", widget: "image", required: false, hint: "Small image for list views (optional). Falls back to Hero Image if not set."}

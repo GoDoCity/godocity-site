@@ -68,6 +68,11 @@ const subLabel = typeof data.subtopic === "string" ? data.subtopic.trim() : "";
 /* keep tag/tagSlug for breadcrumb compatibility */
 const tag = catRaw;
 const tagSlug = catSlug;
+/* Sponsorship tier — replaces category label in kicker when set */
+const tierRaw = typeof data.sponsorTier === "string" ? data.sponsorTier.trim() : "";
+const sponsorLabel = (tierRaw && tierRaw !== "None") ? tierRaw.toUpperCase() : "";
+const kickerLabel = sponsorLabel || catLabel;
+const isSponsored = !!sponsorLabel;
 
 let sponsor: {
   brand: string; tagline: string; body: string;
@@ -133,9 +138,12 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
             {tagSlug && <span class="bcSep" aria-hidden="true">/</span>}
             <span class="bcCurrent" aria-current="page">{data.title}</span>
           </nav>
-          {catLabel && (
-            <div class="articleTag">
-              <a class="articleTagLink" href={`/${city}/${catSlug}/`}>{catLabel}</a>
+          {kickerLabel && (
+            <div class={`articleTag${isSponsored ? " articleTagSponsored" : ""}`}>
+              {isSponsored
+                ? <span class="articleTagSponsorBadge">{kickerLabel}</span>
+                : <a class="articleTagLink" href={`/${city}/${catSlug}/`}>{kickerLabel}</a>
+              }
               {subLabel && <span class="articleTagSub"> — {subLabel}</span>}
             </div>
           )}
@@ -308,6 +316,13 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .articleTagLink { padding: 3px 10px; border-radius: 999px; background: var(--brand1); color: var(--accentText); text-decoration: none; cursor: pointer; transition: opacity 140ms; }
   .articleTagLink:hover { opacity: .82; }
   .articleTagSub { padding: 3px 10px 3px 8px; color: var(--brand1); font-weight: 700; }
+  .articleTagSponsorBadge {
+    padding: 3px 10px; border-radius: 999px;
+    background: rgba(255,200,30,.18); color: rgba(255,210,50,1);
+    border: 1px solid rgba(255,200,30,.32);
+    font-size: 10.5px; font-weight: 900; letter-spacing: .11em;
+    text-transform: uppercase;
+  }
 
   .articleTitle { font-size: clamp(26px, 3.2vw, 32px); font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; line-height: 1.1; letter-spacing: -0.5px; color: var(--text); margin: 0 0 14px; max-width: 720px; }
 
