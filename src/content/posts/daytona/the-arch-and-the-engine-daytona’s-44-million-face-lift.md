@@ -2,7 +2,7 @@
 title: "The Arch and the Engine: Daytona’s $44 Million Face-Lift"
 pubDate: 2026-03-08
 author: Charles King
-category: Community
+category: City
 subtopic: Public Works
 description: >+
   From the meticulous restoration of the iconic Main Street Arch to a
