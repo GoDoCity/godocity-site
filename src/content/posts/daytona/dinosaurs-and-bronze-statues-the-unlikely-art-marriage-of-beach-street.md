@@ -2,7 +2,7 @@
 title: "Dinosaurs and Bronze Statues: The Unlikely Art Marriage of Beach Street"
 pubDate: 2026-03-11
 author: Charles King
-category: Arts & Culture
+category: City
 subtopic: Museums
 description: >+
   Daytona’s cultural calendar is currently a wild mix of Seward Johnson’s
