@@ -11,7 +11,7 @@ const base = Astro.props?.cityBase ? `/${Astro.props.cityBase}` : "";
 const cityBase = base || "/daytona";
 
 const topicItems = [
-  { label: "Biz",               href: `${cityBase}/business/` },
+  { label: "Business", short: "Biz", href: `${cityBase}/business/` },
   { label: "City",              href: `${cityBase}/city/` },
   { label: "Culture",           href: `${cityBase}/culture/` },
   { label: "Food",              href: `${cityBase}/food/` },
@@ -109,7 +109,7 @@ const pills = [
         <div class="drawerSectionLabel">Topics</div>
         <div class="drawerPillGrid">
           {topicItems.map((t) => (
-            <a class="drawerPill" href={t.href}>{t.label}</a>
+            <a class="drawerPill" href={t.href}>{t.short ?? t.label}</a>
           ))}
         </div>
       </div>
