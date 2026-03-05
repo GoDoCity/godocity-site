@@ -2,7 +2,7 @@
 title: "GoDoDaytona is live: what this is and what’s next..."
 pubDate: 2026-01-12
 author: Charles King
-category: Community
+category: City
 subtopic: advertising
 tags:
   - city
