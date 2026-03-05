@@ -26,19 +26,21 @@ collections:
         widget: "select"
         required: false
         options:
-          - {label: "Sports", value: "Sports"}
-          - {label: "Food & Drink", value: "Food & Drink"}
-          - {label: "Events", value: "Events"}
           - {label: "Business", value: "Business"}
+          - {label: "City", value: "City"}
+          - {label: "Culture", value: "Culture"}
+          - {label: "DIY", value: "DIY"}
+          - {label: "Events", value: "Events"}
+          - {label: "Food", value: "Food"}
+          - {label: "History", value: "History"}
           - {label: "Real Estate", value: "Real Estate"}
-          - {label: "Politics", value: "Politics"}
-          - {label: "Community", value: "Community"}
-          - {label: "Tourism", value: "Tourism"}
-          - {label: "Arts & Culture", value: "Arts & Culture"}
-          - {label: "Weather", value: "Weather"}
+          - {label: "Sports", value: "Sports"}
+          - {label: "Travel & Outdoors", value: "Travel & Outdoors"}
+          - {label: "Wellness", value: "Wellness"}
       - {label: "Subtopic", name: "subtopic", widget: "string", required: false, hint: "Short kicker label shown above the headline (e.g. 'Bars', 'Small Business', 'Development')."}
       - {label: "Tags", name: "tags", widget: "list", required: false}
       - {label: "Description", name: "description", widget: "text", required: false}
+      - {label: "Thumbnail", name: "thumbnail", widget: "image", required: false, hint: "Small image for list views (optional). Falls back to Hero Image if not set."}
       - {label: "Hero Image", name: "heroImage", widget: "image", required: false}
       - {label: "City", name: "city", widget: "hidden", default: "daytona"}
       - {label: "Featured", name: "featured", widget: "boolean", required: false, default: false}
