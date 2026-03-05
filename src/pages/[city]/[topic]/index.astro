@@ -4,10 +4,13 @@ import { getCollection } from "astro:content";
 
 /* ── Tag helpers ── */
 function tagKey(raw) {
-  return String(raw ?? "").toLowerCase().trim().replace(/[-_]+/g, " ").replace(/\s+/g, " ");
+  return String(raw ?? "").toLowerCase().trim()
+    .replace(/\s*&\s*/g, " ")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ").trim();
 }
 function tagSlug(key) {
-  return String(key ?? "").toLowerCase().trim().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return String(key ?? "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 function tagLabel(key) {
   return key.split(" ").filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
@@ -36,17 +39,17 @@ function dateText(post) {
 }
 function excerpt(post) { return post?.data?.description ?? ""; }
 
-/* Returns the subtopic label shown as a kicker above the headline.
-   Priority: explicit frontmatter `subtopic` field → `category` (if different
-   from the current topic page) → first non-current tag. */
-function subtopic(post, currentTopicSlug) {
-  const explicit = typeof post.data.subtopic === "string" ? post.data.subtopic.trim() : "";
-  if (explicit) return explicit;
+/* Kicker parts: { catLabel, catSlug, sub }
+   catLabel = UPPERCASED category (or primary tag fallback)
+   catSlug  = URL slug for the category page
+   sub      = explicit subtopic label (post.data.subtopic) */
+function kickerParts(post) {
   const cat = typeof post.data.category === "string" ? post.data.category.trim() : "";
-  if (cat && tagSlug(tagKey(cat)) !== currentTopicSlug) return cat;
-  const tags = Array.isArray(post.data.tags) ? post.data.tags : [];
-  const other = tags.find(t => tagSlug(tagKey(t)) !== currentTopicSlug);
-  return other ? tagLabel(tagKey(other)) : "";
+  const catKey = cat ? tagKey(cat) : "";
+  const catSlug = catKey ? tagSlug(catKey) : "";
+  const catLabel = cat ? cat.toUpperCase() : "";
+  const sub = typeof post.data.subtopic === "string" ? post.data.subtopic.trim() : "";
+  return { catLabel, catSlug, sub };
 }
 
 /* ────────────────────────────────────────────────────────────────────────────
@@ -59,8 +62,8 @@ function subtopic(post, currentTopicSlug) {
 export async function getStaticPaths() {
   const all = await getCollection("posts");
 
-  const _tagKey  = (raw) => String(raw ?? "").toLowerCase().trim().replace(/[-_]+/g, " ").replace(/\s+/g, " ");
-  const _tagSlug = (key) => String(key ?? "").toLowerCase().trim().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const _tagKey  = (raw) => String(raw ?? "").toLowerCase().trim().replace(/\s*&\s*/g, " ").replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
+  const _tagSlug = (key) => String(key ?? "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
   /* Canonical nav topics — always built for every city with posts */
   const KNOWN = [
@@ -120,7 +123,12 @@ const posts = all
     const postCity = (post.data.city ?? post.id?.split("/")[0] ?? "").toLowerCase().trim();
     return postCity === city;
   })
-  .filter(post => (Array.isArray(post.data.tags) ? post.data.tags : []).map(tagKey).includes(topicKey))
+  .filter(post => {
+    const tags = Array.isArray(post.data.tags) ? post.data.tags : [];
+    if (tags.map(tagKey).includes(topicKey)) return true;
+    const cat = typeof post.data.category === "string" ? tagKey(post.data.category) : "";
+    return cat === topicKey;
+  })
   .sort((a, b) => new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime());
 
 const hero = posts.find(isFeatured) ?? posts[0] ?? null;
@@ -162,11 +170,11 @@ const upcomingEvents = allEvents
                 </div>
               )}
               <div class="heroBody">
-                {(subtopic(hero, topic) || isFeatured(hero)) && (
+                {(() => { const { catLabel, sub } = kickerParts(hero); return (catLabel || isFeatured(hero)) && (
                   <div class="heroKicker">
-                    {subtopic(hero, topic) || "FEATURED"}
+                    {catLabel || "FEATURED"}{catLabel && sub ? ` — ${sub}` : ""}
                   </div>
-                )}
+                ); })()}
                 <div class="heroTitle">{hero.data.title}</div>
                 {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
                 <div class="heroMeta">{dateText(hero)}</div>
@@ -176,23 +184,32 @@ const upcomingEvents = allEvents
 
           {rest.length > 0 && (
             <div class="list">
-              {rest.map(p => (
-                <a class="row" href={`/${city}/posts/${p.slug}/`}>
-                  {thumbImage(p) ? (
-                    <div class="rowThumbWrap">
-                      <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""} loading="lazy" decoding="async" />
+              {rest.map(p => {
+                const { catLabel, catSlug, sub } = kickerParts(p);
+                return (
+                  <div class="row">
+                    <a class="rowCardLink" href={`/${city}/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
+                    {thumbImage(p) ? (
+                      <div class="rowThumbWrap">
+                        <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""} loading="lazy" decoding="async" />
+                      </div>
+                    ) : (
+                      <div class="rowThumbWrap isEmpty" aria-hidden="true"></div>
+                    )}
+                    <div class="rowText">
+                      {catLabel && (
+                        <div class="rowKicker">
+                          <a class="kickerCatLink" href={`/${city}/${catSlug}/`}>{catLabel}</a>
+                          {sub && <span class="kickerSub"> — {sub}</span>}
+                        </div>
+                      )}
+                      <div class="rowTitle">{p.data.title ?? p.slug}</div>
+                      {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
+                      <div class="rowMeta">{dateText(p)}</div>
                     </div>
-                  ) : (
-                    <div class="rowThumbWrap isEmpty" aria-hidden="true"></div>
-                  )}
-                  <div class="rowText">
-                    {subtopic(p, topic) && <div class="rowKicker">{subtopic(p, topic)}</div>}
-                    <div class="rowTitle">{p.data.title ?? p.slug}</div>
-                    {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
-                    <div class="rowMeta">{dateText(p)}</div>
                   </div>
-                </a>
-              ))}
+                );
+              })}
             </div>
           )}
 
@@ -362,19 +379,37 @@ const upcomingEvents = allEvents
   /* List */
   .list { display: grid; gap: 12px; margin-top: 6px; }
   .row {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr 2fr;
     gap: 14px;
     align-items: center;
     padding: 14px;
+    cursor: pointer;
+  }
+  /* Stretched invisible link covers the whole card */
+  .rowCardLink {
+    position: absolute; inset: 0; z-index: 0;
+    border-radius: var(--card-radius);
     text-decoration: none;
   }
   .rowText { min-width: 0; }
   .rowKicker {
     font-size: 10px; font-weight: 800;
     letter-spacing: .10em; text-transform: uppercase;
-    color: var(--brand1); margin-bottom: 4px; line-height: 1;
+    margin-bottom: 4px; line-height: 1;
+    position: relative; z-index: 1;
   }
+  /* Clickable category part of kicker */
+  .kickerCatLink {
+    color: var(--brand1);
+    text-decoration: none;
+    font-weight: 800;
+    font-size: inherit;
+    position: relative; z-index: 1;
+  }
+  .kickerCatLink:hover { text-decoration: underline; }
+  .kickerSub { color: var(--brand1); }
   .rowTitle { font-weight: 900; font-size: 17px; line-height: 1.18; letter-spacing: -0.01em; }
   .rowDesc {
     margin-top: 7px; opacity: .84; font-size: 14px; line-height: 1.45;
