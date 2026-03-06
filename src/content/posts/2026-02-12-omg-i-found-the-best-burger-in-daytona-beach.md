@@ -5,10 +5,12 @@ description: Forget the tourist traps and overpriced beach bites; the real local
   Grill. This legendary spot serves up hand-pressed, half-pound masterpieces
   that have defined the Daytona burger scene for decades.
 city: daytona
+author: Charles King
+category: Food
+subtopic: Restaurants
 featured: true
 pubDate: 2026-02-12T10:35:00.000Z
 heroImage: /images/uploads/burger.webp
-sourceUrl: ""
 hasPermission: true
 ---
 **The Legend of the Brickyard: Why This Burger Wins Every Time**

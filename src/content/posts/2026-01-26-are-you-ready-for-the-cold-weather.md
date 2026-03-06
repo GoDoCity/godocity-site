@@ -2,6 +2,9 @@
 title: Are you ready for the COLD weather?
 description: "An artic blast that has swept the Nation is arriving tonight! "
 city: daytona
+author: Charles King
+category: City
+subtopic: Weather
 tags:
   - race
   - motor sports

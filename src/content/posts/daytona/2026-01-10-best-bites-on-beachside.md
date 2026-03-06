@@ -1,5 +1,11 @@
 ---
 title: 5 Beachside Bites That Don’t Feel Like Tourist Traps
+city: daytona
+author: Charles King
+category: Food
+subtopic: Restaurants
+pubDate: 2026-01-10
+featured: false
 ---
 <img src="/images/uploads/burger.webp" alt="Beachside food" style="width:100%;max-width:100%;height:300px;object-fit:cover;border-radius:12px;margin:1.5rem 0;" />
 

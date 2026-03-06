@@ -12,9 +12,8 @@ tags:
 description: Start times, road closures, parking lots that won't drain your
   wallet, and the one grandstand section Charles King has sat in for eleven
   years running.
-heroImage: /images/uploads/daytona-international-speedway-nascar-xfinity-series-daytona-500.jpg-1.jpg
-city: daytona
-featured: true
+category: Sports
+subtopic: NASCAR
 ---
 <img src="/images/uploads/yourfile.jpg" alt="describe it" style="width:100%;max-width:100%;height:300px;object-fit:cover;border-radius:12px;margin:1.5rem 0;" />
 

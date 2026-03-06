@@ -3,15 +3,8 @@ title: "GoDoDaytona is live: what this is and what’s next..."
 pubDate: 2026-01-12
 author: Charles King
 category: City
-subtopic: advertising
-tags:
-  - city
-  - events
-  - business
-description: Our first city site is up. Here’s what we’ll cover, how to
-  subscribe, and how businesses can advertise.
-heroImage: /images/uploads/godo.png
-city: daytona
+subtopic: Community
+tags: ["city","events","business"]
 featured: true
 ---
 

@@ -2,6 +2,9 @@
 title: '"The Best Sub in Town, And the Best People Behind the Counter"'
 description: A local legend where every sub is served with a side of community spirit.
 city: daytona
+author: Charles King
+category: Food
+subtopic: Restaurants
 featured: true
 pubDate: 2026-02-12T10:53:00.000Z
 heroImage: /images/uploads/larrys-giant-subs.jpg

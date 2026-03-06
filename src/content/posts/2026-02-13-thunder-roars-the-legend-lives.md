@@ -2,6 +2,9 @@
 title: 💀 THUNDER ROARS. THE LEGEND LIVES. 💀
 description: "BIKE WEEK 2026: MAKE YOUR STAND AT THE BOOT HILL SALON."
 city: daytona
+author: Charles King
+category: Sports
+subtopic: Bike Week
 featured: false
 pubDate: 2026-02-13T13:23:00.000Z
 heroImage: /images/uploads/boot-hill.jpg

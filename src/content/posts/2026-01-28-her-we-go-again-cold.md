@@ -1,6 +1,9 @@
 ---
 title: Here we go again...COLD!
 city: daytona
+author: Charles King
+category: City
+subtopic: Weather
 tags:
   - motor sports
 featured: false
