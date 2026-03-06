@@ -52,6 +52,9 @@ const kickerDisplay  = isSponsored
   ? tierRaw.toUpperCase()
   : category ? category.toUpperCase() : "";
 
+/* Author link slug: "Charles King" → "charles-king" */
+const authorSlug = authorName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
 /* ── Byline: "March 5, 2026 — Charles King" ── */
 const pubDateRaw = getPostDate(data);
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -120,23 +123,30 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
       <main class="articleMain">
         <header class="articleHeader">
-          <nav class="breadcrumb" aria-label="Breadcrumb">
-            <a class="bcLink" href={`/${city}/`}>{cityCap}</a>
-            <span class="bcSep" aria-hidden="true">/</span>
-            {categorySlug && <a class="bcLink" href={`/${city}/${categorySlug}/`}>{category}</a>}
-            {categorySlug && <span class="bcSep" aria-hidden="true">/</span>}
-            <span class="bcCurrent" aria-current="page">{data.title}</span>
-          </nav>
-          {kickerDisplay && (
-            <div class="articleKicker">
-              {isSponsored
-                ? <span class="kickerSponsored">{kickerDisplay}</span>
-                : <a class="kickerLink" href={`/${city}/${categorySlug}/`}>{kickerDisplay}</a>
-              }
-              {subtopic && <span class="kickerSub"> — {subtopic}</span>}
-            </div>
-          )}
-          <p class="articleByline">{bylineStr}</p>
+          {/* ── Top bar: kicker left — breadcrumb right ── */}
+          <div class="articleMeta">
+            {kickerDisplay
+              ? (
+                <div class="articleKicker">
+                  {isSponsored
+                    ? <span class="kickerSponsored">{kickerDisplay}</span>
+                    : <a class="kickerLink" href={`/${city}/${categorySlug}/`}>{kickerDisplay}</a>
+                  }
+                  {subtopic && <span class="kickerSub"> — {subtopic}</span>}
+                </div>
+              )
+              : <span />
+            }
+            <nav class="breadcrumb" aria-label="Breadcrumb">
+              <a class="bcLink" href={`/${city}/`}>{cityCap}</a>
+              {categorySlug && <><span class="bcSep" aria-hidden="true">/</span><a class="bcLink" href={`/${city}/${categorySlug}/`}>{category}</a></>}
+            </nav>
+          </div>
+          {/* ── Byline (date — author link) ── */}
+          <p class="articleByline">
+            {dateStr && <span>{dateStr} — </span>}
+            <a class="bylineAuthor" href={`/author/${authorSlug}/`}>{authorName}</a>
+          </p>
           <h1 class="articleTitle">{data.title}</h1>
           {data.description && <p class="articleDesc">{data.description}</p>}
         </header>
@@ -291,13 +301,22 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .homeGrid > * { min-width: 0; overflow: hidden; }
   @media (max-width: 980px) { .homeGrid { grid-template-columns: 1fr; } .homeRail { order: 2; } }
 
-  .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; margin-bottom: 16px; font-size: 12.5px; font-weight: 600; color: var(--faint); }
-  .bcLink { color: var(--link); text-decoration: none; transition: opacity 120ms; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px; }
-  .bcLink:hover { opacity: .75; }
-  .bcSep { color: var(--border); }
-  .bcCurrent { color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
+  /* ── Top meta bar: kicker left, breadcrumb right ── */
+  .articleMeta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
 
-  .articleKicker { display: flex; align-items: baseline; gap: 0; margin-bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; font-size: 12px; font-weight: 600; color: var(--faint); }
+  .bcLink { color: var(--faint); text-decoration: none; transition: color 120ms; white-space: nowrap; }
+  .bcLink:hover { color: var(--link); }
+  .bcSep { color: var(--border); margin: 0 2px; }
+
+  .articleKicker { display: flex; align-items: baseline; gap: 0; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
   .kickerLink { color: var(--brand1); text-decoration: none; font-weight: 800; transition: opacity 140ms; }
   .kickerLink:hover { opacity: .75; }
   .kickerSub { color: var(--brand1); font-weight: 700; }
@@ -305,7 +324,9 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
   .articleTitle { font-size: clamp(26px, 3.2vw, 36px); font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; line-height: 1.08; letter-spacing: -0.5px; color: var(--text); margin: 0 0 18px; max-width: 720px; }
 
-  .articleByline { font-size: 13px; color: var(--faint); margin: 0 0 22px; font-weight: 500; }
+  .articleByline { font-size: 13px; color: var(--faint); margin: 0 0 16px; font-weight: 500; }
+  .bylineAuthor { color: var(--faint); text-decoration: none; font-weight: 700; border-bottom: 1px solid transparent; transition: color 130ms, border-color 130ms; }
+  .bylineAuthor:hover { color: var(--link); border-bottom-color: var(--link); }
 
   .articleDesc { font-size: clamp(15px, 1.15vw, 17px); color: var(--muted); line-height: 1.65; border-left: 3px solid var(--brand1); padding-left: 16px; margin: 0 0 28px; max-width: 660px; }
 
@@ -314,17 +335,88 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
   .articleBody img { max-width: 100%; height: auto; display: block; margin: 1.5rem 0; border-radius: 8px; object-fit: cover; }
 
-  .articleBody { font-size: 16px; line-height: 1.75; color: var(--muted); max-width: 680px; padding-bottom: 40px; border-bottom: 1px solid var(--border); }
-  .articleBody :global(h2) { font-size: 22px; font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; color: var(--text); margin: 36px 0 12px; line-height: 1.15; }
-  .articleBody :global(h3) { font-size: 18px; font-weight: 800; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; color: var(--text); margin: 28px 0 10px; line-height: 1.2; }
-  .articleBody :global(p) { margin: 0 0 1.4em; }
-  .articleBody :global(a) { color: var(--link); text-decoration: underline; }
+  /* ── Long-form article body ── */
+  .articleBody {
+    font-size: 17px;
+    line-height: 1.8;
+    color: var(--muted);
+    max-width: 680px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--border);
+  }
+  /* Section headers */
+  .articleBody :global(h2) {
+    font-size: 24px; font-weight: 900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    color: var(--text); margin: 48px 0 14px; line-height: 1.12;
+    letter-spacing: -0.3px;
+    padding-top: 8px; border-top: 2px solid var(--brand1);
+  }
+  .articleBody :global(h3) {
+    font-size: 19px; font-weight: 800;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    color: var(--text); margin: 36px 0 10px; line-height: 1.2;
+  }
+  .articleBody :global(h4) {
+    font-size: 15px; font-weight: 800; text-transform: uppercase;
+    letter-spacing: .08em; color: var(--faint); margin: 28px 0 8px;
+  }
+  /* Paragraphs */
+  .articleBody :global(p) { margin: 0 0 1.5em; }
+  /* Links */
+  .articleBody :global(a) { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
+  .articleBody :global(a:hover) { opacity: .8; }
+  /* Emphasis */
   .articleBody :global(strong) { font-weight: 800; color: var(--text); }
-  .articleBody :global(ul), .articleBody :global(ol) { padding-left: 1.4em; margin: 0 0 1.4em; }
-  .articleBody :global(li) { margin-bottom: .5em; }
-  .articleBody :global(blockquote) { border-left: 3px solid var(--brand1); margin: 1.6em 0; padding: .6em 1em; color: var(--text); font-style: italic; font-size: 17px; }
-  .articleBody :global(img) { width: 100%; max-width: 100%; height: auto; border-radius: 10px; margin: 1.4em 0; display: block; }
-  .articleBody :global(hr) { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+  .articleBody :global(em) { font-style: italic; }
+  /* Lists */
+  .articleBody :global(ul), .articleBody :global(ol) {
+    padding-left: 1.6em; margin: 0 0 1.5em; display: grid; gap: .4em;
+  }
+  .articleBody :global(li) { line-height: 1.65; }
+  .articleBody :global(li > p) { margin: 0; }
+  /* Pull quote / blockquote */
+  .articleBody :global(blockquote) {
+    margin: 2em 0;
+    padding: 1.1em 1.4em;
+    border-left: 4px solid var(--brand1);
+    background: var(--surface2);
+    border-radius: 0 10px 10px 0;
+    color: var(--text);
+    font-style: italic;
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  .articleBody :global(blockquote p) { margin: 0; }
+  /* Images and figures */
+  .articleBody :global(img) {
+    width: 100%; max-width: 100%; height: auto;
+    border-radius: 10px; margin: 1.8em 0; display: block;
+  }
+  .articleBody :global(figure) { margin: 2em 0; }
+  .articleBody :global(figcaption) {
+    font-size: 13px; color: var(--faint); margin-top: 8px;
+    text-align: center; font-style: italic;
+  }
+  /* Inline code */
+  .articleBody :global(code) {
+    font-family: "SF Mono", "Fira Code", Consolas, monospace;
+    font-size: 14px; background: var(--surface2);
+    padding: 2px 6px; border-radius: 4px; color: var(--text);
+  }
+  /* Code blocks */
+  .articleBody :global(pre) {
+    background: var(--surface2); border-radius: 10px;
+    padding: 1.2em 1.4em; overflow-x: auto; margin: 1.8em 0;
+    font-size: 14px; line-height: 1.6;
+  }
+  .articleBody :global(pre code) { background: none; padding: 0; border-radius: 0; }
+  /* Dividers */
+  .articleBody :global(hr) { border: none; border-top: 1px solid var(--border); margin: 2.5em 0; }
+  /* Tables */
+  .articleBody :global(table) { width: 100%; border-collapse: collapse; margin: 1.8em 0; font-size: 15px; }
+  .articleBody :global(th) { text-align: left; font-weight: 800; color: var(--text); padding: 10px 12px; border-bottom: 2px solid var(--brand1); }
+  .articleBody :global(td) { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--muted); }
 
   .articleSponsor { margin: 40px 0 8px; }
   .aSponsorLabel { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
