@@ -123,25 +123,25 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
       <main class="articleMain">
         <header class="articleHeader">
-          {/* ── Top bar: kicker left — breadcrumb right ── */}
-          <div class="articleMeta">
-            {kickerDisplay
-              ? (
-                <div class="articleKicker">
-                  {isSponsored
-                    ? <span class="kickerSponsored">{kickerDisplay}</span>
-                    : <a class="kickerLink" href={`/${city}/${categorySlug}/`}>{kickerDisplay}</a>
-                  }
-                  {subtopic && <span class="kickerSub"> — {subtopic}</span>}
-                </div>
-              )
-              : <span />
-            }
-            <nav class="breadcrumb" aria-label="Breadcrumb">
-              <a class="bcLink" href={`/${city}/`}>{cityCap}</a>
-              {categorySlug && <><span class="bcSep" aria-hidden="true">/</span><a class="bcLink" href={`/${city}/${categorySlug}/`}>{category}</a></>}
-            </nav>
-          </div>
+          {/* ── Single left-aligned breadcrumb: Category > Subtopic > City ── */}
+          <nav class="breadcrumb" aria-label="Breadcrumb">
+            {category && categorySlug && (
+              <>
+                {isSponsored
+                  ? <span class="bcItem bcSponsored">{tierRaw}</span>
+                  : <a class="bcItem bcLink" href={`/${city}/${categorySlug}/`}>{category}</a>
+                }
+                <span class="bcSep" aria-hidden="true">›</span>
+              </>
+            )}
+            {subtopic && (
+              <>
+                <span class="bcItem">{subtopic}</span>
+                <span class="bcSep" aria-hidden="true">›</span>
+              </>
+            )}
+            <a class="bcItem bcLink" href={`/${city}/`}>{cityCap}</a>
+          </nav>
           {/* ── Byline (date — author link) ── */}
           <p class="articleByline">
             {dateStr && <span>{dateStr} — </span>}
@@ -301,26 +301,23 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .homeGrid > * { min-width: 0; overflow: hidden; }
   @media (max-width: 980px) { .homeGrid { grid-template-columns: 1fr; } .homeRail { order: 2; } }
 
-  /* ── Top meta bar: kicker left, breadcrumb right ── */
-  .articleMeta {
+  /* ── Single left-aligned breadcrumb ── */
+  .breadcrumb {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 14px;
     flex-wrap: wrap;
+    gap: 2px;
+    margin-bottom: 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
   }
-
-  .breadcrumb { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; font-size: 12px; font-weight: 600; color: var(--faint); }
-  .bcLink { color: var(--faint); text-decoration: none; transition: color 120ms; white-space: nowrap; }
+  .bcItem { color: var(--faint); white-space: nowrap; }
+  .bcLink { color: var(--faint); text-decoration: none; transition: color 120ms; }
   .bcLink:hover { color: var(--link); }
-  .bcSep { color: var(--border); margin: 0 2px; }
-
-  .articleKicker { display: flex; align-items: baseline; gap: 0; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
-  .kickerLink { color: var(--brand1); text-decoration: none; font-weight: 800; transition: opacity 140ms; }
-  .kickerLink:hover { opacity: .75; }
-  .kickerSub { color: var(--brand1); font-weight: 700; }
-  .kickerSponsored { color: var(--brand1); font-weight: 800; font-style: italic; }
+  .bcSep { color: var(--border); margin: 0 3px; font-size: 13px; line-height: 1; }
+  .bcSponsored { color: var(--brand1); font-style: italic; }
 
   .articleTitle { font-size: clamp(26px, 3.2vw, 36px); font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; line-height: 1.08; letter-spacing: -0.5px; color: var(--text); margin: 0 0 18px; max-width: 720px; }
 
@@ -507,8 +504,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   }
   @media (max-width: 480px) {
     .articleTitle { font-size: 22px; }
-    .breadcrumb { font-size: 11px; }
-    .bcCurrent { max-width: 140px; }
+    .breadcrumb { font-size: 10px; }
   }
 </style>
 </Base>
