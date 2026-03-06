@@ -27,52 +27,54 @@ const { Content } = await render(post);
 const city    = data.city ?? post.slug.split("/")[0];
 const cityCap = city.charAt(0).toUpperCase() + city.slice(1);
 
-function getPostDate(d) {
-  return d?.pubDate ?? d?.date ?? d?.published ?? d?.updated ?? null;
-}
-function dateText(d) {
-  const raw = getPostDate(d);
-  return raw ? new Date(raw).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" }) : "";
-}
-function authorText(d) {
-  const a = d?.author ?? d?.authorName ?? d?.by ?? "";
-  return typeof a === "string" && a.trim() ? a.trim() : "Charles King";
-}
-function byline(d) {
-  const date = dateText(d);
-  const author = authorText(d);
-  return date ? `${date} · ${author}` : author;
-}
-
-const heroImg = (
-  data.heroImage ?? data.heroimage ?? data.image ??
-  data.thumbnail ?? data.cover ?? ""
-);
-
-function primaryTag(d) {
-  if (Array.isArray(d.tags) && d.tags.length) return String(d.tags[0]).trim();
-  if (d.category) return d.category;
-  if (d.topic)    return d.topic;
-  return "";
-}
+/* ── Helpers ── */
 function tagSlugFromRaw(raw) {
   return String(raw ?? "").toLowerCase().trim()
     .replace(/\s*&\s*/g, " ")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
 }
-const catRaw = typeof data.category === "string" ? data.category.trim() : (primaryTag(data) || "");
-const catLabel = catRaw.toUpperCase();
-const catSlug = catRaw ? tagSlugFromRaw(catRaw) : "";
-const subLabel = typeof data.subtopic === "string" ? data.subtopic.trim() : "";
-/* keep tag/tagSlug for breadcrumb compatibility */
-const tag = catRaw;
+function getPostDate(d) {
+  return d?.pubDate ?? d?.date ?? d?.published ?? d?.updated ?? null;
+}
+
+/* ── Direct CMS field reads ── */
+// category   → data.category   (CMS field "category")
+// subtopic   → data.subtopic   (CMS field "subtopic")
+// author     → data.author     (CMS field "author")
+// sponsorTier→ data.sponsorTier(CMS field "sponsorTier")
+const category   = typeof data.category   === "string" ? data.category.trim()   : "";
+const subtopic   = typeof data.subtopic   === "string" ? data.subtopic.trim()   : "";
+const authorName = typeof data.author     === "string" && data.author.trim()
+                   ? data.author.trim() : "Charles King";
+const tierRaw    = typeof data.sponsorTier === "string" ? data.sponsorTier.trim() : "";
+const isSponsored = tierRaw !== "" && tierRaw !== "None";
+
+/* Category for the kicker link: explicit category field first, then first tag */
+const firstTag  = Array.isArray(data.tags) && data.tags.length
+                  ? String(data.tags[0]).trim() : "";
+const kickerCat  = category || firstTag;          /* used for slug + breadcrumb */
+const catSlug    = kickerCat ? tagSlugFromRaw(kickerCat) : "";
+
+/* What the kicker DISPLAYS: tier (sponsored) → CATEGORY → "" */
+const kickerMain = isSponsored
+  ? tierRaw.toUpperCase()
+  : kickerCat ? kickerCat.toUpperCase() : "";
+
+/* Breadcrumb compatibility */
+const tag     = kickerCat;
 const tagSlug = catSlug;
-/* Sponsorship tier — replaces category label in kicker when active */
-const tierRaw = typeof data.sponsorTier === "string" ? data.sponsorTier.trim() : "";
-const sponsorLabel = (tierRaw && tierRaw !== "None") ? tierRaw.toUpperCase() : "";
-const kickerLabel = sponsorLabel || catLabel;
-const isSponsored = !!sponsorLabel;
+
+/* ── Byline: "March 5, 2026 — Charles King" ── */
+const pubDateRaw = getPostDate(data);
+const dateStr = pubDateRaw
+  ? new Date(pubDateRaw).toLocaleDateString("en-US",
+      { month: "long", day: "numeric", year: "numeric" })
+  : "";
+const bylineStr = dateStr ? `${dateStr} — ${authorName}` : authorName;
+
+/* ── Hero image ── */
+const heroImg = data.heroImage ?? data.heroimage ?? data.image ?? data.thumbnail ?? data.cover ?? "";
 
 let sponsor: {
   brand: string; tagline: string; body: string;
@@ -138,21 +140,17 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
             {tagSlug && <span class="bcSep" aria-hidden="true">/</span>}
             <span class="bcCurrent" aria-current="page">{data.title}</span>
           </nav>
-          {kickerLabel && (
+          {kickerMain && (
             <div class={`articleTag${isSponsored ? " articleTagSponsored" : ""}`}>
               {isSponsored
-                ? <span class="articleTagSponsorBadge">{kickerLabel}</span>
-                : <a class="articleTagLink" href={`/${city}/${catSlug}/`}>{kickerLabel}</a>
+                ? <span class="articleTagSponsorBadge">{kickerMain}</span>
+                : <a class="articleTagLink" href={`/${city}/${catSlug}/`}>{kickerMain}</a>
               }
-              {subLabel && <span class="articleTagSub"> — {subLabel}</span>}
+              {subtopic && <span class="articleTagSub"> — {subtopic}</span>}
             </div>
           )}
           <h1 class="articleTitle">{data.title}</h1>
-          <div class="articleByline" aria-label="Article byline">
-            {dateText(data) && <span class="bylineDate">{dateText(data)}</span>}
-            {dateText(data) && <span class="bylineSep" aria-hidden="true">—</span>}
-            <span class="bylineAuthor">{authorText(data)}</span>
-          </div>
+          <p class="articleByline">{bylineStr}</p>
           {data.description && <p class="articleDesc">{data.description}</p>}
         </header>
 
@@ -326,10 +324,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
   .articleTitle { font-size: clamp(26px, 3.2vw, 36px); font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; line-height: 1.08; letter-spacing: -0.5px; color: var(--text); margin: 0 0 18px; max-width: 720px; }
 
-  .articleByline { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--faint); margin-bottom: 22px; }
-  .bylineDate { font-weight: 500; }
-  .bylineSep { opacity: .55; font-weight: 300; letter-spacing: .02em; }
-  .bylineAuthor { font-weight: 700; color: var(--text); }
+  .articleByline { font-size: 13px; color: var(--faint); margin: 0 0 22px; font-weight: 500; }
 
   .articleDesc { font-size: clamp(15px, 1.15vw, 17px); color: var(--muted); line-height: 1.65; border-left: 3px solid var(--brand1); padding-left: 16px; margin: 0 0 28px; max-width: 660px; }
 
