@@ -149,8 +149,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           )}
           <h1 class="articleTitle">{data.title}</h1>
           <div class="articleByline" aria-label="Article byline">
-            <span class="bylineDate">{dateText(data)}</span>
-            {dateText(data) && <span class="bylineSep" aria-hidden="true">·</span>}
+            {dateText(data) && <span class="bylineDate">{dateText(data)}</span>}
+            {dateText(data) && <span class="bylineSep" aria-hidden="true">—</span>}
             <span class="bylineAuthor">{authorText(data)}</span>
           </div>
           {data.description && <p class="articleDesc">{data.description}</p>}
@@ -312,7 +312,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .bcSep { color: var(--border); }
   .bcCurrent { color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
 
-  .articleTag { display: inline-flex; align-items: center; gap: 0; margin-bottom: 12px; font-size: 10.5px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+  .articleTag { display: inline-flex; align-items: center; gap: 0; margin-bottom: 14px; font-size: 10.5px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
   .articleTagLink { padding: 3px 10px; border-radius: 999px; background: var(--brand1); color: var(--accentText); text-decoration: none; cursor: pointer; transition: opacity 140ms; }
   .articleTagLink:hover { opacity: .82; }
   .articleTagSub { padding: 3px 10px 3px 8px; color: var(--brand1); font-weight: 700; }
@@ -324,11 +324,11 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     text-transform: uppercase;
   }
 
-  .articleTitle { font-size: clamp(26px, 3.2vw, 32px); font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; line-height: 1.1; letter-spacing: -0.5px; color: var(--text); margin: 0 0 14px; max-width: 720px; }
+  .articleTitle { font-size: clamp(26px, 3.2vw, 36px); font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; line-height: 1.08; letter-spacing: -0.5px; color: var(--text); margin: 0 0 18px; max-width: 720px; }
 
-  .articleByline { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--faint); margin-bottom: 16px; }
+  .articleByline { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--faint); margin-bottom: 22px; }
   .bylineDate { font-weight: 500; }
-  .bylineSep { opacity: .45; }
+  .bylineSep { opacity: .55; font-weight: 300; letter-spacing: .02em; }
   .bylineAuthor { font-weight: 700; color: var(--text); }
 
   .articleDesc { font-size: clamp(15px, 1.15vw, 17px); color: var(--muted); line-height: 1.65; border-left: 3px solid var(--brand1); padding-left: 16px; margin: 0 0 28px; max-width: 660px; }
