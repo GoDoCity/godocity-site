@@ -2,6 +2,9 @@
 title: Are you ready for Speedweeks 2026?
 description: "For you NASCAR fans "
 city: daytona
+author: Charles King
+category: Sports
+subtopic: NASCAR
 tags:
   - motor sports
   - race

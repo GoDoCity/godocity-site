@@ -3,6 +3,9 @@ title: Daytona Beach is the 1st stop on our way to global domination
 description: If this works we are on our way to becoming the biggest media
   company in the world!
 city: daytona
+author: Charles King
+category: City
+subtopic: Community
 tags:
   - race
 featured: false

@@ -5,6 +5,9 @@ description: Escape the modern grind and retreat into Ormond Beach’s most
   steaks and live jazz, 31 Supper Club blends Prohibition-era grit with
   high-society glitz for the ultimate "treat yourself" evening.
 city: daytona
+author: Charles King
+category: Food
+subtopic: Restaurants
 tags:
   - food
 featured: true

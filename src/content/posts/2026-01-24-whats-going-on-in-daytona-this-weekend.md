@@ -3,6 +3,9 @@ title: Whats going on in Daytona this weekend
 description: The Rolex 24 is this weekend and is set to be the best race yet at
   the Great Daytona Speedway
 city: daytona
+author: Charles King
+category: Sports
+subtopic: Racing
 topics:
   - Race
 featured: true

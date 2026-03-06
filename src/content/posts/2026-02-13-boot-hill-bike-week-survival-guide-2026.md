@@ -4,6 +4,9 @@ description: Bike Week's about to hit Daytona, and you know where the real
   action is! Headed to Main Street? Make sure you’re ready to conquer the
   legendary Boot Hill Saloon!
 city: daytona
+author: Charles King
+category: Sports
+subtopic: Bike Week
 featured: false
 pubDate: 2026-02-13T16:58:00.000Z
 heroImage: /images/uploads/home-to-biketoberfest-.jpg
