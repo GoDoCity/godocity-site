@@ -99,6 +99,28 @@ try {
 
 const pageCity = city.toLowerCase().trim();
 
+/* ── "More from" articles: same city, exclude current, newest first ── */
+const currentSlug = post.slug;
+const allPosts = await getCollection("posts");
+const morePosts = allPosts
+  .filter(p => {
+    const pCity = (p.data.city ?? p.slug.split("/")[0]).toLowerCase().trim();
+    return pCity === pageCity && p.slug !== currentSlug;
+  })
+  .sort((a, b) => new Date(getPostDate(a.data) ?? 0) > new Date(getPostDate(b.data) ?? 0) ? -1 : 1)
+  .slice(0, 12);
+
+function moreHeroImg(p: any) {
+  const v = p?.data?.heroImage ?? p?.data?.heroimage ?? p?.data?.image ?? p?.data?.thumbnail ?? p?.data?.cover ?? "";
+  return typeof v === "string" ? v.trim() : "";
+}
+function moreDate(p: any) {
+  const raw = getPostDate(p.data);
+  if (!raw) return "";
+  const d = new Date(raw);
+  return `${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+}
+
 const upcomingEvents = allEvents
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
@@ -142,13 +164,13 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
             )}
             <a class="bcItem bcLink" href={`/${city}/`}>{cityCap}</a>
           </nav>
-          {/* ── Byline (date — author link) ── */}
+          <h1 class="articleTitle">{data.title}</h1>
+          {data.description && <p class="articleDesc">{data.description}</p>}
+          {/* ── Byline below description ── */}
           <p class="articleByline">
             {dateStr && <span>{dateStr} — </span>}
             <a class="bylineAuthor" href={`/author/${authorSlug}/`}>{authorName}</a>
           </p>
-          <h1 class="articleTitle">{data.title}</h1>
-          {data.description && <p class="articleDesc">{data.description}</p>}
         </header>
 
         {heroImg && (
@@ -191,8 +213,46 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           </div>
         )}
 
-        <div class="relatedSection">
-          <div class="relatedHead">More from {cityCap}</div>
+        {/* ── More from strip ── */}
+        {morePosts.length > 0 && (
+          <section class="moreFrom" aria-label={`More from GoDo${cityCap}`}>
+            <div class="moreFromHead">
+              <span class="moreFromTitle">More from GoDo{cityCap}</span>
+              <a class="moreFromAll" href={`/${city}/`}>See all →</a>
+            </div>
+            <div class="moreFromOuter">
+              <div class="moreFromScroll" id="mfScroll">
+                {morePosts.map(p => {
+                  const pCity = p.data.city ?? p.slug.split("/")[0];
+                  const pSlug = p.slug.split("/").pop();
+                  const img   = moreHeroImg(p);
+                  const cat   = typeof p.data.category === "string" ? p.data.category.trim().toUpperCase() : "";
+                  const dt    = moreDate(p);
+                  return (
+                    <a class="mfCard" href={`/${pCity}/${pSlug}/`}>
+                      <div class="mfImgWrap">
+                        {img
+                          ? <img class="mfImg" src={img} alt="" loading="lazy" decoding="async" />
+                          : <div class="mfImg mfImgFallback" aria-hidden="true" />
+                        }
+                      </div>
+                      <div class="mfBody">
+                        {cat && <div class="mfKicker">{cat}</div>}
+                        <div class="mfTitle">{p.data.title ?? p.slug}</div>
+                        {dt && <div class="mfDate">{dt}</div>}
+                      </div>
+                    </a>
+                  );
+                })}
+              </div>
+              <button class="mfScrollBtn" id="mfBtn" aria-label="Scroll right"
+                onclick="(function(){var el=document.getElementById('mfScroll');el.scrollBy({left:el.offsetWidth*0.8,behavior:'smooth'});})()">
+                ›
+              </button>
+            </div>
+          </section>
+        )}
+        <div class="relatedBack-row">
           <a class="relatedBack" href={`/${city}/`}>← Back to {cityCap} news</a>
         </div>
       </main>
@@ -435,8 +495,72 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .aSponsorCard:not(:has(.aSponsorImgWrap)) { grid-template-columns: 1fr; }
   .aSponsorCard:not(:has(.aSponsorImgWrap)) .aSponsorBody { padding: 24px 26px; }
 
-  .relatedSection { margin-top: 36px; padding-top: 28px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-  .relatedHead { font-size: 16px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: var(--text); }
+  /* ── More from strip ── */
+  .moreFrom { margin-top: 48px; padding-top: 28px; border-top: 2px solid var(--brand1); }
+  .moreFromHead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
+  .moreFromTitle { font-size: 17px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: var(--text); }
+  .moreFromAll { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
+  .moreFromAll:hover { text-decoration: underline; }
+
+  .moreFromOuter { position: relative; }
+  .moreFromScroll {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: calc(25% - 14px);
+    gap: 18px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+  .moreFromScroll::-webkit-scrollbar { display: none; }
+
+  .mfCard {
+    scroll-snap-align: start;
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    transition: opacity 140ms;
+    min-width: 0;
+  }
+  .mfCard:hover { opacity: .85; }
+
+  .mfImgWrap { border-radius: 10px; overflow: hidden; margin-bottom: 9px; }
+  .mfImg { display: block; width: 100%; aspect-ratio: 16/10; object-fit: cover; background: var(--surface2); transition: transform 260ms ease; }
+  .mfCard:hover .mfImg { transform: scale(1.03); }
+  .mfImgFallback { aspect-ratio: 16/10; background: var(--surface2); }
+
+  .mfBody { display: flex; flex-direction: column; gap: 4px; }
+  .mfKicker { font-size: 9.5px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--brand1); }
+  .mfTitle { font-size: 14px; font-weight: 800; line-height: 1.25; color: var(--text); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; transition: color 120ms; }
+  .mfCard:hover .mfTitle { color: var(--link); }
+  .mfDate { font-size: 11px; color: var(--faint); }
+
+  .mfScrollBtn {
+    position: absolute;
+    right: -18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--text);
+    color: var(--bg);
+    border: none;
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,.18);
+    transition: opacity 150ms, background 150ms;
+    z-index: 2;
+    padding: 0 0 2px 1px;
+  }
+  .mfScrollBtn:hover { opacity: .8; }
+
+  .relatedBack-row { margin-top: 28px; padding-top: 20px; border-top: 1px solid var(--border); }
   .relatedBack { font-size: 13.5px; font-weight: 700; color: var(--link); text-decoration: none; border-bottom: 1.5px solid transparent; transition: border-color 140ms; padding-bottom: 1px; }
   .relatedBack:hover { border-color: var(--link); }
 
@@ -501,10 +625,13 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     .aSponsorImgWrap { width: 100%; aspect-ratio: 16/9; }
     .aSponsorBody { padding: 20px 22px; }
     .aSponsorTagline { font-size: 18px; }
+    .moreFromScroll { grid-auto-columns: calc(50% - 9px); }
+    .mfScrollBtn { right: -10px; width: 34px; height: 34px; font-size: 18px; }
   }
   @media (max-width: 480px) {
     .articleTitle { font-size: 22px; }
     .breadcrumb { font-size: 10px; }
+    .moreFromScroll { grid-auto-columns: calc(75% - 9px); }
   }
 </style>
 </Base>
