@@ -3,6 +3,9 @@ import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 /* ── Helpers ── */
+function authorToSlug(name: string) {
+  return String(name ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
 function getPostDate(post: any) {
   return post?.data?.pubDate ?? post?.data?.date ?? post?.data?.published ?? post?.data?.updated ?? null;
 }
