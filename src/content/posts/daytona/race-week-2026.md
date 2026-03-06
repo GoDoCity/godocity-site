@@ -1,9 +1,10 @@
 ---
-title: "Race Week 2026: Everything You Need to Know Before the 500"
+heroImage: /images/posts/daytona/race-week-2026-hero.jpg
 pubDate: 2026-02-10
+city: daytona
 author: Charles King
-category: Sports
-subtopic: racing
+featured: true
+title: "Race Week 2026: Everything You Need to Know Before the 500"
 tags:
   - Sports
   - Daytona 500
