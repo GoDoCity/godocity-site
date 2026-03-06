@@ -38,11 +38,7 @@ function getPostDate(d) {
   return d?.pubDate ?? d?.date ?? d?.published ?? d?.updated ?? null;
 }
 
-/* ── Direct CMS field reads ── */
-// category   → data.category   (CMS field "category")
-// subtopic   → data.subtopic   (CMS field "subtopic")
-// author     → data.author     (CMS field "author")
-// sponsorTier→ data.sponsorTier(CMS field "sponsorTier")
+/* ── CMS field reads — no tag fallbacks ── */
 const category   = typeof data.category   === "string" ? data.category.trim()   : "";
 const subtopic   = typeof data.subtopic   === "string" ? data.subtopic.trim()   : "";
 const authorName = typeof data.author     === "string" && data.author.trim()
@@ -50,20 +46,11 @@ const authorName = typeof data.author     === "string" && data.author.trim()
 const tierRaw    = typeof data.sponsorTier === "string" ? data.sponsorTier.trim() : "";
 const isSponsored = tierRaw !== "" && tierRaw !== "None";
 
-/* Category for the kicker link: explicit category field first, then first tag */
-const firstTag  = Array.isArray(data.tags) && data.tags.length
-                  ? String(data.tags[0]).trim() : "";
-const kickerCat  = category || firstTag;          /* used for slug + breadcrumb */
-const catSlug    = kickerCat ? tagSlugFromRaw(kickerCat) : "";
-
-/* What the kicker DISPLAYS: tier (sponsored) → CATEGORY → "" */
-const kickerMain = isSponsored
+/* Kicker: sponsored tier label OR category — no tag fallback */
+const categorySlug   = category ? tagSlugFromRaw(category) : "";
+const kickerDisplay  = isSponsored
   ? tierRaw.toUpperCase()
-  : kickerCat ? kickerCat.toUpperCase() : "";
-
-/* Breadcrumb compatibility */
-const tag     = kickerCat;
-const tagSlug = catSlug;
+  : category ? category.toUpperCase() : "";
 
 /* ── Byline: "March 5, 2026 — Charles King" ── */
 const pubDateRaw = getPostDate(data);
@@ -136,17 +123,17 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           <nav class="breadcrumb" aria-label="Breadcrumb">
             <a class="bcLink" href={`/${city}/`}>{cityCap}</a>
             <span class="bcSep" aria-hidden="true">/</span>
-            {tagSlug && <a class="bcLink" href={`/${city}/${tagSlug}/`}>{tag}</a>}
-            {tagSlug && <span class="bcSep" aria-hidden="true">/</span>}
+            {categorySlug && <a class="bcLink" href={`/${city}/${categorySlug}/`}>{category}</a>}
+            {categorySlug && <span class="bcSep" aria-hidden="true">/</span>}
             <span class="bcCurrent" aria-current="page">{data.title}</span>
           </nav>
-          {kickerMain && (
-            <div class={`articleTag${isSponsored ? " articleTagSponsored" : ""}`}>
+          {kickerDisplay && (
+            <div class="articleKicker">
               {isSponsored
-                ? <span class="articleTagSponsorBadge">{kickerMain}</span>
-                : <a class="articleTagLink" href={`/${city}/${catSlug}/`}>{kickerMain}</a>
+                ? <span class="kickerSponsored">{kickerDisplay}</span>
+                : <a class="kickerLink" href={`/${city}/${categorySlug}/`}>{kickerDisplay}</a>
               }
-              {subtopic && <span class="articleTagSub"> — {subtopic}</span>}
+              {subtopic && <span class="kickerSub"> — {subtopic}</span>}
             </div>
           )}
           <p class="articleByline">{bylineStr}</p>
@@ -310,17 +297,11 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .bcSep { color: var(--border); }
   .bcCurrent { color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
 
-  .articleTag { display: inline-flex; align-items: center; gap: 0; margin-bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
-  .articleTagLink { color: var(--brand1); text-decoration: none; font-weight: 800; transition: opacity 140ms; }
-  .articleTagLink:hover { opacity: .75; }
-  .articleTagSub { color: var(--brand1); font-weight: 700; padding-left: 0; }
-  .articleTagSponsorBadge {
-    padding: 3px 10px; border-radius: 999px;
-    background: rgba(255,200,30,.18); color: rgba(255,210,50,1);
-    border: 1px solid rgba(255,200,30,.32);
-    font-size: 10.5px; font-weight: 900; letter-spacing: .11em;
-    text-transform: uppercase;
-  }
+  .articleKicker { display: flex; align-items: baseline; gap: 0; margin-bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+  .kickerLink { color: var(--brand1); text-decoration: none; font-weight: 800; transition: opacity 140ms; }
+  .kickerLink:hover { opacity: .75; }
+  .kickerSub { color: var(--brand1); font-weight: 700; }
+  .kickerSponsored { color: var(--brand1); font-weight: 800; font-style: italic; }
 
   .articleTitle { font-size: clamp(26px, 3.2vw, 36px); font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; line-height: 1.08; letter-spacing: -0.5px; color: var(--text); margin: 0 0 18px; max-width: 720px; }
 

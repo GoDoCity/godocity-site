@@ -197,7 +197,7 @@ const topics = [
 
           {/* ── HERO — cinematic wide crop, anchored to sidebar height ── */}
           {hero && (
-            <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
+            <a class="heroCard" href={`/daytona/${hero.slug.split('/').pop()}/`}>
               <div class="heroImgWrap">
                 {heroImage(hero)
                   ? <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="eager" decoding="async" />
@@ -267,12 +267,10 @@ const topics = [
               </div>
 
               {listFeed.map((p) => {
-                const { catLabel, catSlug, sub } = kickerParts(p);
+                const { catLabel, sub } = kickerParts(p);
                 const kickerLabel = catLabel || primaryTag(p).toUpperCase();
-                const kickerSlug = catSlug || tagSlugFromRaw(primaryTag(p));
                 return (
-                  <div class="latestRow">
-                    <a class="latestRowLink" href={`/daytona/${p.slug.split('/').pop()}/`} aria-label={p.data.title ?? p.slug}></a>
+                  <a class="latestRow" href={`/daytona/${p.slug.split('/').pop()}/`}>
                     <div class="latestThumbWrap">
                       {thumbImage(p)
                         ? <img class="latestThumb" src={thumbImage(p)} alt="" loading="lazy" decoding="async" />
@@ -282,14 +280,13 @@ const topics = [
                     <div class="latestText">
                       {kickerLabel && (
                         <div class="latestKicker">
-                          <a class="kickerCatLink" href={`/daytona/${kickerSlug}/`}>{kickerLabel}</a>
-                          {sub && <span class="kickerSub"> — {sub}</span>}
+                          {kickerLabel}{sub ? ` — ${sub}` : ""}
                         </div>
                       )}
                       <div class="latestTitle">{p.data.title ?? p.slug}</div>
                       <div class="latestByline">{byline(p)}</div>
                     </div>
-                  </div>
+                  </a>
                 );
               })}
             </section>
@@ -813,42 +810,25 @@ const topics = [
     }
     .latestMore:hover { text-decoration: underline; }
 
-    /* ── Each article row ── */
+    /* ── Each article row — full <a> wrapper, entire card is clickable ── */
     .latestRow {
-      position: relative;
       display: grid;
       grid-template-columns: 1fr 2fr;
       gap: 18px;
       align-items: center;
       padding: 18px 0;
       border-bottom: 1px solid var(--border);
-      cursor: pointer;
+      text-decoration: none;
       transition: opacity 140ms ease;
     }
     .latestRow:hover { opacity: .78; }
     .latestRow:last-child { border-bottom: none; }
-    /* Stretched invisible card link */
-    .latestRowLink {
-      position: absolute; inset: 0; z-index: 0;
-      text-decoration: none;
-    }
-    /* Kicker category link — floats above the stretched link */
-    .kickerCatLink {
-      position: relative; z-index: 1;
-      color: inherit;
-      text-decoration: none;
-      font-weight: 800;
-      font-size: inherit;
-    }
-    .kickerCatLink:hover { text-decoration: underline; }
-    .kickerSub { color: inherit; }
 
     /* ── Thumbnail ── */
     .latestThumbWrap {
       aspect-ratio: 4/3;
       border-radius: 8px;
       overflow: hidden;
-      position: relative; z-index: 1;
     }
     .latestThumb {
       display: block;
@@ -870,7 +850,6 @@ const topics = [
       flex-direction: column;
       gap: 5px;
       min-width: 0;
-      position: relative; z-index: 1;
     }
     .latestKicker {
       font-size: 10px;
