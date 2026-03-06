@@ -3,7 +3,7 @@ title: "Dirt, Danger, and the #1 Plate: Flat Track Fever Returns to the Speedway
 pubDate: 2026-03-07
 author: Charles King
 category: Sports
-subtopic: "racing "
+subtopic: Racing
 description: "Dallas Daniels is back with a target on his back and a #1 plate on
   his bike as American Flat Track kicks off its 2026 season."
 heroImage: /images/uploads/dirt-track.png

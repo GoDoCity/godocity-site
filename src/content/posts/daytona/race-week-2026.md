@@ -1,5 +1,5 @@
 ---
-heroImage: /images/posts/daytona/race-week-2026-hero.jpg
+heroImage: /images/uploads/daytona-international-speedway-nascar-xfinity-series-daytona-500.jpg-1.jpg
 pubDate: 2026-02-10
 city: daytona
 author: Charles King

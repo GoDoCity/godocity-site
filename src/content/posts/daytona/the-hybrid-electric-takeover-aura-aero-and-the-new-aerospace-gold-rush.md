@@ -1,9 +1,9 @@
 ---
-title: " The Hybrid-Electric Takeover: AURA AERO and the New Aerospace Gold Rush"
+title: "The Hybrid-Electric Takeover: AURA AERO and the New Aerospace Gold Rush"
 pubDate: 2026-03-06
 author: Deb Davis
 category: Business
-subtopic: "Tech "
+subtopic: Tech
 description: " French aviation firm AURA AERO is turning Daytona into a
   hybrid-electric hub, proving that the future of flying isn't just quiet—it’s
   actually profitable."
