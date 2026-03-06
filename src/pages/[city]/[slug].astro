@@ -149,8 +149,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
               {subtopic && <span class="articleTagSub"> — {subtopic}</span>}
             </div>
           )}
-          <h1 class="articleTitle">{data.title}</h1>
           <p class="articleByline">{bylineStr}</p>
+          <h1 class="articleTitle">{data.title}</h1>
           {data.description && <p class="articleDesc">{data.description}</p>}
         </header>
 
@@ -310,10 +310,10 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .bcSep { color: var(--border); }
   .bcCurrent { color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 240px; }
 
-  .articleTag { display: inline-flex; align-items: center; gap: 0; margin-bottom: 14px; font-size: 10.5px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
-  .articleTagLink { padding: 3px 10px; border-radius: 999px; background: var(--brand1); color: var(--accentText); text-decoration: none; cursor: pointer; transition: opacity 140ms; }
-  .articleTagLink:hover { opacity: .82; }
-  .articleTagSub { padding: 3px 10px 3px 8px; color: var(--brand1); font-weight: 700; }
+  .articleTag { display: inline-flex; align-items: center; gap: 0; margin-bottom: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+  .articleTagLink { color: var(--brand1); text-decoration: none; font-weight: 800; transition: opacity 140ms; }
+  .articleTagLink:hover { opacity: .75; }
+  .articleTagSub { color: var(--brand1); font-weight: 700; padding-left: 0; }
   .articleTagSponsorBadge {
     padding: 3px 10px; border-radius: 999px;
     background: rgba(255,200,30,.18); color: rgba(255,210,50,1);
