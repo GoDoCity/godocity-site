@@ -27,6 +27,9 @@ function formatDate(raw: any) {
 }
 
 export async function getStaticPaths() {
+  function authorToSlug(name: string) {
+    return String(name ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  }
   const all = await getCollection("posts");
   /* Collect unique author names */
   const authorMap = new Map<string, string>(); /* slug → display name */
