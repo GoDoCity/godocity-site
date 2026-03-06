@@ -1,0 +1,242 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+/* ── Helpers ── */
+function authorToSlug(name: string) {
+  return String(name ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+function getPostDate(post: any) {
+  return post?.data?.pubDate ?? post?.data?.date ?? post?.data?.published ?? post?.data?.updated ?? null;
+}
+function heroImage(post: any) {
+  const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.thumbnail ?? post?.data?.cover ?? "";
+  return typeof v === "string" ? v.trim() : "";
+}
+function excerpt(post: any) {
+  const v = post?.data?.description ?? post?.data?.excerpt ?? post?.data?.summary ?? post?.body ?? "";
+  if (typeof v !== "string" || !v.trim()) return "";
+  const clean = v.replace(/[#*_`>\[\]]/g, " ").replace(/\s+/g, " ").trim();
+  return clean.length > 160 ? clean.slice(0, 157).trimEnd() + "…" : clean;
+}
+function formatDate(raw: any) {
+  if (!raw) return "";
+  const d = new Date(raw);
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return `${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+}
+
+export async function getStaticPaths() {
+  const all = await getCollection("posts");
+  /* Collect unique author names */
+  const authorMap = new Map<string, string>(); /* slug → display name */
+  for (const post of all) {
+    const name = typeof post.data.author === "string" && post.data.author.trim()
+      ? post.data.author.trim() : "Charles King";
+    const slug = authorToSlug(name);
+    if (!authorMap.has(slug)) authorMap.set(slug, name);
+  }
+  return Array.from(authorMap.entries()).map(([slug, name]) => ({
+    params: { slug },
+    props: { authorName: name },
+  }));
+}
+
+const { slug } = Astro.params;
+const { authorName } = Astro.props;
+
+const all = await getCollection("posts");
+const posts = all
+  .filter(p => {
+    const name = typeof p.data.author === "string" && p.data.author.trim()
+      ? p.data.author.trim() : "Charles King";
+    return authorToSlug(name) === slug;
+  })
+  .sort((a, b) => new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime());
+---
+
+<Base title={`${authorName} — GoDoCity`} subtitle={`Articles by ${authorName}`}>
+  <div class="pageWrap">
+    <div class="container">
+
+      {/* ── Author header ── */}
+      <header class="authorHeader">
+        <div class="authorInitials" aria-hidden="true">
+          {authorName.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()}
+        </div>
+        <div class="authorInfo">
+          <h1 class="authorName">{authorName}</h1>
+          <p class="authorMeta">{posts.length} {posts.length === 1 ? "article" : "articles"} on GoDoCity</p>
+        </div>
+      </header>
+
+      {/* ── Article list ── */}
+      <section class="authorFeed" aria-label={`Articles by ${authorName}`}>
+        <div class="feedHead">
+          <span class="feedLabel">Latest from {authorName}</span>
+        </div>
+
+        {posts.length === 0 && (
+          <p class="noArticles">No articles found for this author.</p>
+        )}
+
+        <div class="authorGrid">
+          {posts.map(p => {
+            const city = p.data.city ?? p.slug.split("/")[0] ?? "daytona";
+            const articleSlug = p.slug.split("/").pop();
+            const img = heroImage(p);
+            const desc = excerpt(p);
+            const date = formatDate(getPostDate(p));
+            const cat = typeof p.data.category === "string" ? p.data.category.trim().toUpperCase() : "";
+            const sub = typeof p.data.subtopic === "string" ? p.data.subtopic.trim() : "";
+            return (
+              <a class="authorCard" href={`/${city}/${articleSlug}/`}>
+                <div class="cardImgWrap">
+                  {img
+                    ? <img class="cardImg" src={img} alt="" loading="lazy" decoding="async" />
+                    : <div class="cardImg cardImgFallback" aria-hidden="true" />
+                  }
+                </div>
+                <div class="cardBody">
+                  {cat && <div class="cardKicker">{cat}{sub ? ` — ${sub}` : ""}</div>}
+                  <div class="cardTitle">{p.data.title ?? p.slug}</div>
+                  {desc && <div class="cardDesc">{desc}</div>}
+                  <div class="cardMeta">{date}</div>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+
+    </div>
+  </div>
+</Base>
+
+<style>
+  :global(html), :global(body) { overflow-x: hidden; }
+  .pageWrap { min-height: 100vh; padding-bottom: 64px; }
+  :global(.container) { max-width: 1280px; margin: 0 auto; padding: 0 2.5rem; }
+  @media (max-width: 768px) { :global(.container) { padding: 0 1.25rem; } }
+
+  /* ── Author header ── */
+  .authorHeader {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 48px 0 32px;
+    border-bottom: 2px solid var(--brand1);
+    margin-bottom: 40px;
+  }
+  .authorInitials {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--brand1);
+    color: #000;
+    font-size: 26px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: -0.03em;
+  }
+  .authorInfo { display: flex; flex-direction: column; gap: 4px; }
+  .authorName {
+    font-size: clamp(28px, 3vw, 40px);
+    font-weight: 900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    color: var(--text);
+    margin: 0;
+    letter-spacing: -0.5px;
+    line-height: 1.05;
+  }
+  .authorMeta { font-size: 14px; color: var(--faint); font-weight: 500; margin: 0; }
+
+  /* ── Feed heading ── */
+  .authorFeed { }
+  .feedHead {
+    display: flex;
+    align-items: baseline;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--brand1);
+    margin-bottom: 28px;
+  }
+  .feedLabel {
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  .noArticles { color: var(--faint); font-size: 15px; padding: 24px 0; }
+
+  /* ── 3-column card grid ── */
+  .authorGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 860px) { .authorGrid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .authorGrid { grid-template-columns: 1fr; gap: 0; } }
+
+  .authorCard {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    transition: opacity 140ms;
+  }
+  .authorCard:hover { opacity: .88; }
+  @media (max-width: 540px) {
+    .authorCard {
+      display: grid;
+      grid-template-columns: 1fr 90px;
+      gap: 12px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+  }
+
+  .cardImgWrap {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  @media (max-width: 540px) { .cardImgWrap { margin-bottom: 0; order: 2; border-radius: 7px; } }
+
+  .cardImg {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16/10;
+    object-fit: cover;
+    background: var(--surface2);
+    transition: transform 280ms ease;
+  }
+  .authorCard:hover .cardImg { transform: scale(1.03); }
+  .cardImgFallback { aspect-ratio: 16/10; background: var(--surface2); }
+  @media (max-width: 540px) {
+    .cardImg { width: 90px; height: 64px; aspect-ratio: unset; }
+    .cardImgFallback { width: 90px; height: 64px; }
+  }
+
+  .cardBody { display: flex; flex-direction: column; gap: 5px; }
+  .cardKicker {
+    font-size: 10px; font-weight: 800; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--brand1);
+  }
+  .cardTitle {
+    font-size: 17px; font-weight: 800; line-height: 1.2;
+    letter-spacing: -0.15px; color: var(--text);
+    display: -webkit-box; -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical; overflow: hidden;
+    transition: color 130ms;
+  }
+  .authorCard:hover .cardTitle { color: var(--link); }
+  .cardDesc {
+    font-size: 13.5px; color: var(--muted); line-height: 1.45;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .cardMeta { font-size: 11.5px; color: var(--faint); }
+</style>
