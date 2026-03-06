@@ -10,7 +10,7 @@ tags:
   - city
   - history
 featured: false
-heroImage: /images/uploads/birthplace-of-speed-ormond.jpg
+heroImage: /images/uploads/daytona-arch.png
 ---
 
 Long before there was a Daytona International Speedway, before NASCAR was even a concept, there was a stretch of hard-packed sand beach in Ormond Beach where the fastest men in the world came to find out just how fast they could go.

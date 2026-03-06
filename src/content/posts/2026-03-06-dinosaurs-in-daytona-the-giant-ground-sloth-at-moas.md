@@ -10,7 +10,7 @@ tags:
   - city
   - culture
 featured: false
-heroImage: /images/uploads/moas-daytona.jpg
+heroImage: /images/uploads/dino-bronze.png
 ---
 
 Most people drive right past the Museum of Arts and Sciences (MOAS) on their way to the beach. That's a mistake. Because tucked inside one of Volusia County's oldest cultural institutions is a skeleton that makes every dinosaur exhibit at Disney look like a participation trophy.
