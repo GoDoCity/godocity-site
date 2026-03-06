@@ -4,7 +4,7 @@ pubDate: 2026-03-06
 author: Deb Davis
 category: Travel & Outdoors
 subtopic: ""
-sponsorTier: Local Guide
+sponsorTier: Spotlight
 description: Exploring the Ponce Inlet Lighthouse, a red-brick giant that
   survived the kerosene era and 1970s abandonment to become Florida’s tallest
   beacon of light.
