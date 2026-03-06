@@ -67,9 +67,9 @@ const tagSlug = catSlug;
 
 /* ── Byline: "March 5, 2026 — Charles King" ── */
 const pubDateRaw = getPostDate(data);
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const dateStr = pubDateRaw
-  ? new Date(pubDateRaw).toLocaleDateString("en-US",
-      { month: "long", day: "numeric", year: "numeric" })
+  ? (() => { const d = new Date(pubDateRaw); return `${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`; })()
   : "";
 const bylineStr = dateStr ? `${dateStr} — ${authorName}` : authorName;
 
