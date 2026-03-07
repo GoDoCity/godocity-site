@@ -218,21 +218,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
         </div>
       </main>
 
-        <div class="editTeamSection">
-          <div class="railHead">
-            <span class="railTitle editTeamTitle">GoDoCity Editorial Team</span>
-          </div>
-          <div class="editTeamRow">
-            <img class="editHeadshot" src={CK_SRC} alt="Charles King"
-              width="80" height="80" loading="eager"
-              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-            <div class="editHeadshotFallback" aria-hidden="true">CK</div>
-            <div class="editTeamInfo">
-              <div class="editName">Charles King</div>
-              <div class="editTitle">Newsletter Editor</div>
-            </div>
-          </div>
-        </div>
+      <aside class="homeRail">
 
         {/* Upcoming Events */}
         <div class="railSection">
@@ -268,18 +254,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           </div>
         </div>
 
-        <div class="displayAdSlot">
-          <div class="adSlotLabel">Advertisement</div>
-          <a class="displayAdCard" href={`/${city}/advertise/`}>
-            <div class="displayAdInner">
-              <div class="displayAdIcon">📢</div>
-              <div class="displayAdTitle">Your Ad Here</div>
-              <div class="displayAdDesc">Reach thousands of {cityCap} locals</div>
-              <div class="displayAdCta">Advertise with us →</div>
-            </div>
-          </a>
-        </div>
-
+        {/* City Guides */}
         <div class="railSection">
           <div class="railHead">
             <span class="railTitle">City Guides</span>
@@ -291,6 +266,18 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
             <a class="guideRow" href={`/${city}/guides/play/`}>🎉 Play in {cityCap}</a>
             <a class="guideRow" href={`/${city}/guides/best-restaurants/`}>🍽️ Best Restaurants</a>
           </div>
+        </div>
+
+        <div class="displayAdSlot">
+          <div class="adSlotLabel">Advertisement</div>
+          <a class="displayAdCard" href={`/${city}/advertise/`}>
+            <div class="displayAdInner">
+              <div class="displayAdIcon">📢</div>
+              <div class="displayAdTitle">Your Ad Here</div>
+              <div class="displayAdDesc">Reach thousands of {cityCap} locals</div>
+              <div class="displayAdCta">Advertise with us →</div>
+            </div>
+          </a>
         </div>
 
         <div class="nlBox">
@@ -377,7 +364,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     text-transform: uppercase;
   }
   .bcItem { color: var(--brand1); white-space: nowrap; }
-  .bcLink { color: var(--brand1); text-decoration: none; transition: color 120ms, text-decoration-color 120ms; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; }
+  .bcLink { color: var(--brand1); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; transition: text-decoration-color 120ms; }
   .bcLink:hover { text-decoration-color: var(--brand1); }
   .bcSep { color: var(--border); margin: 0 3px; font-size: 13px; line-height: 1; }
   .bcSponsored { color: var(--brand1); font-style: italic; }
@@ -510,11 +497,11 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .moreFromAll { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
   .moreFromAll:hover { text-decoration: underline; }
 
-  .moreFromOuter { position: relative; padding: 0 52px; }
+  .moreFromOuter { position: relative; padding: 0 56px; }
   .moreFromScroll {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: calc(31% - 20px);
+    grid-auto-columns: calc(33.333% - 15px);
     gap: 22px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
@@ -564,8 +551,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     transition: background 150ms, color 150ms, box-shadow 150ms;
     z-index: 2;
   }
-  .mfScrollBtn--right { right: 6px; padding: 0 0 2px 1px; }
-  .mfScrollBtn--left  { left:  6px; padding: 0 1px 2px 0; }
+  .mfScrollBtn--right { right: 10px; padding: 0 0 2px 1px; }
+  .mfScrollBtn--left  { left:  10px; padding: 0 1px 2px 0; }
   .mfScrollBtn:hover {
     background: var(--brand1);
     color: #000;
@@ -580,17 +567,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .railSection { display: grid; gap: 0; }
   .railHead { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 10px; border-bottom: 2px solid var(--brand1); }
   .railTitle { font-size: 16px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--text); }
-  .editTeamTitle { white-space: nowrap; letter-spacing: -0.02em; }
   .railMore { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
   .railMore:hover { text-decoration: underline; }
-
-  .editTeamSection { display: grid; gap: 0; }
-  .editTeamRow { display: flex; align-items: center; padding-top: 12px; }
-  .editHeadshot { width: 80px; height: 80px; border-radius: 50%; object-fit: cover; flex-shrink: 0; margin-right: 15px; background: var(--surface2); border: 2px solid var(--border); }
-  .editHeadshotFallback { display: none; width: 80px; height: 80px; border-radius: 50%; background: var(--brand1); color: #000; font-size: 22px; font-weight: 900; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 15px; border: 2px solid var(--border); }
-  .editTeamInfo { display: flex; flex-direction: column; justify-content: center; gap: 3px; }
-  .editName { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.2; }
-  .editTitle { font-size: 14px; color: var(--faint); line-height: 1.3; }
 
   .eventList { display: grid; }
   .eventRow { display: grid; grid-template-columns: 48px 1fr; gap: 12px; align-items: center; text-decoration: none; padding: 13px 0; border-bottom: 1px solid var(--border); transition: opacity 140ms; }
@@ -637,17 +615,17 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     .aSponsorImgWrap { width: 100%; aspect-ratio: 16/9; }
     .aSponsorBody { padding: 20px 22px; }
     .aSponsorTagline { font-size: 18px; }
-    .moreFromOuter { padding: 0 40px; }
-    .moreFromScroll { grid-auto-columns: calc(48% - 12px); }
+    .moreFromOuter { padding: 0 44px; }
+    .moreFromScroll { grid-auto-columns: calc(50% - 11px); }
     .mfScrollBtn { width: 34px; height: 34px; font-size: 18px; }
-    .mfScrollBtn--right { right: 4px; }
-    .mfScrollBtn--left  { left:  4px; }
+    .mfScrollBtn--right { right: 6px; }
+    .mfScrollBtn--left  { left:  6px; }
   }
   @media (max-width: 480px) {
     .articleTitle { font-size: 22px; }
     .breadcrumb { font-size: 10px; }
-    .moreFromOuter { padding: 0 36px; }
-    .moreFromScroll { grid-auto-columns: calc(75% - 9px); }
+    .moreFromOuter { padding: 0 40px; }
+    .moreFromScroll { grid-auto-columns: calc(80% - 9px); }
   }
 </style>
 </Base>
