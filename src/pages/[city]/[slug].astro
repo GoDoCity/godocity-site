@@ -587,17 +587,24 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .adSlotLabel { font-size: 8.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); text-align: center; }
   .displayAdCard {
     display: block; text-decoration: none; border-radius: 13px; overflow: hidden;
-    background-color: var(--brand1);
-    background-image: url('/images/topo-texture.svg');
-    background-size: 480px auto;
-    background-blend-mode: multiply;
+    position: relative;
+    background: var(--brand1);
     transition: opacity 140ms;
   }
+  .displayAdCard::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url('/images/topo-texture.svg') center / cover no-repeat;
+    opacity: 0.75;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    border-radius: inherit;
+  }
   .displayAdCard:hover { opacity: .9; }
-  .displayAdInner { padding: 22px 14px; text-align: center; display: grid; gap: 5px; place-items: center; }
+  .displayAdInner { position: relative; z-index: 1; padding: 22px 14px; text-align: center; display: grid; gap: 5px; place-items: center; }
   .displayAdIcon { font-size: 24px; margin-bottom: 2px; }
   .displayAdTitle { font-size: 16px; font-weight: 900; color: #000; }
-  .displayAdDesc { font-size: 14px; color: rgba(0,0,0,.72); line-height: 1.3; }
+  .displayAdDesc { font-size: 14px; color: rgba(0,0,0,.75); line-height: 1.3; }
   .displayAdCta { margin-top: 6px; display: inline-flex; align-items: center; height: 30px; padding: 0 13px; border-radius: 999px; background: #000; color: var(--brand1); font-size: 11.5px; font-weight: 800; }
 
   .guideList { display: grid; }
@@ -607,15 +614,23 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
   .nlBox {
     padding: 18px 16px; border-radius: 14px; overflow: hidden;
-    background-color: var(--brand1);
-    background-image: url('/images/topo-texture.svg');
-    background-size: 480px auto;
-    background-blend-mode: multiply;
+    position: relative;
+    background: var(--brand1);
     display: flex; flex-direction: column; gap: 7px;
   }
+  .nlBox::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url('/images/topo-texture.svg') center / cover no-repeat;
+    opacity: 0.75;
+    mix-blend-mode: multiply;
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  .nlBox > * { position: relative; z-index: 1; }
   .nlBoxHead { font-size: 18px; font-weight: 900; font-style: italic; color: #000; line-height: 1.1; letter-spacing: -0.03em; }
   .nlBoxHead strong { font-weight: 900; }
-  .nlBoxSub { font-size: 13px; color: rgba(0,0,0,.72); line-height: 1.35; }
+  .nlBoxSub { font-size: 13px; color: rgba(0,0,0,.75); line-height: 1.35; }
   .nlBoxBtn { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 999px; background: #000; color: var(--brand1); font-size: 12.5px; font-weight: 800; text-decoration: none; align-self: flex-start; margin-top: 2px; transition: opacity 140ms; }
   .nlBoxBtn:hover { opacity: .82; }
 
