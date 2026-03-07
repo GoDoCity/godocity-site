@@ -213,55 +213,10 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           </div>
         )}
 
-        {/* ── More from strip ── */}
-        {morePosts.length > 0 && (
-          <section class="moreFrom" aria-label={`More from GoDo${cityCap}`}>
-            <div class="moreFromHead">
-              <span class="moreFromTitle">More from GoDo{cityCap}</span>
-              <a class="moreFromAll" href={`/${city}/`}>See all →</a>
-            </div>
-            <div class="moreFromOuter">
-              <button class="mfScrollBtn mfScrollBtn--left" aria-label="Scroll left"
-                onclick="(function(){var el=document.getElementById('mfScroll');el.scrollBy({left:-el.offsetWidth*0.8,behavior:'smooth'});})()">
-                ‹
-              </button>
-              <div class="moreFromScroll" id="mfScroll">
-                {morePosts.map(p => {
-                  const pCity = p.data.city ?? p.slug.split("/")[0];
-                  const pSlug = p.slug.split("/").pop();
-                  const img   = moreHeroImg(p);
-                  const cat   = typeof p.data.category === "string" ? p.data.category.trim().toUpperCase() : "";
-                  const dt    = moreDate(p);
-                  return (
-                    <a class="mfCard" href={`/${pCity}/${pSlug}/`}>
-                      <div class="mfImgWrap">
-                        {img
-                          ? <img class="mfImg" src={img} alt="" loading="lazy" decoding="async" />
-                          : <div class="mfImg mfImgFallback" aria-hidden="true" />
-                        }
-                      </div>
-                      <div class="mfBody">
-                        {cat && <div class="mfKicker">{cat}</div>}
-                        <div class="mfTitle">{p.data.title ?? p.slug}</div>
-                        {dt && <div class="mfDate">{dt}</div>}
-                      </div>
-                    </a>
-                  );
-                })}
-              </div>
-              <button class="mfScrollBtn mfScrollBtn--right" aria-label="Scroll right"
-                onclick="(function(){var el=document.getElementById('mfScroll');el.scrollBy({left:el.offsetWidth*0.8,behavior:'smooth'});})()">
-                ›
-              </button>
-            </div>
-          </section>
-        )}
         <div class="relatedBack-row">
           <a class="relatedBack" href={`/${city}/`}>← Back to {cityCap} news</a>
         </div>
       </main>
-
-      <aside class="homeRail">
 
         <div class="editTeamSection">
           <div class="railHead">
@@ -346,6 +301,50 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
       </aside>
     </div>
+
+    {/* ── More from strip — spans full container width, into sidebar gutter ── */}
+    {morePosts.length > 0 && (
+      <section class="moreFrom" aria-label={`More from GoDo${cityCap}`}>
+        <div class="moreFromHead">
+          <span class="moreFromTitle">More from GoDo{cityCap}</span>
+          <a class="moreFromAll" href={`/${city}/`}>See all →</a>
+        </div>
+        <div class="moreFromOuter">
+          <button class="mfScrollBtn mfScrollBtn--left" aria-label="Scroll left"
+            onclick="(function(){var el=document.getElementById('mfScroll');el.scrollBy({left:-el.offsetWidth*0.8,behavior:'smooth'});})()">
+            ‹
+          </button>
+          <div class="moreFromScroll" id="mfScroll">
+            {morePosts.map(p => {
+              const pCity = p.data.city ?? p.slug.split("/")[0];
+              const pSlug = p.slug.split("/").pop();
+              const img   = moreHeroImg(p);
+              const cat   = typeof p.data.category === "string" ? p.data.category.trim().toUpperCase() : "";
+              const dt    = moreDate(p);
+              return (
+                <a class="mfCard" href={`/${pCity}/${pSlug}/`}>
+                  <div class="mfImgWrap">
+                    {img
+                      ? <img class="mfImg" src={img} alt="" loading="lazy" decoding="async" />
+                      : <div class="mfImg mfImgFallback" aria-hidden="true" />
+                    }
+                  </div>
+                  <div class="mfBody">
+                    {cat && <div class="mfKicker">{cat}</div>}
+                    <div class="mfTitle">{p.data.title ?? p.slug}</div>
+                    {dt && <div class="mfDate">{dt}</div>}
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+          <button class="mfScrollBtn mfScrollBtn--right" aria-label="Scroll right"
+            onclick="(function(){var el=document.getElementById('mfScroll');el.scrollBy({left:el.offsetWidth*0.8,behavior:'smooth'});})()">
+            ›
+          </button>
+        </div>
+      </section>
+    )}
   </div>
 </div>
 
@@ -377,17 +376,17 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     letter-spacing: .08em;
     text-transform: uppercase;
   }
-  .bcItem { color: var(--faint); white-space: nowrap; }
-  .bcLink { color: var(--faint); text-decoration: none; transition: color 120ms; }
-  .bcLink:hover { color: var(--link); }
+  .bcItem { color: var(--brand1); white-space: nowrap; }
+  .bcLink { color: var(--brand1); text-decoration: none; transition: color 120ms, text-decoration-color 120ms; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; }
+  .bcLink:hover { text-decoration-color: var(--brand1); }
   .bcSep { color: var(--border); margin: 0 3px; font-size: 13px; line-height: 1; }
   .bcSponsored { color: var(--brand1); font-style: italic; }
 
   .articleTitle { font-size: clamp(26px, 3.2vw, 36px); font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; line-height: 1.08; letter-spacing: -0.5px; color: var(--text); margin: 0 0 18px; max-width: 720px; }
 
   .articleByline { font-size: 13px; color: var(--faint); margin: 0 0 16px; font-weight: 500; }
-  .bylineAuthor { color: var(--faint); text-decoration: none; font-weight: 700; border-bottom: 1px solid transparent; transition: color 130ms, border-color 130ms; }
-  .bylineAuthor:hover { color: var(--link); border-bottom-color: var(--link); }
+  .bylineAuthor { color: var(--brand1); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; font-weight: 700; transition: text-decoration-color 130ms; }
+  .bylineAuthor:hover { text-decoration-color: var(--brand1); }
 
   .articleDesc { font-size: clamp(15px, 1.15vw, 17px); color: var(--muted); line-height: 1.65; border-left: 3px solid var(--brand1); padding-left: 16px; margin: 0 0 28px; max-width: 660px; }
 
@@ -499,19 +498,24 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .aSponsorCard:not(:has(.aSponsorImgWrap)) { grid-template-columns: 1fr; }
   .aSponsorCard:not(:has(.aSponsorImgWrap)) .aSponsorBody { padding: 24px 26px; }
 
-  /* ── More from strip ── */
-  .moreFrom { margin-top: 48px; padding-top: 28px; border-top: 2px solid var(--brand1); }
+  /* ── More from strip — full container width ── */
+  .moreFrom {
+    margin-top: 48px;
+    padding-top: 28px;
+    padding-bottom: 48px;
+    border-top: 2px solid var(--brand1);
+  }
   .moreFromHead { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 18px; }
   .moreFromTitle { font-size: 17px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; color: var(--text); }
   .moreFromAll { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
   .moreFromAll:hover { text-decoration: underline; }
 
-  .moreFromOuter { position: relative; }
+  .moreFromOuter { position: relative; padding: 0 52px; }
   .moreFromScroll {
     display: grid;
     grid-auto-flow: column;
-    grid-auto-columns: calc(25% - 14px);
-    gap: 18px;
+    grid-auto-columns: calc(31% - 20px);
+    gap: 22px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     -webkit-overflow-scrolling: touch;
@@ -560,8 +564,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     transition: background 150ms, color 150ms, box-shadow 150ms;
     z-index: 2;
   }
-  .mfScrollBtn--right { right: -20px; padding: 0 0 2px 1px; }
-  .mfScrollBtn--left  { left:  -20px; padding: 0 1px 2px 0; }
+  .mfScrollBtn--right { right: 6px; padding: 0 0 2px 1px; }
+  .mfScrollBtn--left  { left:  6px; padding: 0 1px 2px 0; }
   .mfScrollBtn:hover {
     background: var(--brand1);
     color: #000;
@@ -633,14 +637,16 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     .aSponsorImgWrap { width: 100%; aspect-ratio: 16/9; }
     .aSponsorBody { padding: 20px 22px; }
     .aSponsorTagline { font-size: 18px; }
-    .moreFromScroll { grid-auto-columns: calc(50% - 9px); }
+    .moreFromOuter { padding: 0 40px; }
+    .moreFromScroll { grid-auto-columns: calc(48% - 12px); }
     .mfScrollBtn { width: 34px; height: 34px; font-size: 18px; }
-    .mfScrollBtn--right { right: -14px; }
-    .mfScrollBtn--left  { left:  -14px; }
+    .mfScrollBtn--right { right: 4px; }
+    .mfScrollBtn--left  { left:  4px; }
   }
   @media (max-width: 480px) {
     .articleTitle { font-size: 22px; }
     .breadcrumb { font-size: 10px; }
+    .moreFromOuter { padding: 0 36px; }
     .moreFromScroll { grid-auto-columns: calc(75% - 9px); }
   }
 </style>
