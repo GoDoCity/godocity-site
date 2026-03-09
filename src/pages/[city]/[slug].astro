@@ -290,8 +290,12 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
         <div class="nlStickyWrap">
           <div class="nlBox">
             <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
-            <div class="nlBoxSub">Free local news in your inbox every morning.</div>
-            <a class="nlBoxBtn" href={`/${city}/subscribe/`}>Subscribe free →</a>
+            <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
+            <form class="nlForm" action={`/${city}/subscribe/`} method="get">
+              <input class="nlInput" type="email" name="email"
+                placeholder="your@email.com" required autocomplete="email" />
+              <button class="nlSubmit" type="submit">Sign Up</button>
+            </form>
           </div>
         </div>
 
@@ -621,8 +625,24 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .nlBoxHead { font-size: 23px; font-weight: 900; font-style: italic; color: #000; line-height: 1.1; letter-spacing: -0.03em; }
   .nlBoxHead strong { font-weight: 900; }
   .nlBoxSub { font-size: 15px; color: rgba(0,0,0,.78); line-height: 1.4; }
-  .nlBoxBtn { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 999px; background: #000; color: #f9d900; font-size: 12.5px; font-weight: 800; text-decoration: none; align-self: flex-start; margin-top: 2px; transition: opacity 140ms; }
-  .nlBoxBtn:hover { opacity: .82; }
+  .nlForm    { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .nlInput   {
+    width: 100%; box-sizing: border-box;
+    padding: 12px 14px; border-radius: 10px;
+    border: none; background: #fff;
+    font-size: 14px; color: #111;
+    outline: 2px solid transparent; transition: outline-color 150ms;
+  }
+  .nlInput:focus { outline-color: #000; }
+  .nlInput::placeholder { color: #999; }
+  .nlSubmit  {
+    width: 100%; padding: 12px 0; border-radius: 999px;
+    border: none; background: #000; color: #f9d900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 14px; font-weight: 900; letter-spacing: .04em;
+    cursor: pointer; transition: opacity 150ms;
+  }
+  .nlSubmit:hover { opacity: .82; }
 
   @media (max-width: 768px) {
     .homeGrid { padding: 24px 0 40px; }
