@@ -4,6 +4,7 @@
  * Dynamic Article Template — GoDoCity news & editorial posts v2
  */
 import Base from "../../layouts/Base.astro";
+import SidebarPoll from "../../components/SidebarPoll.astro";
 import { getCollection, render } from "astro:content";
 
 export async function getStaticPaths() {
@@ -280,10 +281,14 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           </a>
         </div>
 
-        <div class="nlBox">
-          <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
-          <div class="nlBoxSub">Free local news in your inbox every morning.</div>
-          <a class="nlBoxBtn" href={`/${city}/subscribe/`}>Subscribe free →</a>
+        <SidebarPoll />
+
+        <div class="nlStickyWrap">
+          <div class="nlBox">
+            <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
+            <div class="nlBoxSub">Free local news in your inbox every morning.</div>
+            <a class="nlBoxBtn" href={`/${city}/subscribe/`}>Subscribe free →</a>
+          </div>
         </div>
 
       </aside>
@@ -348,7 +353,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     align-items: start;
     padding: 40px 0 56px;
   }
-  .homeGrid > * { min-width: 0; overflow: hidden; }
+  .homeGrid > * { min-width: 0; }
+  .homeGrid > *:not(.homeRail) { overflow: hidden; }
   @media (max-width: 980px) { .homeGrid { grid-template-columns: 1fr; } .homeRail { order: 2; } }
 
   /* ── Single left-aligned breadcrumb ── */
@@ -563,7 +569,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .relatedBack { font-size: 13.5px; font-weight: 700; color: var(--link); text-decoration: none; border-bottom: 1.5px solid transparent; transition: border-color 140ms; padding-bottom: 1px; }
   .relatedBack:hover { border-color: var(--link); }
 
-  .homeRail { position: sticky; top: 80px; display: grid; gap: 24px; align-self: start; }
+  .homeRail { display: grid; gap: 24px; align-self: start; }
+  .nlStickyWrap { position: -webkit-sticky; position: sticky; top: 20px; z-index: 10; }
   .railSection { display: grid; gap: 0; }
   .railHead { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 10px; border-bottom: 2px solid var(--brand1); }
   .railTitle { font-size: 16px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--text); }
