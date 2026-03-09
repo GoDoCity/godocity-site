@@ -16,6 +16,12 @@ const posts = defineCollection({
     sponsorTier: z.enum(["None", "Featured", "Spotlight", "Partner Highlight", "Local Guide"]).optional(),
     city:        z.string().optional(),
     featured:    z.boolean().optional(),
+    map_locations: z.array(z.object({
+      label:   z.string(),
+      address: z.string().optional(),
+      lat:     z.number().optional(),
+      lng:     z.number().optional(),
+    })).optional(),
   }),
 });
 

@@ -6,6 +6,27 @@ category: Food
 subtopic: Restaurants
 pubDate: 2026-01-10
 featured: false
+map_locations:
+  - label: Bethune Grill
+    address: 820 Dr Mary McLeod Bethune Blvd, Daytona Beach, FL 32114
+    lat: 29.2108
+    lng: -81.0228
+  - label: Millie’s Restaurant
+    address: 3855 S Nova Rd, Port Orange, FL 32127
+    lat: 29.1003
+    lng: -80.9977
+  - label: Senor Taco
+    address: 801 N Atlantic Ave, Daytona Beach Shores, FL 32118
+    lat: 29.2016
+    lng: -81.0023
+  - label: Dancing Avocado Kitchen
+    address: 110 S Beach St, Daytona Beach, FL 32114
+    lat: 29.2103
+    lng: -81.0128
+  - label: Ocean Deck
+    address: 127 S Ocean Ave, Daytona Beach, FL 32118
+    lat: 29.2115
+    lng: -81.0003
 ---
 <img src="/images/uploads/burger.webp" alt="Beachside food" style="width:100%;max-width:100%;height:300px;object-fit:cover;border-radius:12px;margin:1.5rem 0;" />
 
