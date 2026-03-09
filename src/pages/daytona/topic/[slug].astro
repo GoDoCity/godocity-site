@@ -84,6 +84,15 @@ function excerpt(post) {
   return post?.data?.description ?? "";
 }
 
+function postKicker(post) {
+  const cat = post?.data?.category;
+  if (typeof cat === "string" && cat.trim()) return cat.trim().toUpperCase();
+  const tags = Array.isArray(post?.data?.tags) ? post.data.tags : [];
+  const first = tags[0];
+  if (typeof first === "string" && first.trim()) return first.trim().toUpperCase();
+  return "";
+}
+
 /**
  * getStaticPaths: build all topic pages from unique tag keys
  * BUILD-SAFE: inline Daytona filter + tag normalization here
@@ -170,12 +179,13 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
     <div class="topicHeader">
       <h1 class="topicTitle">{topicLabel}</h1>
-      <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
+      <div class="topicMeta">{posts.length} article{posts.length === 1 ? "" : "s"}</div>
     </div>
 
     <div class="topicLayout">
       <div class="topicMain">
 
+        {/* ── Featured Hero ── */}
         {hero && (
           <a class="heroCard" href={`/daytona/posts/${hero.slug}/`}>
             {heroImage(hero) && (
@@ -189,7 +199,6 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
                 />
               </div>
             )}
-
             <div class="heroBody">
               <div class="heroKicker">{isFeatured(hero) ? "FEATURED" : "TOP STORY"}</div>
               <div class="heroTitle">{hero.data.title}</div>
@@ -199,31 +208,30 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
           </a>
         )}
 
-        <div class="list">
-          {rest.map((p) => (
-            <a class="row" href={`/daytona/posts/${p.slug}/`}>
-              {heroImage(p) ? (
-                <div class="rowThumbWrap">
-                  <img
-                    class="rowThumb"
-                    src={heroImage(p)}
-                    alt={p.data.title ?? "Thumbnail"}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-              ) : (
-                <div class="rowThumbWrap isEmpty" aria-hidden="true"></div>
-              )}
-
-              <div class="rowText">
-                <div class="rowTitle">{p.data.title ?? p.slug}</div>
-                {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
-                <div class="rowMeta">{dateText(p)}</div>
-              </div>
-            </a>
-          ))}
-        </div>
+        {/* ── 3-Column Card Grid ── */}
+        {rest.length > 0 && (
+          <div class="cardGrid">
+            {rest.map((p) => {
+              const img = heroImage(p);
+              const kicker = postKicker(p);
+              return (
+                <a class="mfCard" href={`/daytona/posts/${p.slug}/`}>
+                  <div class="mfImgWrap">
+                    {img
+                      ? <img class="mfImg" src={img} alt="" loading="lazy" decoding="async" />
+                      : <div class="mfImg mfImgFallback" aria-hidden="true" />
+                    }
+                  </div>
+                  <div class="mfBody">
+                    {kicker && <div class="mfKicker">{kicker}</div>}
+                    <div class="mfTitle">{p.data.title ?? p.slug}</div>
+                    <div class="mfMeta">{dateText(p)}</div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+        )}
 
         <p class="topicLinks">
           <a class="pill" href="/daytona/topics/">← All topics</a>
@@ -232,19 +240,10 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
       </div>
 
+      {/* ── Sidebar ── */}
       <aside class="topicSidebar">
-        <div class="moduleCard newsletterCard">
-          <div class="moduleTitle">Good news for Daytona</div>
-          <div class="moduleSubtext">Get the best local posts and events sent to your inbox, for free.</div>
 
-          <div class="newsletterForm">
-            <input class="newsletterInput" type="email" placeholder="Enter your email address" aria-label="Email address" />
-            <button class="newsletterButton" type="button">SIGN UP — IT’S FREE!</button>
-          </div>
-
-          <div class="moduleFineprint">100% free. Unsubscribe anytime.</div>
-        </div>
-
+        {/* Upcoming Events */}
         <div class="moduleCard eventsCard">
           <div class="moduleTitle">Upcoming Events</div>
           {sidebarEvents.length > 0 ? (
@@ -281,6 +280,32 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
           )}
           <a class="eventsLink" href="/daytona/events/">See all events →</a>
         </div>
+
+        {/* City Guides */}
+        <div class="moduleCard guidesCard">
+          <div class="guidesHead">
+            <span class="moduleTitle" style="margin:0">City Guides</span>
+            <a class="guidesMore" href="/daytona/guides/">See all</a>
+          </div>
+          <div class="guideList">
+            <a class="guideRow" href="/daytona/guides/live/">🏠 Live in Daytona</a>
+            <a class="guideRow" href="/daytona/guides/work/">💼 Work in Daytona</a>
+            <a class="guideRow" href="/daytona/guides/play/">🎉 Play in Daytona</a>
+            <a class="guideRow" href="/daytona/guides/best-restaurants/">🍽️ Best Restaurants</a>
+          </div>
+        </div>
+
+        {/* Newsletter */}
+        <div class="moduleCard newsletterCard">
+          <div class="moduleTitle">Good news for Daytona</div>
+          <div class="moduleSubtext">Get the best local posts and events sent to your inbox, for free.</div>
+          <div class="newsletterForm">
+            <input class="newsletterInput" type="email" placeholder="Enter your email address" aria-label="Email address" />
+            <button class="newsletterButton" type="button">SIGN UP — IT’S FREE!</button>
+          </div>
+          <div class="moduleFineprint">100% free. Unsubscribe anytime.</div>
+        </div>
+
       </aside>
 
     </div>
@@ -289,10 +314,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 </section>
 
 <style>
-  /* ----------------------------
-     Premium card system (v3)
-     ---------------------------- */
-  :root{
+  /* ── Layout variables ── */
+  :root {
     --card-radius: 18px;
     --card-border: rgba(255,255,255,.10);
     --card-border-hover: rgba(255,220,80,.22);
@@ -303,278 +326,300 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     --ease: 160ms ease;
   }
 
+  /* ── Page header ── */
   .topicHeader { margin-bottom: 18px; }
-  .topicTitle{
-    margin: 8px 0 6px 0;
+  .topicTitle {
+    margin: 8px 0 6px;
     font-size: clamp(36px, 5vw, 56px);
     line-height: 1.02;
     letter-spacing: -0.02em;
+    color: var(--text);
   }
-  .topicMeta{
-    opacity: .72;
-    font-size: 14px;
-    line-height: 1.2;
-  }
+  .topicMeta { opacity: .72; font-size: 14px; }
 
-  .topicLayout{
+  /* ── Two-column layout ── */
+  .topicLayout {
     display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 18px;
+    grid-template-columns: 1fr 300px;
+    gap: 24px;
     align-items: start;
   }
-  .topicMain{ min-width: 0; }
-  .topicSidebar{
+  .topicMain { min-width: 0; }
+  .topicSidebar {
     display: flex;
     flex-direction: column;
     gap: 14px;
     position: sticky;
     top: 16px;
   }
-
-  @media (max-width: 980px){
-    .topicLayout{ grid-template-columns: 1fr; }
-    .topicSidebar{ position: static; }
+  @media (max-width: 980px) {
+    .topicLayout { grid-template-columns: 1fr; }
+    .topicSidebar { position: static; }
   }
 
-  /* Shared card base */
-  .heroCard, .row, .moduleCard{
+  /* ── Hero card ── */
+  .heroCard {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 0;
     border-radius: var(--card-radius);
     border: 1px solid var(--card-border);
     background: var(--card-bg);
-    transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease), filter var(--ease);
+    overflow: hidden;
+    text-decoration: none;
+    margin: 6px 0 22px;
+    transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease);
     will-change: transform;
   }
-
-  .heroCard:hover, .row:hover, .moduleCard:hover{
+  @media (max-width: 700px) { .heroCard { grid-template-columns: 1fr; } }
+  .heroCard:hover {
     transform: var(--lift);
     background: var(--card-bg-hover);
     border-color: var(--card-border-hover);
     box-shadow: 0 0 0 1px rgba(255,220,80,.08), var(--shadow-soft);
   }
 
-  /* ----------------------------
-     Hero: editorial crop + subtle bottom gradient overlay
-     ---------------------------- */
-  .heroCard{
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 0;
-    overflow: hidden;
-    text-decoration: none;
-    margin: 6px 0 18px;
-  }
-
-  @media (max-width: 880px){
-    .heroCard{ grid-template-columns: 1fr; }
-  }
-
-  .heroMedia{
-    position: relative;
-    overflow: hidden;
-    background: rgba(255,255,255,.02);
-  }
-
-  .heroMedia::after{
-    content:"";
-    position:absolute;
+  .heroMedia { position: relative; overflow: hidden; background: rgba(255,255,255,.02); }
+  .heroMedia::after {
+    content: "";
+    position: absolute;
     inset: 0;
-    pointer-events:none;
-    background: linear-gradient(to bottom,
-      rgba(0,0,0,0) 55%,
-      rgba(0,0,0,.16) 78%,
-      rgba(0,0,0,.22) 100%);
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(0,0,0,0) 55%, rgba(0,0,0,.18) 100%);
   }
-
-  .heroImg{
+  .heroImg {
     width: 100%;
     height: 100%;
     display: block;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 4/3;
     object-fit: cover;
     transform: scale(1.01);
+    transition: transform 320ms ease;
   }
+  .heroCard:hover .heroImg { transform: scale(1.04); }
 
-  .heroBody{
-    padding: 18px 18px 16px;
+  .heroBody {
+    padding: 20px 18px 18px;
     display: flex;
     flex-direction: column;
     justify-content: center;
     min-width: 0;
   }
-
-  .heroKicker{
-    font-size: 12px;
+  .heroKicker {
+    font-size: 11px;
     font-weight: 900;
     letter-spacing: .10em;
-    opacity: .78;
     text-transform: uppercase;
+    color: var(--brand1);
     margin-bottom: 10px;
   }
-
-  .heroTitle{
+  .heroTitle {
     font-weight: 950;
-    font-size: clamp(22px, 2.2vw, 30px);
-    line-height: 1.10;
+    font-size: clamp(20px, 2.2vw, 28px);
+    line-height: 1.12;
     letter-spacing: -0.015em;
+    color: var(--text);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 130ms, color 130ms;
   }
-
-  .heroDesc{
+  .heroCard:hover .heroTitle {
+    color: var(--brand1);
+    text-decoration-color: var(--brand1);
+  }
+  .heroDesc {
     margin-top: 10px;
     opacity: .86;
+    font-size: 14px;
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    color: var(--muted);
   }
+  .heroMeta { margin-top: 12px; opacity: .60; font-size: 12px; color: var(--faint); }
 
-  .heroMeta{
-    margin-top: 12px;
-    opacity: .62;
-    font-size: 12.5px;
-    line-height: 1.2;
-  }
-
-  /* ----------------------------
-     List: tighter alignment + hover polish
-     ---------------------------- */
-  .list{
+  /* ── 3-column card grid ── */
+  .cardGrid {
     display: grid;
-    gap: 12px;
-    margin-top: 6px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 8px;
   }
+  @media (max-width: 700px) { .cardGrid { grid-template-columns: repeat(2, 1fr); gap: 14px; } }
+  @media (max-width: 480px) { .cardGrid { grid-template-columns: 1fr; } }
 
-  .row{
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 14px;
-    align-items: center;
-    padding: 14px 14px;
+  .mfCard {
+    display: flex;
+    flex-direction: column;
     text-decoration: none;
-    cursor: pointer;
+    transition: opacity 140ms;
   }
+  .mfCard:hover { opacity: .88; }
 
-  .rowText{ min-width: 0; }
-
-  .rowTitle{
-    font-weight: 900;
-    font-size: 17px;
-    line-height: 1.18;
-    letter-spacing: -0.01em;
+  .mfImgWrap {
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    background: var(--surface2);
   }
+  .mfImg {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16/10;
+    object-fit: cover;
+    transition: transform 280ms ease;
+  }
+  .mfCard:hover .mfImg { transform: scale(1.03); }
+  .mfImgFallback { aspect-ratio: 16/10; }
 
-  .rowDesc{
-    margin-top: 7px;
-    opacity: .84;
-    font-size: 14px;
-    line-height: 1.45;
+  .mfBody { display: flex; flex-direction: column; gap: 5px; }
+  .mfKicker {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--brand1);
+  }
+  .mfTitle {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.22;
+    letter-spacing: -0.1px;
+    color: var(--text);
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+    transition: color 130ms, text-decoration-color 130ms;
   }
-
-  .rowMeta{
-    margin-top: 9px;
-    opacity: .58;
-    font-size: 12.5px;
-    line-height: 1.2;
+  .mfCard:hover .mfTitle {
+    color: var(--brand1);
+    text-decoration-color: var(--brand1);
   }
+  .mfMeta { font-size: 11.5px; color: var(--faint); }
 
-  .rowThumbWrap{
-    width: 118px;
-    height: 86px;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.02);
-    flex: none;
-  }
-
-  .rowThumbWrap.isEmpty{ opacity: .25; }
-
-  .rowThumb{
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    filter: brightness(.98) contrast(1.02);
-    transition: filter var(--ease);
-  }
-
-  .row:hover{
-    box-shadow: 0 0 0 1px rgba(255,220,80,.12), var(--shadow-soft);
-  }
-  .row:hover .rowThumb{
-    filter: brightness(1.06) contrast(1.03);
-  }
-
-  @media (max-width: 560px){
-    .rowThumbWrap{ width: 104px; height: 76px; border-radius: 12px; }
-    .row{ padding: 12px 12px; gap: 12px; }
-    .rowTitle{ font-size: 16px; }
-  }
-
-  .topicLinks{
-    margin-top: 18px;
+  /* ── Topic nav pills ── */
+  .topicLinks {
+    margin-top: 24px;
     display: flex;
     gap: 10px;
     flex-wrap: wrap;
   }
 
-  /* ----------------------------
-     Sidebar typography (v3)
-     ---------------------------- */
-  .moduleCard{ padding: 16px 16px; }
-
-  .moduleTitle{
+  /* ── Sidebar cards ── */
+  .moduleCard {
+    border-radius: var(--card-radius);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    padding: 16px;
+  }
+  .moduleTitle {
     font-weight: 950;
     font-size: 16px;
     line-height: 1.15;
     letter-spacing: -0.01em;
-    margin: 0 0 8px 0;
+    margin: 0 0 8px;
+    color: var(--text);
   }
+  .moduleSubtext { opacity: .80; font-size: 13.5px; line-height: 1.35; margin-bottom: 12px; }
+  .moduleFineprint { opacity: .62; font-size: 12px; line-height: 1.25; margin-top: 10px; }
 
-  .moduleSubtext{
-    opacity: .80;
-    font-size: 13.5px;
-    line-height: 1.35;
-    margin-bottom: 12px;
-  }
-
-  .moduleFineprint{
-    opacity: .62;
-    font-size: 12px;
-    line-height: 1.25;
-    margin-top: 10px;
-  }
-
-  .newsletterCard{ padding: 18px 16px 16px; }
-
-  .newsletterForm{
+  /* Events */
+  .eventsCard { padding: 16px; }
+  .eventsList { margin-top: 10px; display: grid; gap: 10px; }
+  .eventRow {
     display: grid;
-    gap: 10px;
-    margin-top: 10px;
+    grid-template-columns: 44px 1fr;
+    gap: 12px;
+    align-items: center;
+    text-decoration: none;
   }
+  .eventDate {
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+    padding: 8px;
+    text-align: center;
+    line-height: 1.05;
+  }
+  .eventDay { font-size: 11px; font-weight: 900; letter-spacing: .10em; opacity: .78; }
+  .eventNum { margin-top: 4px; font-size: 16px; font-weight: 950; }
+  .eventMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+  .eventName { font-weight: 900; font-size: 13.8px; line-height: 1.2; margin-bottom: 4px; color: var(--text); }
+  .eventPlace { opacity: .72; font-size: 12.5px; line-height: 1.2; color: var(--muted); }
+  .eventDivider { height: 1px; background: rgba(255,255,255,.08); border-radius: 999px; margin: 2px 0; }
+  .noEvents { font-size: 13px; color: var(--faint); padding: 10px 0 4px; margin: 0; }
+  .eventsLink {
+    display: block;
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--brand1);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+    transition: text-decoration-color 120ms;
+  }
+  .eventsLink:hover { text-decoration-color: var(--brand1); }
 
-  .newsletterInput{
+  /* City Guides */
+  .guidesCard { padding: 16px; }
+  .guidesHead {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+  .guidesMore {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand1);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+    transition: text-decoration-color 120ms;
+  }
+  .guidesMore:hover { text-decoration-color: var(--brand1); }
+  .guideList { display: grid; }
+  .guideRow {
+    display: block;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.3;
+    transition: color 120ms;
+  }
+  .guideRow:last-child { border-bottom: none; }
+  .guideRow:hover { color: var(--brand1); }
+
+  /* Newsletter */
+  .newsletterCard { padding: 18px 16px 16px; }
+  .newsletterForm { display: grid; gap: 10px; margin-top: 10px; }
+  .newsletterInput {
     width: 100%;
-    padding: 12px 12px;
+    padding: 12px;
     border-radius: 12px;
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(0,0,0,.25);
     color: inherit;
     outline: none;
   }
-
-  .newsletterInput:focus{
+  .newsletterInput:focus {
     border-color: rgba(255,220,80,.35);
     box-shadow: 0 0 0 3px rgba(255,220,80,.10);
   }
-
-  .newsletterButton{
+  .newsletterButton {
     width: 100%;
-    padding: 12px 12px;
+    padding: 12px;
     border-radius: 12px;
     border: 1px solid rgba(255,220,80,.35);
     background: rgba(255,220,80,.14);
@@ -584,71 +629,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     cursor: pointer;
     transition: filter var(--ease), background var(--ease), border-color var(--ease);
   }
-
-  .newsletterButton:hover{
+  .newsletterButton:hover {
     filter: brightness(1.06);
     border-color: rgba(255,220,80,.45);
   }
-
-  .eventsCard{ padding: 16px 16px; }
-
-  .eventsList{
-    margin-top: 10px;
-    display: grid;
-    gap: 10px;
-  }
-
-  .eventRow{
-    display: grid;
-    grid-template-columns: 44px 1fr;
-    gap: 12px;
-    align-items: center;
-  }
-
-  .eventDate{
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
-    padding: 8px 8px;
-    text-align: center;
-    line-height: 1.05;
-  }
-
-  .eventDay{
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: .10em;
-    opacity: .78;
-  }
-
-  .eventNum{
-    margin-top: 4px;
-    font-size: 16px;
-    font-weight: 950;
-  }
-
-  .eventName{
-    font-weight: 900;
-    font-size: 13.8px;
-    line-height: 1.2;
-    margin-bottom: 4px;
-  }
-
-  .eventPlace{
-    opacity: .72;
-    font-size: 12.5px;
-    line-height: 1.2;
-  }
-
-  .eventDivider{
-    height: 1px;
-    background: rgba(255,255,255,.08);
-    border-radius: 999px;
-    margin: 2px 0;
-  }
-  .eventMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
-  .noEvents { font-size: 13px; color: var(--faint); padding: 10px 0 4px; margin: 0; }
-  .eventsLink { display: block; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
-  .eventsLink:hover { text-decoration: underline; }
-  .eventRow { text-decoration: none; }
 </style>
