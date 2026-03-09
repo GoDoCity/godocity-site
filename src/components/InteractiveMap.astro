@@ -4,6 +4,8 @@ export interface MapLocation {
   address?: string;
   lat?: number;
   lng?: number;
+  articleHref?: string;
+  articleTitle?: string;
 }
 
 export interface Props {
@@ -35,18 +37,14 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
 />
 
 <script define:vars={{ mapId, pins }}>
-  /* Dynamically load Leaflet JS then initialise */
   (function () {
     function initMap() {
-      /* ── Tile layer ── */
       const CartoDB = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
       const attribution =
         '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>';
 
       const container = document.getElementById(mapId);
       if (!container || typeof window.L === "undefined") return;
-
-      /* Prevent double-init if Astro view transitions replay the script */
       if (container._leaflet_id) return;
 
       const map = window.L.map(mapId, { scrollWheelZoom: false, zoomControl: true });
@@ -72,12 +70,24 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
         const latlng = [pin.lat, pin.lng];
         bounds.push(latlng);
 
-        const popupContent = pin.address
-          ? `<strong>${pin.label}</strong><br><span style="font-size:12px;color:#555;">${pin.address}</span>`
-          : `<strong>${pin.label}</strong>`;
+        /* Build popup: label + optional address + optional "Read Guide" link */
+        let popup = `<strong style="font-size:14px;">${pin.label}</strong>`;
+        if (pin.address) {
+          popup += `<br><span style="font-size:12px;color:#666;line-height:1.4;">${pin.address}</span>`;
+        }
+        if (pin.articleHref) {
+          const linkLabel = pin.articleTitle
+            ? `Read: ${pin.articleTitle}`
+            : "Read Guide →";
+          popup += `<br><a href="${pin.articleHref}"
+            style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;
+                   color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;
+                   text-decoration:none;line-height:1.4;"
+            >${linkLabel}</a>`;
+        }
 
         window.L.marker(latlng, { icon: yellowPin })
-          .bindPopup(popupContent, { maxWidth: 220 })
+          .bindPopup(popup, { maxWidth: 240 })
           .addTo(map);
       });
 
@@ -85,11 +95,10 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
       if (bounds.length === 1) {
         map.setView(bounds[0], 15);
       } else {
-        map.fitBounds(bounds, { padding: [32, 32] });
+        map.fitBounds(bounds, { padding: [36, 36] });
       }
     }
 
-    /* Load Leaflet JS if not already present */
     if (typeof window.L !== "undefined") {
       initMap();
     } else {
@@ -118,7 +127,6 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     height: 100%;
   }
 
-  /* Yellow circular pin */
   :global(.imap-pin) {
     width: 22px;
     height: 22px;
@@ -133,7 +141,6 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     transform: scale(1.25);
   }
 
-  /* Popup polish */
   :global(.leaflet-popup-content-wrapper) {
     border-radius: 10px !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
@@ -151,7 +158,6 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     box-shadow: none !important;
   }
 
-  /* Hide Leaflet's default focus outline on the container */
   :global(.leaflet-container:focus) {
     outline: none;
   }
