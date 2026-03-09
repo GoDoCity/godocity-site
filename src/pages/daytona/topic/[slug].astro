@@ -1,5 +1,6 @@
 ---
 import Base from "../../../layouts/Base.astro";
+import SidebarPoll from "../../../components/SidebarPoll.astro";
 import { getCollection } from "astro:content";
 
 /** Daytona filter */
@@ -295,15 +296,20 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
           </div>
         </div>
 
-        {/* Newsletter */}
-        <div class="moduleCard newsletterCard">
-          <div class="moduleTitle">Good news for Daytona</div>
-          <div class="moduleSubtext">Get the best local posts and events sent to your inbox, for free.</div>
-          <div class="newsletterForm">
-            <input class="newsletterInput" type="email" placeholder="Enter your email address" aria-label="Email address" />
-            <button class="newsletterButton" type="button">SIGN UP — IT’S FREE!</button>
+        {/* Vibe Check Poll */}
+        <SidebarPoll />
+
+        {/* Newsletter — sticky once scrolled past above modules */}
+        <div class="nlStickyWrap">
+          <div class="moduleCard newsletterCard">
+            <div class="moduleTitle">Good news for Daytona</div>
+            <div class="moduleSubtext">Get the best local posts and events sent to your inbox, for free.</div>
+            <div class="newsletterForm">
+              <input class="newsletterInput" type="email" placeholder="Enter your email address" aria-label="Email address" />
+              <button class="newsletterButton" type="button">SIGN UP — IT’S FREE!</button>
+            </div>
+            <div class="moduleFineprint">100% free. Unsubscribe anytime.</div>
           </div>
-          <div class="moduleFineprint">100% free. Unsubscribe anytime.</div>
         </div>
 
       </aside>
@@ -349,12 +355,15 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    position: sticky;
-    top: 16px;
   }
   @media (max-width: 980px) {
     .topicLayout { grid-template-columns: 1fr; }
-    .topicSidebar { position: static; }
+  }
+
+  /* Newsletter becomes sticky only after scrolling past Events + Guides + Poll */
+  .nlStickyWrap {
+    position: sticky;
+    top: 20px;
   }
 
   /* ── Hero card ── */
