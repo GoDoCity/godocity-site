@@ -24,17 +24,17 @@ if (pins.length === 0) return;
 const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
-<div class="imapWrap" style={`height: ${height}`}>
-  <div id={mapId} class="imapEl"></div>
-</div>
-
-<!-- Leaflet CSS -->
+<!-- Leaflet CSS — loaded first so tiles render correctly -->
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
   crossorigin=""
 />
+
+<div class="imapWrap" style={`height: ${height}; min-height: ${height};`}>
+  <div id={mapId} class="imapEl"></div>
+</div>
 
 <script define:vars={{ mapId, pins }}>
   (function () {
@@ -46,8 +46,14 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
       const container = document.getElementById(mapId);
       if (!container || typeof window.L === "undefined") return;
       if (container._leaflet_id) return;
+      /* Force the container to be visible before Leaflet measures it */
+      container.style.width  = "100%";
+      container.style.height = "100%";
+      container.style.display = "block";
 
       const map = window.L.map(mapId, { scrollWheelZoom: false, zoomControl: true });
+      /* Recalculate size after Astro paint — prevents grey/blank tiles */
+      requestAnimationFrame(() => map.invalidateSize());
 
       window.L.tileLayer(CartoDB, {
         attribution,
@@ -114,15 +120,19 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
 
 <style>
   .imapWrap {
+    display: block !important;
     width: 100%;
     border-radius: 14px;
     overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.10);
+    border: 1px solid rgba(0, 0, 0, 0.08);
     margin: 0 0 28px;
     position: relative;
+    z-index: 1;         /* sit above static page background */
+    isolation: isolate; /* create stacking context so Leaflet panes stay inside */
   }
 
   .imapEl {
+    display: block;
     width: 100%;
     height: 100%;
   }
