@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import InteractiveMap from "../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
 
 function isDaytonaPost(post) {
@@ -124,6 +125,21 @@ const topics = [
    sports.jpg      → Motion-blur race car or surfer at New Smyrna Beach
    wellness.jpg    → Yoga on the beach, sunrise run, or spa interior
 ────────────────────────────────────────────────────────────────────── */
+
+/* ── Master Map: flatten all Daytona posts with map_locations ── */
+const masterLocations = posts
+  .filter((p) => Array.isArray(p.data.map_locations) && p.data.map_locations.length > 0)
+  .flatMap((p) => {
+    const articleSlug = p.slug.split("/").pop();
+    const city = (p.data.city ?? p.slug.split("/")[0] ?? "daytona").toLowerCase().trim();
+    const articleHref = `/${city}/${articleSlug}/`;
+    const articleTitle = typeof p.data.title === "string" ? p.data.title : "";
+    return (p.data.map_locations ?? []).map((loc) => ({
+      ...loc,
+      articleHref,
+      articleTitle,
+    }));
+  });
 ---
 
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
@@ -238,6 +254,17 @@ const topics = [
               </a>
             ))}
           </div>
+
+          {/* ── MASTER MAP ── */}
+          {masterLocations.length > 0 && (
+            <div class="masterMapBlock">
+              <div class="masterMapHead">
+                <span class="masterMapTitle">Explore Daytona</span>
+                <span class="masterMapSub">{masterLocations.length} local spot{masterLocations.length === 1 ? "" : "s"} on the map</span>
+              </div>
+              <InteractiveMap locations={masterLocations} height="450px" />
+            </div>
+          )}
 
           {/* ── FEATURED AD — "FEATURED" label, never "Sponsored" ── */}
           <div class="featuredCard">
@@ -765,6 +792,29 @@ const topics = [
       text-decoration: none; transition: filter 130ms;
     }
     .featuredCta:hover { filter: brightness(.92); }
+
+    /* Master map section */
+    .masterMapBlock { margin: 6px 0 4px; }
+    .masterMapHead {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--brand1);
+      margin-bottom: 16px;
+    }
+    .masterMapTitle {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .masterMapSub {
+      font-size: 12.5px;
+      color: var(--faint);
+      font-weight: 500;
+    }
 
     /* View all */
     .viewAllRow { padding: 4px 0 24px; text-align: center; }
