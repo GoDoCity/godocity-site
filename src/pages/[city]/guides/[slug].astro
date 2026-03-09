@@ -13,6 +13,7 @@
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import Base           from "../../../layouts/Base.astro";
+import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection, render } from "astro:content";
 
 /* ── Build all static paths from the guides collection ─────────────────── */
@@ -97,6 +98,13 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   {/* ════════ GUIDE HERO ════════ */}
   <div class="container">
     <header class="guideHero">
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        <a class="bcItem bcLink" href={`/${city}/`}>{city.charAt(0).toUpperCase() + city.slice(1)}</a>
+        <span class="bcSep" aria-hidden="true">›</span>
+        <a class="bcItem bcLink" href={`/${city}/guides/`}>Guides</a>
+        <span class="bcSep" aria-hidden="true">›</span>
+        <span class="bcItem bcCurrent" aria-current="page">{data.title}</span>
+      </nav>
       <div class="guideKicker">
         <span class="kPill kCity">{city.charAt(0).toUpperCase() + city.slice(1)}</span>
         <span class="kPill kCat">{data.category ?? "City Guide"}</span>
@@ -116,6 +124,11 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
       {/* ── MAIN COLUMN ── */}
       <main>
+
+        {/* ── Map (renders only when guide has map_locations) ── */}
+        {data.map_locations && data.map_locations.length > 0 && (
+          <InteractiveMap locations={data.map_locations} height="350px" />
+        )}
 
         {/* ── Items 1–3 always visible ── */}
         <ol class="gList" id="listA">
@@ -325,8 +338,12 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           <div class="nlBoxHead">
             <em>Good News <strong>{city.charAt(0).toUpperCase() + city.slice(1)}!</strong></em>
           </div>
-          <div class="nlBoxSub">Free local news in your inbox every morning.</div>
-          <a class="nlBoxBtn" href={}>Subscribe free →</a>
+          <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
+          <form class="nlForm" action={`/${city}/subscribe/`} method="get">
+            <input class="nlInput" type="email" name="email"
+              placeholder="your@email.com" required autocomplete="email" />
+            <button class="nlSubmit" type="submit">Sign Up</button>
+          </form>
         </div>
 
       </aside>
@@ -390,6 +407,22 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
   :global(.container) { max-width: 1280px; margin: 0 auto; padding: 0 2.5rem; }
   @media (max-width: 768px) { :global(.container) { max-width: 100%; padding: 0 1.25rem; } }
+
+  /* ════ BREADCRUMB ════ */
+  .breadcrumb {
+    display: flex; align-items: center; flex-wrap: wrap;
+    gap: 4px; margin-bottom: 18px;
+    font-size: 13px; font-weight: 600; color: var(--faint);
+  }
+  .bcItem { line-height: 1; }
+  .bcSep  { color: var(--faint); opacity: .6; }
+  .bcLink {
+    color: var(--brand1);
+    text-decoration: underline; text-decoration-color: transparent;
+    text-underline-offset: 2px; transition: text-decoration-color 120ms;
+  }
+  .bcLink:hover { text-decoration-color: var(--brand1); }
+  .bcCurrent { color: var(--faint); }
 
   /* ════ HERO ════ */
   .guideHero {
@@ -482,8 +515,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
   /* Body */
   .iBody {
-    font-size: 16px; color: var(--muted);    /* 16px reading font */
-    line-height: 1.7; margin: 0 0 16px; max-width: 640px;
+    font-size: 20px; color: var(--muted);
+    line-height: 1.65; margin: 0 0 16px; max-width: 640px;
   }
 
   /* CTA */
@@ -584,17 +617,28 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .guideLink:hover { color: var(--link); }
 
   /* Sidebar newsletter */
-  .nlBox    { padding: 18px 16px; border-radius: 14px; background: var(--brand1); display: flex; flex-direction: column; gap: 7px; }
-  .nlBoxHead { font-size: 18px; font-weight: 900; font-style: italic; color: #000; letter-spacing: -0.03em; line-height: 1.1; }
+  .nlBox    { padding: 28px 22px; border-radius: 14px; background: var(--brand1); display: flex; flex-direction: column; gap: 10px; }
+  .nlBoxHead { font-size: 23px; font-weight: 900; font-style: italic; color: #000; letter-spacing: -0.03em; line-height: 1.1; }
   .nlBoxHead strong { font-weight: 900; }
-  .nlBoxSub  { font-size: 13px; color: rgba(0,0,0,.7); line-height: 1.35; }
-  .nlBoxBtn  {
-    display: inline-flex; align-items: center; height: 36px; padding: 0 14px;
-    border-radius: 999px; background: #000; color: #fff;
-    font-size: 12.5px; font-weight: 800; text-decoration: none;
-    align-self: flex-start; margin-top: 2px; transition: opacity 140ms;
+  .nlBoxSub  { font-size: 15px; color: rgba(0,0,0,.78); line-height: 1.4; }
+  .nlForm    { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .nlInput   {
+    width: 100%; box-sizing: border-box;
+    padding: 12px 14px; border-radius: 10px;
+    border: none; background: #fff;
+    font-size: 14px; color: #111;
+    outline: 2px solid transparent; transition: outline-color 150ms;
   }
-  .nlBoxBtn:hover { opacity: .82; }
+  .nlInput:focus { outline-color: #000; }
+  .nlInput::placeholder { color: #999; }
+  .nlSubmit  {
+    width: 100%; padding: 12px 0; border-radius: 999px;
+    border: none; background: #000; color: #f9d900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 14px; font-weight: 900; letter-spacing: .04em;
+    cursor: pointer; transition: opacity 150ms;
+  }
+  .nlSubmit:hover { opacity: .82; }
 
   /* ════ MORE GUIDES FOOTER ════ */
   .moreSection { background: var(--surface); border-top: 2px solid var(--brand1); padding: 48px 0 56px; }
@@ -715,7 +759,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     .rankBadge  { width: 44px; height: 44px; font-size: 22px; border-radius: 11px; }
     .iTitle     { font-size: 20px; }
     .imgWrap    { aspect-ratio: 16/9; border-radius: 10px; }
-    .iBody      { font-size: 15px; max-width: 100%; }
+    .iBody      { font-size: 17px; max-width: 100%; }
     .gItem      { padding: 28px 0 32px; }
     .moreSection { padding: 36px 0 44px; }
     .moreLabel  { font-size: 18px; }
