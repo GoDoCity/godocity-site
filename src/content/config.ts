@@ -45,6 +45,12 @@ const guides = defineCollection({
       imgAlt: z.string().optional().default(""),
       href:   z.string().optional().default(""),
     })).min(1).max(20).optional(),
+    map_locations: z.array(z.object({
+      label:   z.string(),
+      address: z.string().optional(),
+      lat:     z.number().optional(),
+      lng:     z.number().optional(),
+    })).optional(),
     moreGuides: z.array(z.object({
       emoji: z.string(),
       label: z.string(),
