@@ -166,6 +166,9 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
             )}
             <a class="bcItem bcLink" href={`/${city}/`}>{cityCap}</a>
           </nav>
+          {data.map_locations && data.map_locations.length > 0 && (
+            <InteractiveMap locations={data.map_locations} height="350px" />
+          )}
           <h1 class="articleTitle">{data.title}</h1>
           {data.description && <p class="articleDesc">{data.description}</p>}
           {/* ── Byline below description ── */}
@@ -174,10 +177,6 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
             <a class="bylineAuthor" href={`/author/${authorSlug}/`}>{authorName}</a>
           </p>
         </header>
-
-        {data.map_locations && data.map_locations.length > 0 && (
-          <InteractiveMap locations={data.map_locations} />
-        )}
 
         {heroImg && (
           <div class="heroWrap">
@@ -615,13 +614,13 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .guideRow:hover { color: var(--link); }
 
   .nlBox {
-    padding: 18px 16px; border-radius: 14px; overflow: hidden;
+    padding: 26px 22px; border-radius: 14px; overflow: hidden;
     background: #f9d900;
-    display: flex; flex-direction: column; gap: 7px;
+    display: flex; flex-direction: column; gap: 10px;
   }
-  .nlBoxHead { font-size: 18px; font-weight: 900; font-style: italic; color: #000; line-height: 1.1; letter-spacing: -0.03em; }
+  .nlBoxHead { font-size: 23px; font-weight: 900; font-style: italic; color: #000; line-height: 1.1; letter-spacing: -0.03em; }
   .nlBoxHead strong { font-weight: 900; }
-  .nlBoxSub { font-size: 13px; color: rgba(0,0,0,.78); line-height: 1.35; }
+  .nlBoxSub { font-size: 15px; color: rgba(0,0,0,.78); line-height: 1.4; }
   .nlBoxBtn { display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 999px; background: #000; color: #f9d900; font-size: 12.5px; font-weight: 800; text-decoration: none; align-self: flex-start; margin-top: 2px; transition: opacity 140ms; }
   .nlBoxBtn:hover { opacity: .82; }
 
