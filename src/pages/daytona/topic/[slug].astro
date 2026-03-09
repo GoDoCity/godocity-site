@@ -362,8 +362,10 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
   /* Newsletter becomes sticky only after scrolling past Events + Guides + Poll */
   .nlStickyWrap {
+    position: -webkit-sticky;
     position: sticky;
     top: 20px;
+    z-index: 10;
   }
 
   /* ── Hero card ── */
