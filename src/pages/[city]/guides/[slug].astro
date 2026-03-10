@@ -118,6 +118,45 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     </header>
   </div>
 
+  {/* ════════ VOTING BANNER ════════
+      Shows only when votingEnabled: true AND votingStatus is not "closed".
+      Status variants: "open" → Vote Now  |  "tallying" → Counting votes
+                       "published" → See the results
+  ════════════════════════════════════════════════════════════════════════ */}
+  {data.votingEnabled && data.votingStatus !== "closed" && (
+    <div class="container">
+      <div class={`vBanner vBanner--${data.votingStatus}`}>
+        <div class="vBannerLeft">
+          <span class="vBannerBadge">
+            {data.votingStatus === "open"      && "🗳️ VOTING OPEN"}
+            {data.votingStatus === "tallying"  && "⏳ TALLYING VOTES"}
+            {data.votingStatus === "published" && "🏆 RESULTS IN"}
+          </span>
+          <span class="vBannerTitle">
+            {data.votingStatus === "open"      && `Vote for the Best in ${city.charAt(0).toUpperCase() + city.slice(1)}!`}
+            {data.votingStatus === "tallying"  && "Voting has closed — counting your picks."}
+            {data.votingStatus === "published" && "The community has spoken. See who won."}
+          </span>
+          {data.votingStatus === "open" && data.votingDeadline && (
+            <span class="vBannerDeadline">
+              Voting closes {new Date(data.votingDeadline).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })}
+            </span>
+          )}
+        </div>
+        {data.votingStatus === "open" && (
+          <a class="vBannerBtn" href="#vote" aria-label="Vote now">
+            Vote Now
+          </a>
+        )}
+        {data.votingStatus === "published" && (
+          <a class="vBannerBtn vBannerBtn--results" href="#results" aria-label="See results">
+            See Results →
+          </a>
+        )}
+      </div>
+    </div>
+  )}
+
   {/* ════════ 75/25 GRID ════════ */}
   <div class="container">
     <div class="homeGrid">
@@ -751,6 +790,62 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     .sponsorImgWrap { width: 100%; aspect-ratio: 16/9; }
     .sponsorBody { padding: 18px 20px; }
     .sponsorTagline { font-size: 17px; }
+  }
+
+  /* ════ VOTING BANNER ════════════════════════════════════════════════════
+     Rendered between the hero section and the main content grid.
+     Three visual states driven by votingStatus:
+       "open"      → bold yellow CTA
+       "tallying"  → muted gray holding state
+       "published" → celebration state with results link
+  ══════════════════════════════════════════════════════════════════════ */
+  .vBanner {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; flex-wrap: wrap;
+    padding: 18px 24px; border-radius: 14px;
+    margin-bottom: 28px;
+    border: 2px solid var(--brand1);
+  }
+  .vBanner--open      { background: rgba(249,217,0,.08);  border-color: var(--brand1); }
+  .vBanner--tallying  { background: rgba(255,255,255,.03); border-color: rgba(255,255,255,.15); }
+  .vBanner--published { background: rgba(0,200,120,.07);  border-color: #00c878; }
+
+  .vBannerLeft {
+    display: flex; flex-direction: column; gap: 4px; flex: 1 1 0; min-width: 0;
+  }
+  .vBannerBadge {
+    font-size: 10px; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--brand1);
+  }
+  .vBanner--tallying  .vBannerBadge { color: var(--muted); }
+  .vBanner--published .vBannerBadge { color: #00c878; }
+
+  .vBannerTitle {
+    font-size: 17px; font-weight: 800; color: var(--text); line-height: 1.2;
+  }
+  .vBannerDeadline {
+    font-size: 12px; color: var(--faint); margin-top: 2px;
+  }
+
+  /* CTA button */
+  .vBannerBtn {
+    flex-shrink: 0;
+    display: inline-flex; align-items: center;
+    height: 44px; padding: 0 24px; border-radius: 999px;
+    background: var(--brand1); color: #000;
+    font-size: 14px; font-weight: 900; letter-spacing: .04em;
+    text-decoration: none; white-space: nowrap;
+    transition: opacity 140ms, transform 140ms;
+  }
+  .vBannerBtn:hover { opacity: .88; transform: translateY(-1px); }
+
+  .vBannerBtn--results {
+    background: #00c878; color: #000;
+  }
+
+  @media (max-width: 560px) {
+    .vBanner { flex-direction: column; align-items: flex-start; }
+    .vBannerBtn { width: 100%; justify-content: center; }
   }
 
   /* ════ MOBILE ════ */

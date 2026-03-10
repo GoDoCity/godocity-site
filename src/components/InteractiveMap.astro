@@ -11,9 +11,10 @@ export interface MapLocation {
 export interface Props {
   locations: MapLocation[];
   height?: string;
+  zoom?: number;   // force a fixed zoom instead of fitBounds (e.g. 12 for city-wide view)
 }
 
-const { locations = [], height = "400px" } = Astro.props;
+const { locations = [], height = "400px", zoom } = Astro.props;
 
 /* Filter to only pins that have coordinates, then attach 1-based number */
 const pins = locations
@@ -37,6 +38,7 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     id={mapId}
     class="imapEl"
     data-pins={JSON.stringify(pins)}
+    data-zoom={zoom != null ? String(zoom) : ""}
     style={`height: ${height} !important; width: 100% !important; display: block !important;`}
   ></div>
 </div>
@@ -53,14 +55,15 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
       var el = els[i];
       if (el._leaflet_id) continue;
       try {
-        initMap(el.id, JSON.parse(el.getAttribute('data-pins')));
+        var forcedZoom = parseInt(el.getAttribute('data-zoom') || '0', 10) || null;
+        initMap(el.id, JSON.parse(el.getAttribute('data-pins')), forcedZoom);
       } catch (e) {
         console.warn('[InteractiveMap] init failed for', el.id, e);
       }
     }
   }
 
-  function initMap(mapId, pins) {
+  function initMap(mapId, pins, forcedZoom) {
     var container = document.getElementById(mapId);
     if (!container || !window.L) return;
     if (container._leaflet_id) return;
@@ -118,7 +121,12 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
         .addTo(map);
     }
 
-    if (bounds.length === 1) {
+    if (forcedZoom && bounds.length > 0) {
+      /* Fixed zoom mode: centre on the average of all pins */
+      var sumLat = 0, sumLng = 0;
+      for (var k = 0; k < bounds.length; k++) { sumLat += bounds[k][0]; sumLng += bounds[k][1]; }
+      map.setView([sumLat / bounds.length, sumLng / bounds.length], forcedZoom);
+    } else if (bounds.length === 1) {
       map.setView(bounds[0], 15);
     } else {
       map.fitBounds(bounds, { padding: [36, 36] });
