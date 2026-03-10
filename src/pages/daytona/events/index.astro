@@ -129,6 +129,17 @@ const monthOptions = monthKeys.map(k => {
 });
 
 const PAGE_SIZE = 30;
+
+/* ── Unsplash category fallback images ── */
+const CATEGORY_IMG: Record<string, string> = {
+  "Music & Nightlife":    "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=75",
+  "Food & Drink":         "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=75",
+  "Arts & Culture":       "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&q=75",
+  "Markets & Fairs":      "https://images.unsplash.com/photo-1488459716781-0a04a8a37e6e?w=800&q=75",
+  "Racing & Motorsports": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&q=75",
+  "Outdoors & Sports":    "https://images.unsplash.com/photo-1530549387789-4c161668b269?w=800&q=75",
+};
+const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=75";
 ---
 
 <Base
@@ -170,10 +181,9 @@ const PAGE_SIZE = 30;
                    data-external={isExt ? "true" : undefined}
                    data-fallback={isExt ? fbUrl : undefined}>
                   <div class="fcImgWrap">
-                    {e.data.image
-                      ? <img class="fcImg" src={e.data.image} alt={e.data.title} loading="lazy" />
-                      : <div class="fcImgPlaceholder" aria-hidden="true">📅</div>
-                    }
+                    <img class="fcImg"
+                      src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
+                      alt={e.data.title} loading="lazy" />
                     <span class="fcSponsorBadge">SPONSORED</span>
                     <div class="fcImgOverlay" aria-hidden="true"></div>
                     <div class="fcOverlayCopy">
@@ -242,24 +252,15 @@ const PAGE_SIZE = 30;
                   data-external={isExt ? "true" : undefined}
                   data-fallback={isExt ? fbUrl : undefined}
                 >
-                  {/* 16:9 thumbnail — full card width */}
+                  {/* 160px square thumbnail — left */}
                   <div class="evCardImg">
-                    {e.data.image
-                      ? <img src={e.data.image} alt={e.data.title} loading="lazy" decoding="async" />
-                      : <div class="evCardPlaceholder" aria-hidden="true">
-                          {e.data.category === "Music & Nightlife"       ? "🎵"
-                            : e.data.category === "Food & Drink"         ? "🍽️"
-                            : e.data.category === "Racing & Motorsports" ? "🏁"
-                            : e.data.category === "Markets & Fairs"      ? "🛍️"
-                            : e.data.category === "Outdoors & Sports"    ? "🌊"
-                            : e.data.category === "Arts & Culture"       ? "🎨"
-                            : "📅"}
-                        </div>
-                    }
+                    <img
+                      src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
+                      alt={e.data.title} loading="lazy" decoding="async" />
                     {e.data.category && <span class="evCardCat">{e.data.category}</span>}
                   </div>
 
-                  {/* Text details below the image */}
+                  {/* Text details — right */}
                   <div class="evCardBody">
                     <div class="evCardDateRow">
                       <span class="evCardDow">{dow}</span>
@@ -382,8 +383,13 @@ const PAGE_SIZE = 30;
   }
   .submitBtn:hover { opacity: .82; }
 
-  /* ── Featured Scroller — 3 large hero cards ── */
-  .featuredSection { margin-bottom: 32px; }
+  /* ── Featured Scroller — 3 large hero cards, 90vw wide ── */
+  .featuredSection {
+    margin-bottom: 32px;
+    width: 90vw;
+    margin-left: max(-2.5rem, calc(50% - 45vw));
+    padding-left: max(2.5rem, calc(45vw - 50%));
+  }
   .featuredHeadRow { display: flex; align-items: center; margin-bottom: 12px; }
   .featuredSectionTitle {
     font-size: 11px; font-weight: 900; letter-spacing: .1em;
@@ -452,7 +458,10 @@ const PAGE_SIZE = 30;
   }
 
   .evCard {
-    display: block;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 16px;
     text-decoration: none;
     border-bottom: 1px solid #333333;
     padding-bottom: 20px;
@@ -463,31 +472,26 @@ const PAGE_SIZE = 30;
   .evCard:hover { opacity: .88; }
   .evCard--hidden { display: none !important; }
 
-  /* 16:9 thumbnail — 100% card width */
+  /* 160px square thumbnail — left column */
   .evCardImg {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    max-height: 480px;
+    flex-shrink: 0;
+    width: 160px;
+    height: 160px;
     overflow: hidden;
-    border-radius: 12px;
+    border-radius: 10px;
     background: rgba(255,255,255,.05);
     position: relative;
-    margin-bottom: 14px;
   }
   .evCardImg img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .evCardPlaceholder {
-    width: 100%; height: 100%;
-    display: flex; align-items: center; justify-content: center; font-size: 48px;
-  }
   .evCardCat {
-    position: absolute; bottom: 10px; left: 10px;
-    font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
-    background: rgba(0,0,0,.6); color: var(--brand1);
-    padding: 3px 9px; border-radius: 999px; backdrop-filter: blur(4px);
+    position: absolute; bottom: 8px; left: 8px;
+    font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+    background: rgba(0,0,0,.65); color: var(--brand1);
+    padding: 2px 7px; border-radius: 999px; backdrop-filter: blur(4px);
   }
 
-  /* Text details */
-  .evCardBody { display: flex; flex-direction: column; gap: 5px; }
+  /* Text details — right column */
+  .evCardBody { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; padding-top: 4px; }
 
   .evCardDateRow { display: flex; align-items: center; gap: 7px; }
   .evCardDow { font-size: 10px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
@@ -527,12 +531,13 @@ const PAGE_SIZE = 30;
   .noEvents a { color: var(--brand1); }
 
   @media (max-width: 520px) {
+    .featuredSection { width: 100vw; margin-left: calc(-1 * var(--pagePad, 1rem)); padding-left: var(--pagePad, 1rem); }
     .featuredCard { width: 280px; }
     .fcImgWrap    { height: 180px; }
     .filterBar    { gap: 8px; }
     .filterCount  { margin-left: 0; width: 100%; }
-    .evCardImg    { border-radius: 8px; }
-    .evCardTitle  { font-size: 16px; }
-    .evCardVenue  { font-size: 14px; }
+    .evCardImg    { width: 100px; height: 100px; border-radius: 8px; }
+    .evCardTitle  { font-size: 15px; }
+    .evCardVenue  { font-size: 13px; }
   }
 </style>
