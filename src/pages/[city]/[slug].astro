@@ -101,6 +101,28 @@ try {
 
 const pageCity = city.toLowerCase().trim();
 
+/* Cities treated as "Greater Daytona area" for the sidebar events block */
+const GREATER_DAYTONA_SIDEBAR = new Set([
+  "daytona", "daytona beach",
+  "ormond beach", "ormond",
+  "port orange",
+  "daytona beach shores",
+  "south daytona",
+  "holly hill",
+  "new smyrna beach", "new smyrna",
+  "flagler beach", "flagler",
+]);
+const CITY_DISPLAY_NAMES = {
+  "daytona": "Daytona Beach", "daytona beach": "Daytona Beach",
+  "ormond beach": "Ormond Beach", "ormond": "Ormond Beach",
+  "port orange": "Port Orange",
+  "daytona beach shores": "Daytona Beach Shores",
+  "south daytona": "South Daytona",
+  "holly hill": "Holly Hill",
+  "new smyrna beach": "New Smyrna Beach", "new smyrna": "New Smyrna Beach",
+  "flagler beach": "Flagler Beach", "flagler": "Flagler Beach",
+};
+
 /* ── "More from" articles: same city, exclude current, newest first ── */
 const currentSlug = post.slug;
 const allPosts = await getCollection("posts");
@@ -128,7 +150,12 @@ const upcomingEvents = allEvents
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
     const evDate = new Date(e.data.eventDate);
     evDate.setHours(0, 0, 0, 0);
-    return evCity === pageCity && evDate >= today;
+    /* Show all Greater Daytona area events when on a Daytona-area page,
+       otherwise fall back to exact city match */
+    const areaMatch = GREATER_DAYTONA_SIDEBAR.has(pageCity)
+      ? GREATER_DAYTONA_SIDEBAR.has(evCity)
+      : evCity === pageCity;
+    return areaMatch && evDate >= today;
   })
   .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
   .slice(0, 4);
@@ -233,23 +260,30 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           </div>
           <div class="eventList">
             {upcomingEvents.length > 0 ? upcomingEvents.map(e => {
-              const d   = new Date(e.data.eventDate);
-              const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-              const day = d.getDate();
-              const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const d     = new Date(e.data.eventDate);
+              const mon   = d.toLocaleDateString("en-US", { month: "short" });
+              const day   = d.getDate();
+              const dow   = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+              const eMon  = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+              const cityLabel = CITY_DISPLAY_NAMES[evCity] ?? evCity;
               return (
                 <a class="eventRow"
-                   href={e.data.url ?? `/${city}/events/${e.slug.split("/").pop()}/`}
+                   href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
                    target={e.data.url ? "_blank" : "_self"}
                    rel={e.data.url ? "noopener" : ""}>
                   <div class="eventCal">
                     <div class="eDow">{dow}</div>
                     <div class="eDay">{day}</div>
-                    <div class="eMon">{mon}</div>
+                    <div class="eMon">{eMon}</div>
                   </div>
                   <div class="eventInfo">
                     <div class="eName">{e.data.title}</div>
-                    <div class="ePlace">{e.data.location}</div>
+                    <div class="ePlace">
+                      <span>{mon} {day}</span>
+                      <span class="evCitySep">|</span>
+                      <span class="evCityName">{cityLabel}</span>
+                    </div>
                   </div>
                 </a>
               );
@@ -595,7 +629,9 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .eMon { font-size: 8px; font-weight: 700; letter-spacing: .08em; color: var(--faint); text-transform: uppercase; }
   .eventInfo { display: flex; flex-direction: column; gap: 2px; }
   .eName { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
-  .ePlace { font-size: 13px; color: var(--faint); }
+  .ePlace { font-size: 12px; color: var(--faint); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .evCitySep { opacity: .4; }
+  .evCityName { color: var(--brand1); font-weight: 700; }
   .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
 
   .displayAdSlot { display: grid; gap: 5px; }

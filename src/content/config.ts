@@ -101,6 +101,8 @@ const events = defineCollection({
     url:         z.string().optional(),
     image:       z.string().optional(),
     featured:    z.boolean().optional().default(false),
+    lat:         z.number().optional(),
+    lng:         z.number().optional(),
   }),
 });
 

@@ -1,41 +1,116 @@
 ---
 import Base from "../../../layouts/Base.astro";
+import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
 
-const title = "Events";
+const title = "Events — Greater Daytona Beach Area";
 const subtitle = "GoDoDaytona — local events worth knowing about.";
+
+/* ── Greater Daytona area city set ─────────────────────────────────────── */
+const GREATER_DAYTONA = new Set([
+  "daytona", "daytona beach",
+  "ormond beach", "ormond",
+  "port orange",
+  "daytona beach shores",
+  "south daytona",
+  "holly hill",
+  "new smyrna beach", "new smyrna",
+  "flagler beach", "flagler",
+]);
+
+/* City center coordinates for map pins when event has no lat/lng */
+const CITY_CENTERS = {
+  "daytona":              { lat: 29.2108, lng: -81.0228 },
+  "daytona beach":        { lat: 29.2108, lng: -81.0228 },
+  "ormond beach":         { lat: 29.2866, lng: -81.0559 },
+  "ormond":               { lat: 29.2866, lng: -81.0559 },
+  "port orange":          { lat: 29.1380, lng: -81.0045 },
+  "daytona beach shores": { lat: 29.1994, lng: -80.9969 },
+  "south daytona":        { lat: 29.1680, lng: -81.0027 },
+  "holly hill":           { lat: 29.2497, lng: -81.0370 },
+  "new smyrna beach":     { lat: 29.0258, lng: -80.9270 },
+  "new smyrna":           { lat: 29.0258, lng: -80.9270 },
+  "flagler beach":        { lat: 29.4730, lng: -81.1267 },
+  "flagler":              { lat: 29.4730, lng: -81.1267 },
+};
+
+/* UTM helper */
+function addUtm(url) {
+  if (!url) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set("utm_source", "gododaytona");
+    return u.toString();
+  } catch {
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}utm_source=gododaytona`;
+  }
+}
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
 let allEvents = [];
-let collectErr = "";
-try { allEvents = await getCollection("events"); } catch(err) { collectErr = String(err); allEvents = []; }
-
+try { allEvents = await getCollection("events"); } catch { allEvents = []; }
 
 const upcomingEvents = allEvents
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
     const evDate = new Date(e.data.eventDate);
     evDate.setHours(0, 0, 0, 0);
-    return evCity === "daytona" && evDate >= today;
+    return GREATER_DAYTONA.has(evCity) && evDate >= today;
   })
   .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime());
 
-// Group events by "Month Year" label
+/* ── Build map pins from events ─────────────────────────────────────────── */
+const mapPins = upcomingEvents
+  .filter(e => {
+    /* Use event's own lat/lng or fall back to city center */
+    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+    return (e.data.lat != null && e.data.lng != null) || CITY_CENTERS[evCity];
+  })
+  .map(e => {
+    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+    const center = CITY_CENTERS[evCity] ?? { lat: 29.2108, lng: -81.0228 };
+    const d = new Date(e.data.eventDate);
+    const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return {
+      label:   e.data.title,
+      address: `${dateStr} · ${e.data.location}`,
+      lat:     e.data.lat ?? center.lat,
+      lng:     e.data.lng ?? center.lng,
+    };
+  });
+
+/* Group by month */
 function monthLabel(date) {
   return new Date(date).toLocaleDateString("en-US", { month: "long", year: "numeric" });
 }
-
 const grouped = [];
 for (const event of upcomingEvents) {
   const label = monthLabel(event.data.eventDate);
   const last = grouped[grouped.length - 1];
-  if (last && last.label === label) {
-    last.events.push(event);
-  } else {
-    grouped.push({ label, events: [event] });
-  }
+  if (last && last.label === label) last.events.push(event);
+  else grouped.push({ label, events: [event] });
+}
+
+/* Canonical city display names */
+const CITY_DISPLAY = {
+  "daytona":              "Daytona Beach",
+  "daytona beach":        "Daytona Beach",
+  "ormond beach":         "Ormond Beach",
+  "ormond":               "Ormond Beach",
+  "port orange":          "Port Orange",
+  "daytona beach shores": "Daytona Beach Shores",
+  "south daytona":        "South Daytona",
+  "holly hill":           "Holly Hill",
+  "new smyrna beach":     "New Smyrna Beach",
+  "new smyrna":           "New Smyrna Beach",
+  "flagler beach":        "Flagler Beach",
+  "flagler":              "Flagler Beach",
+};
+function cityDisplay(rawCity) {
+  return CITY_DISPLAY[rawCity.toLowerCase().trim()] ?? rawCity;
 }
 ---
 
@@ -43,25 +118,44 @@ for (const event of upcomingEvents) {
   <section class="section">
     <div class="container">
 
-<div class="eventsHeader">
+      <div class="eventsHeader">
         <h1 class="h1">Events</h1>
-        <p class="lede">Festivals, shows, markets, and what's happening in Daytona Beach.</p>
+        <p class="lede">Festivals, shows, markets, and what's happening across the Greater Daytona Beach area — from Flagler Beach to New Smyrna.</p>
+        <div class="headerActions">
+          <a class="submitBtn" href="/submit-event/">+ Submit an Event</a>
+        </div>
+      </div>
+
+      {/* ── Area map ── */}
+      {mapPins.length > 0 && (
+        <div class="mapBlock">
+          <InteractiveMap locations={mapPins} height="380px" />
+        </div>
+      )}
+
+      {/* ── Area filter chips ── */}
+      <div class="areaChips">
+        <span class="chipLabel">Showing:</span>
+        {["Daytona Beach","Ormond Beach","Port Orange","Daytona Beach Shores","South Daytona","Holly Hill","New Smyrna Beach","Flagler Beach"].map(c => (
+          <span class="chip">{c}</span>
+        ))}
       </div>
 
       {upcomingEvents.length === 0 ? (
-        <p class="noEvents">No upcoming events right now — check back soon.</p>
+        <p class="noEvents">No upcoming events right now — check back soon or <a href="/submit-event/">submit one</a>.</p>
       ) : grouped.map(group => (
         <div class="monthGroup">
           <h2 class="monthLabel">{group.label}</h2>
           <div class="eventList">
             {group.events.map(e => {
-              const d   = new Date(e.data.eventDate);
-              const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-              const day = d.getDate();
-              const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              const evCity = e.data.city ?? e.slug.split("/")[0];
+              const d      = new Date(e.data.eventDate);
+              const dow    = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+              const day    = d.getDate();
+              const mon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
               const evSlug = e.slug.split("/").pop();
-              const href = e.data.url ?? `/${evCity}/events/${evSlug}/`;
+              const rawHref = e.data.url ?? `/${e.data.city ?? evCity}/events/${evSlug}/`;
+              const href   = e.data.url ? addUtm(e.data.url) : rawHref;
               const isExternal = !!e.data.url;
               return (
                 <a
@@ -81,7 +175,10 @@ for (const event of upcomingEvents) {
                       <span class="ePlace">{e.data.location}</span>
                       {e.data.address && <span class="eAddress">{e.data.address}</span>}
                     </div>
-                    {e.data.category && <span class="eCat">{e.data.category}</span>}
+                    <div class="eFooter">
+                      {e.data.category && <span class="eCat">{e.data.category}</span>}
+                      <span class="eCityTag">{cityDisplay(evCity)}</span>
+                    </div>
                   </div>
                   {isExternal && <span class="eExtIcon" aria-hidden="true">↗</span>}
                 </a>
@@ -97,7 +194,63 @@ for (const event of upcomingEvents) {
 
 <style>
   .eventsHeader {
-    padding: 12px 0 24px;
+    padding: 12px 0 20px;
+  }
+
+  .lede {
+    font-size: 16px;
+    color: var(--muted);
+    margin: 6px 0 14px;
+    max-width: 620px;
+    line-height: 1.5;
+  }
+
+  .headerActions {
+    margin-top: 4px;
+  }
+
+  .submitBtn {
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: var(--brand1);
+    color: #000;
+    font-size: 13px;
+    font-weight: 800;
+    text-decoration: none;
+    transition: opacity 140ms;
+  }
+  .submitBtn:hover { opacity: .82; }
+
+  .mapBlock {
+    margin-bottom: 12px;
+  }
+
+  /* ── Area chips ── */
+  .areaChips {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 28px;
+  }
+  .chipLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--faint);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-right: 2px;
+  }
+  .chip {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.12);
+    color: var(--muted);
   }
 
   .noEvents {
@@ -105,10 +258,9 @@ for (const event of upcomingEvents) {
     font-size: 16px;
     padding: 32px 0;
   }
+  .noEvents a { color: var(--brand1); }
 
-  .monthGroup {
-    margin-bottom: 36px;
-  }
+  .monthGroup { margin-bottom: 36px; }
 
   .monthLabel {
     font-size: 13px;
@@ -121,10 +273,7 @@ for (const event of upcomingEvents) {
     border-bottom: 1px solid rgba(255,255,255,.08);
   }
 
-  .eventList {
-    display: grid;
-    gap: 4px;
-  }
+  .eventList { display: grid; gap: 4px; }
 
   .eventCard {
     display: grid;
@@ -144,61 +293,46 @@ for (const event of upcomingEvents) {
   }
 
   .eventCal {
-    width: 56px;
-    height: 56px;
+    width: 56px; height: 56px;
     border-radius: 12px;
     background: rgba(255,255,255,.06);
-    display: grid;
-    place-items: center;
-    text-align: center;
-    line-height: 1;
-    flex-shrink: 0;
+    display: grid; place-items: center;
+    text-align: center; line-height: 1; flex-shrink: 0;
   }
   .eDow { font-size: 9px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
   .eDay { font-size: 20px; font-weight: 900; color: var(--text); margin: 1px 0; }
   .eMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
 
-  .eventInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-  }
-  .eName {
-    font-weight: 800;
-    font-size: 16px;
-    color: var(--text);
-    line-height: 1.2;
-  }
+  .eventInfo { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+
+  .eName { font-weight: 800; font-size: 16px; color: var(--text); line-height: 1.2; }
+
   .eMeta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 8px;
-    font-size: 13px;
-    color: var(--faint);
+    display: flex; flex-wrap: wrap; gap: 0 8px;
+    font-size: 13px; color: var(--faint);
   }
   .eAddress::before { content: "·  "; }
+
+  .eFooter { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 2px; }
+
   .eCat {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: rgba(255,212,74,.12);
-    color: var(--accent);
-    width: fit-content;
-    margin-top: 2px;
+    display: inline-block; font-size: 11px; font-weight: 800;
+    padding: 2px 8px; border-radius: 999px;
+    background: rgba(255,212,74,.12); color: var(--accent);
   }
 
-  .eExtIcon {
-    font-size: 14px;
-    color: var(--muted);
-    opacity: .6;
-    align-self: center;
+  .eCityTag {
+    display: inline-block; font-size: 11px; font-weight: 700;
+    padding: 2px 8px; border-radius: 999px;
+    background: rgba(255,255,255,.07); color: var(--faint);
+    letter-spacing: .02em;
   }
+
+  .eExtIcon { font-size: 14px; color: var(--muted); opacity: .6; align-self: center; }
 
   @media (max-width: 520px) {
     .eventCard { grid-template-columns: 56px 1fr; padding: 12px; }
     .eExtIcon { display: none; }
+    .areaChips { gap: 4px; }
   }
 </style>

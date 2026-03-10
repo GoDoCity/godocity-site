@@ -28,6 +28,18 @@ if (data.endDate) {
 }
 
 const { Content } = await event.render();
+
+function addUtm(url) {
+  if (!url) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set("utm_source", "gododaytona");
+    return u.toString();
+  } catch {
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}utm_source=gododaytona`;
+  }
+}
 ---
 
 <Base title={data.title} subtitle={data.description ?? `${data.title} — GoDo ${cityCap}`} cityBase={city}>
@@ -53,7 +65,7 @@ const { Content } = await event.render();
           {data.url && (
             <div class="metaRow">
               <span class="metaIcon">🔗</span>
-              <a class="metaLink" href={data.url} target="_blank" rel="noopener noreferrer">More info ↗</a>
+              <a class="metaLink" href={addUtm(data.url)} target="_blank" rel="noopener noreferrer">More info ↗</a>
             </div>
           )}
         </div>
