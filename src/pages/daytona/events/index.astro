@@ -3,10 +3,7 @@ import Base from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
 
-const title = "Events — Greater Daytona Beach Area";
-const subtitle = "GoDoDaytona — local events worth knowing about.";
-
-/* ── Greater Daytona area city set ─────────────────────────────────────── */
+/* ── Greater Daytona city set ─────────────────────────────────────────── */
 const GREATER_DAYTONA = new Set([
   "daytona", "daytona beach",
   "ormond beach", "ormond",
@@ -18,7 +15,6 @@ const GREATER_DAYTONA = new Set([
   "flagler beach", "flagler",
 ]);
 
-/* City center coordinates for map pins when event has no lat/lng */
 const CITY_CENTERS = {
   "daytona":              { lat: 29.2108, lng: -81.0228 },
   "daytona beach":        { lat: 29.2108, lng: -81.0228 },
@@ -34,7 +30,20 @@ const CITY_CENTERS = {
   "flagler":              { lat: 29.4730, lng: -81.1267 },
 };
 
-/* UTM helper */
+const CITY_DISPLAY = {
+  "daytona": "Daytona Beach", "daytona beach": "Daytona Beach",
+  "ormond beach": "Ormond Beach", "ormond": "Ormond Beach",
+  "port orange": "Port Orange",
+  "daytona beach shores": "Daytona Beach Shores",
+  "south daytona": "South Daytona",
+  "holly hill": "Holly Hill",
+  "new smyrna beach": "New Smyrna Beach", "new smyrna": "New Smyrna Beach",
+  "flagler beach": "Flagler Beach", "flagler": "Flagler Beach",
+};
+function cityDisplay(raw) {
+  return CITY_DISPLAY[raw?.toLowerCase().trim()] ?? raw;
+}
+
 function addUtm(url) {
   if (!url) return url;
   try {
@@ -42,8 +51,7 @@ function addUtm(url) {
     u.searchParams.set("utm_source", "gododaytona");
     return u.toString();
   } catch {
-    const sep = url.includes("?") ? "&" : "?";
-    return `${url}${sep}utm_source=gododaytona`;
+    return url + (url.includes("?") ? "&" : "?") + "utm_source=gododaytona";
   }
 }
 
@@ -62,10 +70,12 @@ const upcomingEvents = allEvents
   })
   .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime());
 
-/* ── Build map pins from events ─────────────────────────────────────────── */
+const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true);
+const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
+
+/* ── Build map pins ── */
 const mapPins = upcomingEvents
   .filter(e => {
-    /* Use event's own lat/lng or fall back to city center */
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
     return (e.data.lat != null && e.data.lng != null) || CITY_CENTERS[evCity];
   })
@@ -82,257 +92,387 @@ const mapPins = upcomingEvents
     };
   });
 
-/* Group by month */
-function monthLabel(date) {
-  return new Date(date).toLocaleDateString("en-US", { month: "long", year: "numeric" });
-}
-const grouped = [];
-for (const event of upcomingEvents) {
-  const label = monthLabel(event.data.eventDate);
-  const last = grouped[grouped.length - 1];
-  if (last && last.label === label) last.events.push(event);
-  else grouped.push({ label, events: [event] });
-}
+/* ── Unique month options for date filter ── */
+const monthKeys = [...new Set(
+  upcomingEvents.map(e => {
+    const d = new Date(e.data.eventDate);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  })
+)];
+const monthOptions = monthKeys.map(k => {
+  const [y, m] = k.split("-");
+  const label = new Date(+y, +m - 1, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  return { key: k, label };
+});
 
-/* Canonical city display names */
-const CITY_DISPLAY = {
-  "daytona":              "Daytona Beach",
-  "daytona beach":        "Daytona Beach",
-  "ormond beach":         "Ormond Beach",
-  "ormond":               "Ormond Beach",
-  "port orange":          "Port Orange",
-  "daytona beach shores": "Daytona Beach Shores",
-  "south daytona":        "South Daytona",
-  "holly hill":           "Holly Hill",
-  "new smyrna beach":     "New Smyrna Beach",
-  "new smyrna":           "New Smyrna Beach",
-  "flagler beach":        "Flagler Beach",
-  "flagler":              "Flagler Beach",
-};
-function cityDisplay(rawCity) {
-  return CITY_DISPLAY[rawCity.toLowerCase().trim()] ?? rawCity;
-}
+const PAGE_SIZE = 30;
 ---
 
-<Base title={title} subtitle={subtitle} cityBase="daytona">
+<Base
+  title="Events — Greater Daytona Beach Area"
+  subtitle="GoDoDaytona — local events worth knowing about."
+  cityBase="daytona"
+>
   <section class="section">
-    <div class="container">
+    <div class="container eventsContainer">
 
+      {/* ── PAGE HEADER ── */}
       <div class="eventsHeader">
         <h1 class="h1">Events</h1>
-        <p class="lede">Festivals, shows, markets, and what's happening across the Greater Daytona Beach area — from Flagler Beach to New Smyrna.</p>
-        <div class="headerActions">
-          <a class="submitBtn" href="/submit-event/">+ Submit an Event</a>
-        </div>
+        <p class="lede">Festivals, markets, shows, and happenings across the Greater Daytona Beach area — from Flagler Beach to New Smyrna.</p>
+        <a class="submitBtn" href="/submit-event/">+ Submit an Event</a>
       </div>
 
-      {/* ── Area map ── */}
-      {mapPins.length > 0 && (
-        <div class="mapBlock">
-          <InteractiveMap locations={mapPins} height="380px" />
-        </div>
-      )}
-
-      {/* ── Area filter chips ── */}
-      <div class="areaChips">
-        <span class="chipLabel">Showing:</span>
-        {["Daytona Beach","Ormond Beach","Port Orange","Daytona Beach Shores","South Daytona","Holly Hill","New Smyrna Beach","Flagler Beach"].map(c => (
-          <span class="chip">{c}</span>
-        ))}
-      </div>
-
-      {upcomingEvents.length === 0 ? (
-        <p class="noEvents">No upcoming events right now — check back soon or <a href="/submit-event/">submit one</a>.</p>
-      ) : grouped.map(group => (
-        <div class="monthGroup">
-          <h2 class="monthLabel">{group.label}</h2>
-          <div class="eventList">
-            {group.events.map(e => {
-              const d      = new Date(e.data.eventDate);
-              const dow    = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-              const day    = d.getDate();
-              const mon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+      {/* ── FEATURED / SPONSORED SCROLLER ── */}
+      {sponsoredEvents.length > 0 && (
+        <div class="featuredSection">
+          <div class="featuredHeadRow">
+            <span class="featuredSectionTitle">Featured Events</span>
+          </div>
+          <div class="featuredScroller">
+            {sponsoredEvents.map(e => {
+              const d    = new Date(e.data.eventDate);
+              const mon  = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const day  = d.getDate();
               const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
               const evSlug = e.slug.split("/").pop();
-              const rawHref = e.data.url ?? `/${e.data.city ?? evCity}/events/${evSlug}/`;
-              const href   = e.data.url ? addUtm(e.data.url) : rawHref;
-              const isExternal = !!e.data.url;
+              const href = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
               return (
-                <a
-                  class="eventCard"
-                  href={href}
-                  target={isExternal ? "_blank" : "_self"}
-                  rel={isExternal ? "noopener noreferrer" : ""}
-                >
-                  <div class="eventCal">
-                    <div class="eDow">{dow}</div>
-                    <div class="eDay">{day}</div>
-                    <div class="eMon">{mon}</div>
+                <a class="featuredCard" href={href}
+                   target={e.data.url ? "_blank" : "_self"}
+                   rel={e.data.url ? "noopener noreferrer" : ""}>
+                  <div class="fcImgWrap">
+                    {e.data.image
+                      ? <img class="fcImg" src={e.data.image} alt={e.data.title} loading="lazy" />
+                      : <div class="fcImgPlaceholder" aria-hidden="true">📅</div>
+                    }
+                    <span class="fcSponsorBadge">SPONSORED</span>
                   </div>
-                  <div class="eventInfo">
-                    <div class="eName">{e.data.title}</div>
-                    <div class="eMeta">
-                      <span class="ePlace">{e.data.location}</span>
-                      {e.data.address && <span class="eAddress">{e.data.address}</span>}
-                    </div>
-                    <div class="eFooter">
-                      {e.data.category && <span class="eCat">{e.data.category}</span>}
-                      <span class="eCityTag">{cityDisplay(evCity)}</span>
-                    </div>
+                  <div class="fcBody">
+                    <div class="fcDate">{mon} {day}</div>
+                    <div class="fcTitle">{e.data.title}</div>
+                    <div class="fcCity">{cityDisplay(evCity)}</div>
                   </div>
-                  {isExternal && <span class="eExtIcon" aria-hidden="true">↗</span>}
                 </a>
               );
             })}
           </div>
         </div>
-      ))}
+      )}
+
+      {/* ── MAP ── */}
+      {mapPins.length > 0 && (
+        <div class="mapBlock">
+          <InteractiveMap locations={mapPins} height="340px" />
+        </div>
+      )}
+
+      {/* ── FILTER BAR ── */}
+      <div class="filterBar">
+        <label class="filterLabel" for="monthFilter">Filter by date:</label>
+        <select class="filterSelect" id="monthFilter">
+          <option value="all">All upcoming</option>
+          {monthOptions.map(o => (
+            <option value={o.key}>{o.label}</option>
+          ))}
+        </select>
+        <span class="filterCount" id="filterCount">
+          {regularEvents.length} event{regularEvents.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+
+      {/* ── EVENT GRID ── */}
+      {regularEvents.length === 0 ? (
+        <p class="noEvents">No upcoming events right now — check back soon or <a href="/submit-event/">submit one</a>.</p>
+      ) : (
+        <>
+          <div class="eventGrid" id="eventGrid">
+            {regularEvents.map((e, idx) => {
+              const d      = new Date(e.data.eventDate);
+              const mon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const day    = d.getDate();
+              const dow    = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+              const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+              const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+              const evSlug = e.slug.split("/").pop();
+              const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
+              const isExternal = !!e.data.url;
+              /* Cards beyond page 1 start hidden — JS shows them */
+              const hidden = idx >= PAGE_SIZE;
+              return (
+                <a
+                  class={`evCard${hidden ? " evCard--hidden" : ""}`}
+                  href={href}
+                  target={isExternal ? "_blank" : "_self"}
+                  rel={isExternal ? "noopener noreferrer" : ""}
+                  data-month={monthKey}
+                  data-idx={String(idx)}
+                >
+                  <div class="evCardImg">
+                    {e.data.image
+                      ? <img src={e.data.image} alt={e.data.title} loading="lazy" decoding="async" />
+                      : <div class="evCardImgPlaceholder" aria-hidden="true">
+                          {e.data.category === "Music & Nightlife" ? "🎵"
+                            : e.data.category === "Food & Drink" ? "🍽️"
+                            : e.data.category === "Racing & Motorsports" ? "🏁"
+                            : e.data.category === "Markets & Fairs" ? "🛍️"
+                            : e.data.category === "Outdoors & Sports" ? "🌊"
+                            : "📅"}
+                        </div>
+                    }
+                    {e.data.category && <span class="evCardCat">{e.data.category}</span>}
+                  </div>
+                  <div class="evCardBody">
+                    <div class="evCardDateRow">
+                      <span class="evCardDow">{dow}</span>
+                      <span class="evCardDay">{mon} {day}</span>
+                      {isExternal && <span class="evCardExt" aria-hidden="true">↗</span>}
+                    </div>
+                    <div class="evCardTitle">{e.data.title}</div>
+                    <div class="evCardMeta">
+                      <span class="evCardCity">{cityDisplay(evCity)}</span>
+                      {e.data.location && <span class="evCardVenue">{e.data.location}</span>}
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+          </div>
+
+          {regularEvents.length > PAGE_SIZE && (
+            <div class="loadMoreRow">
+              <button class="loadMoreBtn" id="loadMoreBtn" type="button">
+                Load more events
+                <span class="loadMoreCount" id="loadMoreCount">
+                  ({Math.min(PAGE_SIZE, regularEvents.length - PAGE_SIZE)} more)
+                </span>
+              </button>
+            </div>
+          )}
+        </>
+      )}
 
     </div>
   </section>
 </Base>
 
+<script is:inline>
+(function () {
+  var PAGE_SIZE = 30;
+  var shown     = PAGE_SIZE;
+  var filter    = "all";
+
+  var grid      = document.getElementById("eventGrid");
+  var filterSel = document.getElementById("monthFilter");
+  var countEl   = document.getElementById("filterCount");
+  var moreBtn   = document.getElementById("loadMoreBtn");
+  var moreCount = document.getElementById("loadMoreCount");
+
+  if (!grid) return;
+
+  var allCards = Array.prototype.slice.call(grid.querySelectorAll(".evCard"));
+
+  function visibleCards() {
+    return allCards.filter(function (c) {
+      return filter === "all" || c.getAttribute("data-month") === filter;
+    });
+  }
+
+  function applyState() {
+    var visible = visibleCards();
+    var total   = visible.length;
+
+    allCards.forEach(function (c) { c.classList.add("evCard--hidden"); });
+    visible.slice(0, shown).forEach(function (c) { c.classList.remove("evCard--hidden"); });
+
+    if (countEl) {
+      countEl.textContent = total + " event" + (total !== 1 ? "s" : "");
+    }
+
+    if (moreBtn) {
+      var remaining = total - shown;
+      if (remaining > 0) {
+        moreBtn.style.display = "";
+        if (moreCount) {
+          moreCount.textContent = "(" + Math.min(PAGE_SIZE, remaining) + " more)";
+        }
+      } else {
+        moreBtn.style.display = "none";
+      }
+    }
+  }
+
+  if (filterSel) {
+    filterSel.addEventListener("change", function () {
+      filter = filterSel.value;
+      shown  = PAGE_SIZE;
+      applyState();
+    });
+  }
+
+  if (moreBtn) {
+    moreBtn.addEventListener("click", function () {
+      shown += PAGE_SIZE;
+      applyState();
+    });
+  }
+
+  applyState();
+})();
+</script>
+
 <style>
-  .eventsHeader {
-    padding: 12px 0 20px;
-  }
+  .eventsContainer { padding-bottom: 64px; }
 
-  .lede {
-    font-size: 16px;
-    color: var(--muted);
-    margin: 6px 0 14px;
-    max-width: 620px;
-    line-height: 1.5;
-  }
-
-  .headerActions {
-    margin-top: 4px;
-  }
-
+  /* Header */
+  .eventsHeader { padding: 12px 0 24px; }
+  .lede { font-size: 16px; color: var(--muted); margin: 6px 0 14px; max-width: 600px; line-height: 1.5; }
   .submitBtn {
-    display: inline-flex;
-    align-items: center;
-    height: 36px;
-    padding: 0 16px;
-    border-radius: 999px;
-    background: var(--brand1);
-    color: #000;
-    font-size: 13px;
-    font-weight: 800;
-    text-decoration: none;
+    display: inline-flex; align-items: center;
+    height: 36px; padding: 0 16px; border-radius: 999px;
+    background: var(--brand1); color: #000;
+    font-size: 13px; font-weight: 800; text-decoration: none;
     transition: opacity 140ms;
   }
   .submitBtn:hover { opacity: .82; }
 
-  .mapBlock {
+  /* ── Featured / Sponsored Scroller ── */
+  .featuredSection { margin-bottom: 32px; }
+  .featuredHeadRow {
+    display: flex; align-items: center; gap: 10px;
     margin-bottom: 12px;
   }
-
-  /* ── Area chips ── */
-  .areaChips {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 28px;
-  }
-  .chipLabel {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--faint);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    margin-right: 2px;
-  }
-  .chip {
-    font-size: 12px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.12);
-    color: var(--muted);
+  .featuredSectionTitle {
+    font-size: 11px; font-weight: 900; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--brand1);
   }
 
-  .noEvents {
-    color: var(--muted);
-    font-size: 16px;
-    padding: 32px 0;
-  }
-  .noEvents a { color: var(--brand1); }
-
-  .monthGroup { margin-bottom: 36px; }
-
-  .monthLabel {
-    font-size: 13px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--muted);
-    margin: 0 0 12px;
+  .featuredScroller {
+    display: flex; gap: 16px;
+    overflow-x: auto; scroll-snap-type: x mandatory;
     padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.15) transparent;
+    -webkit-overflow-scrolling: touch;
+  }
+  .featuredScroller::-webkit-scrollbar { height: 4px; }
+  .featuredScroller::-webkit-scrollbar-track { background: transparent; }
+  .featuredScroller::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
+
+  .featuredCard {
+    flex-shrink: 0; width: 240px; scroll-snap-align: start;
+    border-radius: 14px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.03);
+    text-decoration: none;
+    transition: border-color 140ms, transform 140ms;
+  }
+  .featuredCard:hover { border-color: var(--brand1); transform: translateY(-2px); }
+
+  .fcImgWrap { position: relative; height: 130px; background: rgba(255,255,255,.05); overflow: hidden; }
+  .fcImg { width: 100%; height: 100%; object-fit: cover; }
+  .fcImgPlaceholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+  .fcSponsorBadge {
+    position: absolute; top: 8px; right: 8px;
+    font-size: 9px; font-weight: 900; letter-spacing: .08em;
+    background: var(--brand1); color: #000;
+    padding: 3px 8px; border-radius: 999px;
+  }
+  .fcBody { padding: 12px 14px 14px; }
+  .fcDate { font-size: 11px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+  .fcTitle { font-size: 14px; font-weight: 800; color: var(--text); line-height: 1.3; margin-bottom: 4px; }
+  .fcCity { font-size: 12px; color: var(--faint); }
+
+  /* Map */
+  .mapBlock { margin-bottom: 24px; }
+
+  /* Filter Bar */
+  .filterBar {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px; flex-wrap: wrap;
+  }
+  .filterLabel { font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .filterSelect {
+    height: 36px; padding: 0 32px 0 12px; border-radius: 8px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.05);
+    color: var(--text); font-size: 14px; font-family: inherit;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 10px center;
+    cursor: pointer; outline: none;
+  }
+  .filterSelect:focus { border-color: var(--brand1); }
+  .filterSelect option { background: #1a1a1a; }
+  .filterCount { font-size: 13px; color: var(--faint); margin-left: auto; }
+
+  /* ── Event Grid ── */
+  .eventGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 32px;
   }
 
-  .eventList { display: grid; gap: 4px; }
-
-  .eventCard {
-    display: grid;
-    grid-template-columns: 56px 1fr auto;
-    gap: 14px;
-    align-items: center;
-    text-decoration: none;
-    padding: 14px 16px;
-    border-radius: 12px;
+  .evCard {
+    border-radius: 14px; overflow: hidden;
     border: 1px solid rgba(255,255,255,.07);
     background: rgba(255,255,255,.02);
-    transition: border-color 140ms, background 140ms;
+    text-decoration: none;
+    transition: border-color 140ms, transform 140ms;
+    display: flex; flex-direction: column;
   }
-  .eventCard:hover {
-    border-color: rgba(255,255,255,.15);
-    background: rgba(255,255,255,.05);
+  .evCard:hover { border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
+  .evCard--hidden { display: none !important; }
+
+  .evCardImg {
+    position: relative; height: 140px;
+    background: rgba(255,255,255,.04); overflow: hidden; flex-shrink: 0;
   }
-
-  .eventCal {
-    width: 56px; height: 56px;
-    border-radius: 12px;
-    background: rgba(255,255,255,.06);
-    display: grid; place-items: center;
-    text-align: center; line-height: 1; flex-shrink: 0;
+  .evCardImg img { width: 100%; height: 100%; object-fit: cover; }
+  .evCardImgPlaceholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center; font-size: 40px;
   }
-  .eDow { font-size: 9px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
-  .eDay { font-size: 20px; font-weight: 900; color: var(--text); margin: 1px 0; }
-  .eMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
-
-  .eventInfo { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-
-  .eName { font-weight: 800; font-size: 16px; color: var(--text); line-height: 1.2; }
-
-  .eMeta {
-    display: flex; flex-wrap: wrap; gap: 0 8px;
-    font-size: 13px; color: var(--faint);
-  }
-  .eAddress::before { content: "·  "; }
-
-  .eFooter { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 2px; }
-
-  .eCat {
-    display: inline-block; font-size: 11px; font-weight: 800;
-    padding: 2px 8px; border-radius: 999px;
-    background: rgba(255,212,74,.12); color: var(--accent);
+  .evCardCat {
+    position: absolute; bottom: 8px; left: 8px;
+    font-size: 10px; font-weight: 800; letter-spacing: .05em;
+    background: rgba(0,0,0,.6); color: var(--brand1);
+    padding: 3px 8px; border-radius: 999px;
+    backdrop-filter: blur(4px);
   }
 
-  .eCityTag {
-    display: inline-block; font-size: 11px; font-weight: 700;
-    padding: 2px 8px; border-radius: 999px;
-    background: rgba(255,255,255,.07); color: var(--faint);
-    letter-spacing: .02em;
+  .evCardBody { padding: 12px 14px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .evCardDateRow { display: flex; align-items: center; gap: 6px; }
+  .evCardDow { font-size: 10px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
+  .evCardDay { font-size: 12px; font-weight: 700; color: var(--muted); }
+  .evCardExt { font-size: 11px; color: var(--faint); margin-left: auto; }
+  .evCardTitle { font-size: 14px; font-weight: 800; color: var(--text); line-height: 1.3; }
+  .evCardMeta { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; }
+  .evCardCity { font-size: 12px; font-weight: 700; color: var(--brand1); }
+  .evCardVenue { font-size: 11px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Load More */
+  .loadMoreRow { display: flex; justify-content: center; padding: 8px 0 16px; }
+  .loadMoreBtn {
+    height: 44px; padding: 0 28px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: transparent; color: var(--text);
+    font-size: 14px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: border-color 140ms, background 140ms;
   }
+  .loadMoreBtn:hover { border-color: var(--brand1); background: rgba(249,217,0,.06); }
+  .loadMoreCount { color: var(--faint); font-weight: 400; margin-left: 4px; }
 
-  .eExtIcon { font-size: 14px; color: var(--muted); opacity: .6; align-self: center; }
+  .noEvents { color: var(--muted); font-size: 16px; padding: 32px 0; }
+  .noEvents a { color: var(--brand1); }
 
+  @media (max-width: 800px) {
+    .eventGrid { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width: 520px) {
-    .eventCard { grid-template-columns: 56px 1fr; padding: 12px; }
-    .eExtIcon { display: none; }
-    .areaChips { gap: 4px; }
+    .eventGrid { grid-template-columns: 1fr; gap: 12px; }
+    .featuredCard { width: 200px; }
+    .filterBar { gap: 8px; }
+    .filterCount { margin-left: 0; width: 100%; }
   }
 </style>

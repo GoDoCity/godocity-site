@@ -57,6 +57,17 @@ const guides = defineCollection({
       sub:   z.string(),
       href:  z.string(),
     })).optional(),
+    // ── Reader Voting (Best Of series) ──────────────────────────────────
+    // Set votingEnabled: true to activate the voting UI on a guide page.
+    // votingStatus controls the display state of the voting widget:
+    //   "closed"    → voting not yet open (default, no UI shown)
+    //   "open"      → readers can submit a vote
+    //   "tallying"  → polls closed, counting in progress
+    //   "published" → winner announced, results shown
+    votingEnabled: z.boolean().optional().default(false),
+    votingStatus:  z.enum(["closed", "open", "tallying", "published"]).optional().default("closed"),
+    votingDeadline: z.coerce.date().optional(),   // when "open" voting closes
+
     localSponsor: z.object({
       brand:   z.string().optional().default(""),
       tagline: z.string().optional().default(""),
