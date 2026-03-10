@@ -267,11 +267,13 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
               const eMon  = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
               const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
               const cityLabel = CITY_DISPLAY_NAMES[evCity] ?? evCity;
+              const isSponsored = e.data.sponsored === true;
               return (
-                <a class="eventRow"
+                <a class={`eventRow${isSponsored ? " eventRow--sponsored" : ""}`}
                    href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
                    target={e.data.url ? "_blank" : "_self"}
                    rel={e.data.url ? "noopener" : ""}>
+                  {isSponsored && <span class="sponsoredBadge">SPONSORED</span>}
                   <div class="eventCal">
                     <div class="eDow">{dow}</div>
                     <div class="eDay">{day}</div>
@@ -288,9 +290,11 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
                 </a>
               );
             }) : (
-              <p class="noEvents">No upcoming events.</p>
+              <p class="noEvents">No upcoming events yet.</p>
             )}
           </div>
+          {/* Always visible — fills empty state and prompts submissions */}
+          <a class="submitEventLink" href="/submit-event/">+ Submit an event →</a>
         </div>
 
         {/* City Guides */}
@@ -633,6 +637,36 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .evCitySep { opacity: .4; }
   .evCityName { color: var(--brand1); font-weight: 700; }
   .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
+
+  /* Sponsored event row */
+  .eventRow--sponsored {
+    background: rgba(249,217,0,.07);
+    border-radius: 8px;
+    padding: 10px 8px;
+    margin: 0 -8px;
+    position: relative;
+  }
+  .sponsoredBadge {
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 9px; font-weight: 900;
+    letter-spacing: .08em;
+    background: var(--brand1); color: #000;
+    padding: 2px 6px; border-radius: 999px;
+  }
+
+  /* Submit event prompt */
+  .submitEventLink {
+    display: block;
+    margin-top: 12px;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--brand1);
+    text-decoration: none;
+    opacity: .85;
+    transition: opacity 120ms;
+  }
+  .submitEventLink:hover { opacity: 1; }
 
   .displayAdSlot { display: grid; gap: 5px; }
   .adSlotLabel { font-size: 8.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); text-align: center; }

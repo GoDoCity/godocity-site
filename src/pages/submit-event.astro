@@ -48,7 +48,7 @@ const CATEGORIES = [
           class="submitForm"
           name="event-submission"
           method="POST"
-          action="/submit-event/thanks/"
+          action="/submit-success/"
           data-netlify="true"
           netlify-honeypot="bot-field"
         >
@@ -305,15 +305,16 @@ const CATEGORIES = [
   .fieldInput {
     width: 100%;
     box-sizing: border-box;
-    padding: 11px 14px;
+    padding: 13px 16px;      /* larger touch target for mobile */
     border-radius: 10px;
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(255,255,255,.05);
     color: var(--text);
-    font-size: 14px;
+    font-size: 16px;         /* ≥16px prevents iOS auto-zoom on focus */
     font-family: inherit;
     outline: none;
     transition: border-color 150ms;
+    -webkit-appearance: none; /* removes iOS inner shadow on inputs */
   }
   .fieldInput:focus { border-color: var(--brand1); }
   .fieldInput::placeholder { color: rgba(255,255,255,.28); }
