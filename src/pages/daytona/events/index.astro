@@ -143,190 +143,178 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   cityBase="daytona"
 >
   <section class="section">
-    <div class="container eventsContainer">
+    <div class="eventsContainer">
 
-      {/* ── PAGE HEADER ── */}
-      <div class="eventsHeader">
-        <h1 class="h1">Events</h1>
-        <p class="lede">Festivals, markets, shows, and happenings across the Greater Daytona Beach area — from Flagler Beach to New Smyrna.</p>
-        <a class="submitBtn" href="/submit-event/">+ Submit an Event</a>
-      </div>
-
-      {/* ── NEWSLETTER SIGNUP ── */}
-      <div class="nlBox">
-        <!--
-          Netlify detects this hidden shadow form at build time so the visible
-          JS-submitted form is registered. Both share name="newsletter-signup".
-        -->
+      {/* ── NEWSLETTER BAND — yellow, full-bleed, matching home page ── */}
+      <div class="nlBand">
         <form name="newsletter-signup" data-netlify="true" netlify-honeypot="nl-bot" hidden aria-hidden="true">
-          <input name="form-name" value="newsletter-signup" />
-          <input name="nl-bot" />
-          <input name="email" />
+          <input name="form-name" value="newsletter-signup" /><input name="nl-bot" /><input name="email" />
         </form>
-
         <div class="nlInner">
           <div class="nlCopy">
-            <p class="nlLabel">FREE NEWSLETTER</p>
-            <p class="nlHeadline">Good News Daytona</p>
-            <p class="nlSub">The best events, eats, and things to do — straight to your inbox.</p>
+            <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
+            <div class="nlSub">Get the best local events sent to your inbox, <strong>for free.</strong></div>
           </div>
           <form class="nlForm" id="nlForm" novalidate>
             <input type="hidden" name="form-name" value="newsletter-signup" />
-            <p style="display:none" aria-hidden="true"><label>Leave this empty: <input name="nl-bot" id="nlBot" /></label></p>
-            <div class="nlInputRow">
-              <input
-                class="nlInput"
-                id="nlEmail"
-                name="email"
-                type="email"
-                placeholder="your@email.com"
-                required
-                autocomplete="email"
-              />
-              <button class="nlBtn" id="nlBtn" type="submit">Subscribe →</button>
+            <p style="display:none" aria-hidden="true"><label>Leave empty: <input name="nl-bot" id="nlBot" /></label></p>
+            <div class="nlRow">
+              <input class="nlInput" id="nlEmail" name="email" type="email"
+                placeholder="Enter your email address" autocomplete="email" required />
+              <button class="nlBtn" id="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
             </div>
             <p class="nlError" id="nlError" role="alert" aria-live="polite"></p>
           </form>
         </div>
       </div>
 
-      {/* ── FEATURED SCROLLER — top 3 sponsored, large hero cards ── */}
-      {sponsoredEvents.length > 0 && (
-        <div class="featuredSection">
-          <div class="featuredHeadRow">
-            <span class="featuredSectionTitle">Featured Events</span>
-          </div>
-          <div class="featuredScroller">
-            {sponsoredEvents.map(e => {
-              const d      = new Date(e.data.eventDate);
-              const mon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              const day    = d.getDate();
-              const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-              const evSlug = e.slug.split("/").pop();
-              const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
-              const isExt  = !!e.data.url;
-              const fbUrl  = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " Daytona")}`;
-              return (
-                <a class="featuredCard"
-                   href={href}
-                   target={isExt ? "_blank" : "_self"}
-                   rel={isExt ? "noopener noreferrer" : ""}
-                   data-external={isExt ? "true" : undefined}
-                   data-fallback={isExt ? fbUrl : undefined}>
-                  <div class="fcImgWrap">
-                    <img class="fcImg"
-                      src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
-                      alt={e.data.title} loading="lazy" />
-                    <span class="fcSponsorBadge">SPONSORED</span>
-                    <div class="fcImgOverlay" aria-hidden="true"></div>
-                    <div class="fcOverlayCopy">
-                      <div class="fcDate">{mon} {day}</div>
-                      <div class="fcTitle">{e.data.title}</div>
-                      <div class="fcCity">{cityDisplay(evCity)}</div>
-                    </div>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        </div>
-      )}
+      <div class="container">
 
-      {/* ── MAP ── */}
-      {mapPins.length > 0 && (
-        <div class="mapBlock">
-          <InteractiveMap locations={mapPins} height="300px" />
-        </div>
-      )}
-
-      {/* ── FILTER BAR ── */}
-      <div class="filterBar">
-        <label class="filterLabel" for="monthFilter">Filter:</label>
-        <select class="filterSelect" id="monthFilter">
-          <option value="all">All upcoming</option>
-          {monthOptions.map(o => (
-            <option value={o.key}>{o.label}</option>
-          ))}
-        </select>
-        <span class="filterCount" id="filterCount">
-          {regularEvents.length} event{regularEvents.length !== 1 ? "s" : ""}
-        </span>
-      </div>
-
-      {/* ── EVENT FEED — full-width cards, 16:9 thumbnails ── */}
-      {regularEvents.length === 0 ? (
-        <p class="noEvents">No upcoming events right now — check back soon or <a href="/submit-event/">submit one</a>.</p>
-      ) : (
-        <>
-          <div class="eventFeed" id="eventGrid">
-            {regularEvents.map((e, idx) => {
-              const d        = new Date(e.data.eventDate);
-              const mon      = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              const day      = d.getDate();
-              const dow      = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-              const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-              const evCity   = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-              const evSlug   = e.slug.split("/").pop();
-              const href     = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
-              const isExt    = !!e.data.url;
-              const hidden   = idx >= PAGE_SIZE;
-              const evLat    = e.data.lat ?? CITY_CENTERS[evCity]?.lat;
-              const evLng    = e.data.lng ?? CITY_CENTERS[evCity]?.lng;
-              const dist     = distLabel(evLat, evLng);
-              const fbUrl    = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " " + cityDisplay(evCity))}`;
-              return (
-                <a
-                  class={`evCard${hidden ? " evCard--hidden" : ""}`}
-                  href={href}
-                  target={isExt ? "_blank" : "_self"}
-                  rel={isExt ? "noopener noreferrer" : ""}
-                  data-month={monthKey}
-                  data-idx={String(idx)}
-                  data-external={isExt ? "true" : undefined}
-                  data-fallback={isExt ? fbUrl : undefined}
-                >
-                  {/* 160px square thumbnail — left */}
-                  <div class="evCardImg">
-                    <img
-                      src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
-                      alt={e.data.title} loading="lazy" decoding="async" />
-                    {e.data.category && <span class="evCardCat">{e.data.category}</span>}
-                  </div>
-
-                  {/* Text details — right */}
-                  <div class="evCardBody">
-                    <div class="evCardDateRow">
-                      <span class="evCardDow">{dow}</span>
-                      <span class="evCardDay">{mon} {day}</span>
-                      {isExt && <span class="evCardExt" aria-label="External link">↗</span>}
-                    </div>
-                    <div class="evCardTitle">{e.data.title}</div>
-                    {e.data.location && (
-                      <div class="evCardVenue">{e.data.location}</div>
-                    )}
-                    <div class="evCardMeta">
-                      <span class="evCardCity">{cityDisplay(evCity)}</span>
-                      {dist && <span class="evCardDist">{dist}</span>}
-                    </div>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-
-          {regularEvents.length > PAGE_SIZE && (
-            <div class="loadMoreRow">
-              <button class="loadMoreBtn" id="loadMoreBtn" type="button">
-                Load more events
-                <span class="loadMoreCount" id="loadMoreCount">
-                  ({Math.min(PAGE_SIZE, regularEvents.length - PAGE_SIZE)} more)
-                </span>
-              </button>
+        {/* ── FEATURED SCROLLER — label + action buttons at top ── */}
+        {sponsoredEvents.length > 0 && (
+          <div class="featuredSection">
+            <div class="featuredHeadRow">
+              <span class="featuredSectionTitle">Featured Events</span>
+              <div class="featuredActions">
+                <a class="featuredActionBtn" href="/daytona/advertise/">Advertise With Us</a>
+                <a class="featuredActionBtn featuredActionBtn--add" href="/submit-event/">+ Add Event</a>
+              </div>
             </div>
-          )}
-        </>
-      )}
+            <div class="featuredScroller">
+              {sponsoredEvents.map(e => {
+                const d      = new Date(e.data.eventDate);
+                const mon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const day    = d.getDate();
+                const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+                const evSlug = e.slug.split("/").pop();
+                const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
+                const isExt  = !!e.data.url;
+                const fbUrl  = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " Daytona")}`;
+                return (
+                  <a class="featuredCard"
+                     href={href}
+                     target={isExt ? "_blank" : "_self"}
+                     rel={isExt ? "noopener noreferrer" : ""}
+                     data-external={isExt ? "true" : undefined}
+                     data-fallback={isExt ? fbUrl : undefined}>
+                    <div class="fcImgWrap">
+                      <img class="fcImg"
+                        src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
+                        alt={e.data.title} loading="lazy" />
+                      <span class="fcSponsorBadge">SPONSORED</span>
+                      <div class="fcImgOverlay" aria-hidden="true"></div>
+                      <div class="fcOverlayCopy">
+                        <div class="fcDate">{mon} {day}</div>
+                        <div class="fcTitle">{e.data.title}</div>
+                        <div class="fcCity">{cityDisplay(evCity)}</div>
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
+        {/* ── MAP ── */}
+        {mapPins.length > 0 && (
+          <div class="mapBlock">
+            <InteractiveMap locations={mapPins} height="300px" />
+          </div>
+        )}
+
+        {/* ── FILTER BAR ── */}
+        <div class="filterBar">
+          <label class="filterLabel" for="monthFilter">Filter:</label>
+          <select class="filterSelect" id="monthFilter">
+            <option value="all">All upcoming</option>
+            {monthOptions.map(o => (
+              <option value={o.key}>{o.label}</option>
+            ))}
+          </select>
+          <span class="filterCount" id="filterCount">
+            {regularEvents.length} event{regularEvents.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+
+        {/* ── EVENT FEED — slim horizontal rows, 100×65px thumbnails ── */}
+        {regularEvents.length === 0 ? (
+          <p class="noEvents">No upcoming events — <a href="/submit-event/">submit one</a>.</p>
+        ) : (
+          <>
+            <div class="eventFeed" id="eventGrid">
+              {regularEvents.map((e, idx) => {
+                const d        = new Date(e.data.eventDate);
+                const mon      = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const day      = d.getDate();
+                const dow      = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+                const evCity   = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+                const evSlug   = e.slug.split("/").pop();
+                const href     = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
+                const isExt    = !!e.data.url;
+                const hidden   = idx >= PAGE_SIZE;
+                const evLat    = e.data.lat ?? CITY_CENTERS[evCity]?.lat;
+                const evLng    = e.data.lng ?? CITY_CENTERS[evCity]?.lng;
+                const dist     = distLabel(evLat, evLng);
+                const fbUrl    = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " " + cityDisplay(evCity))}`;
+                return (
+                  <a
+                    class={`evCard${hidden ? " evCard--hidden" : ""}`}
+                    href={href}
+                    target={isExt ? "_blank" : "_self"}
+                    rel={isExt ? "noopener noreferrer" : ""}
+                    data-month={monthKey}
+                    data-idx={String(idx)}
+                    data-external={isExt ? "true" : undefined}
+                    data-fallback={isExt ? fbUrl : undefined}
+                  >
+                    <div class="evCardImg">
+                      <img
+                        src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
+                        alt={e.data.title} loading="lazy" decoding="async" />
+                    </div>
+
+                    <div class="evCardBody">
+                      <div class="evCardDateRow">
+                        <span class="evCardDow">{dow}</span>
+                        <span class="evCardDay">{mon} {day}</span>
+                        {isExt && <span class="evCardExt" aria-label="External link">↗</span>}
+                      </div>
+                      <div class="evCardTitle">{e.data.title}</div>
+                      {e.data.location && (
+                        <div class="evCardVenue">{e.data.location}</div>
+                      )}
+                      <div class="evCardMeta">
+                        <span class="evCardCity">{cityDisplay(evCity)}</span>
+                        {dist && <span class="evCardDist">{dist}</span>}
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+
+            {regularEvents.length > PAGE_SIZE && (
+              <div class="loadMoreRow">
+                <button class="loadMoreBtn" id="loadMoreBtn" type="button">
+                  Load more events
+                  <span class="loadMoreCount" id="loadMoreCount">
+                    ({Math.min(PAGE_SIZE, regularEvents.length - PAGE_SIZE)} more)
+                  </span>
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── SUGGEST AN EVENT CTA ── */}
+        <div class="suggestRow">
+          <p class="suggestText">Know about an event we're missing?</p>
+          <a class="suggestBtn" href="/submit-event/">Suggest an Event →</a>
+        </div>
+
+      </div>
     </div>
   </section>
 </Base>
@@ -400,7 +388,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
       }
 
       nlBtn.disabled    = true;
-      nlBtn.textContent = "Subscribing…";
+      nlBtn.textContent = "SIGNING UP…";
 
       var botVal = document.getElementById("nlBot")?.value ?? "";
       var body   = "form-name=newsletter-signup&email=" + encodeURIComponent(email);
@@ -414,7 +402,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
         .then(function (res) {
           if (res.ok || res.status === 303) {
             nlForm.innerHTML =
-              '<p class="nlSuccess">✓ You\'re subscribed! Good news incoming.</p>';
+              '<p class="nlThanks">✓ You\'re in! Good news coming your way.</p>';
           } else {
             throw new Error(res.status);
           }
@@ -422,7 +410,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
         .catch(function () {
           nlErr.textContent = "Something went wrong — please try again.";
           nlBtn.disabled    = false;
-          nlBtn.textContent = "Subscribe →";
+          nlBtn.textContent = "SIGN UP, IT'S FREE!";
         });
     });
   }
@@ -450,91 +438,114 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 <style>
   .eventsContainer { padding-bottom: 64px; }
 
-  /* ── Newsletter signup box ── */
-  .nlBox {
-    background: linear-gradient(135deg, rgba(249,217,0,.12) 0%, rgba(249,217,0,.04) 100%);
-    border: 1px solid rgba(249,217,0,.25);
-    border-radius: 16px;
-    padding: 28px 28px 24px;
+  /* ── Newsletter Band — yellow full-bleed, matching home page ── */
+  .nlBand {
+    background: var(--brand1);
+    /* Full-bleed: bust out of any parent padding */
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    padding: 28px 0;
     margin-bottom: 32px;
   }
   .nlInner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 28px;
     flex-wrap: wrap;
   }
   .nlCopy { flex: 1; min-width: 220px; }
-  .nlLabel {
-    font-size: 10px; font-weight: 900; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--brand1); margin: 0 0 4px;
+  .nlHead {
+    font-size: clamp(24px, 3vw, 34px);
+    font-weight: 900;
+    color: #000;
+    line-height: 1.1;
+    margin: 0 0 4px;
   }
-  .nlHeadline {
-    font-size: 22px; font-weight: 900; color: var(--text);
-    line-height: 1.1; margin: 0 0 6px;
-  }
+  .nlCity { color: #000; }
   .nlSub {
-    font-size: 14px; color: var(--muted); line-height: 1.45; margin: 0;
+    font-size: 15px;
+    color: rgba(0,0,0,.75);
+    line-height: 1.4;
+    margin: 0;
   }
-  .nlForm { flex: 1; min-width: 260px; }
-  .nlInputRow {
-    display: flex; gap: 8px; align-items: stretch;
-  }
+  .nlSub strong { font-weight: 900; color: #000; }
+  .nlForm { flex: 1; min-width: 260px; max-width: 440px; }
+  .nlRow { display: flex; height: 46px; }
   .nlInput {
     flex: 1; min-width: 0;
-    height: 44px; padding: 0 14px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,.15);
-    background: rgba(255,255,255,.06);
-    color: var(--text); font-size: 15px; font-family: inherit;
-    outline: none; transition: border-color 150ms;
-    -webkit-appearance: none;
+    border-radius: 8px 0 0 8px;
+    border: 2px solid rgba(0,0,0,.35);
+    border-right: none;
+    background: #fff;
+    color: #000;
+    font-size: 15px; font-family: inherit;
+    padding: 0 14px;
+    outline: none;
+    transition: border-color 150ms;
   }
-  .nlInput:focus { border-color: var(--brand1); }
-  .nlInput::placeholder { color: rgba(255,255,255,.3); }
+  .nlInput::placeholder { color: #999; }
+  .nlInput:focus { border-color: rgba(0,0,0,.75); }
   .nlBtn {
     flex-shrink: 0;
-    height: 44px; padding: 0 20px;
-    border-radius: 10px; border: none;
-    background: var(--brand1); color: #000;
-    font-size: 14px; font-weight: 900; font-family: inherit;
-    cursor: pointer; transition: opacity 140ms; white-space: nowrap;
+    padding: 0 16px;
+    border-radius: 0 8px 8px 0;
+    border: none;
+    background: #000;
+    color: var(--brand1);
+    font-size: 12px; font-weight: 900; font-family: inherit;
+    letter-spacing: .04em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 140ms;
   }
-  .nlBtn:hover { opacity: .82; }
+  .nlBtn:hover { background: #222; }
   .nlBtn:disabled { opacity: .5; cursor: default; }
   .nlError {
-    font-size: 13px; color: #ff6b6b; margin: 8px 0 0; min-height: 18px;
+    font-size: 12px; color: rgba(0,0,0,.65);
+    margin: 6px 0 0; min-height: 16px;
   }
-  .nlSuccess {
-    font-size: 15px; font-weight: 700; color: var(--brand1); margin: 10px 0 0;
+  .nlThanks {
+    font-size: 15px; font-weight: 700; color: #000; margin: 10px 0 0;
+  }
+  @media (max-width: 600px) {
+    .nlInner { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .nlForm { width: 100%; max-width: 100%; }
+    .nlRow { flex-direction: column; height: auto; gap: 8px; }
+    .nlInput { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.35); height: 46px; }
+    .nlBtn { border-radius: 8px; height: 46px; }
   }
 
-  /* ── Header ── */
-  .eventsHeader { padding: 12px 0 24px; }
-  .lede { font-size: 16px; color: var(--muted); margin: 6px 0 14px; max-width: 600px; line-height: 1.5; }
-  .submitBtn {
-    display: inline-flex; align-items: center;
-    height: 36px; padding: 0 16px; border-radius: 999px;
-    background: var(--brand1); color: #000;
-    font-size: 13px; font-weight: 800; text-decoration: none;
-    transition: opacity 140ms;
+  /* ── Featured Scroller — label + action buttons row ── */
+  .featuredSection { margin-bottom: 24px; }
+  .featuredHeadRow {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 10px; gap: 10px; flex-wrap: wrap;
   }
-  .submitBtn:hover { opacity: .82; }
-
-  /* ── Featured Scroller — 3 large hero cards, 90vw wide ── */
-  .featuredSection {
-    margin-bottom: 32px;
-    width: 90vw;
-    margin-left: max(-2.5rem, calc(50% - 45vw));
-    padding-left: max(2.5rem, calc(45vw - 50%));
-  }
-  .featuredHeadRow { display: flex; align-items: center; margin-bottom: 12px; }
   .featuredSectionTitle {
     font-size: 11px; font-weight: 900; letter-spacing: .1em;
     text-transform: uppercase; color: var(--brand1);
   }
+  .featuredActions { display: flex; gap: 6px; }
+  .featuredActionBtn {
+    display: inline-flex; align-items: center;
+    height: 28px; padding: 0 12px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.2);
+    background: transparent; color: var(--muted);
+    font-size: 11px; font-weight: 700; text-decoration: none;
+    transition: border-color 140ms, color 140ms;
+    white-space: nowrap;
+  }
+  .featuredActionBtn:hover { border-color: var(--brand1); color: var(--brand1); }
+  .featuredActionBtn--add {
+    border-color: rgba(249,217,0,.35); color: var(--brand1);
+  }
+  .featuredActionBtn--add:hover { border-color: var(--brand1); background: rgba(249,217,0,.08); }
+
   .featuredScroller {
-    display: flex; gap: 16px;
+    display: flex; gap: 14px;
     overflow-x: auto; scroll-snap-type: x mandatory;
     padding-bottom: 8px;
     scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.15) transparent;
@@ -544,138 +555,147 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   .featuredScroller::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
 
   .featuredCard {
-    flex-shrink: 0; width: 340px; scroll-snap-align: start;
-    border-radius: 16px; overflow: hidden;
+    flex-shrink: 0; width: 300px; scroll-snap-align: start;
+    border-radius: 14px; overflow: hidden;
     border: 1px solid rgba(255,255,255,.08);
     text-decoration: none;
     transition: border-color 140ms, transform 140ms;
   }
   .featuredCard:hover { border-color: var(--brand1); transform: translateY(-2px); }
 
-  .fcImgWrap { position: relative; height: 220px; background: rgba(255,255,255,.05); overflow: hidden; }
+  .fcImgWrap { position: relative; height: 190px; background: rgba(255,255,255,.05); overflow: hidden; }
   .fcImg { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .fcImgPlaceholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 48px; }
   .fcImgOverlay {
     position: absolute; inset: 0;
     background: linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.2) 55%, transparent 100%);
   }
   .fcSponsorBadge {
-    position: absolute; top: 10px; right: 10px; z-index: 2;
+    position: absolute; top: 8px; right: 8px; z-index: 2;
     font-size: 9px; font-weight: 900; letter-spacing: .08em;
     background: var(--brand1); color: #000; padding: 3px 8px; border-radius: 999px;
   }
-  .fcOverlayCopy { position: absolute; bottom: 16px; left: 16px; right: 16px; z-index: 2; }
-  .fcDate  { font-size: 11px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
-  .fcTitle { font-size: 18px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 3px; }
-  .fcCity  { font-size: 12px; color: rgba(255,255,255,.65); }
+  .fcOverlayCopy { position: absolute; bottom: 14px; left: 14px; right: 14px; z-index: 2; }
+  .fcDate  { font-size: 10px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 2px; }
+  .fcTitle { font-size: 16px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 2px; }
+  .fcCity  { font-size: 11px; color: rgba(255,255,255,.65); }
 
   /* Map */
-  .mapBlock { margin-bottom: 24px; }
+  .mapBlock { margin-bottom: 20px; }
 
   /* ── Filter Bar ── */
-  .filterBar { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; flex-wrap: wrap; }
-  .filterLabel { font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .filterBar { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; flex-wrap: wrap; }
+  .filterLabel { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
   .filterSelect {
-    height: 36px; padding: 0 32px 0 12px; border-radius: 8px;
+    height: 32px; padding: 0 28px 0 10px; border-radius: 6px;
     border: 1px solid rgba(255,255,255,.12);
     background: rgba(255,255,255,.05);
-    color: var(--text); font-size: 14px; font-family: inherit;
+    color: var(--text); font-size: 13px; font-family: inherit;
     appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 10px center;
+    background-repeat: no-repeat; background-position: right 9px center;
     cursor: pointer; outline: none;
   }
   .filterSelect:focus { border-color: var(--brand1); }
   .filterSelect option { background: #1a1a1a; }
-  .filterCount { font-size: 13px; color: var(--faint); margin-left: auto; }
+  .filterCount { font-size: 12px; color: var(--faint); margin-left: auto; }
 
-  /* ── EVENT FEED — full-width cards, 16:9 thumbnails, #333 separators ── */
+  /* ── EVENT FEED — slim rows, 100×65px thumbnails, tight density ── */
   .eventFeed {
     display: flex; flex-direction: column;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
 
   .evCard {
     display: flex;
     flex-direction: row;
-    align-items: flex-start;
-    gap: 16px;
+    align-items: center;
+    gap: 12px;
     text-decoration: none;
-    border-bottom: 1px solid #333333;
-    padding-bottom: 20px;
-    margin-bottom: 20px;
+    border-bottom: 1px solid #2a2a2a;
+    padding: 10px 0;
     transition: opacity 120ms;
   }
-  .evCard:last-child { border-bottom: none; margin-bottom: 0; }
-  .evCard:hover { opacity: .88; }
+  .evCard:first-child { border-top: 1px solid #2a2a2a; }
+  .evCard:hover { opacity: .85; }
   .evCard--hidden { display: none !important; }
 
-  /* 240×160px landscape thumbnail — left column */
+  /* 100×65px landscape thumbnail */
   .evCardImg {
     flex-shrink: 0;
-    width: 240px;
-    height: 160px;
+    width: 100px;
+    height: 65px;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: 6px;
     background: rgba(255,255,255,.05);
-    position: relative;
   }
   .evCardImg img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .evCardCat {
-    position: absolute; bottom: 8px; left: 8px;
-    font-size: 9px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
-    background: rgba(0,0,0,.65); color: var(--brand1);
-    padding: 2px 7px; border-radius: 999px; backdrop-filter: blur(4px);
-  }
 
   /* Text details — right column */
-  .evCardBody { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 0; padding-top: 4px; }
+  .evCardBody { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 
-  .evCardDateRow { display: flex; align-items: center; gap: 7px; }
-  .evCardDow { font-size: 10px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
-  .evCardDay { font-size: 13px; font-weight: 700; color: var(--muted); }
-  .evCardExt { font-size: 11px; color: var(--faint); margin-left: auto; }
+  .evCardDateRow { display: flex; align-items: center; gap: 5px; }
+  .evCardDow { font-size: 9px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
+  .evCardDay { font-size: 11px; font-weight: 700; color: var(--muted); }
+  .evCardExt { font-size: 10px; color: var(--faint); margin-left: auto; }
 
-  /* Title — bumped +2pt (was 15px → 17px) */
   .evCardTitle {
-    font-size: 17px; font-weight: 800; color: var(--text); line-height: 1.3;
+    font-size: 14px; font-weight: 800; color: var(--text);
+    line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
-  /* Venue — bumped +3pt (was 12px → 15px), brand yellow */
   .evCardVenue {
-    font-size: 15px; font-weight: 700; color: var(--brand1); line-height: 1.3;
+    font-size: 12px; font-weight: 700; color: var(--brand1);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
-  .evCardMeta { display: flex; align-items: center; gap: 7px; }
-  .evCardCity { font-size: 12px; font-weight: 700; color: var(--muted); }
+  .evCardMeta { display: flex; align-items: center; gap: 6px; }
+  .evCardCity { font-size: 11px; font-weight: 600; color: var(--muted); }
   .evCardDist {
-    font-size: 11px; font-weight: 600; color: var(--faint);
-    background: rgba(255,255,255,.06); padding: 1px 7px; border-radius: 999px;
+    font-size: 10px; font-weight: 600; color: var(--faint);
+    background: rgba(255,255,255,.06); padding: 1px 6px; border-radius: 999px;
   }
 
   /* Load More */
-  .loadMoreRow { display: flex; justify-content: center; padding: 8px 0 16px; }
+  .loadMoreRow { display: flex; justify-content: center; padding: 12px 0; }
   .loadMoreBtn {
-    height: 44px; padding: 0 28px; border-radius: 999px;
+    height: 40px; padding: 0 24px; border-radius: 999px;
     border: 1px solid rgba(255,255,255,.15);
     background: transparent; color: var(--text);
-    font-size: 14px; font-weight: 700; font-family: inherit;
+    font-size: 13px; font-weight: 700; font-family: inherit;
     cursor: pointer; transition: border-color 140ms, background 140ms;
   }
   .loadMoreBtn:hover { border-color: var(--brand1); background: rgba(249,217,0,.06); }
   .loadMoreCount { color: var(--faint); font-weight: 400; margin-left: 4px; }
 
-  .noEvents { color: var(--muted); font-size: 16px; padding: 32px 0; }
+  /* ── Suggest an Event CTA ── */
+  .suggestRow {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    padding: 20px 0 8px;
+    border-top: 1px solid #2a2a2a;
+  }
+  .suggestText { font-size: 14px; color: var(--muted); margin: 0; }
+  .suggestBtn {
+    display: inline-flex; align-items: center;
+    height: 36px; padding: 0 18px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.2);
+    background: transparent; color: var(--text);
+    font-size: 13px; font-weight: 700; text-decoration: none;
+    transition: border-color 140ms, color 140ms;
+    white-space: nowrap;
+  }
+  .suggestBtn:hover { border-color: var(--brand1); color: var(--brand1); }
+
+  .noEvents { color: var(--muted); font-size: 15px; padding: 24px 0; }
   .noEvents a { color: var(--brand1); }
 
   @media (max-width: 520px) {
-    .featuredSection { width: 100vw; margin-left: calc(-1 * var(--pagePad, 1rem)); padding-left: var(--pagePad, 1rem); }
-    .featuredCard { width: 280px; }
-    .fcImgWrap    { height: 180px; }
-    .filterBar    { gap: 8px; }
+    .nlBand { padding: 20px 0; margin-bottom: 20px; }
+    .featuredCard { width: 260px; }
+    .fcImgWrap    { height: 160px; }
+    .filterBar    { gap: 6px; }
     .filterCount  { margin-left: 0; width: 100%; }
-    .evCardImg    { width: 120px; height: 80px; border-radius: 8px; }
-    .evCardTitle  { font-size: 15px; }
-    .evCardVenue  { font-size: 13px; }
+    .evCardTitle  { font-size: 13px; }
+    .evCardVenue  { font-size: 11px; }
   }
 </style>
