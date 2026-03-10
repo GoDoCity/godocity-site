@@ -1,0 +1,120 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base
+  title="Event Submitted — GoDoDaytona"
+  subtitle="Thanks for submitting your event to GoDoDaytona."
+  cityBase="daytona"
+>
+  <section class="section">
+    <div class="container">
+      <div class="successWrap">
+
+        <div class="checkmark" aria-hidden="true">✓</div>
+
+        <h1 class="successTitle">You're all set!</h1>
+
+        <p class="successMsg">
+          Thanks for the submission! Our team will review your event for
+          <strong>GoDoDaytona</strong> shortly. If we have any questions we'll
+          reach out via the email you provided.
+        </p>
+
+        <p class="successSub">
+          Community events are typically listed within one business day.
+          Sponsored placements go live after a quick confirmation call.
+        </p>
+
+        <div class="successActions">
+          <a class="btnPrimary" href="/daytona/events/">Browse upcoming events</a>
+          <a class="btnGhost" href="/daytona/">Back to GoDoDaytona</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .successWrap {
+    max-width: 520px;
+    padding: 48px 0 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+  }
+
+  .checkmark {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--brand1);
+    color: #000;
+    font-size: 28px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    flex-shrink: 0;
+  }
+
+  .successTitle {
+    font-size: clamp(30px, 4vw, 46px);
+    font-weight: 900;
+    line-height: 1.05;
+    margin: 0 0 16px;
+  }
+
+  .successMsg {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text);
+    margin: 0 0 12px;
+  }
+
+  .successSub {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin: 0 0 36px;
+  }
+
+  .successActions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btnPrimary {
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 999px;
+    background: var(--brand1);
+    color: #000;
+    font-size: 14px;
+    font-weight: 900;
+    text-decoration: none;
+    transition: opacity 140ms;
+  }
+  .btnPrimary:hover { opacity: .82; }
+
+  .btnGhost {
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 22px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.15);
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: border-color 140ms, color 140ms;
+  }
+  .btnGhost:hover { border-color: rgba(255,255,255,.35); color: var(--text); }
+</style>
