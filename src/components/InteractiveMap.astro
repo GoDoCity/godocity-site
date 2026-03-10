@@ -24,7 +24,7 @@ if (pins.length === 0) return;
 const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
-<!-- Leaflet CSS — loaded first so tiles render correctly -->
+<!-- Leaflet CSS — preloaded so tiles render without a flash -->
 <link
   rel="stylesheet"
   href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -32,90 +32,111 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
   crossorigin=""
 />
 
+<!-- Map container — pin data stored in data-pins so is:inline script can read it -->
 <div class="imapWrap" style={`height: ${height}; min-height: ${height};`}>
-  <div id={mapId} class="imapEl"></div>
+  <div id={mapId} class="imapEl" data-pins={JSON.stringify(pins)}></div>
 </div>
 
-<script define:vars={{ mapId, pins }}>
-  (function () {
-    function initMap() {
-      const CartoDB = "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png";
-      const attribution =
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/">CARTO</a>';
+<!-- is:inline runs immediately as a plain script, not a deferred ES module -->
+<script is:inline>
+(function () {
+  var LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  var JS_SRI      = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/sp38=';
 
-      const container = document.getElementById(mapId);
-      if (!container || typeof window.L === "undefined") return;
-      if (container._leaflet_id) return;
-      /* Force the container to be visible before Leaflet measures it */
-      container.style.width  = "100%";
-      container.style.height = "100%";
-      container.style.display = "block";
+  /* ── Init every uninitialized .imapEl on the page ── */
+  function initAllMaps() {
+    var els = document.querySelectorAll('.imapEl[data-pins]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (el._leaflet_id) continue;           // already initialised
+      if (!el.getAttribute('data-pins')) continue;
+      initMap(el.id, JSON.parse(el.getAttribute('data-pins')));
+    }
+  }
 
-      const map = window.L.map(mapId, { scrollWheelZoom: false, zoomControl: true });
-      /* Recalculate size after Astro paint — prevents grey/blank tiles */
-      requestAnimationFrame(() => map.invalidateSize());
+  function initMap(mapId, pins) {
+    var container = document.getElementById(mapId);
+    if (!container || !window.L) return;
+    if (container._leaflet_id) return;        // double-init guard
 
-      window.L.tileLayer(CartoDB, {
-        attribution,
-        subdomains: "abcd",
-        maxZoom: 19,
-      }).addTo(map);
+    /* Ensure container has real dimensions before Leaflet measures it */
+    container.style.width   = '100%';
+    container.style.height  = '100%';
+    container.style.display = 'block';
 
-      /* ── Custom yellow pin ── */
-      const yellowPin = window.L.divIcon({
-        className: "",
-        html: `<div class="imap-pin" aria-hidden="true"></div>`,
-        iconSize: [22, 22],
-        iconAnchor: [11, 11],
-        popupAnchor: [0, -14],
-      });
+    var CartoDB = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+    var attr    = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' +
+                  ' contributors &copy; <a href="https://carto.com/">CARTO</a>';
 
-      /* ── Add markers ── */
-      const bounds = [];
-      pins.forEach((pin) => {
-        const latlng = [pin.lat, pin.lng];
-        bounds.push(latlng);
+    var map = window.L.map(mapId, { scrollWheelZoom: false, zoomControl: true });
 
-        /* Build popup: label + optional address + optional "Read Guide" link */
-        let popup = `<strong style="font-size:14px;">${pin.label}</strong>`;
-        if (pin.address) {
-          popup += `<br><span style="font-size:12px;color:#666;line-height:1.4;">${pin.address}</span>`;
-        }
-        if (pin.articleHref) {
-          const linkLabel = pin.articleTitle
-            ? `Read: ${pin.articleTitle}`
-            : "Read Guide →";
-          popup += `<br><a href="${pin.articleHref}"
-            style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;
-                   color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;
-                   text-decoration:none;line-height:1.4;"
-            >${linkLabel}</a>`;
-        }
+    /* Recalculate tile layout after the browser has painted */
+    requestAnimationFrame(function () { map.invalidateSize(); });
 
-        window.L.marker(latlng, { icon: yellowPin })
-          .bindPopup(popup, { maxWidth: 240 })
-          .addTo(map);
-      });
+    window.L.tileLayer(CartoDB, { attribution: attr, subdomains: 'abcd', maxZoom: 19 }).addTo(map);
 
-      /* ── Fit map to show all pins ── */
-      if (bounds.length === 1) {
-        map.setView(bounds[0], 15);
-      } else {
-        map.fitBounds(bounds, { padding: [36, 36] });
+    /* ── Custom yellow pin ── */
+    var yellowPin = window.L.divIcon({
+      className: '',
+      html: '<div class="imap-pin" aria-hidden="true"></div>',
+      iconSize:    [22, 22],
+      iconAnchor:  [11, 11],
+      popupAnchor: [0, -14],
+    });
+
+    /* ── Add markers ── */
+    var bounds = [];
+    for (var j = 0; j < pins.length; j++) {
+      var pin    = pins[j];
+      var latlng = [pin.lat, pin.lng];
+      bounds.push(latlng);
+
+      var popup = '<strong style="font-size:14px;">' + pin.label + '</strong>';
+      if (pin.address) {
+        popup += '<br><span style="font-size:12px;color:#666;line-height:1.4;">' + pin.address + '</span>';
       }
+      if (pin.articleHref) {
+        var linkLabel = pin.articleTitle ? 'Read: ' + pin.articleTitle : 'Read Guide \u2192';
+        popup += '<br><a href="' + pin.articleHref + '"' +
+          ' style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;' +
+          'color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;' +
+          'text-decoration:none;line-height:1.4;">' + linkLabel + '</a>';
+      }
+
+      window.L.marker(latlng, { icon: yellowPin })
+        .bindPopup(popup, { maxWidth: 240 })
+        .addTo(map);
     }
 
-    if (typeof window.L !== "undefined") {
-      initMap();
+    /* ── Fit bounds ── */
+    if (bounds.length === 1) {
+      map.setView(bounds[0], 15);
     } else {
-      const script = document.createElement("script");
-      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
-      script.integrity = "sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/sp38=";
-      script.crossOrigin = "";
-      script.onload = initMap;
-      document.head.appendChild(script);
+      map.fitBounds(bounds, { padding: [36, 36] });
     }
-  })();
+  }
+
+  /* ── Load Leaflet JS if not already present, then init maps ── */
+  function run() {
+    if (typeof window.L !== 'undefined') {
+      initAllMaps();
+      return;
+    }
+    var s = document.createElement('script');
+    s.src         = LEAFLET_JS;
+    s.integrity   = JS_SRI;
+    s.crossOrigin = '';
+    s.onload      = initAllMaps;
+    document.head.appendChild(s);
+  }
+
+  /* Handle both inline (DOM ready) and deferred (DOMContentLoaded) contexts */
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
 </script>
 
 <style>
@@ -124,11 +145,11 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     width: 100%;
     border-radius: 14px;
     overflow: hidden;
-    border: 5px solid red; /* DIAGNOSTIC — remove once map is confirmed visible */
+    border: 1px solid rgba(0, 0, 0, 0.08);
     margin: 0 0 28px;
     position: relative;
-    z-index: 1;         /* sit above static page background */
-    isolation: isolate; /* create stacking context so Leaflet panes stay inside */
+    z-index: 1;
+    isolation: isolate;
   }
 
   .imapEl {

@@ -338,11 +338,11 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           <div class="nlBoxHead">
             <em>Good News <strong>{city.charAt(0).toUpperCase() + city.slice(1)}!</strong></em>
           </div>
-          <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
+          <div class="nlBoxSub">Get the best local stories delivered free to your inbox every morning.</div>
           <form class="nlForm" action={`/${city}/subscribe/`} method="get">
             <input class="nlInput" type="email" name="email"
               placeholder="your@email.com" required autocomplete="email" />
-            <button class="nlSubmit" type="submit">Sign Up</button>
+            <button class="nlSubmit" type="submit">SIGN UP</button>
           </form>
         </div>
 
@@ -617,25 +617,26 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .guideLink:hover { color: var(--link); }
 
   /* Sidebar newsletter */
-  .nlBox    { padding: 28px 22px; border-radius: 14px; background: var(--brand1); display: flex; flex-direction: column; gap: 10px; }
-  .nlBoxHead { font-size: 23px; font-weight: 900; font-style: italic; color: #000; letter-spacing: -0.03em; line-height: 1.1; }
+  .nlBox    { padding: 40px 26px; border-radius: 16px; background: var(--brand1); display: flex; flex-direction: column; gap: 12px; }
+  .nlBoxHead { font-size: 28px; font-weight: 900; font-style: italic; color: #000; letter-spacing: -0.04em; line-height: 1.05; }
   .nlBoxHead strong { font-weight: 900; }
-  .nlBoxSub  { font-size: 15px; color: rgba(0,0,0,.78); line-height: 1.4; }
-  .nlForm    { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .nlBoxSub  { font-size: 15px; color: rgba(0,0,0,.8); line-height: 1.45; }
+  .nlForm    { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
   .nlInput   {
     width: 100%; box-sizing: border-box;
-    padding: 12px 14px; border-radius: 10px;
+    padding: 14px 16px; border-radius: 10px;
     border: none; background: #fff;
-    font-size: 14px; color: #111;
+    font-size: 15px; color: #111;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
     outline: 2px solid transparent; transition: outline-color 150ms;
   }
   .nlInput:focus { outline-color: #000; }
-  .nlInput::placeholder { color: #999; }
+  .nlInput::placeholder { color: #aaa; }
   .nlSubmit  {
-    width: 100%; padding: 12px 0; border-radius: 999px;
+    width: 100%; padding: 14px 0; border-radius: 999px;
     border: none; background: #000; color: #f9d900;
     font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
-    font-size: 14px; font-weight: 900; letter-spacing: .04em;
+    font-size: 15px; font-weight: 900; letter-spacing: .08em;
     cursor: pointer; transition: opacity 150ms;
   }
   .nlSubmit:hover { opacity: .82; }
