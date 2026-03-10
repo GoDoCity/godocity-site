@@ -13,7 +13,7 @@ export interface Props {
   height?: string;
 }
 
-const { locations = [], height = "360px" } = Astro.props;
+const { locations = [], height = "400px" } = Astro.props;
 
 /* Filter to only pins that have coordinates */
 const pins = locations.filter((l) => l.lat != null && l.lng != null);
@@ -24,70 +24,74 @@ if (pins.length === 0) return;
 const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
-<!-- Leaflet CSS — preloaded so tiles render without a flash -->
-<link
-  rel="stylesheet"
-  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-  crossorigin=""
-/>
+<!-- Leaflet CSS — no SRI so Cloudflare edge caching never blocks it -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 
-<!-- Map container — pin data stored in data-pins so is:inline script can read it -->
-<div class="imapWrap" style={`height: ${height}; min-height: ${height};`}>
-  <div id={mapId} class="imapEl" data-pins={JSON.stringify(pins)}></div>
+<!--
+  Both divs get explicit pixel heights via inline style.
+  !important on the inner div defeats any cascade that collapses it to 0.
+-->
+<div
+  class="imapWrap"
+  style={`height: ${height} !important; min-height: ${height} !important; width: 100% !important; display: block !important;`}
+>
+  <div
+    id={mapId}
+    class="imapEl"
+    data-pins={JSON.stringify(pins)}
+    style={`height: ${height} !important; width: 100% !important; display: block !important;`}
+  ></div>
 </div>
 
-<!-- is:inline runs immediately as a plain script, not a deferred ES module -->
 <script is:inline>
 (function () {
-  var LEAFLET_JS  = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-  var JS_SRI      = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/sp38=';
+  /* No integrity attr — avoids silent SRI failures on Cloudflare edge caches */
+  var LEAFLET_JS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+  /* OSM tiles — most reliable fallback, no API key needed */
+  var OSM = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  var OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
-  /* ── Init every uninitialized .imapEl on the page ── */
   function initAllMaps() {
     var els = document.querySelectorAll('.imapEl[data-pins]');
     for (var i = 0; i < els.length; i++) {
       var el = els[i];
-      if (el._leaflet_id) continue;           // already initialised
-      if (!el.getAttribute('data-pins')) continue;
-      initMap(el.id, JSON.parse(el.getAttribute('data-pins')));
+      if (el._leaflet_id) continue;
+      try {
+        initMap(el.id, JSON.parse(el.getAttribute('data-pins')));
+      } catch (e) {
+        console.warn('[InteractiveMap] init failed for', el.id, e);
+      }
     }
   }
 
   function initMap(mapId, pins) {
     var container = document.getElementById(mapId);
     if (!container || !window.L) return;
-    if (container._leaflet_id) return;        // double-init guard
+    if (container._leaflet_id) return;
 
-    /* Ensure container has real dimensions before Leaflet measures it */
-    container.style.width   = '100%';
-    container.style.height  = '100%';
-    container.style.display = 'block';
-
-    var CartoDB = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-    var attr    = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' +
-                  ' contributors &copy; <a href="https://carto.com/">CARTO</a>';
+    /* Force explicit pixel height — percentage height breaks when parent
+       hasn't been painted yet, which is common in static Astro pages */
+    var wrapEl = container.parentElement;
+    var pxH = wrapEl ? wrapEl.offsetHeight : 400;
+    if (!pxH || pxH < 50) pxH = 400;
+    container.style.setProperty('height', pxH + 'px', 'important');
+    container.style.setProperty('width',  '100%',     'important');
+    container.style.setProperty('display','block',    'important');
 
     var map = window.L.map(mapId, { scrollWheelZoom: false, zoomControl: true });
 
-    /* Recalculate tile layout after the browser has painted */
-    requestAnimationFrame(function () { map.invalidateSize(); });
+    window.L.tileLayer(OSM, { attribution: OSM_ATTR, maxZoom: 19 }).addTo(map);
 
-    window.L.tileLayer(CartoDB, { attribution: attr, subdomains: 'abcd', maxZoom: 19 }).addTo(map);
-
-    /* ── Custom yellow pin ── */
+    /* Custom yellow pin */
     var yellowPin = window.L.divIcon({
       className: '',
       html: '<div class="imap-pin" aria-hidden="true"></div>',
-      iconSize:    [22, 22],
-      iconAnchor:  [11, 11],
-      popupAnchor: [0, -14],
+      iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -14],
     });
 
-    /* ── Add markers ── */
     var bounds = [];
     for (var j = 0; j < pins.length; j++) {
-      var pin    = pins[j];
+      var pin = pins[j];
       var latlng = [pin.lat, pin.lng];
       bounds.push(latlng);
 
@@ -96,11 +100,11 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
         popup += '<br><span style="font-size:12px;color:#666;line-height:1.4;">' + pin.address + '</span>';
       }
       if (pin.articleHref) {
-        var linkLabel = pin.articleTitle ? 'Read: ' + pin.articleTitle : 'Read Guide \u2192';
-        popup += '<br><a href="' + pin.articleHref + '"' +
-          ' style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;' +
-          'color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;' +
-          'text-decoration:none;line-height:1.4;">' + linkLabel + '</a>';
+        var lbl = pin.articleTitle ? 'Read: ' + pin.articleTitle : 'Read Guide \u2192';
+        popup += '<br><a href="' + pin.articleHref + '"'
+          + ' style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;'
+          + 'color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;'
+          + 'text-decoration:none;line-height:1.4;">' + lbl + '</a>';
       }
 
       window.L.marker(latlng, { icon: yellowPin })
@@ -108,29 +112,33 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
         .addTo(map);
     }
 
-    /* ── Fit bounds ── */
     if (bounds.length === 1) {
       map.setView(bounds[0], 15);
     } else {
       map.fitBounds(bounds, { padding: [36, 36] });
     }
+
+    /* setTimeout(200) lets the browser finish layout before Leaflet
+       recalculates the container dimensions — fixes blank/grey tile bug */
+    setTimeout(function () { map.invalidateSize(); }, 200);
   }
 
-  /* ── Load Leaflet JS if not already present, then init maps ── */
   function run() {
     if (typeof window.L !== 'undefined') {
       initAllMaps();
       return;
     }
     var s = document.createElement('script');
-    s.src         = LEAFLET_JS;
-    s.integrity   = JS_SRI;
+    s.src = LEAFLET_JS;
+    /* No integrity — prevents silent SRI failures on CDN edge caches */
     s.crossOrigin = '';
-    s.onload      = initAllMaps;
+    s.onload = initAllMaps;
+    s.onerror = function () {
+      console.error('[InteractiveMap] Failed to load Leaflet from', LEAFLET_JS);
+    };
     document.head.appendChild(s);
   }
 
-  /* Handle both inline (DOM ready) and deferred (DOMContentLoaded) contexts */
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', run);
   } else {
@@ -142,20 +150,26 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
 <style>
   .imapWrap {
     display: block !important;
-    width: 100%;
+    width: 100% !important;
     border-radius: 14px;
-    overflow: hidden;
+    /* overflow:hidden removed — was forcing Leaflet pane height to 0 in
+       some layout contexts before Leaflet's own CSS applied */
     border: 1px solid rgba(0, 0, 0, 0.08);
     margin: 0 0 28px;
     position: relative;
     z-index: 1;
-    isolation: isolate;
   }
 
   .imapEl {
-    display: block;
-    width: 100%;
-    height: 100%;
+    display: block !important;
+    width: 100% !important;
+    /* height intentionally NOT set here — controlled by inline style
+       so it always beats any cascade from parent templates */
+  }
+
+  /* Leaflet internal chrome */
+  :global(.leaflet-container) {
+    font-family: inherit !important;
   }
 
   :global(.imap-pin) {
@@ -185,11 +199,6 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     line-height: 1.45 !important;
   }
 
-  :global(.leaflet-popup-tip) {
-    box-shadow: none !important;
-  }
-
-  :global(.leaflet-container:focus) {
-    outline: none;
-  }
+  :global(.leaflet-popup-tip) { box-shadow: none !important; }
+  :global(.leaflet-container:focus) { outline: none; }
 </style>
