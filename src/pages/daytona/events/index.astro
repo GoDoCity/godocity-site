@@ -44,6 +44,25 @@ function cityDisplay(raw) {
   return CITY_DISPLAY[raw?.toLowerCase().trim()] ?? raw;
 }
 
+/* ── Haversine distance from Daytona Beach center ── */
+const CENTER_LAT = 29.2108;
+const CENTER_LNG = -81.0228;
+function distanceMiles(lat, lng) {
+  const R = 3958.8;
+  const dLat = (lat - CENTER_LAT) * Math.PI / 180;
+  const dLng = (lng - CENTER_LNG) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(CENTER_LAT * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
+  const d = R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return d;
+}
+function distLabel(lat, lng) {
+  if (lat == null || lng == null) return null;
+  const d = distanceMiles(lat, lng);
+  return d < 0.1 ? "< 0.1 mi" : `${d.toFixed(1)} mi`;
+}
+
 function addUtm(url) {
   if (!url) return url;
   try {
@@ -70,10 +89,11 @@ const upcomingEvents = allEvents
   })
   .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime());
 
-const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true);
+/* Top 3 sponsored → featured scroller; rest → compact list */
+const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true).slice(0, 3);
 const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
 
-/* ── Build map pins ── */
+/* ── Map pins ── */
 const mapPins = upcomingEvents
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
@@ -92,7 +112,7 @@ const mapPins = upcomingEvents
     };
   });
 
-/* ── Unique month options for date filter ── */
+/* ── Month filter options ── */
 const monthKeys = [...new Set(
   upcomingEvents.map(e => {
     const d = new Date(e.data.eventDate);
@@ -123,7 +143,7 @@ const PAGE_SIZE = 30;
         <a class="submitBtn" href="/submit-event/">+ Submit an Event</a>
       </div>
 
-      {/* ── FEATURED / SPONSORED SCROLLER ── */}
+      {/* ── FEATURED / SPONSORED — top 3 as large hero cards ── */}
       {sponsoredEvents.length > 0 && (
         <div class="featuredSection">
           <div class="featuredHeadRow">
@@ -131,27 +151,33 @@ const PAGE_SIZE = 30;
           </div>
           <div class="featuredScroller">
             {sponsoredEvents.map(e => {
-              const d    = new Date(e.data.eventDate);
-              const mon  = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              const day  = d.getDate();
+              const d      = new Date(e.data.eventDate);
+              const mon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const day    = d.getDate();
               const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
               const evSlug = e.slug.split("/").pop();
-              const href = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
+              const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
+              const isExt  = !!e.data.url;
+              const fbUrl  = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " Daytona")}`;
               return (
-                <a class="featuredCard" href={href}
-                   target={e.data.url ? "_blank" : "_self"}
-                   rel={e.data.url ? "noopener noreferrer" : ""}>
+                <a class="featuredCard"
+                   href={href}
+                   target={isExt ? "_blank" : "_self"}
+                   rel={isExt ? "noopener noreferrer" : ""}
+                   data-external={isExt ? "true" : undefined}
+                   data-fallback={isExt ? fbUrl : undefined}>
                   <div class="fcImgWrap">
                     {e.data.image
                       ? <img class="fcImg" src={e.data.image} alt={e.data.title} loading="lazy" />
                       : <div class="fcImgPlaceholder" aria-hidden="true">📅</div>
                     }
                     <span class="fcSponsorBadge">SPONSORED</span>
-                  </div>
-                  <div class="fcBody">
-                    <div class="fcDate">{mon} {day}</div>
-                    <div class="fcTitle">{e.data.title}</div>
-                    <div class="fcCity">{cityDisplay(evCity)}</div>
+                    <div class="fcImgOverlay" aria-hidden="true"></div>
+                    <div class="fcOverlayCopy">
+                      <div class="fcDate">{mon} {day}</div>
+                      <div class="fcTitle">{e.data.title}</div>
+                      <div class="fcCity">{cityDisplay(evCity)}</div>
+                    </div>
                   </div>
                 </a>
               );
@@ -163,13 +189,13 @@ const PAGE_SIZE = 30;
       {/* ── MAP ── */}
       {mapPins.length > 0 && (
         <div class="mapBlock">
-          <InteractiveMap locations={mapPins} height="340px" />
+          <InteractiveMap locations={mapPins} height="300px" />
         </div>
       )}
 
       {/* ── FILTER BAR ── */}
       <div class="filterBar">
-        <label class="filterLabel" for="monthFilter">Filter by date:</label>
+        <label class="filterLabel" for="monthFilter">Filter:</label>
         <select class="filterSelect" id="monthFilter">
           <option value="all">All upcoming</option>
           {monthOptions.map(o => (
@@ -181,59 +207,77 @@ const PAGE_SIZE = 30;
         </span>
       </div>
 
-      {/* ── EVENT GRID ── */}
+      {/* ── EVENT LIST — NOOGA compact horizontal rows ── */}
       {regularEvents.length === 0 ? (
         <p class="noEvents">No upcoming events right now — check back soon or <a href="/submit-event/">submit one</a>.</p>
       ) : (
         <>
-          <div class="eventGrid" id="eventGrid">
+          <div class="eventList" id="eventGrid">
             {regularEvents.map((e, idx) => {
-              const d      = new Date(e.data.eventDate);
-              const mon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              const day    = d.getDate();
-              const dow    = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+              const d        = new Date(e.data.eventDate);
+              const mon      = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const day      = d.getDate();
+              const dow      = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
               const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-              const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-              const evSlug = e.slug.split("/").pop();
-              const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
-              const isExternal = !!e.data.url;
-              /* Cards beyond page 1 start hidden — JS shows them */
-              const hidden = idx >= PAGE_SIZE;
+              const evCity   = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+              const evSlug   = e.slug.split("/").pop();
+              const href     = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
+              const isExt    = !!e.data.url;
+              const hidden   = idx >= PAGE_SIZE;
+              /* Distance from Daytona Beach center */
+              const evLat    = e.data.lat ?? CITY_CENTERS[evCity]?.lat;
+              const evLng    = e.data.lng ?? CITY_CENTERS[evCity]?.lng;
+              const dist     = distLabel(evLat, evLng);
+              const fbUrl    = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " " + cityDisplay(evCity))}`;
               return (
                 <a
-                  class={`evCard${hidden ? " evCard--hidden" : ""}`}
+                  class={`evRow${hidden ? " evRow--hidden" : ""}`}
                   href={href}
-                  target={isExternal ? "_blank" : "_self"}
-                  rel={isExternal ? "noopener noreferrer" : ""}
+                  target={isExt ? "_blank" : "_self"}
+                  rel={isExt ? "noopener noreferrer" : ""}
                   data-month={monthKey}
                   data-idx={String(idx)}
+                  data-external={isExt ? "true" : undefined}
+                  data-fallback={isExt ? fbUrl : undefined}
                 >
-                  <div class="evCardImg">
+                  {/* Small square thumbnail */}
+                  <div class="evRowThumb">
                     {e.data.image
                       ? <img src={e.data.image} alt={e.data.title} loading="lazy" decoding="async" />
-                      : <div class="evCardImgPlaceholder" aria-hidden="true">
-                          {e.data.category === "Music & Nightlife" ? "🎵"
-                            : e.data.category === "Food & Drink" ? "🍽️"
+                      : <div class="evRowPlaceholder" aria-hidden="true">
+                          {e.data.category === "Music & Nightlife"       ? "🎵"
+                            : e.data.category === "Food & Drink"         ? "🍽️"
                             : e.data.category === "Racing & Motorsports" ? "🏁"
-                            : e.data.category === "Markets & Fairs" ? "🛍️"
-                            : e.data.category === "Outdoors & Sports" ? "🌊"
+                            : e.data.category === "Markets & Fairs"      ? "🛍️"
+                            : e.data.category === "Outdoors & Sports"    ? "🌊"
+                            : e.data.category === "Arts & Culture"       ? "🎨"
                             : "📅"}
                         </div>
                     }
-                    {e.data.category && <span class="evCardCat">{e.data.category}</span>}
                   </div>
-                  <div class="evCardBody">
-                    <div class="evCardDateRow">
-                      <span class="evCardDow">{dow}</span>
-                      <span class="evCardDay">{mon} {day}</span>
-                      {isExternal && <span class="evCardExt" aria-hidden="true">↗</span>}
-                    </div>
-                    <div class="evCardTitle">{e.data.title}</div>
-                    <div class="evCardMeta">
-                      <span class="evCardCity">{cityDisplay(evCity)}</span>
-                      {e.data.location && <span class="evCardVenue">{e.data.location}</span>}
+
+                  {/* Date block */}
+                  <div class="evRowDate">
+                    <div class="evRowDow">{dow}</div>
+                    <div class="evRowDay">{day}</div>
+                    <div class="evRowMon">{mon}</div>
+                  </div>
+
+                  {/* Title + venue + city/dist */}
+                  <div class="evRowBody">
+                    <div class="evRowTitle">{e.data.title}</div>
+                    {e.data.location && <div class="evRowVenue">{e.data.location}</div>}
+                    <div class="evRowMeta">
+                      <span class="evRowCity">{cityDisplay(evCity)}</span>
+                      {dist && <span class="evRowDist">{dist}</span>}
+                      {isExt && <span class="evRowExt" aria-label="External link">↗</span>}
                     </div>
                   </div>
+
+                  {/* Category badge — right rail, hidden on mobile */}
+                  {e.data.category && (
+                    <span class="evRowCat">{e.data.category}</span>
+                  )}
                 </a>
               );
             })}
@@ -258,6 +302,7 @@ const PAGE_SIZE = 30;
 
 <script is:inline>
 (function () {
+  /* ── Pagination + filter ── */
   var PAGE_SIZE = 30;
   var shown     = PAGE_SIZE;
   var filter    = "all";
@@ -268,63 +313,86 @@ const PAGE_SIZE = 30;
   var moreBtn   = document.getElementById("loadMoreBtn");
   var moreCount = document.getElementById("loadMoreCount");
 
-  if (!grid) return;
+  if (grid) {
+    var allCards = Array.prototype.slice.call(grid.querySelectorAll(".evRow"));
 
-  var allCards = Array.prototype.slice.call(grid.querySelectorAll(".evCard"));
-
-  function visibleCards() {
-    return allCards.filter(function (c) {
-      return filter === "all" || c.getAttribute("data-month") === filter;
-    });
-  }
-
-  function applyState() {
-    var visible = visibleCards();
-    var total   = visible.length;
-
-    allCards.forEach(function (c) { c.classList.add("evCard--hidden"); });
-    visible.slice(0, shown).forEach(function (c) { c.classList.remove("evCard--hidden"); });
-
-    if (countEl) {
-      countEl.textContent = total + " event" + (total !== 1 ? "s" : "");
+    function visibleCards() {
+      return allCards.filter(function (c) {
+        return filter === "all" || c.getAttribute("data-month") === filter;
+      });
     }
 
-    if (moreBtn) {
-      var remaining = total - shown;
-      if (remaining > 0) {
-        moreBtn.style.display = "";
-        if (moreCount) {
-          moreCount.textContent = "(" + Math.min(PAGE_SIZE, remaining) + " more)";
+    function applyState() {
+      var visible = visibleCards();
+      var total   = visible.length;
+      allCards.forEach(function (c) { c.classList.add("evRow--hidden"); });
+      visible.slice(0, shown).forEach(function (c) { c.classList.remove("evRow--hidden"); });
+      if (countEl) {
+        countEl.textContent = total + " event" + (total !== 1 ? "s" : "");
+      }
+      if (moreBtn) {
+        var remaining = total - shown;
+        if (remaining > 0) {
+          moreBtn.style.display = "";
+          if (moreCount) {
+            moreCount.textContent = "(" + Math.min(PAGE_SIZE, remaining) + " more)";
+          }
+        } else {
+          moreBtn.style.display = "none";
         }
-      } else {
-        moreBtn.style.display = "none";
       }
     }
+
+    if (filterSel) {
+      filterSel.addEventListener("change", function () {
+        filter = filterSel.value; shown = PAGE_SIZE; applyState();
+      });
+    }
+    if (moreBtn) {
+      moreBtn.addEventListener("click", function () { shown += PAGE_SIZE; applyState(); });
+    }
+    applyState();
   }
 
-  if (filterSel) {
-    filterSel.addEventListener("change", function () {
-      filter = filterSel.value;
-      shown  = PAGE_SIZE;
-      applyState();
+  /* ── Link validator: catch dead external URLs, fall back to Google Search ──
+     Uses fetch(url, {mode:'no-cors'}) to detect complete DNS/network failures.
+     Note: HTTP 404s on live domains cannot be detected cross-origin (CORS).
+     This handles the most common failure: the domain no longer exists.
+  ── */
+  function attachLinkValidator(el) {
+    if (!el || el.getAttribute("data-external") !== "true") return;
+    var fallback = el.getAttribute("data-fallback");
+    if (!fallback) return;
+
+    el.addEventListener("click", function () {
+      var href = el.href;
+      if (!href) return;
+      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 5000) : null;
+      var opts = { mode: "no-cors" };
+      if (ctrl) opts.signal = ctrl.signal;
+
+      fetch(href, opts)
+        .then(function () { if (timer) clearTimeout(timer); })
+        .catch(function () {
+          if (timer) clearTimeout(timer);
+          /* Network/DNS failure — silently swap to Google Search */
+          window.open(fallback, "_blank", "noopener,noreferrer");
+        });
+      /* Link opens normally; fetch runs in background and only intercepts on failure */
     });
   }
 
-  if (moreBtn) {
-    moreBtn.addEventListener("click", function () {
-      shown += PAGE_SIZE;
-      applyState();
-    });
-  }
-
-  applyState();
+  document.querySelectorAll("[data-external='true']").forEach(function (el) {
+    attachLinkValidator(el);
+  });
 })();
 </script>
 
 <style>
   .eventsContainer { padding-bottom: 64px; }
 
-  /* Header */
+  /* ── Header ── */
   .eventsHeader { padding: 12px 0 24px; }
   .lede { font-size: 16px; color: var(--muted); margin: 6px 0 14px; max-width: 600px; line-height: 1.5; }
   .submitBtn {
@@ -336,17 +404,13 @@ const PAGE_SIZE = 30;
   }
   .submitBtn:hover { opacity: .82; }
 
-  /* ── Featured / Sponsored Scroller ── */
+  /* ── Featured Scroller — 3 large hero cards ── */
   .featuredSection { margin-bottom: 32px; }
-  .featuredHeadRow {
-    display: flex; align-items: center; gap: 10px;
-    margin-bottom: 12px;
-  }
+  .featuredHeadRow { display: flex; align-items: center; margin-bottom: 12px; }
   .featuredSectionTitle {
     font-size: 11px; font-weight: 900; letter-spacing: .1em;
     text-transform: uppercase; color: var(--brand1);
   }
-
   .featuredScroller {
     display: flex; gap: 16px;
     overflow-x: auto; scroll-snap-type: x mandatory;
@@ -355,40 +419,51 @@ const PAGE_SIZE = 30;
     -webkit-overflow-scrolling: touch;
   }
   .featuredScroller::-webkit-scrollbar { height: 4px; }
-  .featuredScroller::-webkit-scrollbar-track { background: transparent; }
   .featuredScroller::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
 
   .featuredCard {
-    flex-shrink: 0; width: 240px; scroll-snap-align: start;
-    border-radius: 14px; overflow: hidden;
+    flex-shrink: 0; width: 340px; scroll-snap-align: start;
+    border-radius: 16px; overflow: hidden;
     border: 1px solid rgba(255,255,255,.08);
-    background: rgba(255,255,255,.03);
     text-decoration: none;
     transition: border-color 140ms, transform 140ms;
   }
   .featuredCard:hover { border-color: var(--brand1); transform: translateY(-2px); }
 
-  .fcImgWrap { position: relative; height: 130px; background: rgba(255,255,255,.05); overflow: hidden; }
-  .fcImg { width: 100%; height: 100%; object-fit: cover; }
-  .fcImgPlaceholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+  /* Full-bleed image with overlay text */
+  .fcImgWrap {
+    position: relative; height: 220px;
+    background: rgba(255,255,255,.05); overflow: hidden;
+  }
+  .fcImg { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .fcImgPlaceholder {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center; font-size: 48px;
+  }
+  .fcImgOverlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.85) 0%, rgba(0,0,0,.2) 55%, transparent 100%);
+  }
   .fcSponsorBadge {
-    position: absolute; top: 8px; right: 8px;
+    position: absolute; top: 10px; right: 10px;
     font-size: 9px; font-weight: 900; letter-spacing: .08em;
     background: var(--brand1); color: #000;
-    padding: 3px 8px; border-radius: 999px;
+    padding: 3px 8px; border-radius: 999px; z-index: 2;
   }
-  .fcBody { padding: 12px 14px 14px; }
-  .fcDate { font-size: 11px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
-  .fcTitle { font-size: 14px; font-weight: 800; color: var(--text); line-height: 1.3; margin-bottom: 4px; }
-  .fcCity { font-size: 12px; color: var(--faint); }
+  .fcOverlayCopy {
+    position: absolute; bottom: 16px; left: 16px; right: 16px; z-index: 2;
+  }
+  .fcDate  { font-size: 11px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+  .fcTitle { font-size: 18px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 3px; }
+  .fcCity  { font-size: 12px; color: rgba(255,255,255,.65); }
 
   /* Map */
   .mapBlock { margin-bottom: 24px; }
 
-  /* Filter Bar */
+  /* ── Filter Bar ── */
   .filterBar {
     display: flex; align-items: center; gap: 12px;
-    margin-bottom: 20px; flex-wrap: wrap;
+    margin-bottom: 4px; flex-wrap: wrap;
   }
   .filterLabel { font-size: 13px; font-weight: 700; color: var(--muted); white-space: nowrap; }
   .filterSelect {
@@ -405,51 +480,68 @@ const PAGE_SIZE = 30;
   .filterSelect option { background: #1a1a1a; }
   .filterCount { font-size: 13px; color: var(--faint); margin-left: auto; }
 
-  /* ── Event Grid ── */
-  .eventGrid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
+  /* ── NOOGA-style compact horizontal event list ── */
+  .eventList {
+    display: flex; flex-direction: column;
+    border-top: 1px solid rgba(255,255,255,.08);
     margin-bottom: 32px;
   }
 
-  .evCard {
-    border-radius: 14px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,.07);
-    background: rgba(255,255,255,.02);
+  .evRow {
+    display: flex; align-items: center; gap: 14px;
+    padding: 11px 8px 11px 4px;
+    border-bottom: 1px solid rgba(255,255,255,.06);
     text-decoration: none;
-    transition: border-color 140ms, transform 140ms;
-    display: flex; flex-direction: column;
+    border-radius: 8px;
+    transition: background 100ms;
   }
-  .evCard:hover { border-color: rgba(255,255,255,.18); transform: translateY(-2px); }
-  .evCard--hidden { display: none !important; }
+  .evRow:hover { background: rgba(255,255,255,.03); }
+  .evRow--hidden { display: none !important; }
 
-  .evCardImg {
-    position: relative; height: 140px;
-    background: rgba(255,255,255,.04); overflow: hidden; flex-shrink: 0;
+  /* Small square thumbnail */
+  .evRowThumb {
+    width: 72px; height: 72px; flex-shrink: 0;
+    border-radius: 10px; overflow: hidden;
+    background: rgba(255,255,255,.05);
   }
-  .evCardImg img { width: 100%; height: 100%; object-fit: cover; }
-  .evCardImgPlaceholder {
+  .evRowThumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .evRowPlaceholder {
     width: 100%; height: 100%;
-    display: flex; align-items: center; justify-content: center; font-size: 40px;
-  }
-  .evCardCat {
-    position: absolute; bottom: 8px; left: 8px;
-    font-size: 10px; font-weight: 800; letter-spacing: .05em;
-    background: rgba(0,0,0,.6); color: var(--brand1);
-    padding: 3px 8px; border-radius: 999px;
-    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
   }
 
-  .evCardBody { padding: 12px 14px 14px; flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .evCardDateRow { display: flex; align-items: center; gap: 6px; }
-  .evCardDow { font-size: 10px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
-  .evCardDay { font-size: 12px; font-weight: 700; color: var(--muted); }
-  .evCardExt { font-size: 11px; color: var(--faint); margin-left: auto; }
-  .evCardTitle { font-size: 14px; font-weight: 800; color: var(--text); line-height: 1.3; }
-  .evCardMeta { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; }
-  .evCardCity { font-size: 12px; font-weight: 700; color: var(--brand1); }
-  .evCardVenue { font-size: 11px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  /* Date block */
+  .evRowDate {
+    flex-shrink: 0; width: 36px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+  }
+  .evRowDow { font-size: 9px;  font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .05em; line-height: 1.3; }
+  .evRowDay { font-size: 22px; font-weight: 900; color: var(--text); line-height: 1; }
+  .evRowMon { font-size: 9px;  font-weight: 700; color: var(--muted); text-transform: uppercase; line-height: 1.4; }
+
+  /* Body */
+  .evRowBody { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .evRowTitle { font-size: 15px; font-weight: 800; color: var(--text); line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .evRowVenue { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .evRowMeta  { display: flex; align-items: center; gap: 6px; margin-top: 1px; flex-wrap: wrap; }
+  .evRowCity  { font-size: 11px; font-weight: 700; color: var(--brand1); }
+  .evRowDist  {
+    font-size: 10px; font-weight: 600; color: var(--faint);
+    background: rgba(255,255,255,.06); padding: 1px 6px; border-radius: 999px;
+  }
+  .evRowExt   { font-size: 10px; color: var(--faint); }
+
+  /* Category badge — right rail, hidden on small screens */
+  .evRowCat {
+    flex-shrink: 0; max-width: 120px;
+    font-size: 9.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+    color: var(--brand1); background: rgba(249,217,0,.07);
+    border: 1px solid rgba(249,217,0,.15);
+    padding: 3px 9px; border-radius: 999px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    display: none;
+  }
+  @media (min-width: 600px) { .evRowCat { display: block; } }
 
   /* Load More */
   .loadMoreRow { display: flex; justify-content: center; padding: 8px 0 16px; }
@@ -466,13 +558,11 @@ const PAGE_SIZE = 30;
   .noEvents { color: var(--muted); font-size: 16px; padding: 32px 0; }
   .noEvents a { color: var(--brand1); }
 
-  @media (max-width: 800px) {
-    .eventGrid { grid-template-columns: repeat(2, 1fr); }
-  }
   @media (max-width: 520px) {
-    .eventGrid { grid-template-columns: 1fr; gap: 12px; }
-    .featuredCard { width: 200px; }
-    .filterBar { gap: 8px; }
-    .filterCount { margin-left: 0; width: 100%; }
+    .featuredCard { width: 280px; }
+    .fcImgWrap    { height: 180px; }
+    .filterBar    { gap: 8px; }
+    .filterCount  { margin-left: 0; width: 100%; }
+    .evRowThumb   { width: 60px; height: 60px; }
   }
 </style>
