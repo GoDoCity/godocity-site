@@ -1,5 +1,6 @@
 ---
 import Base from "../../../layouts/Base.astro";
+import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
@@ -16,6 +17,7 @@ const { data } = event;
 const city = data.city ?? event.slug.split("/")[0];
 const cityCap = city.charAt(0).toUpperCase() + city.slice(1);
 
+/* ── Date labels ── */
 const d = new Date(data.eventDate);
 const dateLabel = d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 
@@ -41,7 +43,59 @@ function addUtm(url) {
   }
 }
 
-/* ── Related events: same category or same city, upcoming, ≤4 ── */
+/* ── Google Calendar link ── */
+function gcalDate(dt) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}`;
+}
+const gcalStart = gcalDate(d);
+const gcalEnd   = data.endDate ? gcalDate(new Date(data.endDate)) : gcalDate(d);
+const gcalUrl   = `https://calendar.google.com/calendar/render?action=TEMPLATE`
+  + `&text=${encodeURIComponent(data.title)}`
+  + `&dates=${gcalStart}/${gcalEnd}`
+  + `&details=${encodeURIComponent(data.description ?? "")}`
+  + `&location=${encodeURIComponent((data.location ?? "") + (data.address ? ", " + data.address : ""))}`;
+
+/* ── iCal data URI ── */
+function pad(n) { return String(n).padStart(2, "0"); }
+function icsDate(dt) {
+  return `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}`;
+}
+const icsContent = [
+  "BEGIN:VCALENDAR",
+  "VERSION:2.0",
+  "PRODID:-//GoDoDaytona//EN",
+  "BEGIN:VEVENT",
+  `DTSTART;VALUE=DATE:${icsDate(d)}`,
+  `DTEND;VALUE=DATE:${data.endDate ? icsDate(new Date(data.endDate)) : icsDate(d)}`,
+  `SUMMARY:${data.title}`,
+  `DESCRIPTION:${(data.description ?? "").replace(/\n/g, "\\n")}`,
+  `LOCATION:${(data.location ?? "") + (data.address ? ", " + data.address : "")}`,
+  data.url ? `URL:${data.url}` : "",
+  "END:VEVENT",
+  "END:VCALENDAR",
+].filter(Boolean).join("\r\n");
+const icsUri = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
+
+/* ── Venue map pin ── */
+const CITY_CENTERS = {
+  "daytona":              { lat: 29.2108, lng: -81.0228 },
+  "daytona beach":        { lat: 29.2108, lng: -81.0228 },
+  "ormond beach":         { lat: 29.2866, lng: -81.0559 },
+  "port orange":          { lat: 29.1380, lng: -81.0045 },
+  "daytona beach shores": { lat: 29.1994, lng: -80.9969 },
+  "south daytona":        { lat: 29.1680, lng: -81.0027 },
+  "holly hill":           { lat: 29.2497, lng: -81.0370 },
+  "new smyrna beach":     { lat: 29.0258, lng: -80.9270 },
+  "flagler beach":        { lat: 29.4730, lng: -81.1267 },
+};
+const cityKey = city.toLowerCase().trim();
+const center  = CITY_CENTERS[cityKey] ?? { lat: 29.2108, lng: -81.0228 };
+const pinLat  = data.lat ?? center.lat;
+const pinLng  = data.lng ?? center.lng;
+const mapPin  = [{ label: data.title, address: data.location + (data.address ? `, ${data.address}` : ""), lat: pinLat, lng: pinLng }];
+
+/* ── Related events ── */
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
@@ -62,12 +116,15 @@ const relatedEvents = allEvents
   .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
   .slice(0, 4);
 
-/* ── Related guides for this city ── */
+/* ── Related guides ── */
 let allGuides = [];
 try { allGuides = await getCollection("guides"); } catch { allGuides = []; }
 const relatedGuides = allGuides
   .filter(g => g.data.city?.toLowerCase() === city.toLowerCase())
   .slice(0, 3);
+
+/* ── Page URL for sharing ── */
+const pageUrl = Astro.url.href;
 ---
 
 <Base title={data.title} subtitle={data.description ?? `${data.title} — GoDo ${cityCap}`} cityBase={city}>
@@ -89,12 +146,15 @@ const relatedGuides = allGuides
         <div class="evMain">
 
           <div class="eventDetail">
+
+            {/* Header */}
             <div class="eventHeader">
               {!data.image && data.category && <span class="catPill">{data.category}</span>}
               <h1 class="eventTitle">{data.title}</h1>
               {data.description && <p class="eventDesc">{data.description}</p>}
             </div>
 
+            {/* Meta block */}
             <div class="eventMeta">
               <div class="metaRow">
                 <span class="metaIcon">📅</span>
@@ -108,19 +168,53 @@ const relatedGuides = allGuides
                 <div class="metaRow">
                   <span class="metaIcon">🔗</span>
                   <a class="metaLink" href={addUtm(data.url)} target="_blank" rel="noopener noreferrer">
-                    More info ↗
-                  </a>
-                </div>
-              )}
-              {data.url && (
-                <div class="metaCtaRow">
-                  <a class="metaCtaBtn" href={addUtm(data.url)} target="_blank" rel="noopener noreferrer">
-                    Get Tickets / Learn More ↗
+                    Visit event website ↗
                   </a>
                 </div>
               )}
             </div>
 
+            {/* ── ACTION ROW — Ticket, Calendar, Share ── */}
+            <div class="actionRow">
+              {data.url && (
+                <a class="actionTicket" href={addUtm(data.url)} target="_blank" rel="noopener noreferrer">
+                  Get Tickets / More Info ↗
+                </a>
+              )}
+              <div class="actionSecondary">
+                {/* Add to Calendar dropdown */}
+                <div class="calDrop" id="calDrop">
+                  <button class="actionBtn calTrigger" type="button" id="calTrigger" aria-expanded="false" aria-haspopup="true">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v3M11 1v3M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    Add to Calendar
+                  </button>
+                  <div class="calMenu" id="calMenu" role="menu" aria-label="Add to calendar options">
+                    <a class="calOption" href={gcalUrl} target="_blank" rel="noopener noreferrer" role="menuitem">
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v3M11 1v3M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                      Google Calendar
+                    </a>
+                    <a class="calOption" href={icsUri} download={`${data.title.replace(/[^a-z0-9]/gi, "-")}.ics`} role="menuitem">
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="1" y="3" width="14" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 1v3M11 1v3M1 7h14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                      Apple / Outlook (.ics)
+                    </a>
+                  </div>
+                </div>
+
+                {/* Share Event */}
+                <button class="actionBtn" type="button" id="shareBtn"
+                        data-title={data.title} data-url={pageUrl}>
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/><circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7l6-3M5 9l6 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  Share Event
+                </button>
+              </div>
+            </div>
+
+            {/* ── VENUE MAP — compact inline Leaflet map ── */}
+            <div class="venueMapBlock">
+              <InteractiveMap locations={mapPin} height="220px" />
+            </div>
+
+            {/* Body content */}
             <article class="eventBody">
               <Content />
             </article>
@@ -128,14 +222,12 @@ const relatedGuides = allGuides
             <p class="backLink">
               <a class="pill" href={`/${city}/events/`}>← All {cityCap} events</a>
             </p>
-          </div>
 
+          </div>
         </div>
 
         {/* ── SIDEBAR ── */}
         <aside class="evSidebar">
-
-          {/* Related guides */}
           {relatedGuides.length > 0 && (
             <div class="sideBlock">
               <div class="sideHead">{cityCap} Guides</div>
@@ -148,11 +240,10 @@ const relatedGuides = allGuides
                   </a>
                 );
               })}
-              <a class="sideMore" href={`/${city}/events/`}>All events →</a>
+              <a class="sideMore" href={`/${city}/guides/`}>All guides →</a>
             </div>
           )}
 
-          {/* Newsletter */}
           <div class="sideNl">
             <div class="sideNlHead"><em>Good News <strong>{cityCap}!</strong></em></div>
             <div class="sideNlSub">Local events and stories, free every morning.</div>
@@ -162,7 +253,6 @@ const relatedGuides = allGuides
               <button class="sideNlBtn" type="submit">SIGN UP</button>
             </form>
           </div>
-
         </aside>
 
       </div>
@@ -176,13 +266,15 @@ const relatedGuides = allGuides
           </div>
           <div class="relatedGrid">
             {relatedEvents.map(e => {
-              const ed = new Date(e.data.eventDate);
+              const ed  = new Date(e.data.eventDate);
               const mon = ed.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
               const day = ed.getDate();
               const dow = ed.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
               const eCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
               const eSlug = e.slug.split("/").pop();
-              const href = e.data.url ? addUtm(e.data.url) : `/${eCity}/events/${eSlug}/`;
+              const href = e.data.url
+                ? addUtm(e.data.url)
+                : `/${eCity}/events/${eSlug}/`;
               return (
                 <a class="relCard" href={href}
                    target={e.data.url ? "_blank" : "_self"}
@@ -213,99 +305,152 @@ const relatedGuides = allGuides
   </section>
 </Base>
 
+<script is:inline>
+(function () {
+  /* ── Add to Calendar dropdown ── */
+  var trigger = document.getElementById("calTrigger");
+  var menu    = document.getElementById("calMenu");
+  if (trigger && menu) {
+    trigger.addEventListener("click", function () {
+      var open = menu.classList.toggle("calMenu--open");
+      trigger.setAttribute("aria-expanded", open ? "true" : "false");
+    });
+    document.addEventListener("click", function (e) {
+      if (!document.getElementById("calDrop").contains(e.target)) {
+        menu.classList.remove("calMenu--open");
+        trigger.setAttribute("aria-expanded", "false");
+      }
+    });
+  }
+
+  /* ── Share Event ── */
+  var shareBtn = document.getElementById("shareBtn");
+  if (shareBtn) {
+    shareBtn.addEventListener("click", function () {
+      var title = shareBtn.getAttribute("data-title");
+      var url   = shareBtn.getAttribute("data-url") || window.location.href;
+      if (navigator.share) {
+        navigator.share({ title: title, url: url }).catch(function () {});
+      } else {
+        navigator.clipboard.writeText(url).then(function () {
+          var orig = shareBtn.innerHTML;
+          shareBtn.textContent = "✓ Link copied!";
+          setTimeout(function () { shareBtn.innerHTML = orig; }, 2200);
+        }).catch(function () {
+          /* clipboard not available — silently do nothing */
+        });
+      }
+    });
+  }
+})();
+</script>
+
 <style>
   /* ── Hero Image ── */
   .evHero {
-    position: relative;
-    width: 100%;
-    max-height: 480px;
-    overflow: hidden;
-    background: rgba(0,0,0,.8);
+    position: relative; width: 100%; max-height: 480px;
+    overflow: hidden; background: rgba(0,0,0,.8);
   }
-  .evHeroImg {
-    width: 100%;
-    max-height: 480px;
-    object-fit: cover;
-    display: block;
-  }
+  .evHeroImg { width: 100%; max-height: 480px; object-fit: cover; display: block; }
   .evHeroGrad {
-    position: absolute;
-    inset: auto 0 0 0;
-    height: 60%;
+    position: absolute; inset: auto 0 0 0; height: 60%;
     background: linear-gradient(to top, rgba(0,0,0,.7), transparent);
     pointer-events: none;
   }
   .evHeroCat {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: .06em;
-    text-transform: uppercase;
-    background: var(--brand1);
-    color: #000;
-    padding: 4px 12px;
-    border-radius: 999px;
+    position: absolute; bottom: 20px; left: 20px;
+    font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    background: var(--brand1); color: #000;
+    padding: 4px 12px; border-radius: 999px;
   }
 
-  /* ── Layout: 70/30 ── */
+  /* ── 70/30 Layout ── */
   .evLayout {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 280px;
-    gap: 48px;
-    align-items: start;
-    padding: 32px 0 48px;
+    display: grid; grid-template-columns: minmax(0, 1fr) 280px;
+    gap: 48px; align-items: start; padding: 32px 0 48px;
   }
-  @media (max-width: 860px) {
-    .evLayout { grid-template-columns: 1fr; gap: 32px; }
-  }
+  @media (max-width: 860px) { .evLayout { grid-template-columns: 1fr; gap: 32px; } }
 
   /* ── Detail ── */
   .eventDetail { max-width: 680px; }
   .catPill {
-    display: inline-block;
-    font-size: 11px; font-weight: 800;
+    display: inline-block; font-size: 11px; font-weight: 800;
     padding: 3px 10px; border-radius: 999px;
     background: rgba(255,212,74,.12); color: var(--accent);
-    margin-bottom: 10px;
-    text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: 10px; text-transform: uppercase; letter-spacing: .06em;
   }
-  .eventTitle {
-    font-size: clamp(24px, 3vw, 40px);
-    font-weight: 900; line-height: 1.1; margin: 0 0 10px;
-  }
-  .eventDesc {
-    font-size: 17px; color: var(--muted); margin: 0 0 24px; line-height: 1.5;
-  }
+  .eventTitle { font-size: clamp(24px, 3vw, 40px); font-weight: 900; line-height: 1.1; margin: 0 0 10px; }
+  .eventDesc  { font-size: 17px; color: var(--muted); margin: 0 0 24px; line-height: 1.5; }
+
   .eventMeta {
     display: flex; flex-direction: column; gap: 10px;
-    margin-bottom: 28px; padding: 18px 20px;
+    margin-bottom: 20px; padding: 16px 18px;
     border-radius: 14px; border: 1px solid rgba(255,255,255,.08);
     background: rgba(255,255,255,.03);
   }
-  .metaRow {
-    display: flex; align-items: baseline; gap: 10px;
-    font-size: 15px; color: var(--text);
-  }
-  .metaIcon { font-size: 16px; flex-shrink: 0; }
+  .metaRow { display: flex; align-items: baseline; gap: 10px; font-size: 15px; color: var(--text); }
+  .metaIcon { font-size: 15px; flex-shrink: 0; }
   .metaLink { color: var(--link); text-decoration: none; font-weight: 700; }
   .metaLink:hover { text-decoration: underline; }
-  .metaCtaRow { margin-top: 6px; }
-  .metaCtaBtn {
-    display: inline-flex; align-items: center;
-    height: 44px; padding: 0 22px; border-radius: 999px;
-    background: var(--brand1); color: #000;
-    font-size: 14px; font-weight: 800; text-decoration: none;
-    transition: opacity 140ms;
-  }
-  .metaCtaBtn:hover { opacity: .84; }
 
-  .eventBody {
-    line-height: 1.65; font-size: 16px; margin-bottom: 28px;
+  /* ── ACTION ROW ── */
+  .actionRow {
+    display: flex; align-items: center; gap: 10px;
+    flex-wrap: wrap; margin-bottom: 28px;
   }
-  .eventBody :global(p)  { margin: 0 0 1em; }
-  .eventBody :global(a)  { color: var(--link); }
+
+  /* Large brand-yellow ticket button */
+  .actionTicket {
+    display: inline-flex; align-items: center;
+    height: 48px; padding: 0 26px; border-radius: 999px;
+    background: var(--brand1); color: #000;
+    font-size: 15px; font-weight: 900; letter-spacing: .02em;
+    text-decoration: none; white-space: nowrap;
+    transition: opacity 140ms, transform 140ms;
+    box-shadow: 0 2px 12px rgba(249,217,0,.25);
+  }
+  .actionTicket:hover { opacity: .88; transform: translateY(-1px); }
+
+  .actionSecondary { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  /* Ghost action buttons (Calendar, Share) */
+  .actionBtn {
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 40px; padding: 0 16px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: transparent; color: var(--text);
+    font-size: 13px; font-weight: 700; font-family: inherit;
+    cursor: pointer; white-space: nowrap;
+    transition: border-color 140ms, background 140ms;
+    text-decoration: none;
+  }
+  .actionBtn:hover { border-color: var(--brand1); background: rgba(249,217,0,.06); color: var(--text); }
+
+  /* Calendar dropdown */
+  .calDrop { position: relative; }
+  .calMenu {
+    display: none; position: absolute; top: calc(100% + 6px); left: 0; z-index: 40;
+    min-width: 190px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: #1e1e1e; box-shadow: 0 8px 24px rgba(0,0,0,.4);
+    overflow: hidden;
+  }
+  .calMenu--open { display: block; }
+  .calOption {
+    display: flex; align-items: center; gap: 8px;
+    padding: 11px 16px; font-size: 13px; font-weight: 700;
+    color: var(--text); text-decoration: none;
+    transition: background 100ms;
+  }
+  .calOption:hover { background: rgba(255,255,255,.06); }
+
+  /* ── Venue Map ── */
+  .venueMapBlock { margin-bottom: 28px; }
+
+  /* ── Event body ── */
+  .eventBody { line-height: 1.65; font-size: 16px; margin-bottom: 28px; }
+  .eventBody :global(p)      { margin: 0 0 1em; }
+  .eventBody :global(a)      { color: var(--link); }
   .eventBody :global(strong) { font-weight: 700; }
 
   .backLink { margin-top: 8px; }
@@ -323,19 +468,17 @@ const relatedGuides = allGuides
 
   .sideBlock {
     border-radius: 14px; border: 1px solid rgba(255,255,255,.08);
-    background: rgba(255,255,255,.02); padding: 20px;
-    display: grid; gap: 0;
+    background: rgba(255,255,255,.02); padding: 20px; display: grid; gap: 0;
   }
   .sideHead {
-    font-size: 11px; font-weight: 900; letter-spacing: .1em;
-    text-transform: uppercase; color: var(--brand1);
-    padding-bottom: 10px; margin-bottom: 4px;
+    font-size: 11px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--brand1); padding-bottom: 10px; margin-bottom: 4px;
     border-bottom: 2px solid var(--brand1);
   }
   .sideGuideLink {
     display: flex; justify-content: space-between; align-items: center;
     padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.06);
-    text-decoration: none; transition: color 120ms;
+    text-decoration: none;
   }
   .sideGuideLink:last-of-type { border-bottom: none; }
   .sideGuideLink:hover .sideGuideTitle { color: var(--link); }
@@ -343,8 +486,7 @@ const relatedGuides = allGuides
   .sideGuideArrow { font-size: 14px; color: var(--brand1); flex-shrink: 0; }
   .sideMore {
     display: inline-block; margin-top: 12px;
-    font-size: 13px; font-weight: 700; color: var(--link);
-    text-decoration: none;
+    font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none;
   }
   .sideMore:hover { text-decoration: underline; }
 
@@ -352,15 +494,13 @@ const relatedGuides = allGuides
     padding: 28px 22px; border-radius: 16px; background: var(--brand1);
     display: flex; flex-direction: column; gap: 10px;
   }
-  .sideNlHead { font-size: 22px; font-weight: 900; font-style: italic; color: #000; line-height: 1.1; }
+  .sideNlHead  { font-size: 22px; font-weight: 900; font-style: italic; color: #000; line-height: 1.1; }
   .sideNlHead strong { font-weight: 900; }
-  .sideNlSub  { font-size: 14px; color: rgba(0,0,0,.75); line-height: 1.4; }
-  .sideNlForm { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .sideNlSub   { font-size: 14px; color: rgba(0,0,0,.75); line-height: 1.4; }
+  .sideNlForm  { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
   .sideNlInput {
-    width: 100%; box-sizing: border-box;
-    padding: 12px 14px; border-radius: 10px;
-    border: none; background: #fff;
-    font-size: 14px; color: #111;
+    width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 10px;
+    border: none; background: #fff; font-size: 14px; color: #111;
     outline: 2px solid transparent; transition: outline-color 150ms;
   }
   .sideNlInput:focus { outline-color: #000; }
@@ -372,38 +512,29 @@ const relatedGuides = allGuides
   }
   .sideNlBtn:hover { opacity: .82; }
 
-  /* ── More Like This / Related ── */
-  .relatedSection {
-    padding: 40px 0 56px;
-    border-top: 2px solid var(--brand1);
-    margin-top: 0;
-  }
+  /* ── More Like This ── */
+  .relatedSection { padding: 40px 0 56px; border-top: 2px solid var(--brand1); }
   .relatedHead {
-    display: flex; align-items: baseline; justify-content: space-between;
-    margin-bottom: 20px;
+    display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px;
   }
   .relatedLabel { font-size: 18px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--text); }
   .relatedAll   { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
   .relatedAll:hover { text-decoration: underline; }
 
   .relatedGrid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
   }
   @media (max-width: 860px)  { .relatedGrid { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 480px)  { .relatedGrid { grid-template-columns: 1fr; } }
 
   .relCard {
     border-radius: 12px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,.07);
-    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(255,255,255,.07); background: rgba(255,255,255,.02);
     text-decoration: none;
     transition: border-color 140ms, transform 140ms;
     display: flex; flex-direction: column;
   }
   .relCard:hover { border-color: var(--brand1); transform: translateY(-2px); }
-
   .relCardImg {
     position: relative; height: 130px;
     background: rgba(255,255,255,.04); overflow: hidden; flex-shrink: 0;
@@ -417,14 +548,12 @@ const relatedGuides = allGuides
     position: absolute; bottom: 6px; left: 6px;
     font-size: 9px; font-weight: 800; letter-spacing: .05em;
     background: rgba(0,0,0,.65); color: var(--brand1);
-    padding: 2px 7px; border-radius: 999px;
-    backdrop-filter: blur(4px);
+    padding: 2px 7px; border-radius: 999px; backdrop-filter: blur(4px);
   }
-
   .relCardBody { padding: 10px 12px 12px; flex: 1; display: flex; flex-direction: column; gap: 3px; }
   .relCardDate { display: flex; align-items: center; gap: 5px; }
-  .relDow { font-size: 9px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
-  .relDay { font-size: 11px; font-weight: 700; color: var(--muted); }
+  .relDow      { font-size: 9px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
+  .relDay      { font-size: 11px; font-weight: 700; color: var(--muted); }
   .relCardTitle { font-size: 13px; font-weight: 800; color: var(--text); line-height: 1.3; }
   .relCardVenue { font-size: 11px; color: var(--faint); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 </style>

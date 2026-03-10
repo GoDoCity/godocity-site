@@ -366,7 +366,7 @@ const trendingSpots = [
               <a class="railMore" href="/daytona/events/">See all</a>
             </div>
             <div class="eventList">
-              {upcomingEvents.length > 0 ? upcomingEvents.map(e => {
+              {upcomingEvents.length > 0 ? upcomingEvents.slice(0, 4).map(e => {
                 const d   = new Date(e.data.eventDate);
                 const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
                 const day = d.getDate();
