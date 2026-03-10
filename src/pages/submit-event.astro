@@ -44,17 +44,27 @@ const CATEGORIES = [
           </p>
         </div>
 
+        <!--
+          Netlify detects this hidden form at build time to register the schema.
+          The visible form below is submitted via JS fetch for reliable redirect handling.
+        -->
+        <form name="event-submission" data-netlify="true" netlify-honeypot="bot-field" hidden aria-hidden="true">
+          <input type="hidden" name="form-name" value="event-submission" />
+          <input name="bot-field" />
+          <input name="event-title" /><input name="event-date" /><input name="event-end-date" />
+          <input name="event-category" /><textarea name="event-description"></textarea>
+          <input name="event-url" /><input name="event-city" /><input name="event-venue" />
+          <input name="event-address" /><input name="contact-name" /><input name="contact-email" />
+          <input name="contact-org" />
+        </form>
+
         <form
           class="submitForm"
-          name="event-submission"
-          method="POST"
-          action="/submit-success/"
-          data-netlify="true"
-          netlify-honeypot="bot-field"
+          id="eventSubmitForm"
+          novalidate
         >
-          {/* Honeypot for spam bots */}
           <p class="hidden" aria-hidden="true">
-            <label>Don't fill this out: <input name="bot-field" /></label>
+            <label>Don't fill this out: <input name="bot-field" id="botField" /></label>
           </p>
           <input type="hidden" name="form-name" value="event-submission" />
 
@@ -227,8 +237,9 @@ const CATEGORIES = [
               <span class="req">*</span> Required. We review every submission and may edit for clarity
               and length. Commercial events may be offered a sponsored placement.
             </p>
-            <button class="submitBtn" type="submit">Submit Event →</button>
+            <button class="submitBtn" id="submitBtn" type="submit">Submit Event →</button>
           </div>
+          <p class="formError" id="formError" role="alert" aria-live="polite"></p>
         </form>
 
       </div>
@@ -371,6 +382,13 @@ const CATEGORIES = [
 
   .hidden { display: none; }
 
+  .formError {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #ff6b6b;
+    min-height: 20px;
+  }
+
   @media (max-width: 520px) {
     .formSection { padding: 18px 16px 16px; }
     .fieldRow { grid-template-columns: 1fr; }
@@ -378,3 +396,65 @@ const CATEGORIES = [
     .submitBtn { width: 100%; justify-content: center; }
   }
 </style>
+
+<script is:inline>
+(function () {
+  var form    = document.getElementById("eventSubmitForm");
+  var btn     = document.getElementById("submitBtn");
+  var errEl   = document.getElementById("formError");
+
+  if (!form) return;
+
+  /* Basic client-side required-field validation */
+  function validateForm() {
+    var required = form.querySelectorAll("[required]");
+    for (var i = 0; i < required.length; i++) {
+      if (!required[i].value.trim()) {
+        required[i].focus();
+        return required[i].labels?.[0]?.textContent?.replace("*","").trim() + " is required.";
+      }
+    }
+    return null;
+  }
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    errEl.textContent = "";
+    var err = validateForm();
+    if (err) { errEl.textContent = err; return; }
+
+    btn.disabled    = true;
+    btn.textContent = "Submitting…";
+
+    /* Build URL-encoded body Netlify Forms expects */
+    var fields = new FormData(form);
+    /* Copy bot-field value from its actual input */
+    var botVal = document.getElementById("botField")?.value ?? "";
+    if (botVal) fields.set("bot-field", botVal);
+
+    var body = new URLSearchParams(fields).toString();
+
+    fetch("/", {
+      method:  "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body:    body,
+    })
+      .then(function (res) {
+        if (res.ok || res.status === 303) {
+          /* Netlify returns 200 or 303; both mean success */
+          window.location.href = "/submit-success/";
+        } else {
+          throw new Error("Server responded with " + res.status);
+        }
+      })
+      .catch(function (fetchErr) {
+        console.error("[submit-event] Form submission error:", fetchErr);
+        errEl.textContent =
+          "Something went wrong — please try again or email us directly.";
+        btn.disabled    = false;
+        btn.textContent = "Submit Event →";
+      });
+  });
+})();
+</script>

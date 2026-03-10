@@ -96,22 +96,17 @@ const upcomingEvents = allEvents
 const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true).slice(0, 3);
 const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
 
-/* ── Map pins ── */
+/* ── Map pins — only events with verified street-level coordinates ── */
 const mapPins = upcomingEvents
-  .filter(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    return (e.data.lat != null && e.data.lng != null) || CITY_CENTERS[evCity];
-  })
+  .filter(e => e.data.lat != null && e.data.lng != null)
   .map(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    const center = CITY_CENTERS[evCity] ?? { lat: 29.2108, lng: -81.0228 };
     const d = new Date(e.data.eventDate);
     const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
     return {
       label:   e.data.title,
       address: `${dateStr} · ${e.data.location}`,
-      lat:     e.data.lat ?? center.lat,
-      lng:     e.data.lng ?? center.lng,
+      lat:     e.data.lat,
+      lng:     e.data.lng,
     };
   });
 
@@ -155,6 +150,44 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
         <h1 class="h1">Events</h1>
         <p class="lede">Festivals, markets, shows, and happenings across the Greater Daytona Beach area — from Flagler Beach to New Smyrna.</p>
         <a class="submitBtn" href="/submit-event/">+ Submit an Event</a>
+      </div>
+
+      {/* ── NEWSLETTER SIGNUP ── */}
+      <div class="nlBox">
+        <!--
+          Netlify detects this hidden shadow form at build time so the visible
+          JS-submitted form is registered. Both share name="newsletter-signup".
+        -->
+        <form name="newsletter-signup" data-netlify="true" netlify-honeypot="nl-bot" hidden aria-hidden="true">
+          <input name="form-name" value="newsletter-signup" />
+          <input name="nl-bot" />
+          <input name="email" />
+        </form>
+
+        <div class="nlInner">
+          <div class="nlCopy">
+            <p class="nlLabel">FREE NEWSLETTER</p>
+            <p class="nlHeadline">Good News Daytona</p>
+            <p class="nlSub">The best events, eats, and things to do — straight to your inbox.</p>
+          </div>
+          <form class="nlForm" id="nlForm" novalidate>
+            <input type="hidden" name="form-name" value="newsletter-signup" />
+            <p style="display:none" aria-hidden="true"><label>Leave this empty: <input name="nl-bot" id="nlBot" /></label></p>
+            <div class="nlInputRow">
+              <input
+                class="nlInput"
+                id="nlEmail"
+                name="email"
+                type="email"
+                placeholder="your@email.com"
+                required
+                autocomplete="email"
+              />
+              <button class="nlBtn" id="nlBtn" type="submit">Subscribe →</button>
+            </div>
+            <p class="nlError" id="nlError" role="alert" aria-live="polite"></p>
+          </form>
+        </div>
       </div>
 
       {/* ── FEATURED SCROLLER — top 3 sponsored, large hero cards ── */}
@@ -348,6 +381,52 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     applyState();
   }
 
+  /* ── Newsletter signup ── */
+  var nlForm  = document.getElementById("nlForm");
+  var nlBtn   = document.getElementById("nlBtn");
+  var nlEmail = document.getElementById("nlEmail");
+  var nlErr   = document.getElementById("nlError");
+
+  if (nlForm) {
+    nlForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      nlErr.textContent = "";
+
+      var email = nlEmail.value.trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        nlErr.textContent = "Please enter a valid email address.";
+        nlEmail.focus();
+        return;
+      }
+
+      nlBtn.disabled    = true;
+      nlBtn.textContent = "Subscribing…";
+
+      var botVal = document.getElementById("nlBot")?.value ?? "";
+      var body   = "form-name=newsletter-signup&email=" + encodeURIComponent(email);
+      if (botVal) body += "&nl-bot=" + encodeURIComponent(botVal);
+
+      fetch("/", {
+        method:  "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body:    body,
+      })
+        .then(function (res) {
+          if (res.ok || res.status === 303) {
+            nlForm.innerHTML =
+              '<p class="nlSuccess">✓ You\'re subscribed! Good news incoming.</p>';
+          } else {
+            throw new Error(res.status);
+          }
+        })
+        .catch(function () {
+          nlErr.textContent = "Something went wrong — please try again.";
+          nlBtn.disabled    = false;
+          nlBtn.textContent = "Subscribe →";
+        });
+    });
+  }
+
   /* ── Link validator: catch dead external URLs → Google Search fallback ── */
   document.querySelectorAll("[data-external='true']").forEach(function (el) {
     var fallback = el.getAttribute("data-fallback");
@@ -370,6 +449,65 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
 <style>
   .eventsContainer { padding-bottom: 64px; }
+
+  /* ── Newsletter signup box ── */
+  .nlBox {
+    background: linear-gradient(135deg, rgba(249,217,0,.12) 0%, rgba(249,217,0,.04) 100%);
+    border: 1px solid rgba(249,217,0,.25);
+    border-radius: 16px;
+    padding: 28px 28px 24px;
+    margin-bottom: 32px;
+  }
+  .nlInner {
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .nlCopy { flex: 1; min-width: 220px; }
+  .nlLabel {
+    font-size: 10px; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--brand1); margin: 0 0 4px;
+  }
+  .nlHeadline {
+    font-size: 22px; font-weight: 900; color: var(--text);
+    line-height: 1.1; margin: 0 0 6px;
+  }
+  .nlSub {
+    font-size: 14px; color: var(--muted); line-height: 1.45; margin: 0;
+  }
+  .nlForm { flex: 1; min-width: 260px; }
+  .nlInputRow {
+    display: flex; gap: 8px; align-items: stretch;
+  }
+  .nlInput {
+    flex: 1; min-width: 0;
+    height: 44px; padding: 0 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.06);
+    color: var(--text); font-size: 15px; font-family: inherit;
+    outline: none; transition: border-color 150ms;
+    -webkit-appearance: none;
+  }
+  .nlInput:focus { border-color: var(--brand1); }
+  .nlInput::placeholder { color: rgba(255,255,255,.3); }
+  .nlBtn {
+    flex-shrink: 0;
+    height: 44px; padding: 0 20px;
+    border-radius: 10px; border: none;
+    background: var(--brand1); color: #000;
+    font-size: 14px; font-weight: 900; font-family: inherit;
+    cursor: pointer; transition: opacity 140ms; white-space: nowrap;
+  }
+  .nlBtn:hover { opacity: .82; }
+  .nlBtn:disabled { opacity: .5; cursor: default; }
+  .nlError {
+    font-size: 13px; color: #ff6b6b; margin: 8px 0 0; min-height: 18px;
+  }
+  .nlSuccess {
+    font-size: 15px; font-weight: 700; color: var(--brand1); margin: 10px 0 0;
+  }
 
   /* ── Header ── */
   .eventsHeader { padding: 12px 0 24px; }
@@ -472,10 +610,10 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   .evCard:hover { opacity: .88; }
   .evCard--hidden { display: none !important; }
 
-  /* 160px square thumbnail — left column */
+  /* 240×160px landscape thumbnail — left column */
   .evCardImg {
     flex-shrink: 0;
-    width: 160px;
+    width: 240px;
     height: 160px;
     overflow: hidden;
     border-radius: 10px;
@@ -536,7 +674,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     .fcImgWrap    { height: 180px; }
     .filterBar    { gap: 8px; }
     .filterCount  { margin-left: 0; width: 100%; }
-    .evCardImg    { width: 100px; height: 100px; border-radius: 8px; }
+    .evCardImg    { width: 120px; height: 80px; border-radius: 8px; }
     .evCardTitle  { font-size: 15px; }
     .evCardVenue  { font-size: 13px; }
   }
