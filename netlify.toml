@@ -1,0 +1,19 @@
+[build]
+  command   = "npm run build"
+  publish   = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Redirect /submit-success/ after Netlify processes the form POST
+[[redirects]]
+  from   = "/submit-success/"
+  to     = "/submit-success/index.html"
+  status = 200
+  force  = false
+
+# SPA fallback — keep trailing-slash routing working
+[[redirects]]
+  from   = "/*"
+  to     = "/404/index.html"
+  status = 404
