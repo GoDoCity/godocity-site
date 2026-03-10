@@ -107,44 +107,44 @@ items:
 map_locations:
   - label:   "Aunt Catfish's on the River"
     address: "4009 Halifax Dr, Port Orange, FL"
-    lat:     29.1135
-    lng:     -81.0163
+    lat:     29.1388
+    lng:     -80.9942
   - label:   "Racing's North Turn Beach Bar & Grille"
     address: "4511 S Atlantic Ave, Ponce Inlet, FL"
-    lat:     29.0916
-    lng:     -80.9297
+    lat:     29.1455
+    lng:     -80.9708
   - label:   "Dancing Avocado Kitchen"
     address: "110 S Beach St, Daytona Beach, FL"
-    lat:     29.2069
-    lng:     -81.0135
+    lat:     29.2125
+    lng:     -81.0225
   - label:   "Tomoka Brewing Co."
     address: "100 2nd St, Ormond Beach, FL"
-    lat:     29.2862
-    lng:     -81.0567
+    lat:     29.2855
+    lng:     -81.0562
   - label:   "Cobalt on the Ocean"
-    address: "2000 N Atlantic Ave, Daytona Beach, FL"
-    lat:     29.2258
-    lng:     -81.0073
+    address: "2000 N Atlantic Ave, Daytona Beach Shores, FL"
+    lat:     29.2237
+    lng:     -81.0075
   - label:   "Smoke on the Water"
     address: "South Daytona, FL"
-    lat:     29.1850
-    lng:     -81.0150
+    lat:     29.1612
+    lng:     -81.0000
   - label:   "Pho Hoa Daytona"
     address: "1825 S Ridgewood Ave, South Daytona, FL"
-    lat:     29.1680
-    lng:     -81.0027
+    lat:     29.1978
+    lng:     -81.0165
   - label:   "The Cellar Restaurant"
     address: "220 Magnolia Ave, Daytona Beach, FL"
-    lat:     29.2108
-    lng:     -81.0233
+    lat:     29.2096
+    lng:     -81.0225
   - label:   "La Cantina Daytona"
     address: "Downtown Daytona Beach, FL"
-    lat:     29.2103
-    lng:     -81.0170
+    lat:     29.2058
+    lng:     -81.0165
   - label:   "Corkscrew Bar & Grille"
     address: "Volusia Ave, Daytona Beach, FL"
-    lat:     29.2200
-    lng:     -81.0280
+    lat:     29.2040
+    lng:     -81.0208
 
 moreGuides:
   - emoji: "🏠"

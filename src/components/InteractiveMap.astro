@@ -15,8 +15,10 @@ export interface Props {
 
 const { locations = [], height = "400px" } = Astro.props;
 
-/* Filter to only pins that have coordinates */
-const pins = locations.filter((l) => l.lat != null && l.lng != null);
+/* Filter to only pins that have coordinates, then attach 1-based number */
+const pins = locations
+  .filter((l) => l.lat != null && l.lng != null)
+  .map((l, i) => ({ ...l, num: i + 1 }));
 
 if (pins.length === 0) return;
 
@@ -27,10 +29,6 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
 <!-- Leaflet CSS — no SRI so Cloudflare edge caching never blocks it -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 
-<!--
-  Both divs get explicit pixel heights via inline style.
-  !important on the inner div defeats any cascade that collapses it to 0.
--->
 <div
   class="imapWrap"
   style={`height: ${height} !important; min-height: ${height} !important; width: 100% !important; display: block !important;`}
@@ -45,11 +43,9 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
 
 <script is:inline>
 (function () {
-  /* No integrity attr — avoids silent SRI failures on Cloudflare edge caches */
   var LEAFLET_JS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
-  /* OSM tiles — most reliable fallback, no API key needed */
-  var OSM = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  var OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+  var OSM        = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  var OSM_ATTR   = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
   function initAllMaps() {
     var els = document.querySelectorAll('.imapEl[data-pins]');
@@ -69,45 +65,55 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     if (!container || !window.L) return;
     if (container._leaflet_id) return;
 
-    /* Force explicit pixel height — percentage height breaks when parent
-       hasn't been painted yet, which is common in static Astro pages */
+    /* Read real pixel height from wrapper, fall back to 400 */
     var wrapEl = container.parentElement;
     var pxH = wrapEl ? wrapEl.offsetHeight : 400;
     if (!pxH || pxH < 50) pxH = 400;
-    container.style.setProperty('height', pxH + 'px', 'important');
-    container.style.setProperty('width',  '100%',     'important');
-    container.style.setProperty('display','block',    'important');
+    container.style.setProperty('height',  pxH + 'px', 'important');
+    container.style.setProperty('width',   '100%',     'important');
+    container.style.setProperty('display', 'block',    'important');
 
     var map = window.L.map(mapId, { scrollWheelZoom: false, zoomControl: true });
 
     window.L.tileLayer(OSM, { attribution: OSM_ATTR, maxZoom: 19 }).addTo(map);
 
-    /* Custom yellow pin */
-    var yellowPin = window.L.divIcon({
-      className: '',
-      html: '<div class="imap-pin" aria-hidden="true"></div>',
-      iconSize: [22, 22], iconAnchor: [11, 11], popupAnchor: [0, -14],
-    });
-
     var bounds = [];
     for (var j = 0; j < pins.length; j++) {
-      var pin = pins[j];
+      var pin    = pins[j];
       var latlng = [pin.lat, pin.lng];
       bounds.push(latlng);
 
+      /* ── Numbered yellow pin ── */
+      var numberedPin = window.L.divIcon({
+        className: '',
+        html: '<div class="imap-pin" aria-label="Location ' + pin.num + '">' + pin.num + '</div>',
+        iconSize:    [30, 30],
+        iconAnchor:  [15, 15],
+        popupAnchor: [0, -18],
+      });
+
+      /* ── Popup content ── */
       var popup = '<strong style="font-size:14px;">' + pin.label + '</strong>';
       if (pin.address) {
-        popup += '<br><span style="font-size:12px;color:#666;line-height:1.4;">' + pin.address + '</span>';
+        popup += '<br><span style="font-size:12px;color:#666;line-height:1.5;">' + pin.address + '</span>';
       }
+
       if (pin.articleHref) {
+        /* Master map on landing page → "Read Guide" pill */
         var lbl = pin.articleTitle ? 'Read: ' + pin.articleTitle : 'Read Guide \u2192';
         popup += '<br><a href="' + pin.articleHref + '"'
           + ' style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;'
           + 'color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;'
           + 'text-decoration:none;line-height:1.4;">' + lbl + '</a>';
+      } else {
+        /* Guide page → "View Details" anchor to the matching list item */
+        popup += '<br><a href="#spot-' + pin.num + '"'
+          + ' style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;'
+          + 'color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;'
+          + 'text-decoration:none;line-height:1.4;">View Details \u2193</a>';
       }
 
-      window.L.marker(latlng, { icon: yellowPin })
+      window.L.marker(latlng, { icon: numberedPin })
         .bindPopup(popup, { maxWidth: 240 })
         .addTo(map);
     }
@@ -118,8 +124,7 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
       map.fitBounds(bounds, { padding: [36, 36] });
     }
 
-    /* setTimeout(200) lets the browser finish layout before Leaflet
-       recalculates the container dimensions — fixes blank/grey tile bug */
+    /* 200ms delay lets the browser finish layout before Leaflet recalculates */
     setTimeout(function () { map.invalidateSize(); }, 200);
   }
 
@@ -129,11 +134,10 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
       return;
     }
     var s = document.createElement('script');
-    s.src = LEAFLET_JS;
-    /* No integrity — prevents silent SRI failures on CDN edge caches */
+    s.src         = LEAFLET_JS;
     s.crossOrigin = '';
-    s.onload = initAllMaps;
-    s.onerror = function () {
+    s.onload      = initAllMaps;
+    s.onerror     = function () {
       console.error('[InteractiveMap] Failed to load Leaflet from', LEAFLET_JS);
     };
     document.head.appendChild(s);
@@ -152,8 +156,6 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     display: block !important;
     width: 100% !important;
     border-radius: 14px;
-    /* overflow:hidden removed — was forcing Leaflet pane height to 0 in
-       some layout contexts before Leaflet's own CSS applied */
     border: 1px solid rgba(0, 0, 0, 0.08);
     margin: 0 0 28px;
     position: relative;
@@ -163,28 +165,31 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
   .imapEl {
     display: block !important;
     width: 100% !important;
-    /* height intentionally NOT set here — controlled by inline style
-       so it always beats any cascade from parent templates */
   }
 
-  /* Leaflet internal chrome */
-  :global(.leaflet-container) {
-    font-family: inherit !important;
-  }
-
+  /* ── Numbered yellow pin ── */
   :global(.imap-pin) {
-    width: 22px;
-    height: 22px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     background: #f9d900;
-    border: 3px solid #000;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+    border: 2.5px solid #000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    line-height: 25px;   /* (30px height − 2 × 2.5px border) */
+    font-size: 12px;
+    font-weight: 900;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #000;
     transition: transform 120ms ease;
   }
 
   :global(.leaflet-marker-icon:hover .imap-pin) {
-    transform: scale(1.25);
+    transform: scale(1.2);
   }
+
+  /* ── Leaflet chrome ── */
+  :global(.leaflet-container) { font-family: inherit !important; }
 
   :global(.leaflet-popup-content-wrapper) {
     border-radius: 10px !important;
@@ -196,7 +201,7 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
   :global(.leaflet-popup-content) {
     margin: 10px 14px !important;
     font-size: 13.5px !important;
-    line-height: 1.45 !important;
+    line-height: 1.5 !important;
   }
 
   :global(.leaflet-popup-tip) { box-shadow: none !important; }
