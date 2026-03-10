@@ -111,8 +111,8 @@ map_locations:
     lng:     -80.9942
   - label:   "Racing's North Turn Beach Bar & Grille"
     address: "4511 S Atlantic Ave, Ponce Inlet, FL"
-    lat:     29.1455
-    lng:     -80.9708
+    lat:     29.0977
+    lng:     -80.9792
   - label:   "Dancing Avocado Kitchen"
     address: "110 S Beach St, Daytona Beach, FL"
     lat:     29.2125
@@ -123,16 +123,16 @@ map_locations:
     lng:     -81.0562
   - label:   "Cobalt on the Ocean"
     address: "2000 N Atlantic Ave, Daytona Beach Shores, FL"
-    lat:     29.2237
-    lng:     -81.0075
+    lat:     29.2060
+    lng:     -81.0004
   - label:   "Smoke on the Water"
     address: "South Daytona, FL"
     lat:     29.1612
     lng:     -81.0000
   - label:   "Pho Hoa Daytona"
     address: "1825 S Ridgewood Ave, South Daytona, FL"
-    lat:     29.1978
-    lng:     -81.0165
+    lat:     29.1697
+    lng:     -81.0091
   - label:   "The Cellar Restaurant"
     address: "220 Magnolia Ave, Daytona Beach, FL"
     lat:     29.2096
