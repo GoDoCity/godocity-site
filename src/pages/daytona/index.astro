@@ -126,20 +126,17 @@ const topics = [
    wellness.jpg    → Yoga on the beach, sunrise run, or spa interior
 ────────────────────────────────────────────────────────────────────── */
 
-/* ── Master Map: flatten all Daytona posts with map_locations ── */
-const masterLocations = posts
-  .filter((p) => Array.isArray(p.data.map_locations) && p.data.map_locations.length > 0)
-  .flatMap((p) => {
-    const articleSlug = p.slug.split("/").pop();
-    const city = (p.data.city ?? p.slug.split("/")[0] ?? "daytona").toLowerCase().trim();
-    const articleHref = `/${city}/${articleSlug}/`;
-    const articleTitle = typeof p.data.title === "string" ? p.data.title : "";
-    return (p.data.map_locations ?? []).map((loc) => ({
-      ...loc,
-      articleHref,
-      articleTitle,
-    }));
-  });
+/* ── Trending Now map: diverse mix of bars, parks, attractions, fast food ── */
+const trendingSpots = [
+  { label: "Daytona International Speedway",  address: "1801 W International Speedway Blvd", lat: 29.1847, lng: -81.0711 },
+  { label: "Daytona Beach Boardwalk & Pier",  address: "1200 Main St",                       lat: 29.2202, lng: -81.0004 },
+  { label: "Boot Hill Saloon",                address: "310 Main St — Bike Week institution", lat: 29.2049, lng: -81.0185 },
+  { label: "Tomoka State Park",               address: "2099 N Beach St, Ormond Beach",       lat: 29.3518, lng: -81.0981 },
+  { label: "Crabby's Oceanside Bar & Grill",  address: "3701 S Atlantic Ave",                 lat: 29.2225, lng: -81.0058 },
+  { label: "Halifax Harbor Marina",           address: "Halifax River waterfront",            lat: 29.2095, lng: -81.0163 },
+  { label: "Ocean Walk Shoppes & Movies",     address: "250 N Atlantic Ave",                  lat: 29.2198, lng: -81.0010 },
+  { label: "Jackie Robinson Ballpark",        address: "105 E Orange Ave — historic 1914 park", lat: 29.2111, lng: -81.0217 },
+];
 ---
 
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
@@ -255,16 +252,14 @@ const masterLocations = posts
             ))}
           </div>
 
-          {/* ── MASTER MAP ── */}
-          {masterLocations.length > 0 && (
-            <div class="masterMapBlock">
-              <div class="masterMapHead">
-                <span class="masterMapTitle">Explore Daytona</span>
-                <span class="masterMapSub">{masterLocations.length} local spot{masterLocations.length === 1 ? "" : "s"} on the map</span>
-              </div>
-              <InteractiveMap locations={masterLocations} height="450px" />
+          {/* ── TRENDING NOW MAP ── */}
+          <div class="masterMapBlock">
+            <div class="masterMapHead">
+              <span class="masterMapTitle">Go Do Daytona: Trending Now</span>
+              <span class="masterMapSub">{trendingSpots.length} spots worth checking out</span>
             </div>
-          )}
+            <InteractiveMap locations={trendingSpots} height="450px" />
+          </div>
 
           {/* ── FEATURED AD — "FEATURED" label, never "Sponsored" ── */}
           <div class="featuredCard">
