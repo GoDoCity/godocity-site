@@ -266,6 +266,11 @@ const mapPins = upcomingEvents
     };
   });
 
+/* Log every pin so water-pin origins are visible in Cloudflare build logs */
+mapPins.forEach(p =>
+  console.log(`[MAP PIN] "${p.label}" → ${p.lat}, ${p.lng}`)
+);
+
 /* ── Month filter options ── */
 const monthKeys = [...new Set(
   upcomingEvents.map(e => {
