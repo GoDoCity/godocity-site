@@ -9,14 +9,14 @@
 # to the serverless function before Netlify's form-bot can intercept it.
 [[redirects]]
   from   = "/ping.txt"
-  to     = "/.netlify/functions/submit-event"
+  to     = "/.netlify/functions/process-intake"
   status = 200
   force  = true
 
 # Convenience alias kept for direct API calls / future use
 [[redirects]]
-  from   = "/api/submit-event"
-  to     = "/.netlify/functions/submit-event"
+  from   = "/api/process-intake"
+  to     = "/.netlify/functions/process-intake"
   status = 200
   force  = true
 

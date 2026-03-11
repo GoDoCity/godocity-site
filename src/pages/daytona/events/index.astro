@@ -100,8 +100,10 @@ const scrapedEvents = scrapedRaw.map((e: any) => ({
     url:         e.url       ?? null,
     image:       e.image     ?? null,
     category:    e.category  ?? null,
-    lat:         e.lat       ?? null,
-    lng:         e.lng       ?? null,
+    lat:         e.lat         ?? null,
+    lng:         e.lng         ?? null,
+    coordSource: e.coordSource ?? null,  // "hardlock" | "known_venue" | "schema" | null
+    source:      e.source      ?? null,  // non-null marks this as a scraped event
     sponsored:   false,
   },
 }));
@@ -198,12 +200,25 @@ upcomingEvents
 const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true).slice(0, 3);
 const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
 
-/* ── Map pins — verified coordinates only; exclude 0,0 (ocean) ── */
+/* ── Map pins — Hide & Seek filter ───────────────────────────────────────────
+   We only plot a pin when we're confident in the coordinates:
+     • Markdown / manual events (no `source` field) — author-provided, trusted
+     • Scraped events with coordSource "hardlock"    — SCRAPER_COORD_OVERRIDES
+     • Scraped events with coordSource "known_venue" — KNOWN_VENUES table
+   Scraped events where coordSource is "schema" are excluded — those coords
+   come from the venue's own JSON-LD and often resolve to city-centre or
+   river-adjacent defaults, producing noisy river/parking-lot pins.
+   ─────────────────────────────────────────────────────────────────────────── */
 const mapPins = upcomingEvents
-  .filter(e =>
-    e.data.lat != null && e.data.lng != null &&
-    (e.data.lat !== 0 || e.data.lng !== 0)
-  )
+  .filter(e => {
+    if (e.data.lat == null || e.data.lng == null) return false;
+    if (e.data.lat === 0 && e.data.lng === 0)     return false;
+    // Scraped events must have verified coords (hardlock or known_venue)
+    if (e.data.source) {
+      return e.data.coordSource === "hardlock" || e.data.coordSource === "known_venue";
+    }
+    return true; // markdown / manual: trust author-provided coords
+  })
   .map(e => {
     const d = new Date(e.data.eventDate);
     const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });

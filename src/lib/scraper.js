@@ -117,7 +117,7 @@ function applyScraperCoordOverrides(event) {
     const hitTitle = ov.titleTest && ov.titleTest.test(title);
     const hitVenue = ov.venueTest && ov.venueTest.test(venue);
     if (hitTitle || hitVenue) {
-      return { ...event, lat: ov.lat, lng: ov.lng };
+      return { ...event, lat: ov.lat, lng: ov.lng, coordSource: "hardlock" };
     }
   }
   return event;
@@ -285,13 +285,20 @@ function parseJsonLd(html, source) {
       const addrCity = addr.addressLocality ?? "";
 
       // Coords — only from schema, never guessed
-      let lat = null, lng = null;
+      // coordSource tracks how reliable the pin is:
+      //   "schema"      — from the event site's own JSON-LD (may be city-centre)
+      //   "known_venue" — matched our KNOWN_VENUES table (exact street address)
+      //   "hardlock"    — overridden by SCRAPER_COORD_OVERRIDES (highest trust)
+      //   null          — no coordinates available; event is excluded from map
+      let lat = null, lng = null, coordSource = null;
       if (item.geo?.latitude  && item.geo?.longitude) {
         lat = parseFloat(item.geo.latitude);
         lng = parseFloat(item.geo.longitude);
+        coordSource = "schema";
       } else if (loc.geo?.latitude && loc.geo?.longitude) {
         lat = parseFloat(loc.geo.latitude);
         lng = parseFloat(loc.geo.longitude);
+        coordSource = "schema";
       }
 
       // Lookup known venue coords when address was found in HTML but not in schema
@@ -300,6 +307,7 @@ function parseJsonLd(html, source) {
         for (const [key, known] of Object.entries(KNOWN_VENUES)) {
           if (vk.includes(key) || key.includes(vk)) {
             lat = known.lat; lng = known.lng;
+            coordSource = "known_venue";
             break;
           }
         }
@@ -316,6 +324,7 @@ function parseJsonLd(html, source) {
         image:    item.image?.url ?? item.image ?? null,
         lat,
         lng,
+        coordSource,
         source:   source.name,
       });
     }
@@ -565,9 +574,11 @@ function applyKnownVenueCoords(events, source) {
   if (!known) return events;
   return events.map(e => ({
     ...e,
-    address: e.address || known.address,
-    lat:     e.lat ?? known.lat,
-    lng:     e.lng ?? known.lng,
+    address:     e.address || known.address,
+    lat:         e.lat ?? known.lat,
+    lng:         e.lng ?? known.lng,
+    // Only upgrade coordSource; never downgrade a hardlock or known_venue already set
+    coordSource: e.coordSource ?? "known_venue",
   }));
 }
 
