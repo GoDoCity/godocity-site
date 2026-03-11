@@ -6,13 +6,11 @@
  * The sheet must be published to the web as CSV (File → Share → Publish to web → CSV).
  * Set the public CSV URL in Cloudflare env var: SHEET_CSV_URL
  *
- * Column layout (1-indexed):
- *   A (col 1) — Eventbrite URL  (required)
- *   B (col 2) — Override title  (optional, fills in if Eventbrite title isn't scraped)
- *   C (col 3) — eventDate       (YYYY-MM-DD, optional — Eventbrite page parse fills this)
- *   D (col 4) — city            (optional, defaults to "daytona beach")
- *   E (col 5) — lat             (optional)
- *   F (col 6) — lng             (optional)
+ * Column layout is flexible — every cell in each row is scanned:
+ *   • A cell starting with https://www.eventbrite.com → the event URL
+ *   • Any other https:// cell → event URL (non-Eventbrite URLs are logged and skipped)
+ *   • Rows where all cells are blank, or the first cell is a heading like
+ *     "GoDoDaytona Events" / "URL" / "Event" → skipped automatically
  *
  * Returns an array of event objects in the same shape as manual-events.json quickEntry[].
  */
@@ -57,33 +55,42 @@ export async function importFromSheet(csvUrl) {
 
   const rows = parseCsv(text);
   const events = [];
+  let firstDataRow = true;
 
   for (const row of rows) {
-    const url = (row[0] ?? "").trim();
-    if (!url.startsWith("http")) continue;
+    /* Skip blank rows */
+    const cells = row.map(c => c.trim()).filter(Boolean);
+    if (cells.length === 0) continue;
+
+    /* Skip heading rows — single-cell titles, or column-header rows */
+    const firstCell = cells[0];
+    if (isHeadingRow(firstCell, cells)) continue;
+
+    /* Log the first data row we attempt to parse */
+    if (firstDataRow) {
+      console.log(`[sheet-import] First data row: ${JSON.stringify(cells.slice(0, 4))}`);
+      firstDataRow = false;
+    }
+
+    /* Scan all cells to find the Eventbrite URL (column-agnostic) */
+    const url = cells.find(c => /^https?:\/\//i.test(c)) ?? null;
+    if (!url) continue;
 
     const idMatch = url.match(EB_ID_RE);
     if (!idMatch) {
-      console.warn("[sheet-import] Skipping non-Eventbrite URL:", url);
+      console.log(`[sheet-import] Skipping non-Eventbrite URL: ${url}`);
       continue;
     }
     const eventbriteId = idMatch[1];
 
-    /* Override columns from the sheet */
-    const overrideTitle = (row[1] ?? "").trim() || null;
-    const overrideDate  = (row[2] ?? "").trim() || null;
-    const overrideCity  = (row[3] ?? "").trim() || null;
-    const overrideLat   = parseFloat(row[4]) || null;
-    const overrideLng   = parseFloat(row[5]) || null;
-
     /* Fetch og: metadata from the Eventbrite event page */
     const meta = await fetchEventbriteMeta(url, eventbriteId);
 
-    const title = overrideTitle ?? meta.title ?? `Eventbrite Event ${eventbriteId}`;
-    const eventDate = overrideDate ?? meta.eventDate ?? null;
+    const title = meta.title ?? `Eventbrite Event ${eventbriteId}`;
+    const eventDate = meta.eventDate ?? null;
 
     if (!eventDate) {
-      console.warn(`[sheet-import] No date for "${title}" (${eventbriteId}) — skipping`);
+      console.log(`[sheet-import] No date for "${title}" (${eventbriteId}) — skipping`);
       continue;
     }
 
@@ -92,12 +99,12 @@ export async function importFromSheet(csvUrl) {
       eventDate,
       endDate:   meta.endDate   ?? null,
       location:  meta.location  ?? "",
-      city:      overrideCity   ?? meta.city ?? "daytona beach",
+      city:      meta.city      ?? "daytona beach",
       url,
       image:     meta.image     ?? null,
       category:  meta.category  ?? null,
-      lat:       overrideLat    ?? meta.lat ?? null,
-      lng:       overrideLng    ?? meta.lng ?? null,
+      lat:       meta.lat       ?? null,
+      lng:       meta.lng       ?? null,
       sponsored: false,
       source:    "eventbrite-sheet",
     });
@@ -184,6 +191,20 @@ function parseEventbritePage(html) {
   }
 
   return result;
+}
+
+/**
+ * Returns true for rows that are clearly headings or label rows, not event data.
+ * Catches: "GoDoDaytona Events", "URL", "Event", "Raw Text", "Status", etc.
+ */
+function isHeadingRow(firstCell, cells) {
+  /* Single-cell rows with no URL are headings (sheet title, section labels) */
+  if (cells.length === 1 && !/^https?:\/\//i.test(firstCell)) return true;
+  /* Common column-header words */
+  if (/^(url|event|title|name|raw\s*text|status|description|date)$/i.test(firstCell)) return true;
+  /* Sheet title: "GoDoDaytona" anywhere in the first cell */
+  if (/godo(daytona|city)/i.test(firstCell)) return true;
+  return false;
 }
 
 /** Minimal CSV row parser — handles double-quoted fields with internal commas/newlines. */
