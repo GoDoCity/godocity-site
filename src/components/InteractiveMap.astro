@@ -16,9 +16,10 @@ export interface Props {
 
 const { locations = [], height = "400px", zoom } = Astro.props;
 
-/* Filter to only pins that have coordinates, then attach 1-based number */
+/* Filter to only pins with real coordinates.
+   Exclude null/undefined AND lat=0,lng=0 (the ocean default from bad geocoding). */
 const pins = locations
-  .filter((l) => l.lat != null && l.lng != null)
+  .filter((l) => l.lat != null && l.lng != null && (l.lat !== 0 || l.lng !== 0))
   .map((l, i) => ({ ...l, num: i + 1 }));
 
 if (pins.length === 0) return;
