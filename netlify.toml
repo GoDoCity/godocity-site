@@ -5,7 +5,14 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Redirect /submit-success/ after Netlify processes the form POST
+# Clean alias for the event-submission function
+[[redirects]]
+  from   = "/api/submit-event"
+  to     = "/.netlify/functions/submit-event"
+  status = 200
+  force  = true
+
+# Redirect /submit-success/ to its static page
 [[redirects]]
   from   = "/submit-success/"
   to     = "/submit-success/index.html"
