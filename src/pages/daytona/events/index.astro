@@ -2,6 +2,7 @@
 import Base from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
+import { scrapeAll } from "../../../lib/scraper.js";
 
 /* ── Greater Daytona city set ─────────────────────────────────────────── */
 const GREATER_DAYTONA = new Set([
@@ -79,8 +80,35 @@ today.setHours(0, 0, 0, 0);
 let allEvents = [];
 try { allEvents = await getCollection("events"); } catch { allEvents = []; }
 
+/* ── Scrape live events from 8 sources (Hard Rock, The Shores, city calendars) ──
+   Runs at every `astro build` so data is always fresh on each deploy.
+   scrapeAll() never throws — individual source failures return [] silently.   */
+let scrapedRaw: any[] = [];
+try { scrapedRaw = await scrapeAll(); } catch { scrapedRaw = []; }
+
+/* Normalise scraped events to the same { data, slug } shape as the collection */
+const scrapedEvents = scrapedRaw.map((e: any) => ({
+  slug: `${String(e.city ?? "daytona").replace(/\s+/g, "-")}/scraped-${String(e.title ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}`,
+  data: {
+    title:       e.title,
+    eventDate:   e.eventDate,
+    endDate:     e.endDate   ?? null,
+    location:    e.location  ?? "",
+    city:        e.city      ?? "daytona beach",
+    url:         e.url       ?? null,
+    image:       e.image     ?? null,
+    category:    e.category  ?? null,
+    lat:         e.lat       ?? null,
+    lng:         e.lng       ?? null,
+    sponsored:   false,
+  },
+}));
+
+/* Merge: static markdown events take precedence (they come first for dedup purposes) */
+const allEventsWithLive = [...allEvents, ...scrapedEvents];
+
 /* ── Include events that haven't started yet OR are still ongoing (endDate >= today) ── */
-const upcomingEvents = allEvents
+const upcomingEvents = allEventsWithLive
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
     const evDate = new Date(e.data.eventDate);
@@ -147,7 +175,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
       {/* ── NEWSLETTER — contained adBand-style yellow card ── */}
       <div class="nlWrap">
-        <form name="newsletter-signup" data-netlify="true" netlify-honeypot="nl-bot" hidden aria-hidden="true">
+        <form name="newsletter-signup" data-netlify="true" netlify-honeypot="nl-bot" style="display:none" aria-hidden="true">
           <input name="form-name" value="newsletter-signup" /><input name="nl-bot" /><input name="email" />
         </form>
         <div class="nlCard">
@@ -445,15 +473,18 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 <style>
   .eventsContainer { padding-bottom: 64px; }
 
-  /* ── Newsletter — adBand-style contained card ── */
+  /* ── Newsletter — full-bleed yellow band, flat edges ── */
   .nlWrap {
-    padding: 32px 0 24px;
+    /* Provides breathing room above/below the band */
+    padding: 0;
+    /* Full-bleed: bust out of any parent padding to true screen edges */
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
   }
   .nlCard {
     background: linear-gradient(135deg, var(--brand1), var(--brand2));
-    border-radius: 18px;
-    box-shadow: 0 12px 40px color-mix(in srgb, var(--brand1) 35%, transparent);
-    padding: clamp(20px, 3vw, 36px) clamp(20px, 4vw, 48px);
+    /* No border-radius — hard edge to edge */
+    padding: clamp(28px, 4vw, 48px) 1.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -525,12 +556,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     color: var(--accentText);
     text-align: center;
     padding: 8px 0;
-  }
-  @media (max-width: 520px) {
-    .nlCard { border-radius: 14px; }
-    .nlRow { flex-direction: column; height: auto; gap: 8px; }
-    .nlInput { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
-    .nlBtn { border-radius: 8px; height: 46px; }
   }
 
   /* ── Featured Scroller — label + action buttons row ── */
@@ -726,7 +751,10 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   .noEvents a { color: var(--brand1); }
 
   @media (max-width: 520px) {
-    .nlBand { padding: 20px 0; margin-bottom: 20px; }
+    .nlCard       { padding: 24px 1.25rem; }
+    .nlRow        { flex-direction: column; height: auto; gap: 8px; }
+    .nlInput      { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
+    .nlBtn        { border-radius: 8px; height: 46px; }
     .featuredCard { width: 260px; }
     .fcImgWrap    { height: 160px; }
     .filterBar    { gap: 6px; }
