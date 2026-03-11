@@ -48,7 +48,7 @@ const CATEGORIES = [
           Netlify detects this hidden form at build time to register the schema.
           The visible form below is submitted via JS fetch for reliable redirect handling.
         -->
-        <form name="event-submission" data-netlify="true" netlify-honeypot="bot-field" hidden aria-hidden="true">
+        <form name="event-submission" data-netlify="true" netlify-honeypot="bot-field" style="display:none" aria-hidden="true">
           <input type="hidden" name="form-name" value="event-submission" />
           <input name="bot-field" />
           <input name="event-title" /><input name="event-date" /><input name="event-end-date" />
@@ -436,13 +436,20 @@ const CATEGORIES = [
     var body = new URLSearchParams(fields).toString();
 
     fetch("/", {
-      method:  "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body:    body,
+      method:   "POST",
+      headers:  { "Content-Type": "application/x-www-form-urlencoded" },
+      body:     body,
+      redirect: "manual",   /* capture Netlify's 303 instead of following it */
     })
       .then(function (res) {
-        if (res.ok || res.status === 303) {
-          /* Netlify returns 200 or 303; both mean success */
+        /*
+         * Netlify Forms returns one of:
+         *   200  — AJAX submission acknowledged
+         *   303  — redirect to thank-you page; with redirect:"manual" this
+         *          becomes an opaque redirect: type="opaqueredirect", status=0
+         * Both mean success. Any 4xx/5xx means the form wasn't registered.
+         */
+        if (res.ok || res.type === "opaqueredirect" || res.status === 0) {
           window.location.href = "/submit-success/";
         } else {
           throw new Error("Server responded with " + res.status);

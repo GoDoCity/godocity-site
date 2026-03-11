@@ -1,0 +1,425 @@
+---
+/**
+ * /admin/parse — CitySpark → manual-events.json Quick Parser
+ *
+ * Internal utility, not linked from the public site.
+ * Paste raw text from CitySpark (or any event listing) and get a
+ * JSON object ready to drop into src/data/manual-events.json > quickEntry[].
+ *
+ * Handles:
+ *   • "March 15, 2026" / "March 6–15, 2026" / "Mar 6 - Mar 15, 2026"
+ *   • "3/15/2026" numeric dates
+ *   • Short weekday prefixes like "Sat, Mar 15"
+ *   • Venue lines after the date
+ *   • City extraction from "Daytona Beach, FL 32118"
+ *   • Multiple events separated by blank lines
+ */
+import Base from "../../layouts/Base.astro";
+---
+
+<Base title="CitySpark Parser — Internal" cityBase="daytona">
+  <section class="section">
+    <div class="container">
+      <div class="parserWrap">
+
+        <div class="parserHead">
+          <h1 class="parserTitle">CitySpark → JSON Parser</h1>
+          <p class="parserSub">
+            Paste raw CitySpark event text. Supports one or multiple events
+            (separate with a blank line). Output pastes directly into
+            <code>src/data/manual-events.json</code> → <code>quickEntry[]</code>.
+          </p>
+        </div>
+
+        <div class="splitPane">
+          <div class="pane">
+            <label class="paneLabel" for="rawInput">Raw CitySpark Text</label>
+            <textarea id="rawInput" class="paneArea"
+              placeholder="Paste event text here…
+
+Example:
+Bike Week 2026
+March 6–15, 2026
+Main Street, Daytona Beach FL
+https://officialbikeweek.com"></textarea>
+            <div class="paneBtns">
+              <button id="parseBtn" class="btn btn--primary">Parse →</button>
+              <button id="clearBtn" class="btn btn--ghost">Clear</button>
+            </div>
+          </div>
+
+          <div class="pane">
+            <label class="paneLabel" for="jsonOutput">JSON (paste into quickEntry[])</label>
+            <textarea id="jsonOutput" class="paneArea" readonly
+              placeholder="Parsed JSON appears here…"></textarea>
+            <div class="paneBtns">
+              <button id="copyBtn" class="btn btn--primary">Copy JSON</button>
+              <span id="parseStatus" class="parseStatus"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hintBox">
+          <p class="hintTitle">Tips</p>
+          <ul class="hintList">
+            <li>Put the <strong>event title</strong> on the first line, date on the next line.</li>
+            <li>For multi-day events write the full range: <em>March 6–15, 2026</em></li>
+            <li>A URL anywhere in the block is auto-detected.</li>
+            <li>Paste <strong>multiple events</strong> separated by a blank line — all will parse at once.</li>
+            <li>After copying, open <code>src/data/manual-events.json</code> and add the object(s) inside <code>quickEntry: [ … ]</code>.</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script is:inline>
+(function () {
+  /* ── Month name → number map ── */
+  var MONTHS = {
+    january:1, february:2, march:3, april:4, may:5, june:6,
+    july:7, august:8, september:9, october:10, november:11, december:12,
+    jan:1, feb:2, mar:3, apr:4, jun:6, jul:7, aug:8, sep:9, oct:10, nov:11, dec:12,
+  };
+
+  function padZ(n) { return String(n).padStart(2, "0"); }
+
+  /* Parse a date string → "YYYY-MM-DD" or null */
+  function parseDateStr(s) {
+    if (!s) return null;
+    s = s.trim();
+
+    /* Already ISO */
+    if (/^\d{4}-\d{2}-\d{2}/.test(s)) return s.slice(0, 10);
+
+    /* "March 15, 2026" or "March 6-15, 2026" or "March 6 – March 15, 2026" */
+    var m = s.match(/([A-Za-z]+)\s+(\d{1,2})(?:\s*[–\-]\s*(?:[A-Za-z]+\s+)?\d{1,2})?,?\s+(\d{4})/);
+    if (m) {
+      var mo = MONTHS[m[1].toLowerCase()];
+      if (mo) return m[3] + "-" + padZ(mo) + "-" + padZ(parseInt(m[2]));
+    }
+
+    /* "3/15/2026" */
+    m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if (m) return m[3] + "-" + padZ(parseInt(m[1])) + "-" + padZ(parseInt(m[2]));
+
+    /* "Sat, Mar 15" or "Sat Mar 15" — no year, guess nearest future */
+    m = s.match(/[A-Za-z]{2,3},?\s+([A-Za-z]{3,})\s+(\d{1,2})/);
+    if (m) {
+      var mo = MONTHS[m[1].toLowerCase()];
+      if (mo) {
+        var yr = new Date().getFullYear();
+        var d = new Date(yr, mo - 1, parseInt(m[2]));
+        if (d < new Date()) d.setFullYear(yr + 1);
+        return d.toISOString().slice(0, 10);
+      }
+    }
+
+    return null;
+  }
+
+  /* Parse end date from a range string, e.g. "March 6–15, 2026" or "March 6 – March 15, 2026" */
+  function parseEndDate(s) {
+    if (!s) return null;
+
+    /* "March 6-15, 2026" */
+    var m = s.match(/([A-Za-z]+)\s+\d{1,2}\s*[–\-]\s*(\d{1,2}),?\s+(\d{4})/);
+    if (m) {
+      var mo = MONTHS[m[1].toLowerCase()];
+      if (mo) return m[3] + "-" + padZ(mo) + "-" + padZ(parseInt(m[2]));
+    }
+
+    /* "March 6 – March 15, 2026" */
+    m = s.match(/[A-Za-z]+\s+\d+[^–\-]*[–\-]\s*([A-Za-z]+)\s+(\d{1,2}),?\s+(\d{4})/);
+    if (m) {
+      var mo = MONTHS[m[1].toLowerCase()];
+      if (mo) return m[3] + "-" + padZ(mo) + "-" + padZ(parseInt(m[2]));
+    }
+
+    return null;
+  }
+
+  /* True if a line appears to contain a date */
+  function isDateLine(line) {
+    return /\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b/i.test(line)
+        || /\d{1,2}\/\d{1,2}\/\d{4}/.test(line)
+        || /\d{4}-\d{2}-\d{2}/.test(line)
+        || /\b(mon|tue|wed|thu|fri|sat|sun),?\s+[A-Za-z]{3}/i.test(line);
+  }
+
+  var KNOWN_CITIES = [
+    "Daytona Beach Shores","Daytona Beach","Ormond Beach","Port Orange",
+    "New Smyrna Beach","South Daytona","Holly Hill","Flagler Beach",
+  ];
+
+  /* Remove trailing ", City, FL XXXXX" from a venue string */
+  function stripCitySuffix(venue) {
+    return venue.replace(/,\s*(Daytona Beach Shores|Daytona Beach|Ormond Beach|Port Orange|New Smyrna Beach|Flagler Beach|South Daytona|Holly Hill)[,\s].*/i, "").trim();
+  }
+
+  /* Extract city key from any string */
+  function extractCity(text) {
+    for (var i = 0; i < KNOWN_CITIES.length; i++) {
+      if (text.toLowerCase().indexOf(KNOWN_CITIES[i].toLowerCase()) !== -1) {
+        return KNOWN_CITIES[i].toLowerCase();
+      }
+    }
+    return "daytona beach";
+  }
+
+  /* Parse a single block of text → event object or null */
+  function parseBlock(raw) {
+    var lines = raw.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
+    if (!lines.length) return null;
+
+    var title    = null;
+    var eventDate = null;
+    var endDate  = null;
+    var location = null;
+    var city     = "daytona beach";
+    var url      = null;
+
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+
+      /* URL detection */
+      if (/^https?:\/\//i.test(line)) {
+        if (!url) url = line;
+        continue;
+      }
+
+      /* City-only line */
+      var cityHit = null;
+      for (var c = 0; c < KNOWN_CITIES.length; c++) {
+        if (new RegExp("^" + KNOWN_CITIES[c] + "[,\\s]*$", "i").test(line)) {
+          cityHit = KNOWN_CITIES[c].toLowerCase(); break;
+        }
+      }
+      if (cityHit) { city = cityHit; continue; }
+
+      /* Date line */
+      if (!eventDate && isDateLine(line)) {
+        eventDate = parseDateStr(line);
+        endDate   = parseEndDate(line);
+
+        /* Title = last non-date, non-url line before this one */
+        if (!title) {
+          for (var j = i - 1; j >= 0; j--) {
+            if (!isDateLine(lines[j]) && !/^https?:\/\//i.test(lines[j])) {
+              title = lines[j]; break;
+            }
+          }
+        }
+
+        /* Venue = next line after date (if not another date / url) */
+        if (!location && i + 1 < lines.length) {
+          var next = lines[i + 1];
+          if (!isDateLine(next) && !/^https?:\/\//i.test(next)) {
+            /* extract city if embedded */
+            var cFromVenue = extractCity(next);
+            if (cFromVenue !== "daytona beach") city = cFromVenue;
+            location = stripCitySuffix(next);
+            i++; /* consume venue line */
+          }
+        }
+        continue;
+      }
+
+      /* Accumulate potential title before we hit a date */
+      if (!eventDate && !title && line.length >= 3 && line.length <= 200) {
+        title = line;
+      }
+    }
+
+    /* Fall back: first line as title if nothing else matched */
+    if (!title) title = lines[0] || "Untitled Event";
+    if (!eventDate) return null; /* can't create entry without a date */
+
+    /* Inline city detection from title/venue as last resort */
+    if (city === "daytona beach") {
+      var combined = (title || "") + " " + (location || "");
+      var detected = extractCity(combined);
+      if (detected !== "daytona beach") city = detected;
+    }
+
+    return {
+      title:     title,
+      eventDate: eventDate,
+      endDate:   endDate  || null,
+      location:  location || "",
+      city:      city,
+      url:       url      || null,
+      image:     null,
+      category:  null,
+      lat:       null,
+      lng:       null,
+      sponsored: false,
+    };
+  }
+
+  /* Split raw input into per-event blocks and parse each */
+  function parseAll(raw) {
+    var blocks = raw.split(/\n{2,}/).filter(function (b) { return b.trim(); });
+    var out = [];
+    blocks.forEach(function (b) {
+      var ev = parseBlock(b);
+      if (ev) out.push(ev);
+    });
+    return out;
+  }
+
+  /* ── DOM wiring ── */
+  var rawInput   = document.getElementById("rawInput");
+  var jsonOutput = document.getElementById("jsonOutput");
+  var parseBtn   = document.getElementById("parseBtn");
+  var copyBtn    = document.getElementById("copyBtn");
+  var clearBtn   = document.getElementById("clearBtn");
+  var status     = document.getElementById("parseStatus");
+
+  function doParseEvents() {
+    var raw = rawInput.value.trim();
+    status.textContent = "";
+    status.className   = "parseStatus";
+    if (!raw) { jsonOutput.value = ""; return; }
+
+    var results = parseAll(raw);
+    if (!results.length) {
+      jsonOutput.value = "// No events with a recognisable date were found.\n// Tip: include a full date like \"March 15, 2026\".";
+      status.textContent = "⚠ No dates found";
+      status.className   = "parseStatus warn";
+      return;
+    }
+
+    var out;
+    if (results.length === 1) {
+      out = JSON.stringify(results[0], null, 2);
+    } else {
+      out = results.map(function (r) { return JSON.stringify(r, null, 2); }).join(",\n\n");
+    }
+
+    jsonOutput.value   = out;
+    status.textContent = "✓ " + results.length + " event" + (results.length !== 1 ? "s" : "") + " parsed";
+    status.className   = "parseStatus ok";
+  }
+
+  parseBtn.addEventListener("click", doParseEvents);
+
+  clearBtn.addEventListener("click", function () {
+    rawInput.value = ""; jsonOutput.value = "";
+    status.textContent = ""; rawInput.focus();
+  });
+
+  copyBtn.addEventListener("click", function () {
+    if (!jsonOutput.value) return;
+    navigator.clipboard.writeText(jsonOutput.value).then(function () {
+      copyBtn.textContent = "Copied!";
+      setTimeout(function () { copyBtn.textContent = "Copy JSON"; }, 2000);
+    }).catch(function () {
+      jsonOutput.select();
+      document.execCommand("copy");
+      copyBtn.textContent = "Copied!";
+      setTimeout(function () { copyBtn.textContent = "Copy JSON"; }, 2000);
+    });
+  });
+
+  /* Auto-parse 400ms after typing stops */
+  var debounce;
+  rawInput.addEventListener("input", function () {
+    clearTimeout(debounce);
+    debounce = setTimeout(doParseEvents, 400);
+  });
+})();
+</script>
+
+<style>
+  .parserWrap { max-width: 1000px; padding: 20px 0 64px; }
+
+  .parserHead { margin-bottom: 28px; }
+  .parserTitle {
+    font-size: clamp(24px, 3vw, 36px); font-weight: 900; margin: 0 0 10px;
+  }
+  .parserSub {
+    font-size: 15px; color: var(--muted); line-height: 1.55; margin: 0;
+  }
+  .parserSub code {
+    background: rgba(255,255,255,.07); padding: 2px 6px;
+    border-radius: 4px; font-size: 13px; color: var(--brand1);
+  }
+
+  .splitPane {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+
+  .pane { display: flex; flex-direction: column; gap: 8px; }
+
+  .paneLabel {
+    font-size: 11px; font-weight: 900; text-transform: uppercase;
+    letter-spacing: .1em; color: var(--brand1);
+  }
+
+  .paneArea {
+    flex: 1;
+    min-height: 320px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.1);
+    background: rgba(255,255,255,.04);
+    color: var(--text);
+    font-size: 13px;
+    font-family: "Menlo", "Consolas", "Monaco", monospace;
+    line-height: 1.55;
+    resize: vertical;
+    outline: none;
+    transition: border-color 150ms;
+  }
+  .paneArea:focus { border-color: var(--brand1); }
+  .paneArea[readonly] { color: var(--brand1); cursor: default; }
+  .paneArea::placeholder { color: rgba(255,255,255,.2); }
+
+  .paneBtns { display: flex; align-items: center; gap: 10px; }
+
+  .btn {
+    height: 38px; padding: 0 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 900; font-family: inherit;
+    cursor: pointer; white-space: nowrap; transition: opacity 140ms;
+    border: none;
+  }
+  .btn--primary { background: var(--brand1); color: #000; }
+  .btn--primary:hover { opacity: .85; }
+  .btn--ghost {
+    background: transparent; color: var(--muted);
+    border: 1px solid rgba(255,255,255,.15);
+  }
+  .btn--ghost:hover { border-color: var(--brand1); color: var(--brand1); }
+
+  .parseStatus { font-size: 13px; font-weight: 700; }
+  .parseStatus.ok   { color: #4caf7d; }
+  .parseStatus.warn { color: #e8a838; }
+
+  /* Hint box */
+  .hintBox {
+    background: rgba(255,255,255,.03);
+    border: 1px solid rgba(255,255,255,.07);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .hintTitle { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; color: var(--brand1); margin: 0 0 10px; }
+  .hintList { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+  .hintList li { font-size: 13px; color: var(--muted); line-height: 1.4; }
+  .hintList li code {
+    background: rgba(255,255,255,.07); padding: 1px 5px;
+    border-radius: 4px; font-size: 12px; color: var(--brand1);
+  }
+
+  @media (max-width: 700px) {
+    .splitPane { grid-template-columns: 1fr; }
+    .paneArea  { min-height: 220px; }
+  }
+</style>
