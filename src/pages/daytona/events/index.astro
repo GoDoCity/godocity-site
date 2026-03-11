@@ -147,7 +147,7 @@ const COORD_OVERRIDES: Array<{
   // "The Bank", "Dirty Harry's", "Main Street" are all the same corridor
   {
     titleTest: /bike week|main street/i,
-    venueTest: /main street|the bank|dirty harry/i,
+    venueTest: /main street|the bank|dirty harry|boot hill|iron horse|main st\b/i,
     lat: 29.2235, lng: -81.0115,
   },
 ];
@@ -182,12 +182,6 @@ console.log(
   `[events] Markdown: ${allEvents.length} | Manual: ${manualEvents.length} | ` +
   `Scraped: ${scrapedCount} | Total upcoming: ${upcomingEvents.length}`
 );
-// Coord spot-check — verify key events are pinned correctly
-upcomingEvents
-  .filter(e => /turkey run|bike week|main street/i.test(String(e.data.title ?? "")))
-  .forEach(e => console.log(
-    `[events] coord-check "${e.data.title}" → ${e.data.lat}, ${e.data.lng}`
-  ));
 
 // Warn about events with no usable coordinates (will be excluded from map)
 upcomingEvents
