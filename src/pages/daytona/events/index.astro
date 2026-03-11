@@ -3,6 +3,7 @@ import Base from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
 import { scrapeAll } from "../../../lib/scraper.js";
+import manualFeedData from "../../../data/manual-events.json";
 
 /* ── Greater Daytona city set ─────────────────────────────────────────── */
 const GREATER_DAYTONA = new Set([
@@ -105,8 +106,42 @@ const scrapedEvents = scrapedRaw.map((e: any) => ({
   },
 }));
 
-/* Merge: static markdown events take precedence (they come first for dedup purposes) */
-const allEventsWithLive = [...allEvents, ...scrapedEvents];
+/* ── Manual Quick-Entry feed (src/data/manual-events.json) ──────────────────
+   Paste event objects here as a fallback when scrapers are blocked.
+   Manual entries are processed first and win over scraped data on dedup.   */
+const manualEvents = ((manualFeedData as any).quickEntry ?? [])
+  .filter((e: any) => e.title && e.eventDate && !e._note)
+  .map((e: any) => ({
+    slug: `${String(e.city ?? "daytona").replace(/\s+/g, "-")}/manual-${String(e.title ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}`,
+    data: {
+      title:     e.title,
+      eventDate: e.eventDate,
+      endDate:   e.endDate   ?? null,
+      location:  e.location  ?? "",
+      city:      e.city      ?? "daytona beach",
+      url:       e.url       ?? null,
+      image:     e.image     ?? null,
+      category:  e.category  ?? null,
+      lat:       e.lat       ?? null,
+      lng:       e.lng       ?? null,
+      sponsored: e.sponsored ?? false,
+    },
+  }));
+
+/* ── Turkey Run coordinate hard-fix ─────────────────────────────────────────
+   The Turkey Run is always at Daytona International Speedway.
+   Any source that misplaces it (Ridgewood Ave, city centre, etc.) is overwritten. */
+const TURKEY_RUN_LAT = 29.1852;
+const TURKEY_RUN_LNG = -81.0705;
+function patchEventCoords(e: any) {
+  if (String(e.data.title ?? "").toLowerCase().includes("turkey run")) {
+    return { ...e, data: { ...e.data, lat: TURKEY_RUN_LAT, lng: TURKEY_RUN_LNG } };
+  }
+  return e;
+}
+
+/* Merge order: markdown → manual → scraped (first occurrence wins on dedup) */
+const allEventsWithLive = [...allEvents, ...manualEvents, ...scrapedEvents].map(patchEventCoords);
 
 /* ── Include events that haven't started yet OR are still ongoing (endDate >= today) ── */
 const upcomingEvents = allEventsWithLive
@@ -120,6 +155,11 @@ const upcomingEvents = allEventsWithLive
     return GREATER_DAYTONA.has(evCity) && isActive;
   })
   .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime());
+
+console.log(
+  `[events] Markdown: ${allEvents.length} | Manual: ${manualEvents.length} | ` +
+  `Scraped: ${scrapedCount} | Total upcoming: ${upcomingEvents.length}`
+);
 
 /* Top 3 sponsored → featured scroller; rest → card feed */
 const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true).slice(0, 3);
@@ -174,33 +214,32 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   <section class="section">
     <div class="eventsContainer">
 
-        <div class="container">
-
-        {/* ── NEWSLETTER — contained card matching homepage container width ── */}
-        <form name="newsletter-signup" data-netlify="true" netlify-honeypot="nl-bot" style="display:none" aria-hidden="true">
-          <input name="form-name" value="newsletter-signup" /><input name="nl-bot" /><input name="email" />
-        </form>
-        <div class="nlWrap">
-          <div class="nlCard">
-            <div class="nlContent" id="nlContent">
-              <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
-              <div class="nlSub">Get the best local events sent to your inbox, <strong>for free.</strong></div>
-              <form class="nlForm" id="nlForm" novalidate>
-                <input type="hidden" name="form-name" value="newsletter-signup" />
-                <p style="display:none" aria-hidden="true"><label>Leave empty: <input name="nl-bot" id="nlBot" /></label></p>
-                <div class="nlRow">
-                  <input class="nlInput" id="nlEmail" name="email" type="email"
-                    placeholder="Enter your email address" autocomplete="email" required />
-                  <button class="nlBtn" id="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
-                </div>
-              </form>
-              <div class="nlFine">100% free · Unsubscribe anytime</div>
-            </div>
-            <div class="nlThanks" id="nlThanks" aria-live="polite" style="display:none">
-              Thank you! You're on the list. ✓
-            </div>
+      {/* ── NEWSLETTER — full-bleed slim band, edge-to-edge, no curves ── */}
+      <form name="newsletter-signup" data-netlify="true" netlify-honeypot="nl-bot" style="display:none" aria-hidden="true">
+        <input name="form-name" value="newsletter-signup" /><input name="nl-bot" /><input name="email" />
+      </form>
+      <div class="nlWrap">
+        <div class="nlCard">
+          <div class="nlContent" id="nlContent">
+            <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
+            <div class="nlSub">Get the best local events sent to your inbox, <strong>for free.</strong></div>
+            <form class="nlForm" id="nlForm" novalidate>
+              <input type="hidden" name="form-name" value="newsletter-signup" />
+              <p style="display:none" aria-hidden="true"><label>Leave empty: <input name="nl-bot" id="nlBot" /></label></p>
+              <div class="nlRow">
+                <input class="nlInput" id="nlEmail" name="email" type="email"
+                  placeholder="Enter your email address" autocomplete="email" required />
+                <button class="nlBtn" id="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
+              </div>
+            </form>
+          </div>
+          <div class="nlThanks" id="nlThanks" aria-live="polite" style="display:none">
+            Thank you! You're on the list. ✓
           </div>
         </div>
+      </div>
+
+      <div class="container">
 
         {/* ── FEATURED SCROLLER — label + action buttons at top ── */}
         {sponsoredEvents.length > 0 && (
@@ -359,8 +398,8 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
           <a class="suggestBtn" href="/submit-event/">Suggest an Event →</a>
         </div>
 
-      </div>
-    </div>
+        </div>{/* /.container */}
+    </div>{/* /.eventsContainer */}
   </section>
 </Base>
 
@@ -481,18 +520,22 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 <style>
   .eventsContainer { padding-bottom: 64px; }
 
-  /* ── Newsletter — contained card, matches homepage container width ── */
+  /* ── Newsletter — full-bleed slim band, strict 180px, no curves ── */
   .nlWrap {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
     margin-bottom: 28px;
   }
   .nlCard {
     background: linear-gradient(135deg, var(--brand1), var(--brand2));
-    border-radius: 16px;
-    padding: clamp(28px, 4vw, 48px) 1.5rem;
+    /* No border-radius — hard edge to edge */
+    height: 180px;
+    max-height: 180px;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 160px;
+    padding: 0 1.5rem;
   }
   .nlContent {
     max-width: 520px;
@@ -703,21 +746,21 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   .evCardBody { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 
   .evCardTitle {
-    font-size: 16px; font-weight: 800; color: var(--text);
+    font-size: 18px; font-weight: 800; color: var(--text);
     line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .evCardExt { font-size: 10px; color: var(--faint); margin-left: 4px; }
+  .evCardExt { font-size: 11px; color: var(--faint); margin-left: 4px; }
 
   .evCardVenue {
-    font-size: 13px; font-weight: 700; color: var(--brand1);
+    font-size: 15px; font-weight: 700; color: var(--brand1);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
   .evCardMeta { display: flex; align-items: center; gap: 5px; }
-  .evCardCity { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .evCardCity { font-size: 15px; font-weight: 600; color: var(--muted); }
   .evCardDist {
-    font-size: 12px; font-weight: 600; color: var(--faint);
-    background: rgba(255,255,255,.06); padding: 1px 5px; border-radius: 999px;
+    font-size: 15px; font-weight: 700; color: var(--brand1);
+    background: rgba(249,217,0,.10); padding: 1px 6px; border-radius: 999px;
   }
 
   /* Load More */
@@ -773,7 +816,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     .fcImgWrap    { height: 160px; }
     .filterBar    { gap: 6px; }
     .filterCount  { margin-left: 0; width: 100%; }
-    .evCardTitle  { font-size: 15px; }
-    .evCardVenue  { font-size: 12px; }
+    .evCardTitle  { font-size: 16px; }
+    .evCardVenue  { font-size: 13px; }
+    .evCardCity   { font-size: 13px; }
+    .evCardDist   { font-size: 13px; }
   }
 </style>
