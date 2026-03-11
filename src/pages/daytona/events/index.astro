@@ -85,22 +85,17 @@ try { allEvents = await getCollection("events"); } catch { allEvents = []; }
 /* ── Google Sheet Eventbrite import (SHEET_CSV_URL env var) ─────────────────
    Publish the sheet to the web as CSV and set SHEET_CSV_URL in Cloudflare.
    Column A = Eventbrite URL. Title, image, and date are fetched at build time.
-   When the sheet is reachable it becomes the primary event source and the
-   legacy HTML scraper is skipped entirely (eliminates ocean-coord pins).      */
+   The sheet is the sole live event source. The legacy HTML scraper is disabled.
+   If the sheet is unreachable only markdown + manual-events.json are shown.    */
 const sheetCsvUrl = import.meta.env.SHEET_CSV_URL ?? "";
 let sheetRaw: any[] = [];
 try { sheetRaw = await importFromSheet(sheetCsvUrl); } catch { sheetRaw = []; }
-const sheetIsActive = sheetRaw.length > 0;
 
-/* ── Legacy HTML scraper — skipped when the Google Sheet returned events ─────
-   scrapeAll() never throws — individual source failures return [] silently.   */
-let scrapedRaw: any[] = [];
-if (!sheetIsActive) {
-  try { scrapedRaw = await scrapeAll(); } catch { scrapedRaw = []; }
-} else {
-  console.log("[events] Sheet is active — legacy scraper skipped");
-}
-const scrapedCount = scrapedRaw.length;
+/* ── Legacy HTML scraper — permanently disabled ──────────────────────────────
+   Scraped events placed ocean-side pins due to schema.org coord drift.
+   Re-enable by replacing [] with a scrapeAll() call if ever needed.           */
+const scrapedRaw: any[] = [];
+const scrapedCount = 0;
 
 /* Normalise scraped events to the same { data, slug } shape as the collection */
 const scrapedEvents = scrapedRaw.map((e: any) => ({
