@@ -81,7 +81,7 @@ https://officialbikeweek.com"></textarea>
   var MONTHS = {
     january:1, february:2, march:3, april:4, may:5, june:6,
     july:7, august:8, september:9, october:10, november:11, december:12,
-    jan:1, feb:2, mar:3, apr:4, jun:6, jul:7, aug:8, sep:9, oct:10, nov:11, dec:12,
+    jan:1, feb:2, mar:3, apr:4, /* may=5 already above */ jun:6, jul:7, aug:8, sep:9, oct:10, nov:11, dec:12,
   };
 
   function padZ(n) { return String(n).padStart(2, "0"); }
@@ -143,7 +143,7 @@ https://officialbikeweek.com"></textarea>
 
   /* True if a line appears to contain a date */
   function isDateLine(line) {
-    return /\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b/i.test(line)
+    return /\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/i.test(line)
         || /\d{1,2}\/\d{1,2}\/\d{4}/.test(line)
         || /\d{4}-\d{2}-\d{2}/.test(line)
         || /\b(mon|tue|wed|thu|fri|sat|sun),?\s+[A-Za-z]{3}/i.test(line);
