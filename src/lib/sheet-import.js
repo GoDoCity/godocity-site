@@ -107,6 +107,14 @@ export async function importFromSheet(csvUrl) {
       continue;
     }
 
+    /* Column D (index 3 in the raw row) — explicit image URL takes priority over og:image.
+       Any https:// value that is NOT the Eventbrite event URL is treated as the thumbnail. */
+    const rawCells  = row.map(c => c.trim());
+    const colDValue = rawCells[3] ?? "";
+    const sheetImage =
+      colDValue.startsWith("https://") && colDValue !== url ? colDValue : null;
+    const image = sheetImage ?? meta.image ?? "/images/daytona-placeholder.jpg";
+
     events.push({
       title,
       eventDate,
@@ -114,7 +122,7 @@ export async function importFromSheet(csvUrl) {
       location:  meta.location  ?? "",
       city:      meta.city      ?? "daytona beach",
       url,
-      image:     meta.image     ?? null,
+      image,
       category:  meta.category  ?? null,
       lat:       meta.lat       ?? null,
       lng:       meta.lng       ?? null,
