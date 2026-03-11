@@ -13,8 +13,8 @@ url: https://www.officialbikeweek.com/
 image: /images/uploads/bike-week-2026.jpg
 featured: true
 sponsored: true
-lat: 29.2120
-lng: -81.0193
+lat: 29.2235
+lng: -81.0115
 ---
 Bike Week 2026 brings an estimated 500,000 motorcycle enthusiasts to Daytona Beach for ten days of riding, racing at the Speedway, concerts at the Bandshell, and the legendary street scene on Main Street and beyond.
 

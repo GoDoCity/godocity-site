@@ -128,14 +128,21 @@ const manualEvents = ((manualFeedData as any).quickEntry ?? [])
     },
   }));
 
-/* ── Turkey Run coordinate hard-fix ─────────────────────────────────────────
-   The Turkey Run is always at Daytona International Speedway.
-   Any source that misplaces it (Ridgewood Ave, city centre, etc.) is overwritten. */
-const TURKEY_RUN_LAT = 29.1852;
-const TURKEY_RUN_LNG = -81.0705;
+/* ── Coordinate hard-fixes ───────────────────────────────────────────────────
+   Prevents any source (scraper, stale markdown, manual entry) from misplacing
+   these landmarks. Matches are case-insensitive substring checks on title.    */
+const COORD_OVERRIDES: Array<{ test: RegExp; lat: number; lng: number }> = [
+  // Turkey Run → Daytona International Speedway
+  { test: /turkey run/i,           lat: 29.1852, lng: -81.0705 },
+  // Bike Week / Main Street scene → Main Street, Daytona Beach
+  { test: /bike week|main street/i, lat: 29.2235, lng: -81.0115 },
+];
 function patchEventCoords(e: any) {
-  if (String(e.data.title ?? "").toLowerCase().includes("turkey run")) {
-    return { ...e, data: { ...e.data, lat: TURKEY_RUN_LAT, lng: TURKEY_RUN_LNG } };
+  const title = String(e.data.title ?? "");
+  for (const override of COORD_OVERRIDES) {
+    if (override.test.test(title)) {
+      return { ...e, data: { ...e.data, lat: override.lat, lng: override.lng } };
+    }
   }
   return e;
 }
@@ -160,6 +167,12 @@ console.log(
   `[events] Markdown: ${allEvents.length} | Manual: ${manualEvents.length} | ` +
   `Scraped: ${scrapedCount} | Total upcoming: ${upcomingEvents.length}`
 );
+// Coord spot-check — verify key events are pinned correctly
+upcomingEvents
+  .filter(e => /turkey run|bike week|main street/i.test(String(e.data.title ?? "")))
+  .forEach(e => console.log(
+    `[events] coord-check "${e.data.title}" → ${e.data.lat}, ${e.data.lng}`
+  ));
 
 /* Top 3 sponsored → featured scroller; rest → card feed */
 const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true).slice(0, 3);
@@ -523,7 +536,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   /* ── Newsletter — full-bleed slim band, strict 180px, no curves ── */
   .nlWrap {
     width: 100vw;
-    margin-left: calc(50% - 50vw);
+    /* translateX approach: transform doesn't affect layout so no scrollbar/clip */
+    margin-left: 50%;
+    transform: translateX(-50%);
     margin-bottom: 28px;
   }
   .nlCard {
@@ -699,18 +714,18 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     gap: 10px;
     text-decoration: none;
     border-bottom: 1px solid #242424;
-    padding: 10px 0;
+    padding: 12px 0;
     transition: opacity 120ms;
   }
   .evCard:first-child { border-top: 1px solid #242424; }
   .evCard:hover { opacity: .82; }
   .evCard--hidden { display: none !important; }
 
-  /* Col 1 — 100×65px landscape thumbnail */
+  /* Col 1 — 125×82px landscape thumbnail (+25%) */
   .evCardImg {
     flex-shrink: 0;
-    width: 100px;
-    height: 65px;
+    width: 125px;
+    height: 82px;
     overflow: hidden;
     border-radius: 6px;
     background: rgba(255,255,255,.05);
