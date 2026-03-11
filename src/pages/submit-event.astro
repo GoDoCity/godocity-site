@@ -48,10 +48,9 @@ const CATEGORIES = [
           Form submissions are handled by netlify/functions/submit-event.js
           — no Netlify Forms required, no shadow form, no 405 errors.
         -->
-        <form
+        <div
           class="submitForm"
           id="eventSubmitForm"
-          novalidate
         >
           <p class="hidden" aria-hidden="true">
             <label>Don't fill this out: <input name="bot-field" id="botField" /></label>
@@ -226,10 +225,10 @@ const CATEGORIES = [
               <span class="req">*</span> Required. We review every submission and may edit for clarity
               and length. Commercial events may be offered a sponsored placement.
             </p>
-            <button class="submitBtn" id="submitBtn" type="submit">Submit Event →</button>
+            <button class="submitBtn" id="submitBtn" type="button">Submit Event →</button>
           </div>
           <p class="formError" id="formError" role="alert" aria-live="polite"></p>
-        </form>
+        </div>
 
       </div>
     </div>
@@ -388,46 +387,54 @@ const CATEGORIES = [
 
 <script is:inline>
 (function () {
-  var form    = document.getElementById("eventSubmitForm");
-  var btn     = document.getElementById("submitBtn");
-  var errEl   = document.getElementById("formError");
+  var wrap  = document.getElementById("eventSubmitForm");
+  var btn   = document.getElementById("submitBtn");
+  var errEl = document.getElementById("formError");
 
-  if (!form) return;
+  if (!wrap || !btn) return;
 
-  /* Basic client-side required-field validation */
-  function validateForm() {
-    var required = form.querySelectorAll("[required]");
+  /* Validate all [required] inputs/selects/textareas inside the div */
+  function validateFields() {
+    var required = wrap.querySelectorAll("[required]");
     for (var i = 0; i < required.length; i++) {
       if (!required[i].value.trim()) {
         required[i].focus();
-        return required[i].labels?.[0]?.textContent?.replace("*","").trim() + " is required.";
+        var label = required[i].labels && required[i].labels[0];
+        var name  = label ? label.textContent.replace("*","").trim() : "Field";
+        return name + " is required.";
       }
     }
     return null;
   }
 
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
+  /* Collect all named inputs/selects/textareas into URLSearchParams */
+  function collectBody() {
+    var params = new URLSearchParams();
+    var els = wrap.querySelectorAll("[name]");
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (el.name) params.set(el.name, el.value);
+    }
+    return params.toString();
+  }
 
+  btn.addEventListener("click", function () {
     errEl.textContent = "";
-    var err = validateForm();
+
+    var err = validateFields();
     if (err) { errEl.textContent = err; return; }
+
+    /* Honeypot check */
+    var botVal = document.getElementById("botField");
+    if (botVal && botVal.value) return;
 
     btn.disabled    = true;
     btn.textContent = "Submitting…";
 
-    /* Build URL-encoded body Netlify Forms expects */
-    var fields = new FormData(form);
-    /* Copy bot-field value from its actual input */
-    var botVal = document.getElementById("botField")?.value ?? "";
-    if (botVal) fields.set("bot-field", botVal);
-
-    var body = new URLSearchParams(fields).toString();
-
     fetch("/.netlify/functions/submit-event", {
       method:  "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body:    body,
+      body:    collectBody(),
     })
       .then(function (res) { return res.json(); })
       .then(function (data) {
@@ -438,7 +445,7 @@ const CATEGORIES = [
         }
       })
       .catch(function (fetchErr) {
-        console.error("[submit-event] Form submission error:", fetchErr);
+        console.error("[submit-event] fetch error:", fetchErr);
         errEl.textContent =
           "Something went wrong — please try again or email us directly.";
         btn.disabled    = false;
