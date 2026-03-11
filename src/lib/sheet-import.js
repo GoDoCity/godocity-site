@@ -52,6 +52,9 @@ export async function importFromSheet(csvUrl) {
     return [];
   }
 
+  /* Payload preview — diagnose login-page vs real CSV in Cloudflare build logs */
+  console.log(`[sheet-import] Payload preview (first 100 chars): ${text.slice(0, 100).replace(/\n/g, "↵")}`);
+
   const rows = parseCsv(text);
   const events = [];
 
