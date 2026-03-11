@@ -16,13 +16,9 @@ export interface Props {
 
 const { locations = [], height = "400px", zoom } = Astro.props;
 
-/* Mapbox public token — client-side credential, safe to ship in HTML.
-   Assembled from two halves to satisfy GitHub secret-scanning rules
-   (pk. tokens are public by Mapbox design; restrict by URL in the
-   Mapbox dashboard: https://account.mapbox.com/access-tokens/).   */
-const _mb1 = "pk.eyJ1Ijoic2tvb3ppIiwiYSI6ImNtbW1iYng1aDJiZmoycG9pd";
-const _mb2 = "W5maW11bTcifQ.fAkf9zUZ-dRxsz6c9_C9pg";
-const mapboxToken = _mb1 + _mb2;
+/* Mapbox token — injected at build time from MAPBOX_ACCESS_TOKEN env var.
+   Set in Cloudflare Pages → Settings → Environment variables.              */
+const mapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
 
 /* ── Ocean-pin guard ──────────────────────────────────────────────────────
    Skip any pin that has no coordinates (null/undefined) OR lands at (0, 0)
