@@ -31,7 +31,10 @@ const EB_ID_RE = /eventbrite\.com\/e\/[^/?#]+-(\d{5,})/i;
  * @returns {Promise<object[]>}
  */
 export async function importFromSheet(csvUrl) {
-  if (!csvUrl) return [];
+  if (!csvUrl) {
+    console.log("[sheet-import] ERROR: SHEET_CSV_URL env var is not set — sheet import skipped");
+    return [];
+  }
 
   let text;
   try {
@@ -40,12 +43,12 @@ export async function importFromSheet(csvUrl) {
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     });
     if (!res.ok) {
-      console.warn(`[sheet-import] CSV fetch failed: ${res.status} ${res.statusText}`);
+      console.log(`[sheet-import] ERROR: Could not reach the Sheet URL — HTTP ${res.status} ${res.statusText}`);
       return [];
     }
     text = await res.text();
   } catch (err) {
-    console.warn("[sheet-import] Failed to fetch CSV:", err?.message ?? err);
+    console.log(`[sheet-import] ERROR: Could not reach the Sheet URL — ${err?.message ?? err}`);
     return [];
   }
 
@@ -97,7 +100,7 @@ export async function importFromSheet(csvUrl) {
     });
   }
 
-  console.log(`[sheet-import] Imported ${events.length} event(s) from sheet`);
+  console.log(`[sheet-import] SUCCESS: Found ${events.length} event(s) in the Google Sheet`);
   return events;
 }
 

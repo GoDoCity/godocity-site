@@ -82,20 +82,25 @@ today.setHours(0, 0, 0, 0);
 let allEvents = [];
 try { allEvents = await getCollection("events"); } catch { allEvents = []; }
 
-/* ── Scrape live events from active sources (Hard Rock, The Shores, city calendars) ──
-   Runs at every `astro build` so data is always fresh on each deploy.
-   scrapeAll() never throws — individual source failures return [] silently.   */
-let scrapedRaw: any[] = [];
-try { scrapedRaw = await scrapeAll(); } catch { scrapedRaw = []; }
-const scrapedCount = scrapedRaw.length;
-
 /* ── Google Sheet Eventbrite import (SHEET_CSV_URL env var) ─────────────────
    Publish the sheet to the web as CSV and set SHEET_CSV_URL in Cloudflare.
    Column A = Eventbrite URL. Title, image, and date are fetched at build time.
-   Silently skipped if env var is not set.                                     */
+   When the sheet is reachable it becomes the primary event source and the
+   legacy HTML scraper is skipped entirely (eliminates ocean-coord pins).      */
 const sheetCsvUrl = import.meta.env.SHEET_CSV_URL ?? "";
 let sheetRaw: any[] = [];
 try { sheetRaw = await importFromSheet(sheetCsvUrl); } catch { sheetRaw = []; }
+const sheetIsActive = sheetRaw.length > 0;
+
+/* ── Legacy HTML scraper — skipped when the Google Sheet returned events ─────
+   scrapeAll() never throws — individual source failures return [] silently.   */
+let scrapedRaw: any[] = [];
+if (!sheetIsActive) {
+  try { scrapedRaw = await scrapeAll(); } catch { scrapedRaw = []; }
+} else {
+  console.log("[events] Sheet is active — legacy scraper skipped");
+}
+const scrapedCount = scrapedRaw.length;
 
 /* Normalise scraped events to the same { data, slug } shape as the collection */
 const scrapedEvents = scrapedRaw.map((e: any) => ({
