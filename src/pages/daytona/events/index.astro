@@ -3,6 +3,7 @@ import Base from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
 import { scrapeAll } from "../../../lib/scraper.js";
+import { importFromSheet } from "../../../lib/sheet-import.js";
 import manualFeedData from "../../../data/manual-events.json";
 
 /* ── Greater Daytona city set ─────────────────────────────────────────── */
@@ -81,12 +82,20 @@ today.setHours(0, 0, 0, 0);
 let allEvents = [];
 try { allEvents = await getCollection("events"); } catch { allEvents = []; }
 
-/* ── Scrape live events from 8 sources (Hard Rock, The Shores, city calendars) ──
+/* ── Scrape live events from active sources (Hard Rock, The Shores, city calendars) ──
    Runs at every `astro build` so data is always fresh on each deploy.
    scrapeAll() never throws — individual source failures return [] silently.   */
 let scrapedRaw: any[] = [];
 try { scrapedRaw = await scrapeAll(); } catch { scrapedRaw = []; }
 const scrapedCount = scrapedRaw.length;
+
+/* ── Google Sheet Eventbrite import (SHEET_CSV_URL env var) ─────────────────
+   Publish the sheet to the web as CSV and set SHEET_CSV_URL in Cloudflare.
+   Column A = Eventbrite URL. Title, image, and date are fetched at build time.
+   Silently skipped if env var is not set.                                     */
+const sheetCsvUrl = import.meta.env.SHEET_CSV_URL ?? "";
+let sheetRaw: any[] = [];
+try { sheetRaw = await importFromSheet(sheetCsvUrl); } catch { sheetRaw = []; }
 
 /* Normalise scraped events to the same { data, slug } shape as the collection */
 const scrapedEvents = scrapedRaw.map((e: any) => ({
@@ -104,6 +113,28 @@ const scrapedEvents = scrapedRaw.map((e: any) => ({
     lng:         e.lng         ?? null,
     coordSource: e.coordSource ?? null,  // "hardlock" | "known_venue" | "schema" | null
     source:      e.source      ?? null,  // non-null marks this as a scraped event
+    sponsored:   false,
+  },
+}));
+
+/* ── Sheet-imported Eventbrite events ───────────────────────────────────────
+   Same shape as scrapedEvents but tagged source="eventbrite-sheet".
+   coordSource is null unless COORD_OVERRIDES fires on title.                  */
+const sheetEvents = sheetRaw.map((e: any) => ({
+  slug: `${String(e.city ?? "daytona").replace(/\s+/g, "-")}/sheet-${String(e.title ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}`,
+  data: {
+    title:       e.title,
+    eventDate:   e.eventDate,
+    endDate:     e.endDate   ?? null,
+    location:    e.location  ?? "",
+    city:        e.city      ?? "daytona beach",
+    url:         e.url       ?? null,
+    image:       e.image     ?? null,
+    category:    e.category  ?? null,
+    lat:         e.lat       ?? null,
+    lng:         e.lng       ?? null,
+    coordSource: null,
+    source:      "eventbrite-sheet",
     sponsored:   false,
   },
 }));
@@ -150,6 +181,16 @@ const COORD_OVERRIDES: Array<{
     venueTest: /main street|the bank|dirty harry|boot hill|iron horse|main st\b/i,
     lat: 29.2235, lng: -81.0115,
   },
+  // MindTravel → New Smyrna Beach beachside
+  {
+    titleTest: /mindtravel/i,
+    lat: 29.0258, lng: -80.9270,
+  },
+  // Spring Break → Hard Rock Hotel beachside
+  {
+    titleTest: /spring break/i,
+    lat: 29.2373, lng: -81.0026,
+  },
 ];
 function patchEventCoords(e: any) {
   const title = String(e.data.title    ?? "");
@@ -162,8 +203,8 @@ function patchEventCoords(e: any) {
   return e;
 }
 
-/* Merge order: markdown → manual → scraped (first occurrence wins on dedup) */
-const allEventsWithLive = [...allEvents, ...manualEvents, ...scrapedEvents].map(patchEventCoords);
+/* Merge order: markdown → manual → sheet → scraped (first occurrence wins on dedup) */
+const allEventsWithLive = [...allEvents, ...manualEvents, ...sheetEvents, ...scrapedEvents].map(patchEventCoords);
 
 /* ── Include events that haven't started yet OR are still ongoing (endDate >= today) ── */
 const upcomingEvents = allEventsWithLive
@@ -180,7 +221,7 @@ const upcomingEvents = allEventsWithLive
 
 console.log(
   `[events] Markdown: ${allEvents.length} | Manual: ${manualEvents.length} | ` +
-  `Scraped: ${scrapedCount} | Total upcoming: ${upcomingEvents.length}`
+  `Sheet: ${sheetRaw.length} | Scraped: ${scrapedCount} | Total upcoming: ${upcomingEvents.length}`
 );
 
 // Warn about events with no usable coordinates (will be excluded from map)
@@ -208,10 +249,10 @@ const mapPins = upcomingEvents
     if (e.data.lat == null || e.data.lng == null) return false;
     if (e.data.lat === 0 && e.data.lng === 0)     return false;
     // Scraped events must have verified coords (hardlock or known_venue)
-    if (e.data.source) {
+    if (e.data.source && e.data.source !== "eventbrite-sheet") {
       return e.data.coordSource === "hardlock" || e.data.coordSource === "known_venue";
     }
-    return true; // markdown / manual: trust author-provided coords
+    return true; // markdown / manual / sheet: trust author-provided or COORD_OVERRIDES coords
   })
   .map(e => {
     const d = new Date(e.data.eventDate);

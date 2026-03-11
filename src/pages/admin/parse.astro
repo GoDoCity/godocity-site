@@ -9,7 +9,8 @@
  * Handles:
  *   • "March 15, 2026" / "March 6–15, 2026" / "Mar 6 - Mar 15, 2026"
  *   • "3/15/2026" numeric dates
- *   • Short weekday prefixes like "Sat, Mar 15"
+ *   • Full weekday prefixes: "Wednesday, Mar 11" or short: "Sat, Mar 15"
+ *   • Eventbrite URLs — extracts event ID, generates a build-time skeleton
  *   • Venue lines after the date
  *   • City extraction from "Daytona Beach, FL 32118"
  *   • Multiple events separated by blank lines
@@ -72,8 +73,9 @@ https://officialbikeweek.com"></textarea>
           <p class="hintTitle">Tips</p>
           <ul class="hintList">
             <li>Put the <strong>event title</strong> on the first line, date on the next line.</li>
+            <li>Dates can be: <em>March 15, 2026</em> · <em>3/15/2026</em> · <em>Wednesday, Mar 11</em> · <em>Sat, Mar 15</em></li>
             <li>For multi-day events write the full range: <em>March 6–15, 2026</em></li>
-            <li>A URL anywhere in the block is auto-detected.</li>
+            <li>Paste a bare <strong>Eventbrite URL</strong> to generate a build-time skeleton (title &amp; image fetched at deploy).</li>
             <li>Paste <strong>multiple events</strong> separated by a blank line — all will parse at once.</li>
             <li>After copying, open <code>src/data/manual-events.json</code> and add the object(s) inside <code>quickEntry: [ … ]</code>.</li>
           </ul>
@@ -114,8 +116,8 @@ https://officialbikeweek.com"></textarea>
     m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
     if (m) return m[3] + "-" + padZ(parseInt(m[1])) + "-" + padZ(parseInt(m[2]));
 
-    /* "Sat, Mar 15" or "Sat Mar 15" — no year, guess nearest future */
-    m = s.match(/[A-Za-z]{2,3},?\s+([A-Za-z]{3,})\s+(\d{1,2})/);
+    /* "Wednesday, Mar 11" or "Sat, Mar 15" — full or short weekday, no year → guess nearest future */
+    m = s.match(/[A-Za-z]{2,},?\s+([A-Za-z]{3,})\s+(\d{1,2})/);
     if (m) {
       var mo = MONTHS[m[1].toLowerCase()];
       if (mo) {
@@ -155,7 +157,30 @@ https://officialbikeweek.com"></textarea>
     return /\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/i.test(line)
         || /\d{1,2}\/\d{1,2}\/\d{4}/.test(line)
         || /\d{4}-\d{2}-\d{2}/.test(line)
-        || /\b(mon|tue|wed|thu|fri|sat|sun),?\s+[A-Za-z]{3}/i.test(line);
+        || /\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday|mon|tue|wed|thu|fri|sat|sun),?\s+[A-Za-z]{3}/i.test(line);
+  }
+
+  /* Eventbrite event ID from a URL */
+  var EB_RE = /eventbrite\.com\/e\/[^/?#]+-(\d{5,})/i;
+
+  function parseEventbriteUrl(url) {
+    var m = url.match(EB_RE);
+    if (!m) return null;
+    return {
+      title:           "⏳ (fetched at build time from Eventbrite)",
+      eventDate:       null,
+      endDate:         null,
+      location:        "",
+      city:            "daytona beach",
+      url:             url,
+      image:           null,
+      category:        null,
+      lat:             null,
+      lng:             null,
+      sponsored:       false,
+      _eventbriteId:   m[1],
+      _note:           "Paste into sheet CSV (Column A). Title, image, date fill in at build.",
+    };
   }
 
   var KNOWN_CITIES = [
@@ -183,12 +208,13 @@ https://officialbikeweek.com"></textarea>
     var lines = raw.split(/\r?\n/).map(function (l) { return l.trim(); }).filter(Boolean);
     if (!lines.length) return null;
 
-    var title    = null;
-    var eventDate = null;
-    var endDate  = null;
-    var location = null;
-    var city     = "daytona beach";
-    var url      = null;
+    var title        = null;
+    var eventDate    = null;
+    var endDate      = null;
+    var location     = null;
+    var city         = "daytona beach";
+    var url          = null;
+    var eventbriteId = null;
 
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i];
@@ -196,6 +222,11 @@ https://officialbikeweek.com"></textarea>
       /* URL detection */
       if (/^https?:\/\//i.test(line)) {
         if (!url) url = line;
+        /* Tag Eventbrite event ID if present */
+        if (!eventbriteId) {
+          var ebm = line.match(EB_RE);
+          if (ebm) eventbriteId = ebm[1];
+        }
         continue;
       }
 
@@ -253,7 +284,7 @@ https://officialbikeweek.com"></textarea>
       if (detected !== "daytona beach") city = detected;
     }
 
-    return {
+    var result = {
       title:     title,
       eventDate: eventDate,
       endDate:   endDate  || null,
@@ -266,6 +297,8 @@ https://officialbikeweek.com"></textarea>
       lng:       null,
       sponsored: false,
     };
+    if (eventbriteId) result._eventbriteId = eventbriteId;
+    return result;
   }
 
   /* Split raw input into per-event blocks and parse each */
@@ -273,6 +306,13 @@ https://officialbikeweek.com"></textarea>
     var blocks = raw.split(/\n{2,}/).filter(function (b) { return b.trim(); });
     var out = [];
     blocks.forEach(function (b) {
+      /* If the block is a lone Eventbrite URL, generate a skeleton directly */
+      var singleLine = b.trim();
+      if (/^https?:\/\//i.test(singleLine) && EB_RE.test(singleLine)) {
+        var eb = parseEventbriteUrl(singleLine);
+        if (eb) { out.push(eb); return; }
+      }
+
       var ev = parseBlock(b);
       if (ev) out.push(ev);
     });
