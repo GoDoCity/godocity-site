@@ -136,7 +136,12 @@ function applyScraperCoordOverrides(event) {
   return event;
 }
 
-/** Sources to scrape — order determines priority for deduplication */
+/** Sources to scrape — order determines priority for deduplication.
+ *
+ *  DISABLED sources are commented out. Re-enable by uncommenting when
+ *  the upstream URL is verified live and returning parseable HTML/JSON-LD.
+ *  Use `npm run dev` + build logs to confirm 0 errors before re-enabling.
+ */
 const SOURCES = [
   /* ── Official city / county event calendars ───────────────────────────── */
   {
@@ -146,35 +151,31 @@ const SOURCES = [
     imgTheme: "concert",
   },
   {
-    name: "Ormond Beach Official",
-    url:  "https://www.ormondbeach.org/government/departments/parks-recreation/special-events",
-    city: "ormond beach",
-    imgTheme: "default",
-  },
-  {
     name: "New Smyrna Beach",
     url:  "https://www.visitnewsmyrnabeach.com/things-to-do/events/",
     city: "new smyrna beach",
     imgTheme: "default",
   },
-  {
-    name: "Port Orange Parks & Rec",
-    url:  "https://www.port-orange.org/index.aspx?NID=85",
-    city: "port orange",
-    imgTheme: "default",
-  },
-  {
-    name: "Flagler Beach",
-    url:  "https://www.flaglerbeachfl.gov/calendar.aspx",
-    city: "flagler beach",
-    imgTheme: "default",
-  },
-  {
-    name: "Volusia County",
-    url:  "https://www.volusia.org/calendar.aspx",
-    city: "daytona beach",
-    imgTheme: "default",
-  },
+  // DISABLED — 404 on current URL; re-enable when live URL is confirmed
+  // { name: "Ormond Beach Official",
+  //   url:  "https://www.ormondbeach.org/government/departments/parks-recreation/special-events",
+  //   city: "ormond beach", imgTheme: "default" },
+  //
+  // DISABLED — returning errors; Parks & Rec calendar moved or blocked
+  // { name: "Port Orange Parks & Rec",
+  //   url:  "https://www.port-orange.org/index.aspx?NID=85",
+  //   city: "port orange", imgTheme: "default" },
+  //
+  // DISABLED — calendar page returning errors
+  // { name: "Flagler Beach",
+  //   url:  "https://www.flaglerbeachfl.gov/calendar.aspx",
+  //   city: "flagler beach", imgTheme: "default" },
+  //
+  // DISABLED — calendar page returning errors
+  // { name: "Volusia County",
+  //   url:  "https://www.volusia.org/calendar.aspx",
+  //   city: "daytona beach", imgTheme: "default" },
+
   /* ── High-value venue event pages ─────────────────────────────────────── */
   {
     name:  "Hard Rock Hotel Daytona",
