@@ -45,29 +45,9 @@ const CATEGORIES = [
         </div>
 
         <!--
-          Netlify detects this hidden form at build time to register the schema.
-          method="POST" is REQUIRED — Netlify uses it to accept POST requests.
-          Without it Netlify registers a GET-only form and returns 405 on every submission.
-          The visible form below is submitted via JS fetch for reliable redirect handling.
+          Form submissions are handled by netlify/functions/submit-event.js
+          — no Netlify Forms required, no shadow form, no 405 errors.
         -->
-        <form
-          name="event-submission"
-          method="POST"
-          action="/"
-          data-netlify="true"
-          netlify-honeypot="bot-field"
-          style="display:none"
-          aria-hidden="true"
-        >
-          <input type="hidden" name="form-name" value="event-submission" />
-          <input name="bot-field" />
-          <input name="event-title" /><input name="event-date" /><input name="event-end-date" />
-          <input name="event-category" /><textarea name="event-description"></textarea>
-          <input name="event-url" /><input name="event-city" /><input name="event-venue" />
-          <input name="event-address" /><input name="contact-name" /><input name="contact-email" />
-          <input name="contact-org" />
-        </form>
-
         <form
           class="submitForm"
           id="eventSubmitForm"
@@ -76,7 +56,6 @@ const CATEGORIES = [
           <p class="hidden" aria-hidden="true">
             <label>Don't fill this out: <input name="bot-field" id="botField" /></label>
           </p>
-          <input type="hidden" name="form-name" value="event-submission" />
 
           {/* ── Section 1: Event Details ── */}
           <fieldset class="formSection">
@@ -445,24 +424,17 @@ const CATEGORIES = [
 
     var body = new URLSearchParams(fields).toString();
 
-    fetch("/submit-event/", {
-      method:   "POST",
-      headers:  { "Content-Type": "application/x-www-form-urlencoded" },
-      body:     body,
-      redirect: "manual",
+    fetch("/.netlify/functions/submit-event", {
+      method:  "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body:    body,
     })
-      .then(function (res) {
-        /*
-         * Netlify Forms returns one of:
-         *   200  — AJAX submission acknowledged
-         *   303  — redirect to thank-you page; with redirect:"manual" this
-         *          becomes an opaque redirect: type="opaqueredirect", status=0
-         * Both mean success. Any 4xx/5xx means the form wasn't registered.
-         */
-        if (res.ok || res.type === "opaqueredirect" || res.status === 0) {
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.ok) {
           window.location.href = "/submit-success/";
         } else {
-          throw new Error("Server responded with " + res.status);
+          throw new Error(data.error || "Submission failed.");
         }
       })
       .catch(function (fetchErr) {

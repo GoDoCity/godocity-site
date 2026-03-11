@@ -187,6 +187,13 @@ upcomingEvents
     `[events] coord-check "${e.data.title}" → ${e.data.lat}, ${e.data.lng}`
   ));
 
+// Warn about events with no usable coordinates (will be excluded from map)
+upcomingEvents
+  .filter(e => e.data.lat == null || e.data.lng == null || (e.data.lat === 0 && e.data.lng === 0))
+  .forEach(e => console.warn(
+    `[events] missing coords: "${e.data.title}" (${e.data.eventDate}) — add lat/lng to pin on map`
+  ));
+
 /* Top 3 sponsored → featured scroller; rest → card feed */
 const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true).slice(0, 3);
 const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
