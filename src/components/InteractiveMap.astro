@@ -4,6 +4,7 @@ export interface MapLocation {
   address?: string;
   lat?: number;
   lng?: number;
+  image?: string;
   articleHref?: string;
   articleTitle?: string;
 }
@@ -12,9 +13,10 @@ export interface Props {
   locations: MapLocation[];
   height?: string;
   zoom?: number;   // force a fixed zoom instead of fitBounds (e.g. 12 for city-wide view)
+  center?: [number, number]; // [lat, lng] — default view center when zoom is set
 }
 
-const { locations = [], height = "400px", zoom } = Astro.props;
+const { locations = [], height = "400px", zoom, center } = Astro.props;
 
 /* Mapbox token — bound from MAPBOX_ACCESS_TOKEN in Cloudflare Pages env vars.
    GitHub push protection permanently rejects pk.eyJ1 literals in source, so
@@ -46,6 +48,7 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     class="imapEl"
     data-pins={JSON.stringify(pins)}
     data-zoom={zoom != null ? String(zoom) : ""}
+    data-center={center != null ? JSON.stringify(center) : ""}
     data-mapbox-token={mapboxToken}
     style={`height: ${height} !important; width: 100% !important; display: block !important;`}
   ></div>
@@ -62,15 +65,17 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
       if (el._leaflet_id) continue;
       try {
         var forcedZoom  = parseInt(el.getAttribute('data-zoom') || '0', 10) || null;
+        var centerRaw   = el.getAttribute('data-center') || '';
+        var defaultCenter = centerRaw ? JSON.parse(centerRaw) : null;
         var mapboxToken = el.getAttribute('data-mapbox-token') || '';
-        initMap(el.id, JSON.parse(el.getAttribute('data-pins')), forcedZoom, mapboxToken);
+        initMap(el.id, JSON.parse(el.getAttribute('data-pins')), forcedZoom, defaultCenter, mapboxToken);
       } catch (e) {
         console.warn('[InteractiveMap] init failed for', el.id, e);
       }
     }
   }
 
-  function initMap(mapId, pins, forcedZoom, mapboxToken) {
+  function initMap(mapId, pins, forcedZoom, defaultCenter, mapboxToken) {
     var container = document.getElementById(mapId);
     if (!container || !window.L) return;
     if (container._leaflet_id) return;
@@ -112,7 +117,14 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
       });
 
       /* ── Popup content ── */
-      var popup = '<strong style="font-size:14px;">' + pin.label + '</strong>';
+      var popup = '';
+      if (pin.image) {
+        popup += '<img src="' + pin.image + '" alt="" '
+          + 'style="width:100%;height:80px;object-fit:cover;border-radius:6px;'
+          + 'margin-bottom:6px;display:block;" '
+          + 'onerror="this.style.display=\'none\'" />';
+      }
+      popup += '<strong style="font-size:14px;">' + pin.label + '</strong>';
       if (pin.address) {
         popup += '<br><span style="font-size:12px;color:#666;line-height:1.5;">' + pin.address + '</span>';
       }
@@ -137,11 +149,16 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
         .addTo(map);
     }
 
-    if (forcedZoom && bounds.length > 0) {
-      /* Fixed zoom mode: centre on the average of all pins */
+    if (defaultCenter && forcedZoom) {
+      /* Explicit center + zoom: always start here regardless of pin positions */
+      map.setView(defaultCenter, forcedZoom);
+    } else if (forcedZoom && bounds.length > 0) {
+      /* Fixed zoom, no explicit center: centre on the average of all pins */
       var sumLat = 0, sumLng = 0;
       for (var k = 0; k < bounds.length; k++) { sumLat += bounds[k][0]; sumLng += bounds[k][1]; }
       map.setView([sumLat / bounds.length, sumLng / bounds.length], forcedZoom);
+    } else if (defaultCenter) {
+      map.setView(defaultCenter, forcedZoom || 12);
     } else if (bounds.length === 1) {
       map.setView(bounds[0], 15);
     } else {

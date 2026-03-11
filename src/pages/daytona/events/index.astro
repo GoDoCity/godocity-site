@@ -263,6 +263,7 @@ const mapPins = upcomingEvents
       address: `${dateStr} · ${e.data.location}`,
       lat:     e.data.lat,
       lng:     e.data.lng,
+      image:   e.data.image ?? "/images/daytona-placeholder.jpg",
     };
   });
 
@@ -382,7 +383,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
         {/* ── MAP ── */}
         {mapPins.length > 0 && (
           <div class="mapBlock">
-            <InteractiveMap locations={mapPins} height="300px" />
+            <InteractiveMap locations={mapPins} height="300px" zoom={12} center={[29.2108, -81.0228]} />
           </div>
         )}
 
