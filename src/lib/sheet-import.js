@@ -57,6 +57,15 @@ export async function importFromSheet(csvUrl) {
   const events = [];
   let firstDataRow = true;
 
+  /* Detect whether this sheet uses a Status column.
+     If any cell in any non-heading row equals "live" (case-insensitive),
+     we're in Status-mode and only import rows marked Live.              */
+  const hasStatusColumn = rows.some(row => {
+    const cells = row.map(c => c.trim()).filter(Boolean);
+    if (cells.length === 0 || isHeadingRow(cells[0], cells)) return false;
+    return cells.some(c => /^live$/i.test(c));
+  });
+
   for (const row of rows) {
     /* Skip blank rows */
     const cells = row.map(c => c.trim()).filter(Boolean);
@@ -71,6 +80,9 @@ export async function importFromSheet(csvUrl) {
       console.log(`[sheet-import] First data row: ${JSON.stringify(cells.slice(0, 4))}`);
       firstDataRow = false;
     }
+
+    /* Status filter — only import rows marked "Live" when the sheet uses that column */
+    if (hasStatusColumn && !cells.some(c => /^live$/i.test(c))) continue;
 
     /* Scan all cells to find the Eventbrite URL (column-agnostic) */
     const url = cells.find(c => /^https?:\/\//i.test(c)) ?? null;
@@ -110,7 +122,8 @@ export async function importFromSheet(csvUrl) {
     });
   }
 
-  console.log(`[sheet-import] SUCCESS: Found ${events.length} event(s) in the Google Sheet`);
+  const liveLabel = hasStatusColumn ? "Live " : "";
+  console.log(`[sheet-import] SUCCESS: Found ${events.length} ${liveLabel}events in the Google Sheet`);
   return events;
 }
 
