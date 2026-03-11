@@ -85,6 +85,7 @@ try { allEvents = await getCollection("events"); } catch { allEvents = []; }
    scrapeAll() never throws — individual source failures return [] silently.   */
 let scrapedRaw: any[] = [];
 try { scrapedRaw = await scrapeAll(); } catch { scrapedRaw = []; }
+const scrapedCount = scrapedRaw.length;
 
 /* Normalise scraped events to the same { data, slug } shape as the collection */
 const scrapedEvents = scrapedRaw.map((e: any) => ({
@@ -173,33 +174,33 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   <section class="section">
     <div class="eventsContainer">
 
-      {/* ── NEWSLETTER — contained adBand-style yellow card ── */}
-      <div class="nlWrap">
+        <div class="container">
+
+        {/* ── NEWSLETTER — contained card matching homepage container width ── */}
         <form name="newsletter-signup" data-netlify="true" netlify-honeypot="nl-bot" style="display:none" aria-hidden="true">
           <input name="form-name" value="newsletter-signup" /><input name="nl-bot" /><input name="email" />
         </form>
-        <div class="nlCard">
-          <div class="nlContent" id="nlContent">
-            <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
-            <div class="nlSub">Get the best local events sent to your inbox, <strong>for free.</strong></div>
-            <form class="nlForm" id="nlForm" novalidate>
-              <input type="hidden" name="form-name" value="newsletter-signup" />
-              <p style="display:none" aria-hidden="true"><label>Leave empty: <input name="nl-bot" id="nlBot" /></label></p>
-              <div class="nlRow">
-                <input class="nlInput" id="nlEmail" name="email" type="email"
-                  placeholder="Enter your email address" autocomplete="email" required />
-                <button class="nlBtn" id="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
-              </div>
-            </form>
-            <div class="nlFine">100% free · Unsubscribe anytime</div>
-          </div>
-          <div class="nlThanks" id="nlThanks" aria-live="polite" style="display:none">
-            Thank you! You're on the list. ✓
+        <div class="nlWrap">
+          <div class="nlCard">
+            <div class="nlContent" id="nlContent">
+              <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
+              <div class="nlSub">Get the best local events sent to your inbox, <strong>for free.</strong></div>
+              <form class="nlForm" id="nlForm" novalidate>
+                <input type="hidden" name="form-name" value="newsletter-signup" />
+                <p style="display:none" aria-hidden="true"><label>Leave empty: <input name="nl-bot" id="nlBot" /></label></p>
+                <div class="nlRow">
+                  <input class="nlInput" id="nlEmail" name="email" type="email"
+                    placeholder="Enter your email address" autocomplete="email" required />
+                  <button class="nlBtn" id="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
+                </div>
+              </form>
+              <div class="nlFine">100% free · Unsubscribe anytime</div>
+            </div>
+            <div class="nlThanks" id="nlThanks" aria-live="polite" style="display:none">
+              Thank you! You're on the list. ✓
+            </div>
           </div>
         </div>
-      </div>
-
-      <div class="container">
 
         {/* ── FEATURED SCROLLER — label + action buttons at top ── */}
         {sponsoredEvents.length > 0 && (
@@ -267,6 +268,13 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
             {regularEvents.length} event{regularEvents.length !== 1 ? "s" : ""}
           </span>
         </div>
+
+        {/* ── Scraper fallback notice — shown when live fetch returned nothing ── */}
+        {scrapedCount === 0 && (
+          <div class="scrapeNotice">
+            Local events are loading — check back in 5 minutes.
+          </div>
+        )}
 
         {/* ── EVENT FEED — slim horizontal rows, 100×65px thumbnails ── */}
         {regularEvents.length === 0 ? (
@@ -473,17 +481,13 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 <style>
   .eventsContainer { padding-bottom: 64px; }
 
-  /* ── Newsletter — full-bleed yellow band, flat edges ── */
+  /* ── Newsletter — contained card, matches homepage container width ── */
   .nlWrap {
-    /* Provides breathing room above/below the band */
-    padding: 0;
-    /* Full-bleed: bust out of any parent padding to true screen edges */
-    width: 100vw;
-    margin-left: calc(50% - 50vw);
+    margin-bottom: 28px;
   }
   .nlCard {
     background: linear-gradient(135deg, var(--brand1), var(--brand2));
-    /* No border-radius — hard edge to edge */
+    border-radius: 16px;
     padding: clamp(28px, 4vw, 48px) 1.5rem;
     display: flex;
     align-items: center;
@@ -699,20 +703,20 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   .evCardBody { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 
   .evCardTitle {
-    font-size: 14px; font-weight: 800; color: var(--text);
+    font-size: 16px; font-weight: 800; color: var(--text);
     line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .evCardExt { font-size: 10px; color: var(--faint); margin-left: 4px; }
 
   .evCardVenue {
-    font-size: 11px; font-weight: 700; color: var(--brand1);
+    font-size: 13px; font-weight: 700; color: var(--brand1);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
 
   .evCardMeta { display: flex; align-items: center; gap: 5px; }
-  .evCardCity { font-size: 10px; font-weight: 600; color: var(--muted); }
+  .evCardCity { font-size: 12px; font-weight: 600; color: var(--muted); }
   .evCardDist {
-    font-size: 9px; font-weight: 600; color: var(--faint);
+    font-size: 12px; font-weight: 600; color: var(--faint);
     background: rgba(255,255,255,.06); padding: 1px 5px; border-radius: 999px;
   }
 
@@ -750,6 +754,16 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   .noEvents { color: var(--muted); font-size: 15px; padding: 24px 0; }
   .noEvents a { color: var(--brand1); }
 
+  /* Scraper zero-results notice */
+  .scrapeNotice {
+    font-size: 13px; color: var(--muted);
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+  }
+
   @media (max-width: 520px) {
     .nlCard       { padding: 24px 1.25rem; }
     .nlRow        { flex-direction: column; height: auto; gap: 8px; }
@@ -759,7 +773,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     .fcImgWrap    { height: 160px; }
     .filterBar    { gap: 6px; }
     .filterCount  { margin-left: 0; width: 100%; }
-    .evCardTitle  { font-size: 13px; }
-    .evCardVenue  { font-size: 11px; }
+    .evCardTitle  { font-size: 15px; }
+    .evCardVenue  { font-size: 12px; }
   }
 </style>
