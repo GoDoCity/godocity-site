@@ -80,9 +80,10 @@ const today = new Date();
 today.setHours(0, 0, 0, 0);
 
 /* ── Sheet events — same source as the /events page ─────────────────────── */
-const sheetCsvUrl = import.meta.env.SHEET_CSV_URL ?? "";
+const sheetCsvUrl    = import.meta.env.SHEET_CSV_URL       ?? "";
+const sheetMapboxTok = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
 let sheetRaw: any[] = [];
-try { sheetRaw = await importFromSheet(sheetCsvUrl); } catch { sheetRaw = []; }
+try { sheetRaw = await importFromSheet(sheetCsvUrl, sheetMapboxTok); } catch { sheetRaw = []; }
 
 const HOME_COORD_OVERRIDES: Array<{ titleTest: RegExp; venueTest?: RegExp; lat: number; lng: number }> = [
   { titleTest: /turkey run/i,                                                           lat: 29.1852, lng: -81.0705 },

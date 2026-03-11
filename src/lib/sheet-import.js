@@ -6,11 +6,17 @@
  * The sheet must be published to the web as CSV (File → Share → Publish to web → CSV).
  * Set the public CSV URL in Cloudflare env var: SHEET_CSV_URL
  *
- * Column layout is flexible — every cell in each row is scanned:
- *   • A cell starting with https://www.eventbrite.com → the event URL
- *   • Any other https:// cell → event URL (non-Eventbrite URLs are logged and skipped)
- *   • Rows where all cells are blank, or the first cell is a heading like
- *     "GoDoDaytona Events" / "URL" / "Event" → skipped automatically
+ * Column layout (fixed indices):
+ *   A (col 0) — Eventbrite URL        (required)
+ *   B (col 1) — Title override        (optional — overrides Eventbrite og:title)
+ *   C (col 2) — Status                ("Live" to publish, anything else = skip)
+ *   D (col 3) — Image URL             (optional — overrides og:image)
+ *   E (col 4) — Venue / address text  (optional — geocoded via Mapbox if provided)
+ *
+ * Coordinate priority (highest → lowest):
+ *   1. Geocode Column E text  (venue name or full address)
+ *   2. Geocode event title    (fallback when Column E is empty)
+ *   3. COORD_OVERRIDES        (applied in events/index.astro after import)
  *
  * Returns an array of event objects in the same shape as manual-events.json quickEntry[].
  */
@@ -29,7 +35,7 @@ const EB_ID_RE = /eventbrite\.com\/e\/[^/?#]+-(\d{5,})/i;
  * @param {string} csvUrl  Public CSV export URL from Google Sheets.
  * @returns {Promise<object[]>}
  */
-export async function importFromSheet(csvUrl) {
+export async function importFromSheet(csvUrl, mapboxToken = "") {
   if (!csvUrl) {
     console.log("[sheet-import] ERROR: SHEET_CSV_URL env var is not set — sheet import skipped");
     return [];
@@ -96,10 +102,17 @@ export async function importFromSheet(csvUrl) {
     }
     const eventbriteId = idMatch[1];
 
+    /* Raw column values (fixed positions, before blank-filtering) */
+    const rawCells = row.map(c => c.trim());
+
+    /* Column B — sheet title override (takes priority over Eventbrite og:title) */
+    const colB = rawCells[1] ?? "";
+    const titleOverride = colB && !/^https?:\/\//i.test(colB) && !/^live$/i.test(colB) && colB.length > 1 ? colB : null;
+
     /* Fetch og: metadata from the Eventbrite event page */
     const meta = await fetchEventbriteMeta(url, eventbriteId);
 
-    const title = meta.title ?? `Eventbrite Event ${eventbriteId}`;
+    const title     = titleOverride ?? meta.title ?? `Eventbrite Event ${eventbriteId}`;
     const eventDate = meta.eventDate ?? null;
 
     if (!eventDate) {
@@ -107,25 +120,45 @@ export async function importFromSheet(csvUrl) {
       continue;
     }
 
-    /* Column D (index 3 in the raw row) — explicit image URL takes priority over og:image.
-       Any https:// value that is NOT the Eventbrite event URL is treated as the thumbnail. */
-    const rawCells  = row.map(c => c.trim());
-    const colDValue = rawCells[3] ?? "";
-    const sheetImage =
-      colDValue.startsWith("https://") && colDValue !== url ? colDValue : null;
+    /* Column D — explicit image URL (overrides og:image; must differ from the event URL) */
+    const colD = rawCells[3] ?? "";
+    const sheetImage = colD.startsWith("https://") && colD !== url ? colD : null;
     const image = sheetImage ?? meta.image ?? "/images/daytona-placeholder.jpg";
+
+    /* Column E — venue / address text: geocoded via Mapbox Geocoding API.
+       Priority: Column E geocode > title geocode.
+       COORD_OVERRIDES in events/index.astro can still override afterwards.   */
+    const colE = rawCells[4] ?? "";
+    let lat = null, lng = null;
+
+    if (colE) {
+      /* Column E is the source of truth for venue — append city hint only if bare name */
+      const geoQuery = colE.toLowerCase().includes("fl") ? colE : `${colE}, Daytona Beach, FL`;
+      const geo = await geocode(geoQuery, mapboxToken);
+      if (geo) { lat = geo.lat; lng = geo.lng; }
+    }
+
+    if (lat == null) {
+      /* Fallback: geocode the event title + area so every live event gets a pin */
+      const fallbackQuery = `${title}, Daytona Beach, FL`;
+      const geo = await geocode(fallbackQuery, mapboxToken);
+      if (geo) { lat = geo.lat; lng = geo.lng; }
+    }
+
+    /* Venue location from Eventbrite JSON-LD (display only, not for coords) */
+    const location = meta.location ?? colE ?? "";
 
     events.push({
       title,
       eventDate,
-      endDate:   meta.endDate   ?? null,
-      location:  meta.location  ?? "",
-      city:      meta.city      ?? "daytona beach",
+      endDate:  meta.endDate ?? null,
+      location,
+      city:     meta.city    ?? "daytona beach",
       url,
       image,
-      category:  meta.category  ?? null,
-      lat:       meta.lat       ?? null,
-      lng:       meta.lng       ?? null,
+      category: meta.category ?? null,
+      lat,
+      lng,
       sponsored: false,
       source:    "eventbrite-sheet",
     });
@@ -206,6 +239,44 @@ function parseEventbritePage(html) {
   }
 
   return result;
+}
+
+/**
+ * Geocode a text query using the Mapbox Geocoding API, biased to the greater
+ * Daytona Beach area. Returns { lat, lng } or null on failure / no result.
+ */
+async function geocode(query, mapboxToken) {
+  if (!query || !mapboxToken) return null;
+  try {
+    const q   = encodeURIComponent(query);
+    // bbox covers Volusia + Flagler counties; proximity biases toward Daytona Beach
+    const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${q}.json`
+      + `?access_token=${mapboxToken}`
+      + `&limit=1`
+      + `&bbox=-82.5,28.3,-80.3,30.2`
+      + `&proximity=-81.0228,29.2108`
+      + `&types=poi,address,place,neighborhood`;
+    const res = await fetch(url, {
+      headers: { "User-Agent": UA },
+      signal: AbortSignal.timeout(5_000),
+    });
+    if (!res.ok) {
+      console.log(`[sheet-import] Geocode failed for "${query}": HTTP ${res.status}`);
+      return null;
+    }
+    const data = await res.json();
+    const feature = data.features?.[0];
+    if (!feature) {
+      console.log(`[sheet-import] Geocode: no result for "${query}"`);
+      return null;
+    }
+    const [lng, lat] = feature.center;
+    console.log(`[sheet-import] Geocoded "${query}" → ${lat.toFixed(4)}, ${lng.toFixed(4)} (${feature.place_name})`);
+    return { lat, lng };
+  } catch (err) {
+    console.log(`[sheet-import] Geocode error for "${query}": ${err?.message ?? err}`);
+    return null;
+  }
 }
 
 /**
