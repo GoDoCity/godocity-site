@@ -15,7 +15,8 @@
  * Returns an array of event objects in the same shape as manual-events.json quickEntry[].
  */
 
-const FETCH_TIMEOUT_MS = 12_000;
+const CSV_TIMEOUT_MS  = 12_000;  // Google Sheets CSV fetch
+const PAGE_TIMEOUT_MS =  5_000;  // per-event Eventbrite page fetch (avoid 504)
 const UA = "Mozilla/5.0 (compatible; GodoCityBot/1.0; +https://godocity.com)";
 
 /** Regex to extract Eventbrite numeric event ID from a URL */
@@ -38,7 +39,7 @@ export async function importFromSheet(csvUrl) {
   try {
     const res = await fetch(csvUrl, {
       headers: { "User-Agent": UA },
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      signal: AbortSignal.timeout(CSV_TIMEOUT_MS),
     });
     if (!res.ok) {
       console.log(`[sheet-import] ERROR: Could not reach the Sheet URL — HTTP ${res.status} ${res.statusText}`);
@@ -137,16 +138,16 @@ async function fetchEventbriteMeta(url, eventbriteId) {
   try {
     const res = await fetch(url, {
       headers: { "User-Agent": UA },
-      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+      signal: AbortSignal.timeout(PAGE_TIMEOUT_MS),
     });
     if (!res.ok) {
-      console.warn(`[sheet-import] Eventbrite page ${eventbriteId} → ${res.status}`);
+      console.log(`[sheet-import] Eventbrite page ${eventbriteId} → ${res.status} — skipping`);
       return {};
     }
     const html = await res.text();
     return parseEventbritePage(html);
   } catch (err) {
-    console.warn(`[sheet-import] Failed to fetch Eventbrite ${eventbriteId}:`, err?.message ?? err);
+    console.log(`[sheet-import] Eventbrite ${eventbriteId} timed out or failed (${err?.message ?? err}) — skipping`);
     return {};
   }
 }
@@ -190,15 +191,8 @@ function parseEventbritePage(html) {
         if (!result.city && item.location?.address?.addressLocality) {
           result.city = item.location.address.addressLocality.toLowerCase();
         }
-        /* Geo */
-        if (result.lat == null && item.location?.geo?.latitude) {
-          const lat = parseFloat(item.location.geo.latitude);
-          const lng = parseFloat(item.location.geo.longitude);
-          if (!isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)) {
-            result.lat = lat;
-            result.lng = lng;
-          }
-        }
+        /* Geo intentionally omitted — Eventbrite JSON-LD coords are unreliable.
+           Pin location is set exclusively by COORD_OVERRIDES in events/index.astro. */
       }
     } catch { /* ignore malformed JSON-LD */ }
   }

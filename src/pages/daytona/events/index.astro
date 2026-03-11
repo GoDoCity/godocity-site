@@ -81,6 +81,7 @@ today.setHours(0, 0, 0, 0);
 
 let allEvents = [];
 try { allEvents = await getCollection("events"); } catch { allEvents = []; }
+console.log(`[CLEANUP] Markdown directory is empty: ${allEvents.length === 0}`);
 
 /* ── Google Sheet Eventbrite import (SHEET_CSV_URL env var) ─────────────────
    Publish the sheet to the web as CSV and set SHEET_CSV_URL in Cloudflare.
