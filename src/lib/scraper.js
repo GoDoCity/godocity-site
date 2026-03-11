@@ -66,6 +66,18 @@ const KNOWN_VENUES = {
     address: "200 E International Speedway Blvd, Daytona Beach, FL 32114",
     lat: 29.2124, lng: -81.0150,
   },
+  /* ── Main Street corridor hard-locks ────────────────────────────────────
+     These venues share the same authoritative pin (29.2235, -81.0115).
+     Listing them here ensures the KNOWN_VENUES lookup fires inside the
+     JSON-LD parser BEFORE schema.org geo coords can claim the slot, which
+     prevents Mapbox/schema from guessing nearby streets like Harvey Ave.  */
+  "main street":            { address: "Main St, Daytona Beach, FL 32118",     lat: 29.2235, lng: -81.0115 },
+  "the bank":               { address: "Main St, Daytona Beach, FL 32118",     lat: 29.2235, lng: -81.0115 },
+  "dirty harry's":          { address: "Main St, Daytona Beach, FL 32118",     lat: 29.2235, lng: -81.0115 },
+  "dirty harrys":           { address: "Main St, Daytona Beach, FL 32118",     lat: 29.2235, lng: -81.0115 },
+  "boot hill saloon":       { address: "310 Main St, Daytona Beach, FL 32118", lat: 29.2235, lng: -81.0115 },
+  "main street station":    { address: "Main St, Daytona Beach, FL 32118",     lat: 29.2235, lng: -81.0115 },
+  "iron horse saloon":      { address: "Main St, Daytona Beach, FL 32118",     lat: 29.2235, lng: -81.0115 },
 };
 
 /** Hardcoded fallback images keyed by category or source type */
@@ -100,11 +112,12 @@ const SCRAPER_COORD_OVERRIDES = [
     venueTest: null,
     lat: 29.1852, lng: -81.0705,
   },
-  // Main Street corridor — title OR venue containing any of these names
-  // locks to Main Street, Daytona Beach — overrides any scraped address
+  // Main Street corridor — PRIORITY lock applied BEFORE any schema.org geo can
+  // claim the slot. Fires on title OR venue name to prevent Harvey Ave / river drift.
+  // venueTest is broad enough to catch all known Main St establishments.
   {
     titleTest: /bike week|main street/i,
-    venueTest: /main street|the bank|dirty harry/i,
+    venueTest: /main street|the bank|dirty harry|boot hill|iron horse|main st\b/i,
     lat: 29.2235, lng: -81.0115,
   },
 ];
