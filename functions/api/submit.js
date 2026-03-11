@@ -9,7 +9,8 @@
  * No npm packages — uses native fetch (Cloudflare Workers runtime).
  */
 
-const NOTIFY_EMAIL_DEFAULT = "yellowcabking@msn.com";
+/* Hard-coded notification address — always used regardless of env vars */
+const NOTIFY_EMAIL = "yellowcabking@msn.com";
 
 export async function onRequestPost({ request, env }) {
   try {
@@ -35,10 +36,10 @@ export async function onRequestPost({ request, env }) {
       contact: d["contact-email"],
     }, null, 2));
 
-    /* Email via Resend — gracefully skip if key not set */
+    /* Email via Resend — requires RESEND_API_KEY in Cloudflare Pages env vars.
+       NOTIFY_EMAIL is hard-coded above; no env var can override the recipient. */
     const apiKey = env.RESEND_API_KEY;
     if (apiKey) {
-      const notifyEmail = env.NOTIFY_EMAIL ?? NOTIFY_EMAIL_DEFAULT;
       try {
         const emailRes = await fetch("https://api.resend.com/emails", {
           method: "POST",
@@ -48,7 +49,7 @@ export async function onRequestPost({ request, env }) {
           },
           body: JSON.stringify({
             from:    "GoDoDaytona <noreply@godocity.com>",
-            to:      [notifyEmail],
+            to:      [NOTIFY_EMAIL],
             subject: `New Event Submission: ${d["event-title"]}`,
             html:    buildEmailHtml(d),
           }),
@@ -57,13 +58,13 @@ export async function onRequestPost({ request, env }) {
           const errText = await emailRes.text().catch(() => "");
           console.warn("[submit] Resend error:", emailRes.status, errText);
         } else {
-          console.log("[submit] Email sent to", notifyEmail);
+          console.log("[submit] Email sent to", NOTIFY_EMAIL);
         }
       } catch (emailErr) {
         console.warn("[submit] Email send failed:", emailErr?.message ?? emailErr);
       }
     } else {
-      console.log("[submit] RESEND_API_KEY not set — skipping email notification");
+      console.warn("[submit] RESEND_API_KEY not configured — set it in Cloudflare Pages › Settings › Environment Variables");
     }
 
     return ok();
@@ -85,6 +86,7 @@ function jsonResponse(data, status = 200) {
     headers: {
       "Content-Type":                "application/json",
       "Access-Control-Allow-Origin": "*",
+      "Cache-Control":               "no-store, no-cache, must-revalidate",
     },
   });
 }
