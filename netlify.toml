@@ -5,7 +5,15 @@
 [build.environment]
   NODE_VERSION = "20"
 
-# Clean alias for the event-submission function
+# Static-bypass workaround for Netlify 405: POST to /ping.txt is rewritten
+# to the serverless function before Netlify's form-bot can intercept it.
+[[redirects]]
+  from   = "/ping.txt"
+  to     = "/.netlify/functions/submit-event"
+  status = 200
+  force  = true
+
+# Convenience alias kept for direct API calls / future use
 [[redirects]]
   from   = "/api/submit-event"
   to     = "/.netlify/functions/submit-event"

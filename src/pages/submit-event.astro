@@ -431,7 +431,7 @@ const CATEGORIES = [
     btn.disabled    = true;
     btn.textContent = "Submitting…";
 
-    fetch("/.netlify/functions/submit-event", {
+    fetch("/ping.txt", {
       method:  "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body:    collectBody(),
