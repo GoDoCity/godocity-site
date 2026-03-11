@@ -46,9 +46,19 @@ const CATEGORIES = [
 
         <!--
           Netlify detects this hidden form at build time to register the schema.
+          method="POST" is REQUIRED — Netlify uses it to accept POST requests.
+          Without it Netlify registers a GET-only form and returns 405 on every submission.
           The visible form below is submitted via JS fetch for reliable redirect handling.
         -->
-        <form name="event-submission" data-netlify="true" netlify-honeypot="bot-field" style="display:none" aria-hidden="true">
+        <form
+          name="event-submission"
+          method="POST"
+          action="/"
+          data-netlify="true"
+          netlify-honeypot="bot-field"
+          style="display:none"
+          aria-hidden="true"
+        >
           <input type="hidden" name="form-name" value="event-submission" />
           <input name="bot-field" />
           <input name="event-title" /><input name="event-date" /><input name="event-end-date" />

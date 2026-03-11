@@ -81,6 +81,48 @@ const CATEGORY_FALLBACK = {
   "default":  "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=75",
 };
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Global coordinate hard-locks
+   Applied to every scraped event BEFORE it leaves this module.
+   index.astro has a second pass for markdown/manual entries.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/**
+ * Each entry is checked against title AND location (venue name).
+ * titleTest  — fires when the event title matches
+ * venueTest  — fires when the location/venue field matches (even if title doesn't)
+ * Both checks are OR'd — either one triggers the override.
+ */
+const SCRAPER_COORD_OVERRIDES = [
+  // Turkey Run → Daytona International Speedway
+  {
+    titleTest: /turkey run/i,
+    venueTest: null,
+    lat: 29.1852, lng: -81.0705,
+  },
+  // Main Street corridor — title OR venue containing any of these names
+  // locks to Main Street, Daytona Beach — overrides any scraped address
+  {
+    titleTest: /bike week|main street/i,
+    venueTest: /main street|the bank|dirty harry/i,
+    lat: 29.2235, lng: -81.0115,
+  },
+];
+
+/** Apply coord overrides to a single scraped event object. */
+function applyScraperCoordOverrides(event) {
+  const title = String(event.title    ?? "").toLowerCase();
+  const venue = String(event.location ?? "").toLowerCase();
+  for (const ov of SCRAPER_COORD_OVERRIDES) {
+    const hitTitle = ov.titleTest && ov.titleTest.test(title);
+    const hitVenue = ov.venueTest && ov.venueTest.test(venue);
+    if (hitTitle || hitVenue) {
+      return { ...event, lat: ov.lat, lng: ov.lng };
+    }
+  }
+  return event;
+}
+
 /** Sources to scrape — order determines priority for deduplication */
 const SOURCES = [
   /* ── Official city / county event calendars ───────────────────────────── */
@@ -688,9 +730,12 @@ export async function scrapeAll({
   allEvents.sort((a, b) => (a.eventDate ?? "").localeCompare(b.eventDate ?? ""));
   const unique = dedupe(allEvents);
 
+  // Hard-lock coordinates for known landmarks before image resolution
+  const coordLocked = unique.map(applyScraperCoordOverrides);
+
   // Resolve images for events without one (Unsplash + fallback)
   const withImages = await Promise.all(
-    unique.map(async e => {
+    coordLocked.map(async e => {
       const image = await resolveImage(e, unsplashKey);
       const { _imgTheme: _t, ...rest } = e; // strip internal prop
       return { ...rest, image };
