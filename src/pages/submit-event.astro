@@ -431,7 +431,7 @@ const CATEGORIES = [
     btn.disabled    = true;
     btn.textContent = "Submitting…";
 
-    fetch("/ping.txt", {
+    fetch("/api/process-intake", {
       method:  "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body:    collectBody(),
