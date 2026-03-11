@@ -2,6 +2,7 @@
 import Base from "../../layouts/Base.astro";
 import InteractiveMap from "../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
+import { importFromSheet } from "../../lib/sheet-import.js";
 
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
@@ -77,17 +78,65 @@ const listFeed = feed.slice(3, 7);  /* ── Latest Feed — exactly 4 rows bel
 
 const today = new Date();
 today.setHours(0, 0, 0, 0);
-let allEvents = [];
-try { allEvents = await getCollection("events"); } catch { allEvents = []; }
-const upcomingEvents = allEvents
-  .filter(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    const evDate = new Date(e.data.eventDate);
+
+/* ── Sheet events — same source as the /events page ─────────────────────── */
+const sheetCsvUrl = import.meta.env.SHEET_CSV_URL ?? "";
+let sheetRaw: any[] = [];
+try { sheetRaw = await importFromSheet(sheetCsvUrl); } catch { sheetRaw = []; }
+
+const HOME_COORD_OVERRIDES: Array<{ titleTest: RegExp; venueTest?: RegExp; lat: number; lng: number }> = [
+  { titleTest: /turkey run/i,                                                           lat: 29.1852, lng: -81.0705 },
+  { titleTest: /bike week|main street/i, venueTest: /main street|boot hill|iron horse/i, lat: 29.2235, lng: -81.0115 },
+  { titleTest: /mindtravel/i,                                                            lat: 29.0258, lng: -80.9270 },
+  { titleTest: /spring break/i,                                                         lat: 29.2373, lng: -81.0026 },
+];
+function patchHomeCoords(e: any) {
+  for (const ov of HOME_COORD_OVERRIDES) {
+    if (ov.titleTest.test(e.title ?? "") || (ov.venueTest && ov.venueTest.test(e.location ?? ""))) {
+      return { ...e, lat: ov.lat, lng: ov.lng };
+    }
+  }
+  return e;
+}
+
+const DAYTONA_CITIES = new Set([
+  "daytona", "daytona beach", "ormond beach", "ormond", "port orange",
+  "daytona beach shores", "south daytona", "holly hill",
+  "new smyrna beach", "new smyrna", "flagler beach", "flagler",
+]);
+
+const upcomingRaw = sheetRaw
+  .map(patchHomeCoords)
+  .filter((e: any) => {
+    const evDate = new Date(e.eventDate);
     evDate.setHours(0, 0, 0, 0);
-    return evCity === "daytona" && evDate >= today;
+    const endDate = e.endDate ? new Date(e.endDate) : null;
+    if (endDate) endDate.setHours(0, 0, 0, 0);
+    const isActive = evDate >= today || (endDate !== null && endDate >= today);
+    return isActive && DAYTONA_CITIES.has((e.city ?? "daytona beach").toLowerCase().trim());
   })
-  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
-  .slice(0, 4);
+  .sort((a: any, b: any) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+
+/* Wrap into { slug, data } shape expected by the sidebar JSX */
+const upcomingEvents = upcomingRaw.slice(0, 4).map((e: any) => ({
+  slug: `daytona/sheet-${String(e.title ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}`,
+  data: e,
+}));
+
+/* Map pins — only events where coords were resolved by COORD_OVERRIDES */
+const homePins = upcomingRaw
+  .filter((e: any) => e.lat != null && e.lng != null)
+  .map((e: any) => {
+    const d = new Date(e.eventDate);
+    const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return {
+      label:   e.title,
+      address: `${dateStr} · ${e.location ?? ""}`,
+      lat:     e.lat,
+      lng:     e.lng,
+      image:   e.image ?? "/images/daytona-placeholder.jpg",
+    };
+  });
 
 const featuredAd = {
   tag: "Featured Business",
@@ -126,20 +175,7 @@ const topics = [
    wellness.jpg    → Yoga on the beach, sunrise run, or spa interior
 ────────────────────────────────────────────────────────────────────── */
 
-/* ── Trending Now map pins ──────────────────────────────────────────────────
-   All coords are manually verified. Main St venues use the corridor hard-lock
-   (29.2235, -81.0115) matching COORD_OVERRIDES in events/index.astro.
-   Ocean guard: InteractiveMap filters out any pin with lat=0 or lng=0.        */
-const trendingSpots = [
-  { label: "Daytona International Speedway",  address: "1801 W International Speedway Blvd", lat: 29.1852, lng: -81.0705 },
-  { label: "Daytona Beach Boardwalk & Pier",  address: "250 N Atlantic Ave",                 lat: 29.2262, lng: -81.0000 },
-  { label: "Boot Hill Saloon",                address: "310 Main St — Bike Week institution", lat: 29.2235, lng: -81.0115 },
-  { label: "Tomoka State Park",               address: "2099 N Beach St, Ormond Beach",       lat: 29.3397, lng: -81.1007 },
-  { label: "Crabby's Oceanside Bar & Grill",  address: "3701 S Atlantic Ave",                 lat: 29.1903, lng: -81.0007 },
-  { label: "Halifax Harbor Marina",           address: "125 Basin St, Daytona Beach",         lat: 29.2098, lng: -81.0237 },
-  { label: "Ocean Walk Shoppes & Movies",     address: "250 N Atlantic Ave",                  lat: 29.2262, lng: -81.0000 },
-  { label: "Jackie Robinson Ballpark",        address: "105 E Orange Ave — historic 1914 park", lat: 29.2086, lng: -81.0167 },
-].filter(p => p.lat !== 0 && p.lng !== 0);
+/* trendingSpots removed — homepage map now shows Live sheet events only */
 ---
 
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
@@ -258,10 +294,10 @@ const trendingSpots = [
           {/* ── TRENDING NOW MAP ── */}
           <div class="masterMapBlock">
             <div class="masterMapHead">
-              <span class="masterMapTitle">Go Do Daytona: Trending Now</span>
-              <span class="masterMapSub">{trendingSpots.length} spots worth checking out</span>
+              <span class="masterMapTitle">Go Do Daytona: Live Events</span>
+              <span class="masterMapSub">{homePins.length} event{homePins.length !== 1 ? "s" : ""} on the map</span>
             </div>
-            <InteractiveMap locations={trendingSpots} height="450px" zoom={12} />
+            <InteractiveMap locations={homePins} height="450px" zoom={12} center={[29.2108, -81.0228]} />
           </div>
 
           {/* ── FEATURED AD — "FEATURED" label, never "Sponsored" ── */}
