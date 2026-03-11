@@ -597,6 +597,7 @@ async function resolveImage(event, unsplashKey) {
  * @returns {Promise<object[]>}
  */
 async function scrapeSource(source) {
+  console.log(`[scraper] Scraping ${source.name}…`);
   const html = await fetchHtml(source.url);
   if (!html) return [];
 
