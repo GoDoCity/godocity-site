@@ -445,11 +445,11 @@ const CATEGORIES = [
 
     var body = new URLSearchParams(fields).toString();
 
-    fetch("/", {
+    fetch("/submit-event/", {
       method:   "POST",
       headers:  { "Content-Type": "application/x-www-form-urlencoded" },
       body:     body,
-      redirect: "manual",   /* capture Netlify's 303 instead of following it */
+      redirect: "manual",
     })
       .then(function (res) {
         /*
