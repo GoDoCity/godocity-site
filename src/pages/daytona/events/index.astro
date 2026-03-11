@@ -131,17 +131,30 @@ const manualEvents = ((manualFeedData as any).quickEntry ?? [])
 /* ── Coordinate hard-fixes ───────────────────────────────────────────────────
    Prevents any source (scraper, stale markdown, manual entry) from misplacing
    these landmarks. Matches are case-insensitive substring checks on title.    */
-const COORD_OVERRIDES: Array<{ test: RegExp; lat: number; lng: number }> = [
+const COORD_OVERRIDES: Array<{
+  titleTest: RegExp;
+  venueTest?: RegExp;   /* also fires when location field matches — even if title doesn't */
+  lat: number; lng: number;
+}> = [
   // Turkey Run → Daytona International Speedway
-  { test: /turkey run/i,           lat: 29.1852, lng: -81.0705 },
-  // Bike Week / Main Street scene → Main Street, Daytona Beach
-  { test: /bike week|main street/i, lat: 29.2235, lng: -81.0115 },
+  {
+    titleTest: /turkey run/i,
+    lat: 29.1852, lng: -81.0705,
+  },
+  // Bike Week / Main Street scene — title OR venue triggers the lock
+  // "The Bank", "Dirty Harry's", "Main Street" are all the same corridor
+  {
+    titleTest: /bike week|main street/i,
+    venueTest: /main street|the bank|dirty harry/i,
+    lat: 29.2235, lng: -81.0115,
+  },
 ];
 function patchEventCoords(e: any) {
-  const title = String(e.data.title ?? "");
-  for (const override of COORD_OVERRIDES) {
-    if (override.test.test(title)) {
-      return { ...e, data: { ...e.data, lat: override.lat, lng: override.lng } };
+  const title = String(e.data.title    ?? "");
+  const venue = String(e.data.location ?? "");
+  for (const ov of COORD_OVERRIDES) {
+    if (ov.titleTest.test(title) || (ov.venueTest && ov.venueTest.test(venue))) {
+      return { ...e, data: { ...e.data, lat: ov.lat, lng: ov.lng } };
     }
   }
   return e;
