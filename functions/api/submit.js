@@ -6,16 +6,10 @@
  * No npm packages — uses native fetch (Cloudflare Workers runtime).
  */
 
-/* Notification target — hard-coded, not overridable via env */
+/* Notification target — hard-coded */
 const NOTIFY_EMAIL = "yellowcabking@msn.com";
 
-/* Resend API key — split across two constants to satisfy GitHub secret-scanning
-   rules (intentional inclusion of a public-facing service credential).         */
-const _rk1 = "re_JNbp9fMs";
-const _rk2 = "_9oLbKeK7o8sQJ2ZJAqejvCdY";
-const RESEND_KEY = _rk1 + _rk2;
-
-export async function onRequestPost({ request }) {
+export async function onRequestPost({ request, env }) {
   try {
     const body = await request.text();
     const params = new URLSearchParams(body);
@@ -39,29 +33,34 @@ export async function onRequestPost({ request }) {
       contact: d["contact-email"],
     }, null, 2));
 
-    /* Email via Resend — key is hard-coded above */
-    try {
-      const emailRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${RESEND_KEY}`,
-          "Content-Type":  "application/json",
-        },
-        body: JSON.stringify({
-          from:    "GoDoCity <onboarding@resend.dev>",
-          to:      [NOTIFY_EMAIL],
-          subject: `New Event Submission: ${d["event-title"]}`,
-          html:    buildEmailHtml(d),
-        }),
-      });
-      if (!emailRes.ok) {
-        const errText = await emailRes.text().catch(() => "");
-        console.warn("[submit] Resend error:", emailRes.status, errText);
-      } else {
-        console.log("[submit] Email sent to", NOTIFY_EMAIL);
+    /* Email via Resend — key bound from Cloudflare env */
+    const resendKey = env.RESEND_API_KEY;
+    if (!resendKey) {
+      console.warn("[submit] RESEND_API_KEY not set in Cloudflare environment");
+    } else {
+      try {
+        const emailRes = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${resendKey}`,
+            "Content-Type":  "application/json",
+          },
+          body: JSON.stringify({
+            from:    "GoDoCity <onboarding@resend.dev>",
+            to:      [NOTIFY_EMAIL],
+            subject: `New Event Submission: ${d["event-title"]}`,
+            html:    buildEmailHtml(d),
+          }),
+        });
+        if (!emailRes.ok) {
+          const errText = await emailRes.text().catch(() => "");
+          console.warn("[submit] Resend error:", emailRes.status, errText);
+        } else {
+          console.log("[submit] Email sent to", NOTIFY_EMAIL);
+        }
+      } catch (emailErr) {
+        console.warn("[submit] Email send failed:", emailErr?.message ?? emailErr);
       }
-    } catch (emailErr) {
-      console.warn("[submit] Email send failed:", emailErr?.message ?? emailErr);
     }
 
     return ok();
