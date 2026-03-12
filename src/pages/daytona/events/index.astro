@@ -336,10 +336,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
         </div>
       </div>
 
-      <div class="container">
-
-        {/* ── FEATURED SCROLLER — label + action buttons at top ── */}
-        {sponsoredEvents.length > 0 && (
+      {/* ── FEATURED SCROLLER — own container so it aligns identically with map/feed ── */}
+      {sponsoredEvents.length > 0 && (
+        <div class="container">
           <div class="featuredSection">
             <div class="featuredHeadRow">
               <span class="featuredSectionTitle">Featured Events</span>
@@ -382,7 +381,10 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
               })}
             </div>
           </div>
-        )}
+        </div>{/* /.container (featuredSection) */}
+      )}
+
+      <div class="container">
 
         {/* ── MAP ── */}
         {mapPins.length > 0 && (
@@ -501,7 +503,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
           <a class="suggestBtn" href="/submit-event/">Suggest an Event →</a>
         </div>
 
-        </div>{/* /.container */}
+        </div>{/* /.container (map + feed) */}
     </div>{/* /.eventsContainer */}
   </section>
 </Base>
@@ -822,29 +824,39 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   }
   .evCardImg img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  /* Col 2 — Date block: MON / DD stacked, fixed 38px wide */
+  /* Col 2 — Date block: mini-calendar icon, yellow month tab + large day */
   .evCardDate {
     flex-shrink: 0;
-    width: 38px;
+    width: 44px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1px;
+    align-items: stretch;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,.08);
   }
   .evCardMon {
-    font-size: 9px;
+    background: var(--brand1);
+    color: #000;
+    font-size: 8px;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: .06em;
-    color: var(--brand1);
+    letter-spacing: .08em;
+    text-align: center;
+    padding: 3px 2px 2px;
     line-height: 1;
   }
   .evCardDay {
     font-size: 20px;
     font-weight: 900;
     color: var(--text);
+    text-align: center;
     line-height: 1;
+    padding: 5px 0 6px;
+    background: rgba(255,255,255,.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* Col 3 — Text: title, venue, meta */
