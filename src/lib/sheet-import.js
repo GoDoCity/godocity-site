@@ -6,22 +6,30 @@
  *  1. Google Sheet  (SHEET_CSV_URL)
  *     Manual curation. Column C "Sponsored" = imported + featured at top.
  *     Column C "Live"      = imported as a regular event.
+ *     Column E (col 4)     = explicit address override — geocoded via Mapbox,
+ *                            overrides ALL other coordinate sources.
  *     Sheet always wins on dedup — any event ID in the sheet overrides the
  *     auto-discovered version entirely.
  *
- *  2. Eventbrite Search API  (EVENTBRITE_TOKEN)
- *     Auto-discovers all public events within 20mi of Daytona Beach center.
+ *  2. Eventbrite Destination Search API  (EVENTBRITE_TOKEN)
+ *     Auto-discovers all public events within 25mi of Daytona Beach center
+ *     using /v3/destination/events/.
  *     Up to 150 events (3 pages × 50). Filtered to start >= today.
  *     Deduped against sheet by Eventbrite ID. Never marked sponsored.
  *
  * Coordinate resolution (per event, highest priority first):
- *   1. Eventbrite venue.address.latitude / longitude  (exact geocode from EB)
- *   2. Mapbox Geocoding API fallback when (0,0) or missing  (MAPBOX_ACCESS_TOKEN)
+ *   1. Column E address override in Google Sheet  (geocoded via Mapbox)
+ *   2. Eventbrite venue.address.latitude / longitude  (exact geocode from EB)
+ *      — REJECTED if (0,0) or within a Water Zone (Halifax River / Atlantic Ocean)
+ *   3. Mapbox Geocoding API fallback  (MAPBOX_ACCESS_TOKEN)
+ *      — Query is "VenueName Daytona Beach, FL" for water-zone rescues
  *
  * Sheet column layout:
  *   A (col 0) — Eventbrite URL   (required)
  *   B (col 1) — Title override   (optional)
  *   C (col 2) — Status           ("Live" | "Sponsored")
+ *   D (col 3) — (reserved / ignored)
+ *   E (col 4) — Address override (optional — overrides all coordinate sources)
  */
 
 const CSV_TIMEOUT_MS = 12_000;
@@ -35,6 +43,32 @@ const EB_ID_RE = /eventbrite\.com\/e\/[^/?#]+-(\d{5,})/i;
 /* Daytona Beach center — used for search radius and Mapbox proximity bias */
 const DAYTONA_LAT =  29.2108;
 const DAYTONA_LNG = -81.0228;
+
+/**
+ * Water Zone bounding boxes — Daytona Beach area.
+ * Coordinates that fall inside these boxes are treated as bad/ocean defaults
+ * and trigger a Mapbox venue-name geocode instead.
+ *
+ *   Halifax River / Intracoastal Waterway:
+ *     Runs N–S through the heart of Daytona, lng ≈ -81.035 to -81.012.
+ *   Atlantic Ocean (east of barrier island):
+ *     Anything east of ~lng -80.995 at these latitudes is open water.
+ *
+ * Note: The barrier island itself (hotels, beach venues) sits between the two
+ * zones (lng ≈ -81.012 to -80.995) and is intentionally NOT flagged.
+ */
+const WATER_ZONES = [
+  { minLat: 29.10, maxLat: 29.50, minLng: -81.035, maxLng: -81.012 }, // Halifax River
+  { minLat: 29.10, maxLat: 29.50, minLng: -80.995, maxLng: -80.850 }, // Atlantic Ocean
+];
+
+function isInWaterZone(lat, lng) {
+  if (lat === 0 && lng === 0) return true; // null-island / Eventbrite default
+  return WATER_ZONES.some(z =>
+    lat >= z.minLat && lat <= z.maxLat &&
+    lng >= z.minLng && lng <= z.maxLng
+  );
+}
 
 /**
  * Main entry point.
@@ -81,7 +115,7 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     return cells.some(c => /^(live|sponsored)$/i.test(c));
   });
 
-  /* Build sheetMeta: eventbriteId → { titleOverride, isSponsored, isLive, url } */
+  /* Build sheetMeta: eventbriteId → { titleOverride, isSponsored, isLive, url, addressOverride } */
   const sheetMeta = new Map();
   let firstDataRow = true;
 
@@ -90,7 +124,7 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     if (!cells.length || isHeadingRow(cells[0], cells)) continue;
 
     if (firstDataRow) {
-      console.log(`[sheet-import] First data row: ${JSON.stringify(cells.slice(0, 4))}`);
+      console.log(`[sheet-import] First data row: ${JSON.stringify(cells.slice(0, 5))}`);
       firstDataRow = false;
     }
 
@@ -104,12 +138,26 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     if (!idMatch) { console.log(`[sheet-import] Skipping non-Eventbrite URL: ${url}`); continue; }
 
     const rawCells = row.map(c => c.trim());
+
+    /* Column B — title override */
     const colB = rawCells[1] ?? "";
     const titleOverride =
       colB && !/^https?:\/\//i.test(colB) && !/^(live|sponsored)$/i.test(colB) && colB.length > 1
         ? colB : null;
 
-    sheetMeta.set(idMatch[1], { titleOverride, isSponsored, isLive, url });
+    /* Column E (index 4) — address override; overrides all coordinate sources */
+    const colE = rawCells[4] ?? "";
+    const addressOverride =
+      colE && colE.length > 3 &&
+      !/^(live|sponsored)$/i.test(colE) &&
+      !/^https?:\/\//i.test(colE)
+        ? colE : null;
+
+    if (addressOverride) {
+      console.log(`[sheet-import] Col-E address override for event ${idMatch[1]}: "${addressOverride}"`);
+    }
+
+    sheetMeta.set(idMatch[1], { titleOverride, isSponsored, isLive, url, addressOverride });
   }
 
   // ── 2. Fetch Eventbrite API data for each Live sheet event ─────────────────
@@ -127,7 +175,7 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
       continue;
     }
 
-    const coords = await resolveVenueCoords(api._venue, mapboxToken, title);
+    const coords = await resolveVenueCoords(api._venue, mapboxToken, title, meta.addressOverride);
     console.log(`[EVENTBRITE API] Successfully fetched '${title}' using private token`);
 
     sheetEvents.push(makeEvent({
@@ -146,7 +194,7 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     }));
   }
 
-  // ── 3. Auto-discover nearby events via Eventbrite Search API ──────────────
+  // ── 3. Auto-discover nearby events via Eventbrite Destination Search API ───
   const sheetIds      = new Set(sheetMeta.keys());
   const searchResults = await searchNearbyEvents(eventbriteToken);
 
@@ -162,6 +210,7 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     const endDateRaw = item.end?.local?.slice(0, 10);
     const endDate    = endDateRaw && endDateRaw !== eventDate ? endDateRaw : null;
 
+    /* No Column E override for auto-discovered events */
     const coords = await resolveVenueCoords(item.venue, mapboxToken, title);
 
     let image = "/images/daytona-placeholder.jpg";
@@ -262,7 +311,8 @@ async function fetchEventbriteAPI(eventId, token) {
 }
 
 /**
- * Search the Eventbrite API for public events within 20 miles of Daytona Beach.
+ * Search for public events within 25 miles of Daytona Beach using the
+ * Eventbrite Destination Events API (/v3/destination/events/).
  * Fetches up to SEARCH_PAGES pages (50 results each). Returns raw API event objects.
  */
 async function searchNearbyEvents(token) {
@@ -278,15 +328,15 @@ async function searchNearbyEvents(token) {
 
   for (let page = 1; page <= SEARCH_PAGES; page++) {
     try {
-      const url = new URL("https://www.eventbriteapi.com/v3/events/search/");
-      url.searchParams.set("location.latitude",       String(DAYTONA_LAT));
-      url.searchParams.set("location.longitude",      String(DAYTONA_LNG));
-      url.searchParams.set("location.within",         "20mi");
-      url.searchParams.set("expand",                  "venue,logo,category");
-      url.searchParams.set("sort_by",                 "date");
-      url.searchParams.set("start_date.range_start",  today);
-      url.searchParams.set("page_size",               "50");
-      url.searchParams.set("page",                    String(page));
+      const url = new URL("https://www.eventbriteapi.com/v3/destination/events/");
+      url.searchParams.set("latitude",              String(DAYTONA_LAT));
+      url.searchParams.set("longitude",             String(DAYTONA_LNG));
+      url.searchParams.set("distance",              "25mi");
+      url.searchParams.set("expand",                "venue,logo,category");
+      url.searchParams.set("sort_by",               "date");
+      url.searchParams.set("start_date.range_start", today);
+      url.searchParams.set("page_size",             "50");
+      url.searchParams.set("page",                  String(page));
 
       const res = await fetch(url.toString(), {
         headers: { "Authorization": `Bearer ${token}`, "User-Agent": UA },
@@ -294,18 +344,18 @@ async function searchNearbyEvents(token) {
       });
 
       if (!res.ok) {
-        console.log(`[sheet-import] Search page ${page} → HTTP ${res.status} — stopping`);
+        console.log(`[sheet-import] Destination search page ${page} → HTTP ${res.status} — stopping`);
         break;
       }
 
       const data   = await res.json();
       const events = data.events ?? [];
       allEvents.push(...events);
-      console.log(`[sheet-import] Search page ${page}: ${events.length} events found`);
+      console.log(`[sheet-import] Destination search page ${page}: ${events.length} events found`);
 
       if (!data.pagination?.has_more_items) break;
     } catch (err) {
-      console.log(`[sheet-import] Search page ${page} error: ${err?.message ?? err} — stopping`);
+      console.log(`[sheet-import] Destination search page ${page} error: ${err?.message ?? err} — stopping`);
       break;
     }
   }
@@ -316,48 +366,86 @@ async function searchNearbyEvents(token) {
 
 /**
  * Resolve lat/lng for a venue object.
- * Priority: (1) Eventbrite venue coordinates → (2) Mapbox geocode fallback.
  *
- * @param {object|null} venue       Raw Eventbrite venue object.
- * @param {string}      mapboxToken Mapbox Access Token.
- * @param {string}      eventTitle  Used as last-resort geocode query.
+ * Priority:
+ *   1. addressOverride (Column E) — geocoded via Mapbox, absolute authority.
+ *   2. Eventbrite venue coordinates — accepted only when outside Water Zones.
+ *   3. Mapbox geocode fallback:
+ *      - Water-zone rescue: "VenueName Daytona Beach, FL"
+ *      - Missing-coords fallback: best available address string.
+ *
+ * @param {object|null} venue           Raw Eventbrite venue object.
+ * @param {string}      mapboxToken     Mapbox Access Token.
+ * @param {string}      eventTitle      Used as last-resort geocode query.
+ * @param {string|null} addressOverride Column E value — overrides everything.
  * @returns {{ lat: number, lng: number } | { lat: null, lng: null }}
  */
-async function resolveVenueCoords(venue, mapboxToken, eventTitle = "") {
-  if (!venue) return { lat: null, lng: null };
+async function resolveVenueCoords(venue, mapboxToken, eventTitle = "", addressOverride = null) {
+  // ── 0. Column E address override — absolute authority ─────────────────────
+  if (addressOverride) {
+    if (!mapboxToken) {
+      console.log(`[sheet-import] Col-E override "${addressOverride}" ignored — no Mapbox token`);
+      return { lat: null, lng: null };
+    }
+    console.log(`[sheet-import] Col-E override → geocoding: "${addressOverride}"`);
+    return (await geocode(addressOverride, mapboxToken)) ?? { lat: null, lng: null };
+  }
 
-  /* 1. Prefer Eventbrite's own geocoded coordinates */
-  const rawLat = parseFloat(venue.address?.latitude  ?? "");
-  const rawLng = parseFloat(venue.address?.longitude ?? "");
-  if (!isNaN(rawLat) && !isNaN(rawLng) && (rawLat !== 0 || rawLng !== 0)) {
+  // ── 1. Eventbrite venue coordinates — accept only when outside Water Zones ─
+  const rawLat = parseFloat(venue?.address?.latitude  ?? "");
+  const rawLng = parseFloat(venue?.address?.longitude ?? "");
+  const hasCoords = !isNaN(rawLat) && !isNaN(rawLng);
+
+  if (hasCoords && !isInWaterZone(rawLat, rawLng)) {
     console.log(
-      `[sheet-import] Venue coords for "${venue.name ?? "?"}" → ` +
+      `[sheet-import] Venue coords for "${venue?.name ?? "?"}" → ` +
       `${rawLat.toFixed(4)}, ${rawLng.toFixed(4)}`
     );
     return { lat: rawLat, lng: rawLng };
   }
 
-  /* 2. Mapbox geocode fallback — build the most specific query available */
+  if (hasCoords && isInWaterZone(rawLat, rawLng)) {
+    console.log(
+      `[sheet-import] Water-zone pin (${rawLat.toFixed(4)}, ${rawLng.toFixed(4)}) ` +
+      `for "${venue?.name ?? eventTitle}" — falling back to Mapbox venue-name search`
+    );
+  }
+
+  // ── 2. Mapbox geocode fallback ─────────────────────────────────────────────
   if (!mapboxToken) {
-    console.log(`[sheet-import] No coords for "${venue.name ?? eventTitle}" and no Mapbox token — pin omitted`);
+    console.log(
+      `[sheet-import] No usable coords for "${venue?.name ?? eventTitle}" ` +
+      `and no Mapbox token — pin omitted`
+    );
     return { lat: null, lng: null };
   }
 
-  const addrDisplay = venue.address?.localized_address_display ?? "";
-  const venueName   = venue.name ?? "";
+  const venueName   = venue?.name ?? "";
+  const addrDisplay = venue?.address?.localized_address_display ?? "";
   const hasFL       = /\bfl\b|\bflorida\b/i.test(`${addrDisplay} ${venueName}`);
 
-  const query = addrDisplay
-    ? (hasFL ? addrDisplay : `${addrDisplay}, FL`)
-    : venueName
-    ? `${venueName}, Daytona Beach, FL`
-    : eventTitle
-    ? `${eventTitle}, Daytona Beach, FL`
-    : null;
+  let query;
+  if (hasCoords && isInWaterZone(rawLat, rawLng)) {
+    /* Water-zone rescue: search by venue name + city for best accuracy */
+    query = venueName
+      ? `${venueName} Daytona Beach, FL`
+      : eventTitle
+      ? `${eventTitle}, Daytona Beach, FL`
+      : null;
+  } else {
+    /* No coordinates at all: use the best available address string */
+    query = addrDisplay
+      ? (hasFL ? addrDisplay : `${addrDisplay}, FL`)
+      : venueName
+      ? `${venueName}, Daytona Beach, FL`
+      : eventTitle
+      ? `${eventTitle}, Daytona Beach, FL`
+      : null;
+  }
 
   if (!query) return { lat: null, lng: null };
 
-  console.log(`[sheet-import] No venue coords — geocoding: "${query}"`);
+  console.log(`[sheet-import] No valid venue coords — geocoding: "${query}"`);
   return (await geocode(query, mapboxToken)) ?? { lat: null, lng: null };
 }
 
@@ -406,7 +494,7 @@ async function geocode(query, mapboxToken) {
  */
 function isHeadingRow(firstCell, cells) {
   if (cells.length === 1 && !/^https?:\/\//i.test(firstCell)) return true;
-  if (/^(url|event|title|name|raw\s*text|status|description|date)$/i.test(firstCell)) return true;
+  if (/^(url|event|title|name|raw\s*text|status|description|date|address)$/i.test(firstCell)) return true;
   if (/godo(daytona|city)/i.test(firstCell)) return true;
   return false;
 }

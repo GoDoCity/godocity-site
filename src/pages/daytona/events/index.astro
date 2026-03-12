@@ -469,6 +469,12 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
                       <div class="evCardMeta">
                         <span class="evCardCity">{cityDisplay(evCity)}</span>
                         {dist && <span class="evCardDist">{dist}</span>}
+                        {e.data.source === "eventbrite-sheet" && (
+                          <span class="evSrcBadge evSrcBadge--featured">Featured</span>
+                        )}
+                        {e.data.source === "eventbrite-discovered" && (
+                          <span class="evSrcBadge evSrcBadge--community">Community Event</span>
+                        )}
                       </div>
                     </div>
                   </a>
@@ -860,6 +866,24 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   .evCardDist {
     font-size: 15px; font-weight: 700; color: var(--brand1);
     background: rgba(249,217,0,.10); padding: 1px 6px; border-radius: 999px;
+  }
+
+  /* ── Source badges — Community Event / Featured ── */
+  .evSrcBadge {
+    display: inline-block;
+    font-size: 10px; font-weight: 700; letter-spacing: .04em;
+    padding: 2px 7px; border-radius: 999px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .evSrcBadge--featured {
+    background: rgba(249,217,0,.12);
+    color: var(--brand1);
+    border: 1px solid rgba(249,217,0,.3);
+  }
+  .evSrcBadge--community {
+    background: rgba(255,255,255,.06);
+    color: var(--muted);
+    border: 1px solid rgba(255,255,255,.12);
   }
 
   /* Load More */
