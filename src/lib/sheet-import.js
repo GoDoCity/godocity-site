@@ -36,6 +36,25 @@ const CSV_TIMEOUT_MS = 12_000;
 const API_TIMEOUT_MS =  8_000;
 const GEO_TIMEOUT_MS =  5_000;
 const SEARCH_PAGES   =  3;       // 3 pages × 50 = up to 150 auto-discovered events
+
+/* Eventbrite category IDs included in auto-discovery searches.
+ * Focuses results on leisure/community events relevant to a city guide.
+ * IDs: 103 Music, 105 Performing & Visual Arts, 108 Sports & Fitness,
+ *      109 Travel & Outdoor, 110 Food & Drink, 113 Community & Culture,
+ *      115 Family & Education, 116 Seasonal & Holiday, 118 Auto/Boat/Air,
+ *      119 Hobbies & Special Interest */
+const DISCOVERY_CATEGORY_IDS = [
+  "103",  // Music
+  "105",  // Performing & Visual Arts
+  "108",  // Sports & Fitness
+  "109",  // Travel & Outdoor
+  "110",  // Food & Drink
+  "113",  // Community & Culture
+  "115",  // Family & Education
+  "116",  // Seasonal & Holiday
+  "118",  // Auto, Boat & Air
+  "119",  // Hobbies & Special Interest
+].join(",");
 const UA = "Mozilla/5.0 (compatible; GodoCityBot/1.0; +https://godocity.com)";
 
 const EB_ID_RE = /eventbrite\.com\/e\/[^/?#]+-(\d{5,})/i;
@@ -335,6 +354,7 @@ async function searchNearbyEvents(token) {
       url.searchParams.set("expand",                "venue,logo,category");
       url.searchParams.set("sort_by",               "date");
       url.searchParams.set("start_date.range_start", today);
+      url.searchParams.set("categories",            DISCOVERY_CATEGORY_IDS);
       url.searchParams.set("page_size",             "50");
       url.searchParams.set("page",                  String(page));
 
