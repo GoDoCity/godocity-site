@@ -80,10 +80,10 @@ const today = new Date();
 today.setHours(0, 0, 0, 0);
 
 /* ── Sheet events — same source as the /events page ─────────────────────── */
-const sheetCsvUrl    = import.meta.env.SHEET_CSV_URL       ?? "";
-const sheetMapboxTok = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
+const sheetCsvUrl = import.meta.env.SHEET_CSV_URL    ?? "";
+const ebToken     = import.meta.env.EVENTBRITE_TOKEN ?? "";
 let sheetRaw: any[] = [];
-try { sheetRaw = await importFromSheet(sheetCsvUrl, sheetMapboxTok); } catch { sheetRaw = []; }
+try { sheetRaw = await importFromSheet(sheetCsvUrl, ebToken); } catch { sheetRaw = []; }
 
 const HOME_COORD_OVERRIDES: Array<{ titleTest: RegExp; venueTest?: RegExp; lat: number; lng: number }> = [
   { titleTest: /turkey run/i,                                                           lat: 29.1852, lng: -81.0705 },
@@ -116,7 +116,12 @@ const upcomingRaw = sheetRaw
     const isActive = evDate >= today || (endDate !== null && endDate >= today);
     return isActive && DAYTONA_CITIES.has((e.city ?? "daytona beach").toLowerCase().trim());
   })
-  .sort((a: any, b: any) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+  .sort((a: any, b: any) => {
+    /* Sponsored events always float to the top */
+    if (a.sponsored && !b.sponsored) return -1;
+    if (!a.sponsored && b.sponsored)  return  1;
+    return new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime();
+  });
 
 /* Wrap into { slug, data } shape expected by the sidebar JSX */
 const upcomingEvents = upcomingRaw.slice(0, 4).map((e: any) => ({

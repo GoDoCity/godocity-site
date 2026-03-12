@@ -88,10 +88,10 @@ console.log(`[CLEANUP] Markdown directory is empty: ${allEvents.length === 0}`);
    Column A = Eventbrite URL. Title, image, and date are fetched at build time.
    The sheet is the sole live event source. The legacy HTML scraper is disabled.
    If the sheet is unreachable only markdown + manual-events.json are shown.    */
-const sheetCsvUrl    = import.meta.env.SHEET_CSV_URL       ?? "";
-const sheetMapboxTok = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
+const sheetCsvUrl  = import.meta.env.SHEET_CSV_URL    ?? "";
+const ebToken      = import.meta.env.EVENTBRITE_TOKEN ?? "";
 let sheetRaw: any[] = [];
-try { sheetRaw = await importFromSheet(sheetCsvUrl, sheetMapboxTok); } catch { sheetRaw = []; }
+try { sheetRaw = await importFromSheet(sheetCsvUrl, ebToken); } catch { sheetRaw = []; }
 
 /* ── Legacy HTML scraper — permanently disabled ──────────────────────────────
    Scraped events placed ocean-side pins due to schema.org coord drift.
@@ -137,7 +137,7 @@ const sheetEvents = sheetRaw.map((e: any) => ({
     lng:         e.lng       ?? null,
     coordSource: null,
     source:      "eventbrite-sheet",
-    sponsored:   false,
+    sponsored:   e.sponsored ?? false,
   },
 }));
 
