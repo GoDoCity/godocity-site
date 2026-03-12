@@ -340,6 +340,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
       {sponsoredEvents.length > 0 && (
         <div class="container">
           <div class="featuredSection">
+          <div class="featuredInner">
             <div class="featuredHeadRow">
               <span class="featuredSectionTitle">Featured Events</span>
               <div class="featuredActions">
@@ -380,7 +381,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
                 );
               })}
             </div>
-          </div>
+          </div>{/* /.featuredInner */}
         </div>
       )}
 
@@ -713,8 +714,17 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   }
 
   /* ── Featured Scroller — label + action buttons row ── */
-  .featuredSection { margin-bottom: 24px; max-width: var(--max); margin-left: auto; margin-right: auto; }
+  .featuredSection { margin-bottom: 24px; }
+  .featuredInner {
+    width: 100%;
+    max-width: var(--max);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
   .featuredHeadRow {
+    width: 100%;
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 10px; gap: 10px; flex-wrap: wrap;
   }
@@ -739,6 +749,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   .featuredActionBtn--add:hover { border-color: var(--brand1); background: rgba(249,217,0,.08); }
 
   .featuredScroller {
+    width: 100%;
     display: flex; gap: 14px;
     overflow-x: auto; scroll-snap-type: x mandatory;
     padding-bottom: 8px;
