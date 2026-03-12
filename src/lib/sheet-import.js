@@ -132,8 +132,9 @@ export async function importFromSheet(csvUrl, mapboxToken = "") {
     let lat = null, lng = null;
 
     if (colE) {
-      /* Column E is the source of truth for venue — append city hint only if bare name */
-      const geoQuery = colE.toLowerCase().includes("fl") ? colE : `${colE}, Daytona Beach, FL`;
+      /* Column E is the source of truth for venue — append city hint unless FL/Florida already present */
+      const hasFL = /\bfl\b|\bflorida\b/i.test(colE);
+      const geoQuery = hasFL ? colE : `${colE}, Daytona Beach, FL`;
       const geo = await geocode(geoQuery, mapboxToken);
       if (geo) { lat = geo.lat; lng = geo.lng; }
     }
@@ -271,6 +272,13 @@ async function geocode(query, mapboxToken) {
       return null;
     }
     const [lng, lat] = feature.center;
+    const relevance  = feature.relevance ?? 1;
+    /* Low-confidence warning: relevance < 0.5 or no street number in place_name */
+    if (relevance < 0.5) {
+      console.log(`[sheet-import] WARNING: Low-confidence geocode (relevance=${relevance.toFixed(2)}) for "${query}" → "${feature.place_name}" — consider a more specific address in Column E`);
+    } else if (!/\d/.test(feature.place_name.split(",")[0])) {
+      console.log(`[sheet-import] NOTE: Geocode for "${query}" resolved to a general place, not a street address → "${feature.place_name}"`);
+    }
     console.log(`[sheet-import] Geocoded "${query}" → ${lat.toFixed(4)}, ${lng.toFixed(4)} (${feature.place_name})`);
     return { lat, lng };
   } catch (err) {

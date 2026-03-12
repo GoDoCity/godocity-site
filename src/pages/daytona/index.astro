@@ -136,6 +136,7 @@ const homePins = upcomingRaw
       lat:     e.lat,
       lng:     e.lng,
       image:   e.image ?? "/images/daytona-placeholder.jpg",
+      url:     e.url ?? null,
     };
   });
 
@@ -298,7 +299,7 @@ const topics = [
               <span class="masterMapTitle">Go Do Daytona: Live Events</span>
               <span class="masterMapSub">{homePins.length} event{homePins.length !== 1 ? "s" : ""} on the map</span>
             </div>
-            <InteractiveMap locations={homePins} height="450px" zoom={12} center={[29.2108, -81.0228]} />
+            <InteractiveMap locations={homePins} height="450px" center={[29.2108, -81.0228]} />
           </div>
 
           {/* ── FEATURED AD — "FEATURED" label, never "Sponsored" ── */}
