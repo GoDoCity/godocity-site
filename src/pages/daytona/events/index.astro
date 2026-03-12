@@ -88,10 +88,11 @@ console.log(`[CLEANUP] Markdown directory is empty: ${allEvents.length === 0}`);
    Column A = Eventbrite URL. Title, image, and date are fetched at build time.
    The sheet is the sole live event source. The legacy HTML scraper is disabled.
    If the sheet is unreachable only markdown + manual-events.json are shown.    */
-const sheetCsvUrl  = import.meta.env.SHEET_CSV_URL    ?? "";
-const ebToken      = import.meta.env.EVENTBRITE_TOKEN ?? "";
+const sheetCsvUrl  = import.meta.env.SHEET_CSV_URL      ?? "";
+const ebToken      = import.meta.env.EVENTBRITE_TOKEN  ?? "";
+const mapboxToken  = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
 let sheetRaw: any[] = [];
-try { sheetRaw = await importFromSheet(sheetCsvUrl, ebToken); } catch { sheetRaw = []; }
+try { sheetRaw = await importFromSheet(sheetCsvUrl, ebToken, mapboxToken); } catch { sheetRaw = []; }
 
 /* ── Legacy HTML scraper — permanently disabled ──────────────────────────────
    Scraped events placed ocean-side pins due to schema.org coord drift.
@@ -136,7 +137,7 @@ const sheetEvents = sheetRaw.map((e: any) => ({
     lat:         e.lat       ?? null,
     lng:         e.lng       ?? null,
     coordSource: null,
-    source:      "eventbrite-sheet",
+    source:      e.source ?? "eventbrite-sheet",  // preserve "eventbrite-discovered" for search results
     sponsored:   e.sponsored ?? false,
   },
 }));
@@ -250,11 +251,12 @@ const mapPins = upcomingEvents
   .filter(e => {
     if (e.data.lat == null || e.data.lng == null) return false;
     if (e.data.lat === 0 && e.data.lng === 0)     return false;
-    // Scraped events must have verified coords (hardlock or known_venue)
-    if (e.data.source && e.data.source !== "eventbrite-sheet") {
+    // Scraped (legacy) events require verified coords; sheet + discovered events are trusted
+    const isEventbriteSource = e.data.source === "eventbrite-sheet" || e.data.source === "eventbrite-discovered";
+    if (e.data.source && !isEventbriteSource) {
       return e.data.coordSource === "hardlock" || e.data.coordSource === "known_venue";
     }
-    return true; // markdown / manual / sheet: trust author-provided or COORD_OVERRIDES coords
+    return true; // markdown / manual / sheet / discovered: trust API-sourced or COORD_OVERRIDES coords
   })
   .map(e => {
     const d = new Date(e.data.eventDate);
