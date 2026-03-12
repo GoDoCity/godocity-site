@@ -713,7 +713,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   }
 
   /* ── Featured Scroller — label + action buttons row ── */
-  .featuredSection { margin-bottom: 24px; }
+  .featuredSection { margin-bottom: 24px; max-width: var(--max); margin-left: auto; margin-right: auto; }
   .featuredHeadRow {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 10px; gap: 10px; flex-wrap: wrap;
@@ -831,20 +831,20 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    border-radius: 8px;
+    border: 2px solid #FFD700;
+    border-radius: 4px;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,.08);
   }
   .evCardMon {
-    background: var(--brand1);
+    background: #FFD700;
     color: #000;
-    font-size: 8px;
+    font-size: 9px;
     font-weight: 900;
     text-transform: uppercase;
-    letter-spacing: .08em;
-    text-align: center;
-    padding: 3px 2px 2px;
+    letter-spacing: .06em;
     line-height: 1;
+    text-align: center;
+    padding: 3px 0;
   }
   .evCardDay {
     font-size: 20px;
@@ -857,6 +857,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     display: flex;
     align-items: center;
     justify-content: center;
+    border-top: 1px solid rgba(255,215,0,.35);
   }
 
   /* Col 3 — Text: title, venue, meta */
