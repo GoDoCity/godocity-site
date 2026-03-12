@@ -1,243 +1,423 @@
 /**
  * src/lib/sheet-import.js
  *
- * Build-time Google Sheet → Eventbrite API event importer.
+ * Build-time event importer — two sources merged into one array:
  *
- * The sheet must be published to the web as CSV (File → Share → Publish to web → CSV).
- * Set the public CSV URL in Cloudflare env var: SHEET_CSV_URL
- * Set your Eventbrite Private Token in Cloudflare env var: EVENTBRITE_TOKEN
+ *  1. Google Sheet  (SHEET_CSV_URL)
+ *     Manual curation. Column C "Sponsored" = imported + featured at top.
+ *     Column C "Live"      = imported as a regular event.
+ *     Sheet always wins on dedup — any event ID in the sheet overrides the
+ *     auto-discovered version entirely.
  *
- * Column layout (fixed indices):
- *   A (col 0) — Eventbrite URL        (required)
- *   B (col 1) — Title override        (optional — overrides Eventbrite API name)
- *   C (col 2) — Status                ("Live" to publish, "Sponsored" = Live + featured)
+ *  2. Eventbrite Search API  (EVENTBRITE_TOKEN)
+ *     Auto-discovers all public events within 20mi of Daytona Beach center.
+ *     Up to 150 events (3 pages × 50). Filtered to start >= today.
+ *     Deduped against sheet by Eventbrite ID. Never marked sponsored.
  *
- * Event data (title, dates, venue, coords, image, category) comes directly from
- * the Eventbrite REST API — no HTML scraping or geocoding required.
+ * Coordinate resolution (per event, highest priority first):
+ *   1. Eventbrite venue.address.latitude / longitude  (exact geocode from EB)
+ *   2. Mapbox Geocoding API fallback when (0,0) or missing  (MAPBOX_ACCESS_TOKEN)
  *
- * Returns an array of event objects in the same shape as manual-events.json quickEntry[].
+ * Sheet column layout:
+ *   A (col 0) — Eventbrite URL   (required)
+ *   B (col 1) — Title override   (optional)
+ *   C (col 2) — Status           ("Live" | "Sponsored")
  */
 
-const CSV_TIMEOUT_MS = 12_000;  // Google Sheets CSV fetch
-const API_TIMEOUT_MS =  8_000;  // per-event Eventbrite API fetch
+const CSV_TIMEOUT_MS = 12_000;
+const API_TIMEOUT_MS =  8_000;
+const GEO_TIMEOUT_MS =  5_000;
+const SEARCH_PAGES   =  3;       // 3 pages × 50 = up to 150 auto-discovered events
 const UA = "Mozilla/5.0 (compatible; GodoCityBot/1.0; +https://godocity.com)";
 
-/** Regex to extract Eventbrite numeric event ID from a URL */
 const EB_ID_RE = /eventbrite\.com\/e\/[^/?#]+-(\d{5,})/i;
 
+/* Daytona Beach center — used for search radius and Mapbox proximity bias */
+const DAYTONA_LAT =  29.2108;
+const DAYTONA_LNG = -81.0228;
+
 /**
- * Fetch the Google Sheet CSV and return parsed events via the Eventbrite API.
- * Never throws — errors are logged and an empty array is returned.
+ * Main entry point.
  *
- * @param {string} csvUrl           Public CSV export URL from Google Sheets.
- * @param {string} eventbriteToken  Eventbrite Private Token (EVENTBRITE_TOKEN env var).
- * @returns {Promise<object[]>}
+ * @param {string} csvUrl          Public CSV export URL from Google Sheets.
+ * @param {string} eventbriteToken Eventbrite Private Token.
+ * @param {string} mapboxToken     Mapbox Access Token (geocode fallback).
+ * @returns {Promise<object[]>}    Merged event array, sheet events first.
  */
-export async function importFromSheet(csvUrl, eventbriteToken = "") {
+export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken = "") {
   if (!csvUrl) {
-    console.log("[sheet-import] ERROR: SHEET_CSV_URL env var is not set — sheet import skipped");
+    console.log("[sheet-import] ERROR: SHEET_CSV_URL not set — import skipped");
     return [];
   }
-
   if (!eventbriteToken) {
-    console.log("[sheet-import] WARNING: EVENTBRITE_TOKEN env var not set — API fetches will be skipped");
+    console.log("[sheet-import] WARNING: EVENTBRITE_TOKEN not set — API calls will fail");
   }
 
-  let text;
+  // ── 1. Fetch and parse the Google Sheet CSV ────────────────────────────────
+  let csvText;
   try {
     const res = await fetch(csvUrl, {
       headers: { "User-Agent": UA },
       signal: AbortSignal.timeout(CSV_TIMEOUT_MS),
     });
     if (!res.ok) {
-      console.log(`[sheet-import] ERROR: Could not reach the Sheet URL — HTTP ${res.status} ${res.statusText}`);
+      console.log(`[sheet-import] Sheet fetch → HTTP ${res.status} ${res.statusText}`);
       return [];
     }
-    text = await res.text();
+    csvText = await res.text();
   } catch (err) {
-    console.log(`[sheet-import] ERROR: Could not reach the Sheet URL — ${err?.message ?? err}`);
+    console.log(`[sheet-import] Sheet fetch failed: ${err?.message ?? err}`);
     return [];
   }
 
-  /* Payload preview — diagnose login-page vs real CSV in Cloudflare build logs */
-  console.log(`[sheet-import] Payload preview (first 100 chars): ${text.slice(0, 100).replace(/\n/g, "↵")}`);
+  console.log(`[sheet-import] Payload preview: ${csvText.slice(0, 100).replace(/\n/g, "↵")}`);
 
-  const rows = parseCsv(text);
-  const events = [];
-  let firstDataRow = true;
+  const rows = parseCsv(csvText);
 
-  /* Detect whether this sheet uses a Status column.
-     If any cell in any non-heading row equals "live" or "sponsored" (case-insensitive),
-     we're in Status-mode and only import rows with those values.                       */
-  const hasStatusColumn = rows.some(row => {
+  /* Detect whether a Status column ("Live" / "Sponsored") is in use */
+  const hasStatusCol = rows.some(row => {
     const cells = row.map(c => c.trim()).filter(Boolean);
-    if (cells.length === 0 || isHeadingRow(cells[0], cells)) return false;
+    if (!cells.length || isHeadingRow(cells[0], cells)) return false;
     return cells.some(c => /^(live|sponsored)$/i.test(c));
   });
 
+  /* Build sheetMeta: eventbriteId → { titleOverride, isSponsored, isLive, url } */
+  const sheetMeta = new Map();
+  let firstDataRow = true;
+
   for (const row of rows) {
-    /* Skip blank rows */
     const cells = row.map(c => c.trim()).filter(Boolean);
-    if (cells.length === 0) continue;
+    if (!cells.length || isHeadingRow(cells[0], cells)) continue;
 
-    /* Skip heading rows */
-    const firstCell = cells[0];
-    if (isHeadingRow(firstCell, cells)) continue;
-
-    /* Log the first data row we attempt to parse */
     if (firstDataRow) {
       console.log(`[sheet-import] First data row: ${JSON.stringify(cells.slice(0, 4))}`);
       firstDataRow = false;
     }
 
-    /* Status filter — only import rows marked "Live" or "Sponsored" when status column exists */
-    if (hasStatusColumn && !cells.some(c => /^(live|sponsored)$/i.test(c))) continue;
-
-    /* Sponsored flag — any cell contains exactly "Sponsored" */
+    const isLive      = hasStatusCol ? cells.some(c => /^(live|sponsored)$/i.test(c)) : true;
     const isSponsored = cells.some(c => /^sponsored$/i.test(c));
 
-    /* Scan all cells to find the Eventbrite URL (column-agnostic) */
     const url = cells.find(c => /^https?:\/\//i.test(c)) ?? null;
     if (!url) continue;
 
     const idMatch = url.match(EB_ID_RE);
-    if (!idMatch) {
-      console.log(`[sheet-import] Skipping non-Eventbrite URL: ${url}`);
-      continue;
-    }
-    const eventbriteId = idMatch[1];
+    if (!idMatch) { console.log(`[sheet-import] Skipping non-Eventbrite URL: ${url}`); continue; }
 
-    /* Raw column values (fixed positions, before blank-filtering) */
     const rawCells = row.map(c => c.trim());
-
-    /* Column B — sheet title override (takes priority over Eventbrite API name) */
     const colB = rawCells[1] ?? "";
-    const titleOverride = colB && !/^https?:\/\//i.test(colB) && !/^(live|sponsored)$/i.test(colB) && colB.length > 1 ? colB : null;
+    const titleOverride =
+      colB && !/^https?:\/\//i.test(colB) && !/^(live|sponsored)$/i.test(colB) && colB.length > 1
+        ? colB : null;
 
-    /* Fetch event data from Eventbrite REST API */
-    const api = await fetchEventbriteAPI(eventbriteId, eventbriteToken);
+    sheetMeta.set(idMatch[1], { titleOverride, isSponsored, isLive, url });
+  }
 
-    const title     = titleOverride ?? api.title ?? `Eventbrite Event ${eventbriteId}`;
+  // ── 2. Fetch Eventbrite API data for each Live sheet event ─────────────────
+  const sheetEvents = [];
+
+  for (const [id, meta] of sheetMeta) {
+    if (!meta.isLive) continue;
+
+    const api = await fetchEventbriteAPI(id, eventbriteToken);
+    const title     = meta.titleOverride ?? api.title ?? `Eventbrite Event ${id}`;
     const eventDate = api.eventDate ?? null;
 
     if (!eventDate) {
-      console.log(`[sheet-import] No date for "${title}" (${eventbriteId}) — skipping`);
+      console.log(`[sheet-import] No date for "${title}" (${id}) — skipping`);
       continue;
     }
 
+    const coords = await resolveVenueCoords(api._venue, mapboxToken, title);
     console.log(`[EVENTBRITE API] Successfully fetched '${title}' using private token`);
 
-    events.push({
+    sheetEvents.push(makeEvent({
       title,
       eventDate,
       endDate:   api.endDate  ?? null,
       location:  api.location ?? "",
       city:      api.city     ?? "daytona beach",
-      url,
+      url:       meta.url,
       image:     api.image    ?? "/images/daytona-placeholder.jpg",
       category:  api.category ?? null,
-      lat:       api.lat      ?? null,
-      lng:       api.lng      ?? null,
-      sponsored: isSponsored,
+      lat:       coords?.lat  ?? null,
+      lng:       coords?.lng  ?? null,
+      sponsored: meta.isSponsored,
       source:    "eventbrite-sheet",
-    });
+    }));
   }
 
-  const liveLabel = hasStatusColumn ? "Live/Sponsored " : "";
-  console.log(`[sheet-import] SUCCESS: Found ${events.length} ${liveLabel}events in the Google Sheet`);
-  return events;
+  // ── 3. Auto-discover nearby events via Eventbrite Search API ──────────────
+  const sheetIds      = new Set(sheetMeta.keys());
+  const searchResults = await searchNearbyEvents(eventbriteToken);
+
+  const discoveredEvents = [];
+  for (const item of searchResults) {
+    /* Sheet version always takes priority — skip if already in the sheet */
+    if (sheetIds.has(item.id)) continue;
+
+    const title     = item.name?.text ?? "Untitled Event";
+    const eventDate = item.start?.local?.slice(0, 10) ?? null;
+    if (!eventDate) continue;
+
+    const endDateRaw = item.end?.local?.slice(0, 10);
+    const endDate    = endDateRaw && endDateRaw !== eventDate ? endDateRaw : null;
+
+    const coords = await resolveVenueCoords(item.venue, mapboxToken, title);
+
+    let image = "/images/daytona-placeholder.jpg";
+    if (item.logo?.original?.url) image = item.logo.original.url;
+    else if (item.logo?.url)      image = item.logo.url;
+
+    discoveredEvents.push(makeEvent({
+      title,
+      eventDate,
+      endDate,
+      location: item.venue?.name ?? "",
+      city:     (item.venue?.address?.city ?? "daytona beach").toLowerCase(),
+      url:      item.url ?? null,
+      image,
+      category: item.category?.name ?? null,
+      lat:      coords?.lat ?? null,
+      lng:      coords?.lng ?? null,
+      sponsored: false,
+      source:   "eventbrite-discovered",
+    }));
+  }
+
+  console.log(
+    `[sheet-import] SUCCESS: ${sheetEvents.length} sheet events + ` +
+    `${discoveredEvents.length} auto-discovered`
+  );
+  /* Sheet events come first — they contain Sponsored entries that must lead */
+  return [...sheetEvents, ...discoveredEvents];
 }
 
-/* ── Helpers ── */
+/* ── Helpers ─────────────────────────────────────────────────────────────── */
+
+function makeEvent({ title, eventDate, endDate, location, city, url, image, category, lat, lng, sponsored, source }) {
+  return {
+    title,
+    eventDate,
+    endDate:   endDate   ?? null,
+    location:  location  ?? "",
+    city:      city      ?? "daytona beach",
+    url:       url       ?? null,
+    image:     image     ?? "/images/daytona-placeholder.jpg",
+    category:  category  ?? null,
+    lat:       lat       ?? null,
+    lng:       lng       ?? null,
+    sponsored: !!sponsored,
+    source,
+  };
+}
 
 /**
- * Fetch a single Eventbrite event via the REST API v3 and return a partial event object.
- * Expands: venue (for coords + location name), logo (for image), category (for tag).
- * Returns {} on any failure so the caller can skip gracefully.
+ * Fetch a single event from the Eventbrite REST API v3.
+ * Returns a partial object; _venue carries the raw venue for coord resolution.
  */
 async function fetchEventbriteAPI(eventId, token) {
   if (!token) {
-    console.log(`[sheet-import] Eventbrite API skipped for ${eventId} — no token`);
+    console.log(`[sheet-import] API skipped for ${eventId} — no token`);
     return {};
   }
   try {
-    const url = `https://www.eventbriteapi.com/v3/events/${eventId}/?expand=venue,logo,category`;
-    const res = await fetch(url, {
-      headers: {
-        "Authorization": `Bearer ${token}`,
-        "User-Agent": UA,
-      },
-      signal: AbortSignal.timeout(API_TIMEOUT_MS),
-    });
+    const res = await fetch(
+      `https://www.eventbriteapi.com/v3/events/${eventId}/?expand=venue,logo,category`,
+      {
+        headers: { "Authorization": `Bearer ${token}`, "User-Agent": UA },
+        signal: AbortSignal.timeout(API_TIMEOUT_MS),
+      }
+    );
     if (!res.ok) {
-      console.log(`[sheet-import] Eventbrite API ${eventId} → HTTP ${res.status} ${res.statusText} — skipping`);
+      console.log(`[sheet-import] API ${eventId} → HTTP ${res.status} — skipping`);
       return {};
     }
-
-    const data = await res.json();
+    const data   = await res.json();
     const result = {};
 
-    /* Title */
     if (data.name?.text) result.title = data.name.text;
 
-    /* Dates — "local" field is already in the venue's timezone; slice to YYYY-MM-DD */
     if (data.start?.local) result.eventDate = data.start.local.slice(0, 10);
     if (data.end?.local) {
       const end = data.end.local.slice(0, 10);
       if (end !== result.eventDate) result.endDate = end;
     }
 
-    /* Venue — name, city, and precise coordinates from Eventbrite's geocoder */
     if (data.venue) {
+      result._venue   = data.venue;
       result.location = data.venue.name ?? "";
       result.city     = (data.venue.address?.city ?? "daytona beach").toLowerCase();
-
-      const lat = parseFloat(data.venue.address?.latitude  ?? "");
-      const lng = parseFloat(data.venue.address?.longitude ?? "");
-      /* Reject (0, 0) — the "null island" default for unresolved venues */
-      if (!isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)) {
-        result.lat = lat;
-        result.lng = lng;
-      }
     }
 
-    /* Image — prefer full-resolution original, fall back to display URL */
     if (data.logo?.original?.url) result.image = data.logo.original.url;
     else if (data.logo?.url)      result.image = data.logo.url;
 
-    /* Category */
     if (data.category?.name) result.category = data.category.name;
 
     return result;
   } catch (err) {
-    console.log(`[sheet-import] Eventbrite API ${eventId} failed (${err?.message ?? err}) — skipping`);
+    console.log(`[sheet-import] API ${eventId} failed: ${err?.message ?? err}`);
     return {};
   }
 }
 
 /**
+ * Search the Eventbrite API for public events within 20 miles of Daytona Beach.
+ * Fetches up to SEARCH_PAGES pages (50 results each). Returns raw API event objects.
+ */
+async function searchNearbyEvents(token) {
+  if (!token) {
+    console.log("[sheet-import] Auto-discovery skipped — no Eventbrite token");
+    return [];
+  }
+
+  /* ISO 8601 start of today (UTC) so we don't surface past events */
+  const today = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+
+  const allEvents = [];
+
+  for (let page = 1; page <= SEARCH_PAGES; page++) {
+    try {
+      const url = new URL("https://www.eventbriteapi.com/v3/events/search/");
+      url.searchParams.set("location.latitude",       String(DAYTONA_LAT));
+      url.searchParams.set("location.longitude",      String(DAYTONA_LNG));
+      url.searchParams.set("location.within",         "20mi");
+      url.searchParams.set("expand",                  "venue,logo,category");
+      url.searchParams.set("sort_by",                 "date");
+      url.searchParams.set("start_date.range_start",  today);
+      url.searchParams.set("page_size",               "50");
+      url.searchParams.set("page",                    String(page));
+
+      const res = await fetch(url.toString(), {
+        headers: { "Authorization": `Bearer ${token}`, "User-Agent": UA },
+        signal: AbortSignal.timeout(API_TIMEOUT_MS),
+      });
+
+      if (!res.ok) {
+        console.log(`[sheet-import] Search page ${page} → HTTP ${res.status} — stopping`);
+        break;
+      }
+
+      const data   = await res.json();
+      const events = data.events ?? [];
+      allEvents.push(...events);
+      console.log(`[sheet-import] Search page ${page}: ${events.length} events found`);
+
+      if (!data.pagination?.has_more_items) break;
+    } catch (err) {
+      console.log(`[sheet-import] Search page ${page} error: ${err?.message ?? err} — stopping`);
+      break;
+    }
+  }
+
+  console.log(`[sheet-import] Auto-discovery total: ${allEvents.length} events`);
+  return allEvents;
+}
+
+/**
+ * Resolve lat/lng for a venue object.
+ * Priority: (1) Eventbrite venue coordinates → (2) Mapbox geocode fallback.
+ *
+ * @param {object|null} venue       Raw Eventbrite venue object.
+ * @param {string}      mapboxToken Mapbox Access Token.
+ * @param {string}      eventTitle  Used as last-resort geocode query.
+ * @returns {{ lat: number, lng: number } | { lat: null, lng: null }}
+ */
+async function resolveVenueCoords(venue, mapboxToken, eventTitle = "") {
+  if (!venue) return { lat: null, lng: null };
+
+  /* 1. Prefer Eventbrite's own geocoded coordinates */
+  const rawLat = parseFloat(venue.address?.latitude  ?? "");
+  const rawLng = parseFloat(venue.address?.longitude ?? "");
+  if (!isNaN(rawLat) && !isNaN(rawLng) && (rawLat !== 0 || rawLng !== 0)) {
+    console.log(
+      `[sheet-import] Venue coords for "${venue.name ?? "?"}" → ` +
+      `${rawLat.toFixed(4)}, ${rawLng.toFixed(4)}`
+    );
+    return { lat: rawLat, lng: rawLng };
+  }
+
+  /* 2. Mapbox geocode fallback — build the most specific query available */
+  if (!mapboxToken) {
+    console.log(`[sheet-import] No coords for "${venue.name ?? eventTitle}" and no Mapbox token — pin omitted`);
+    return { lat: null, lng: null };
+  }
+
+  const addrDisplay = venue.address?.localized_address_display ?? "";
+  const venueName   = venue.name ?? "";
+  const hasFL       = /\bfl\b|\bflorida\b/i.test(`${addrDisplay} ${venueName}`);
+
+  const query = addrDisplay
+    ? (hasFL ? addrDisplay : `${addrDisplay}, FL`)
+    : venueName
+    ? `${venueName}, Daytona Beach, FL`
+    : eventTitle
+    ? `${eventTitle}, Daytona Beach, FL`
+    : null;
+
+  if (!query) return { lat: null, lng: null };
+
+  console.log(`[sheet-import] No venue coords — geocoding: "${query}"`);
+  return (await geocode(query, mapboxToken)) ?? { lat: null, lng: null };
+}
+
+/**
+ * Geocode a text query using the Mapbox Geocoding API, biased to the greater
+ * Daytona Beach / Volusia County area. Returns { lat, lng } or null.
+ */
+async function geocode(query, mapboxToken) {
+  if (!query || !mapboxToken) return null;
+  try {
+    const url =
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json` +
+      `?access_token=${mapboxToken}` +
+      `&limit=1` +
+      `&bbox=-82.5,28.3,-80.3,30.2` +           // Volusia + Flagler counties
+      `&proximity=${DAYTONA_LNG},${DAYTONA_LAT}` + // bias toward Daytona center
+      `&types=poi,address,place,neighborhood`;
+
+    const res = await fetch(url, {
+      headers: { "User-Agent": UA },
+      signal: AbortSignal.timeout(GEO_TIMEOUT_MS),
+    });
+    if (!res.ok) return null;
+
+    const data    = await res.json();
+    const feature = data.features?.[0];
+    if (!feature) {
+      console.log(`[sheet-import] Geocode: no result for "${query}"`);
+      return null;
+    }
+
+    const [lng, lat] = feature.center;
+    console.log(
+      `[sheet-import] Geocoded "${query}" → ${lat.toFixed(4)}, ${lng.toFixed(4)} ` +
+      `(${feature.place_name})`
+    );
+    return { lat, lng };
+  } catch (err) {
+    console.log(`[sheet-import] Geocode error for "${query}": ${err?.message ?? err}`);
+    return null;
+  }
+}
+
+/**
  * Returns true for rows that are clearly headings or label rows, not event data.
- * Catches: "GoDoDaytona Events", "URL", "Event", "Raw Text", "Status", etc.
  */
 function isHeadingRow(firstCell, cells) {
-  /* Single-cell rows with no URL are headings (sheet title, section labels) */
   if (cells.length === 1 && !/^https?:\/\//i.test(firstCell)) return true;
-  /* Common column-header words */
   if (/^(url|event|title|name|raw\s*text|status|description|date)$/i.test(firstCell)) return true;
-  /* Sheet title: "GoDoDaytona" anywhere in the first cell */
   if (/godo(daytona|city)/i.test(firstCell)) return true;
   return false;
 }
 
-/** Minimal CSV row parser — handles double-quoted fields with internal commas/newlines. */
+/** Minimal CSV parser — handles double-quoted fields with internal commas. */
 function parseCsv(text) {
   const rows = [];
-  const lines = text.split(/\r?\n/);
-  for (const line of lines) {
+  for (const line of text.split(/\r?\n/)) {
     if (!line.trim()) continue;
     const cols = [];
-    let cur = "";
-    let inQuote = false;
+    let cur = "", inQuote = false;
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
       if (ch === '"') {

@@ -80,10 +80,11 @@ const today = new Date();
 today.setHours(0, 0, 0, 0);
 
 /* ── Sheet events — same source as the /events page ─────────────────────── */
-const sheetCsvUrl = import.meta.env.SHEET_CSV_URL    ?? "";
-const ebToken     = import.meta.env.EVENTBRITE_TOKEN ?? "";
+const sheetCsvUrl = import.meta.env.SHEET_CSV_URL       ?? "";
+const ebToken     = import.meta.env.EVENTBRITE_TOKEN   ?? "";
+const mapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
 let sheetRaw: any[] = [];
-try { sheetRaw = await importFromSheet(sheetCsvUrl, ebToken); } catch { sheetRaw = []; }
+try { sheetRaw = await importFromSheet(sheetCsvUrl, ebToken, mapboxToken); } catch { sheetRaw = []; }
 
 const HOME_COORD_OVERRIDES: Array<{ titleTest: RegExp; venueTest?: RegExp; lat: number; lng: number }> = [
   { titleTest: /turkey run/i,                                                           lat: 29.1852, lng: -81.0705 },
@@ -129,9 +130,9 @@ const upcomingEvents = upcomingRaw.slice(0, 4).map((e: any) => ({
   data: e,
 }));
 
-/* Map pins — only events where coords were resolved by COORD_OVERRIDES */
+/* Map pins — events with valid non-ocean coordinates */
 const homePins = upcomingRaw
-  .filter((e: any) => e.lat != null && e.lng != null)
+  .filter((e: any) => e.lat != null && e.lng != null && (e.lat !== 0 || e.lng !== 0))
   .map((e: any) => {
     const d = new Date(e.eventDate);
     const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
