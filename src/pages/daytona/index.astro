@@ -432,6 +432,12 @@ const topics = [
                     <div class="eventInfo">
                       <div class="eName">{e.data.title}</div>
                       <div class="ePlace">{e.data.location}</div>
+                      {e.data.source === "eventbrite-sheet" && (
+                        <span class="evSrcBadge evSrcBadge--featured">Featured</span>
+                      )}
+                      {e.data.source === "eventbrite-discovered" && (
+                        <span class="evSrcBadge evSrcBadge--community">Community Event</span>
+                      )}
                     </div>
                   </a>
                 );
@@ -1218,6 +1224,19 @@ const topics = [
     .eMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
     .eName { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
     .ePlace { font-size: 13px; color: var(--faint); margin-top: 2px; }
+    .evSrcBadge {
+      display: inline-block; margin-top: 4px;
+      font-size: 10px; font-weight: 700; letter-spacing: .04em;
+      padding: 2px 7px; border-radius: 999px; white-space: nowrap;
+    }
+    .evSrcBadge--featured {
+      background: rgba(249,217,0,.12); color: var(--brand1);
+      border: 1px solid rgba(249,217,0,.3);
+    }
+    .evSrcBadge--community {
+      background: rgba(255,255,255,.06); color: var(--muted);
+      border: 1px solid rgba(255,255,255,.12);
+    }
     .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
 
     /* Display ad */
