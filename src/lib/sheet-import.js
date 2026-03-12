@@ -127,56 +127,61 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
 
   const rows = parseCsv(csvText);
 
-  /* Detect whether a Status column ("Live" / "Sponsored") is in use */
-  const hasStatusCol = rows.some(row => {
-    const cells = row.map(c => c.trim()).filter(Boolean);
-    if (!cells.length || isHeadingRow(cells[0], cells)) return false;
-    return cells.some(c => /^(live|sponsored)$/i.test(c));
-  });
+  /*
+   * Sheet column layout (fixed positions):
+   *   A (0) — Eventbrite URL          (required)
+   *   B (1) — Status                  "Live" | "Sponsored"
+   *   C (2) — Date Override           Plain text date; overrides Eventbrite date
+   *   D (3) — Location / Address      Address string; overrides venue geocode
+   *   E (4) — Image URL               Optional image override
+   *   F (5) — Raw Text / Title        Optional title override
+   */
 
-  /* Build sheetMeta: eventbriteId → { titleOverride, isSponsored, isLive, url, addressOverride } */
+  /* Build sheetMeta: eventbriteId → { titleOverride, isSponsored, isLive, url,
+                                        addressOverride, dateOverride, imageOverride } */
   const sheetMeta = new Map();
   let firstDataRow = true;
 
   for (const row of rows) {
-    const cells = row.map(c => c.trim()).filter(Boolean);
-    if (!cells.length || isHeadingRow(cells[0], cells)) continue;
+    const rawCells = row.map(c => c.trim());
+    if (!rawCells.some(Boolean)) continue;                          // skip blank rows
+    if (isHeadingRow(rawCells[0], rawCells.filter(Boolean))) continue;
 
     if (firstDataRow) {
-      console.log(`[sheet-import] First data row: ${JSON.stringify(cells.slice(0, 5))}`);
+      console.log(`[sheet-import] First data row: ${JSON.stringify(rawCells.slice(0, 6))}`);
       firstDataRow = false;
     }
 
-    const isLive      = hasStatusCol ? cells.some(c => /^(live|sponsored)$/i.test(c)) : true;
-    const isSponsored = cells.some(c => /^sponsored$/i.test(c));
-
-    const url = cells.find(c => /^https?:\/\//i.test(c)) ?? null;
-    if (!url) continue;
+    /* Col A — URL (required) */
+    const url = rawCells[0] ?? "";
+    if (!/^https?:\/\//i.test(url)) continue;
 
     const idMatch = url.match(EB_ID_RE);
     if (!idMatch) { console.log(`[sheet-import] Skipping non-Eventbrite URL: ${url}`); continue; }
 
-    const rawCells = row.map(c => c.trim());
+    /* Col B — Status */
+    const statusCell  = rawCells[1] ?? "";
+    const isLive      = /^(live|sponsored)$/i.test(statusCell);
+    const isSponsored = /^sponsored$/i.test(statusCell);
 
-    /* Column B — title override */
-    const colB = rawCells[1] ?? "";
-    const titleOverride =
-      colB && !/^https?:\/\//i.test(colB) && !/^(live|sponsored)$/i.test(colB) && colB.length > 1
-        ? colB : null;
+    /* Col C — Date Override (plain-text date; empty = use Eventbrite date) */
+    const dateOverride = rawCells[2] || null;
 
-    /* Column E (index 4) — address override; overrides all coordinate sources */
-    const colE = rawCells[4] ?? "";
-    const addressOverride =
-      colE && colE.length > 3 &&
-      !/^(live|sponsored)$/i.test(colE) &&
-      !/^https?:\/\//i.test(colE)
-        ? colE : null;
-
+    /* Col D — Location / Address Override */
+    const addressOverride = rawCells[3] || null;
     if (addressOverride) {
-      console.log(`[sheet-import] Col-E address override for event ${idMatch[1]}: "${addressOverride}"`);
+      console.log(`[sheet-import] Col-D address override for event ${idMatch[1]}: "${addressOverride}"`);
     }
 
-    sheetMeta.set(idMatch[1], { titleOverride, isSponsored, isLive, url, addressOverride });
+    /* Col E — Image Override (must look like a URL) */
+    const imageOverride = (rawCells[4] && /^https?:\/\//i.test(rawCells[4]))
+      ? rawCells[4] : null;
+
+    /* Col F — Title Override */
+    const titleOverride = rawCells[5] || null;
+
+    sheetMeta.set(idMatch[1], { titleOverride, isSponsored, isLive, url,
+                                 addressOverride, dateOverride, imageOverride });
   }
 
   // ── 2. Fetch Eventbrite API data for each Live sheet event ─────────────────
@@ -187,7 +192,9 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
 
     const api = await fetchEventbriteAPI(id, eventbriteToken);
     const title     = meta.titleOverride ?? api.title ?? `Eventbrite Event ${id}`;
-    const eventDate = api.eventDate ?? null;
+    const eventDate = meta.dateOverride
+      ? parseOverrideDate(meta.dateOverride)
+      : (api.eventDate ?? null);
 
     if (!eventDate) {
       console.log(`[sheet-import] No date for "${title}" (${id}) — skipping`);
@@ -204,7 +211,7 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
       location:  api.location ?? "",
       city:      api.city     ?? "daytona beach",
       url:       meta.url,
-      image:     api.image    ?? "/images/daytona-placeholder.jpg",
+      image:     meta.imageOverride ?? api.image ?? "/images/daytona-placeholder.jpg",
       category:  api.category ?? null,
       lat:       coords?.lat  ?? null,
       lng:       coords?.lng  ?? null,
@@ -261,6 +268,26 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
 }
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
+
+/**
+ * Parse a plain-text date override from Col C into an ISO string.
+ * Accepts: "March 15, 2026" / "Mar 15 2026" / "2026-03-15" / "03/15/2026".
+ * Always forces noon UTC so the calendar icon shows the right day in all timezones.
+ */
+function parseOverrideDate(text) {
+  if (!text) return null;
+  // ISO date-only (YYYY-MM-DD) — avoid Date() treating it as UTC midnight
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text.trim())) {
+    return text.trim() + "T12:00:00.000Z";
+  }
+  const d = new Date(text);
+  if (isNaN(d.getTime())) {
+    console.log(`[sheet-import] Could not parse date override: "${text}"`);
+    return null;
+  }
+  d.setUTCHours(12, 0, 0, 0);
+  return d.toISOString();
+}
 
 function makeEvent({ title, eventDate, endDate, location, city, url, image, category, lat, lng, sponsored, source }) {
   return {

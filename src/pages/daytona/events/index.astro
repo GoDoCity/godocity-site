@@ -338,7 +338,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
       {/* ── FEATURED SCROLLER — own container so it aligns identically with map/feed ── */}
       {sponsoredEvents.length > 0 && (
-        <div class="container">
+        <div class="container" style="display:flex; flex-direction:column; align-items:center;">
           <div class="featuredSection">
           <div class="featuredInner">
             <div class="featuredHeadRow">
@@ -722,7 +722,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
   }
   .featuredHeadRow {
     width: 100%;
