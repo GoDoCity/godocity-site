@@ -5,6 +5,7 @@ export interface MapLocation {
   lat?: number;
   lng?: number;
   image?: string;
+  url?: string;
   articleHref?: string;
   articleTitle?: string;
 }
@@ -137,11 +138,13 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
           + 'color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;'
           + 'text-decoration:none;line-height:1.4;">' + lbl + '</a>';
       } else {
-        /* Guide page → "View Details" anchor to the matching list item */
-        popup += '<br><a href="#spot-' + pin.num + '"'
+        /* Event map → link to Eventbrite URL if available, else anchor to list item */
+        var detailHref = pin.url || ('#spot-' + pin.num);
+        var detailTarget = pin.url ? ' target="_blank" rel="noopener noreferrer"' : '';
+        popup += '<br><a href="' + detailHref + '"' + detailTarget
           + ' style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;'
           + 'color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;'
-          + 'text-decoration:none;line-height:1.4;">View Details \u2193</a>';
+          + 'text-decoration:none;line-height:1.4;">View Details \u2192</a>';
       }
 
       window.L.marker(latlng, { icon: numberedPin })
