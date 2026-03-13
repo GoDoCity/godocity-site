@@ -351,8 +351,8 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
             <div class="featuredScroller">
               {sponsoredEvents.map(e => {
                 const d      = new Date(e.data.eventDate);
-                const mon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                const day    = d.getDate();
+                const mon    = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const day    = isNaN(d) ? "??" : d.getDate();
                 const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
                 const evSlug = e.slug.split("/").pop();
                 const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
@@ -424,9 +424,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
             <div class="eventFeed" id="eventGrid">
               {regularEvents.map((e, idx) => {
                 const d        = new Date(e.data.eventDate);
-                const mon      = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                const day      = d.getDate();
-                const dow      = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                const mon      = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const day      = isNaN(d) ? "??" : d.getDate();
+                const dow      = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
                 const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
                 const evCity   = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
                 const evSlug   = e.slug.split("/").pop();
@@ -506,6 +506,20 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
         </div>
 
         </div>{/* /.container (map + feed) */}
+
+      {/* ── OWN THE CITY CTA ── */}
+      <div class="container ctaOuter">
+        <div class="ctaBox">
+          <h2 class="ctaHeadline">Own the City.</h2>
+          <p class="ctaBody">
+            GoDoDaytona is built by locals, for locals. If you're a business owner or event
+            organizer, we want to help you grow. Submit your event for free, or ask about our
+            Sponsored Featured spots to stay at the top of the list all week long.
+          </p>
+          <a class="ctaBtn" href="/daytona/advertise/">Get Featured</a>
+        </div>
+      </div>
+
     </div>{/* /.eventsContainer */}
   </section>
 </Base>
@@ -969,4 +983,50 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     .evCardCity   { font-size: 13px; }
     .evCardDist   { font-size: 13px; }
   }
+
+  /* ── Own the City CTA ─────────────────────────────────────────────────── */
+  .ctaOuter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 40px;
+    padding-bottom: 16px;
+  }
+  .ctaBox {
+    width: 100%;
+    max-width: var(--max);
+    background: #0d0d0d;
+    border: 1px solid rgba(249,217,0,.25);
+    border-radius: 16px;
+    padding: clamp(32px, 5vw, 56px) clamp(24px, 6vw, 64px);
+    text-align: center;
+    box-shadow: 0 0 40px rgba(249,217,0,.06);
+  }
+  .ctaHeadline {
+    margin: 0 0 16px;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 900;
+    letter-spacing: -.02em;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .ctaBody {
+    margin: 0 auto 32px;
+    max-width: 640px;
+    font-size: clamp(15px, 1.6vw, 18px);
+    color: rgba(255,255,255,.72);
+    line-height: 1.65;
+  }
+  .ctaBtn {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 52px; padding: 0 36px;
+    border-radius: 999px;
+    background: var(--brand1);
+    color: #000;
+    font-size: 15px; font-weight: 900;
+    letter-spacing: .04em; text-transform: uppercase;
+    text-decoration: none;
+    transition: filter 140ms, transform 120ms;
+  }
+  .ctaBtn:hover { filter: brightness(1.1); transform: translateY(-1px); }
 </style>
