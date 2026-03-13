@@ -303,12 +303,36 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     }));
   }
 
+  /* ── 4. Expiry filter — hide events that ended more than 6 hours ago ────────
+     Keeps the site clean the morning after a concert without curator action.
+     Cutoff = midnight UTC of the day after the event date + 6 hours.
+     Example: event on Mar 13 → hidden after 06:00 UTC on Mar 14 (2am EST).   */
+  const now = Date.now();
+  function isExpired(eventDate) {
+    const dateStr = (eventDate || "").slice(0, 10); // "YYYY-MM-DD"
+    if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+    const [yr, mo, dy] = dateStr.split("-").map(Number);
+    // Midnight UTC of the next calendar day = end-of-event-day boundary
+    const endOfDay = Date.UTC(yr, mo - 1, dy + 1, 0, 0, 0);
+    const cutoff   = endOfDay + 6 * 60 * 60 * 1000; // + 6 hours grace period
+    return now > cutoff;
+  }
+
+  const allMerged = [...sheetEvents, ...discoveredEvents];
+  const liveEvents = allMerged.filter(e => {
+    if (isExpired(e.eventDate)) {
+      console.log(`[sheet-import] EXPIRED (>6h past end): "${e.title}" (${e.eventDate}) — hidden`);
+      return false;
+    }
+    return true;
+  });
+
   console.log(
     `[sheet-import] SUCCESS: ${sheetEvents.length} sheet events + ` +
-    `${discoveredEvents.length} auto-discovered`
+    `${discoveredEvents.length} auto-discovered → ${liveEvents.length} after expiry filter`
   );
   /* Sheet events come first — they contain Sponsored entries that must lead */
-  return [...sheetEvents, ...discoveredEvents];
+  return liveEvents;
 }
 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
