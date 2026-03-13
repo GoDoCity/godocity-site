@@ -775,18 +775,14 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
   .featuredScroller {
     width: 100%;
-    display: flex; gap: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
     justify-content: center;
-    overflow-x: auto; scroll-snap-type: x mandatory;
-    padding-bottom: 8px;
-    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.15) transparent;
-    -webkit-overflow-scrolling: touch;
   }
-  .featuredScroller::-webkit-scrollbar { height: 4px; }
-  .featuredScroller::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 2px; }
 
   .featuredCard {
-    flex-shrink: 0; width: 420px; scroll-snap-align: start;
+    width: 100%;
     border-radius: 16px; overflow: hidden;
     border: 1px solid rgba(255,255,255,.08);
     text-decoration: none;
@@ -986,7 +982,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     .nlRow        { flex-direction: column; height: auto; gap: 8px; }
     .nlInput      { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
     .nlBtn        { border-radius: 8px; height: 46px; }
-    .featuredCard { width: 300px; }
     .fcImgWrap    { height: 200px; }
     .fcTitle      { font-size: 17px; }
     .fcDate       { font-size: 11px; }
