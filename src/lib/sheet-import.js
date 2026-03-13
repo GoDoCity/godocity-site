@@ -195,6 +195,13 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     }
 
     const api = await fetchEventbriteAPI(id, eventbriteToken);
+
+    /* null = event definitively gone from Eventbrite — drop entirely */
+    if (api === null) {
+      console.log(`[sheet-import] DROP ${id}: event not found on Eventbrite — removed from build`);
+      continue;
+    }
+
     const title = meta.titleOverride ?? api.title ?? `Eventbrite Event ${id}`;
 
     /* ── Resolve event date — 3-tier with fallbacks, NEVER skip Live/Sponsored ── */
@@ -453,7 +460,14 @@ function makeEvent({ title, eventDate, endDate, location, city, url, image, cate
 
 /**
  * Fetch a single event from the Eventbrite REST API v3.
- * Returns a partial object; _venue carries the raw venue for coord resolution.
+ *
+ * Returns:
+ *   - A partial event object on success (_venue carries the raw venue).
+ *   - null  when the event definitively does not exist (404, deleted,
+ *           unpublished, or Eventbrite error code). The caller MUST drop
+ *           that sheet row so "Event Not Found" entries never reach the site.
+ *   - {}    on transient failures (network timeout, no token) so the row
+ *           is still included using whatever overrides are available.
  */
 async function fetchEventbriteAPI(eventId, token) {
   if (!token) {
@@ -468,11 +482,31 @@ async function fetchEventbriteAPI(eventId, token) {
         signal: AbortSignal.timeout(API_TIMEOUT_MS),
       }
     );
+
+    /* 404 / 403 / 410 = event gone or never existed — hard drop */
+    if (res.status === 404 || res.status === 403 || res.status === 410) {
+      console.log(`[sheet-import] DROP ${eventId} → HTTP ${res.status} (event not found / removed)`);
+      return null;
+    }
+
     if (!res.ok) {
-      console.log(`[sheet-import] API ${eventId} → HTTP ${res.status} — skipping`);
+      /* Other HTTP errors (5xx, rate-limit 429) — transient, keep the row */
+      console.log(`[sheet-import] API ${eventId} → HTTP ${res.status} — transient error, keeping row`);
       return {};
     }
-    const data   = await res.json();
+
+    /* Check Eventbrite's own error payload (200 OK with error body) */
+    const data = await res.json();
+    if (data.error) {
+      /* "NOT_FOUND", "EVENT_DELETED", "ARGUMENTS_ERROR", etc. */
+      const isGone = /not.?found|deleted|does.?not.?exist/i.test(data.error + " " + (data.error_description ?? ""));
+      if (isGone) {
+        console.log(`[sheet-import] DROP ${eventId} → EB error "${data.error}" (${data.error_description ?? ""})`);
+        return null;
+      }
+      console.log(`[sheet-import] API ${eventId} → EB error "${data.error}" — keeping row`);
+      return {};
+    }
     const result = {};
 
     if (data.name?.text) result.title = data.name.text;
