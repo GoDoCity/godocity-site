@@ -206,21 +206,31 @@ function patchEventCoords(e: any) {
   return e;
 }
 
+/* ── Sort key: parse eventDate ISO string to ms; NaN dates sink to the bottom. ── */
+function sortKey(e: any): number {
+  const ms = new Date(e.data.eventDate ?? "").getTime();
+  return isNaN(ms) ? Number.MAX_SAFE_INTEGER : ms;
+}
+
 /* Merge order: markdown → manual → sheet → scraped (first occurrence wins on dedup) */
 const allEventsWithLive = [...allEvents, ...manualEvents, ...sheetEvents, ...scrapedEvents].map(patchEventCoords);
 
-/* ── Include events that haven't started yet OR are still ongoing (endDate >= today) ── */
+/* ── Include events that haven't started yet OR are still ongoing (endDate >= today).
+   Sheet events (source="eventbrite-sheet") bypass the date filter entirely —
+   the curator has explicitly listed them as Live/Sponsored. ── */
 const upcomingEvents = allEventsWithLive
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+    if (!GREATER_DAYTONA.has(evCity)) return false;
+    // Curator authority: sheet events are always shown regardless of date
+    if (e.data.source === "eventbrite-sheet") return true;
     const evDate = new Date(e.data.eventDate);
     evDate.setHours(0, 0, 0, 0);
     const endDate = e.data.endDate ? new Date(e.data.endDate) : null;
     if (endDate) endDate.setHours(0, 0, 0, 0);
-    const isActive = evDate >= today || (endDate !== null && endDate >= today);
-    return GREATER_DAYTONA.has(evCity) && isActive;
+    return evDate >= today || (endDate !== null && endDate >= today);
   })
-  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime());
+  .sort((a, b) => sortKey(a) - sortKey(b));
 
 console.log(
   `[events] Markdown: ${allEvents.length} | Manual: ${manualEvents.length} | ` +
@@ -234,8 +244,8 @@ upcomingEvents
     `[events] missing coords: "${e.data.title}" (${e.data.eventDate}) — add lat/lng to pin on map`
   ));
 
-/* Top 3 sponsored → featured scroller; rest → card feed */
-const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true).slice(0, 3);
+/* All sponsored → featured scroller; rest → card feed */
+const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true);
 const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
 
 /* ── Map pins — Hide & Seek filter ───────────────────────────────────────────
@@ -289,7 +299,7 @@ const monthOptions = monthKeys.map(k => {
   return { key: k, label };
 });
 
-const PAGE_SIZE = 30;
+const PAGE_SIZE = 20;
 
 /* ── Unsplash category fallback images ── */
 const CATEGORY_IMG: Record<string, string> = {
@@ -527,7 +537,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 <script is:inline>
 (function () {
   /* ── Pagination + filter ── */
-  var PAGE_SIZE = 30;
+  var PAGE_SIZE = 20;
   var shown     = PAGE_SIZE;
   var filter    = "all";
 
