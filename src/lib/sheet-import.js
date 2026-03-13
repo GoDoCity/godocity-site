@@ -188,21 +188,65 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
   const sheetEvents = [];
 
   for (const [id, meta] of sheetMeta) {
-    if (!meta.isLive) continue;
-
-    const api = await fetchEventbriteAPI(id, eventbriteToken);
-    const title     = meta.titleOverride ?? api.title ?? `Eventbrite Event ${id}`;
-    const eventDate = meta.dateOverride
-      ? parseOverrideDate(meta.dateOverride)
-      : (api.eventDate ?? null);
-
-    if (!eventDate) {
-      console.log(`[sheet-import] No date for "${title}" (${id}) — skipping`);
+    /* ── Diagnostic: log every non-live row so missing events are traceable ── */
+    if (!meta.isLive) {
+      console.log(`[sheet-import] SKIP ${id} (${meta.url}): status not Live/Sponsored`);
       continue;
     }
 
+    const api = await fetchEventbriteAPI(id, eventbriteToken);
+    const title = meta.titleOverride ?? api.title ?? `Eventbrite Event ${id}`;
+
+    /* ── Resolve event date — 3-tier with fallbacks, NEVER skip Live/Sponsored ── */
+    let eventDate = null;
+
+    if (meta.dateOverride) {
+      eventDate = parseOverrideDate(meta.dateOverride);
+      if (!eventDate) {
+        // Override was set but unparseable — warn loudly; fall through to API date
+        console.log(
+          `[sheet-import] WARN ${id} "${title}": Col-C override "${meta.dateOverride}" ` +
+          `could not be parsed — falling back to Eventbrite API date. Fix the date format.`
+        );
+      }
+    }
+
+    if (!eventDate) {
+      // No override (or override failed) — use the API date if available
+      if (api.eventDate) {
+        // If the API date is in the past the event is likely a recurring series
+        // whose original start is stale. Promote to today so it appears correctly
+        // in the feed; the curator should add a Col-C override to pin the real date.
+        const apiParsed = new Date(api.eventDate + "T12:00:00.000Z");
+        const nowMidnight = new Date();
+        nowMidnight.setUTCHours(0, 0, 0, 0);
+        if (apiParsed < nowMidnight) {
+          const fallback = new Date();
+          fallback.setUTCHours(12, 0, 0, 0);
+          eventDate = fallback.toISOString();
+          console.log(
+            `[sheet-import] WARN ${id} "${title}": Eventbrite date ${api.eventDate} is in ` +
+            `the past — using today as fallback. Add a Date Override in Col C to fix sorting.`
+          );
+        } else {
+          eventDate = api.eventDate + "T12:00:00.000Z";
+        }
+      }
+    }
+
+    if (!eventDate) {
+      // No date from any source (API error + no override) — still include the event
+      const fallback = new Date();
+      fallback.setUTCHours(12, 0, 0, 0);
+      eventDate = fallback.toISOString();
+      console.log(
+        `[sheet-import] WARN ${id} "${title}": no date available (API may have failed, ` +
+        `no Col-C override set) — using today as fallback. Add a Date Override in Col C.`
+      );
+    }
+
     const coords = await resolveVenueCoords(api._venue, mapboxToken, title, meta.addressOverride);
-    console.log(`[EVENTBRITE API] Successfully fetched '${title}' using private token`);
+    console.log(`[sheet-import] OK ${id} "${title}" → ${eventDate}`);
 
     sheetEvents.push(makeEvent({
       title,
@@ -270,37 +314,100 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
 /* ── Helpers ─────────────────────────────────────────────────────────────── */
 
 /**
- * Parse a plain-text date override from Col C into an ISO string.
- * Accepts: "March 15, 2026" / "Mar 15 2026" / "2026-03-15" / "03/15/2026".
- * Always forces noon UTC so the calendar icon shows the right day in all timezones.
+ * Given a 1-based month and 1-based day, return an ISO string at noon UTC.
+ * If that date is already more than 1 day in the past, bump to next year
+ * (handles short-form overrides like "MAR 28" or "6/10" without a year).
+ */
+function inferYear(month, day) {
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const candidate = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  // If the date already passed (yesterday or earlier), assume next year
+  const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  if (candidate < yesterday) {
+    return new Date(Date.UTC(year + 1, month - 1, day, 12, 0, 0)).toISOString();
+  }
+  return candidate.toISOString();
+}
+
+/** Month abbreviation → 1-based number, covers 3-char prefixes of any case. */
+const MONTH_ABBR = {
+  jan:1, feb:2, mar:3, apr:4, may:5, jun:6,
+  jul:7, aug:8, sep:9, oct:10, nov:11, dec:12,
+};
+
+/**
+ * Parse a plain-text date override from Col C into an ISO string (noon UTC).
+ *
+ * Supported formats (case-insensitive):
+ *   • YYYY-MM-DD          e.g. "2026-03-28"
+ *   • M/D/YYYY            e.g. "3/28/2026"   (Google Sheets default export)
+ *   • M/D/YY              e.g. "3/28/26"
+ *   • M/D                 e.g. "6/10"        (year inferred)
+ *   • MMM D               e.g. "MAR 28"      (year inferred)
+ *   • Month D, YYYY       e.g. "March 28, 2026"
  */
 function parseOverrideDate(text) {
   if (!text) return null;
   const t = text.trim();
 
-  // 1. ISO date-only YYYY-MM-DD — safest; avoid Date() treating as UTC midnight
+  // 1. ISO YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(t)) {
     return t + "T12:00:00.000Z";
   }
 
-  // 2. US format M/D/YYYY or MM/DD/YYYY (what Google Sheets auto-formats to)
-  //    new Date("3/28/2026") is implementation-defined in Node and often fails,
-  //    so we parse it manually instead.
-  const us = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (us) {
-    const [, mm, dd, yyyy] = us;
+  // 2. M/D/YYYY — explicit 4-digit year (Google Sheets auto-format)
+  const us4 = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (us4) {
+    const [, mm, dd, yyyy] = us4;
     return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}T12:00:00.000Z`;
   }
 
-  // 3. Plain English: "March 28, 2026" / "Mar 28 2026" / "28 March 2026"
-  //    new Date() handles these reliably in V8.
-  const d = new Date(t);
-  if (isNaN(d.getTime())) {
-    console.log(`[sheet-import] Could not parse date override: "${text}"`);
-    return null;
+  // 3. M/D/YY — 2-digit year (e.g. "6/10/26")
+  const us2y = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+  if (us2y) {
+    const [, mm, dd, yy] = us2y;
+    const yyyy = 2000 + parseInt(yy, 10);
+    return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}T12:00:00.000Z`;
   }
-  d.setUTCHours(12, 0, 0, 0);
-  return d.toISOString();
+
+  // 4. M/D — no year, e.g. "6/10" — infer year
+  const us0y = t.match(/^(\d{1,2})\/(\d{1,2})$/);
+  if (us0y) {
+    return inferYear(parseInt(us0y[1], 10), parseInt(us0y[2], 10));
+  }
+
+  // 5. "MAR 28" / "Mar 28" / "MARCH 28" — month name/abbrev + day, no year
+  const monDay = t.match(/^([A-Za-z]{3,9})\s+(\d{1,2})(?:st|nd|rd|th)?$/i);
+  if (monDay) {
+    const abbr = monDay[1].slice(0, 3).toLowerCase();
+    const day  = parseInt(monDay[2], 10);
+    if (MONTH_ABBR[abbr]) return inferYear(MONTH_ABBR[abbr], day);
+  }
+
+  // 6. "28 MAR" / "28 March" — day-first format
+  const dayMon = t.match(/^(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,9})(?:\s+(\d{4}))?$/i);
+  if (dayMon) {
+    const abbr = dayMon[2].slice(0, 3).toLowerCase();
+    const day  = parseInt(dayMon[1], 10);
+    if (MONTH_ABBR[abbr]) {
+      if (dayMon[3]) {
+        const yyyy = parseInt(dayMon[3], 10);
+        return new Date(Date.UTC(yyyy, MONTH_ABBR[abbr] - 1, day, 12)).toISOString();
+      }
+      return inferYear(MONTH_ABBR[abbr], day);
+    }
+  }
+
+  // 7. Plain English with year: "March 28, 2026" / "Mar 28 2026" — V8 handles these
+  const d = new Date(t);
+  if (!isNaN(d.getTime())) {
+    d.setUTCHours(12, 0, 0, 0);
+    return d.toISOString();
+  }
+
+  console.log(`[sheet-import] WARN: unrecognised date override format: "${text}"`);
+  return null;
 }
 
 function makeEvent({ title, eventDate, endDate, location, city, url, image, category, lat, lng, sponsored, source }) {
