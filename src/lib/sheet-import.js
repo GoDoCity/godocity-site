@@ -276,11 +276,25 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
  */
 function parseOverrideDate(text) {
   if (!text) return null;
-  // ISO date-only (YYYY-MM-DD) — avoid Date() treating it as UTC midnight
-  if (/^\d{4}-\d{2}-\d{2}$/.test(text.trim())) {
-    return text.trim() + "T12:00:00.000Z";
+  const t = text.trim();
+
+  // 1. ISO date-only YYYY-MM-DD — safest; avoid Date() treating as UTC midnight
+  if (/^\d{4}-\d{2}-\d{2}$/.test(t)) {
+    return t + "T12:00:00.000Z";
   }
-  const d = new Date(text);
+
+  // 2. US format M/D/YYYY or MM/DD/YYYY (what Google Sheets auto-formats to)
+  //    new Date("3/28/2026") is implementation-defined in Node and often fails,
+  //    so we parse it manually instead.
+  const us = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (us) {
+    const [, mm, dd, yyyy] = us;
+    return `${yyyy}-${mm.padStart(2, "0")}-${dd.padStart(2, "0")}T12:00:00.000Z`;
+  }
+
+  // 3. Plain English: "March 28, 2026" / "Mar 28 2026" / "28 March 2026"
+  //    new Date() handles these reliably in V8.
+  const d = new Date(t);
   if (isNaN(d.getTime())) {
     console.log(`[sheet-import] Could not parse date override: "${text}"`);
     return null;

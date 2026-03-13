@@ -338,7 +338,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
       {/* ── FEATURED SCROLLER — own container so it aligns identically with map/feed ── */}
       {sponsoredEvents.length > 0 && (
-        <div class="container" style="display:flex; flex-direction:column; align-items:center;">
+        <div class="container">
           <div class="featuredSection">
           <div class="featuredInner">
             <div class="featuredHeadRow">
@@ -729,14 +729,12 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   }
 
   /* ── Featured Scroller — label + action buttons row ── */
-  .featuredSection { margin-bottom: 24px; }
+  .featuredSection { width: 100%; margin-bottom: 24px; }
   .featuredInner {
     width: 100%;
-    max-width: var(--max);
-    margin: 0 auto;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
   }
   .featuredHeadRow {
     width: 100%;
@@ -857,12 +855,12 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    border: 2px solid #FFD700;
+    border: 2px solid var(--brand1);
     border-radius: 4px;
     overflow: hidden;
   }
   .evCardMon {
-    background: #FFD700;
+    background: var(--brand1);
     color: #000;
     font-size: 9px;
     font-weight: 900;
@@ -986,15 +984,11 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
   /* ── Own the City CTA ─────────────────────────────────────────────────── */
   .ctaOuter {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     padding-top: 40px;
     padding-bottom: 16px;
   }
   .ctaBox {
     width: 100%;
-    max-width: var(--max);
     background: #0d0d0d;
     border: 1px solid rgba(249,217,0,.25);
     border-radius: 16px;
