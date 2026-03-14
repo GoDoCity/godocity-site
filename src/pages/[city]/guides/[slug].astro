@@ -346,7 +346,20 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
       {/* ── SIDEBAR ── */}
       <aside class="homeRail">
 
-        {/* Display ad */}
+        {/* 1 — Email Newsletter Banner (Top) */}
+        <div class="nlBox">
+          <div class="nlBoxHead">
+            <em>Good News <strong>{city.charAt(0).toUpperCase() + city.slice(1)}!</strong></em>
+          </div>
+          <div class="nlBoxSub">Get the best local stories delivered free to your inbox every morning.</div>
+          <form class="nlForm" action={`/${city}/subscribe/`} method="get">
+            <input class="nlInput" type="email" name="email"
+              placeholder="your@email.com" required autocomplete="email" />
+            <button class="nlSubmit" type="submit">SIGN UP</button>
+          </form>
+        </div>
+
+        {/* 2 — Advertisement */}
         <div class="adSlot">
           <div class="adLabel">Advertisement</div>
           <a class="adCard" href={}>
@@ -359,7 +372,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           </a>
         </div>
 
-        {/* More guides */}
+        {/* 3 — City Guides */}
         <div class="railSection">
           <div class="railHead">
             <span class="railTitle">City Guides</span>
@@ -370,19 +383,6 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
               <a class="guideLink" href={g.href}>{g.emoji} {g.label}</a>
             ))}
           </div>
-        </div>
-
-        {/* Newsletter CTA */}
-        <div class="nlBox">
-          <div class="nlBoxHead">
-            <em>Good News <strong>{city.charAt(0).toUpperCase() + city.slice(1)}!</strong></em>
-          </div>
-          <div class="nlBoxSub">Get the best local stories delivered free to your inbox every morning.</div>
-          <form class="nlForm" action={`/${city}/subscribe/`} method="get">
-            <input class="nlInput" type="email" name="email"
-              placeholder="your@email.com" required autocomplete="email" />
-            <button class="nlSubmit" type="submit">SIGN UP</button>
-          </form>
         </div>
 
       </aside>

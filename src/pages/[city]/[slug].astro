@@ -252,7 +252,20 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
       <aside class="homeRail">
 
-        {/* Upcoming Events */}
+        {/* 1 — Email Newsletter Banner (Top) */}
+        <div class="nlStickyWrap">
+          <div class="nlBox">
+            <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
+            <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
+            <form class="nlForm" action={`/${city}/subscribe/`} method="get">
+              <input class="nlInput" type="email" name="email"
+                placeholder="your@email.com" required autocomplete="email" />
+              <button class="nlSubmit" type="submit">SIGN UP</button>
+            </form>
+          </div>
+        </div>
+
+        {/* 2 — Upcoming Events */}
         <div class="railSection">
           <div class="railHead">
             <span class="railTitle">Upcoming Events</span>
@@ -297,20 +310,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           <a class="submitEventLink" href="/submit-event/">+ Submit an event →</a>
         </div>
 
-        {/* City Guides */}
-        <div class="railSection">
-          <div class="railHead">
-            <span class="railTitle">City Guides</span>
-            <a class="railMore" href={`/${city}/guides/`}>See all</a>
-          </div>
-          <div class="guideList">
-            <a class="guideRow" href={`/${city}/guides/live/`}>🏠 Live in {cityCap}</a>
-            <a class="guideRow" href={`/${city}/guides/work/`}>💼 Work in {cityCap}</a>
-            <a class="guideRow" href={`/${city}/guides/play/`}>🎉 Play in {cityCap}</a>
-            <a class="guideRow" href={`/${city}/guides/best-restaurants/`}>🍽️ Best Restaurants</a>
-          </div>
-        </div>
-
+        {/* 3 — Advertisement */}
         <div class="displayAdSlot">
           <div class="adSlotLabel">Advertisement</div>
           <a class="displayAdCard" href={`/${city}/advertise/`}>
@@ -323,17 +323,20 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           </a>
         </div>
 
+        {/* 4 — Vibe Check */}
         <SidebarPoll />
 
-        <div class="nlStickyWrap">
-          <div class="nlBox">
-            <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
-            <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
-            <form class="nlForm" action={`/${city}/subscribe/`} method="get">
-              <input class="nlInput" type="email" name="email"
-                placeholder="your@email.com" required autocomplete="email" />
-              <button class="nlSubmit" type="submit">SIGN UP</button>
-            </form>
+        {/* 5 — City Guides */}
+        <div class="railSection">
+          <div class="railHead">
+            <span class="railTitle">City Guides</span>
+            <a class="railMore" href={`/${city}/guides/`}>See all</a>
+          </div>
+          <div class="guideList">
+            <a class="guideRow" href={`/${city}/guides/live/`}>🏠 Live in {cityCap}</a>
+            <a class="guideRow" href={`/${city}/guides/work/`}>💼 Work in {cityCap}</a>
+            <a class="guideRow" href={`/${city}/guides/play/`}>🎉 Play in {cityCap}</a>
+            <a class="guideRow" href={`/${city}/guides/best-restaurants/`}>🍽️ Best Restaurants</a>
           </div>
         </div>
 

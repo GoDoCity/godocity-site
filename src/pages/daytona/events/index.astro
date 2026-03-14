@@ -245,14 +245,11 @@ upcomingEvents
   ));
 
 /* Featured scroller: top 3 sponsored events only (keeps the row tidy).
-   Any additional sponsored events (4th+) overflow into the regular feed
-   so they are never silently dropped. */
+   Sponsored events are NEVER placed in the regular feed — text from a
+   sponsored card must never bleed into a non-sponsored event row. */
 const allSponsored    = upcomingEvents.filter(e => e.data.sponsored === true);
 const sponsoredEvents = allSponsored.slice(0, 3);
-const regularEvents   = [
-  ...allSponsored.slice(3),                         // 4th+ sponsored → top of feed
-  ...upcomingEvents.filter(e => !e.data.sponsored), // then all non-sponsored
-];
+const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
 
 /* ── Map pins — Hide & Seek filter ───────────────────────────────────────────
    We only plot a pin when we're confident in the coordinates:
