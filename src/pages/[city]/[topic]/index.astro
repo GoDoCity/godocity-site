@@ -169,6 +169,14 @@ const upcomingEvents = allEvents
 
       <div class="topicHeader">
         <h1 class="topicTitle">{topicLabelStr}</h1>
+        {topic === "diy" && (
+          <div class="diySubtitle">Your local how-to hub — Clean, Paint, Repair, Decorate, Build &amp; Craft</div>
+          <div class="diyPills">
+            {["Clean","Paint","Repair","Decorate","Build","Craft"].map(label => (
+              <span class="diyPill">{label}</span>
+            ))}
+          </div>
+        )}
         <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
       </div>
 
@@ -345,6 +353,18 @@ const upcomingEvents = allEvents
   }
 
   .topicHeader { margin-bottom: 18px; }
+  .diySubtitle {
+    font-size: 15px; color: var(--muted); margin: 6px 0 10px; line-height: 1.4;
+  }
+  .diyPills {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px;
+  }
+  .diyPill {
+    font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+    padding: 4px 14px; border-radius: 999px;
+    background: rgba(249,217,0,.10); color: var(--brand1);
+    border: 1px solid rgba(249,217,0,.22);
+  }
   .topicTitle {
     margin: 8px 0 6px;
     font-size: clamp(36px, 5vw, 56px);
