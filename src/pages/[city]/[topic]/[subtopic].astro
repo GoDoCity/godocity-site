@@ -1,0 +1,418 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import { importFromSheet } from "../../../lib/sheet-import.js";
+
+/* ── Tag / string helpers (same as [topic]/index.astro) ── */
+function tagKey(raw) {
+  return String(raw ?? "").toLowerCase().trim()
+    .replace(/\s*&\s*/g, " ")
+    .replace(/[-_]+/g, " ")
+    .replace(/\s+/g, " ").trim();
+}
+function tagLabel(key) {
+  return key.split(" ").filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
+}
+function getPostDate(post) {
+  return post?.data?.pubDate ?? post?.data?.date ?? post?.data?.published ?? post?.data?.updated ?? null;
+}
+function isFeatured(post) {
+  const v = post?.data?.featured;
+  if (v === true || v === 1) return true;
+  return ["true", "yes", "1"].includes(String(v ?? "").toLowerCase().trim());
+}
+function heroImage(post) {
+  return String(post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "").trim();
+}
+function thumbImage(post) {
+  return String(post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "").trim();
+}
+function dateText(post) {
+  const d = getPostDate(post);
+  return d ? new Date(d).toLocaleDateString("en-US") : "";
+}
+function excerpt(post) { return post?.data?.description ?? ""; }
+
+/* ── DIY sub-categories ── */
+const DIY_SUBS = ["clean", "paint", "repair", "decorate", "build", "craft"];
+
+export async function getStaticPaths() {
+  const all = await getCollection("posts");
+  const cities = new Set();
+  for (const post of all) {
+    const city = (post.data.city ?? post.id?.split("/")[0] ?? "").toLowerCase().trim();
+    if (city) cities.add(city);
+  }
+  /* Always generate all 6 DIY sub-pages for every city that has posts */
+  const paths = [];
+  for (const city of cities) {
+    for (const subtopic of ["clean", "paint", "repair", "decorate", "build", "craft"]) {
+      paths.push({ params: { city, topic: "diy", subtopic } });
+    }
+  }
+  return paths;
+}
+
+/* ── Page data ── */
+const { city, subtopic } = Astro.params;
+const subtopicKey   = tagKey(subtopic);
+const subtopicLabel = tagLabel(subtopicKey);
+const cityCap       = city.charAt(0).toUpperCase() + city.slice(1);
+
+const all = await getCollection("posts");
+const posts = all
+  .filter(post => {
+    const postCity = (post.data.city ?? post.id?.split("/")[0] ?? "").toLowerCase().trim();
+    return postCity === city;
+  })
+  .filter(post => {
+    /* Post must belong to the "diy" topic AND match the subtopic */
+    const tags = Array.isArray(post.data.tags) ? post.data.tags.map(tagKey) : [];
+    const cat  = tagKey(post.data.category ?? "");
+    const sub  = tagKey(post.data.subtopic ?? "");
+    const inDiy = tags.includes("diy") || cat === "diy";
+    if (!inDiy) return false;
+    return tags.includes(subtopicKey) || sub === subtopicKey;
+  })
+  .sort((a, b) => new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime());
+
+const hero = posts.find(isFeatured) ?? posts[0] ?? null;
+const rest = hero ? posts.filter(p => p.slug !== hero.slug) : posts;
+
+/* ── Sidebar events (sheet, no API calls) ── */
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+const GREATER_DAYTONA = new Set([
+  "daytona", "daytona beach", "port orange", "ormond beach", "holly hill",
+  "south daytona", "new smyrna beach", "deland", "edgewater",
+]);
+let upcomingEvents = [];
+try {
+  const csvUrl = import.meta.env.SHEET_CSV_URL ?? "";
+  if (csvUrl) {
+    const raw = await importFromSheet(csvUrl, "", "");
+    upcomingEvents = raw
+      .filter(e => {
+        const evCity = (e.city ?? "").toLowerCase().trim();
+        return GREATER_DAYTONA.has(evCity) || evCity === city;
+      })
+      .filter(e => {
+        const evDate = new Date(e.eventDate);
+        evDate.setHours(0, 0, 0, 0);
+        return evDate >= today;
+      })
+      .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
+      .slice(0, 3)
+      .map(e => ({
+        data: { title: e.title, eventDate: e.eventDate, location: e.location, url: e.url },
+        slug: `${e.city ?? city}/${(e.title ?? "event").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
+      }));
+  }
+} catch { upcomingEvents = []; }
+
+const DIY_PILL_LIST = [
+  { label: "Clean",    href: `/${city}/diy/clean/` },
+  { label: "Paint",    href: `/${city}/diy/paint/` },
+  { label: "Repair",   href: `/${city}/diy/repair/` },
+  { label: "Decorate", href: `/${city}/diy/decorate/` },
+  { label: "Build",    href: `/${city}/diy/build/` },
+  { label: "Craft",    href: `/${city}/diy/craft/` },
+];
+---
+
+<Base title={`${subtopicLabel} | DIY | GoDo ${cityCap}`} subtitle={`DIY — ${subtopicLabel}`} cityBase={city}>
+  <section class="section">
+    <div class="container" style="max-width: 1080px;">
+
+      <div class="topicHeader">
+        <div class="diyBreadcrumb">
+          <a class="breadLink" href={`/${city}/diy/`}>Master Your Home</a>
+          <span class="breadSep">›</span>
+          <span class="breadCurrent">{subtopicLabel}</span>
+        </div>
+        <h1 class="topicTitle">{subtopicLabel}</h1>
+        <div class="diyPills">
+          {DIY_PILL_LIST.map(({ label, href }) => (
+            <a class={`diyPill${tagKey(label) === subtopicKey ? " diyPill--active" : ""}`} href={href}>{label}</a>
+          ))}
+        </div>
+        <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
+      </div>
+
+      <div class="topicLayout">
+        <div class="topicMain">
+
+          {hero && (
+            <a class="heroCard" href={`/${city}/posts/${hero.slug}/`}>
+              {heroImage(hero) && (
+                <div class="heroMedia">
+                  <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="lazy" decoding="async" />
+                </div>
+              )}
+              <div class="heroBody">
+                <div class="heroKicker">DIY — {subtopicLabel}</div>
+                <div class="heroTitle">{hero.data.title}</div>
+                {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
+                <div class="heroMeta">{dateText(hero)}</div>
+              </div>
+            </a>
+          )}
+
+          {rest.length > 0 && (
+            <div class="list" id="articleList">
+              {rest.map((p, idx) => (
+                <div class={`row${idx >= 9 ? " rowHidden" : ""}`}>
+                  <a class="rowCardLink" href={`/${city}/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
+                  {thumbImage(p) ? (
+                    <div class="rowThumbWrap">
+                      <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""} loading="lazy" decoding="async" />
+                    </div>
+                  ) : (
+                    <div class="rowThumbWrap isEmpty" aria-hidden="true"></div>
+                  )}
+                  <div class="rowText">
+                    <div class="rowTitle">{p.data.title ?? p.slug}</div>
+                    {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
+                    <div class="rowMeta">{dateText(p)}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {rest.length > 9 && (
+            <button class="loadMoreBtn" id="loadMoreBtn" type="button">
+              Load {rest.length - 9} more {rest.length - 9 === 1 ? "post" : "posts"}
+            </button>
+          )}
+
+          {posts.length === 0 && (
+            <p class="emptyMsg">No {subtopicLabel.toLowerCase()} posts yet — check back soon.</p>
+          )}
+
+          <p class="topicLinks">
+            <a class="pill" href={`/${city}/diy/`}>← All DIY</a>
+            <a class="pill" href={`/${city}/topics/`}>All topics</a>
+          </p>
+
+        </div>
+
+        <aside class="topicSidebar">
+          <div class="moduleCard newsletterCard">
+            <div class="moduleTitle">Good news for {cityCap}</div>
+            <div class="moduleSubtext">Get the best local posts and events sent to your inbox, for free.</div>
+            <form class="newsletterForm" action={`/${city}/subscribe/`} method="get">
+              <input class="newsletterInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" />
+              <button class="newsletterButton" type="submit">SIGN UP — IT'S FREE!</button>
+            </form>
+            <div class="moduleFineprint">100% free. Unsubscribe anytime.</div>
+          </div>
+
+          <div class="moduleCard eventsCard">
+            <div class="moduleTitle">Upcoming Events</div>
+            {upcomingEvents.length > 0 ? (
+              <div class="eventsList">
+                {upcomingEvents.map((e, i) => {
+                  const d   = new Date(e.data.eventDate);
+                  const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                  const day = d.getDate();
+                  const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                  return (
+                    <>
+                      {i > 0 && <div class="eventDivider" aria-hidden="true"></div>}
+                      <a class="eventRow"
+                         href={e.data.url ?? `/${city}/events/`}
+                         target={e.data.url ? "_blank" : "_self"}
+                         rel={e.data.url ? "noopener" : ""}>
+                        <div class="eventDate">
+                          <div class="eventDow">{dow}</div>
+                          <div class="eventNum">{day}</div>
+                          <div class="eventMon">{mon}</div>
+                        </div>
+                        <div class="eventInfo">
+                          <div class="eventName">{e.data.title}</div>
+                          <div class="eventPlace">{e.data.location}</div>
+                        </div>
+                      </a>
+                    </>
+                  );
+                })}
+              </div>
+            ) : (
+              <p class="noEvents">No upcoming events — check back soon.</p>
+            )}
+            <a class="eventsLink" href={`/${city}/events/`}>See all events →</a>
+          </div>
+        </aside>
+      </div>
+
+    </div>
+  </section>
+</Base>
+
+<style>
+  :root {
+    --card-radius: 18px;
+    --card-border: rgba(255,255,255,.10);
+    --card-border-hover: rgba(255,220,80,.22);
+    --card-bg: rgba(255,255,255,.035);
+    --card-bg-hover: rgba(255,255,255,.05);
+    --shadow-soft: 0 10px 30px rgba(0,0,0,.24);
+    --lift: translateY(-2px);
+    --ease: 160ms ease;
+  }
+
+  .topicHeader { margin-bottom: 18px; }
+
+  .diyBreadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; color: var(--muted); margin-bottom: 6px;
+  }
+  .breadLink { color: var(--brand1); text-decoration: none; font-weight: 700; }
+  .breadLink:hover { text-decoration: underline; }
+  .breadSep { opacity: .5; }
+  .breadCurrent { font-weight: 600; }
+
+  .topicTitle {
+    margin: 4px 0 10px;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+  .topicMeta { opacity: .72; font-size: 14px; margin-top: 6px; }
+
+  .diyPills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
+  .diyPill {
+    font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+    padding: 4px 14px; border-radius: 999px; text-decoration: none;
+    background: rgba(249,217,0,.08); color: var(--brand1);
+    border: 1px solid rgba(249,217,0,.18);
+    transition: background 140ms, border-color 140ms;
+  }
+  .diyPill:hover { background: rgba(249,217,0,.18); border-color: rgba(249,217,0,.4); }
+  .diyPill--active {
+    background: rgba(249,217,0,.22); border-color: rgba(249,217,0,.55);
+    color: var(--brand1); font-weight: 900;
+  }
+
+  .topicLayout {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 18px;
+    align-items: start;
+  }
+  .topicMain { min-width: 0; }
+  .topicSidebar {
+    display: flex; flex-direction: column; gap: 14px;
+    position: sticky; top: 16px;
+  }
+  @media (max-width: 980px) {
+    .topicLayout { grid-template-columns: 1fr; }
+    .topicSidebar { position: static; }
+  }
+
+  .heroCard, .row, .moduleCard {
+    border-radius: var(--card-radius);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease);
+    will-change: transform;
+  }
+  .heroCard:hover, .row:hover, .moduleCard:hover {
+    transform: var(--lift);
+    background: var(--card-bg-hover);
+    border-color: var(--card-border-hover);
+    box-shadow: 0 0 0 1px rgba(255,220,80,.08), var(--shadow-soft);
+  }
+
+  .heroCard {
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 0; overflow: hidden; text-decoration: none; margin: 6px 0 18px;
+  }
+  @media (max-width: 880px) { .heroCard { grid-template-columns: 1fr; } }
+  .heroMedia { position: relative; overflow: hidden; background: rgba(255,255,255,.02); }
+  .heroImg { width: 100%; height: 100%; display: block; aspect-ratio: 4/3; object-fit: cover; }
+  .heroBody { padding: 18px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+  .heroKicker {
+    font-size: 12px; font-weight: 900; letter-spacing: .10em;
+    opacity: .78; text-transform: uppercase; margin-bottom: 10px; color: var(--brand1);
+  }
+  .heroTitle { font-weight: 950; font-size: clamp(22px, 2.2vw, 30px); line-height: 1.10; letter-spacing: -0.015em; }
+  .heroDesc { margin-top: 10px; opacity: .86; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .heroMeta { margin-top: 12px; opacity: .62; font-size: 12.5px; }
+
+  .list { display: grid; gap: 12px; margin-top: 6px; }
+  .row {
+    position: relative; display: grid; grid-template-columns: 1fr 2fr;
+    gap: 14px; align-items: center; padding: 14px; cursor: pointer;
+  }
+  .rowCardLink { position: absolute; inset: 0; z-index: 0; border-radius: var(--card-radius); text-decoration: none; }
+  .rowText { min-width: 0; }
+  .rowTitle { font-weight: 900; font-size: 17px; line-height: 1.18; letter-spacing: -0.01em; }
+  .rowDesc { margin-top: 7px; opacity: .84; font-size: 14px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .rowMeta { margin-top: 9px; opacity: .58; font-size: 12.5px; }
+  .rowThumbWrap { aspect-ratio: 4/3; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.02); }
+  .rowThumbWrap.isEmpty { opacity: .25; }
+  .rowThumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .rowHidden { display: none; }
+  .loadMoreBtn {
+    display: block; width: 100%; margin-top: 14px; padding: 14px;
+    border-radius: var(--card-radius); border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.04); color: inherit;
+    font-weight: 800; font-size: 14px; cursor: pointer;
+    transition: background var(--ease), border-color var(--ease);
+  }
+  .loadMoreBtn:hover { background: rgba(255,255,255,.07); border-color: rgba(255,220,80,.22); }
+
+  .emptyMsg { opacity: .6; font-size: 15px; padding: 24px 0; }
+  .topicLinks { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+
+  /* Sidebar */
+  .moduleCard { padding: 16px; }
+  .moduleTitle { font-weight: 950; font-size: 16px; line-height: 1.15; letter-spacing: -0.01em; margin: 0 0 8px; }
+  .moduleSubtext { opacity: .80; font-size: 13.5px; line-height: 1.35; margin-bottom: 12px; }
+  .moduleFineprint { opacity: .62; font-size: 12px; margin-top: 10px; }
+  .newsletterCard { padding: 18px 16px 16px; }
+  .newsletterForm { display: grid; gap: 10px; margin-top: 10px; }
+  .newsletterInput {
+    width: 100%; padding: 12px; border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.25); color: inherit; outline: none;
+  }
+  .newsletterInput:focus { border-color: rgba(255,220,80,.35); box-shadow: 0 0 0 3px rgba(255,220,80,.10); }
+  .newsletterButton {
+    width: 100%; padding: 12px; border-radius: 12px;
+    border: 1px solid rgba(255,220,80,.35); background: rgba(255,220,80,.14);
+    color: rgba(255,220,80,.98); font-weight: 900; cursor: pointer;
+    transition: filter var(--ease), background var(--ease);
+  }
+  .newsletterButton:hover { filter: brightness(1.06); }
+
+  .eventsCard { padding: 16px; }
+  .eventsList { margin-top: 10px; display: grid; gap: 8px; }
+  .eventRow { display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: center; text-decoration: none; }
+  .eventDate { border-radius: 12px; border: 1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03); padding: 6px 8px; text-align: center; line-height: 1.1; }
+  .eventDow { font-size: 9px; font-weight: 900; letter-spacing: .10em; color: var(--brand1); text-transform: uppercase; }
+  .eventNum { font-size: 16px; font-weight: 950; color: var(--text); margin-top: 2px; }
+  .eventMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
+  .eventName { font-weight: 900; font-size: 13.5px; line-height: 1.2; color: var(--text); margin-bottom: 3px; }
+  .eventPlace { opacity: .72; font-size: 12px; color: var(--faint); }
+  .eventDivider { height: 1px; background: rgba(255,255,255,.08); border-radius: 999px; }
+  .noEvents { font-size: 13px; color: var(--faint); padding: 10px 0 4px; margin: 0; }
+  .eventsLink { display: block; margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
+  .eventsLink:hover { text-decoration: underline; }
+</style>
+
+<script is:inline>
+(function () {
+  var btn = document.getElementById("loadMoreBtn");
+  if (btn) {
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".rowHidden").forEach(function (el) {
+        el.classList.remove("rowHidden");
+      });
+      btn.style.display = "none";
+    });
+  }
+})();
+</script>
