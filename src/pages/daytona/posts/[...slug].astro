@@ -33,9 +33,11 @@ function sortNewestFirst(a, b) {
   return new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime();
 }
 
-/* Hero image field */
+/* Hero image field — checks all common frontmatter aliases */
+const FALLBACK_IMG = "/images/gododaytona-bg.png";
 function heroImage(post) {
-  return String(post?.data?.heroImage ?? "").trim();
+  const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.thumbnail ?? "";
+  return String(v).trim() || FALLBACK_IMG;
 }
 
 /* Related posts */
@@ -192,11 +194,10 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
             {featured && <span class="featuredPill">FEATURED</span>}
           </div>
 
-          {hero && (
-            <figure class="heroFigure">
-              <img class="heroFull" src={hero} alt={post.data.title ?? "Post image"} loading="eager" decoding="async" />
-            </figure>
-          )}
+          <figure class="heroFigure">
+            <img class="heroFull" src={hero} alt={post.data.title ?? "Post image"} loading="eager" decoding="async"
+              onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+          </figure>
 
           <article class="postBody">
             <Content />
@@ -215,11 +216,8 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
                   return (
                     <a class="relatedRow" href={`/daytona/posts/${p.slug}/`}>
                       <div class="relatedThumb">
-                        {img ? (
-                          <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async" />
-                        ) : (
-                          <div class="relatedImg relatedFallback" aria-hidden="true"></div>
-                        )}
+                        <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async"
+                          onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
                       </div>
                       <div class="relatedText">
                         <div class="relatedTitle">{t}</div>
@@ -301,7 +299,14 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
   }
   @media (max-width: 860px) {
     .postLayout { grid-template-columns: 1fr; }
-    .postSidebar { position: static; }
+    .postSidebar {
+      position: static;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Newsletter always renders before events when sidebar stacks below article */
+    .newsletterCard { order: 1; }
+    .sidebarCard    { order: 2; }
   }
 
   .postMain { min-width: 0; }
