@@ -28,12 +28,21 @@ const guideItems = [
   { label: "Play", emoji: "🎉", href: `${cityBase}/guides/play/` },
 ];
 
+const diyItems = [
+  { label: "Clean",    href: `${cityBase}/diy/clean/` },
+  { label: "Paint",    href: `${cityBase}/diy/paint/` },
+  { label: "Repair",   href: `${cityBase}/diy/repair/` },
+  { label: "Decorate", href: `${cityBase}/diy/decorate/` },
+  { label: "Build",    href: `${cityBase}/diy/build/` },
+  { label: "Craft",    href: `${cityBase}/diy/craft/` },
+];
+
 const pills = [
   { label: "Home",      href: `${cityBase}/`,           dropdown: null },
   { label: "Topics",    href: `${cityBase}/topics/`,    dropdown: "topics" },
   { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides" },
   { label: "Events",    href: `${cityBase}/events/`,    dropdown: null },
-  { label: "DIY",       href: `${cityBase}/diy/`,       dropdown: null },
+  { label: "DIY",       href: `${cityBase}/diy/`,       dropdown: "diy" },
   { label: "Advertise", href: `${cityBase}/advertise/`, dropdown: null },
 ];
 ---
@@ -82,6 +91,20 @@ const pills = [
               </div>
             </div>
           )}
+
+          {p.dropdown === "diy" && (
+            <div class="dropdown diyDropdown" role="menu">
+              <div class="dropBridge" aria-hidden="true"></div>
+              <div class="dropInner">
+                <div class="dropGrid">
+                  {diyItems.map((d) => (
+                    <a class="dropPill" href={d.href} role="menuitem">{d.label}</a>
+                  ))}
+                </div>
+                <a class="dropFooter" href={`${cityBase}/diy/`}>All DIY guides →</a>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <a class="pill" href={p.href}>{p.label}</a>
@@ -120,7 +143,15 @@ const pills = [
         ))}
       </div>
       <a class="drawerLink" href={`${cityBase}/events/`}>Events</a>
-      <a class="drawerLink" href={`${cityBase}/diy/`}>DIY</a>
+      <div class="drawerSection">
+        <div class="drawerSectionLabel">DIY</div>
+        <div class="drawerPillGrid">
+          {diyItems.map((d) => (
+            <a class="drawerPill" href={d.href}>{d.label}</a>
+          ))}
+        </div>
+        <a class="drawerLink" href={`${cityBase}/diy/`} style="margin-top:4px;">All DIY guides →</a>
+      </div>
       <a class="drawerLink drawerAdvertise" href={`${cityBase}/advertise/`}>Advertise</a>
     </div>
   </aside>

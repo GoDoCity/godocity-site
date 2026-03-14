@@ -147,12 +147,51 @@ const carouselPosts = all
   .sort((a, b) => new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime())
   .slice(0, 8);
 
-/* ── Live upcoming events for sidebar ── */
+/* ── Live upcoming events for sidebar ─────────────────────────────────────────
+   Primary source: Google Sheet CSV (same import as the events page).
+   Passing empty Mapbox token skips geocoding (sidebar doesn't need coords).
+   Passing empty EB token skips Eventbrite API calls — dates/titles come from
+   Col C and Col F sheet overrides, which is sufficient for the sidebar display.
+   Falls back to the Astro events collection if the sheet isn't configured.   */
+import { importFromSheet } from "../../../lib/sheet-import.js";
+
 const today = new Date();
 today.setHours(0, 0, 0, 0);
-let allEvents = [];
-try { allEvents = await getCollection("events"); } catch { allEvents = []; }
-const upcomingEvents = allEvents
+
+const GREATER_DAYTONA = new Set([
+  "daytona", "daytona beach", "port orange", "ormond beach", "holly hill",
+  "south daytona", "new smyrna beach", "deland", "edgewater",
+]);
+
+let sheetSidebarEvents = [];
+try {
+  const csvUrl = import.meta.env.SHEET_CSV_URL ?? "";
+  if (csvUrl) {
+    // No EB token → no Eventbrite API calls (fast); no Mapbox → no geocoding
+    const raw = await importFromSheet(csvUrl, "", "");
+    sheetSidebarEvents = raw
+      .filter(e => {
+        const evCity = (e.city ?? "").toLowerCase().trim();
+        return GREATER_DAYTONA.has(evCity) || evCity === city;
+      })
+      .filter(e => {
+        const evDate = new Date(e.eventDate);
+        evDate.setHours(0, 0, 0, 0);
+        return evDate >= today;
+      })
+      .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
+      .slice(0, 3)
+      .map(e => ({
+        data: { title: e.title, eventDate: e.eventDate, location: e.location, url: e.url },
+        slug: `${e.city ?? city}/${(e.title ?? "event").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
+      }));
+  }
+} catch { sheetSidebarEvents = []; }
+
+/* Fallback: Astro events collection (markdown files) */
+let collectionEvents = [];
+try { collectionEvents = await getCollection("events"); } catch { collectionEvents = []; }
+const collectionUpcoming = collectionEvents
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
     const evDate = new Date(e.data.eventDate);
@@ -161,6 +200,8 @@ const upcomingEvents = allEvents
   })
   .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
   .slice(0, 3);
+
+const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : collectionUpcoming;
 ---
 
 <Base title={`${topicLabelStr} | GoDo ${cityCap}`} subtitle={topicLabelStr} cityBase={city}>
@@ -168,14 +209,23 @@ const upcomingEvents = allEvents
     <div class="container" style="max-width: 1080px;">
 
       <div class="topicHeader">
-        <h1 class="topicTitle">{topicLabelStr}</h1>
+        <h1 class="topicTitle">{topic === "diy" ? "Master Your Home" : topicLabelStr}</h1>
         {topic === "diy" && (
-          <div class="diySubtitle">Your local how-to hub — Clean, Paint, Repair, Decorate, Build &amp; Craft</div>
-          <div class="diyPills">
-            {["Clean","Paint","Repair","Decorate","Build","Craft"].map(label => (
-              <span class="diyPill">{label}</span>
-            ))}
-          </div>
+          <>
+            <div class="diySubtitle">Your how-to hub for every project — from quick fixes to full renovations.</div>
+            <div class="diyPills">
+              {[
+                { label: "Clean",    href: `/${city}/diy/clean/` },
+                { label: "Paint",    href: `/${city}/diy/paint/` },
+                { label: "Repair",   href: `/${city}/diy/repair/` },
+                { label: "Decorate", href: `/${city}/diy/decorate/` },
+                { label: "Build",    href: `/${city}/diy/build/` },
+                { label: "Craft",    href: `/${city}/diy/craft/` },
+              ].map(({ label, href }) => (
+                <a class="diyPill" href={href}>{label}</a>
+              ))}
+            </div>
+          </>
         )}
         <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
       </div>
