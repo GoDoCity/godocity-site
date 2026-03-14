@@ -89,7 +89,8 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     container.style.setProperty('width',   '100%',     'important');
     container.style.setProperty('display', 'block',    'important');
 
-    var map = window.L.map(mapId, { scrollWheelZoom: false, zoomControl: true });
+    var map = window.L.map(mapId, { scrollWheelZoom: true, zoomControl: false });
+    window.L.control.zoom({ position: 'topright' }).addTo(map);
     map.attributionControl.setPrefix(''); /* remove 'Leaflet' watermark */
 
     var mbLayer = window.L.tileLayer(

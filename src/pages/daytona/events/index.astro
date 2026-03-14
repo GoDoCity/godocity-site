@@ -244,9 +244,15 @@ upcomingEvents
     `[events] missing coords: "${e.data.title}" (${e.data.eventDate}) — add lat/lng to pin on map`
   ));
 
-/* All sponsored → featured scroller (max 3 to keep one tidy row); rest → card feed */
-const sponsoredEvents = upcomingEvents.filter(e => e.data.sponsored === true).slice(0, 3);
-const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
+/* Featured scroller: top 3 sponsored events only (keeps the row tidy).
+   Any additional sponsored events (4th+) overflow into the regular feed
+   so they are never silently dropped. */
+const allSponsored    = upcomingEvents.filter(e => e.data.sponsored === true);
+const sponsoredEvents = allSponsored.slice(0, 3);
+const regularEvents   = [
+  ...allSponsored.slice(3),                         // 4th+ sponsored → top of feed
+  ...upcomingEvents.filter(e => !e.data.sponsored), // then all non-sponsored
+];
 
 /* ── Map pins — Hide & Seek filter ───────────────────────────────────────────
    We only plot a pin when we're confident in the coordinates:
