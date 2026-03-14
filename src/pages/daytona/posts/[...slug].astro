@@ -1,6 +1,7 @@
 ---
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
+import { importFromSheet } from "../../../lib/sheet-import.js";
 
 /* Featured flag normalization */
 function isFeatured(post) {
@@ -123,12 +124,41 @@ const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
 const featured = isFeatured(post);
 const hero = heroImage(post);
 
-/* Upcoming events */
+/* Upcoming events — pull from live sheet first, fall back to content collection */
 const todayE = new Date();
 todayE.setHours(0, 0, 0, 0);
-let allEvents = [];
-try { allEvents = await getCollection("events"); } catch { allEvents = []; }
-const upcomingEvents = allEvents
+const GREATER_DAYTONA = new Set([
+  "daytona", "daytona beach", "port orange", "ormond beach", "holly hill",
+  "south daytona", "new smyrna beach", "deland", "edgewater",
+]);
+let sheetSidebarEvents = [];
+try {
+  const csvUrl = import.meta.env.SHEET_CSV_URL ?? "";
+  if (csvUrl) {
+    // No EB token → no Eventbrite API calls (fast); no Mapbox → no geocoding
+    const raw = await importFromSheet(csvUrl, "", "");
+    sheetSidebarEvents = raw
+      .filter(e => {
+        const evCity = (e.city ?? "").toLowerCase().trim();
+        return GREATER_DAYTONA.has(evCity);
+      })
+      .filter(e => {
+        const evDate = new Date(e.eventDate);
+        evDate.setHours(0, 0, 0, 0);
+        return evDate >= todayE;
+      })
+      .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
+      .slice(0, 4)
+      .map(e => ({
+        data: { title: e.title, eventDate: e.eventDate, location: e.location, url: e.url },
+        slug: `daytona/${(e.title ?? "event").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
+      }));
+  }
+} catch { sheetSidebarEvents = []; }
+
+let collectionEvents = [];
+try { collectionEvents = await getCollection("events"); } catch { collectionEvents = []; }
+const collectionUpcoming = collectionEvents
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
     const evDate = new Date(e.data.eventDate);
@@ -137,6 +167,8 @@ const upcomingEvents = allEvents
   })
   .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
   .slice(0, 4);
+
+const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : collectionUpcoming;
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona">
@@ -209,9 +241,23 @@ const upcomingEvents = allEvents
         </div>
 
         <aside class="postSidebar">
+
+          <!-- ── Email sign-up banner ── -->
+          <div class="newsletterCard">
+            <div class="newsletterBadge">FREE DAILY NEWSLETTER</div>
+            <div class="newsletterHeadline">Don't miss a beat.</div>
+            <div class="newsletterSubtext">Get the best of Daytona in your inbox every morning.</div>
+            <form class="newsletterForm" action="/daytona/subscribe/" method="get">
+              <input class="newsletterInput" type="email" name="email" placeholder="your@email.com" aria-label="Email address" />
+              <button class="newsletterButton" type="submit">SIGN UP FREE →</button>
+            </form>
+            <div class="newsletterFineprint">100% free. Unsubscribe anytime.</div>
+          </div>
+
+          <!-- ── Upcoming events ── -->
           <div class="sidebarCard">
             <div class="sidebarHead">Upcoming Events</div>
-            {upcomingEvents.length > 0 ? upcomingEvents.map(e => {
+            {upcomingEvents.length > 0 ? upcomingEvents.map((e, i) => {
               const d = new Date(e.data.eventDate);
               const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
               const day = d.getDate();
@@ -233,10 +279,11 @@ const upcomingEvents = allEvents
                 </a>
               );
             }) : (
-              <p style="color:var(--muted);font-size:14px;margin:0">No upcoming events.</p>
+              <p style="color:var(--muted);font-size:14px;margin:0">No upcoming events — check back soon.</p>
             )}
             <a class="seeAll" href="/daytona/events/">See all events →</a>
           </div>
+
         </aside>
 
       </div>
@@ -259,6 +306,51 @@ const upcomingEvents = allEvents
 
   .postMain { min-width: 0; }
   .postSidebar { position: sticky; top: 80px; min-width: 0; }
+
+  /* ── Newsletter banner ── */
+  .newsletterCard {
+    border-radius: 16px;
+    background: #f9d900;
+    padding: 18px 16px 16px;
+    margin-bottom: 16px;
+  }
+  .newsletterBadge {
+    display: inline-block;
+    font-size: 9px; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; color: rgba(0,0,0,.55);
+    background: rgba(0,0,0,.10); border-radius: 999px;
+    padding: 3px 9px; margin-bottom: 8px;
+  }
+  .newsletterHeadline {
+    font-size: 20px; font-weight: 950; color: #000;
+    line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 5px;
+  }
+  .newsletterSubtext {
+    font-size: 13px; color: rgba(0,0,0,.72); line-height: 1.4; margin-bottom: 12px;
+  }
+  .newsletterForm { display: grid; gap: 8px; }
+  .newsletterInput {
+    width: 100%; padding: 11px 12px;
+    border-radius: 10px; border: 1.5px solid rgba(0,0,0,.18);
+    background: rgba(255,255,255,.85); color: #111;
+    font-size: 13.5px; outline: none;
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+  }
+  .newsletterInput:focus {
+    border-color: #000;
+    box-shadow: 0 0 0 3px rgba(0,0,0,.12);
+  }
+  .newsletterButton {
+    width: 100%; padding: 11px 12px;
+    border-radius: 10px; border: none;
+    background: #000; color: #f9d900;
+    font-size: 13px; font-weight: 900; letter-spacing: .04em;
+    cursor: pointer; transition: opacity 140ms ease;
+  }
+  .newsletterButton:hover { opacity: .88; }
+  .newsletterFineprint {
+    margin-top: 8px; font-size: 11px; color: rgba(0,0,0,.52); text-align: center;
+  }
 
   .sidebarCard {
     border: 1px solid rgba(255,255,255,.10);
