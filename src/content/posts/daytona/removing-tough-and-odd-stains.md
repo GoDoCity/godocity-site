@@ -8,7 +8,7 @@ description: Stains can be such a challenge to remove and I put some to the
   test. Here are a few ways I found to remove these stains with inexpensive and
   easy to find ingredients.
 thumbnail: ""
-heroImage: /images/uploads/cleaning-cartoon.webp
+heroImage: /images/uploads/pop-art-illustration-young-beautiful-260nw-660377692.webp
 city: daytona
 featured: false
 ---
