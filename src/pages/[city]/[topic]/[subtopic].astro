@@ -21,11 +21,14 @@ function isFeatured(post) {
   if (v === true || v === 1) return true;
   return ["true", "yes", "1"].includes(String(v ?? "").toLowerCase().trim());
 }
+/* Fallback shown when an article has no image or a broken image URL */
+const FALLBACK_IMG = "/images/gododaytona-bg.png";
+
 function heroImage(post) {
-  return String(post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "").trim();
+  return String(post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "").trim() || FALLBACK_IMG;
 }
 function thumbImage(post) {
-  return String(post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "").trim();
+  return String(post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "").trim() || FALLBACK_IMG;
 }
 function dateText(post) {
   const d = getPostDate(post);
@@ -144,11 +147,11 @@ const DIY_PILL_LIST = [
 
           {hero && (
             <a class="heroCard" href={`/${city}/posts/${hero.slug}/`}>
-              {heroImage(hero) && (
-                <div class="heroMedia">
-                  <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="lazy" decoding="async" />
-                </div>
-              )}
+              <div class="heroMedia">
+                <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""}
+                  loading="lazy" decoding="async"
+                  onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+              </div>
               <div class="heroBody">
                 <div class="heroKicker">DIY — {subtopicLabel}</div>
                 <div class="heroTitle">{hero.data.title}</div>
@@ -163,13 +166,11 @@ const DIY_PILL_LIST = [
               {rest.map((p, idx) => (
                 <div class={`row${idx >= 9 ? " rowHidden" : ""}`}>
                   <a class="rowCardLink" href={`/${city}/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
-                  {thumbImage(p) ? (
-                    <div class="rowThumbWrap">
-                      <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""} loading="lazy" decoding="async" />
-                    </div>
-                  ) : (
-                    <div class="rowThumbWrap isEmpty" aria-hidden="true"></div>
-                  )}
+                  <div class="rowThumbWrap">
+                    <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""}
+                      loading="lazy" decoding="async"
+                      onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+                  </div>
                   <div class="rowText">
                     <div class="rowTitle">{p.data.title ?? p.slug}</div>
                     {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}

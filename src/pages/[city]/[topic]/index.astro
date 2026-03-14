@@ -25,13 +25,16 @@ function isFeatured(post) {
   if (v === true || v === 1) return true;
   return ["true", "yes", "1"].includes(String(v ?? "").toLowerCase().trim());
 }
+/* Fallback shown when an article has no image or a broken image URL */
+const FALLBACK_IMG = "/images/gododaytona-bg.png";
+
 function heroImage(post) {
   const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "";
-  return String(v).trim();
+  return String(v).trim() || FALLBACK_IMG;
 }
 function thumbImage(post) {
   const v = post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "";
-  return String(v).trim();
+  return String(v).trim() || FALLBACK_IMG;
 }
 function dateText(post) {
   const d = getPostDate(post);
@@ -235,11 +238,11 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
 
           {hero && (
             <a class={`heroCard${kickerParts(hero).sponsorLabel ? " sponsoredCard" : ""}`} href={`/${city}/posts/${hero.slug}/`}>
-              {heroImage(hero) && (
-                <div class="heroMedia">
-                  <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="lazy" decoding="async" />
-                </div>
-              )}
+              <div class="heroMedia">
+                <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""}
+                  loading="lazy" decoding="async"
+                  onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+              </div>
               <div class="heroBody">
                 {(() => { const { catLabel, sub, sponsorLabel } = kickerParts(hero); const kl = sponsorLabel || catLabel; return (kl || isFeatured(hero)) && (
                   <div class={`heroKicker${sponsorLabel ? " sponsorKicker" : ""}`}>
@@ -262,13 +265,11 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
                 return (
                   <div class={`row${idx >= 9 ? " rowHidden" : ""}${isSponsored ? " sponsoredRow" : ""}`}>
                     <a class="rowCardLink" href={`/${city}/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
-                    {thumbImage(p) ? (
-                      <div class="rowThumbWrap">
-                        <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""} loading="lazy" decoding="async" />
-                      </div>
-                    ) : (
-                      <div class="rowThumbWrap isEmpty" aria-hidden="true"></div>
-                    )}
+                    <div class="rowThumbWrap">
+                      <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""}
+                        loading="lazy" decoding="async"
+                        onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+                    </div>
                     <div class="rowText">
                       {kickerLabel && (
                         <div class="rowKicker">
@@ -317,10 +318,9 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
                   return (
                     <a class="carouselCard" href={`/${city}/posts/${p.slug}/`}>
                       <div class="carouselThumb">
-                        {img
-                          ? <img class="carouselImg" src={img} alt={p.data.title ?? ""} loading="lazy" decoding="async" />
-                          : <div class="carouselImgEmpty" aria-hidden="true" />
-                        }
+                        <img class="carouselImg" src={img} alt={p.data.title ?? ""}
+                          loading="lazy" decoding="async"
+                          onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
                       </div>
                       <div class="carouselBody">
                         {catLabel && <div class="carouselKicker">{catLabel}</div>}
