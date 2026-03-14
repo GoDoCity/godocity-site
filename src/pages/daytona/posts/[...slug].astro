@@ -2,6 +2,7 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import { importFromSheet } from "../../../lib/sheet-import.js";
+import SidebarPoll from "../../../components/SidebarPoll.astro";
 
 /* Featured flag normalization */
 function isFeatured(post) {
@@ -240,7 +241,7 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
 
         <aside class="postSidebar">
 
-          <!-- ── Email sign-up banner ── -->
+          <!-- 1 ── Newsletter banner (always first) ── -->
           <div class="newsletterCard">
             <div class="newsletterBadge">FREE DAILY NEWSLETTER</div>
             <div class="newsletterHeadline">Don't miss a beat.</div>
@@ -252,34 +253,59 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
             <div class="newsletterFineprint">100% free. Unsubscribe anytime.</div>
           </div>
 
-          <!-- ── Upcoming events ── -->
-          <div class="sidebarCard">
-            <div class="sidebarHead">Upcoming Events</div>
-            {upcomingEvents.length > 0 ? upcomingEvents.map((e, i) => {
-              const d = new Date(e.data.eventDate);
-              const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-              const day = d.getDate();
-              const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              return (
-                <a class="eventRow"
-                   href={e.data.url ?? `/daytona/events/${e.slug.split("/").pop()}/`}
-                   target={e.data.url ? "_blank" : "_self"}
-                   rel={e.data.url ? "noopener" : ""}>
-                  <div class="eventCal">
-                    <div class="eDow">{dow}</div>
-                    <div class="eDay">{day}</div>
-                    <div class="eMon">{mon}</div>
-                  </div>
-                  <div class="eventInfo">
-                    <div class="eName">{e.data.title}</div>
-                    <div class="ePlace">{e.data.location}</div>
-                  </div>
-                </a>
-              );
-            }) : (
-              <p style="color:var(--muted);font-size:14px;margin:0">No upcoming events — check back soon.</p>
-            )}
-            <a class="seeAll" href="/daytona/events/">See all events →</a>
+          <!-- 2 ── Upcoming events (hidden when empty) ── -->
+          {upcomingEvents.length > 0 && (
+            <div class="sidebarCard">
+              <div class="sidebarHead">Upcoming Events</div>
+              {upcomingEvents.map((e) => {
+                const d = new Date(e.data.eventDate);
+                const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                const day = d.getDate();
+                const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                return (
+                  <a class="eventRow"
+                     href={e.data.url ?? `/daytona/events/${e.slug.split("/").pop()}/`}
+                     target={e.data.url ? "_blank" : "_self"}
+                     rel={e.data.url ? "noopener" : ""}>
+                    <div class="eventCal">
+                      <div class="eDow">{dow}</div>
+                      <div class="eDay">{day}</div>
+                      <div class="eMon">{mon}</div>
+                    </div>
+                    <div class="eventInfo">
+                      <div class="eName">{e.data.title}</div>
+                      <div class="ePlace">{e.data.location}</div>
+                    </div>
+                  </a>
+                );
+              })}
+              <a class="seeAll" href="/daytona/events/">See all events →</a>
+            </div>
+          )}
+
+          <!-- 3 ── Ad slot ── -->
+          <a class="adCard" href="/daytona/advertise/" aria-label="Advertise with GoDo Daytona">
+            <div class="adBadge">SPONSORED</div>
+            <div class="adHeadline">Reach Daytona locals.</div>
+            <div class="adSubtext">Promote your business to thousands of engaged readers.</div>
+            <div class="adCta">Get in touch →</div>
+          </a>
+
+          <!-- 4 ── Vibe Check poll ── -->
+          <SidebarPoll />
+
+          <!-- 5 ── City Guides ── -->
+          <div class="sidebarCard guidesCard">
+            <div class="guidesHead">
+              <span class="sidebarHead" style="margin:0">City Guides</span>
+              <a class="guidesMore" href="/daytona/guides/">See all</a>
+            </div>
+            <div class="guideList">
+              <a class="guideRow" href="/daytona/guides/live/">🏠 Live in Daytona</a>
+              <a class="guideRow" href="/daytona/guides/work/">💼 Work in Daytona</a>
+              <a class="guideRow" href="/daytona/guides/play/">🎉 Play in Daytona</a>
+              <a class="guideRow" href="/daytona/guides/best-restaurants/">🍽️ Best Restaurants</a>
+            </div>
           </div>
 
         </aside>
@@ -299,25 +325,26 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
   }
   @media (max-width: 860px) {
     .postLayout { grid-template-columns: 1fr; }
-    .postSidebar {
-      position: static;
-      display: flex;
-      flex-direction: column;
-    }
-    /* Newsletter always renders before events when sidebar stacks below article */
+    .postSidebar { position: static; }
+    /* Explicit mobile order: newsletter first, then events, ads, poll, guides */
     .newsletterCard { order: 1; }
     .sidebarCard    { order: 2; }
+    .adCard         { order: 3; }
+    .pollCard       { order: 4; }
+    .guidesCard     { order: 5; }
   }
 
   .postMain { min-width: 0; }
-  .postSidebar { position: sticky; top: 80px; min-width: 0; }
+  .postSidebar {
+    position: sticky; top: 80px; min-width: 0;
+    display: flex; flex-direction: column; gap: 12px;
+  }
 
   /* ── Newsletter banner ── */
   .newsletterCard {
     border-radius: 16px;
     background: #f9d900;
     padding: 18px 16px 16px;
-    margin-bottom: 16px;
   }
   .newsletterBadge {
     display: inline-block;
@@ -386,6 +413,46 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
   .eName { font-weight: 800; font-size: 14px; color: var(--text); line-height: 1.2; }
   .ePlace { font-size: 12px; color: var(--faint); }
   .seeAll { display: block; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
+
+  /* ── Ad slot ── */
+  .adCard {
+    display: block; text-decoration: none;
+    border-radius: 16px;
+    border: 1px dashed rgba(255,255,255,.15);
+    background: rgba(255,255,255,.025);
+    padding: 14px 16px;
+    transition: border-color 140ms ease, background 140ms ease;
+  }
+  .adCard:hover { border-color: rgba(255,220,80,.28); background: rgba(255,255,255,.045); }
+  .adBadge {
+    font-size: 9px; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; color: rgba(255,255,255,.38);
+    margin-bottom: 6px;
+  }
+  .adHeadline { font-size: 15px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
+  .adSubtext { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
+  .adCta { font-size: 12px; font-weight: 800; color: var(--brand1); }
+
+  /* ── City Guides ── */
+  .guidesCard { padding: 14px 14px 8px; }
+  .guidesHead {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 8px;
+  }
+  .guidesMore {
+    font-size: 12px; font-weight: 700; color: var(--brand1);
+    text-decoration: none; opacity: .85;
+  }
+  .guidesMore:hover { opacity: 1; }
+  .guideList { display: grid; }
+  .guideRow {
+    display: block; text-decoration: none;
+    font-size: 13.5px; font-weight: 700; color: var(--text);
+    padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.07);
+    line-height: 1.3; transition: color 120ms;
+  }
+  .guideRow:last-child { border-bottom: none; }
+  .guideRow:hover { color: var(--brand1); }
 
   .postTitle {
     margin: 0 0 8px;
