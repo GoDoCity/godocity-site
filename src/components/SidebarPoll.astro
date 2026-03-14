@@ -65,9 +65,11 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     const pollId = (card as HTMLElement).dataset.pollId ?? "poll";
     const storageKey = `poll-voted-${pollId}`;
 
-    // If already voted this session, show results immediately
+    // If already voted this session, skip form and show thanks directly
     if (sessionStorage.getItem(storageKey)) {
-      revealResults(card);
+      form.replaceWith(thanks!);
+      thanks!.hidden = false;
+      return;
     }
 
     form.addEventListener("submit", (e) => {
