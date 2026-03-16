@@ -18,10 +18,9 @@ const {
   pollId = "beachside-burger",
 } = Astro.props;
 
-// Seed votes provide social proof — randomised at build time (112–147)
-const seedVotes = 112 + Math.floor(Math.random() * 36);
+// Display total is seeded for social proof — randomised at build time (112–147)
+const displayTotal = 112 + Math.floor(Math.random() * 36);
 const total = options.reduce((s, o) => s + o.votes, 0);
-const displayTotal = total + seedVotes;
 ---
 
 <div class="pollCard" data-poll-id={pollId}>
