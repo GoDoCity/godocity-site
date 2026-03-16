@@ -4,37 +4,39 @@ export interface Props {
   question?: string;
   options?: { label: string; votes: number }[];
   pollId?: string;
+  formAction?: string;
 }
 
 const {
-  title = "Vibe Check: Best of Daytona",
-  question = "Best Beachside Burger?",
+  title = "Vibe Check: Best of Ormond",
+  question = "Who has the best tacos in Ormond?",
   options = [
-    { label: "Hyde Park", votes: 41 },
-    { label: "31 Supper Club", votes: 29 },
-    { label: "Burger Ten", votes: 19 },
-    { label: "Other", votes: 11 },
+    { label: "La Fiesta",       votes: 112 + Math.floor(Math.random() * 36) },
+    { label: "Tortilla Republic", votes: 112 + Math.floor(Math.random() * 36) },
+    { label: "Cabo's Mexican",  votes: 112 + Math.floor(Math.random() * 36) },
+    { label: "Other",           votes: 112 + Math.floor(Math.random() * 36) },
   ],
-  pollId = "beachside-burger",
+  pollId = "ormond-tacos",
+  formAction = "#",
 } = Astro.props;
 
-// Display total is seeded for social proof — randomised at build time (112–147)
-const displayTotal = 112 + Math.floor(Math.random() * 36);
+// Display total seeded for social proof — sum of the randomised option counts
 const total = options.reduce((s, o) => s + o.votes, 0);
+const displayTotal = total;
 ---
 
 <div class="pollCard" data-poll-id={pollId}>
   <div class="pollTitle">{title}</div>
   <div class="pollQuestion">{question}</div>
 
-  <form class="pollForm" data-poll-form>
+  <form class="pollForm" data-poll-form action={formAction} method="POST">
     {options.map((opt, i) => (
       <label class="pollOption" data-option>
         <input
           class="pollRadio"
           type="radio"
           name={`poll-${pollId}`}
-          value={i}
+          value={opt.label}
         />
         <span class="pollLabel">{opt.label}</span>
         <span class="pollBar" aria-hidden="true">
@@ -67,19 +69,13 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     const pollId = (card as HTMLElement).dataset.pollId ?? "poll";
     const storageKey = `poll-voted-${pollId}`;
 
-    // If already voted this session, skip form and show thanks directly
-    if (sessionStorage.getItem(storageKey)) {
-      form.replaceWith(thanks!);
-      thanks!.hidden = false;
-      return;
-    }
-
+    // Intercept submission: show thank-you, then let the POST fire
     form.addEventListener("submit", (e) => {
-      e.preventDefault();
       const checked = form.querySelector<HTMLInputElement>(
         'input[type="radio"]:checked'
       );
       if (!checked) {
+        e.preventDefault();
         btn.animate(
           [{ transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "none" }],
           { duration: 180, iterations: 2 }
@@ -88,8 +84,11 @@ const total = options.reduce((s, o) => s + o.votes, 0);
       }
       sessionStorage.setItem(storageKey, checked.value);
       revealResults(card);
-      form.replaceWith(thanks!);
-      thanks!.hidden = false;
+      // Brief delay so the user sees the thank-you before any page reload
+      setTimeout(() => {
+        thanks!.hidden = false;
+        form.style.display = "none";
+      }, 80);
     });
   }
 
@@ -100,7 +99,6 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     card.querySelectorAll<HTMLElement>(".pollPct").forEach((pct) => {
       pct.style.display = "block";
     });
-    card.querySelector<HTMLElement>(".pollBtn")?.remove();
   }
 
   document.querySelectorAll(".pollCard").forEach(initPoll);

@@ -140,6 +140,7 @@ export function normalizeSheetEvent(raw) {
       lat:       e.lat       ?? null,
       lng:       e.lng       ?? null,
       sponsored: e.sponsored === true,
+      proTip:    e.proTip    ?? null,
       source:    e.source    ?? "eventbrite-sheet",
     },
   };

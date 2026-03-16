@@ -1,0 +1,69 @@
+---
+/**
+ * src/components/ProTip.astro
+ * Reusable "Local's Knowledge" Pro Tip callout.
+ *
+ * Usage in guides / articles:
+ *   import ProTip from "../../components/ProTip.astro";
+ *   <ProTip tip="Park on the west side of A1A — it's free and only 2 blocks to the sand." />
+ *
+ * Or pass a tip pulled from event data by ID:
+ *   <ProTip tip={eventData.proTip} />
+ */
+export interface Props {
+  tip: string;
+  /** Optional label override (defaults to "Local's Knowledge") */
+  label?: string;
+}
+
+const { tip, label = "Local's Knowledge" } = Astro.props;
+
+if (!tip) return;
+---
+
+<aside class="proTipBlock">
+  <div class="proTipHeader">
+    <span class="proTipBulb">💡</span>
+    <span class="proTipLabel">{label}</span>
+  </div>
+  <p class="proTipBody">{tip}</p>
+</aside>
+
+<style>
+  .proTipBlock {
+    display: grid;
+    gap: 8px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border-left: 3px solid var(--brand1);
+    background: rgba(255, 210, 74, 0.07);
+    margin: 1.5em 0;
+  }
+
+  .proTipHeader {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .proTipBulb {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .proTipLabel {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: var(--brand1);
+  }
+
+  .proTipBody {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--text);
+    font-weight: 500;
+  }
+</style>

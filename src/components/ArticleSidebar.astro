@@ -70,7 +70,7 @@ const hasEvents = hasSlider || hasList;
               const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
               const cityLabel = cityDisplayName(evCity);
               return (
-                <a class={`evSlide${idx === 0 ? " evSlide--active" : ""}`}
+                <a class={`evSlide${idx === 0 ? " evSlide--active" : ""}${e.data.proTip ? " evSlide--hasTip" : ""}`}
                    href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
                    target={e.data.url ? "_blank" : "_self"}
                    rel={e.data.url ? "noopener" : ""}
@@ -82,7 +82,10 @@ const hasEvents = hasSlider || hasList;
                     <div class="eMon">{eMon}</div>
                   </div>
                   <div class="eventInfo">
-                    <div class="eName">{e.data.title}</div>
+                    <div class="eName">
+                      {e.data.title}
+                      {e.data.proTip && <span class="proTipIcon" title="Pro Tip">💡</span>}
+                    </div>
                     <div class="ePlace">
                       <span>{mon} {day}</span>
                       <span class="evCitySep">|</span>
@@ -90,6 +93,12 @@ const hasEvents = hasSlider || hasList;
                       <span class="sponsoredBadge">SPONSORED</span>
                     </div>
                   </div>
+                  {e.data.proTip && (
+                    <div class="proTipOverlay">
+                      <span class="proTipOverlayIcon">💡</span>
+                      <span class="proTipOverlayText">{e.data.proTip}</span>
+                    </div>
+                  )}
                 </a>
               );
             })}
@@ -158,8 +167,15 @@ const hasEvents = hasSlider || hasList;
     </a>
   </div>
 
+  <!-- 3b — Community Alert bar (scrolls to Vibe Check poll) -->
+  <a class="communityAlert" href="#vibeCheckPoll">
+    🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="caVote">Vote Now</span>
+  </a>
+
   <!-- 4 — Vibe Check poll -->
-  <SidebarPoll />
+  <div id="vibeCheckPoll">
+    <SidebarPoll />
+  </div>
 
   <!-- 5 — City Guides -->
   <div class="railSection">
@@ -389,6 +405,49 @@ const hasEvents = hasSlider || hasList;
     height: 30px; padding: 0 13px; border-radius: 999px;
     background: #000; color: #f9d900; font-size: 11.5px; font-weight: 800;
   }
+
+  /* ── Community Alert bar ── */
+  .communityAlert {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+    padding: 11px 14px; border-radius: 10px;
+    background: #1a7a3c; color: #fff;
+    font-size: 13.5px; font-weight: 700; line-height: 1.3;
+    text-decoration: none;
+    transition: opacity 140ms, background 140ms;
+  }
+  .communityAlert:hover { opacity: .9; background: #166332; }
+  .communityAlert strong { font-weight: 900; }
+  .caVote {
+    display: inline-flex; align-items: center;
+    padding: 2px 9px; border-radius: 999px;
+    background: #fff; color: #1a7a3c;
+    font-size: 11.5px; font-weight: 900; letter-spacing: .04em;
+    white-space: nowrap; margin-left: auto;
+  }
+
+  /* ── Pro Tip overlay on sponsored slides ── */
+  .evSlide--hasTip { position: relative; overflow: hidden; }
+  .proTipIcon { font-size: 13px; margin-left: 4px; vertical-align: middle; cursor: help; }
+  .proTipOverlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; align-items: flex-start; gap: 6px;
+    padding: 8px 10px;
+    background: rgba(0,0,0,.72);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    font-size: 11.5px; line-height: 1.35; color: #fff;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 200ms ease, transform 200ms ease;
+    pointer-events: none;
+    border-radius: 0 0 8px 8px;
+  }
+  .evSlide--hasTip:hover .proTipOverlay,
+  .evSlide--hasTip:focus .proTipOverlay {
+    opacity: 1; transform: translateY(0);
+  }
+  .proTipOverlayIcon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .proTipOverlayText { font-weight: 600; }
 
   /* ── City Guides ── */
   .guideList { display: grid; }
