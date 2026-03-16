@@ -3,11 +3,14 @@
  * src/components/ArticleSidebar.astro
  * Unified article sidebar — used by every article/post layout.
  *
- * Fetches Upcoming Events from the Google Sheet CSV first (importFromSheet),
- * then falls back to the Astro events content collection.
- * Event filtering is based on the Greater Daytona area only — never filtered
- * by the article's topic/category, so a Food article and a DIY article both
- * show the same regional event list.
+ * Upcoming Events section:
+ *  - Slot 1: Smart Slider — top 5 Sponsored events, cycles every 5 s
+ *  - Below:  Static list of next 4–5 regular (non-sponsored) events
+ *
+ * Event filtering:
+ *  - Greater Daytona area only (never filtered by article topic/category)
+ *  - UTC-safe past-event filter: events before today (midnight UTC) are hidden
+ *  - Date badges always show actual month + day (never "Today")
  */
 import SidebarPoll from "./SidebarPoll.astro";
 import { getCollection } from "astro:content";
@@ -49,61 +52,97 @@ const CITY_DISPLAY_NAMES: Record<string, string> = {
   "edgewater": "Edgewater",
 };
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+/* UTC-safe "today" — compare YYYY-MM-DD strings to avoid timezone drift */
+const todayStr = new Date().toISOString().split("T")[0]; // e.g. "2026-03-16"
 
-let upcomingEvents: any[] = [];
+function isUpcoming(eventDateRaw: string): boolean {
+  if (!eventDateRaw) return false;
+  const dateStr = String(eventDateRaw).split("T")[0]; // strip time if present
+  return dateStr >= todayStr;
+}
 
-// Primary: Google Sheet CSV (fast — no EB token, no Mapbox geocoding)
+let sponsoredSlides: any[] = [];  // top 5 sponsored — for the slider
+let regularList: any[]    = [];   // next 5 regular   — for the static list
+
+// Primary: Google Sheet CSV
 try {
   const csvUrl = import.meta.env.SHEET_CSV_URL ?? "";
   if (csvUrl) {
     const raw = await importFromSheet(csvUrl, "", "");
-    const filtered = (raw as any[])
+    const upcoming = (raw as any[])
       .filter(e => {
         const evCity = (e.city ?? "").toLowerCase().trim();
-        return GREATER_DAYTONA.has(evCity) || evCity === city;
+        return GREATER_DAYTONA.has(evCity) || evCity === city.toLowerCase().trim();
       })
-      .filter(e => {
-        const evDate = new Date(e.eventDate);
-        evDate.setHours(0, 0, 0, 0);
-        return evDate >= today;
-      })
-      .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
-      .slice(0, 4)
+      .filter(e => isUpcoming(e.eventDate))
+      .sort((a, b) => {
+        const da = String(a.eventDate ?? "").split("T")[0];
+        const db = String(b.eventDate ?? "").split("T")[0];
+        return da < db ? -1 : da > db ? 1 : 0;
+      });
+
+    sponsoredSlides = upcoming
+      .filter(e => e.status === "Sponsored")
+      .slice(0, 5)
       .map(e => ({
         data: {
-          title: e.title,
+          title:     e.title,
           eventDate: e.eventDate,
-          location: e.location,
-          url: e.url,
-          city: e.city,
-          sponsored: e.status === "Sponsored",
+          location:  e.location,
+          url:       e.url,
+          city:      e.city,
+          image:     e.image ?? null,
+          sponsored: true,
         },
         slug: `${e.city ?? city}/${(e.title ?? "event").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
       }));
-    if (filtered.length > 0) upcomingEvents = filtered;
+
+    regularList = upcoming
+      .filter(e => e.status !== "Sponsored")
+      .slice(0, 5)
+      .map(e => ({
+        data: {
+          title:     e.title,
+          eventDate: e.eventDate,
+          location:  e.location,
+          url:       e.url,
+          city:      e.city,
+          sponsored: false,
+        },
+        slug: `${e.city ?? city}/${(e.title ?? "event").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
+      }));
   }
 } catch { /* fall through to collection */ }
 
 // Fallback: Astro events content collection
-if (upcomingEvents.length === 0) {
+if (sponsoredSlides.length === 0 && regularList.length === 0) {
   try {
     const allEvents = await getCollection("events");
-    upcomingEvents = (allEvents as any[])
+    const upcoming = (allEvents as any[])
       .filter(e => {
         const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-        const evDate = new Date(e.data.eventDate);
-        evDate.setHours(0, 0, 0, 0);
-        const areaMatch = GREATER_DAYTONA.has(city)
+        const areaMatch = GREATER_DAYTONA.has(city.toLowerCase().trim())
           ? GREATER_DAYTONA.has(evCity)
-          : evCity === city;
-        return areaMatch && evDate >= today;
+          : evCity === city.toLowerCase().trim();
+        return areaMatch && isUpcoming(e.data.eventDate);
       })
-      .sort((a: any, b: any) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
-      .slice(0, 4);
-  } catch { upcomingEvents = []; }
+      .sort((a: any, b: any) => {
+        const da = String(a.data.eventDate ?? "").split("T")[0];
+        const db = String(b.data.eventDate ?? "").split("T")[0];
+        return da < db ? -1 : da > db ? 1 : 0;
+      });
+
+    sponsoredSlides = upcoming.filter((e: any) => e.data.sponsored === true).slice(0, 5);
+    regularList     = upcoming.filter((e: any) => !e.data.sponsored).slice(0, 5);
+  } catch {
+    sponsoredSlides = [];
+    regularList     = [];
+  }
 }
+
+const hasSlider = sponsoredSlides.length > 0;
+const hasList   = regularList.length > 0;
+const hasEvents = hasSlider || hasList;
 ---
 
 <aside class="articleSidebar">
@@ -127,41 +166,96 @@ if (upcomingEvents.length === 0) {
       <span class="railTitle">Upcoming Events</span>
       <a class="railMore" href={`/${city}/events/`}>See all</a>
     </div>
-    <div class="eventList">
-      {upcomingEvents.length > 0 ? upcomingEvents.map((e: any) => {
-        const d       = new Date(e.data.eventDate);
-        const dow     = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-        const day     = d.getDate();
-        const eMon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-        const mon     = d.toLocaleDateString("en-US", { month: "short" });
-        const evCity  = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-        const cityLabel = CITY_DISPLAY_NAMES[evCity] ?? evCity;
-        const isSp    = e.data.sponsored === true;
-        return (
-          <a class={`eventRow${isSp ? " eventRow--sponsored" : ""}`}
-             href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
-             target={e.data.url ? "_blank" : "_self"}
-             rel={e.data.url ? "noopener" : ""}>
-            {isSp && <span class="sponsoredBadge">SPONSORED</span>}
-            <div class="eventCal">
-              <div class="eDow">{dow}</div>
-              <div class="eDay">{day}</div>
-              <div class="eMon">{eMon}</div>
-            </div>
-            <div class="eventInfo">
-              <div class="eName">{e.data.title}</div>
-              <div class="ePlace">
-                <span>{mon} {day}</span>
-                <span class="evCitySep">|</span>
-                <span class="evCityName">{cityLabel}</span>
+
+    {!hasEvents ? (
+      <p class="noEvents">No upcoming events yet.</p>
+    ) : (
+      <div class="eventList">
+
+        {/* ── Smart Slider: top 5 sponsored events, fades every 5 s ── */}
+        {hasSlider && (
+          <div class="evSlider" id="sbSlider" aria-label="Featured sponsored events">
+            {sponsoredSlides.map((e: any, idx: number) => {
+              const d      = new Date(e.data.eventDate);
+              const dow    = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+              const day    = d.getDate();
+              const eMon   = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const mon    = d.toLocaleDateString("en-US", { month: "short" });
+              const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+              const cityLabel = CITY_DISPLAY_NAMES[evCity] ?? evCity;
+              return (
+                <a class={`evSlide${idx === 0 ? " evSlide--active" : ""}`}
+                   href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
+                   target={e.data.url ? "_blank" : "_self"}
+                   rel={e.data.url ? "noopener" : ""}
+                   aria-hidden={idx !== 0 ? "true" : undefined}
+                   data-slide-idx={String(idx)}>
+                  <span class="sponsoredBadge">SPONSORED</span>
+                  <div class="eventCal">
+                    <div class="eDow">{dow}</div>
+                    <div class="eDay">{day}</div>
+                    <div class="eMon">{eMon}</div>
+                  </div>
+                  <div class="eventInfo">
+                    <div class="eName">{e.data.title}</div>
+                    <div class="ePlace">
+                      <span>{mon} {day}</span>
+                      <span class="evCitySep">|</span>
+                      <span class="evCityName">{cityLabel}</span>
+                    </div>
+                  </div>
+                </a>
+              );
+            })}
+            {/* Dots for slider */}
+            {sponsoredSlides.length > 1 && (
+              <div class="sbDots" id="sbDots">
+                {sponsoredSlides.map((_: any, idx: number) => (
+                  <button
+                    class={`sbDot${idx === 0 ? " sbDot--active" : ""}`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                    data-sb-dot={String(idx)}
+                    type="button"
+                  ></button>
+                ))}
               </div>
-            </div>
-          </a>
-        );
-      }) : (
-        <p class="noEvents">No upcoming events yet.</p>
-      )}
-    </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Static list: regular upcoming events ── */}
+        {hasList && regularList.map((e: any) => {
+          const d       = new Date(e.data.eventDate);
+          const dow     = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+          const day     = d.getDate();
+          const eMon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+          const mon     = d.toLocaleDateString("en-US", { month: "short" });
+          const evCity  = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+          const cityLabel = CITY_DISPLAY_NAMES[evCity] ?? evCity;
+          return (
+            <a class="eventRow"
+               href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
+               target={e.data.url ? "_blank" : "_self"}
+               rel={e.data.url ? "noopener" : ""}>
+              <div class="eventCal">
+                <div class="eDow">{dow}</div>
+                <div class="eDay">{day}</div>
+                <div class="eMon">{eMon}</div>
+              </div>
+              <div class="eventInfo">
+                <div class="eName">{e.data.title}</div>
+                <div class="ePlace">
+                  <span>{mon} {day}</span>
+                  <span class="evCitySep">|</span>
+                  <span class="evCityName">{cityLabel}</span>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+
+      </div>
+    )}
     <a class="submitEventLink" href="/submit-event/">+ Submit an event →</a>
   </div>
 
@@ -196,6 +290,53 @@ if (upcomingEvents.length === 0) {
   </div>
 
 </aside>
+
+<script>
+  /* ── Sidebar Smart Slider ── */
+  (function () {
+    var slider = document.getElementById("sbSlider");
+    if (!slider) return;
+
+    var slides  = Array.prototype.slice.call(slider.querySelectorAll(".evSlide"));
+    var dotsEl  = document.getElementById("sbDots");
+    var dots    = dotsEl ? Array.prototype.slice.call(dotsEl.querySelectorAll(".sbDot")) : [];
+    var current = 0;
+    var total   = slides.length;
+    var timer: ReturnType<typeof setInterval> | null = null;
+
+    if (total <= 1) return;
+
+    function goTo(idx: number) {
+      slides[current].classList.remove("evSlide--active");
+      slides[current].setAttribute("aria-hidden", "true");
+      if (dots[current]) { dots[current].classList.remove("sbDot--active"); }
+
+      current = (idx + total) % total;
+
+      slides[current].classList.add("evSlide--active");
+      slides[current].removeAttribute("aria-hidden");
+      if (dots[current]) { dots[current].classList.add("sbDot--active"); }
+    }
+
+    function startAuto() {
+      timer = setInterval(function () { goTo(current + 1); }, 5000);
+    }
+    function resetAuto() {
+      if (timer) clearInterval(timer);
+      startAuto();
+    }
+
+    dots.forEach(function (dot, i) {
+      dot.addEventListener("click", function () { goTo(i); resetAuto(); });
+    });
+
+    /* Pause on hover */
+    slider.addEventListener("mouseenter", function () { if (timer) clearInterval(timer); });
+    slider.addEventListener("mouseleave", startAuto);
+
+    startAuto();
+  })();
+</script>
 
 <style>
   .articleSidebar {
@@ -254,8 +395,55 @@ if (upcomingEvents.length === 0) {
   .railMore { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
   .railMore:hover { text-decoration: underline; }
 
-  /* ── Events ── */
+  /* ── Events list ── */
   .eventList { display: grid; }
+
+  /* ── Smart Slider (sponsored) ── */
+  /* CSS grid overlap trick: all slides share one cell → container auto-sizes */
+  .evSlider {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .evSlide {
+    grid-row: 1;
+    grid-column: 1;
+    display: grid; grid-template-columns: 48px 1fr; gap: 12px;
+    align-items: center; text-decoration: none;
+    padding: 13px 10px;
+    background: rgba(249,217,0,.06);
+    border-radius: 8px;
+    margin: 8px -8px 0;
+    opacity: 0;
+    transition: opacity 500ms ease;
+    pointer-events: none;
+    position: relative; /* for .sponsoredBadge */
+  }
+  .evSlide--active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Dots row is a separate grid row, not overlapping */
+  .sbDots { grid-row: 2; grid-column: 1; }
+
+  /* Dots for slider */
+  .sbDots {
+    display: flex; gap: 5px; justify-content: center;
+    padding: 8px 0 4px;
+  }
+  .sbDot {
+    width: 6px; height: 6px; border-radius: 50%;
+    border: none; padding: 0;
+    background: rgba(255,255,255,.25);
+    cursor: pointer;
+    transition: background 200ms, transform 200ms;
+  }
+  .sbDot--active {
+    background: var(--brand1);
+    transform: scale(1.3);
+  }
+
   .eventRow {
     display: grid; grid-template-columns: 48px 1fr; gap: 12px;
     align-items: center; text-decoration: none;
@@ -264,6 +452,7 @@ if (upcomingEvents.length === 0) {
   }
   .eventRow:last-child { border-bottom: none; }
   .eventRow:hover { opacity: .76; }
+
   .eventCal {
     width: 48px; height: 48px; border-radius: 10px;
     background: var(--pillBg); border: 1px solid var(--pillBorder);
@@ -279,13 +468,6 @@ if (upcomingEvents.length === 0) {
   .evCityName { color: var(--brand1); font-weight: 700; }
   .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
 
-  .eventRow--sponsored {
-    background: rgba(249,217,0,.07);
-    border-radius: 8px;
-    padding: 10px 8px;
-    margin: 0 -8px;
-    position: relative;
-  }
   .sponsoredBadge {
     position: absolute;
     top: 6px; right: 8px;
