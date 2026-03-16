@@ -76,8 +76,9 @@ function addUtm(url) {
   }
 }
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+/* Strict date cutoff — today's events are hidden; only future dates appear */
+const todayStr = new Date().toISOString().split("T")[0];
+const today = new Date(todayStr + "T00:00:00Z"); // midnight UTC
 
 let allEvents = [];
 try { allEvents = await getCollection("events"); } catch { allEvents = []; }
@@ -215,16 +216,17 @@ function sortKey(e: any): number {
 /* Merge order: markdown → manual → sheet → scraped (first occurrence wins on dedup) */
 const allEventsWithLive = [...allEvents, ...manualEvents, ...sheetEvents, ...scrapedEvents].map(patchEventCoords);
 
-/* ── Include events that haven't started yet OR are still ongoing (endDate >= today). ── */
+/* ── Include events starting tomorrow or later, OR multi-day events still ongoing.
+   Strict: today's single-day events are excluded; list starts fresh from tomorrow. ── */
 const upcomingEvents = allEventsWithLive
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
     if (!GREATER_DAYTONA.has(evCity)) return false;
-    const evDate = new Date(e.data.eventDate);
-    evDate.setHours(0, 0, 0, 0);
-    const endDate = e.data.endDate ? new Date(e.data.endDate) : null;
-    if (endDate) endDate.setHours(0, 0, 0, 0);
-    return evDate >= today || (endDate !== null && endDate >= today);
+    const evDate = new Date((String(e.data.eventDate ?? "").split("T")[0]) + "T00:00:00Z");
+    const endDate = e.data.endDate
+      ? new Date((String(e.data.endDate).split("T")[0]) + "T00:00:00Z")
+      : null;
+    return evDate > today || (endDate !== null && endDate > today);
   })
   .sort((a, b) => sortKey(a) - sortKey(b));
 
@@ -480,12 +482,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
                       <div class="evCardMeta">
                         <span class="evCardCity">{cityDisplay(evCity)}</span>
                         {dist && <span class="evCardDist">{dist}</span>}
-                        {e.data.source === "eventbrite-sheet" && (
-                          <span class="evSrcBadge evSrcBadge--featured">Featured</span>
-                        )}
-                        {e.data.source === "eventbrite-discovered" && (
-                          <span class="evSrcBadge evSrcBadge--community">Community Event</span>
-                        )}
+                        {/* Badge only for explicitly sponsored events — no auto-tags */}
                       </div>
                     </div>
                   </a>

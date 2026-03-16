@@ -221,15 +221,15 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     if (!eventDate) {
       // No override (or override failed) — use the API date if available
       if (api.eventDate) {
-        const apiParsed = new Date(api.eventDate + "T12:00:00.000Z");
+        const apiParsed = new Date(api.eventDate + "T00:00:00.000Z");
         const nowMidnight = new Date();
         nowMidnight.setUTCHours(0, 0, 0, 0);
-        if (apiParsed < nowMidnight) {
-          // Event date is in the past and no Col-C override was provided — skip it.
+        if (apiParsed <= nowMidnight) {
+          // Event is today or in the past and no Col-C override was provided — skip it.
           // Add a Date Override in Col C to keep a recurring event in the feed.
           console.log(
-            `[sheet-import] SKIP ${id} "${title}": Eventbrite date ${api.eventDate} is in ` +
-            `the past and no Date Override was set in Col C — excluded from feed.`
+            `[sheet-import] SKIP ${id} "${title}": Eventbrite date ${api.eventDate} is today ` +
+            `or past and no Date Override was set in Col C — excluded from feed.`
           );
           continue;
         } else {

@@ -52,23 +52,27 @@ const CITY_DISPLAY_NAMES: Record<string, string> = {
   "edgewater": "Edgewater",
 };
 
-/* UTC-safe "today" — compare YYYY-MM-DD strings to avoid timezone drift */
+/* UTC-safe "today" — compare YYYY-MM-DD strings to avoid timezone drift.
+   Strict: events ON today are hidden; only future dates (> today) appear.  */
 const todayStr = new Date().toISOString().split("T")[0]; // e.g. "2026-03-16"
 
 function isUpcoming(eventDateRaw: string): boolean {
   if (!eventDateRaw) return false;
   const dateStr = String(eventDateRaw).split("T")[0]; // strip time if present
-  return dateStr >= todayStr;
+  return dateStr > todayStr;  // strictly future: today's events are excluded
 }
 
 let sponsoredSlides: any[] = [];  // top 5 sponsored — for the slider
 let regularList: any[]    = [];   // next 5 regular   — for the static list
 
-// Primary: Google Sheet CSV
+// Primary: Google Sheet CSV — pass same tokens as the main Events page so
+// Eventbrite API dates are fetched correctly (empty token → today fallback).
 try {
-  const csvUrl = import.meta.env.SHEET_CSV_URL ?? "";
+  const csvUrl      = import.meta.env.SHEET_CSV_URL          ?? "";
+  const ebToken     = import.meta.env.EVENTBRITE_TOKEN        ?? "";
+  const mapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN     ?? "";
   if (csvUrl) {
-    const raw = await importFromSheet(csvUrl, "", "");
+    const raw = await importFromSheet(csvUrl, ebToken, mapboxToken);
     const upcoming = (raw as any[])
       .filter(e => {
         const evCity = (e.city ?? "").toLowerCase().trim();

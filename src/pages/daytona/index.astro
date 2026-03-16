@@ -76,8 +76,9 @@ const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 const latest = feed.slice(0, 3);
 const listFeed = feed.slice(3, 7);  /* ── Latest Feed — exactly 4 rows below the 3-card grid (Rule of 4) ── */
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
+/* Strict date cutoff — today's events are hidden; only future dates appear */
+const todayStr = new Date().toISOString().split("T")[0]; // "2026-03-16"
+const today = new Date(todayStr + "T00:00:00Z");         // midnight UTC
 
 /* ── Sheet events — same source as the /events page ─────────────────────── */
 const sheetCsvUrl = import.meta.env.SHEET_CSV_URL       ?? "";
@@ -114,7 +115,7 @@ const upcomingRaw = sheetRaw
     evDate.setHours(0, 0, 0, 0);
     const endDate = e.endDate ? new Date(e.endDate) : null;
     if (endDate) endDate.setHours(0, 0, 0, 0);
-    const isActive = evDate >= today || (endDate !== null && endDate >= today);
+    const isActive = evDate > today || (endDate !== null && endDate > today);
     return isActive && DAYTONA_CITIES.has((e.city ?? "daytona beach").toLowerCase().trim());
   })
   .sort((a: any, b: any) => {
@@ -432,11 +433,8 @@ const topics = [
                     <div class="eventInfo">
                       <div class="eName">{e.data.title}</div>
                       <div class="ePlace">{e.data.location}</div>
-                      {e.data.source === "eventbrite-sheet" && (
-                        <span class="evSrcBadge evSrcBadge--featured">Featured</span>
-                      )}
-                      {e.data.source === "eventbrite-discovered" && (
-                        <span class="evSrcBadge evSrcBadge--community">Community Event</span>
+                      {e.data.sponsored && (
+                        <span class="evSrcBadge evSrcBadge--featured">Sponsored</span>
                       )}
                     </div>
                   </a>
