@@ -3,18 +3,16 @@
  * src/components/ArticleSidebar.astro
  * Unified article sidebar — used by every article/post layout.
  *
- * Upcoming Events section:
- *  - Slot 1: Smart Slider — top 5 Sponsored events, cycles every 5 s
- *  - Below:  Static list of next 4–5 regular (non-sponsored) events
+ * Event data comes from src/lib/events.js, which calls importFromSheet()
+ * exactly ONCE per build via a module-level singleton promise.  All article
+ * pages therefore share the same pre-filtered, pre-sorted event list.
  *
- * Event filtering:
- *  - Greater Daytona area only (never filtered by article topic/category)
- *  - UTC-safe past-event filter: events before today (midnight UTC) are hidden
- *  - Date badges always show actual month + day (never "Today")
+ * Upcoming Events layout:
+ *  - Slot 1: Smart Slider — top 5 Sponsored events, auto-cycles every 5 s
+ *  - Slots 2+: Static chronological list of regular (non-sponsored) events
  */
 import SidebarPoll from "./SidebarPoll.astro";
-import { getCollection } from "astro:content";
-import { importFromSheet } from "../lib/sheet-import.js";
+import { getGreaterDaytonaEvents, cityDisplayName } from "../lib/events.js";
 
 interface Props {
   city: string;
@@ -23,126 +21,10 @@ interface Props {
 const { city } = Astro.props;
 const cityCap = city.charAt(0).toUpperCase() + city.slice(1);
 
-const GREATER_DAYTONA = new Set([
-  "daytona", "daytona beach",
-  "ormond beach", "ormond",
-  "port orange",
-  "daytona beach shores",
-  "south daytona",
-  "holly hill",
-  "new smyrna beach", "new smyrna",
-  "flagler beach", "flagler",
-  "deland", "edgewater",
-]);
-
-const CITY_DISPLAY_NAMES: Record<string, string> = {
-  "daytona": "Daytona Beach",
-  "daytona beach": "Daytona Beach",
-  "ormond beach": "Ormond Beach",
-  "ormond": "Ormond Beach",
-  "port orange": "Port Orange",
-  "daytona beach shores": "Daytona Beach Shores",
-  "south daytona": "South Daytona",
-  "holly hill": "Holly Hill",
-  "new smyrna beach": "New Smyrna Beach",
-  "new smyrna": "New Smyrna Beach",
-  "flagler beach": "Flagler Beach",
-  "flagler": "Flagler Beach",
-  "deland": "DeLand",
-  "edgewater": "Edgewater",
-};
-
-/* UTC-safe "today" — compare YYYY-MM-DD strings to avoid timezone drift.
-   Strict: events ON today are hidden; only future dates (> today) appear.  */
-const todayStr = new Date().toISOString().split("T")[0]; // e.g. "2026-03-16"
-
-function isUpcoming(eventDateRaw: string): boolean {
-  if (!eventDateRaw) return false;
-  const dateStr = String(eventDateRaw).split("T")[0]; // strip time if present
-  return dateStr > todayStr;  // strictly future: today's events are excluded
-}
-
-let sponsoredSlides: any[] = [];  // top 5 sponsored — for the slider
-let regularList: any[]    = [];   // next 5 regular   — for the static list
-
-// Primary: Google Sheet CSV — pass same tokens as the main Events page so
-// Eventbrite API dates are fetched correctly (empty token → today fallback).
-try {
-  const csvUrl      = import.meta.env.SHEET_CSV_URL          ?? "";
-  const ebToken     = import.meta.env.EVENTBRITE_TOKEN        ?? "";
-  const mapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN     ?? "";
-  if (csvUrl) {
-    const raw = await importFromSheet(csvUrl, ebToken, mapboxToken);
-    const upcoming = (raw as any[])
-      .filter(e => {
-        const evCity = (e.city ?? "").toLowerCase().trim();
-        return GREATER_DAYTONA.has(evCity) || evCity === city.toLowerCase().trim();
-      })
-      .filter(e => isUpcoming(e.eventDate))
-      .sort((a, b) => {
-        const da = String(a.eventDate ?? "").split("T")[0];
-        const db = String(b.eventDate ?? "").split("T")[0];
-        return da < db ? -1 : da > db ? 1 : 0;
-      });
-
-    sponsoredSlides = upcoming
-      .filter(e => e.status === "Sponsored")
-      .slice(0, 5)
-      .map(e => ({
-        data: {
-          title:     e.title,
-          eventDate: e.eventDate,
-          location:  e.location,
-          url:       e.url,
-          city:      e.city,
-          image:     e.image ?? null,
-          sponsored: true,
-        },
-        slug: `${e.city ?? city}/${(e.title ?? "event").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
-      }));
-
-    regularList = upcoming
-      .filter(e => e.status !== "Sponsored")
-      .slice(0, 5)
-      .map(e => ({
-        data: {
-          title:     e.title,
-          eventDate: e.eventDate,
-          location:  e.location,
-          url:       e.url,
-          city:      e.city,
-          sponsored: false,
-        },
-        slug: `${e.city ?? city}/${(e.title ?? "event").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
-      }));
-  }
-} catch { /* fall through to collection */ }
-
-// Fallback: Astro events content collection
-if (sponsoredSlides.length === 0 && regularList.length === 0) {
-  try {
-    const allEvents = await getCollection("events");
-    const upcoming = (allEvents as any[])
-      .filter(e => {
-        const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-        const areaMatch = GREATER_DAYTONA.has(city.toLowerCase().trim())
-          ? GREATER_DAYTONA.has(evCity)
-          : evCity === city.toLowerCase().trim();
-        return areaMatch && isUpcoming(e.data.eventDate);
-      })
-      .sort((a: any, b: any) => {
-        const da = String(a.data.eventDate ?? "").split("T")[0];
-        const db = String(b.data.eventDate ?? "").split("T")[0];
-        return da < db ? -1 : da > db ? 1 : 0;
-      });
-
-    sponsoredSlides = upcoming.filter((e: any) => e.data.sponsored === true).slice(0, 5);
-    regularList     = upcoming.filter((e: any) => !e.data.sponsored).slice(0, 5);
-  } catch {
-    sponsoredSlides = [];
-    regularList     = [];
-  }
-}
+// Single call — returns cached data on every article page after the first
+const allEvents    = await getGreaterDaytonaEvents();
+const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
+const regularList     = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 5);
 
 const hasSlider = sponsoredSlides.length > 0;
 const hasList   = regularList.length > 0;
@@ -186,7 +68,7 @@ const hasEvents = hasSlider || hasList;
               const eMon   = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
               const mon    = d.toLocaleDateString("en-US", { month: "short" });
               const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-              const cityLabel = CITY_DISPLAY_NAMES[evCity] ?? evCity;
+              const cityLabel = cityDisplayName(evCity);
               return (
                 <a class={`evSlide${idx === 0 ? " evSlide--active" : ""}`}
                    href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
@@ -235,7 +117,7 @@ const hasEvents = hasSlider || hasList;
           const eMon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
           const mon     = d.toLocaleDateString("en-US", { month: "short" });
           const evCity  = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-          const cityLabel = CITY_DISPLAY_NAMES[evCity] ?? evCity;
+          const cityLabel = cityDisplayName(evCity);
           return (
             <a class="eventRow"
                href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
