@@ -30,6 +30,8 @@
  *   C (col 2) — Status           ("Live" | "Sponsored")
  *   D (col 3) — (reserved / ignored)
  *   E (col 4) — Address override (optional — overrides all coordinate sources)
+ *   F (col 5) — Raw Text / Title (optional title override)
+ *   G (col 6) — Pro Tip          (optional — insider tip shown on hover in slider)
  */
 
 const CSV_TIMEOUT_MS = 12_000;
@@ -135,6 +137,7 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
    *   D (3) — Location / Address      Address string; overrides venue geocode
    *   E (4) — Image URL               Optional image override
    *   F (5) — Raw Text / Title        Optional title override
+   *   G (6) — Pro Tip                 Optional insider tip (shown on hover in sidebar slider)
    */
 
   /* Build sheetMeta: eventbriteId → { titleOverride, isSponsored, isLive, url,
@@ -180,8 +183,11 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     /* Col F — Title Override */
     const titleOverride = rawCells[5] || null;
 
+    /* Col G — Pro Tip (insider tip text shown on hover in sidebar slider) */
+    const proTip = rawCells[6] || null;
+
     sheetMeta.set(idMatch[1], { titleOverride, isSponsored, isLive, url,
-                                 addressOverride, dateOverride, imageOverride });
+                                 addressOverride, dateOverride, imageOverride, proTip });
   }
 
   // ── 2. Fetch Eventbrite API data for each Live sheet event ─────────────────
@@ -264,6 +270,7 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
       lat:       coords?.lat  ?? null,
       lng:       coords?.lng  ?? null,
       sponsored: meta.isSponsored,
+      proTip:    meta.proTip  ?? null,
       source:    "eventbrite-sheet",
     }));
   }
@@ -436,7 +443,7 @@ function parseOverrideDate(text) {
   return null;
 }
 
-function makeEvent({ title, eventDate, endDate, location, city, url, image, category, lat, lng, sponsored, source }) {
+function makeEvent({ title, eventDate, endDate, location, city, url, image, category, lat, lng, sponsored, proTip, source }) {
   return {
     title,
     eventDate,
@@ -449,6 +456,7 @@ function makeEvent({ title, eventDate, endDate, location, city, url, image, cate
     lat:       lat       ?? null,
     lng:       lng       ?? null,
     sponsored: !!sponsored,
+    proTip:    proTip    ?? null,
     source,
   };
 }
