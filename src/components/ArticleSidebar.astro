@@ -24,7 +24,7 @@ const cityCap = city.charAt(0).toUpperCase() + city.slice(1);
 // Single call — returns cached data on every article page after the first
 const allEvents    = await getGreaterDaytonaEvents();
 const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
-const regularList     = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 5);
+const regularList     = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
 
 const hasSlider = sponsoredSlides.length > 0;
 const hasList   = regularList.length > 0;
@@ -76,7 +76,6 @@ const hasEvents = hasSlider || hasList;
                    rel={e.data.url ? "noopener" : ""}
                    aria-hidden={idx !== 0 ? "true" : undefined}
                    data-slide-idx={String(idx)}>
-                  <span class="sponsoredBadge">SPONSORED</span>
                   <div class="eventCal">
                     <div class="eDow">{dow}</div>
                     <div class="eDay">{day}</div>
@@ -88,6 +87,7 @@ const hasEvents = hasSlider || hasList;
                       <span>{mon} {day}</span>
                       <span class="evCitySep">|</span>
                       <span class="evCityName">{cityLabel}</span>
+                      <span class="sponsoredBadge">SPONSORED</span>
                     </div>
                   </div>
                 </a>
@@ -304,7 +304,6 @@ const hasEvents = hasSlider || hasList;
     opacity: 0;
     transition: opacity 500ms ease;
     pointer-events: none;
-    position: relative; /* for .sponsoredBadge */
   }
   .evSlide--active {
     opacity: 1;
@@ -355,11 +354,12 @@ const hasEvents = hasSlider || hasList;
   .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
 
   .sponsoredBadge {
-    position: absolute;
-    top: 6px; right: 8px;
-    font-size: 9px; font-weight: 900; letter-spacing: .08em;
-    background: var(--brand1); color: #000;
-    padding: 2px 6px; border-radius: 999px;
+    display: inline-block;
+    font-size: 8px; font-weight: 900; letter-spacing: .08em;
+    background: rgba(249,217,0,.18); color: var(--brand1);
+    border: 1px solid rgba(249,217,0,.35);
+    padding: 1px 5px; border-radius: 999px;
+    white-space: nowrap;
   }
   .submitEventLink {
     display: block; margin-top: 12px;
