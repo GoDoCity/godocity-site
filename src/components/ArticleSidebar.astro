@@ -1,0 +1,334 @@
+---
+/**
+ * src/components/ArticleSidebar.astro
+ * Unified article sidebar — used by every article/post layout.
+ *
+ * Fetches Upcoming Events from the Google Sheet CSV first (importFromSheet),
+ * then falls back to the Astro events content collection.
+ * Event filtering is based on the Greater Daytona area only — never filtered
+ * by the article's topic/category, so a Food article and a DIY article both
+ * show the same regional event list.
+ */
+import SidebarPoll from "./SidebarPoll.astro";
+import { getCollection } from "astro:content";
+import { importFromSheet } from "../lib/sheet-import.js";
+
+interface Props {
+  city: string;
+}
+
+const { city } = Astro.props;
+const cityCap = city.charAt(0).toUpperCase() + city.slice(1);
+
+const GREATER_DAYTONA = new Set([
+  "daytona", "daytona beach",
+  "ormond beach", "ormond",
+  "port orange",
+  "daytona beach shores",
+  "south daytona",
+  "holly hill",
+  "new smyrna beach", "new smyrna",
+  "flagler beach", "flagler",
+  "deland", "edgewater",
+]);
+
+const CITY_DISPLAY_NAMES: Record<string, string> = {
+  "daytona": "Daytona Beach",
+  "daytona beach": "Daytona Beach",
+  "ormond beach": "Ormond Beach",
+  "ormond": "Ormond Beach",
+  "port orange": "Port Orange",
+  "daytona beach shores": "Daytona Beach Shores",
+  "south daytona": "South Daytona",
+  "holly hill": "Holly Hill",
+  "new smyrna beach": "New Smyrna Beach",
+  "new smyrna": "New Smyrna Beach",
+  "flagler beach": "Flagler Beach",
+  "flagler": "Flagler Beach",
+  "deland": "DeLand",
+  "edgewater": "Edgewater",
+};
+
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+let upcomingEvents: any[] = [];
+
+// Primary: Google Sheet CSV (fast — no EB token, no Mapbox geocoding)
+try {
+  const csvUrl = import.meta.env.SHEET_CSV_URL ?? "";
+  if (csvUrl) {
+    const raw = await importFromSheet(csvUrl, "", "");
+    const filtered = (raw as any[])
+      .filter(e => {
+        const evCity = (e.city ?? "").toLowerCase().trim();
+        return GREATER_DAYTONA.has(evCity) || evCity === city;
+      })
+      .filter(e => {
+        const evDate = new Date(e.eventDate);
+        evDate.setHours(0, 0, 0, 0);
+        return evDate >= today;
+      })
+      .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
+      .slice(0, 4)
+      .map(e => ({
+        data: {
+          title: e.title,
+          eventDate: e.eventDate,
+          location: e.location,
+          url: e.url,
+          city: e.city,
+          sponsored: e.status === "Sponsored",
+        },
+        slug: `${e.city ?? city}/${(e.title ?? "event").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
+      }));
+    if (filtered.length > 0) upcomingEvents = filtered;
+  }
+} catch { /* fall through to collection */ }
+
+// Fallback: Astro events content collection
+if (upcomingEvents.length === 0) {
+  try {
+    const allEvents = await getCollection("events");
+    upcomingEvents = (allEvents as any[])
+      .filter(e => {
+        const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+        const evDate = new Date(e.data.eventDate);
+        evDate.setHours(0, 0, 0, 0);
+        const areaMatch = GREATER_DAYTONA.has(city)
+          ? GREATER_DAYTONA.has(evCity)
+          : evCity === city;
+        return areaMatch && evDate >= today;
+      })
+      .sort((a: any, b: any) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
+      .slice(0, 4);
+  } catch { upcomingEvents = []; }
+}
+---
+
+<aside class="articleSidebar">
+
+  <!-- 1 — Newsletter -->
+  <div class="nlStickyWrap">
+    <div class="nlBox">
+      <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
+      <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
+      <form class="nlForm" action={`/${city}/subscribe/`} method="get">
+        <input class="nlInput" type="email" name="email"
+          placeholder="your@email.com" required autocomplete="email" />
+        <button class="nlSubmit" type="submit">SIGN UP</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2 — Upcoming Events -->
+  <div class="railSection">
+    <div class="railHead">
+      <span class="railTitle">Upcoming Events</span>
+      <a class="railMore" href={`/${city}/events/`}>See all</a>
+    </div>
+    <div class="eventList">
+      {upcomingEvents.length > 0 ? upcomingEvents.map((e: any) => {
+        const d       = new Date(e.data.eventDate);
+        const dow     = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+        const day     = d.getDate();
+        const eMon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+        const mon     = d.toLocaleDateString("en-US", { month: "short" });
+        const evCity  = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+        const cityLabel = CITY_DISPLAY_NAMES[evCity] ?? evCity;
+        const isSp    = e.data.sponsored === true;
+        return (
+          <a class={`eventRow${isSp ? " eventRow--sponsored" : ""}`}
+             href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
+             target={e.data.url ? "_blank" : "_self"}
+             rel={e.data.url ? "noopener" : ""}>
+            {isSp && <span class="sponsoredBadge">SPONSORED</span>}
+            <div class="eventCal">
+              <div class="eDow">{dow}</div>
+              <div class="eDay">{day}</div>
+              <div class="eMon">{eMon}</div>
+            </div>
+            <div class="eventInfo">
+              <div class="eName">{e.data.title}</div>
+              <div class="ePlace">
+                <span>{mon} {day}</span>
+                <span class="evCitySep">|</span>
+                <span class="evCityName">{cityLabel}</span>
+              </div>
+            </div>
+          </a>
+        );
+      }) : (
+        <p class="noEvents">No upcoming events yet.</p>
+      )}
+    </div>
+    <a class="submitEventLink" href="/submit-event/">+ Submit an event →</a>
+  </div>
+
+  <!-- 3 — Advertisement -->
+  <div class="displayAdSlot">
+    <div class="adSlotLabel">Advertisement</div>
+    <a class="displayAdCard" href={`/${city}/advertise/`}>
+      <div class="displayAdInner">
+        <div class="displayAdIcon">📢</div>
+        <div class="displayAdTitle">Your Ad Here</div>
+        <div class="displayAdDesc">Reach thousands of {cityCap} locals</div>
+        <div class="displayAdCta">Advertise with us →</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- 4 — Vibe Check poll -->
+  <SidebarPoll />
+
+  <!-- 5 — City Guides -->
+  <div class="railSection">
+    <div class="railHead">
+      <span class="railTitle">City Guides</span>
+      <a class="railMore" href={`/${city}/guides/`}>See all</a>
+    </div>
+    <div class="guideList">
+      <a class="guideRow" href={`/${city}/guides/live/`}>🏠 Live in {cityCap}</a>
+      <a class="guideRow" href={`/${city}/guides/work/`}>💼 Work in {cityCap}</a>
+      <a class="guideRow" href={`/${city}/guides/play/`}>🎉 Play in {cityCap}</a>
+      <a class="guideRow" href={`/${city}/guides/best-restaurants/`}>🍽️ Best Restaurants</a>
+    </div>
+  </div>
+
+</aside>
+
+<style>
+  .articleSidebar {
+    display: grid;
+    gap: 24px;
+    align-self: start;
+    min-width: 0;
+  }
+
+  /* ── Newsletter ── */
+  .nlStickyWrap { position: -webkit-sticky; position: sticky; top: 20px; z-index: 10; }
+  .nlBox {
+    padding: 40px 26px;
+    border-radius: 16px;
+    background: #f9d900;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .nlBoxHead {
+    font-size: 28px; font-weight: 900; font-style: italic;
+    color: #000; line-height: 1.05; letter-spacing: -0.04em;
+  }
+  .nlBoxHead strong { font-weight: 900; }
+  .nlBoxSub { font-size: 15px; color: rgba(0,0,0,.8); line-height: 1.45; }
+  .nlForm { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .nlInput {
+    width: 100%; box-sizing: border-box;
+    padding: 14px 16px; border-radius: 10px;
+    border: none; background: #fff;
+    font-size: 15px; color: #111;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    outline: 2px solid transparent; transition: outline-color 150ms;
+  }
+  .nlInput:focus { outline-color: #000; }
+  .nlInput::placeholder { color: #aaa; }
+  .nlSubmit {
+    width: 100%; padding: 14px 0; border-radius: 999px;
+    border: none; background: #000; color: #f9d900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 15px; font-weight: 900; letter-spacing: .08em;
+    cursor: pointer; transition: opacity 150ms;
+  }
+  .nlSubmit:hover { opacity: .82; }
+
+  /* ── Rail sections ── */
+  .railSection { display: grid; gap: 0; }
+  .railHead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 10px; border-bottom: 2px solid var(--brand1);
+  }
+  .railTitle {
+    font-size: 16px; font-weight: 900; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text);
+  }
+  .railMore { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
+  .railMore:hover { text-decoration: underline; }
+
+  /* ── Events ── */
+  .eventList { display: grid; }
+  .eventRow {
+    display: grid; grid-template-columns: 48px 1fr; gap: 12px;
+    align-items: center; text-decoration: none;
+    padding: 13px 0; border-bottom: 1px solid var(--border);
+    transition: opacity 140ms;
+  }
+  .eventRow:last-child { border-bottom: none; }
+  .eventRow:hover { opacity: .76; }
+  .eventCal {
+    width: 48px; height: 48px; border-radius: 10px;
+    background: var(--pillBg); border: 1px solid var(--pillBorder);
+    display: grid; place-items: center; text-align: center; line-height: 1;
+  }
+  .eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
+  .eDay { font-size: 19px; font-weight: 900; color: var(--text); margin-top: 1px; }
+  .eMon { font-size: 8px; font-weight: 700; letter-spacing: .08em; color: var(--faint); text-transform: uppercase; }
+  .eventInfo { display: flex; flex-direction: column; gap: 2px; }
+  .eName { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
+  .ePlace { font-size: 12px; color: var(--faint); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .evCitySep { opacity: .4; }
+  .evCityName { color: var(--brand1); font-weight: 700; }
+  .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
+
+  .eventRow--sponsored {
+    background: rgba(249,217,0,.07);
+    border-radius: 8px;
+    padding: 10px 8px;
+    margin: 0 -8px;
+    position: relative;
+  }
+  .sponsoredBadge {
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 9px; font-weight: 900; letter-spacing: .08em;
+    background: var(--brand1); color: #000;
+    padding: 2px 6px; border-radius: 999px;
+  }
+  .submitEventLink {
+    display: block; margin-top: 12px;
+    font-size: 12.5px; font-weight: 700;
+    color: var(--brand1); text-decoration: none;
+    opacity: .85; transition: opacity 120ms;
+  }
+  .submitEventLink:hover { opacity: 1; }
+
+  /* ── Ad slot ── */
+  .displayAdSlot { display: grid; gap: 5px; }
+  .adSlotLabel {
+    font-size: 8.5px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--faint); text-align: center;
+  }
+  .displayAdCard {
+    display: block; text-decoration: none; border-radius: 13px; overflow: hidden;
+    background: #f9d900; transition: opacity 140ms;
+  }
+  .displayAdCard:hover { opacity: .9; }
+  .displayAdInner { padding: 22px 14px; text-align: center; display: grid; gap: 5px; place-items: center; }
+  .displayAdIcon { font-size: 24px; margin-bottom: 2px; }
+  .displayAdTitle { font-size: 16px; font-weight: 900; color: #000; }
+  .displayAdDesc { font-size: 14px; color: rgba(0,0,0,.78); line-height: 1.3; }
+  .displayAdCta {
+    margin-top: 6px; display: inline-flex; align-items: center;
+    height: 30px; padding: 0 13px; border-radius: 999px;
+    background: #000; color: #f9d900; font-size: 11.5px; font-weight: 800;
+  }
+
+  /* ── City Guides ── */
+  .guideList { display: grid; }
+  .guideRow {
+    display: block; text-decoration: none; font-size: 15px; font-weight: 700;
+    color: var(--text); padding: 11px 0; border-bottom: 1px solid var(--border);
+    line-height: 1.3; transition: color 120ms;
+  }
+  .guideRow:last-child { border-bottom: none; }
+  .guideRow:hover { color: var(--link); }
+</style>
