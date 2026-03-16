@@ -2,7 +2,7 @@
 import Base from "../../layouts/Base.astro";
 import InteractiveMap from "../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
-import { importFromSheet } from "../../lib/sheet-import.js";
+import { getGreaterDaytonaEvents, cityDisplayName } from "../../lib/events.js";
 
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
@@ -76,74 +76,33 @@ const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 const latest = feed.slice(0, 3);
 const listFeed = feed.slice(3, 7);  /* ── Latest Feed — exactly 4 rows below the 3-card grid (Rule of 4) ── */
 
-/* Strict date cutoff — today's events are hidden; only future dates appear */
-const todayStr = new Date().toISOString().split("T")[0]; // "2026-03-16"
-const today = new Date(todayStr + "T00:00:00Z");         // midnight UTC
+/* ── Sheet events via centralised singleton ──────────────────────────────────
+   getGreaterDaytonaEvents() shares the same module-level promise as the Events
+   page and ArticleSidebar — importFromSheet() runs only ONCE per build.       */
+const allDaytona = await getGreaterDaytonaEvents();
 
-/* ── Sheet events — same source as the /events page ─────────────────────── */
-const sheetCsvUrl = import.meta.env.SHEET_CSV_URL       ?? "";
-const ebToken     = import.meta.env.EVENTBRITE_TOKEN   ?? "";
-const mapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
-let sheetRaw: any[] = [];
-try { sheetRaw = await importFromSheet(sheetCsvUrl, ebToken, mapboxToken); } catch { sheetRaw = []; }
-
-const HOME_COORD_OVERRIDES: Array<{ titleTest: RegExp; venueTest?: RegExp; lat: number; lng: number }> = [
-  { titleTest: /turkey run/i,                                                           lat: 29.1852, lng: -81.0705 },
-  { titleTest: /bike week|main street/i, venueTest: /main street|boot hill|iron horse/i, lat: 29.2235, lng: -81.0115 },
-  { titleTest: /mindtravel/i,                                                            lat: 29.0258, lng: -80.9270 },
-  { titleTest: /spring break/i,                                                         lat: 29.2373, lng: -81.0026 },
-];
-function patchHomeCoords(e: any) {
-  for (const ov of HOME_COORD_OVERRIDES) {
-    if (ov.titleTest.test(e.title ?? "") || (ov.venueTest && ov.venueTest.test(e.location ?? ""))) {
-      return { ...e, lat: ov.lat, lng: ov.lng };
-    }
-  }
-  return e;
-}
-
-const DAYTONA_CITIES = new Set([
-  "daytona", "daytona beach", "ormond beach", "ormond", "port orange",
-  "daytona beach shores", "south daytona", "holly hill",
-  "new smyrna beach", "new smyrna", "flagler beach", "flagler",
-]);
-
-const upcomingRaw = sheetRaw
-  .map(patchHomeCoords)
-  .filter((e: any) => {
-    const evDate = new Date(e.eventDate);
-    evDate.setHours(0, 0, 0, 0);
-    const endDate = e.endDate ? new Date(e.endDate) : null;
-    if (endDate) endDate.setHours(0, 0, 0, 0);
-    const isActive = evDate > today || (endDate !== null && endDate > today);
-    return isActive && DAYTONA_CITIES.has((e.city ?? "daytona beach").toLowerCase().trim());
-  })
+/* Sponsored first, then chronological — top 4 shown in the sidebar rail */
+const upcomingEvents = [...allDaytona]
   .sort((a: any, b: any) => {
-    /* Sponsored events always float to the top */
-    if (a.sponsored && !b.sponsored) return -1;
-    if (!a.sponsored && b.sponsored)  return  1;
-    return new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime();
-  });
-
-/* Wrap into { slug, data } shape expected by the sidebar JSX */
-const upcomingEvents = upcomingRaw.slice(0, 4).map((e: any) => ({
-  slug: `daytona/sheet-${String(e.title ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}`,
-  data: e,
-}));
+    if (a.data.sponsored && !b.data.sponsored) return -1;
+    if (!a.data.sponsored && b.data.sponsored)  return  1;
+    return 0; // getGreaterDaytonaEvents() already sorted by date
+  })
+  .slice(0, 4);
 
 /* Map pins — events with valid non-ocean coordinates */
-const homePins = upcomingRaw
-  .filter((e: any) => e.lat != null && e.lng != null && (e.lat !== 0 || e.lng !== 0))
+const homePins = allDaytona
+  .filter((e: any) => e.data.lat != null && e.data.lng != null && (e.data.lat !== 0 || e.data.lng !== 0))
   .map((e: any) => {
-    const d = new Date(e.eventDate);
+    const d = new Date(e.data.eventDate);
     const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
     return {
-      label:   e.title,
-      address: `${dateStr} · ${e.location ?? ""}`,
-      lat:     e.lat,
-      lng:     e.lng,
-      image:   e.image ?? "/images/daytona-placeholder.jpg",
-      url:     e.url ?? null,
+      label:   e.data.title,
+      address: `${dateStr} · ${e.data.location ?? ""}`,
+      lat:     e.data.lat,
+      lng:     e.data.lng,
+      image:   e.data.image ?? "/images/daytona-placeholder.jpg",
+      url:     e.data.url ?? null,
     };
   });
 

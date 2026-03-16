@@ -2,22 +2,17 @@
 import Base from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
-import { scrapeAll } from "../../../lib/scraper.js";
-import { importFromSheet } from "../../../lib/sheet-import.js";
 import manualFeedData from "../../../data/manual-events.json";
+import {
+  getAllSheetEvents,
+  GREATER_DAYTONA,
+  CITY_DISPLAY,
+  cityDisplayName,
+  isStrictlyFuture,
+  HARD_CUTOFF,
+} from "../../../lib/events.js";
 
-/* ── Greater Daytona city set ─────────────────────────────────────────── */
-const GREATER_DAYTONA = new Set([
-  "daytona", "daytona beach",
-  "ormond beach", "ormond",
-  "port orange",
-  "daytona beach shores",
-  "south daytona",
-  "holly hill",
-  "new smyrna beach", "new smyrna",
-  "flagler beach", "flagler",
-]);
-
+/* ── City centres for distance label (events page only) ──────────────── */
 const CITY_CENTERS = {
   "daytona":              { lat: 29.2108, lng: -81.0228 },
   "daytona beach":        { lat: 29.2108, lng: -81.0228 },
@@ -32,20 +27,6 @@ const CITY_CENTERS = {
   "flagler beach":        { lat: 29.4730, lng: -81.1267 },
   "flagler":              { lat: 29.4730, lng: -81.1267 },
 };
-
-const CITY_DISPLAY = {
-  "daytona": "Daytona Beach", "daytona beach": "Daytona Beach",
-  "ormond beach": "Ormond Beach", "ormond": "Ormond Beach",
-  "port orange": "Port Orange",
-  "daytona beach shores": "Daytona Beach Shores",
-  "south daytona": "South Daytona",
-  "holly hill": "Holly Hill",
-  "new smyrna beach": "New Smyrna Beach", "new smyrna": "New Smyrna Beach",
-  "flagler beach": "Flagler Beach", "flagler": "Flagler Beach",
-};
-function cityDisplay(raw) {
-  return CITY_DISPLAY[raw?.toLowerCase().trim()] ?? raw;
-}
 
 /* ── Haversine distance from Daytona Beach center ── */
 const CENTER_LAT = 29.2108;
@@ -76,72 +57,16 @@ function addUtm(url) {
   }
 }
 
-/* Strict date cutoff — today's events are hidden; only future dates appear */
-const todayStr = new Date().toISOString().split("T")[0];
-const today = new Date(todayStr + "T00:00:00Z"); // midnight UTC
-
 let allEvents = [];
 try { allEvents = await getCollection("events"); } catch { allEvents = []; }
 console.log(`[CLEANUP] Markdown directory is empty: ${allEvents.length === 0}`);
 
-/* ── Google Sheet Eventbrite import (SHEET_CSV_URL env var) ─────────────────
-   Publish the sheet to the web as CSV and set SHEET_CSV_URL in Cloudflare.
-   Column A = Eventbrite URL. Title, image, and date are fetched at build time.
-   The sheet is the sole live event source. The legacy HTML scraper is disabled.
-   If the sheet is unreachable only markdown + manual-events.json are shown.    */
-const sheetCsvUrl  = import.meta.env.SHEET_CSV_URL      ?? "";
-const ebToken      = import.meta.env.EVENTBRITE_TOKEN  ?? "";
-const mapboxToken  = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
-let sheetRaw: any[] = [];
-try { sheetRaw = await importFromSheet(sheetCsvUrl, ebToken, mapboxToken); } catch { sheetRaw = []; }
-
-/* ── Legacy HTML scraper — permanently disabled ──────────────────────────────
-   Scraped events placed ocean-side pins due to schema.org coord drift.
-   Re-enable by replacing [] with a scrapeAll() call if ever needed.           */
-const scrapedRaw: any[] = [];
-const scrapedCount = 0;
-
-/* Normalise scraped events to the same { data, slug } shape as the collection */
-const scrapedEvents = scrapedRaw.map((e: any) => ({
-  slug: `${String(e.city ?? "daytona").replace(/\s+/g, "-")}/scraped-${String(e.title ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}`,
-  data: {
-    title:       e.title,
-    eventDate:   e.eventDate,
-    endDate:     e.endDate   ?? null,
-    location:    e.location  ?? "",
-    city:        e.city      ?? "daytona beach",
-    url:         e.url       ?? null,
-    image:       e.image     ?? null,
-    category:    e.category  ?? null,
-    lat:         e.lat         ?? null,
-    lng:         e.lng         ?? null,
-    coordSource: e.coordSource ?? null,  // "hardlock" | "known_venue" | "schema" | null
-    source:      e.source      ?? null,  // non-null marks this as a scraped event
-    sponsored:   false,
-  },
-}));
-
-/* ── Sheet-imported Eventbrite events ───────────────────────────────────────
-   Same shape as scrapedEvents but tagged source="eventbrite-sheet".
-   coordSource is null unless COORD_OVERRIDES fires on title.                  */
-const sheetEvents = sheetRaw.map((e: any) => ({
-  slug: `${String(e.city ?? "daytona").replace(/\s+/g, "-")}/sheet-${String(e.title ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}`,
-  data: {
-    title:       e.title,
-    eventDate:   e.eventDate,
-    endDate:     e.endDate   ?? null,
-    location:    e.location  ?? "",
-    city:        e.city      ?? "daytona beach",
-    url:         e.url       ?? null,
-    image:       e.image     ?? null,
-    category:    e.category  ?? null,
-    lat:         e.lat       ?? null,
-    lng:         e.lng       ?? null,
-    coordSource: null,
-    source:      e.source ?? "eventbrite-sheet",  // preserve "eventbrite-discovered" for search results
-    sponsored:   e.sponsored ?? false,
-  },
-}));
+/* ── Sheet events — normalised, deduped, date-filtered by events.js ─────────
+   getAllSheetEvents() uses the module-level singleton, so importFromSheet()
+   runs only ONCE per build regardless of how many pages import this module.   */
+let sheetEvents: any[] = [];
+try { sheetEvents = await getAllSheetEvents(); } catch { sheetEvents = []; }
+const scrapedCount = 0; // scraper permanently disabled
 
 /* ── Manual Quick-Entry feed (src/data/manual-events.json) ──────────────────
    Paste event objects here as a fallback when scrapers are blocked.
@@ -165,74 +90,29 @@ const manualEvents = ((manualFeedData as any).quickEntry ?? [])
     },
   }));
 
-/* ── Coordinate hard-fixes ───────────────────────────────────────────────────
-   Prevents any source (scraper, stale markdown, manual entry) from misplacing
-   these landmarks. Matches are case-insensitive substring checks on title.    */
-const COORD_OVERRIDES: Array<{
-  titleTest: RegExp;
-  venueTest?: RegExp;   /* also fires when location field matches — even if title doesn't */
-  lat: number; lng: number;
-}> = [
-  // Turkey Run → Daytona International Speedway
-  {
-    titleTest: /turkey run/i,
-    lat: 29.1852, lng: -81.0705,
-  },
-  // Bike Week / Main Street scene — title OR venue triggers the lock
-  // "The Bank", "Dirty Harry's", "Main Street" are all the same corridor
-  {
-    titleTest: /bike week|main street/i,
-    venueTest: /main street|the bank|dirty harry|boot hill|iron horse|main st\b/i,
-    lat: 29.2235, lng: -81.0115,
-  },
-  // MindTravel → New Smyrna Beach beachside
-  {
-    titleTest: /mindtravel/i,
-    lat: 29.0258, lng: -80.9270,
-  },
-  // Spring Break → Hard Rock Hotel beachside
-  {
-    titleTest: /spring break/i,
-    lat: 29.2373, lng: -81.0026,
-  },
-];
-function patchEventCoords(e: any) {
-  const title = String(e.data.title    ?? "");
-  const venue = String(e.data.location ?? "");
-  for (const ov of COORD_OVERRIDES) {
-    if (ov.titleTest.test(title) || (ov.venueTest && ov.venueTest.test(venue))) {
-      return { ...e, data: { ...e.data, lat: ov.lat, lng: ov.lng } };
-    }
-  }
-  return e;
+/* ── Sort key: date string → lexicographic (NaN-safe) ── */
+function sortKey(e: any): string {
+  return String(e.data?.eventDate ?? "").split("T")[0] || "9999-99-99";
 }
 
-/* ── Sort key: parse eventDate ISO string to ms; NaN dates sink to the bottom. ── */
-function sortKey(e: any): number {
-  const ms = new Date(e.data.eventDate ?? "").getTime();
-  return isNaN(ms) ? Number.MAX_SAFE_INTEGER : ms;
-}
+/* Merge: markdown → manual → sheet (coord overrides already applied in events.js) */
+const allEventsWithLive = [...allEvents, ...manualEvents, ...sheetEvents];
 
-/* Merge order: markdown → manual → sheet → scraped (first occurrence wins on dedup) */
-const allEventsWithLive = [...allEvents, ...manualEvents, ...sheetEvents, ...scrapedEvents].map(patchEventCoords);
-
-/* ── Include events starting tomorrow or later, OR multi-day events still ongoing.
-   Strict: today's single-day events are excluded; list starts fresh from tomorrow. ── */
+/* ── Filter: Greater Daytona area + strictly after HARD_CUTOFF ── */
 const upcomingEvents = allEventsWithLive
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
     if (!GREATER_DAYTONA.has(evCity)) return false;
-    const evDate = new Date((String(e.data.eventDate ?? "").split("T")[0]) + "T00:00:00Z");
-    const endDate = e.data.endDate
-      ? new Date((String(e.data.endDate).split("T")[0]) + "T00:00:00Z")
-      : null;
-    return evDate > today || (endDate !== null && endDate > today);
+    // For multi-day events, keep if endDate is still in the future
+    const dateStr    = String(e.data.eventDate ?? "").split("T")[0];
+    const endDateStr = e.data.endDate ? String(e.data.endDate).split("T")[0] : null;
+    return dateStr > HARD_CUTOFF || (endDateStr !== null && endDateStr > HARD_CUTOFF);
   })
-  .sort((a, b) => sortKey(a) - sortKey(b));
+  .sort((a, b) => sortKey(a) < sortKey(b) ? -1 : sortKey(a) > sortKey(b) ? 1 : 0);
 
 console.log(
   `[events] Markdown: ${allEvents.length} | Manual: ${manualEvents.length} | ` +
-  `Sheet: ${sheetRaw.length} | Scraped: ${scrapedCount} | Total upcoming: ${upcomingEvents.length}`
+  `Sheet: ${sheetEvents.length} | Scraped: ${scrapedCount} | Total upcoming: ${upcomingEvents.length}`
 );
 
 // Warn about events with no usable coordinates (will be excluded from map)
@@ -384,7 +264,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
                       <div class="fcOverlayCopy">
                         <div class="fcDate">{mon} {day}</div>
                         <div class="fcTitle">{e.data.title}</div>
-                        <div class="fcCity">{cityDisplay(evCity)}</div>
+                        <div class="fcCity">{cityDisplayName(evCity)}</div>
                       </div>
                     </div>
                   </a>
@@ -445,7 +325,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
                 const evLat    = e.data.lat ?? CITY_CENTERS[evCity]?.lat;
                 const evLng    = e.data.lng ?? CITY_CENTERS[evCity]?.lng;
                 const dist     = distLabel(evLat, evLng);
-                const fbUrl    = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " " + cityDisplay(evCity))}`;
+                const fbUrl    = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " " + cityDisplayName(evCity))}`;
                 return (
                   <a
                     class={`evCard${hidden ? " evCard--hidden" : ""}`}
@@ -480,7 +360,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
                         <div class="evCardVenue">{e.data.location}</div>
                       )}
                       <div class="evCardMeta">
-                        <span class="evCardCity">{cityDisplay(evCity)}</span>
+                        <span class="evCardCity">{cityDisplayName(evCity)}</span>
                         {dist && <span class="evCardDist">{dist}</span>}
                         {/* Badge only for explicitly sponsored events — no auto-tags */}
                       </div>
