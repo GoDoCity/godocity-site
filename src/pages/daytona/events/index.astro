@@ -215,15 +215,11 @@ function sortKey(e: any): number {
 /* Merge order: markdown → manual → sheet → scraped (first occurrence wins on dedup) */
 const allEventsWithLive = [...allEvents, ...manualEvents, ...sheetEvents, ...scrapedEvents].map(patchEventCoords);
 
-/* ── Include events that haven't started yet OR are still ongoing (endDate >= today).
-   Sheet events (source="eventbrite-sheet") bypass the date filter entirely —
-   the curator has explicitly listed them as Live/Sponsored. ── */
+/* ── Include events that haven't started yet OR are still ongoing (endDate >= today). ── */
 const upcomingEvents = allEventsWithLive
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
     if (!GREATER_DAYTONA.has(evCity)) return false;
-    // Curator authority: sheet events are always shown regardless of date
-    if (e.data.source === "eventbrite-sheet") return true;
     const evDate = new Date(e.data.eventDate);
     evDate.setHours(0, 0, 0, 0);
     const endDate = e.data.endDate ? new Date(e.data.endDate) : null;
@@ -244,11 +240,11 @@ upcomingEvents
     `[events] missing coords: "${e.data.title}" (${e.data.eventDate}) — add lat/lng to pin on map`
   ));
 
-/* Featured scroller: top 3 sponsored events only (keeps the row tidy).
+/* Featured slider: top 5 sponsored events — auto-cycles every 5 seconds.
    Sponsored events are NEVER placed in the regular feed — text from a
    sponsored card must never bleed into a non-sponsored event row. */
 const allSponsored    = upcomingEvents.filter(e => e.data.sponsored === true);
-const sponsoredEvents = allSponsored.slice(0, 3);
+const sponsoredEvents = allSponsored.slice(0, 5);
 const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
 
 /* ── Map pins — Hide & Seek filter ───────────────────────────────────────────
@@ -361,38 +357,66 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
                 <a class="featuredActionBtn featuredActionBtn--add" href="/submit-event/">+ Add Event</a>
               </div>
             </div>
-            <div class="featuredScroller">
-              {sponsoredEvents.map(e => {
-                const d      = new Date(e.data.eventDate);
-                const mon    = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                const day    = isNaN(d) ? "??" : d.getDate();
-                const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-                const evSlug = e.slug.split("/").pop();
-                const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
-                const isExt  = !!e.data.url;
-                const fbUrl  = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " Daytona")}`;
-                return (
-                  <a class="featuredCard"
-                     href={href}
-                     target={isExt ? "_blank" : "_self"}
-                     rel={isExt ? "noopener noreferrer" : ""}
-                     data-external={isExt ? "true" : undefined}
-                     data-fallback={isExt ? fbUrl : undefined}>
-                    <div class="fcImgWrap">
-                      <img class="fcImg"
-                        src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
-                        alt={e.data.title} loading="lazy" />
-                      <span class="fcSponsorBadge">SPONSORED</span>
-                      <div class="fcImgOverlay" aria-hidden="true"></div>
-                      <div class="fcOverlayCopy">
-                        <div class="fcDate">{mon} {day}</div>
-                        <div class="fcTitle">{e.data.title}</div>
-                        <div class="fcCity">{cityDisplay(evCity)}</div>
+            <div class="featuredSlider" id="featuredSlider" aria-label="Featured sponsored events slider">
+              <div class="fsTrack" id="fsTrack">
+                {sponsoredEvents.map((e, idx) => {
+                  const d      = new Date(e.data.eventDate);
+                  const mon    = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                  const day    = isNaN(d) ? "??" : d.getDate();
+                  const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+                  const evSlug = e.slug.split("/").pop();
+                  const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
+                  const isExt  = !!e.data.url;
+                  const fbUrl  = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " Daytona")}`;
+                  return (
+                    <a class={`featuredCard fsSlide${idx === 0 ? " fsSlide--active" : ""}`}
+                       href={href}
+                       target={isExt ? "_blank" : "_self"}
+                       rel={isExt ? "noopener noreferrer" : ""}
+                       data-slide-idx={String(idx)}
+                       data-external={isExt ? "true" : undefined}
+                       data-fallback={isExt ? fbUrl : undefined}
+                       aria-hidden={idx !== 0 ? "true" : undefined}>
+                      <div class="fcImgWrap">
+                        <img class="fcImg"
+                          src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
+                          alt={e.data.title} loading={idx === 0 ? "eager" : "lazy"} />
+                        <span class="fcSponsorBadge">SPONSORED</span>
+                        <div class="fcImgOverlay" aria-hidden="true"></div>
+                        <div class="fcOverlayCopy">
+                          <div class="fcDate">{mon} {day}</div>
+                          <div class="fcTitle">{e.data.title}</div>
+                          <div class="fcCity">{cityDisplay(evCity)}</div>
+                        </div>
                       </div>
-                    </div>
-                  </a>
-                );
-              })}
+                    </a>
+                  );
+                })}
+              </div>
+
+              {/* Prev / Next arrows — only rendered if >1 slide */}
+              {sponsoredEvents.length > 1 && (
+                <>
+                  <button class="fsArrow fsArrow--prev" id="fsPrev" aria-label="Previous sponsored event" type="button">&#8249;</button>
+                  <button class="fsArrow fsArrow--next" id="fsNext" aria-label="Next sponsored event" type="button">&#8250;</button>
+                </>
+              )}
+
+              {/* Dots */}
+              {sponsoredEvents.length > 1 && (
+                <div class="fsDots" id="fsDots" role="tablist" aria-label="Slide navigation">
+                  {sponsoredEvents.map((_, idx) => (
+                    <button
+                      class={`fsDot${idx === 0 ? " fsDot--active" : ""}`}
+                      role="tab"
+                      aria-selected={idx === 0 ? "true" : "false"}
+                      aria-label={`Go to slide ${idx + 1}`}
+                      data-dot-idx={String(idx)}
+                      type="button"
+                    ></button>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -539,6 +563,63 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
 <script is:inline>
 (function () {
+  /* ── Featured Event Slider ── */
+  var slider    = document.getElementById("featuredSlider");
+  var prevBtn   = document.getElementById("fsPrev");
+  var nextBtn   = document.getElementById("fsNext");
+  var dotsEl    = document.getElementById("fsDots");
+
+  if (slider) {
+    var slides = Array.prototype.slice.call(slider.querySelectorAll(".fsSlide"));
+    var dots   = dotsEl ? Array.prototype.slice.call(dotsEl.querySelectorAll(".fsDot")) : [];
+    var current = 0;
+    var total   = slides.length;
+    var timer   = null;
+
+    function goTo(idx) {
+      slides[current].classList.remove("fsSlide--active");
+      slides[current].setAttribute("aria-hidden", "true");
+      if (dots[current]) { dots[current].classList.remove("fsDot--active"); dots[current].setAttribute("aria-selected", "false"); }
+
+      current = (idx + total) % total;
+
+      slides[current].classList.add("fsSlide--active");
+      slides[current].removeAttribute("aria-hidden");
+      if (dots[current]) { dots[current].classList.add("fsDot--active"); dots[current].setAttribute("aria-selected", "true"); }
+    }
+
+    function startAuto() {
+      if (total <= 1) return;
+      timer = setInterval(function () { goTo(current + 1); }, 5000);
+    }
+    function resetAuto() {
+      clearInterval(timer);
+      startAuto();
+    }
+
+    if (prevBtn) prevBtn.addEventListener("click", function () { goTo(current - 1); resetAuto(); });
+    if (nextBtn) nextBtn.addEventListener("click", function () { goTo(current + 1); resetAuto(); });
+
+    dots.forEach(function (dot, i) {
+      dot.addEventListener("click", function () { goTo(i); resetAuto(); });
+    });
+
+    /* Pause on hover / resume on leave */
+    slider.addEventListener("mouseenter", function () { clearInterval(timer); });
+    slider.addEventListener("mouseleave", startAuto);
+
+    /* Touch swipe support */
+    var touchStartX = 0;
+    slider.addEventListener("touchstart", function (e) { touchStartX = e.touches[0].clientX; clearInterval(timer); }, { passive: true });
+    slider.addEventListener("touchend", function (e) {
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 40) goTo(dx < 0 ? current + 1 : current - 1);
+      startAuto();
+    }, { passive: true });
+
+    startAuto();
+  }
+
   /* ── Pagination + filter ── */
   var PAGE_SIZE = 20;
   var shown     = PAGE_SIZE;
@@ -776,39 +857,93 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   }
   .featuredActionBtn--add:hover { border-color: var(--brand1); background: rgba(249,217,0,.08); }
 
-  .featuredScroller {
+  /* ── Featured Slider ── */
+  .featuredSlider {
+    position: relative;
     width: 100%;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 24px;
-    justify-content: center;
+    border-radius: 16px;
+    overflow: hidden;
+    background: rgba(255,255,255,.03);
+    box-shadow: 0 4px 32px rgba(0,0,0,.40);
   }
+
+  .fsTrack { position: relative; width: 100%; height: 320px; }
 
   .featuredCard {
-    width: 100%;
-    border-radius: 16px; overflow: hidden;
-    border: 1px solid rgba(255,255,255,.08);
+    position: absolute;
+    inset: 0;
+    border-radius: 0;
+    overflow: hidden;
     text-decoration: none;
-    transition: border-color 140ms, transform 140ms;
-    box-shadow: 0 4px 24px rgba(0,0,0,.35);
+    opacity: 0;
+    transition: opacity 600ms ease;
+    pointer-events: none;
   }
-  .featuredCard:hover { border-color: var(--brand1); transform: translateY(-3px); }
+  .featuredCard.fsSlide--active {
+    opacity: 1;
+    pointer-events: auto;
+  }
 
-  .fcImgWrap { position: relative; height: 260px; background: rgba(255,255,255,.05); overflow: hidden; }
-  .fcImg { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .fcImgWrap { position: relative; height: 100%; background: rgba(255,255,255,.05); overflow: hidden; }
+  .fcImg { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 8s ease; }
+  .featuredCard.fsSlide--active .fcImg { transform: scale(1.04); }
   .fcImgOverlay {
     position: absolute; inset: 0;
     background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.25) 55%, transparent 100%);
   }
   .fcSponsorBadge {
-    position: absolute; top: 12px; right: 12px; z-index: 2;
+    position: absolute; top: 14px; right: 14px; z-index: 2;
     font-size: 11px; font-weight: 900; letter-spacing: .08em;
     background: var(--brand1); color: #000; padding: 4px 11px; border-radius: 999px;
   }
-  .fcOverlayCopy { position: absolute; bottom: 18px; left: 18px; right: 18px; z-index: 2; }
+  .fcOverlayCopy { position: absolute; bottom: 22px; left: 22px; right: 80px; z-index: 2; }
   .fcDate  { font-size: 13px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
-  .fcTitle { font-size: 21px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 4px; }
+  .fcTitle { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 4px; }
   .fcCity  { font-size: 13px; color: rgba(255,255,255,.65); }
+
+  /* Prev / Next arrows */
+  .fsArrow {
+    position: absolute; top: 50%; z-index: 10;
+    transform: translateY(-50%);
+    width: 42px; height: 42px; border-radius: 50%;
+    border: none;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(4px);
+    color: #fff; font-size: 26px; line-height: 1;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: background 140ms, transform 140ms;
+    padding: 0;
+  }
+  .fsArrow:hover { background: rgba(249,217,0,.85); color: #000; transform: translateY(-50%) scale(1.08); }
+  .fsArrow--prev { left: 12px; padding-right: 2px; }
+  .fsArrow--next { right: 12px; padding-left: 2px; }
+
+  /* Dots */
+  .fsDots {
+    position: absolute; bottom: 14px; left: 50%; z-index: 10;
+    transform: translateX(-50%);
+    display: flex; gap: 6px; align-items: center;
+  }
+  .fsDot {
+    width: 7px; height: 7px; border-radius: 50%;
+    border: none; padding: 0;
+    background: rgba(255,255,255,.35);
+    cursor: pointer;
+    transition: background 200ms, transform 200ms;
+  }
+  .fsDot--active {
+    background: var(--brand1);
+    transform: scale(1.3);
+  }
+
+  @media (max-width: 520px) {
+    .fsTrack { height: 240px; }
+    .fcTitle { font-size: 17px; }
+    .fcDate  { font-size: 11px; }
+    .fcCity  { font-size: 12px; }
+    .fsArrow { width: 34px; height: 34px; font-size: 22px; }
+  }
 
   /* Map */
   .mapBlock { margin-bottom: 20px; }
@@ -987,10 +1122,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     .nlRow        { flex-direction: column; height: auto; gap: 8px; }
     .nlInput      { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
     .nlBtn        { border-radius: 8px; height: 46px; }
-    .fcImgWrap    { height: 200px; }
-    .fcTitle      { font-size: 17px; }
-    .fcDate       { font-size: 11px; }
-    .fcCity       { font-size: 12px; }
     .filterBar    { gap: 6px; }
     .filterCount  { margin-left: 0; width: 100%; }
     .evCardTitle  { font-size: 16px; }

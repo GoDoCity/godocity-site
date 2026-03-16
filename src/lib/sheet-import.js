@@ -221,20 +221,17 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     if (!eventDate) {
       // No override (or override failed) — use the API date if available
       if (api.eventDate) {
-        // If the API date is in the past the event is likely a recurring series
-        // whose original start is stale. Promote to today so it appears correctly
-        // in the feed; the curator should add a Col-C override to pin the real date.
         const apiParsed = new Date(api.eventDate + "T12:00:00.000Z");
         const nowMidnight = new Date();
         nowMidnight.setUTCHours(0, 0, 0, 0);
         if (apiParsed < nowMidnight) {
-          const fallback = new Date();
-          fallback.setUTCHours(12, 0, 0, 0);
-          eventDate = fallback.toISOString();
+          // Event date is in the past and no Col-C override was provided — skip it.
+          // Add a Date Override in Col C to keep a recurring event in the feed.
           console.log(
-            `[sheet-import] WARN ${id} "${title}": Eventbrite date ${api.eventDate} is in ` +
-            `the past — using today as fallback. Add a Date Override in Col C to fix sorting.`
+            `[sheet-import] SKIP ${id} "${title}": Eventbrite date ${api.eventDate} is in ` +
+            `the past and no Date Override was set in Col C — excluded from feed.`
           );
+          continue;
         } else {
           eventDate = api.eventDate + "T12:00:00.000Z";
         }
@@ -310,19 +307,17 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     }));
   }
 
-  /* ── 4. Expiry filter — hide events that ended more than 6 hours ago ────────
-     Keeps the site clean the morning after a concert without curator action.
-     Cutoff = midnight UTC of the day after the event date + 6 hours.
-     Example: event on Mar 13 → hidden after 06:00 UTC on Mar 14 (2am EST).   */
+  /* ── 4. Expiry filter — hide events whose date is strictly before today ──────
+     Events are hidden once today's date passes the event date (midnight UTC).
+     This keeps the feed clean without curator action.                          */
   const now = Date.now();
   function isExpired(eventDate) {
     const dateStr = (eventDate || "").slice(0, 10); // "YYYY-MM-DD"
     if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
     const [yr, mo, dy] = dateStr.split("-").map(Number);
-    // Midnight UTC of the next calendar day = end-of-event-day boundary
-    const endOfDay = Date.UTC(yr, mo - 1, dy + 1, 0, 0, 0);
-    const cutoff   = endOfDay + 6 * 60 * 60 * 1000; // + 6 hours grace period
-    return now > cutoff;
+    // Midnight UTC of the event date — anything before this is expired
+    const startOfDay = Date.UTC(yr, mo - 1, dy, 0, 0, 0);
+    return now > startOfDay + 24 * 60 * 60 * 1000; // expired after end of event day
   }
 
   const allMerged = [...sheetEvents, ...discoveredEvents];
