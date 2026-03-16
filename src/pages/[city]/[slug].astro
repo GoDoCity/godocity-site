@@ -4,9 +4,9 @@
  * Dynamic Article Template — GoDoCity news & editorial posts v2
  */
 import Base from "../../layouts/Base.astro";
-import SidebarPoll from "../../components/SidebarPoll.astro";
 import InteractiveMap from "../../components/InteractiveMap.astro";
 import { getCollection, render } from "astro:content";
+import ArticleSidebar from "../../components/ArticleSidebar.astro";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
@@ -88,40 +88,8 @@ try {
   sponsor = null;
 }
 
-// Upcoming events — future only, this city, soonest first
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
-let allEvents = [];
-try {
-  allEvents = await getCollection("events");
-} catch {
-  allEvents = [];
-}
-
 const pageCity = city.toLowerCase().trim();
 
-/* Cities treated as "Greater Daytona area" for the sidebar events block */
-const GREATER_DAYTONA_SIDEBAR = new Set([
-  "daytona", "daytona beach",
-  "ormond beach", "ormond",
-  "port orange",
-  "daytona beach shores",
-  "south daytona",
-  "holly hill",
-  "new smyrna beach", "new smyrna",
-  "flagler beach", "flagler",
-]);
-const CITY_DISPLAY_NAMES = {
-  "daytona": "Daytona Beach", "daytona beach": "Daytona Beach",
-  "ormond beach": "Ormond Beach", "ormond": "Ormond Beach",
-  "port orange": "Port Orange",
-  "daytona beach shores": "Daytona Beach Shores",
-  "south daytona": "South Daytona",
-  "holly hill": "Holly Hill",
-  "new smyrna beach": "New Smyrna Beach", "new smyrna": "New Smyrna Beach",
-  "flagler beach": "Flagler Beach", "flagler": "Flagler Beach",
-};
 
 /* ── "More from" articles: same city, exclude current, newest first ── */
 const currentSlug = post.slug;
@@ -145,20 +113,6 @@ function moreDate(p: any) {
   return `${MONTH_NAMES[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
 }
 
-const upcomingEvents = allEvents
-  .filter(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    const evDate = new Date(e.data.eventDate);
-    evDate.setHours(0, 0, 0, 0);
-    /* Show all Greater Daytona area events when on a Daytona-area page,
-       otherwise fall back to exact city match */
-    const areaMatch = GREATER_DAYTONA_SIDEBAR.has(pageCity)
-      ? GREATER_DAYTONA_SIDEBAR.has(evCity)
-      : evCity === pageCity;
-    return areaMatch && evDate >= today;
-  })
-  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
-  .slice(0, 4);
 
 const CK_SRC = "data:image/jpeg;base64,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";
 ---
@@ -250,97 +204,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
         </div>
       </main>
 
-      <aside class="homeRail">
-
-        {/* 1 — Email Newsletter Banner (Top) */}
-        <div class="nlStickyWrap">
-          <div class="nlBox">
-            <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
-            <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
-            <form class="nlForm" action={`/${city}/subscribe/`} method="get">
-              <input class="nlInput" type="email" name="email"
-                placeholder="your@email.com" required autocomplete="email" />
-              <button class="nlSubmit" type="submit">SIGN UP</button>
-            </form>
-          </div>
-        </div>
-
-        {/* 2 — Upcoming Events */}
-        <div class="railSection">
-          <div class="railHead">
-            <span class="railTitle">Upcoming Events</span>
-            <a class="railMore" href={`/${city}/events/`}>See all</a>
-          </div>
-          <div class="eventList">
-            {upcomingEvents.length > 0 ? upcomingEvents.map(e => {
-              const d     = new Date(e.data.eventDate);
-              const mon   = d.toLocaleDateString("en-US", { month: "short" });
-              const day   = d.getDate();
-              const dow   = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-              const eMon  = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-              const cityLabel = CITY_DISPLAY_NAMES[evCity] ?? evCity;
-              const isSponsored = e.data.sponsored === true;
-              return (
-                <a class={`eventRow${isSponsored ? " eventRow--sponsored" : ""}`}
-                   href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
-                   target={e.data.url ? "_blank" : "_self"}
-                   rel={e.data.url ? "noopener" : ""}>
-                  {isSponsored && <span class="sponsoredBadge">SPONSORED</span>}
-                  <div class="eventCal">
-                    <div class="eDow">{dow}</div>
-                    <div class="eDay">{day}</div>
-                    <div class="eMon">{eMon}</div>
-                  </div>
-                  <div class="eventInfo">
-                    <div class="eName">{e.data.title}</div>
-                    <div class="ePlace">
-                      <span>{mon} {day}</span>
-                      <span class="evCitySep">|</span>
-                      <span class="evCityName">{cityLabel}</span>
-                    </div>
-                  </div>
-                </a>
-              );
-            }) : (
-              <p class="noEvents">No upcoming events yet.</p>
-            )}
-          </div>
-          {/* Always visible — fills empty state and prompts submissions */}
-          <a class="submitEventLink" href="/submit-event/">+ Submit an event →</a>
-        </div>
-
-        {/* 3 — Advertisement */}
-        <div class="displayAdSlot">
-          <div class="adSlotLabel">Advertisement</div>
-          <a class="displayAdCard" href={`/${city}/advertise/`}>
-            <div class="displayAdInner">
-              <div class="displayAdIcon">📢</div>
-              <div class="displayAdTitle">Your Ad Here</div>
-              <div class="displayAdDesc">Reach thousands of {cityCap} locals</div>
-              <div class="displayAdCta">Advertise with us →</div>
-            </div>
-          </a>
-        </div>
-
-        {/* 4 — Vibe Check */}
-        <SidebarPoll />
-
-        {/* 5 — City Guides */}
-        <div class="railSection">
-          <div class="railHead">
-            <span class="railTitle">City Guides</span>
-            <a class="railMore" href={`/${city}/guides/`}>See all</a>
-          </div>
-          <div class="guideList">
-            <a class="guideRow" href={`/${city}/guides/live/`}>🏠 Live in {cityCap}</a>
-            <a class="guideRow" href={`/${city}/guides/work/`}>💼 Work in {cityCap}</a>
-            <a class="guideRow" href={`/${city}/guides/play/`}>🎉 Play in {cityCap}</a>
-            <a class="guideRow" href={`/${city}/guides/best-restaurants/`}>🍽️ Best Restaurants</a>
-          </div>
-        </div>
-
-      </aside>
+      <ArticleSidebar city={city} />
     </div>
 
     {/* ── More from strip — spans full container width, into sidebar gutter ── */}
@@ -618,105 +482,6 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .relatedBack { font-size: 13.5px; font-weight: 700; color: var(--link); text-decoration: none; border-bottom: 1.5px solid transparent; transition: border-color 140ms; padding-bottom: 1px; }
   .relatedBack:hover { border-color: var(--link); }
 
-  .homeRail { display: grid; gap: 24px; align-self: start; }
-  .nlStickyWrap { position: -webkit-sticky; position: sticky; top: 20px; z-index: 10; }
-  .railSection { display: grid; gap: 0; }
-  .railHead { display: flex; justify-content: space-between; align-items: baseline; padding-bottom: 10px; border-bottom: 2px solid var(--brand1); }
-  .railTitle { font-size: 16px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--text); }
-  .railMore { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
-  .railMore:hover { text-decoration: underline; }
-
-  .eventList { display: grid; }
-  .eventRow { display: grid; grid-template-columns: 48px 1fr; gap: 12px; align-items: center; text-decoration: none; padding: 13px 0; border-bottom: 1px solid var(--border); transition: opacity 140ms; }
-  .eventRow:last-child { border-bottom: none; }
-  .eventRow:hover { opacity: .76; }
-  .eventCal { width: 48px; height: 48px; border-radius: 10px; background: var(--pillBg); border: 1px solid var(--pillBorder); display: grid; place-items: center; text-align: center; line-height: 1; }
-  .eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
-  .eDay { font-size: 19px; font-weight: 900; color: var(--text); margin-top: 1px; }
-  .eMon { font-size: 8px; font-weight: 700; letter-spacing: .08em; color: var(--faint); text-transform: uppercase; }
-  .eventInfo { display: flex; flex-direction: column; gap: 2px; }
-  .eName { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
-  .ePlace { font-size: 12px; color: var(--faint); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-  .evCitySep { opacity: .4; }
-  .evCityName { color: var(--brand1); font-weight: 700; }
-  .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
-
-  /* Sponsored event row */
-  .eventRow--sponsored {
-    background: rgba(249,217,0,.07);
-    border-radius: 8px;
-    padding: 10px 8px;
-    margin: 0 -8px;
-    position: relative;
-  }
-  .sponsoredBadge {
-    position: absolute;
-    top: 6px; right: 8px;
-    font-size: 9px; font-weight: 900;
-    letter-spacing: .08em;
-    background: var(--brand1); color: #000;
-    padding: 2px 6px; border-radius: 999px;
-  }
-
-  /* Submit event prompt */
-  .submitEventLink {
-    display: block;
-    margin-top: 12px;
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--brand1);
-    text-decoration: none;
-    opacity: .85;
-    transition: opacity 120ms;
-  }
-  .submitEventLink:hover { opacity: 1; }
-
-  .displayAdSlot { display: grid; gap: 5px; }
-  .adSlotLabel { font-size: 8.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); text-align: center; }
-  .displayAdCard {
-    display: block; text-decoration: none; border-radius: 13px; overflow: hidden;
-    background: #f9d900;
-    transition: opacity 140ms;
-  }
-  .displayAdCard:hover { opacity: .9; }
-  .displayAdInner { padding: 22px 14px; text-align: center; display: grid; gap: 5px; place-items: center; }
-  .displayAdIcon { font-size: 24px; margin-bottom: 2px; }
-  .displayAdTitle { font-size: 16px; font-weight: 900; color: #000; }
-  .displayAdDesc { font-size: 14px; color: rgba(0,0,0,.78); line-height: 1.3; }
-  .displayAdCta { margin-top: 6px; display: inline-flex; align-items: center; height: 30px; padding: 0 13px; border-radius: 999px; background: #000; color: #f9d900; font-size: 11.5px; font-weight: 800; }
-
-  .guideList { display: grid; }
-  .guideRow { display: block; text-decoration: none; font-size: 15px; font-weight: 700; color: var(--text); padding: 11px 0; border-bottom: 1px solid var(--border); line-height: 1.3; transition: color 120ms; }
-  .guideRow:last-child { border-bottom: none; }
-  .guideRow:hover { color: var(--link); }
-
-  .nlBox {
-    padding: 40px 26px; border-radius: 16px;
-    background: #f9d900;
-    display: flex; flex-direction: column; gap: 12px;
-  }
-  .nlBoxHead { font-size: 28px; font-weight: 900; font-style: italic; color: #000; line-height: 1.05; letter-spacing: -0.04em; }
-  .nlBoxHead strong { font-weight: 900; }
-  .nlBoxSub { font-size: 15px; color: rgba(0,0,0,.8); line-height: 1.45; }
-  .nlForm    { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
-  .nlInput   {
-    width: 100%; box-sizing: border-box;
-    padding: 14px 16px; border-radius: 10px;
-    border: none; background: #fff;
-    font-size: 15px; color: #111;
-    box-shadow: 0 2px 8px rgba(0,0,0,.12);
-    outline: 2px solid transparent; transition: outline-color 150ms;
-  }
-  .nlInput:focus { outline-color: #000; }
-  .nlInput::placeholder { color: #aaa; }
-  .nlSubmit  {
-    width: 100%; padding: 14px 0; border-radius: 999px;
-    border: none; background: #000; color: #f9d900;
-    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
-    font-size: 15px; font-weight: 900; letter-spacing: .08em;
-    cursor: pointer; transition: opacity 150ms;
-  }
-  .nlSubmit:hover { opacity: .82; }
 
   @media (max-width: 768px) {
     .homeGrid { padding: 24px 0 40px; }

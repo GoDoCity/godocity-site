@@ -1,8 +1,7 @@
 ---
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
-import { importFromSheet } from "../../../lib/sheet-import.js";
-import SidebarPoll from "../../../components/SidebarPoll.astro";
+import ArticleSidebar from "../../../components/ArticleSidebar.astro";
 
 /* Featured flag normalization */
 function isFeatured(post) {
@@ -127,51 +126,6 @@ const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
 const featured = isFeatured(post);
 const hero = heroImage(post);
 
-/* Upcoming events — pull from live sheet first, fall back to content collection */
-const todayE = new Date();
-todayE.setHours(0, 0, 0, 0);
-const GREATER_DAYTONA = new Set([
-  "daytona", "daytona beach", "port orange", "ormond beach", "holly hill",
-  "south daytona", "new smyrna beach", "deland", "edgewater",
-]);
-let sheetSidebarEvents = [];
-try {
-  const csvUrl = import.meta.env.SHEET_CSV_URL ?? "";
-  if (csvUrl) {
-    // No EB token → no Eventbrite API calls (fast); no Mapbox → no geocoding
-    const raw = await importFromSheet(csvUrl, "", "");
-    sheetSidebarEvents = raw
-      .filter(e => {
-        const evCity = (e.city ?? "").toLowerCase().trim();
-        return GREATER_DAYTONA.has(evCity);
-      })
-      .filter(e => {
-        const evDate = new Date(e.eventDate);
-        evDate.setHours(0, 0, 0, 0);
-        return evDate >= todayE;
-      })
-      .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
-      .slice(0, 4)
-      .map(e => ({
-        data: { title: e.title, eventDate: e.eventDate, location: e.location, url: e.url },
-        slug: `daytona/${(e.title ?? "event").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
-      }));
-  }
-} catch { sheetSidebarEvents = []; }
-
-let collectionEvents = [];
-try { collectionEvents = await getCollection("events"); } catch { collectionEvents = []; }
-const collectionUpcoming = collectionEvents
-  .filter(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    const evDate = new Date(e.data.eventDate);
-    evDate.setHours(0, 0, 0, 0);
-    return evCity === "daytona" && evDate >= todayE;
-  })
-  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
-  .slice(0, 4);
-
-const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : collectionUpcoming;
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona">
@@ -239,76 +193,7 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
           </p>
         </div>
 
-        <aside class="postSidebar">
-
-          <!-- 1 ── Newsletter banner (always first) ── -->
-          <div class="newsletterCard">
-            <div class="newsletterBadge">FREE DAILY NEWSLETTER</div>
-            <div class="newsletterHeadline">Don't miss a beat.</div>
-            <div class="newsletterSubtext">Get the best of Daytona in your inbox every morning.</div>
-            <form class="newsletterForm" action="/daytona/subscribe/" method="get">
-              <input class="newsletterInput" type="email" name="email" placeholder="your@email.com" aria-label="Email address" />
-              <button class="newsletterButton" type="submit">SIGN UP FREE →</button>
-            </form>
-            <div class="newsletterFineprint">100% free. Unsubscribe anytime.</div>
-          </div>
-
-          <!-- 2 ── Upcoming events (hidden when empty) ── -->
-          {upcomingEvents.length > 0 && (
-            <div class="sidebarCard">
-              <div class="sidebarHead">Upcoming Events</div>
-              {upcomingEvents.map((e) => {
-                const d = new Date(e.data.eventDate);
-                const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                const day = d.getDate();
-                const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                return (
-                  <a class="eventRow"
-                     href={e.data.url ?? `/daytona/events/${e.slug.split("/").pop()}/`}
-                     target={e.data.url ? "_blank" : "_self"}
-                     rel={e.data.url ? "noopener" : ""}>
-                    <div class="eventCal">
-                      <div class="eDow">{dow}</div>
-                      <div class="eDay">{day}</div>
-                      <div class="eMon">{mon}</div>
-                    </div>
-                    <div class="eventInfo">
-                      <div class="eName">{e.data.title}</div>
-                      <div class="ePlace">{e.data.location}</div>
-                    </div>
-                  </a>
-                );
-              })}
-              <a class="seeAll" href="/daytona/events/">See all events →</a>
-            </div>
-          )}
-
-          <!-- 3 ── Ad slot ── -->
-          <a class="adCard" href="/daytona/advertise/" aria-label="Advertise with GoDo Daytona">
-            <div class="adBadge">SPONSORED</div>
-            <div class="adHeadline">Reach Daytona locals.</div>
-            <div class="adSubtext">Promote your business to thousands of engaged readers.</div>
-            <div class="adCta">Get in touch →</div>
-          </a>
-
-          <!-- 4 ── Vibe Check poll ── -->
-          <SidebarPoll />
-
-          <!-- 5 ── City Guides ── -->
-          <div class="sidebarCard guidesCard">
-            <div class="guidesHead">
-              <span class="sidebarHead" style="margin:0">City Guides</span>
-              <a class="guidesMore" href="/daytona/guides/">See all</a>
-            </div>
-            <div class="guideList">
-              <a class="guideRow" href="/daytona/guides/live/">🏠 Live in Daytona</a>
-              <a class="guideRow" href="/daytona/guides/work/">💼 Work in Daytona</a>
-              <a class="guideRow" href="/daytona/guides/play/">🎉 Play in Daytona</a>
-              <a class="guideRow" href="/daytona/guides/best-restaurants/">🍽️ Best Restaurants</a>
-            </div>
-          </div>
-
-        </aside>
+        <ArticleSidebar city="daytona" />
 
       </div>
     </div>
@@ -325,134 +210,9 @@ const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : coll
   }
   @media (max-width: 860px) {
     .postLayout { grid-template-columns: 1fr; }
-    .postSidebar { position: static; }
-    /* Explicit mobile order: newsletter first, then events, ads, poll, guides */
-    .newsletterCard { order: 1; }
-    .sidebarCard    { order: 2; }
-    .adCard         { order: 3; }
-    .pollCard       { order: 4; }
-    .guidesCard     { order: 5; }
   }
 
   .postMain { min-width: 0; }
-  .postSidebar {
-    position: sticky; top: 80px; min-width: 0;
-    display: flex; flex-direction: column; gap: 12px;
-  }
-
-  /* ── Newsletter banner ── */
-  .newsletterCard {
-    border-radius: 16px;
-    background: #f9d900;
-    padding: 18px 16px 16px;
-  }
-  .newsletterBadge {
-    display: inline-block;
-    font-size: 9px; font-weight: 900; letter-spacing: .12em;
-    text-transform: uppercase; color: rgba(0,0,0,.55);
-    background: rgba(0,0,0,.10); border-radius: 999px;
-    padding: 3px 9px; margin-bottom: 8px;
-  }
-  .newsletterHeadline {
-    font-size: 20px; font-weight: 950; color: #000;
-    line-height: 1.1; letter-spacing: -0.02em; margin-bottom: 5px;
-  }
-  .newsletterSubtext {
-    font-size: 13px; color: rgba(0,0,0,.72); line-height: 1.4; margin-bottom: 12px;
-  }
-  .newsletterForm { display: grid; gap: 8px; }
-  .newsletterInput {
-    width: 100%; padding: 11px 12px;
-    border-radius: 10px; border: 1.5px solid rgba(0,0,0,.18);
-    background: rgba(255,255,255,.85); color: #111;
-    font-size: 13.5px; outline: none;
-    transition: border-color 140ms ease, box-shadow 140ms ease;
-  }
-  .newsletterInput:focus {
-    border-color: #000;
-    box-shadow: 0 0 0 3px rgba(0,0,0,.12);
-  }
-  .newsletterButton {
-    width: 100%; padding: 11px 12px;
-    border-radius: 10px; border: none;
-    background: #000; color: #f9d900;
-    font-size: 13px; font-weight: 900; letter-spacing: .04em;
-    cursor: pointer; transition: opacity 140ms ease;
-  }
-  .newsletterButton:hover { opacity: .88; }
-  .newsletterFineprint {
-    margin-top: 8px; font-size: 11px; color: rgba(0,0,0,.52); text-align: center;
-  }
-
-  .sidebarCard {
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
-    border-radius: 16px;
-    padding: 14px;
-  }
-  .sidebarHead {
-    font-weight: 900; font-size: 14px; text-transform: uppercase;
-    letter-spacing: .1em; color: var(--muted); margin-bottom: 10px;
-  }
-
-  .eventRow {
-    display: grid; grid-template-columns: 48px 1fr; gap: 10px;
-    align-items: center; text-decoration: none;
-    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.08);
-  }
-  .eventRow:last-of-type { border-bottom: none; }
-  .eventCal {
-    width: 48px; height: 48px; border-radius: 10px;
-    background: rgba(255,255,255,.06);
-    display: grid; place-items: center; text-align: center; line-height: 1;
-  }
-  .eDow { font-size: 9px; font-weight: 900; color: var(--brand1); text-transform: uppercase; }
-  .eDay { font-size: 18px; font-weight: 900; color: var(--text); }
-  .eMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; }
-  .eventInfo { display: flex; flex-direction: column; gap: 2px; }
-  .eName { font-weight: 800; font-size: 14px; color: var(--text); line-height: 1.2; }
-  .ePlace { font-size: 12px; color: var(--faint); }
-  .seeAll { display: block; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
-
-  /* ── Ad slot ── */
-  .adCard {
-    display: block; text-decoration: none;
-    border-radius: 16px;
-    border: 1px dashed rgba(255,255,255,.15);
-    background: rgba(255,255,255,.025);
-    padding: 14px 16px;
-    transition: border-color 140ms ease, background 140ms ease;
-  }
-  .adCard:hover { border-color: rgba(255,220,80,.28); background: rgba(255,255,255,.045); }
-  .adBadge {
-    font-size: 9px; font-weight: 900; letter-spacing: .12em;
-    text-transform: uppercase; color: rgba(255,255,255,.38);
-    margin-bottom: 6px;
-  }
-  .adHeadline { font-size: 15px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
-  .adSubtext { font-size: 12px; color: var(--muted); line-height: 1.4; margin-bottom: 8px; }
-  .adCta { font-size: 12px; font-weight: 800; color: var(--brand1); }
-
-  /* ── City Guides ── */
-  .guidesCard { padding: 14px 14px 8px; }
-  .guidesHead {
-    display: flex; align-items: baseline; justify-content: space-between;
-    margin-bottom: 8px;
-  }
-  .guidesMore {
-    font-size: 12px; font-weight: 700; color: var(--brand1);
-    text-decoration: none; opacity: .85;
-  }
-  .guidesMore:hover { opacity: 1; }
-  .guideList { display: grid; }
-  .guideRow {
-    display: block; text-decoration: none;
-    font-size: 13.5px; font-weight: 700; color: var(--text);
-    padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.07);
-    line-height: 1.3; transition: color 120ms;
-  }
-  .guideRow:last-child { border-bottom: none; }
-  .guideRow:hover { color: var(--brand1); }
 
   .postTitle {
     margin: 0 0 8px;
