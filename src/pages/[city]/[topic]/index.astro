@@ -151,60 +151,16 @@ const carouselPosts = all
   .slice(0, 8);
 
 /* ── Live upcoming events for sidebar ─────────────────────────────────────────
-   Primary source: Google Sheet CSV (same import as the events page).
-   Passing empty Mapbox token skips geocoding (sidebar doesn't need coords).
-   Passing empty EB token skips Eventbrite API calls — dates/titles come from
-   Col C and Col F sheet overrides, which is sufficient for the sidebar display.
-   Falls back to the Astro events collection if the sheet isn't configured.   */
-import { importFromSheet } from "../../../lib/sheet-import.js";
+   getGreaterDaytonaEvents() uses the module-level singleton + filesystem cache
+   in src/lib/events.js — importFromSheet() runs ONCE per build regardless of
+   how many topic pages Astro generates.                                       */
+import { getGreaterDaytonaEvents } from "../../../lib/events.js";
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
-const GREATER_DAYTONA = new Set([
-  "daytona", "daytona beach", "port orange", "ormond beach", "holly hill",
-  "south daytona", "new smyrna beach", "deland", "edgewater",
-]);
-
-let sheetSidebarEvents = [];
+let upcomingEvents: any[] = [];
 try {
-  const csvUrl = import.meta.env.SHEET_CSV_URL ?? "";
-  if (csvUrl) {
-    // No EB token → no Eventbrite API calls (fast); no Mapbox → no geocoding
-    const raw = await importFromSheet(csvUrl, "", "");
-    sheetSidebarEvents = raw
-      .filter(e => {
-        const evCity = (e.city ?? "").toLowerCase().trim();
-        return GREATER_DAYTONA.has(evCity) || evCity === city;
-      })
-      .filter(e => {
-        const evDate = new Date(e.eventDate);
-        evDate.setHours(0, 0, 0, 0);
-        return evDate >= today;
-      })
-      .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime())
-      .slice(0, 3)
-      .map(e => ({
-        data: { title: e.title, eventDate: e.eventDate, location: e.location, url: e.url },
-        slug: `${e.city ?? city}/${(e.title ?? "event").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}`,
-      }));
-  }
-} catch { sheetSidebarEvents = []; }
-
-/* Fallback: Astro events collection (markdown files) */
-let collectionEvents = [];
-try { collectionEvents = await getCollection("events"); } catch { collectionEvents = []; }
-const collectionUpcoming = collectionEvents
-  .filter(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    const evDate = new Date(e.data.eventDate);
-    evDate.setHours(0, 0, 0, 0);
-    return evCity === city && evDate >= today;
-  })
-  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
-  .slice(0, 3);
-
-const upcomingEvents = sheetSidebarEvents.length > 0 ? sheetSidebarEvents : collectionUpcoming;
+  const allEvents = await getGreaterDaytonaEvents();
+  upcomingEvents = allEvents.slice(0, 3);
+} catch { upcomingEvents = []; }
 ---
 
 <Base title={`${topicLabelStr} | GoDo ${cityCap}`} subtitle={topicLabelStr} cityBase={city}>

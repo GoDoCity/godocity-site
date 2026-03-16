@@ -8,11 +8,34 @@
  * the same resolved result — no duplicate Eventbrite / Mapbox API calls.
  *
  * Consumers
- *   ArticleSidebar.astro      → getGreaterDaytonaEvents()
- *   daytona/events/index.astro → getAllSheetEvents()
- *   daytona/index.astro        → getGreaterDaytonaEvents()
+ *   ArticleSidebar.astro         → getGreaterDaytonaEvents()
+ *   [city]/[topic]/index.astro   → getGreaterDaytonaEvents()
+ *   daytona/events/index.astro   → getAllSheetEvents()
+ *   daytona/index.astro          → getGreaterDaytonaEvents()
  */
 import { importFromSheet } from "./sheet-import.js";
+import { readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
+import { join } from "node:path";
+
+// ── Build-time filesystem cache ───────────────────────────────────────────────
+// Persists the fetch result to disk so parallel Astro workers (each with their
+// own module scope) all hit the cache after the first worker writes it.
+const _CACHE_FILE    = join(process.cwd(), ".astro", "events-build-cache.json");
+const _CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes — covers any single build
+
+function _tryReadCache() {
+  try {
+    const age = Date.now() - statSync(_CACHE_FILE).mtimeMs;
+    if (age < _CACHE_MAX_AGE) return JSON.parse(readFileSync(_CACHE_FILE, "utf-8"));
+  } catch {}
+  return null;
+}
+function _tryWriteCache(data) {
+  try {
+    mkdirSync(join(process.cwd(), ".astro"), { recursive: true });
+    writeFileSync(_CACHE_FILE, JSON.stringify(data));
+  } catch {}
+}
 
 // ── Hard global cutoff ────────────────────────────────────────────────────────
 /** Events whose date is on or before this YYYY-MM-DD string are excluded everywhere. */
@@ -132,14 +155,25 @@ let _promise = null;
  */
 export function getRawSheetEvents() {
   if (_promise !== null) return _promise;
+
+  // Filesystem cache — shared across Astro worker processes in the same build
+  const cached = _tryReadCache();
+  if (cached !== null) {
+    console.log(`[events] Build cache hit (${cached.length} events)`);
+    _promise = Promise.resolve(cached);
+    return _promise;
+  }
+
   const csvUrl      = import.meta.env.SHEET_CSV_URL          ?? "";
   const ebToken     = import.meta.env.EVENTBRITE_TOKEN        ?? "";
   const mapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN     ?? "";
   _promise = csvUrl
-    ? importFromSheet(csvUrl, ebToken, mapboxToken).catch(err => {
-        console.error("[events] importFromSheet failed:", err?.message ?? err);
-        return [];
-      })
+    ? importFromSheet(csvUrl, ebToken, mapboxToken)
+        .then(data => { _tryWriteCache(data); return data; })
+        .catch(err => {
+          console.error("[events] importFromSheet failed:", err?.message ?? err);
+          return [];
+        })
     : Promise.resolve([]);
   return _promise;
 }
