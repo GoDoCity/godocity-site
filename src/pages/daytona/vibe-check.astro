@@ -78,12 +78,16 @@ import SidebarPoll from "../../components/SidebarPoll.astro";
     background:
       radial-gradient(circle at 50% 0%, rgba(58, 77, 101, 0.4) 0%, transparent 70%),
       linear-gradient(180deg, #3A4D65 0%, #2E3E52 100%);
-    padding: 58px 24px 50px;
+    padding: 44px 24px 38px;
+    margin-top: 20px;
     display: flex;
     justify-content: center;
     align-items: center;
     text-align: center;
-    border-bottom: 1px solid rgba(255, 210, 74, 0.1);
+    border-top: 2px solid #FFD24A;
+    border-bottom: 2px solid #FFD24A;
+    width: 100%;
+    box-sizing: border-box;
   }
   .vibe-hero__inner {
     max-width: 800px;
@@ -127,7 +131,7 @@ import SidebarPoll from "../../components/SidebarPoll.astro";
   }
   @media (max-width: 1024px) {
     .vibe-hero {
-      padding: 50px 20px 44px;
+      padding: 38px 20px 33px;
     }
     .vibe-hero__title {
       font-size: 44px;
@@ -135,7 +139,7 @@ import SidebarPoll from "../../components/SidebarPoll.astro";
   }
   @media (max-width: 768px) {
     .vibe-hero {
-      padding: 44px 16px 36px;
+      padding: 33px 16px 27px;
     }
     .vibe-hero__eyebrow {
       font-size: 16px;
