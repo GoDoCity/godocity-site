@@ -1,0 +1,161 @@
+---
+import Base from "../../layouts/Base.astro";
+import SidebarPoll from "../../components/SidebarPoll.astro";
+---
+
+<Base title="Vibe Check | GoDo Daytona" subtitle="Community polls for Daytona" cityBase="daytona">
+  <div class="vibeWrap">
+
+    <div class="vibeHero">
+      <div class="vibeHeroInner">
+        <div class="vibeEyebrow">Community Pulse</div>
+        <h1 class="vibeTitle">Vibe Check</h1>
+        <p class="vibeSub">Let your voice shape Daytona. Vote on the questions locals are talking about — results updated weekly.</p>
+      </div>
+    </div>
+
+    <div class="vibeContainer">
+
+      {/* ── CURRENT POLL ── */}
+      <section class="vibeSection" aria-label="Current poll">
+        <div class="vibeSectionHead">
+          <span class="vibeSectionLabel">🗳️ Current Poll</span>
+        </div>
+        <div class="vibePollWrap">
+          <SidebarPoll
+            title="Vibe Check: Best of Ormond"
+            question="Who has the best tacos in Ormond?"
+            options={[
+              { label: "La Fiesta",         votes: 148 },
+              { label: "Tortilla Republic",  votes: 122 },
+              { label: "Cabo's Mexican",     votes: 134 },
+              { label: "Other",              votes: 97  },
+            ]}
+            pollId="ormond-tacos"
+          />
+        </div>
+      </section>
+
+      {/* ── PAST POLLS ── */}
+      <section class="vibeSection vibeSection--past" aria-label="Past polls">
+        <div class="vibeSectionHead">
+          <span class="vibeSectionLabel">📊 Past Results</span>
+        </div>
+        <div class="vibePastGrid">
+          <div class="vibePastCard">
+            <div class="vibePastQ">Best brunch spot in Daytona Beach?</div>
+            <div class="vibePastWinner">🏆 Café on the Beach — 41% of votes</div>
+            <div class="vibePastMeta">502 votes · March 2026</div>
+          </div>
+          <div class="vibePastCard">
+            <div class="vibePastQ">Which Daytona neighbourhood is most up-and-coming?</div>
+            <div class="vibePastWinner">🏆 Midtown — 38% of votes</div>
+            <div class="vibePastMeta">389 votes · February 2026</div>
+          </div>
+          <div class="vibePastCard">
+            <div class="vibePastQ">Best beach for families in the greater Daytona area?</div>
+            <div class="vibePastWinner">🏆 New Smyrna Beach — 47% of votes</div>
+            <div class="vibePastMeta">611 votes · January 2026</div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</Base>
+
+<style>
+  .vibeWrap {
+    min-height: 100vh;
+  }
+
+  /* ── Hero Banner ── */
+  .vibeHero {
+    background: #1a2533;
+    padding: 56px 24px 52px;
+    text-align: center;
+  }
+  .vibeHeroInner {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+  .vibeEyebrow {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--brand1);
+    margin-bottom: 12px;
+  }
+  .vibeTitle {
+    font-size: clamp(42px, 7vw, 72px);
+    font-weight: 950;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: #fff;
+    margin: 0 0 16px;
+  }
+  .vibeSub {
+    font-size: 17px;
+    line-height: 1.55;
+    color: rgba(255,255,255,.72);
+    margin: 0;
+  }
+
+  /* ── Main container ── */
+  .vibeContainer {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+    display: grid;
+    gap: 56px;
+  }
+
+  /* ── Section ── */
+  .vibeSection { display: grid; gap: 20px; }
+  .vibeSectionHead {
+    border-bottom: 2px solid var(--brand1);
+    padding-bottom: 10px;
+  }
+  .vibeSectionLabel {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: .10em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  /* ── Current poll wrapper ── */
+  .vibePollWrap {
+    max-width: 480px;
+  }
+
+  /* ── Past polls grid ── */
+  .vibePastGrid {
+    display: grid;
+    gap: 14px;
+  }
+  .vibePastCard {
+    padding: 18px 20px;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    background: var(--pillBg);
+    display: grid;
+    gap: 6px;
+  }
+  .vibePastQ {
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .vibePastWinner {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--brand1);
+  }
+  .vibePastMeta {
+    font-size: 12px;
+    color: var(--faint);
+  }
+</style>
