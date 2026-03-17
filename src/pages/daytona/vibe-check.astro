@@ -6,13 +6,17 @@ import SidebarPoll from "../../components/SidebarPoll.astro";
 <Base title="Vibe Check | GoDo Daytona" subtitle="Community polls for Daytona" cityBase="daytona">
   <div class="vibeWrap">
 
-    <div class="vibeHero">
-      <div class="vibeHeroInner">
-        <div class="vibeEyebrow">Community Pulse</div>
-        <h1 class="vibeTitle">Vibe Check</h1>
-        <p class="vibeSub">Let your voice shape Daytona. Vote on the questions locals are talking about — results updated weekly.</p>
+    <section class="vibe-hero">
+      <div class="vibe-hero__inner">
+        <span class="vibe-hero__eyebrow">COMMUNITY PULSE</span>
+        <h1 class="vibe-hero__title">Vibe Check</h1>
+        <p class="vibe-hero__dek">
+          Vote on what Daytona is talking about. <br class="mobile-break" />
+          New results every week.
+        </p>
+        <div class="vibe-hero__divider"></div>
       </div>
-    </div>
+    </section>
 
     <div class="vibeContainer">
 
@@ -70,36 +74,80 @@ import SidebarPoll from "../../components/SidebarPoll.astro";
   }
 
   /* ── Hero Banner ── */
-  .vibeHero {
-    background: #2E3E52;
-    padding: 56px 24px 52px;
+  .vibe-hero {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(58, 77, 101, 0.4) 0%, transparent 70%),
+      linear-gradient(180deg, #3A4D65 0%, #2E3E52 100%);
+    padding: 96px 24px 84px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     text-align: center;
+    border-bottom: 1px solid rgba(255, 210, 74, 0.1);
   }
-  .vibeHeroInner {
-    max-width: 680px;
-    margin: 0 auto;
+  .vibe-hero__inner {
+    max-width: 800px;
+    width: 100%;
   }
-  .vibeEyebrow {
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: .18em;
+  .vibe-hero__eyebrow {
+    display: block;
+    font-family: 'Manrope', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--brand1);
-    margin-bottom: 12px;
+    color: #FFD24A;
+    margin-bottom: 16px;
   }
-  .vibeTitle {
-    font-size: clamp(42px, 7vw, 72px);
-    font-weight: 950;
-    letter-spacing: -0.04em;
-    line-height: 1;
-    color: #fff;
-    margin: 0 0 16px;
+  .vibe-hero__title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1.0;
+    color: #F5F7FA;
+    margin: 0 auto 24px;
+    letter-spacing: -0.02em;
   }
-  .vibeSub {
-    font-size: 17px;
-    line-height: 1.55;
-    color: rgba(255,255,255,.72);
-    margin: 0;
+  .vibe-hero__dek {
+    font-family: 'Manrope', sans-serif;
+    font-size: 22px;
+    font-weight: 500;
+    color: rgba(232, 237, 244, 0.88);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  .vibe-hero__divider {
+    width: 40px;
+    height: 3px;
+    background: #FFD24A;
+    margin: 32px auto 0;
+    border-radius: 2px;
+  }
+  @media (max-width: 1024px) {
+    .vibe-hero {
+      padding: 84px 20px 72px;
+    }
+    .vibe-hero__title {
+      font-size: 44px;
+    }
+  }
+  @media (max-width: 768px) {
+    .vibe-hero {
+      padding: 72px 16px 60px;
+    }
+    .vibe-hero__eyebrow {
+      font-size: 15px;
+    }
+    .vibe-hero__title {
+      font-size: 38px;
+    }
+    .vibe-hero__dek {
+      font-size: 18px;
+    }
+    .mobile-break {
+      display: none;
+    }
   }
 
   /* ── Main container ── */
