@@ -25,7 +25,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
 const displayTotal = total;
 ---
 
-<div class="pollCard" data-poll-id={pollId}>
+<div class="pollCard" data-poll-id={pollId} data-question={question}>
   <div class="pollTitle">{title}</div>
   <div class="pollQuestion">{question}</div>
 
@@ -60,37 +60,12 @@ const displayTotal = total;
 </div>
 
 <script>
-  function initPoll(card: Element) {
-    const form = card.querySelector<HTMLFormElement>("[data-poll-form]");
-    const thanks = card.querySelector<HTMLElement>("[data-poll-thanks]");
-    const btn = card.querySelector<HTMLButtonElement>(".pollBtn");
-    if (!form || !thanks || !btn) return;
+  import { createClient } from "@supabase/supabase-js";
 
-    const pollId = (card as HTMLElement).dataset.pollId ?? "poll";
-    const storageKey = `poll-voted-${pollId}`;
-
-    // Intercept submission: show thank-you, then let the POST fire
-    form.addEventListener("submit", (e) => {
-      const checked = form.querySelector<HTMLInputElement>(
-        'input[type="radio"]:checked'
-      );
-      if (!checked) {
-        e.preventDefault();
-        btn.animate(
-          [{ transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "none" }],
-          { duration: 180, iterations: 2 }
-        );
-        return;
-      }
-      sessionStorage.setItem(storageKey, checked.value);
-      revealResults(card);
-      // Brief delay so the user sees the thank-you before any page reload
-      setTimeout(() => {
-        thanks!.hidden = false;
-        form.style.display = "none";
-      }, 80);
-    });
-  }
+  const supabase = createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+  );
 
   function revealResults(card: Element) {
     card.querySelectorAll<HTMLElement>(".pollBar").forEach((bar) => {
@@ -98,6 +73,81 @@ const displayTotal = total;
     });
     card.querySelectorAll<HTMLElement>(".pollPct").forEach((pct) => {
       pct.style.display = "block";
+    });
+  }
+
+  function updateResultsInDOM(card: Element, counts: Record<string, number>, totalVotes: number) {
+    card.querySelectorAll<HTMLElement>("[data-option]").forEach((optEl) => {
+      const label = optEl.querySelector<HTMLElement>(".pollLabel")?.textContent?.trim();
+      if (!label) return;
+      const pct = totalVotes > 0 ? Math.round(((counts[label] ?? 0) / totalVotes) * 100) : 0;
+      const fill = optEl.querySelector<HTMLElement>(".pollFill");
+      const pctEl = optEl.querySelector<HTMLElement>(".pollPct");
+      if (fill) fill.style.width = `${pct}%`;
+      if (pctEl) pctEl.textContent = `${pct}%`;
+    });
+    const footer = card.querySelector<HTMLElement>(".pollFooter");
+    if (footer) footer.textContent = `${totalVotes.toLocaleString()} votes cast`;
+  }
+
+  async function initPoll(card: Element) {
+    const form = card.querySelector<HTMLFormElement>("[data-poll-form]");
+    const thanks = card.querySelector<HTMLElement>("[data-poll-thanks]");
+    const btn = card.querySelector<HTMLButtonElement>(".pollBtn");
+    if (!form || !thanks || !btn) return;
+
+    const pollId = (card as HTMLElement).dataset.pollId ?? "poll";
+    const questionText = (card as HTMLElement).dataset.question ?? "";
+    const storageKey = `poll-voted-${pollId}`;
+
+    // Already voted this session — show results immediately
+    if (sessionStorage.getItem(storageKey)) {
+      revealResults(card);
+      thanks.hidden = false;
+      form.style.display = "none";
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const checked = form.querySelector<HTMLInputElement>('input[type="radio"]:checked');
+      if (!checked) {
+        btn.animate(
+          [{ transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "none" }],
+          { duration: 180, iterations: 2 }
+        );
+        return;
+      }
+
+      const selectedOption = checked.value;
+      sessionStorage.setItem(storageKey, selectedOption);
+
+      // Optimistically show UI before the async calls finish
+      revealResults(card);
+      setTimeout(() => {
+        thanks!.hidden = false;
+        form.style.display = "none";
+      }, 80);
+
+      // INSERT the vote
+      await supabase.from("vibe_check_votes").insert({
+        option_selected: selectedOption,
+        question_text: questionText,
+      });
+
+      // SELECT live counts for this question and update the bars
+      const { data } = await supabase
+        .from("vibe_check_votes")
+        .select("option_selected")
+        .eq("question_text", questionText);
+
+      if (data && data.length > 0) {
+        const counts: Record<string, number> = {};
+        data.forEach((row) => {
+          counts[row.option_selected] = (counts[row.option_selected] ?? 0) + 1;
+        });
+        updateResultsInDOM(card, counts, data.length);
+      }
     });
   }
 
