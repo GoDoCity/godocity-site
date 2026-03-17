@@ -11,10 +11,10 @@ const {
   title = "Vibe Check: Best of Ormond",
   question = "Who has the best tacos in Ormond?",
   options = [
-    { label: "La Fiesta",         votes: 112 + Math.floor(Math.random() * 36) },
-    { label: "Tortilla Republic", votes: 112 + Math.floor(Math.random() * 36) },
-    { label: "Cabo's Mexican",    votes: 112 + Math.floor(Math.random() * 36) },
-    { label: "Other",             votes: 112 + Math.floor(Math.random() * 36) },
+    { label: "La Fiesta",         votes: 8 },
+    { label: "Tortilla Republic", votes: 8 },
+    { label: "Cabo's Mexican",    votes: 8 },
+    { label: "Other",             votes: 8 },
   ],
   pollId = "ormond-tacos",
   formAction = "#",
@@ -117,8 +117,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     if (form) form.style.display = "none";
     if (loading) loading.hidden = false;
 
-    // Generate random base: 101–501
-    const randomBase = Math.floor(Math.random() * 401) + 101;
+    const BASE = 8;
 
     const { data, error } = await supabase
       .from("vibe_check_votes")
@@ -133,7 +132,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
 
     if (data && data.length > 0) {
       const realVotes = data.length;
-      const combinedTotal = realVotes + randomBase;
+      const combinedTotal = realVotes + BASE;
       const counts: Record<string, number> = {};
       data.forEach((row) => {
         counts[row.option_selected] = (counts[row.option_selected] ?? 0) + 1;
@@ -141,7 +140,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
       updateResultsView(card, counts, combinedTotal, realVotes);
     } else {
       // Zero votes or Supabase error — show 0% for all options
-      updateResultsView(card, {}, randomBase, 0);
+      updateResultsView(card, {}, BASE, 0);
     }
     showResultsView(card);
   }
@@ -313,6 +312,9 @@ const total = options.reduce((s, o) => s + o.votes, 0);
       transform: rotate(360deg);
     }
   }
+
+  /* Force hidden attribute to always win over display declarations */
+  [hidden] { display: none !important; }
 
   /* ── Results view ── */
   .pollResults {
