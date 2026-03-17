@@ -146,11 +146,12 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     const pollId = (card as HTMLElement).dataset.pollId ?? "poll";
     const storageKey = `poll-voted-${pollId}`;
 
-    // Already voted — show results immediately without forcing a re-vote
-    if (localStorage.getItem(storageKey)) {
-      await fetchAndShowResults(card, pollId);
-      return;
-    }
+    // STRESS-TEST MODE: localStorage check disabled — allows voting multiple times
+    // Re-enable this block when done testing:
+    // if (localStorage.getItem(storageKey)) {
+    //   await fetchAndShowResults(card, pollId);
+    //   return;
+    // }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
