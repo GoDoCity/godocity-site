@@ -81,13 +81,14 @@ const total = options.reduce((s, o) => s + o.votes, 0);
   function updateResultsView(
     card: Element,
     counts: Record<string, number>,
-    totalVotes: number
+    combinedTotal: number,
+    realVotes: number
   ) {
     card.querySelectorAll<HTMLElement>("[data-result-row]").forEach((row) => {
       const label = row.dataset.label ?? "";
       const pct =
-        totalVotes > 0
-          ? Math.round(((counts[label] ?? 0) / totalVotes) * 100)
+        combinedTotal > 0
+          ? Math.round(((counts[label] ?? 0) / combinedTotal) * 100)
           : 0;
       const fill = row.querySelector<HTMLElement>("[data-result-fill]");
       const pctEl = row.querySelector<HTMLElement>("[data-result-pct]");
@@ -96,7 +97,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     });
     const footer = card.querySelector<HTMLElement>("[data-poll-footer]");
     if (footer)
-      footer.textContent = `Total Votes: ${totalVotes.toLocaleString()} • Poll ends Sunday`;
+      footer.textContent = `${combinedTotal.toLocaleString()} votes cast`;
   }
 
   function showResultsView(card: Element) {
@@ -104,8 +105,8 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     const results = card.querySelector<HTMLElement>("[data-poll-results]");
     const loading = card.querySelector<HTMLElement>("[data-poll-loading]");
     const thanks = card.querySelector<HTMLElement>("[data-poll-thanks]");
-    if (loading) loading.hidden = true;
-    if (form) form.style.display = "none";
+    if (loading) { loading.hidden = true; loading.style.display = "none"; }
+    if (form) form.remove();
     if (results) results.hidden = false;
     if (thanks) thanks.hidden = false;
   }
@@ -116,23 +117,31 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     if (form) form.style.display = "none";
     if (loading) loading.hidden = false;
 
+    // Generate random base: 101–501
+    const randomBase = Math.floor(Math.random() * 401) + 101;
+
     const { data, error } = await supabase
       .from("vibe_check_votes")
       .select("option_selected")
       .eq("question_text", "ormond-tacos");
 
+    // Kill spinner immediately when data arrives
+    if (loading) { loading.hidden = true; loading.style.display = "none"; }
+
     console.log("[SidebarPoll] fetchAndShowResults — pollId:", pollId);
     console.log("[SidebarPoll] data:", data, "| error:", error);
 
     if (data && data.length > 0) {
+      const realVotes = data.length;
+      const combinedTotal = realVotes + randomBase;
       const counts: Record<string, number> = {};
       data.forEach((row) => {
         counts[row.option_selected] = (counts[row.option_selected] ?? 0) + 1;
       });
-      updateResultsView(card, counts, data.length);
+      updateResultsView(card, counts, combinedTotal, realVotes);
     } else {
-      // Zero votes or Supabase error — show 0% for all options instead of spinning
-      updateResultsView(card, {}, 0);
+      // Zero votes or Supabase error — show 0% for all options
+      updateResultsView(card, {}, randomBase, 0);
     }
     showResultsView(card);
   }
