@@ -119,7 +119,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     const { data, error } = await supabase
       .from("vibe_check_votes")
       .select("option_selected")
-      .eq("question_text", pollId);
+      .eq("question_text", "ormond-tacos");
 
     console.log("[SidebarPoll] fetchAndShowResults — pollId:", pollId);
     console.log("[SidebarPoll] data:", data, "| error:", error);
@@ -177,35 +177,14 @@ const total = options.reduce((s, o) => s + o.votes, 0);
       form.style.display = "none";
       loading.hidden = false;
 
-      // INSERT vote using pollId as the stable key, then SELECT live counts
+      // INSERT vote with hardcoded poll ID, then immediately fetch live counts
       const { error: insertError } = await supabase.from("vibe_check_votes").insert({
         option_selected: selectedOption,
-        question_text: pollId,
+        question_text: "ormond-tacos",
       });
-      console.log("[SidebarPoll] insert — option:", selectedOption, "| pollId:", pollId, "| error:", insertError);
+      console.log("[SidebarPoll] insert — option:", selectedOption, "| pollId: ormond-tacos | error:", insertError);
 
-      const [{ data, error: selectError }] = await Promise.all([
-        supabase
-          .from("vibe_check_votes")
-          .select("option_selected")
-          .eq("question_text", pollId),
-        new Promise<void>((resolve) => setTimeout(resolve, 400)),
-      ]);
-      console.log("[SidebarPoll] select after vote — data:", data, "| error:", selectError);
-
-      if (data && data.length > 0) {
-        const counts: Record<string, number> = {};
-        data.forEach((row) => {
-          counts[row.option_selected] =
-            (counts[row.option_selected] ?? 0) + 1;
-        });
-        updateResultsView(card, counts, data.length);
-      } else {
-        // Zero votes returned or error — show 0% instead of spinning indefinitely
-        updateResultsView(card, {}, 0);
-      }
-
-      showResultsView(card);
+      await fetchAndShowResults(card, "ormond-tacos");
     });
   }
 
