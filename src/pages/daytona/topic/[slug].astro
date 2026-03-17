@@ -176,7 +176,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 <Base title={`${topicLabel} | GoDo Daytona`} subtitle={`${topicLabel}`} cityBase="daytona" />
 
 <section class="section">
-  <div class="container" style="max-width: 1080px;">
+  <div class="container" style="max-width: 1320px;">
 
     <div class="topicHeader">
       <h1 class="topicTitle">{topicLabel}</h1>
@@ -347,7 +347,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   .topicLayout {
     display: grid;
     grid-template-columns: 1fr 300px;
-    gap: 24px;
+    gap: 80px;
     align-items: start;
   }
   .topicMain { min-width: 0; }
@@ -410,7 +410,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   .heroCard:hover .heroImg { transform: scale(1.04); }
 
   .heroBody {
-    padding: 20px 18px 18px;
+    padding: 18px 16px 16px;
     display: flex;
     flex-direction: column;
     justify-content: center;
