@@ -110,7 +110,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     if (thanks) thanks.hidden = false;
   }
 
-  async function fetchAndShowResults(card: Element, questionText: string) {
+  async function fetchAndShowResults(card: Element, pollId: string) {
     const loading = card.querySelector<HTMLElement>("[data-poll-loading]");
     const form = card.querySelector<HTMLFormElement>("[data-poll-form]");
     if (form) form.style.display = "none";
@@ -119,9 +119,9 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     const { data, error } = await supabase
       .from("vibe_check_votes")
       .select("option_selected")
-      .eq("question_text", questionText);
+      .eq("question_text", pollId);
 
-    console.log("[SidebarPoll] fetchAndShowResults — question:", questionText);
+    console.log("[SidebarPoll] fetchAndShowResults — pollId:", pollId);
     console.log("[SidebarPoll] data:", data, "| error:", error);
 
     if (data && data.length > 0) {
@@ -144,12 +144,11 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     if (!form || !loading || !btn) return;
 
     const pollId = (card as HTMLElement).dataset.pollId ?? "poll";
-    const questionText = (card as HTMLElement).dataset.question ?? "";
     const storageKey = `poll-voted-${pollId}`;
 
     // Already voted — show results immediately without forcing a re-vote
     if (localStorage.getItem(storageKey)) {
-      await fetchAndShowResults(card, questionText);
+      await fetchAndShowResults(card, pollId);
       return;
     }
 
@@ -178,18 +177,18 @@ const total = options.reduce((s, o) => s + o.votes, 0);
       form.style.display = "none";
       loading.hidden = false;
 
-      // INSERT vote, then SELECT live counts — run count fetch + min delay in parallel
+      // INSERT vote using pollId as the stable key, then SELECT live counts
       const { error: insertError } = await supabase.from("vibe_check_votes").insert({
         option_selected: selectedOption,
-        question_text: questionText,
+        question_text: pollId,
       });
-      console.log("[SidebarPoll] insert — option:", selectedOption, "| question:", questionText, "| error:", insertError);
+      console.log("[SidebarPoll] insert — option:", selectedOption, "| pollId:", pollId, "| error:", insertError);
 
       const [{ data, error: selectError }] = await Promise.all([
         supabase
           .from("vibe_check_votes")
           .select("option_selected")
-          .eq("question_text", questionText),
+          .eq("question_text", pollId),
         new Promise<void>((resolve) => setTimeout(resolve, 400)),
       ]);
       console.log("[SidebarPoll] select after vote — data:", data, "| error:", selectError);
@@ -232,7 +231,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
 
   .pollQuestion {
     font-weight: 950;
-    font-size: 15px;
+    font-size: 18px;
     line-height: 1.2;
     letter-spacing: -0.01em;
     color: var(--text);
@@ -274,7 +273,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
   }
 
   .pollLabel {
-    font-size: 13.5px;
+    font-size: 16.5px;
     font-weight: 700;
     color: var(--text);
     line-height: 1.2;
@@ -343,7 +342,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
   }
 
   .pollResultLabel {
-    font-size: 13.5px;
+    font-size: 16.5px;
     font-weight: 700;
     color: var(--text);
   }
