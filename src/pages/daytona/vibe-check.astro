@@ -284,6 +284,8 @@ const hasEvents  = hasSlider || hasList;
     margin: 0 auto 16px;
     letter-spacing: 0.05em;
     text-transform: uppercase;
+    -webkit-text-stroke: 1px #000;
+    paint-order: stroke fill;
   }
   .vibe-hero__dek {
     font-family: 'Manrope', sans-serif;
@@ -332,7 +334,7 @@ const hasEvents  = hasSlider || hasList;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 320px;
     gap: 32px;
-    max-width: 1100px;
+    max-width: 1400px;
     margin: 0 auto;
     padding: 0 18px;
     align-items: start;
@@ -372,13 +374,14 @@ const hasEvents  = hasSlider || hasList;
 
   /* ── Current poll wrapper ── */
   .vibePollWrap {
-    max-width: 560px;
+    max-width: 680px;
   }
 
   /* ── Past polls grid ── */
   .vibePastGrid {
     display: grid;
     gap: 14px;
+    max-width: 680px;
   }
   .vibePastCard {
     padding: 18px 20px;
@@ -566,13 +569,14 @@ const hasEvents  = hasSlider || hasList;
   .vppTipBadge {
     display: inline-flex; align-items: center;
     padding: 2px 8px; border-radius: 999px;
-    font-size: 9px; font-weight: 900; letter-spacing: .08em;
+    font-size: 11px; font-weight: 900; letter-spacing: .08em;
     background: rgba(255, 210, 74, 0.12); color: var(--brand1);
     border: 1px solid rgba(255, 210, 74, 0.3);
     width: fit-content;
+    justify-self: end;
   }
   .vppTip {
-    font-size: 13px; font-weight: 600; color: var(--text);
+    font-size: 14px; font-weight: 600; color: var(--text);
     line-height: 1.4;
   }
 </style>
