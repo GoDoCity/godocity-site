@@ -184,6 +184,7 @@ const topics = [
         }
         makeBleed(document.getElementById('nlBand'));
         makeBleed(document.getElementById('adBand'));
+        makeBleed(document.getElementById('alertBand'));
       }
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', bleedFix);
@@ -206,7 +207,7 @@ const topics = [
     </script>
 
     {/* ── COMMUNITY ALERT BAR — thin strip under email band ── */}
-    <a class="homeAlertBar" href="/daytona/vibe-check/">
+    <a class="homeAlertBar" id="alertBand" href="/daytona/vibe-check/">
       🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="habVote">Vote Now →</span>
     </a>
 
@@ -534,10 +535,10 @@ const topics = [
       }
     }
 
-    /* ── Newsletter — breathing room above, 60px below ── */
+    /* ── Newsletter — breathing room above, alert bar directly below ── */
     .nlBand {
       background: var(--brand1);
-      margin: 24px 0 60px;   /* 24px gap between nav pills and banner */
+      margin: 24px 0 0;   /* 24px gap between nav pills and banner; alert bar sits flush below */
       width: 100%;
       display: flex;
       align-items: stretch;
@@ -628,7 +629,7 @@ const topics = [
       width: 100%;
     }
     @media (max-width: 700px) {
-      .nlBand { margin-top: 16px; margin-bottom: 32px; }
+      .nlBand { margin-top: 16px; margin-bottom: 0; }
       .nlInner { padding: 20px 1.25rem; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
       .nlSub { white-space: normal; font-size: 15px; text-align: center; }
@@ -876,21 +877,21 @@ const topics = [
 
     /* ── Home Alert Bar ── */
     .homeAlertBar {
-      display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-      padding: 12px 20px;
-      background: #1a2533; color: #fff;
-      font-size: 14px; font-weight: 700; line-height: 1.3;
-      text-decoration: none;
+      display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+      padding: 12px 20px; margin-bottom: 60px;
+      background: #2E3E52; color: #E8EDF4;
+      font-size: 16px; font-weight: 700; line-height: 1.3;
+      text-decoration: none; text-align: center;
       transition: opacity 140ms, background 140ms;
     }
-    .homeAlertBar:hover { background: #243347; }
-    .homeAlertBar strong { font-weight: 900; }
+    .homeAlertBar:hover { background: #3a4f68; }
+    .homeAlertBar strong { font-weight: 900; color: #FFD24A; }
     .habVote {
       display: inline-flex; align-items: center;
-      padding: 3px 11px; border-radius: 999px;
-      background: #fff; color: #1a2533;
-      font-size: 12px; font-weight: 900; letter-spacing: .04em;
-      white-space: nowrap; margin-left: auto;
+      padding: 4px 13px; border-radius: 999px;
+      background: #FFD24A; color: #0B0D10;
+      font-size: 13px; font-weight: 900; letter-spacing: .04em;
+      white-space: nowrap;
     }
 
     /* View all */
