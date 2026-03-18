@@ -11,10 +11,10 @@ const {
   title = "Vibe Check: Best of Ormond",
   question = "Who has the best tacos in Ormond?",
   options = [
-    { label: "La Fiesta",         votes: 8 },
-    { label: "Tortilla Republic", votes: 8 },
-    { label: "Cabo's Mexican",    votes: 8 },
-    { label: "Other",             votes: 8 },
+    { label: "La Fiesta",         votes: 0 },
+    { label: "Tortilla Republic", votes: 0 },
+    { label: "Cabo's Mexican",    votes: 0 },
+    { label: "Other",             votes: 0 },
   ],
   pollId = "ormond-tacos",
   formAction = "#",
@@ -119,8 +119,6 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     if (form) form.style.display = "none";
     if (loading) loading.hidden = false;
 
-    const BASE = 8;
-
     const { data, error } = await supabase
       .from("vibe_check_votes")
       .select("option_selected")
@@ -134,15 +132,14 @@ const total = options.reduce((s, o) => s + o.votes, 0);
 
     if (data && data.length > 0) {
       const realVotes = data.length;
-      const combinedTotal = realVotes + BASE;
       const counts: Record<string, number> = {};
       data.forEach((row) => {
         counts[row.option_selected] = (counts[row.option_selected] ?? 0) + 1;
       });
-      updateResultsView(card, counts, combinedTotal, realVotes);
+      updateResultsView(card, counts, realVotes, realVotes);
     } else {
       // Zero votes or Supabase error — show 0% for all options
-      updateResultsView(card, {}, BASE, 0);
+      updateResultsView(card, {}, 0, 0);
     }
     showResultsView(card);
   }
@@ -317,6 +314,8 @@ const total = options.reduce((s, o) => s + o.votes, 0);
 
   /* Force hidden attribute to always win over display declarations */
   [hidden] { display: none !important; }
+  /* Belt-and-suspenders: spinner stays gone once results are visible */
+  .pollCard:has(.pollResults:not([hidden])) .pollLoading { display: none !important; }
 
   /* ── Results view ── */
   .pollResults {

@@ -346,7 +346,7 @@ const hasEvents  = hasSlider || hasList;
     display: grid;
     grid-template-columns: minmax(0, 1fr) 320px;
     gap: 32px;
-    max-width: 1260px;
+    max-width: var(--max);
     margin: 0 auto;
     padding: 0 18px;
     align-items: start;
@@ -589,7 +589,7 @@ const hasEvents  = hasSlider || hasList;
     backdrop-filter: blur(4px);
     width: fit-content;
   }
-  .vppBody { padding: 10px 14px 10px; display: grid; gap: 6px; }
+  .vppBody { padding: 6px 14px 6px; min-height: 0; display: grid; gap: 6px; }
   .vppTip {
     font-size: 14px; font-weight: 600; color: var(--text);
     line-height: 1.4;
