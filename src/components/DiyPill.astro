@@ -39,6 +39,16 @@ const {
   heroImage,
 } = Astro.props;
 
+/* ── Smart-list normalisation — belt-and-suspenders for CMS textarea input ──
+ *  Schema transform in config.ts handles the canonical case; this guards
+ *  against any raw string that slips through (e.g. direct component usage). */
+const normMaterials: string[] = Array.isArray(materials)
+  ? materials
+  : String(materials).split("\n").map((s) => s.trim()).filter(Boolean);
+const normSteps: string[] = Array.isArray(steps)
+  ? steps
+  : String(steps).split("\n").map((s) => s.trim()).filter(Boolean);
+
 /* ── Intro: enforce ≤200 words, then split into paragraphs (min 2) ── */
 const words   = intro.split(/\s+/).filter(Boolean);
 const trimmed = words.length > 200 ? words.slice(0, 200).join(" ") + "\u2026" : intro;
@@ -95,7 +105,7 @@ const pubDateStr = pubDate
         <section class="diySteps" aria-labelledby="steps-heading">
           <h2 class="sectionHead" id="steps-heading">Step-by-Step</h2>
           <ol class="stepList">
-            {steps.map((step, i) => (
+            {normSteps.map((step, i) => (
               <li class="stepItem">
                 <div class="stepNum" aria-label={`Step ${i + 1}`}>{i + 1}</div>
                 <p class="stepText">{step}</p>
@@ -122,7 +132,7 @@ const pubDateStr = pubDate
         <div class="sidebarInner">
           <div class="sidebarHead">What You'll Need</div>
           <ul class="materialList">
-            {materials.map((m) => (
+            {normMaterials.map((m) => (
               <li class="materialItem">
                 <span class="materialDot" aria-hidden="true">✓</span>
                 <span>{m}</span>
@@ -140,14 +150,14 @@ const pubDateStr = pubDate
 </div>{/* end .diyWrap */}
 
 <style>
-  /* ── Container — matches 1260px / 80px site standard ── */
-  :global(.container) {
+  /* ── Container — scoped to .diyWrap so global containers are unaffected ── */
+  :global(.diyWrap .container) {
     max-width: 1260px !important;
     margin: 0 auto !important;
-    padding: 0 2rem;
+    padding: 0 2rem !important;
   }
   @media (max-width: 768px) {
-    :global(.container) { max-width: 100% !important; padding: 0 1.25rem; }
+    :global(.diyWrap .container) { max-width: 100% !important; padding: 0 1.25rem !important; }
   }
 
   .diyWrap { min-height: 60vh; padding-bottom: 64px; }
