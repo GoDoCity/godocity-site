@@ -54,13 +54,6 @@ const pubDateStr = pubDate
 
 <div class="diyWrap">
 
-  {/* ══ HERO BANNER ══ */}
-  {heroImage && (
-    <div class="diyHeroBanner">
-      <img class="diyHeroImg" src={heroImage} alt={title} loading="eager" decoding="async" />
-      <div class="diyHeroOverlay" aria-hidden="true"></div>
-    </div>
-  )}
 
   <div class="container">
 
@@ -85,6 +78,13 @@ const pubDateStr = pubDate
 
       {/* ── 75% MAIN COLUMN ── */}
       <main class="diyMain">
+
+        {/* Hero image — rendered at top of main column */}
+        {heroImage && (
+          <div class="diyHeroBanner">
+            <img class="diyHeroImg" src={heroImage} alt={title} loading="eager" decoding="async" />
+          </div>
+        )}
 
         {/* Intro — ≥2 paragraphs, ≤200 words */}
         <div class="diyIntro">
@@ -152,19 +152,14 @@ const pubDateStr = pubDate
 
   .diyWrap { min-height: 60vh; padding-bottom: 64px; }
 
-  /* ── Hero Banner (optional) ── */
+  /* ── Hero Image — top of 75% main column ── */
   .diyHeroBanner {
-    position: relative; width: 100%;
-    max-height: 340px; overflow: hidden;
-    margin-bottom: 40px;
+    width: 100%; border-radius: 14px; overflow: hidden;
+    max-height: 380px;
   }
   .diyHeroImg {
-    display: block; width: 100%; height: 340px;
+    display: block; width: 100%; height: 380px;
     object-fit: cover; object-position: center;
-  }
-  .diyHeroOverlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(to bottom, transparent 40%, var(--bg) 100%);
   }
 
   /* ── Header ── */
@@ -322,7 +317,7 @@ const pubDateStr = pubDate
     .stepText   { font-size: 15px; }
     .stepNum    { width: 38px; height: 38px; font-size: 17px; border-radius: 10px; }
     .diySidebar { position: static; }
-    .diyHeroBanner { max-height: 220px; margin-bottom: 0; }
+    .diyHeroBanner { max-height: 220px; border-radius: 10px; }
     .diyHeroImg { height: 220px; }
   }
 </style>

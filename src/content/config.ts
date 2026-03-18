@@ -133,8 +133,16 @@ const diy = defineCollection({
         (v) => v.split(/\n\n+/).filter(Boolean).length >= 2,
         { message: "Intro must have at least 2 paragraphs (separated by a blank line)." }
       ),
-    materials:      z.array(z.string()).min(1),
-    steps:          z.array(z.string()).min(1),
+    // Accept either a multiline string (new CMS textarea) or a YAML array (legacy).
+    // Both are normalised to string[] before reaching the component.
+    materials: z.union([
+      z.string().min(1),
+      z.array(z.string()).min(1),
+    ]).transform((v) => Array.isArray(v) ? v : v.split("\n").map((s) => s.trim()).filter(Boolean)),
+    steps: z.union([
+      z.string().min(1),
+      z.array(z.string()).min(1),
+    ]).transform((v) => Array.isArray(v) ? v : v.split("\n").map((s) => s.trim()).filter(Boolean)),
     community_note: z.string().optional(),
     // Cities this guide deploys to — e.g. ["daytona", "orlando", "904"]
     cities:         z.array(z.string()).min(1),

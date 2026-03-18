@@ -137,8 +137,20 @@ const posts = all
   })
   .sort((a, b) => new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime());
 
-const hero = posts.find(isFeatured) ?? posts[0] ?? null;
-const rest = hero ? posts.filter(p => p.slug !== hero.slug) : posts;
+// When on the DIY topic, also pull entries from the dedicated `diy` collection.
+// Each entry carries a `_href` so the template links to /[city]/diy/[slug]/ instead of /posts/.
+let feedItems: any[] = posts;
+if (topic === "diy") {
+  const allDiy = await getCollection("diy");
+  const diyItems = allDiy
+    .filter(e => Array.isArray(e.data.cities) && e.data.cities.includes(city))
+    .map(e => ({ ...e, _href: `/${city}/diy/${e.slug}/` }));
+  feedItems = [...posts, ...diyItems]
+    .sort((a, b) => new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime());
+}
+
+const hero = feedItems.find(isFeatured) ?? feedItems[0] ?? null;
+const rest = hero ? feedItems.filter(p => p.slug !== hero.slug) : feedItems;
 
 /* Carousel: recent city posts NOT in the current topic list */
 const carouselPosts = all
@@ -186,14 +198,14 @@ try {
             </div>
           </>
         )}
-        <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
+        <div class="topicMeta">{feedItems.length} post{feedItems.length === 1 ? "" : "s"}</div>
       </div>
 
       <div class="topicLayout">
         <div class="topicMain">
 
           {hero && (
-            <a class={`heroCard${kickerParts(hero).sponsorLabel ? " sponsoredCard" : ""}`} href={`/${city}/posts/${hero.slug}/`}>
+            <a class={`heroCard${kickerParts(hero).sponsorLabel ? " sponsoredCard" : ""}`} href={hero._href ?? `/${city}/posts/${hero.slug}/`}>
               <div class="heroMedia">
                 <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""}
                   loading="lazy" decoding="async"
@@ -220,7 +232,7 @@ try {
                 const kickerLabel = sponsorLabel || catLabel;
                 return (
                   <div class={`row${idx >= 9 ? " rowHidden" : ""}${isSponsored ? " sponsoredRow" : ""}`}>
-                    <a class="rowCardLink" href={`/${city}/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
+                    <a class="rowCardLink" href={p._href ?? `/${city}/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
                     <div class="rowThumbWrap">
                       <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""}
                         loading="lazy" decoding="async"
