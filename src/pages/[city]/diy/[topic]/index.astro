@@ -1,0 +1,245 @@
+---
+/**
+ * src/pages/[city]/diy/[topic]/index.astro
+ * ─────────────────────────────────────────────────────────────────────────────
+ * DIY topic feed — lists all DIY guides for a given city filtered by topic.
+ *
+ * URL pattern:  /daytona/diy/paint/
+ *               /daytona/diy/repair/
+ *               /[any-city]/diy/[topic]/
+ *
+ * Topics (lowercase slugs match NavMenu diyItems):
+ *   clean, paint, repair, decorate, build, craft
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+import Base from "../../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+const DIY_TOPICS = ["clean", "paint", "repair", "decorate", "build", "craft"] as const;
+
+export async function getStaticPaths() {
+  const diyEntries = await getCollection("diy");
+  const paths: { params: { city: string; topic: string } }[] = [];
+
+  for (const entry of diyEntries) {
+    const topicSlug = entry.data.topic.toLowerCase();
+    for (const city of entry.data.cities) {
+      paths.push({ params: { city, topic: topicSlug } });
+    }
+  }
+
+  // Also generate empty-state pages for all city × topic combos where city exists
+  const citySet = new Set<string>();
+  for (const entry of diyEntries) {
+    for (const city of entry.data.cities) citySet.add(city);
+  }
+  for (const city of citySet) {
+    for (const topic of DIY_TOPICS) {
+      paths.push({ params: { city, topic } });
+    }
+  }
+
+  // Deduplicate
+  const seen = new Set<string>();
+  return paths.filter(({ params }) => {
+    const key = `${params.city}/${params.topic}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+const { city, topic } = Astro.params;
+const cityLabel  = city.charAt(0).toUpperCase() + city.slice(1);
+const topicLabel = topic.charAt(0).toUpperCase() + topic.slice(1);
+
+const allDiy = await getCollection("diy");
+const guides = allDiy
+  .filter(
+    (e) =>
+      e.data.cities.includes(city) &&
+      e.data.topic.toLowerCase() === topic.toLowerCase()
+  )
+  .sort(
+    (a, b) =>
+      new Date(b.data.pubDate ?? 0).getTime() -
+      new Date(a.data.pubDate ?? 0).getTime()
+  );
+
+function formatDate(d: Date | null | undefined): string {
+  if (!d) return "";
+  try {
+    return new Date(d).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return "";
+  }
+}
+---
+
+<Base
+  title={`${topicLabel} DIY | GoDo${cityLabel}`}
+  subtitle={`${topicLabel} DIY guides for ${cityLabel}`}
+  cityBase={city}
+>
+  <section class="diyTopicLanding">
+    <div class="container" style="max-width: 980px;">
+
+      <div class="landingKicker">
+        <span class="kCity">{cityLabel}</span>
+        <span class="kSep">/</span>
+        <span class="kCat">DIY</span>
+        <span class="kSep">/</span>
+        <span class="kTopic">{topicLabel}</span>
+      </div>
+
+      <h1 class="landingTitle">{topicLabel} DIY Guides</h1>
+      <p class="landingLede">
+        {topicLabel} how-tos built for {cityLabel} — hands-on and local.
+      </p>
+      <p class="landingCount">{guides.length} guide{guides.length !== 1 ? "s" : ""}</p>
+
+      {guides.length === 0 ? (
+        <p class="emptyState">
+          No {topicLabel.toLowerCase()} DIY guides yet for {cityLabel}. Check back soon!
+        </p>
+      ) : (
+        <ul class="diyList">
+          {guides.map((entry) => {
+            const dateStr = formatDate(entry.data.pubDate);
+            const description = entry.data.intro.split(/\n\n+/)[0].substring(0, 160);
+            return (
+              <li class="diyCard">
+                <a class="cardLink" href={`/${city}/diy/${entry.slug}/`} aria-label={`Read: ${entry.data.title}`}>
+                  <div class="cardThumbWrap">
+                    {entry.data.heroImage
+                      ? <img class="cardThumb" src={entry.data.heroImage} alt="" loading="lazy" decoding="async" />
+                      : <div class="cardThumbEmpty" aria-hidden="true" />
+                    }
+                  </div>
+                  <div class="cardBody">
+                    <div class="cardKicker">
+                      <span class="kCityPill">{cityLabel}</span>
+                      <span class="kTopicPill">{topicLabel}</span>
+                    </div>
+                    <div class="cardTitle">{entry.data.title}</div>
+                    {dateStr && <div class="cardDate">{dateStr}</div>}
+                    {description && <div class="cardDesc">{description}</div>}
+                  </div>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      <div class="backLink">
+        <a href={`/${city}/diy/`}>← All DIY guides</a>
+      </div>
+
+    </div>
+  </section>
+</Base>
+
+<style>
+  .diyTopicLanding { padding: 28px 0 64px; }
+
+  .landingKicker {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 11px; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .kCity  { color: var(--brand1); }
+  .kSep   { opacity: .35; }
+  .kCat   { color: var(--muted); }
+  .kTopic { color: var(--text); }
+
+  .landingTitle {
+    font-size: clamp(28px, 4vw, 48px); font-weight: 900;
+    line-height: 1.06; letter-spacing: -0.6px;
+    margin: 0 0 10px;
+  }
+  .landingLede  { font-size: 16px; color: var(--muted); margin: 0 0 4px; }
+  .landingCount { font-size: 13px; opacity: .55; margin: 0 0 28px; }
+  .emptyState   { color: var(--muted); font-size: 16px; margin: 40px 0; }
+
+  .diyList {
+    list-style: none; padding: 0; margin: 0;
+    display: grid; gap: 14px;
+  }
+  .diyCard {
+    border: 1px solid rgba(255,255,255,.09);
+    border-radius: 14px;
+    background: rgba(255,255,255,.02);
+    overflow: hidden;
+    transition: border-color .14s, background .14s;
+  }
+  .diyCard:hover {
+    border-color: rgba(255,255,255,.16);
+    background: rgba(255,255,255,.04);
+  }
+  .cardLink {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 18px;
+    align-items: center;
+    text-decoration: none;
+    color: inherit;
+    padding: 14px;
+  }
+  .cardThumbWrap {
+    aspect-ratio: 4/3; border-radius: 10px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.08);
+    background: rgba(255,255,255,.03);
+  }
+  .cardThumb      { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cardThumbEmpty { width: 100%; height: 100%; }
+  .cardBody { min-width: 0; }
+
+  .cardKicker { display: flex; gap: 8px; align-items: center; margin-bottom: 7px; }
+  .kCityPill, .kTopicPill {
+    font-size: 10px; font-weight: 900; letter-spacing: .1em;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 999px;
+  }
+  .kCityPill {
+    background: var(--brand1);
+    color: var(--accentText, #000);
+  }
+  .kTopicPill {
+    background: var(--pillBg);
+    color: var(--brand1);
+    border: 1px solid var(--pillBorder);
+  }
+
+  .cardTitle {
+    font-size: 18px; font-weight: 900; line-height: 1.18;
+    margin: 0 0 6px; letter-spacing: -0.2px;
+  }
+  .cardDate  { font-size: 12px; opacity: .55; font-weight: 700; margin-bottom: 6px; }
+  .cardDesc  {
+    font-size: 14px; color: var(--muted); line-height: 1.55;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .backLink {
+    margin-top: 32px;
+  }
+  .backLink a {
+    font-size: 13.5px; font-weight: 800; color: var(--link);
+    text-decoration: none; border: 1px solid var(--pillBorder);
+    background: var(--pillBg); padding: 9px 22px;
+    border-radius: 999px; display: inline-flex; align-items: center;
+  }
+  .backLink a:hover { background: color-mix(in srgb, var(--brand1) 18%, transparent); }
+
+  @media (max-width: 640px) {
+    .cardLink { grid-template-columns: 1fr; }
+    .cardThumbWrap { aspect-ratio: 16/9; border-radius: 8px; }
+  }
+</style>

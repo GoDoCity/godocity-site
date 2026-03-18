@@ -118,6 +118,17 @@ collections:
         widget: "text"
         required: false
         hint: "Optional expert tip, warning, or local insight. Rendered as a highlighted blockquote at the bottom of the main column."
+      - label: "Topic"
+        name: "topic"
+        widget: "select"
+        hint: "Select the primary topic for this guide. Determines which topic feed the article appears in."
+        options:
+          - {label: "Clean", value: "Clean"}
+          - {label: "Paint", value: "Paint"}
+          - {label: "Repair", value: "Repair"}
+          - {label: "Decorate", value: "Decorate"}
+          - {label: "Build", value: "Build"}
+          - {label: "Craft", value: "Craft"}
       - label: "Deploy to Cities"
         name: "cities"
         widget: "select"

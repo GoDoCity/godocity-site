@@ -22,6 +22,7 @@ export interface Props {
   steps:          string[];
   community_note?: string;
   city:           string;
+  topic?:         string;
   author?:        string;
   pubDate?:       Date;
   heroImage?:     string;
@@ -34,6 +35,7 @@ const {
   steps,
   community_note,
   city,
+  topic,
   author   = "Charles King",
   pubDate,
   heroImage,
@@ -72,6 +74,7 @@ const pubDateStr = pubDate
       <div class="diyKicker">
         <span class="kPill kCity">{cityLabel}</span>
         <span class="kPill kCat">DIY</span>
+        {topic && <span class="kPill kTopic">{topic}</span>}
       </div>
       <h1 class="diyTitle">{title}</h1>
       {(author || pubDateStr) && (
@@ -190,6 +193,11 @@ const pubDateStr = pubDate
   .kCat  {
     background: var(--pillBg); color: var(--brand1);
     border: 1px solid var(--pillBorder);
+  }
+  .kTopic {
+    background: rgba(255, 210, 74, 0.12); color: var(--brand1);
+    border: 1px solid rgba(255, 210, 74, 0.35);
+    font-family: 'Manrope', sans-serif;
   }
 
   .diyTitle {
