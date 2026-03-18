@@ -1,8 +1,10 @@
 ---
+import { createClient } from "@supabase/supabase-js";
+
 export interface Props {
   title?: string;
   question?: string;
-  options?: { label: string; votes: number }[];
+  options?: { label: string }[];
   pollId?: string;
   formAction?: string;
 }
@@ -11,16 +13,29 @@ const {
   title = "Vibe Check: Best of Ormond",
   question = "Who has the best tacos in Ormond?",
   options = [
-    { label: "La Fiesta",         votes: 0 },
-    { label: "Tortilla Republic", votes: 0 },
-    { label: "Cabo's Mexican",    votes: 0 },
-    { label: "Other",             votes: 0 },
+    { label: "La Fiesta" },
+    { label: "Tortilla Republic" },
+    { label: "Cabo's Mexican" },
+    { label: "Other" },
   ],
   pollId = "ormond-tacos",
   formAction = "#",
 } = Astro.props;
 
-const total = options.reduce((s, o) => s + o.votes, 0);
+let initialTotal = 0;
+try {
+  const supabase = createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+  );
+  const { count } = await supabase
+    .from("vibe_check_votes")
+    .select("*", { count: "exact", head: true })
+    .eq("question_text", pollId);
+  initialTotal = count ?? 0;
+} catch (_) {
+  // fallback to 0 if Supabase is unreachable at build time
+}
 ---
 
 <div class="pollCard" data-poll-id={pollId} data-question={question}>
@@ -67,7 +82,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     <span class="pollThanksIcon">✓</span> Thanks for voting!
   </div>
 
-  <div class="pollFooter" data-poll-footer>{total.toLocaleString()} votes cast</div>
+  <div class="pollFooter" data-poll-footer>{initialTotal.toLocaleString()} votes cast</div>
 </div>
 
 <script>
