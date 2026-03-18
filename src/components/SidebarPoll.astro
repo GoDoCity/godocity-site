@@ -105,10 +105,12 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     const results = card.querySelector<HTMLElement>("[data-poll-results]");
     const loading = card.querySelector<HTMLElement>("[data-poll-loading]");
     const thanks = card.querySelector<HTMLElement>("[data-poll-thanks]");
+    // Forcibly kill spinner before any result element becomes visible
     if (loading) { loading.hidden = true; loading.style.display = "none"; }
     if (form) form.remove();
-    if (results) results.hidden = false;
-    if (thanks) thanks.hidden = false;
+    // Results and thanks unhide only after spinner is definitively gone
+    if (results) { results.hidden = false; }
+    if (thanks) { thanks.hidden = false; }
   }
 
   async function fetchAndShowResults(card: Element, pollId: string) {
