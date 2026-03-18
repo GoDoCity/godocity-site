@@ -1,10 +1,11 @@
 ---
 title: How to Tie Dye Easter Eggs
-intro: If you are looking for a unique and fun way to dye Easter eggs with
-  materials you already have at home, then this easy method is perfect for you!
-  Here are the 5 simple steps for how to tie dye Easter eggs. This egg dyeing
-  technique that doesn't use vinegar might just become your favorite way to
-  color hard boiled eggs.
+intro: >-
+  If you are looking for a unique and fun way to dye Easter eggs with materials
+  you already have at home, then this easy method is perfect for you! 
+
+
+  Here are the 5 simple steps for how to tie dye Easter eggs. This egg dyeing technique that doesn't use vinegar might just become your favorite way to color hard boiled eggs.
 materials: |-
   White hard-boiled eggs, dry and cooled completely
   Food coloring
