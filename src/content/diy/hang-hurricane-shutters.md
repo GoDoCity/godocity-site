@@ -18,6 +18,7 @@ steps:
   - "Test every panel by pushing firmly at center. There should be no wobble. Tighten any loose bolts until the panel is solid."
   - "Label each panel with a paint marker (Window A, B, C…) and bag the hardware together so next season's setup takes 20 minutes."
 community_note: "Skip galvanized hardware entirely — one salty summer and those bolts weld themselves shut. Stainless costs a couple dollars more and lasts a decade. Also: store panels flat on sawhorses or a wall rack, never leaning vertical — they warp from their own weight and won't slide back into the track cleanly."
+topic: "Repair"
 cities:
   - daytona
 pubDate: "2026-03-18"
