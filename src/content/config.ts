@@ -145,7 +145,7 @@ const diy = defineCollection({
     ]).transform((v) => Array.isArray(v) ? v : v.split("\n").map((s) => s.trim()).filter(Boolean)),
     community_note: z.string().optional(),
     // Topic determines which nav pill feed the article appears in
-    topic:          z.enum(["Clean", "Paint", "Repair", "Decorate", "Build", "Craft"]),
+    topic:          z.enum(["Clean", "Paint", "Repair", "Decorate", "Build", "Craft"]).optional(),
     // Cities this guide deploys to — e.g. ["daytona", "orlando", "904"]
     cities:         z.array(z.string()).min(1),
     pubDate:        z.coerce.date().optional(),
