@@ -29,6 +29,7 @@ steps: >+
 
   This is just one unique way to dye Easter eggs.
 
+topic: Decorate
 cities:
   - daytona
 pubDate: 2026-03-18
