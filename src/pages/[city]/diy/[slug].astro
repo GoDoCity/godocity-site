@@ -50,15 +50,22 @@ const cityLabel  = city.charAt(0).toUpperCase() + city.slice(1);
   subtitle={data.title}
   cityBase={city}
 >
-  <DiyPill
-    title={data.title}
-    intro={data.intro}
-    materials={data.materials}
-    steps={data.steps}
-    community_note={data.community_note}
-    city={city}
-    author={data.author}
-    pubDate={data.pubDate}
-    heroImage={data.heroImage}
-  />
+  <div class="diyPageWrap">
+    <DiyPill
+      title={data.title}
+      intro={data.intro}
+      materials={data.materials}
+      steps={data.steps}
+      community_note={data.community_note}
+      city={city}
+      author={data.author}
+      pubDate={data.pubDate}
+      heroImage={data.heroImage}
+    />
+  </div>
 </Base>
+
+<style>
+  .diyPageWrap { max-width: 1260px !important; margin: 0 auto !important; }
+  :global(.diyPageWrap .container) { max-width: 1260px !important; margin: 0 auto !important; }
+</style>
