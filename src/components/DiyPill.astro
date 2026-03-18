@@ -142,12 +142,12 @@ const pubDateStr = pubDate
 <style>
   /* ── Container — matches 1260px / 80px site standard ── */
   :global(.container) {
-    max-width: 1260px;
-    margin: 0 auto;
+    max-width: 1260px !important;
+    margin: 0 auto !important;
     padding: 0 2rem;
   }
   @media (max-width: 768px) {
-    :global(.container) { max-width: 100%; padding: 0 1.25rem; }
+    :global(.container) { max-width: 100% !important; padding: 0 1.25rem; }
   }
 
   .diyWrap { min-height: 60vh; padding-bottom: 64px; }
