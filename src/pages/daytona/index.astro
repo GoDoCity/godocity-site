@@ -210,6 +210,7 @@ const topics = [
     <a class="homeAlertBar" id="alertBand" href="/daytona/vibe-check/">
       🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="habVote">Vote Now →</span>
     </a>
+    <div class="alertBarLine"></div>
 
     <div class="container">
       <div class="homeGrid">
@@ -878,7 +879,7 @@ const topics = [
     /* ── Home Alert Bar ── */
     .homeAlertBar {
       display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
-      padding: 12px 20px; margin-bottom: 60px;
+      padding: 12px 20px; margin-bottom: 6px;
       background: #2E3E52; color: #E8EDF4;
       font-size: 16px; font-weight: 700; line-height: 1.3;
       text-decoration: none; text-align: center;
@@ -886,6 +887,12 @@ const topics = [
     }
     .homeAlertBar:hover { background: #3a4f68; }
     .homeAlertBar strong { font-weight: 900; color: #FFD24A; }
+    .alertBarLine {
+      height: 1px;
+      background: rgba(255, 210, 74, 0.45);
+      box-shadow: 0 0 8px rgba(255, 210, 74, 0.25);
+      margin-bottom: 54px;
+    }
     .habVote {
       display: inline-flex; align-items: center;
       padding: 4px 13px; border-radius: 999px;
