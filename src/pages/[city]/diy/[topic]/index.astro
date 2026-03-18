@@ -21,6 +21,7 @@ export async function getStaticPaths() {
   const paths: { params: { city: string; topic: string } }[] = [];
 
   for (const entry of diyEntries) {
+    if (!entry.data.topic) continue;
     const topicSlug = entry.data.topic.toLowerCase();
     for (const city of entry.data.cities) {
       paths.push({ params: { city, topic: topicSlug } });
@@ -57,7 +58,7 @@ const guides = allDiy
   .filter(
     (e) =>
       e.data.cities.includes(city) &&
-      e.data.topic.toLowerCase() === topic.toLowerCase()
+      e.data.topic?.toLowerCase() === topic.toLowerCase()
   )
   .sort(
     (a, b) =>
