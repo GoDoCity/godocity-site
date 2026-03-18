@@ -201,6 +201,11 @@ const hero = heroImage(post);
 </Base>
 
 <style>
+  /* ── Width lock: 1260px + 32px gutters ── */
+  .section { padding: 24px 0; }
+  :global(.container) { max-width: 1260px !important; margin: 0 auto; padding: 0 2rem !important; }
+  @media (max-width: 768px) { :global(.container) { padding: 0 1.25rem !important; } }
+
   .postLayout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 280px;

@@ -1,6 +1,4 @@
 ---
-import { createClient } from "@supabase/supabase-js";
-
 export interface Props {
   title?: string;
   question?: string;
@@ -22,20 +20,7 @@ const {
   formAction = "#",
 } = Astro.props;
 
-let initialTotal = 0;
-try {
-  const supabase = createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY
-  );
-  const { count } = await supabase
-    .from("vibe_check_votes")
-    .select("*", { count: "exact", head: true })
-    .eq("question_text", pollId);
-  initialTotal = count ?? 0;
-} catch (_) {
-  // fallback to 0 if Supabase is unreachable at build time
-}
+// Vote count is fetched live on the client — no server-baked number
 ---
 
 <div class="pollCard" data-poll-id={pollId} data-question={question}>
@@ -82,7 +67,7 @@ try {
     <span class="pollThanksIcon">✓</span> Thanks for voting!
   </div>
 
-  <div class="pollFooter" data-poll-footer>{initialTotal.toLocaleString()} votes cast</div>
+  <div class="pollFooter" data-poll-footer></div>
 </div>
 
 <script>
@@ -159,6 +144,20 @@ try {
     showResultsView(card);
   }
 
+  async function fetchLiveCount(card: Element, pollId: string) {
+    const footer = card.querySelector<HTMLElement>("[data-poll-footer]");
+    if (!footer) return;
+    try {
+      const { count } = await supabase
+        .from("vibe_check_votes")
+        .select("*", { count: "exact", head: true })
+        .eq("question_text", pollId);
+      footer.textContent = `${(count ?? 0).toLocaleString()} votes cast`;
+    } catch (_) {
+      footer.textContent = "";
+    }
+  }
+
   async function initPoll(card: Element) {
     const form = card.querySelector<HTMLFormElement>("[data-poll-form]");
     const loading = card.querySelector<HTMLElement>("[data-poll-loading]");
@@ -167,6 +166,9 @@ try {
 
     const pollId = (card as HTMLElement).dataset.pollId ?? "poll";
     const storageKey = `poll-voted-${pollId}`;
+
+    // Fetch live count immediately — footer stays empty until this resolves
+    fetchLiveCount(card, pollId);
 
     // STRESS-TEST MODE: localStorage check disabled — allows voting multiple times
     // Re-enable this block when done testing:
