@@ -40,6 +40,7 @@ community_note: >-
 
 
   Pro-Tip: For streak-free mirrors, mix vinegar and Windex 50/50. Spray it on a cloth (not the glass!) and wipe in opposite directions on each side so you can spot any missed smudges instantly. Super easy and effective! 🧡"
+
 topic: Clean
 cities:
   - daytona
