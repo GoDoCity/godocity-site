@@ -91,6 +91,52 @@ collections:
       - {label: "Featured", name: "featured", widget: "boolean", required: false, default: false, hint: "ON = pinned to top of events list."}
       - {label: "Body", name: "body", widget: "markdown", required: false}
 
+  - name: "diy-guides"
+    label: "DIY Guides"
+    label_singular: "DIY Guide"
+    folder: "src/content/diy"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    summary: "{{title}} — {{cities}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string", hint: "Clear, action-oriented headline (e.g. 'How to Hang Hurricane Shutters')."}
+      - label: "Intro"
+        name: "intro"
+        widget: "text"
+        hint: "Minimum 2 paragraphs (separate with a blank line). Maximum 200 words. No markdown — plain text only."
+      - label: "Materials"
+        name: "materials"
+        widget: "list"
+        label_singular: "Material"
+        hint: "One item per line. Be specific — brand names, sizes, quantities help readers."
+        field: {label: "Item", name: "item", widget: "string"}
+      - label: "Steps"
+        name: "steps"
+        widget: "list"
+        label_singular: "Step"
+        hint: "Write each step as a full action sentence. Readers should be able to follow along without other instructions."
+        field: {label: "Step", name: "step", widget: "string"}
+      - label: "Community Note"
+        name: "community_note"
+        widget: "text"
+        required: false
+        hint: "Optional expert tip, warning, or local insight. Rendered as a highlighted blockquote at the bottom of the main column."
+      - label: "Deploy to Cities"
+        name: "cities"
+        widget: "select"
+        multiple: true
+        min: 1
+        hint: "Select every city site this guide should appear on."
+        options:
+          - {label: "Daytona Beach", value: "daytona"}
+          - {label: "Orlando", value: "orlando"}
+          - {label: "Jacksonville / 904", value: "904"}
+      - {label: "Publish Date", name: "pubDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false}
+      - {label: "Author", name: "author", widget: "string", required: false, default: "Charles King"}
+      - {label: "Hero Image", name: "heroImage", widget: "image", required: false, hint: "Optional banner image displayed above the title."}
+      - {label: "Category", name: "category", widget: "hidden", default: "DIY"}
+
   - name: "global-sponsors"
     label: "Global Sponsors"
     label_singular: "Sponsor Campaign"

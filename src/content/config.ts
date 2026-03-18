@@ -118,4 +118,31 @@ const events = defineCollection({
   }),
 });
 
-export const collections = { posts, guides, globalSponsors, events };
+// DIY GUIDES — multi-city via `cities` array; rendered by DiyPill.astro
+// Intro: 2-paragraph minimum, 200-word maximum (enforced at schema level).
+const diy = defineCollection({
+  type: "content",
+  schema: z.object({
+    title:    z.string(),
+    intro:    z.string()
+      .refine(
+        (v) => v.split(/\s+/).filter(Boolean).length <= 200,
+        { message: "Intro must be 200 words or fewer." }
+      )
+      .refine(
+        (v) => v.split(/\n\n+/).filter(Boolean).length >= 2,
+        { message: "Intro must have at least 2 paragraphs (separated by a blank line)." }
+      ),
+    materials:      z.array(z.string()).min(1),
+    steps:          z.array(z.string()).min(1),
+    community_note: z.string().optional(),
+    // Cities this guide deploys to — e.g. ["daytona", "orlando", "904"]
+    cities:         z.array(z.string()).min(1),
+    pubDate:        z.coerce.date().optional(),
+    author:         z.string().optional().default("Charles King"),
+    heroImage:      z.string().optional().transform((v) => v === "" ? undefined : v),
+    category:       z.string().optional().default("DIY"),
+  }),
+});
+
+export const collections = { posts, guides, globalSponsors, events, diy };
