@@ -288,7 +288,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .bcSep { color: var(--border); margin: 0 3px; font-size: 13px; line-height: 1; }
   .bcSponsored { color: var(--brand1); font-style: italic; }
 
-  .articleTitle { font-size: clamp(26px, 3.2vw, 36px); font-weight: 900; font-family: "Century Gothic", AppleGothic, Arial, sans-serif; line-height: 1.08; letter-spacing: -0.5px; color: var(--text); margin: 0 0 18px; max-width: 720px; }
+  .articleTitle { font-size: clamp(26px, 3.2vw, 36px); font-weight: 800; font-family: "Manrope", sans-serif; line-height: 1.08; letter-spacing: -0.02em; color: var(--text); margin: 0 0 18px; max-width: 720px; }
 
   .articleByline { font-size: 13px; color: var(--faint); margin: 0 0 16px; font-weight: 500; }
   .bylineAuthor { color: var(--brand1); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; font-weight: 700; transition: text-decoration-color 130ms; }
@@ -312,16 +312,17 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   }
   /* Section headers */
   .articleBody :global(h2) {
-    font-size: 24px; font-weight: 900;
-    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 24px; font-weight: 800;
+    font-family: "Manrope", sans-serif;
     color: var(--text); margin: 48px 0 14px; line-height: 1.12;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.02em;
     padding-top: 8px; border-top: 2px solid var(--brand1);
   }
   .articleBody :global(h3) {
-    font-size: 19px; font-weight: 800;
-    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 19px; font-weight: 700;
+    font-family: "Manrope", sans-serif;
     color: var(--text); margin: 36px 0 10px; line-height: 1.2;
+    letter-spacing: -0.01em;
   }
   .articleBody :global(h4) {
     font-size: 15px; font-weight: 800; text-transform: uppercase;
@@ -397,7 +398,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .aSponsorMeta { display: flex; align-items: center; gap: 10px; }
   .aSponsorLogo { height: 28px; width: auto; object-fit: contain; }
   .aSponsorBrand { font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
-  .aSponsorTagline { font-size: 22px; font-weight: 900; line-height: 1.12; letter-spacing: -0.3px; color: var(--text); font-family: "Century Gothic", AppleGothic, Arial, sans-serif; }
+  .aSponsorTagline { font-size: 22px; font-weight: 800; line-height: 1.12; letter-spacing: -0.02em; color: var(--text); font-family: "Manrope", sans-serif; }
   .aSponsorText { font-size: 14px; color: var(--muted); line-height: 1.6; margin: 0; max-width: 440px; }
   .aSponsorCta { display: inline-flex; align-items: center; align-self: flex-start; margin-top: 4px; height: 40px; padding: 0 20px; border-radius: 999px; background: var(--brand1); color: var(--accentText); font-size: 13px; font-weight: 800; text-decoration: none; transition: opacity 150ms; }
   .aSponsorCta:hover { opacity: .86; }
