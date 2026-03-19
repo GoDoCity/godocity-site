@@ -152,8 +152,8 @@ const topics = [
           <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong>for free.</strong></div>
           <form class="nlForm" id="nlForm" action="/daytona/subscribe/" method="get">
             <div class="nlRow" style="width: 100% !important; max-width: 100% !important; display: block !important;">
-              <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" style="width: 100% !important; min-width: 100% !important; height: 68px !important; display: block !important; font-size: 1.2rem !important; margin-bottom: 12px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;" />
-              <button class="nlBtn" type="submit" style="width: 100% !important; height: 52px !important; display: block !important; background-color: #000 !important; color: #fff !important; font-weight: 800 !important;">SIGN UP, IT'S FREE!</button>
+              <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" style="width: 100% !important; min-width: 100% !important; height: 44px !important; display: block !important; font-size: 1.2rem !important; margin-bottom: 12px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;" />
+              <button class="nlBtn" type="submit" style="width: 100% !important; height: 44px !important; display: block !important; background-color: #000 !important; color: #fff !important; font-weight: 800 !important;">SIGN UP, IT'S FREE!</button>
             </div>
           </form>
           <div class="nlFine">100% free, unsubscribe anytime.</div>
@@ -576,23 +576,23 @@ const topics = [
         width: 100%;
         align-items: stretch;     /* both children span full width */
       }
-      /* 2. Input — full width, 54px tall (visually dominant over button) */
+      /* 2. Input — full width, 48px tall (visually dominant over button) */
       .nlInput {
         width: 100% !important;
         max-width: none;
         padding-left: 1rem;
         border-radius: 8px !important;
         border-right: 2px solid rgba(0,0,0,.4);
-        height: 54px !important;
+        height: 48px !important;
         font-size: 1.1rem;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
       }
-      /* 3. Button — 46px, 8px shorter than input for clear visual hierarchy */
+      /* 3. Button — 42px, 6px shorter than input for clear visual hierarchy */
       .nlBtn {
         width: 100% !important;
         max-width: none;
         border-radius: 8px !important;
-        height: 46px !important;
+        height: 42px !important;
         font-weight: 700 !important;
         letter-spacing: 0.1em !important;
       }
@@ -656,6 +656,7 @@ const topics = [
     .nlRow { display: flex; height: 48px; width: 100%; }
     .nlInput {
       flex: 1; min-width: 0;
+      height: 44px !important;
       border-radius: 8px 0 0 8px;
       border: 2px solid rgba(0,0,0,.4);
       border-right: none;
@@ -668,6 +669,7 @@ const topics = [
     .nlInput:focus { border-color: rgba(0,0,0,.75); }
     .nlBtn {
       flex-shrink: 0; padding: 0 20px;
+      height: 44px !important;
       border-radius: 0 8px 8px 0;
       border: none;
       background: #000;
@@ -715,10 +717,10 @@ const topics = [
       /* Form column stack */
       .nlForm { display: flex; flex-direction: column; width: 100%; max-width: 100%; gap: 1rem; }
       .nlRow { flex-direction: column; height: auto; gap: 0.75rem; width: 100%; align-items: stretch; }
-      /* 2. Input — 54px tall, clearly dominant over button, with depth shadow */
-      .nlInput { border-radius: 8px !important; border-right: 2px solid rgba(0,0,0,.4); height: 54px !important; width: 100% !important; max-width: none; font-size: 1.1rem; padding-left: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
-      /* 3. Button — 46px, 8px shorter than input for clear visual hierarchy */
-      .nlBtn { border-radius: 8px !important; height: 46px !important; width: 100% !important; max-width: none; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+      /* 2. Input — 48px tall, clearly dominant over button, with depth shadow */
+      .nlInput { border-radius: 8px !important; border-right: 2px solid rgba(0,0,0,.4); height: 48px !important; width: 100% !important; max-width: none; font-size: 1.1rem; padding-left: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
+      /* 3. Button — 42px, 6px shorter than input for clear visual hierarchy */
+      .nlBtn { border-radius: 8px !important; height: 42px !important; width: 100% !important; max-width: none; font-weight: 700 !important; letter-spacing: 0.1em !important; }
     }
 
     /* ── Home grid 75/25 inside 1280px container ── */
