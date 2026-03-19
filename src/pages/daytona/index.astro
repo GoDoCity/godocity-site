@@ -151,9 +151,9 @@ const topics = [
           <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
           <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong>for free.</strong></div>
           <form class="nlForm" id="nlForm" action="/daytona/subscribe/" method="get">
-            <div class="nlRow" style="width: 100% !important; max-width: 100% !important; display: block !important;">
-              <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" style="width: 100% !important; min-width: 100% !important; height: 44px !important; display: block !important; font-size: 1.2rem !important; margin-bottom: 12px !important; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;" />
-              <button class="nlBtn" type="submit" style="width: 100% !important; height: 44px !important; display: block !important; background-color: #000 !important; color: #fff !important; font-weight: 800 !important;">SIGN UP, IT'S FREE!</button>
+            <div class="nlRow">
+              <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" />
+              <button class="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
             </div>
           </form>
           <div class="nlFine">100% free, unsubscribe anytime.</div>
@@ -653,11 +653,19 @@ const topics = [
     /* "for free." — Extra Bold emphasis, value hook */
     .nlSub strong { font-weight: 900; color: #000; }
     .nlForm { width: 100%; max-width: 480px; }
-    .nlRow { display: flex; height: 48px; width: 100%; }
+    .nlRow {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      height: auto;
+      width: 100%;
+    }
     .nlInput {
-      flex: 1; min-width: 0;
+      width: 350px !important;
       height: 44px !important;
-      border-radius: 8px 0 0 8px;
+      border-radius: 4px 0 0 4px;
       border: 2px solid rgba(0,0,0,.4);
       border-right: none;
       background: #fff; color: #111;
@@ -668,9 +676,10 @@ const topics = [
     .nlInput::placeholder { color: #999; }
     .nlInput:focus { border-color: rgba(0,0,0,.75); }
     .nlBtn {
-      flex-shrink: 0; padding: 0 20px;
+      width: auto !important;
+      padding: 0 25px;
       height: 44px !important;
-      border-radius: 0 8px 8px 0;
+      border-radius: 0 4px 4px 0;
       border: none;
       background: #000;
       color: #fff;
