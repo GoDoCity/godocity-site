@@ -535,23 +535,33 @@ const topics = [
         padding-left: 1.25rem;    /* 20px each side as specified   */
         padding-right: 1.25rem;
       }
+      /* ── Newsletter mobile fixes (under 768px) ── */
+      .nlSub {
+        white-space: normal;      /* prevent "for free." from hanging */
+        font-size: 1.2rem;        /* tighter so the phrase fits on one line */
+        width: 100%;
+        max-width: 100%;
+      }
       .nlRow {
         display: flex;
-        flex-direction: column;
+        flex-direction: column;   /* stack input above button */
+        gap: 0.75rem;             /* clean gap between them */
         height: auto;
+        align-items: stretch;     /* both children span full width */
       }
       .nlInput {
-        width: 100%;
+        width: 100% !important;
+        max-width: none;
         padding: 0 16px;
         border-radius: 8px;
         border-right: 2px solid rgba(0,0,0,.4);
-        height: 46px;
+        height: 54px !important;  /* matches button height */
       }
       .nlBtn {
-        width: 100%;
+        width: 100% !important;
+        max-width: none;
         border-radius: 8px;
-        height: 46px;
-        margin-top: 1rem;
+        height: 54px !important;  /* matches input height */
       }
     }
 
@@ -652,10 +662,10 @@ const topics = [
       .nlBand { margin-top: 16px; margin-bottom: 0; }
       .nlInner { padding: 20px 1.25rem; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
-      .nlSub { white-space: normal; font-size: 15px; text-align: center; }
-      .nlRow { flex-direction: column; height: auto; gap: 8px; align-items: center; }
-      .nlInput { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
-      .nlBtn { border-radius: 8px; height: 46px; width: 100%; }
+      .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; width: 100%; max-width: 100%; }
+      .nlRow { flex-direction: column; height: auto; gap: 0.75rem; align-items: stretch; }
+      .nlInput { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 54px !important; width: 100% !important; max-width: none; }
+      .nlBtn { border-radius: 8px; height: 54px !important; width: 100% !important; max-width: none; }
     }
 
     /* ── Home grid 75/25 inside 1280px container ── */
