@@ -614,51 +614,47 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
   /* ── Newsletter mobile overhaul (< 768px) ── */
   @media (max-width: 767px) {
-    /* 1. Parent containers: force full width, override any pinching */
-    .nlCard, .nlContent, .nlForm {
+    /* 1. Reset any restrictive parent containers */
+    .nlCard, .nlContent, .nlForm, .nlInner {
       width: 100% !important;
       max-width: 100% !important;
-      padding-left: 10px !important;
-      padding-right: 10px !important;
+      padding: 15px 0 !important;
+      overflow: visible !important;
     }
-    /* 2. Form row: column stack, centered */
+
+    /* 2. Breakout Header: Single line and centered */
+    .nlHead {
+      font-size: 1.85rem !important;
+      white-space: nowrap !important;
+      display: block !important;
+      width: 100vw !important;
+      text-align: center !important;
+      margin-left: calc(-50vw + 50%) !important;
+    }
+
+    /* 3. Breakout Form: Stacks elements at fixed width */
     .nlRow {
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
-      width: 100% !important;
-      height: auto !important;
+      width: 100vw !important;
+      margin-left: calc(-50vw + 50%) !important;
+      gap: 12px !important;
     }
-    /* 3. Input: 90vw so it ignores parent constraints and reads the screen */
-    .nlInput {
-      width: 90vw !important;
-      max-width: 340px !important;
-      min-width: 280px !important;
+
+    /* 4. Uniform Sizing: Identical width and height */
+    .nlInput, .nlBtn {
+      width: 320px !important;
+      min-width: 320px !important;
+      max-width: 320px !important;
       height: 48px !important;
+      margin: 0 auto !important;
+      display: block !important;
       box-sizing: border-box !important;
-      margin-left: auto !important;
-      margin-right: auto !important;
-      border-radius: 8px !important;
-      border-right: 2px solid rgba(0,0,0,.4) !important;
-    }
-    /* 3. Button: 90vw so it ignores parent constraints and reads the screen */
-    .nlBtn {
-      width: 90vw !important;
-      max-width: 340px !important;
-      min-width: 280px !important;
-      height: 48px !important;
-      margin-left: auto !important;
-      margin-right: auto !important;
       border-radius: 8px !important;
     }
-    /* 4. Header: keep 'Good News Daytona!' on one line, centered */
-    .nlHead {
-      font-size: 1.85rem !important;
-      white-space: nowrap !important;
-      width: 100% !important;
-      text-align: center !important;
-    }
-    /* 5. 'for free.' stays bold */
+
+    /* 5. Polish: Bold the 'for free' text */
     .nlSub strong {
       font-weight: 900 !important;
     }
