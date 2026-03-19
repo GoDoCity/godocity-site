@@ -612,6 +612,46 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     padding: 8px 0;
   }
 
+  /* ── Newsletter mobile kill-switch (< 768px) ── */
+  @media (max-width: 767px) {
+    /* 1. Wrapper: blow out any parent choking the width */
+    .nlContent,
+    .nlRow,
+    .nlForm {
+      width: 100% !important;
+      max-width: 100% !important;
+      display: block !important;
+    }
+
+    /* 2. Header: scale with viewport, single line */
+    .nlHead {
+      font-size: 6.5vw !important;
+      white-space: nowrap !important;
+    }
+
+    /* 3. Bold hook: "for free." pops in black */
+    .nlSub strong {
+      font-weight: 900 !important;
+      color: #000;
+    }
+
+    /* 4. Input bar: tall and full-width */
+    .nlInput {
+      height: 68px !important;
+      width: 100% !important;
+      border-radius: 8px !important;
+      border-right: 2px solid rgba(0,0,0,.4) !important;
+    }
+
+    /* 5. Button follows below in column layout */
+    .nlBtn {
+      width: 100% !important;
+      border-radius: 8px !important;
+      margin-top: 8px;
+      padding: 14px 0 !important;
+    }
+  }
+
   /* ── Featured Section — 3-column static grid ── */
   .featuredSection { width: 100%; margin-bottom: 24px; }
   .featuredHeadRow {
