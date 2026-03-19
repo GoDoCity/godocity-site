@@ -148,7 +148,7 @@ const topics = [
     <div class="nlBand" id="nlBand">
       <div class="nlInner">
         <div class="nlContent" id="nlContent">
-          <div class="nlHead" style="white-space: nowrap !important; font-size: 6.5vw !important; font-family: 'Montserrat', sans-serif !important; font-weight: 900 !important;"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
+          <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
           <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong>for free.</strong></div>
           <form class="nlForm" id="nlForm" action="/daytona/subscribe/" method="get">
             <div class="nlRow" style="width: 100% !important; max-width: 100% !important; display: block !important;">
@@ -629,7 +629,8 @@ const topics = [
       gap: 6px;
     }
     .nlHead {
-      font-size: clamp(29px, 3.2vw, 38px);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 3.5rem;
       font-weight: 900;
       font-style: italic;          /* "Speedway" lean — slanted heavy sans */
       color: #000;
@@ -693,7 +694,7 @@ const topics = [
       padding: 28px 2.5rem;
       width: 100%;
     }
-    @media (max-width: 700px) {
+    @media (max-width: 768px) {
       .nlBand { margin-top: 16px; margin-bottom: 0; }
       /* 5. Container — Nooga breathing room */
       .nlInner { padding: 1.5rem 1rem !important; width: 100%; justify-content: center; text-align: center; }
