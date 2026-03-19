@@ -495,11 +495,11 @@ const topics = [
         <div class="adCopy">
           <div class="adEyebrow">Grow your business</div>
           <div class="adHead">Advertise with GoDo Daytona.</div>
-          <div class="adDesc">Reach thousands of engaged Daytona locals every day. Featured stories, display ads, event promotion, and newsletter placements — built for local businesses that want real results.</div>
-        </div>
-        <div class="adActions">
-          <a class="adBtnPrimary" href="/daytona/advertise/">Get started →</a>
-          <a class="adBtnGhost" href="/daytona/advertise/">See our rates</a>
+          <div class="ad-description">Reach thousands of engaged Daytona locals every day. Featured stories, display ads, event promotion, and newsletter placements — built for local businesses that want real results.</div>
+          <div class="adActions">
+            <a class="adBtnPrimary" href="/daytona/advertise/">Get started →</a>
+            <a class="adBtnGhost" href="/daytona/advertise/">See our rates</a>
+          </div>
         </div>
       </div>
     </div>
@@ -1364,10 +1364,11 @@ const topics = [
       justify-content: space-between; gap: 28px; flex-wrap: wrap;
     }
     .adEyebrow {
-      font-size: 11px; font-weight: 800; letter-spacing: .16em;
+      font-size: 1.1rem !important; font-weight: 800; letter-spacing: 0.1em;
       text-transform: uppercase; color: var(--accentText); opacity: .82; margin-bottom: 5px;
     }
     .adHead {
+      font-family: 'Montserrat', sans-serif;
       font-size: 3.5rem !important;
       font-weight: 900 !important;
       line-height: 1.1;
@@ -1376,14 +1377,14 @@ const topics = [
       color: #000000;
       margin-bottom: 5px;
     }
-    .adDesc {
-      font-size: 1.4rem !important;
+    .ad-description {
+      font-size: 1.6rem !important;
       font-weight: 500;
       line-height: 1.4;
       color: #1a1a1a;
-      max-width: 420px;
+      max-width: 850px;
     }
-    .adActions { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; margin-top: 1.5rem; }
+    .adActions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 2rem; }
     .adBtnPrimary {
       display: inline-flex; align-items: center;
       height: 42px; padding: 0 20px; border-radius: 11px;
@@ -1410,8 +1411,8 @@ const topics = [
         flex-direction: column; align-items: center; text-align: center; gap: 12px;
       }
       .adCopy { display: flex; flex-direction: column; align-items: center; text-align: center; }
-      .adEyebrow, .adHead, .adDesc { text-align: center; }
-      .adDesc { max-width: 100%; }
+      .adEyebrow, .adHead, .ad-description { text-align: center; }
+      .ad-description { max-width: 100%; }
       .adActions { width: 100%; justify-content: center; gap: 8px; margin-top: 4px; }
       .adBtnPrimary, .adBtnGhost { flex: 1; justify-content: center; }
     }
