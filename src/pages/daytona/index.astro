@@ -540,11 +540,12 @@ const topics = [
       .nlInner {
         padding: 2.5rem 1.25rem !important;
       }
-      /* 1. Header — slightly smaller, tight margin below */
+      /* 1. Header — Montserrat Black 900, tight tracking for extra punch */
       .nlHead {
         font-family: 'Montserrat', sans-serif !important;
         font-weight: 900 !important;
         font-size: 2.1rem !important;
+        letter-spacing: -0.02em !important;
         text-align: center;
         margin-bottom: 0.5rem;
       }
@@ -568,30 +569,29 @@ const topics = [
       .nlRow {
         display: flex;
         flex-direction: column;   /* stack input above button */
-        gap: 0;                   /* spacing handled by button margin-top */
+        gap: 0.75rem;             /* 12px between input and button */
         height: auto;
         width: 100%;
         align-items: stretch;     /* both children span full width */
       }
-      /* 2. Input — full width, 58px tall (more prominent than button) */
+      /* 2. Input — full width, 64px tall (more prominent than button) */
       .nlInput {
         width: 100% !important;
         max-width: none;
         padding-left: 1rem;
         border-radius: 8px !important;
         border-right: 2px solid rgba(0,0,0,.4);
-        height: 58px !important;
+        height: 64px !important;
         font-size: 1.1rem;
       }
-      /* 3. Button — slightly shorter than input for visual hierarchy */
+      /* 3. Button — 50px, 14px shorter than input for clear visual hierarchy */
       .nlBtn {
         width: 100% !important;
         max-width: none;
         border-radius: 8px !important;
-        height: 52px !important;
+        height: 50px !important;
         font-weight: 700 !important;
         letter-spacing: 0.1em !important;
-        margin-top: 0.75rem;
       }
     }
 
@@ -693,22 +693,23 @@ const topics = [
       /* 5. Container — Nooga breathing room */
       .nlInner { padding: 2.5rem 1.25rem !important; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
-      /* 1. Header — 2.1rem, weight 900, margin-bottom */
+      /* 1. Header — Montserrat Black 900, tight tracking for extra punch */
       .nlHead {
         font-family: 'Montserrat', sans-serif !important;
         font-weight: 900 !important;
         font-size: 2.1rem !important;
+        letter-spacing: -0.02em !important;
         margin-bottom: 0.5rem;
       }
       /* 4. Description — max-width: 90% keeps "for free." from widowing */
       .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; width: 100%; max-width: 90%; margin: 0 auto; }
       /* Form column stack */
       .nlForm { display: flex; flex-direction: column; width: 100%; max-width: 100%; gap: 1rem; }
-      .nlRow { flex-direction: column; height: auto; gap: 0; width: 100%; align-items: stretch; }
-      /* 2. Input — 58px tall, more prominent than button */
-      .nlInput { border-radius: 8px !important; border-right: 2px solid rgba(0,0,0,.4); height: 58px !important; width: 100% !important; max-width: none; font-size: 1.1rem; padding-left: 1rem; }
-      /* 3. Button — 52px, slightly shorter, margin-top for visual hierarchy */
-      .nlBtn { border-radius: 8px !important; height: 52px !important; width: 100% !important; max-width: none; font-weight: 700 !important; letter-spacing: 0.1em !important; margin-top: 0.75rem; }
+      .nlRow { flex-direction: column; height: auto; gap: 0.75rem; width: 100%; align-items: stretch; }
+      /* 2. Input — 64px tall, clearly dominant over button */
+      .nlInput { border-radius: 8px !important; border-right: 2px solid rgba(0,0,0,.4); height: 64px !important; width: 100% !important; max-width: none; font-size: 1.1rem; padding-left: 1rem; }
+      /* 3. Button — 50px, 14px shorter than input for clear visual hierarchy */
+      .nlBtn { border-radius: 8px !important; height: 50px !important; width: 100% !important; max-width: none; font-weight: 700 !important; letter-spacing: 0.1em !important; }
     }
 
     /* ── Home grid 75/25 inside 1280px container ── */
