@@ -733,23 +733,33 @@ const topics = [
     }
 
     @media (max-width: 767px) {
-      /* Target the 'Enter your email address' box */
-      input[type='email'].nlInput {
-        width: 100% !important; /* Forces it to fill the yellow box side-to-side */
-        max-width: none !important; /* Removes any old constraints */
-        height: 54px !important; /* Matches your preferred scaled-down size */
-      }
-      /* Target the 'SIGN UP, IT'S FREE!' button */
-      button.nlBtn {
-        width: 100% !important;
-        height: 46px !important; /* Matches your preferred scaled-down size */
-        margin-top: 1rem; /* Creates clean spacing between the blocks */
-      }
-      /* Ensure the form uses Flexbox to stack them */
+      /* 1. Row: forced flex column, full-width, centered */
       .nlRow {
-        display: flex;
-        flex-direction: column; /* This will stack the elements vertically for portrait */
-        width: 100%;
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        align-items: center !important;
+      }
+      /* 2. Input: full-width, no side margins pinching */
+      .nlInput {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      /* 3. Button: full-width, no side margins pinching */
+      .nlBtn {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      /* 4. Header: single line, punchy size */
+      .nlHead {
+        white-space: nowrap !important;
+        font-size: 1.85rem !important;
       }
     }
 
