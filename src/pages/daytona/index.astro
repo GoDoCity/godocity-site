@@ -535,23 +535,29 @@ const topics = [
         padding-left: 1.25rem;    /* 20px each side as specified   */
         padding-right: 1.25rem;
       }
-      /* ── Newsletter mobile fixes (under 768px) ── */
-      /* 1. Header boldness — Montserrat Black, massive impact */
+      /* ── Newsletter mobile fixes (under 768px) — Nooga style ── */
+      /* 5. Container — more breathing room in the yellow box */
+      .nlInner {
+        padding: 2.5rem 1.25rem !important;
+      }
+      /* 1. Header — slightly smaller, tight margin below */
       .nlHead {
         font-family: 'Montserrat', sans-serif !important;
         font-weight: 900 !important;
-        font-size: 2.4rem !important;
+        font-size: 2.1rem !important;
         text-align: center;
+        margin-bottom: 0.5rem;
       }
-      /* 5. Description — allow wrapping, constrain width so "for free." stays tidy */
+      /* 4. Description — allow wrapping, constrain width so "for free." stays tidy */
       .nlSub {
         white-space: normal;      /* prevent "for free." from hanging */
-        font-size: 1.2rem;        /* tighter so the phrase fits on one line */
+        font-size: 1.2rem;
         width: 100%;
-        max-width: 90%;           /* slight inset avoids edge-to-edge cramping */
+        max-width: 90%;           /* forces natural break, no orphan "for free" */
         text-align: center;
+        margin: 0 auto;
       }
-      /* 4. Form container — stacks input above button as full-width blocks */
+      /* Form container — stacks input above button as full-width blocks */
       .nlForm {
         display: flex;
         flex-direction: column;
@@ -562,28 +568,30 @@ const topics = [
       .nlRow {
         display: flex;
         flex-direction: column;   /* stack input above button */
-        gap: 1rem;                /* 1rem gap per Nooga spec */
+        gap: 0;                   /* spacing handled by button margin-top */
         height: auto;
         width: 100%;
         align-items: stretch;     /* both children span full width */
       }
-      /* 2. Input — full width, 54px tall thumb target, matching radius */
+      /* 2. Input — full width, 58px tall (more prominent than button) */
       .nlInput {
         width: 100% !important;
         max-width: none;
-        padding: 0 16px;
+        padding-left: 1rem;
         border-radius: 8px !important;
         border-right: 2px solid rgba(0,0,0,.4);
-        height: 54px !important;  /* thumb-sized, matches button */
+        height: 58px !important;
+        font-size: 1.1rem;
       }
-      /* 3. Button — full width, 54px tall, Nooga weight + letter-spacing */
+      /* 3. Button — slightly shorter than input for visual hierarchy */
       .nlBtn {
         width: 100% !important;
         max-width: none;
         border-radius: 8px !important;
-        height: 54px !important;  /* matches input height */
+        height: 52px !important;
         font-weight: 700 !important;
         letter-spacing: 0.1em !important;
+        margin-top: 0.75rem;
       }
     }
 
@@ -682,23 +690,25 @@ const topics = [
     }
     @media (max-width: 700px) {
       .nlBand { margin-top: 16px; margin-bottom: 0; }
-      .nlInner { padding: 20px 1.25rem; justify-content: center; text-align: center; }
+      /* 5. Container — Nooga breathing room */
+      .nlInner { padding: 2.5rem 1.25rem !important; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
-      /* 1. Montserrat Black heading on narrow screens */
+      /* 1. Header — 2.1rem, weight 900, margin-bottom */
       .nlHead {
         font-family: 'Montserrat', sans-serif !important;
         font-weight: 900 !important;
-        font-size: 2.4rem !important;
+        font-size: 2.1rem !important;
+        margin-bottom: 0.5rem;
       }
-      /* 5. Description wrapping — max-width: 90% keeps "for free." from widowing */
-      .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; width: 100%; max-width: 90%; }
-      /* 4. Form column stack */
+      /* 4. Description — max-width: 90% keeps "for free." from widowing */
+      .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; width: 100%; max-width: 90%; margin: 0 auto; }
+      /* Form column stack */
       .nlForm { display: flex; flex-direction: column; width: 100%; max-width: 100%; gap: 1rem; }
-      .nlRow { flex-direction: column; height: auto; gap: 1rem; width: 100%; align-items: stretch; }
-      /* 2. Input */
-      .nlInput { border-radius: 8px !important; border-right: 2px solid rgba(0,0,0,.4); height: 54px !important; width: 100% !important; max-width: none; }
-      /* 3. Button — Nooga weight + spacing */
-      .nlBtn { border-radius: 8px !important; height: 54px !important; width: 100% !important; max-width: none; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+      .nlRow { flex-direction: column; height: auto; gap: 0; width: 100%; align-items: stretch; }
+      /* 2. Input — 58px tall, more prominent than button */
+      .nlInput { border-radius: 8px !important; border-right: 2px solid rgba(0,0,0,.4); height: 58px !important; width: 100% !important; max-width: none; font-size: 1.1rem; padding-left: 1rem; }
+      /* 3. Button — 52px, slightly shorter, margin-top for visual hierarchy */
+      .nlBtn { border-radius: 8px !important; height: 52px !important; width: 100% !important; max-width: none; font-weight: 700 !important; letter-spacing: 0.1em !important; margin-top: 0.75rem; }
     }
 
     /* ── Home grid 75/25 inside 1280px container ── */
