@@ -612,35 +612,45 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     padding: 8px 0;
   }
 
-  /* ── Newsletter mobile kill-switch (< 768px) ── */
+  /* ── Newsletter mobile overhaul (< 768px) ── */
   @media (max-width: 767px) {
-    /* 1. Row: forced flex column, full-width, centered */
+    /* 1. Form container: column stack, centered */
     .nlRow {
       display: flex !important;
       flex-direction: column !important;
-      width: 100% !important;
       align-items: center !important;
+      width: 100% !important;
+      height: auto !important;
     }
-    /* 2. Input: full-width, no side margins pinching */
+    /* 2. Input: uniform width + height, restored full border-radius */
     .nlInput {
-      width: 100% !important;
-      max-width: 100% !important;
-      min-width: 100% !important;
+      width: 90% !important;
+      max-width: 340px !important;
+      min-width: unset !important;
+      height: 48px !important;
       box-sizing: border-box !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      border-radius: 8px !important;
+      border-right: 2px solid rgba(0,0,0,.4) !important;
     }
-    /* 3. Button: full-width, no side margins pinching */
+    /* 3. Button: uniform width + height, full border-radius */
     .nlBtn {
-      width: 100% !important;
-      max-width: 100% !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
+      width: 90% !important;
+      max-width: 340px !important;
+      height: 48px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      border-radius: 8px !important;
     }
-    /* 4. Header: single line, punchy size */
+    /* 4. Header: keep 'Good News Daytona!' on one line */
     .nlHead {
       white-space: nowrap !important;
       font-size: 1.85rem !important;
+    }
+    /* 5. 'for free.' stays bold */
+    .nlSub strong {
+      font-weight: 900 !important;
     }
   }
 
