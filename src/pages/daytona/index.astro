@@ -732,6 +732,27 @@ const topics = [
       .nlBtn { border-radius: 8px !important; height: 42px !important; width: 100% !important; max-width: none; font-weight: 700 !important; letter-spacing: 0.1em !important; }
     }
 
+    @media (max-width: 767px) {
+      /* Target the 'Enter your email address' box */
+      input[type='email'].nlInput {
+        width: 100% !important; /* Forces it to fill the yellow box side-to-side */
+        max-width: none !important; /* Removes any old constraints */
+        height: 54px !important; /* Matches your preferred scaled-down size */
+      }
+      /* Target the 'SIGN UP, IT'S FREE!' button */
+      button.nlBtn {
+        width: 100% !important;
+        height: 46px !important; /* Matches your preferred scaled-down size */
+        margin-top: 1rem; /* Creates clean spacing between the blocks */
+      }
+      /* Ensure the form uses Flexbox to stack them */
+      .nlRow {
+        display: flex;
+        flex-direction: column; /* This will stack the elements vertically for portrait */
+        width: 100%;
+      }
+    }
+
     /* ── Home grid 75/25 inside 1280px container ── */
     .homeGrid {
       display: grid;
