@@ -614,7 +614,14 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
   /* ── Newsletter mobile overhaul (< 768px) ── */
   @media (max-width: 767px) {
-    /* 1. Form container: column stack, centered */
+    /* 1. Parent containers: force full width, override any pinching */
+    .nlCard, .nlContent, .nlForm {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding-left: 10px !important;
+      padding-right: 10px !important;
+    }
+    /* 2. Form row: column stack, centered */
     .nlRow {
       display: flex !important;
       flex-direction: column !important;
@@ -622,11 +629,11 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
       width: 100% !important;
       height: auto !important;
     }
-    /* 2. Input: uniform width + height, restored full border-radius */
+    /* 3. Input: 90vw so it ignores parent constraints and reads the screen */
     .nlInput {
-      width: 90% !important;
+      width: 90vw !important;
       max-width: 340px !important;
-      min-width: unset !important;
+      min-width: 280px !important;
       height: 48px !important;
       box-sizing: border-box !important;
       margin-left: auto !important;
@@ -634,19 +641,22 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
       border-radius: 8px !important;
       border-right: 2px solid rgba(0,0,0,.4) !important;
     }
-    /* 3. Button: uniform width + height, full border-radius */
+    /* 3. Button: 90vw so it ignores parent constraints and reads the screen */
     .nlBtn {
-      width: 90% !important;
+      width: 90vw !important;
       max-width: 340px !important;
+      min-width: 280px !important;
       height: 48px !important;
       margin-left: auto !important;
       margin-right: auto !important;
       border-radius: 8px !important;
     }
-    /* 4. Header: keep 'Good News Daytona!' on one line */
+    /* 4. Header: keep 'Good News Daytona!' on one line, centered */
     .nlHead {
-      white-space: nowrap !important;
       font-size: 1.85rem !important;
+      white-space: nowrap !important;
+      width: 100% !important;
+      text-align: center !important;
     }
     /* 5. 'for free.' stays bold */
     .nlSub strong {
