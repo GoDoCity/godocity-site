@@ -538,14 +538,14 @@ const topics = [
       /* ── Newsletter mobile fixes (under 768px) — Nooga style ── */
       /* 5. Container — more breathing room in the yellow box */
       .nlInner {
-        padding: 2rem 1rem !important;
+        padding: 1.5rem 1rem !important;
         width: 100%;
       }
       /* 1. Header — single line, Montserrat Black 900, tight tracking for extra punch */
       .nlHead {
         font-family: 'Montserrat', sans-serif !important;
         font-weight: 900 !important;
-        font-size: 1.8rem !important;
+        font-size: 1.85rem !important;
         letter-spacing: -0.02em !important;
         text-align: center;
         margin-bottom: 0.5rem;
@@ -576,26 +576,28 @@ const topics = [
         width: 100%;
         align-items: stretch;     /* both children span full width */
       }
-      /* 2. Input — full width, 68px tall (visually dominant over button) */
+      /* 2. Input — full width, 54px tall (visually dominant over button) */
       .nlInput {
         width: 100% !important;
         max-width: none;
         padding-left: 1rem;
         border-radius: 8px !important;
         border-right: 2px solid rgba(0,0,0,.4);
-        height: 68px !important;
+        height: 54px !important;
         font-size: 1.1rem;
         box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
       }
-      /* 3. Button — 50px, 14px shorter than input for clear visual hierarchy */
+      /* 3. Button — 46px, 8px shorter than input for clear visual hierarchy */
       .nlBtn {
         width: 100% !important;
         max-width: none;
         border-radius: 8px !important;
-        height: 50px !important;
+        height: 46px !important;
         font-weight: 700 !important;
         letter-spacing: 0.1em !important;
       }
+      /* 4. Bold hook — "for free." stays extra-bold */
+      .nlSub strong { font-weight: 900 !important; }
     }
 
     /* ── Newsletter — breathing room above, alert bar directly below ── */
@@ -694,26 +696,28 @@ const topics = [
     @media (max-width: 700px) {
       .nlBand { margin-top: 16px; margin-bottom: 0; }
       /* 5. Container — Nooga breathing room */
-      .nlInner { padding: 2rem 1rem !important; width: 100%; justify-content: center; text-align: center; }
+      .nlInner { padding: 1.5rem 1rem !important; width: 100%; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
       /* 1. Header — single line, Montserrat Black 900, tight tracking for extra punch */
       .nlHead {
         font-family: 'Montserrat', sans-serif !important;
         font-weight: 900 !important;
-        font-size: 1.8rem !important;
+        font-size: 1.85rem !important;
         letter-spacing: -0.02em !important;
         margin-bottom: 0.5rem;
         white-space: nowrap !important;
       }
       /* 4. Description — max-width: 90% keeps "for free." from widowing */
       .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; width: 100%; max-width: 90%; margin: 0 auto; }
+      /* "for free." stays extra-bold */
+      .nlSub strong { font-weight: 900 !important; }
       /* Form column stack */
       .nlForm { display: flex; flex-direction: column; width: 100%; max-width: 100%; gap: 1rem; }
       .nlRow { flex-direction: column; height: auto; gap: 0.75rem; width: 100%; align-items: stretch; }
-      /* 2. Input — 68px tall, clearly dominant over button, with depth shadow */
-      .nlInput { border-radius: 8px !important; border-right: 2px solid rgba(0,0,0,.4); height: 68px !important; width: 100% !important; max-width: none; font-size: 1.1rem; padding-left: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
-      /* 3. Button — 50px, 14px shorter than input for clear visual hierarchy */
-      .nlBtn { border-radius: 8px !important; height: 50px !important; width: 100% !important; max-width: none; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+      /* 2. Input — 54px tall, clearly dominant over button, with depth shadow */
+      .nlInput { border-radius: 8px !important; border-right: 2px solid rgba(0,0,0,.4); height: 54px !important; width: 100% !important; max-width: none; font-size: 1.1rem; padding-left: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
+      /* 3. Button — 46px, 8px shorter than input for clear visual hierarchy */
+      .nlBtn { border-radius: 8px !important; height: 46px !important; width: 100% !important; max-width: none; font-weight: 700 !important; letter-spacing: 0.1em !important; }
     }
 
     /* ── Home grid 75/25 inside 1280px container ── */
