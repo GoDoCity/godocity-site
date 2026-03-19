@@ -614,41 +614,33 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
   /* ── Newsletter mobile kill-switch (< 768px) ── */
   @media (max-width: 767px) {
-    /* 1. Wrapper: blow out any parent choking the width */
-    .nlContent,
-    .nlRow,
-    .nlForm {
+    /* 1. Row: forced flex column, full-width, centered */
+    .nlRow {
+      display: flex !important;
+      flex-direction: column !important;
+      width: 100% !important;
+      align-items: center !important;
+    }
+    /* 2. Input: full-width, no side margins pinching */
+    .nlInput {
       width: 100% !important;
       max-width: 100% !important;
-      display: block !important;
+      min-width: 100% !important;
+      box-sizing: border-box !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
     }
-
-    /* 2. Header: scale with viewport, single line */
-    .nlHead {
-      font-size: 6.5vw !important;
-      white-space: nowrap !important;
-    }
-
-    /* 3. Bold hook: "for free." pops in black */
-    .nlSub strong {
-      font-weight: 900 !important;
-      color: #000;
-    }
-
-    /* 4. Input bar: tall and full-width */
-    .nlInput {
-      height: 68px !important;
-      width: 100% !important;
-      border-radius: 8px !important;
-      border-right: 2px solid rgba(0,0,0,.4) !important;
-    }
-
-    /* 5. Button follows below in column layout */
+    /* 3. Button: full-width, no side margins pinching */
     .nlBtn {
       width: 100% !important;
-      border-radius: 8px !important;
-      margin-top: 8px;
-      padding: 14px 0 !important;
+      max-width: 100% !important;
+      margin-left: 0 !important;
+      margin-right: 0 !important;
+    }
+    /* 4. Header: single line, punchy size */
+    .nlHead {
+      white-space: nowrap !important;
+      font-size: 1.85rem !important;
     }
   }
 
