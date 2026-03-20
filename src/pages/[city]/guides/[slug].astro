@@ -16,25 +16,37 @@ import Base           from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection, render } from "astro:content";
 
-/* ── Build all static paths from the cityGuides collection ─────────────────── */
+/* ── Build all static paths from both guide collections ────────────────────── */
 export async function getStaticPaths() {
-  const guides = await getCollection("cityGuides");
-  return guides.map((guide) => ({
+  const cityGuidesAll = await getCollection("cityGuides");
+  const newGuidesAll  = await getCollection("guides");
+
+  const cityGuidePaths = cityGuidesAll.map((guide) => ({
     params: {
-      city: guide.data.city,          // "daytona"  → from frontmatter
-      slug: guide.slug.split("/").pop(), // "best-restaurants" → from filename
+      city: guide.data.city,
+      slug: guide.slug.split("/").pop(),
     },
-    props: { guide },
+    props: { guide, collectionType: "cityGuide" as const },
   }));
+
+  const newGuidePaths = newGuidesAll.map((guide) => ({
+    params: {
+      city: guide.slug.split("/")[0],        // "daytona" from "daytona/date-night"
+      slug: guide.slug.split("/").pop(),     // "date-night"
+    },
+    props: { guide, collectionType: "guide" as const },
+  }));
+
+  return [...cityGuidePaths, ...newGuidePaths];
 }
 
 /* ── Per-page data ──────────────────────────────────────────────────────── */
-const { guide }   = Astro.props;
+const { guide, collectionType } = Astro.props;
 const { data }    = guide;
 const { Content } = await render(guide);   // renders any body markdown
 
-const city     = data.city;
-const items    = [...data.items].sort((a, b) => a.rank - b.rank);
+const city = collectionType === "cityGuide" ? (data as any).city : (guide.slug.split("/")[0]);
+const items    = collectionType === "cityGuide" ? [...((data as any).items ?? [])].sort((a: any, b: any) => a.rank - b.rank) : [];
 const firstHalf  = items.slice(0, Math.ceil(items.length / 2));  // always-visible
 const secondHalf = items.slice(Math.ceil(items.length / 2));     // load-more
 
@@ -78,8 +90,9 @@ if (data.localSponsor) {
   }
 }
 
-const pubDateStr = data.pubDate
-  ? new Date(data.pubDate).toLocaleDateString("en-US", {
+const rawDate = collectionType === "cityGuide" ? (data as any).pubDate : (data as any).date;
+const pubDateStr = rawDate
+  ? new Date(rawDate).toLocaleDateString("en-US", {
       month: "long", year: "numeric",
     })
   : "";
@@ -107,12 +120,12 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
       </nav>
       <div class="guideKicker">
         <span class="kPill kCity">{city.charAt(0).toUpperCase() + city.slice(1)}</span>
-        <span class="kPill kCat">{data.category ?? "City Guide"}</span>
+        <span class="kPill kCat">{collectionType === "guide" ? ((data as any).topic + " Guide") : ((data as any).category ?? "City Guide")}</span>
       </div>
       <h1 class="guideTitle">{data.title}</h1>
-      <p  class="guideIntro">{data.intro}</p>
+      <p  class="guideIntro">{collectionType === "guide" ? (data as any).description : (data as any).intro}</p>
       <div class="guideMeta">
-        <span class="gAuthor">By {data.author ?? "Charles King"}</span>
+        <span class="gAuthor">By Charles King</span>
         {pubDateStr && <><span class="gDot" aria-hidden="true">·</span><span class="gDate">{pubDateStr}</span></>}
       </div>
     </header>
@@ -157,7 +170,28 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     </div>
   )}
 
-  {/* ════════ 75/25 GRID ════════ */}
+  {/* ════════ NEW GUIDE: simple markdown content ════════ */}
+  {collectionType === "guide" && (
+    <div class="container">
+      <div class="guideMarkdownWrap">
+        {(data as any).image && (
+          <img
+            class="guideFeatImg"
+            src={(data as any).image}
+            alt={data.title}
+            loading="eager"
+            decoding="async"
+          />
+        )}
+        <div class="guideMarkdown prose">
+          <Content />
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* ════════ 75/25 GRID (cityGuide ranked list) ════════ */}
+  {collectionType === "cityGuide" && (
   <div class="container">
     <div class="homeGrid">
 
@@ -165,13 +199,13 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
       <main>
 
         {/* ── Map (renders only when guide has map_locations) ── */}
-        {data.map_locations && data.map_locations.length > 0 && (
-          <InteractiveMap locations={data.map_locations} height="350px" />
+        {(data as any).map_locations && (data as any).map_locations.length > 0 && (
+          <InteractiveMap locations={(data as any).map_locations} height="350px" />
         )}
 
         {/* ── Items 1–3 always visible ── */}
         <ol class="gList" id="listA">
-          {firstHalf.slice(0, 3).map((item) => (
+          {firstHalf.slice(0, 3).map((item: any) => (
             <li class="gItem" id={`spot-${item.rank}`}>
               <div class="iHeader">
                 <div class="rankBadge" aria-label={`Number ${item.rank}`}>{item.rank}</div>
@@ -388,6 +422,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
       </aside>
     </div>
   </div>
+  )}{/* end cityGuide conditional */}
 
   {/* ════════ MORE GUIDES FOOTER ════════ */}
   <section class="moreSection">
@@ -443,6 +478,51 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   /* ── Global reset (matches homepage) ── */
   :global(html), :global(body) { overflow-x: hidden; width: 100%; position: relative; }
   .pageWrap { min-height: 100vh; overflow-x: hidden; width: 100%; }
+
+  /* ── New guide: simple markdown layout ── */
+  .guideMarkdownWrap {
+    max-width: 780px;
+    margin: 40px auto 64px;
+  }
+  .guideFeatImg {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 14px;
+    margin-bottom: 32px;
+  }
+  .guideMarkdown :global(h2) {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text);
+    margin: 2rem 0 0.75rem;
+  }
+  .guideMarkdown :global(h3) {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 1.5rem 0 0.5rem;
+  }
+  .guideMarkdown :global(p) {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--muted);
+    margin: 0 0 1rem;
+  }
+  .guideMarkdown :global(ul), .guideMarkdown :global(ol) {
+    padding-left: 1.5rem;
+    margin: 0 0 1rem;
+  }
+  .guideMarkdown :global(li) {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .guideMarkdown :global(a) {
+    color: var(--link);
+    text-decoration: underline;
+  }
 
   :global(.container) { max-width: 1260px; margin: 0 auto; padding: 0 2rem; }
   @media (max-width: 768px) { :global(.container) { max-width: 100%; padding: 0 1.25rem; } }
