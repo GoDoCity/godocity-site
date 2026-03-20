@@ -1,12 +1,20 @@
 ---
 city: daytona
 section: play
-title: "Play in Daytona"
-description: "Things to do, beaches, parks, and weekend ideas."
+title: "Your Ultimate Guide to Daytona — Play: Date Night Spots"
+description: "From sunset cocktails on the Intracoastal to hidden gem bistros in Ormond, we've scouted the perfect spots for your next night out. Stop guessing and start GoDo-ing."
 ---
 
-## Start here
+From sunset cocktails on the Intracoastal to hidden gem bistros in Ormond, we've scouted the perfect spots for your next night out. Stop guessing and start GoDo-ing.
 
-- Beaches, trails, and day trips
-- Seasonal events
-- “Best of” lists
+## Sunset Seekers
+
+The best views in Volusia County come with a golden hour you won't forget. These waterfront spots nail the vibe — whether you're looking for craft cocktails with a dock view or a leisurely stroll before dinner.
+
+<!-- Add your Sunset Seekers venue picks here -->
+
+## Foodie Favorites
+
+Ormond and Daytona's dining scene punches above its weight. These kitchens are putting out food worth making a reservation for — no tourist traps, no chain menus.
+
+<!-- Add your Foodie Favorites venue picks here -->
