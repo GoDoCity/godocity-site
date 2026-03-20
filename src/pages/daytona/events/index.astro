@@ -98,15 +98,17 @@ function sortKey(e: any): string {
 /* Merge: markdown → manual → sheet (coord overrides already applied in events.js) */
 const allEventsWithLive = [...allEvents, ...manualEvents, ...sheetEvents];
 
-/* ── Filter: Greater Daytona area + strictly after HARD_CUTOFF ── */
+/* ── Filter: Greater Daytona area + date >= yesterday, with sponsor override ── */
 const upcomingEvents = allEventsWithLive
   .filter(e => {
     const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
     if (!GREATER_DAYTONA.has(evCity)) return false;
+    // Sponsored events always show (extra visibility window)
+    if (e.data.sponsored === true) return true;
     // For multi-day events, keep if endDate is still in the future
     const dateStr    = String(e.data.eventDate ?? "").split("T")[0];
     const endDateStr = e.data.endDate ? String(e.data.endDate).split("T")[0] : null;
-    return dateStr > HARD_CUTOFF || (endDateStr !== null && endDateStr > HARD_CUTOFF);
+    return dateStr >= HARD_CUTOFF || (endDateStr !== null && endDateStr >= HARD_CUTOFF);
   })
   .sort((a, b) => sortKey(a) < sortKey(b) ? -1 : sortKey(a) > sortKey(b) ? 1 : 0);
 

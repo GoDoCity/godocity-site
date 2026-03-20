@@ -38,9 +38,10 @@ function _tryWriteCache(data) {
 }
 
 // ── Hard global cutoff ────────────────────────────────────────────────────────
-/** Yesterday's date as YYYY-MM-DD — events on or after today always pass the `> HARD_CUTOFF` check. */
+/** Yesterday at midnight — events on or after yesterday always pass the date check. */
 const _yesterday = new Date();
 _yesterday.setDate(_yesterday.getDate() - 1);
+_yesterday.setHours(0, 0, 0, 0);
 export const HARD_CUTOFF = _yesterday.toISOString().split("T")[0];
 
 // ── Shared area set ───────────────────────────────────────────────────────────
@@ -103,10 +104,12 @@ function applyCoordOverrides(e) {
 }
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
-/** True only when the event date is strictly after HARD_CUTOFF. */
-export function isStrictlyFuture(eventDateRaw) {
+/** True when the event date is >= yesterday (start of day), or the event is sponsored. */
+export function isStrictlyFuture(eventDateRaw, isSponsored = false) {
+  if (isSponsored) return true;
   if (!eventDateRaw) return false;
-  return String(eventDateRaw).split("T")[0] > HARD_CUTOFF;
+  const eventDate = new Date(String(eventDateRaw));
+  return !isNaN(eventDate) ? eventDate >= _yesterday : String(eventDateRaw).split("T")[0] >= HARD_CUTOFF;
 }
 
 function dateSortKey(e) {
@@ -192,20 +195,21 @@ export async function getGreaterDaytonaEvents() {
   return raw
     .filter(e => {
       const evCity = (e.city ?? "").toLowerCase().trim();
-      return GREATER_DAYTONA.has(evCity) && isStrictlyFuture(e.eventDate);
+      return GREATER_DAYTONA.has(evCity) && isStrictlyFuture(e.eventDate, e.sponsored === true);
     })
     .map(normalizeSheetEvent)
     .sort((a, b) => (dateSortKey(a) < dateSortKey(b) ? -1 : dateSortKey(a) > dateSortKey(b) ? 1 : 0));
 }
 
 /**
- * All normalised sheet events strictly after HARD_CUTOFF (any city), sorted by date.
+ * All normalised sheet events >= yesterday (any city), sorted by date.
+ * Sponsored events are always included regardless of date.
  * Used by the Events page, which merges markdown / manual events on top.
  */
 export async function getAllSheetEvents() {
   const raw = await getRawSheetEvents();
   return raw
-    .filter(e => isStrictlyFuture(e.eventDate))
+    .filter(e => isStrictlyFuture(e.eventDate, e.sponsored === true))
     .map(normalizeSheetEvent)
     .sort((a, b) => (dateSortKey(a) < dateSortKey(b) ? -1 : dateSortKey(a) > dateSortKey(b) ? 1 : 0));
 }
