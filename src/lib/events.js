@@ -38,8 +38,10 @@ function _tryWriteCache(data) {
 }
 
 // ── Hard global cutoff ────────────────────────────────────────────────────────
-/** Events whose date is on or before this YYYY-MM-DD string are excluded everywhere. */
-export const HARD_CUTOFF = "2026-03-16";
+/** Yesterday's date as YYYY-MM-DD — events on or after today always pass the `> HARD_CUTOFF` check. */
+const _yesterday = new Date();
+_yesterday.setDate(_yesterday.getDate() - 1);
+export const HARD_CUTOFF = _yesterday.toISOString().split("T")[0];
 
 // ── Shared area set ───────────────────────────────────────────────────────────
 export const GREATER_DAYTONA = new Set([
