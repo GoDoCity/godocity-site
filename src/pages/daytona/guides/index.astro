@@ -314,16 +314,19 @@ const sections = [
       align-items: center;
       justify-content: center;
       margin-bottom: 28px;
+      border-top: 4px solid #FFD700 !important;
+      border-bottom: 4px solid #FFD700 !important;
     }
     .ghCategoryBannerText {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(2.2rem, 4vw, 2.9rem);
+      font-size: clamp(4.4rem, 8vw, 5.8rem) !important;
       font-weight: 900;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #ffffff;
       margin: 0;
       line-height: 1;
+      text-align: center;
     }
 
     /* ── Sub-header row (view-all link) ── */
@@ -558,7 +561,7 @@ const sections = [
       .ghHero { padding: 32px 0 28px; }
       .ghSection { padding: 0 0 32px; }
       .ghCategoryBanner { padding: 36px 0; }
-      .ghCategoryBannerText { font-size: clamp(1.9rem, 8vw, 2.4rem); }
+      .ghCategoryBannerText { font-size: clamp(2.8rem, 8vw, 4rem) !important; }
       .ghSecSubHead { margin-bottom: 16px; }
       .ghGrid { gap: 16px; }
       .ghArticleRow { grid-template-columns: 72px 1fr; gap: 10px; padding: 12px 14px; }
