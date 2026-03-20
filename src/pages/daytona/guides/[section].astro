@@ -1,5 +1,5 @@
 ---
-import Base from "../../../layouts/Base.astro";
+import GuideLayout from "../../../layouts/GuideLayout.astro";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
@@ -13,36 +13,36 @@ export async function getStaticPaths() {
 
 const { section } = Astro.params;
 
+/* Map URL section → display topic label */
+const topicMap: Record<string, string> = {
+  live: "Live",
+  work: "Work",
+  play: "Play",
+  best: "Best",
+};
+const topic = topicMap[section] ?? "";
+
 const guide = (
   await getCollection("guides", (g) =>
-    g.data.city === "daytona" && g.data.section === section
+    g.data.city === "daytona" && g.slug.split("/").pop() === section
   )
 )[0];
 
 const rendered = guide ? await guide.render() : null;
 ---
 
-<Base
-  title={`${guide?.data.title ?? section} | GoDoDaytona`}
-  subtitle={guide?.data.description ?? "GoDo guides"}
+<GuideLayout
+  title={`${guide?.data.title ?? topic} | GoDoDaytona`}
+  subtitle={guide?.data.intro ?? "GoDo guides"}
   cityBase="daytona"
+  topic={topic}
+  showToC={true}
 >
-  <section class="section">
-    <div class="container">
-      <div class="card card-pad">
-        <div class="kicker">Guide</div>
-        <h1 style="margin:10px 0 10px;font-size:34px">
-          {guide?.data.title ?? "Guide"}
-        </h1>
-
-        {rendered ? (
-          <rendered.Content />
-        ) : (
-          <p class="lede">
-            No guide yet. Add one in <code>src/content/guides/daytona</code>.
-          </p>
-        )}
-      </div>
-    </div>
-  </section>
-</Base>
+  {rendered ? (
+    <rendered.Content />
+  ) : (
+    <p class="lede">
+      No guide yet. Add one in <code>src/content/guides/daytona</code>.
+    </p>
+  )}
+</GuideLayout>

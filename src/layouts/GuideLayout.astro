@@ -1,0 +1,680 @@
+---
+/**
+ * src/layouts/GuideLayout.astro
+ * Layout for guide pages (Live / Work / Play / Best).
+ *
+ * Props
+ *  title       – page <title>
+ *  subtitle    – meta description
+ *  cityBase    – city slug, e.g. "daytona"
+ *  topic       – "Live" | "Work" | "Play" | "Best" (displayed as branding label)
+ *  showToC     – when true, a Table of Contents is built from h2/h3 in the article
+ *
+ * Grid (desktop): 70 % content column | 30 % sticky sidebar
+ * Sidebar:  mini newsletter sign-up (sticky) + upcoming events list
+ */
+import Base from "./Base.astro";
+import { getGreaterDaytonaEvents, cityDisplayName } from "../lib/events.js";
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  cityBase?: string;
+  topic?: string;
+  showToC?: boolean;
+}
+
+const { title, subtitle, cityBase = "daytona", topic = "", showToC = false } = Astro.props;
+
+/* ── Events for sidebar ── */
+const allEvents       = await getGreaterDaytonaEvents();
+const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
+const regularList     = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
+const hasSlider = sponsoredSlides.length > 0;
+const hasList   = regularList.length > 0;
+const hasEvents = hasSlider || hasList;
+
+/* Topic emoji map */
+const topicEmoji: Record<string, string> = {
+  Live: "🏠",
+  Work: "💼",
+  Play: "🎉",
+  Best: "⭐",
+};
+const emoji = topicEmoji[topic] ?? "📖";
+---
+
+<Base title={title} subtitle={subtitle} cityBase={cityBase}>
+
+  <section class="gl-wrap">
+
+    <!-- ── Branding header ─────────────────────────────────────────────── -->
+    <header class="gl-header">
+      <a class="gl-pill" href={`/${cityBase}/guides/`}>Guides</a>
+      {topic && (
+        <span class="gl-topic">
+          <span class="gl-topic-emoji">{emoji}</span>
+          {topic}
+        </span>
+      )}
+    </header>
+
+    <!-- ── Main grid ──────────────────────────────────────────────────── -->
+    <div class="gl-grid">
+
+      <!-- Left / Center: article + optional ToC -->
+      <div class="gl-main">
+
+        {showToC && (
+          <nav class="gl-toc" id="guide-toc" aria-label="Table of contents">
+            <div class="gl-toc-head">On This Page</div>
+            <ol class="gl-toc-list" id="toc-list">
+              <!-- Populated by client-side script -->
+            </ol>
+          </nav>
+        )}
+
+        <article class="gl-article" id="guide-article">
+          <slot />
+        </article>
+
+      </div>
+
+      <!-- Right: sticky sidebar ─────────────────────────────────────── -->
+      <aside class="gl-sidebar">
+
+        <!-- 1 — Mini newsletter (sticky) -->
+        <div class="gl-sticky-top">
+          <div class="gl-nl">
+            <div class="gl-nl-head">
+              <em>Good News <strong>{cityBase.charAt(0).toUpperCase() + cityBase.slice(1)}!</strong></em>
+            </div>
+            <div class="gl-nl-sub">Free local stories, every morning.</div>
+            <form class="gl-nl-form" action={`/${cityBase}/subscribe/`} method="get">
+              <input
+                class="gl-nl-input"
+                type="email"
+                name="email"
+                placeholder="your@email.com"
+                required
+                autocomplete="email"
+              />
+              <button class="gl-nl-btn" type="submit">SIGN UP</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- 2 — Upcoming Events -->
+        <div class="gl-events">
+          <div class="gl-ev-head">
+            <span class="gl-ev-title">Upcoming Events</span>
+            <a class="gl-ev-more" href={`/${cityBase}/events/`}>See all</a>
+          </div>
+
+          {!hasEvents ? (
+            <p class="gl-no-events">No upcoming events yet.</p>
+          ) : (
+            <div class="gl-ev-list">
+
+              {/* Sponsored slider */}
+              {hasSlider && (
+                <div class="gl-slider" id="gsSlider" aria-label="Featured sponsored events">
+                  {sponsoredSlides.map((e: any, idx: number) => {
+                    const d        = new Date(e.data.eventDate);
+                    const dow      = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                    const day      = d.getDate();
+                    const eMon     = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                    const mon      = d.toLocaleDateString("en-US", { month: "short" });
+                    const evCity   = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+                    const cityLbl  = cityDisplayName(evCity);
+                    return (
+                      <a
+                        class={`gl-slide${idx === 0 ? " gl-slide--on" : ""}`}
+                        href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
+                        target={e.data.url ? "_blank" : "_self"}
+                        rel={e.data.url ? "noopener" : ""}
+                        aria-hidden={idx !== 0 ? "true" : undefined}
+                        data-gs-idx={String(idx)}
+                      >
+                        <div class="gl-ev-cal">
+                          <div class="gl-eDow">{dow}</div>
+                          <div class="gl-eDay">{day}</div>
+                          <div class="gl-eMon">{eMon}</div>
+                        </div>
+                        <div class="gl-ev-info">
+                          <div class="gl-ev-name">{e.data.title}</div>
+                          <div class="gl-ev-meta">
+                            <span>{mon} {day}</span>
+                            <span class="gl-ev-sep">|</span>
+                            <span class="gl-ev-city">{cityLbl}</span>
+                            <span class="gl-sp-badge">SPONSORED</span>
+                          </div>
+                        </div>
+                      </a>
+                    );
+                  })}
+                  {sponsoredSlides.length > 1 && (
+                    <div class="gl-dots" id="gsDots">
+                      {sponsoredSlides.map((_: any, idx: number) => (
+                        <button
+                          class={`gl-dot${idx === 0 ? " gl-dot--on" : ""}`}
+                          aria-label={`Go to event ${idx + 1}`}
+                          data-gs-dot={String(idx)}
+                          type="button"
+                        ></button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Regular event list */}
+              {hasList && regularList.map((e: any) => {
+                const d       = new Date(e.data.eventDate);
+                const dow     = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                const day     = d.getDate();
+                const eMon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const mon     = d.toLocaleDateString("en-US", { month: "short" });
+                const evCity  = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+                const cityLbl = cityDisplayName(evCity);
+                return (
+                  <a
+                    class="gl-ev-row"
+                    href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
+                    target={e.data.url ? "_blank" : "_self"}
+                    rel={e.data.url ? "noopener" : ""}
+                  >
+                    <div class="gl-ev-cal">
+                      <div class="gl-eDow">{dow}</div>
+                      <div class="gl-eDay">{day}</div>
+                      <div class="gl-eMon">{eMon}</div>
+                    </div>
+                    <div class="gl-ev-info">
+                      <div class="gl-ev-name">{e.data.title}</div>
+                      <div class="gl-ev-meta">
+                        <span>{mon} {day}</span>
+                        <span class="gl-ev-sep">|</span>
+                        <span class="gl-ev-city">{cityLbl}</span>
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+
+            </div>
+          )}
+
+          <a class="gl-submit-ev" href="/submit-event/">+ Submit an event →</a>
+        </div>
+
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<!-- ── Table of Contents builder (runs only when showToC is true) ─── -->
+{showToC && (
+  <script>
+    (function () {
+      var toc     = document.getElementById("guide-toc");
+      var article = document.getElementById("guide-article");
+      var list    = document.getElementById("toc-list");
+      if (!toc || !article || !list) return;
+
+      var headings = Array.prototype.slice.call(
+        article.querySelectorAll("h2, h3")
+      );
+
+      if (headings.length === 0) {
+        toc.style.display = "none";
+        return;
+      }
+
+      headings.forEach(function (h: HTMLElement, i: number) {
+        if (!h.id) h.id = "toc-" + i;
+
+        var li = document.createElement("li");
+        li.className = h.tagName === "H3"
+          ? "gl-toc-item gl-toc-item--sub"
+          : "gl-toc-item";
+
+        var a = document.createElement("a");
+        a.href        = "#" + h.id;
+        a.textContent = h.textContent;
+        a.className   = "gl-toc-link";
+
+        li.appendChild(a);
+        list.appendChild(li);
+      });
+
+      /* Highlight active heading on scroll */
+      var links: HTMLAnchorElement[] = Array.prototype.slice.call(
+        list.querySelectorAll(".gl-toc-link")
+      );
+
+      function markActive() {
+        var scrollY = window.scrollY + 100;
+        var active  = 0;
+        headings.forEach(function (h: HTMLElement, i: number) {
+          if ((h as HTMLElement).offsetTop <= scrollY) active = i;
+        });
+        links.forEach(function (l, i) {
+          l.classList.toggle("gl-toc-link--active", i === active);
+        });
+      }
+
+      window.addEventListener("scroll", markActive, { passive: true });
+      markActive();
+    })();
+  </script>
+)}
+
+<!-- ── Sidebar event slider ─────────────────────────────────────────── -->
+<script>
+  (function () {
+    var slider = document.getElementById("gsSlider");
+    if (!slider) return;
+
+    var slides  = Array.prototype.slice.call(slider.querySelectorAll(".gl-slide"));
+    var dotsEl  = document.getElementById("gsDots");
+    var dots    = dotsEl
+      ? Array.prototype.slice.call(dotsEl.querySelectorAll(".gl-dot"))
+      : [];
+    var current = 0;
+    var total   = slides.length;
+    var timer: ReturnType<typeof setInterval> | null = null;
+
+    if (total <= 1) return;
+
+    function goTo(idx: number) {
+      slides[current].classList.remove("gl-slide--on");
+      slides[current].setAttribute("aria-hidden", "true");
+      if (dots[current]) dots[current].classList.remove("gl-dot--on");
+
+      current = (idx + total) % total;
+
+      slides[current].classList.add("gl-slide--on");
+      slides[current].removeAttribute("aria-hidden");
+      if (dots[current]) dots[current].classList.add("gl-dot--on");
+    }
+
+    function start() { timer = setInterval(function () { goTo(current + 1); }, 5000); }
+    function reset() { if (timer) clearInterval(timer); start(); }
+
+    dots.forEach(function (dot, i) {
+      dot.addEventListener("click", function () { goTo(i); reset(); });
+    });
+    slider.addEventListener("mouseenter", function () { if (timer) clearInterval(timer); });
+    slider.addEventListener("mouseleave", start);
+
+    start();
+  })();
+</script>
+
+<style>
+  /* ── Wrapper ── */
+  .gl-wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── Branding header ── */
+  .gl-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .gl-pill {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: var(--pillBg, rgba(255, 210, 74, 0.14));
+    border: 1px solid var(--pillBorder, rgba(255, 210, 74, 0.55));
+    color: var(--brand1, #ffd24a);
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: opacity 140ms;
+  }
+  .gl-pill:hover { opacity: 0.78; color: var(--brand1, #ffd24a); }
+
+  .gl-topic {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-head, "Manrope", sans-serif);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .gl-topic-emoji { font-size: 20px; }
+
+  /* ── Two-column grid ── */
+  .gl-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    gap: 56px;
+    align-items: start;
+  }
+
+  /* ── Main column ── */
+  .gl-main {
+    display: grid;
+    gap: 32px;
+    min-width: 0;
+  }
+
+  /* ── Table of Contents ── */
+  .gl-toc {
+    background: var(--panel, #10141a);
+    border: 1px solid var(--border, rgba(255,255,255,.12));
+    border-left: 3px solid var(--brand1, #ffd24a);
+    border-radius: var(--radius, 14px);
+    padding: 20px 24px;
+  }
+
+  .gl-toc-head {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brand1, #ffd24a);
+    margin-bottom: 14px;
+  }
+
+  .gl-toc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2px;
+  }
+
+  .gl-toc-item { padding: 0; }
+  .gl-toc-item--sub { padding-left: 16px; }
+
+  .gl-toc-link {
+    display: block;
+    padding: 5px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    margin-left: -10px;
+    transition: color 140ms, border-color 140ms;
+    line-height: 1.3;
+  }
+  .gl-toc-link:hover { color: var(--text); }
+  .gl-toc-link--active {
+    color: var(--brand1, #ffd24a);
+    border-left-color: var(--brand1, #ffd24a);
+  }
+
+  .gl-toc-item--sub .gl-toc-link {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--faint, rgba(232,237,244,.58));
+  }
+  .gl-toc-item--sub .gl-toc-link:hover { color: var(--muted); }
+  .gl-toc-item--sub .gl-toc-link.gl-toc-link--active { color: var(--brand1, #ffd24a); }
+
+  /* ── Article body ── */
+  .gl-article {
+    min-width: 0;
+    line-height: 1.75;
+    color: var(--text);
+  }
+
+  .gl-article h2 {
+    font-family: var(--font-head, "Manrope", sans-serif);
+    font-size: clamp(1.4rem, 2.5vw, 1.8rem);
+    font-weight: 800;
+    margin: 40px 0 12px;
+    letter-spacing: -0.03em;
+    scroll-margin-top: 80px;
+  }
+  .gl-article h3 {
+    font-family: var(--font-head, "Manrope", sans-serif);
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    font-weight: 700;
+    margin: 28px 0 8px;
+    scroll-margin-top: 80px;
+  }
+  .gl-article p  { margin: 0 0 18px; }
+  .gl-article ul,
+  .gl-article ol { margin: 0 0 18px; padding-left: 24px; }
+  .gl-article li { margin-bottom: 6px; }
+
+  /* ── Sidebar column ── */
+  .gl-sidebar {
+    display: grid;
+    gap: 28px;
+    align-self: start;
+    min-width: 0;
+  }
+
+  /* Sticky top wrapper keeps the newsletter box pinned */
+  .gl-sticky-top {
+    position: sticky;
+    top: 80px;          /* clear fixed header */
+    z-index: 10;
+  }
+
+  /* ── Mini Newsletter ── */
+  .gl-nl {
+    background: #f9d900;
+    border-radius: 16px;
+    padding: 28px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .gl-nl-head {
+    font-size: 22px;
+    font-weight: 900;
+    font-style: italic;
+    color: #000;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+  }
+  .gl-nl-head strong { font-weight: 900; }
+
+  .gl-nl-sub {
+    font-size: 13.5px;
+    color: rgba(0, 0, 0, 0.78);
+    line-height: 1.4;
+  }
+
+  .gl-nl-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .gl-nl-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: none;
+    background: #fff;
+    font-size: 14px;
+    color: #111;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    outline: 2px solid transparent;
+    transition: outline-color 150ms;
+  }
+  .gl-nl-input:focus { outline-color: #000; }
+  .gl-nl-input::placeholder { color: #aaa; }
+
+  .gl-nl-btn {
+    width: 100%;
+    padding: 12px 0;
+    border-radius: 999px;
+    border: none;
+    background: #000;
+    color: #f9d900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: opacity 150ms;
+  }
+  .gl-nl-btn:hover { opacity: 0.82; }
+
+  /* ── Events section ── */
+  .gl-events { display: grid; gap: 0; }
+
+  .gl-ev-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--brand1, #ffd24a);
+    margin-bottom: 0;
+  }
+
+  .gl-ev-title {
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .gl-ev-more {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--link, #ffd24a);
+    text-decoration: none;
+  }
+  .gl-ev-more:hover { text-decoration: underline; }
+
+  .gl-ev-list { display: grid; }
+
+  /* Sponsored slider */
+  .gl-slider {
+    display: grid;
+    grid-template-columns: 1fr;
+    border-bottom: 1px solid var(--border, rgba(255,255,255,.12));
+    margin-bottom: 4px;
+  }
+
+  .gl-slide {
+    grid-row: 1;
+    grid-column: 1;
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 10px;
+    align-items: center;
+    text-decoration: none;
+    padding: 12px 8px;
+    background: rgba(249, 217, 0, 0.06);
+    border-radius: 8px;
+    margin: 6px -6px 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 500ms ease;
+  }
+  .gl-slide--on {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .gl-dots { grid-row: 2; grid-column: 1; display: flex; gap: 4px; justify-content: center; padding: 7px 0 3px; }
+  .gl-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    border: none; padding: 0; background: rgba(255,255,255,.22);
+    cursor: pointer; transition: background 200ms, transform 200ms;
+  }
+  .gl-dot--on { background: var(--brand1, #ffd24a); transform: scale(1.3); }
+
+  /* Regular event row */
+  .gl-ev-row {
+    display: grid;
+    grid-template-columns: 44px 1fr;
+    gap: 10px;
+    align-items: center;
+    text-decoration: none;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--border, rgba(255,255,255,.12));
+    transition: opacity 140ms;
+  }
+  .gl-ev-row:last-child { border-bottom: none; }
+  .gl-ev-row:hover { opacity: 0.76; }
+
+  /* Shared calendar block */
+  .gl-ev-cal {
+    width: 44px;
+    height: 44px;
+    border-radius: 9px;
+    background: var(--pillBg, rgba(255,210,74,.14));
+    border: 1px solid var(--pillBorder, rgba(255,210,74,.55));
+    display: grid;
+    place-items: center;
+    text-align: center;
+    line-height: 1;
+  }
+  .gl-eDow { font-size: 9px;  font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1, #ffd24a); }
+  .gl-eDay { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 1px; }
+  .gl-eMon { font-size: 7px;  font-weight: 700; letter-spacing: .08em; color: var(--faint, rgba(232,237,244,.58)); text-transform: uppercase; }
+
+  .gl-ev-info { display: flex; flex-direction: column; gap: 2px; }
+  .gl-ev-name { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.25; }
+  .gl-ev-meta { font-size: 11px; color: var(--faint, rgba(232,237,244,.58)); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .gl-ev-sep  { opacity: 0.4; }
+  .gl-ev-city { color: var(--brand1, #ffd24a); font-weight: 700; }
+  .gl-sp-badge {
+    display: inline-block; font-size: 7.5px; font-weight: 900; letter-spacing: .08em;
+    background: rgba(249,217,0,.18); color: var(--brand1, #ffd24a);
+    border: 1px solid rgba(249,217,0,.35); padding: 1px 4px; border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .gl-no-events { font-size: 12px; color: var(--faint); padding: 10px 0; margin: 0; }
+
+  .gl-submit-ev {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--brand1, #ffd24a);
+    text-decoration: none;
+    opacity: 0.85;
+    transition: opacity 120ms;
+  }
+  .gl-submit-ev:hover { opacity: 1; }
+
+  /* ── Responsive ─────────────────────────────────────────────────────── */
+  @media (max-width: 900px) {
+    .gl-grid {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+
+    /* On mobile, sidebar sits below content */
+    .gl-sticky-top { position: static; }
+
+    /* Show sidebar events section before the main article on mobile */
+    .gl-sidebar { order: -1; }
+  }
+
+  @media (max-width: 600px) {
+    .gl-wrap { padding: 24px 16px 60px; }
+    .gl-header { margin-bottom: 20px; }
+  }
+</style>
