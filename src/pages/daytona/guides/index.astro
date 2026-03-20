@@ -51,7 +51,12 @@ const hardcodedFeatured: Record<string, SectionDef["featured"]> = {
     description: "From seasonal tourism fleets to marine service rigs, Volusia County's vehicle economy runs deep. Here's who keeps it moving and how to get your operation into compliance without the runaround.",
     href: "/daytona/guides/work/",
   },
-  Play: null, // Play has a real guide, no fallback needed
+  Play: {
+    img: "/images/topics/sports.jpg",
+    title: "Your Ultimate Guide to Daytona — Play: Date Night Spots",
+    description: "From sunset cocktails on the Intracoastal to hidden gem bistros in Ormond, we've scouted the perfect spots for your next night out. Stop guessing and start GoDo-ing.",
+    href: "/daytona/guides/play/",
+  },
 };
 
 const hardcodedArticles: Record<string, SectionDef["articles"]> = {
@@ -73,7 +78,11 @@ const hardcodedArticles: Record<string, SectionDef["articles"]> = {
 };
 
 const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
-  const topicGuides = allGuides.filter((g) => g.data.topic === topic);
+  // Sort by date descending so the most recent guide is first
+  const topicGuides = allGuides
+    .filter((g) => g.data.topic === topic)
+    .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+  // Explicit featured: true wins; otherwise the most recent guide is featured
   const featuredGuide = topicGuides.find((g) => g.data.featured) ?? topicGuides[0] ?? null;
   const articleGuides = topicGuides.filter((g) => g !== featuredGuide).slice(0, 3);
 
