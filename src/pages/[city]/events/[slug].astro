@@ -118,7 +118,7 @@ const relatedEvents = allEvents
 
 /* ── Related guides ── */
 let allGuides = [];
-try { allGuides = await getCollection("guides"); } catch { allGuides = []; }
+try { allGuides = await getCollection("cityGuides"); } catch { allGuides = []; }
 const relatedGuides = allGuides
   .filter(g => g.data.city?.toLowerCase() === city.toLowerCase())
   .slice(0, 3);

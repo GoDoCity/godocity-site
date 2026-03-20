@@ -23,7 +23,7 @@ const topicMap: Record<string, string> = {
 const topic = topicMap[section] ?? "";
 
 const guide = (
-  await getCollection("guides", (g) =>
+  await getCollection("cityGuides", (g) =>
     g.data.city === "daytona" && g.slug.split("/").pop() === section
   )
 )[0];

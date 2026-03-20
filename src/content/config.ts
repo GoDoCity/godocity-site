@@ -26,6 +26,21 @@ const posts = defineCollection({
 });
 
 const guides = defineCollection({
+  type: 'content',
+  schema: z.object({
+    title: z.string(),
+    topic: z.enum(['Live', 'Work', 'Play']),
+    featured: z.boolean().default(false),
+    showToC: z.boolean().default(true),
+    image: z.string().optional(),
+    description: z.string(),
+    date: z.date().or(z.string()).transform((val) => new Date(val)),
+  }),
+});
+
+// Legacy city-specific ranked-list guides (e.g. "Best Restaurants in Daytona")
+// Stored under src/content/cityGuides/[city]/[slug].md
+const cityGuides = defineCollection({
   type: "content",
   schema: z.object({
     city:      z.string(),
@@ -36,6 +51,8 @@ const guides = defineCollection({
     role:      z.string().optional().default("Newsletter Editor"),
     pubDate:   z.coerce.date().optional(),
     heroImage: z.string().optional(),
+    section:   z.string().optional(),
+    description: z.string().optional(),
     items: z.array(z.object({
       rank:   z.number().int().min(1).max(20),
       tag:    z.string().optional(),
@@ -57,17 +74,9 @@ const guides = defineCollection({
       sub:   z.string(),
       href:  z.string(),
     })).optional(),
-    // ── Reader Voting (Best Of series) ──────────────────────────────────
-    // Set votingEnabled: true to activate the voting UI on a guide page.
-    // votingStatus controls the display state of the voting widget:
-    //   "closed"    → voting not yet open (default, no UI shown)
-    //   "open"      → readers can submit a vote
-    //   "tallying"  → polls closed, counting in progress
-    //   "published" → winner announced, results shown
-    votingEnabled: z.boolean().optional().default(false),
-    votingStatus:  z.enum(["closed", "open", "tallying", "published"]).optional().default("closed"),
-    votingDeadline: z.coerce.date().optional(),   // when "open" voting closes
-
+    votingEnabled:  z.boolean().optional().default(false),
+    votingStatus:   z.enum(["closed", "open", "tallying", "published"]).optional().default("closed"),
+    votingDeadline: z.coerce.date().optional(),
     localSponsor: z.object({
       brand:   z.string().optional().default(""),
       tagline: z.string().optional().default(""),
@@ -155,4 +164,4 @@ const diy = defineCollection({
   }),
 });
 
-export const collections = { posts, guides, globalSponsors, events, diy };
+export const collections = { posts, guides, cityGuides, globalSponsors, events, diy };
