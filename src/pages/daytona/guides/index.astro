@@ -142,14 +142,16 @@ const sections = [
     {/* ── THREE STACKED SECTIONS ── */}
     {sections.map((s) => (
       <section class={`ghSection ghSection--${s.bg}`} id={s.id}>
+
+        {/* Full-width category banner */}
+        <div class="ghCategoryBanner">
+          <h2 class="ghCategoryBannerText">{s.label.toUpperCase()}</h2>
+        </div>
+
         <div class="container">
 
-          {/* Section header */}
-          <div class="ghSecHead">
-            <div class="ghSecLeft">
-              <h2 class="ghSecTitle">{s.label}</h2>
-              <span class="ghGuidesPill">Guides</span>
-            </div>
+          {/* Sub-header row: just the "View all" link */}
+          <div class="ghSecSubHead">
             <a class="ghSecMore" href={s.viewAllHref}>
               View all {s.label} Guides →
             </a>
@@ -293,54 +295,42 @@ const sections = [
 
     /* ── Section shells — alternating backgrounds ── */
     .ghSection {
-      padding: 56px 0 48px;
+      padding: 0 0 48px;
     }
     .ghSection--white {
       background: var(--surface);
     }
     .ghSection--grey {
       background: var(--surface2);
-      border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
 
-    /* ── Section header row ── */
-    .ghSecHead {
+    /* ── Full-width category banner ── */
+    .ghCategoryBanner {
+      width: 100vw !important;
+      background: #2E3E52;
+      padding: 56px 0;
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 16px;
-      padding-bottom: 14px;
-      border-bottom: 2px solid var(--brand1);
+      align-items: center;
+      justify-content: center;
       margin-bottom: 28px;
-      flex-wrap: wrap;
     }
-    .ghSecLeft {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .ghSecTitle {
+    .ghCategoryBannerText {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+      font-size: clamp(2.2rem, 4vw, 2.9rem);
       font-weight: 900;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      margin: 0;
-      line-height: 1.05;
-    }
-    .ghGuidesPill {
-      display: inline-flex;
-      align-items: center;
-      padding: 3px 12px;
-      border-radius: 999px;
-      border: 1px solid var(--pillBorder);
-      background: var(--pillBg);
-      color: var(--brand1);
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .06em;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
+      color: #ffffff;
+      margin: 0;
+      line-height: 1;
+    }
+
+    /* ── Sub-header row (view-all link) ── */
+    .ghSecSubHead {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 20px;
     }
     .ghSecMore {
       font-size: 13px;
@@ -566,8 +556,10 @@ const sections = [
     /* ── Mobile stacks ── */
     @media (max-width: 640px) {
       .ghHero { padding: 32px 0 28px; }
-      .ghSection { padding: 36px 0 32px; }
-      .ghSecHead { margin-bottom: 20px; }
+      .ghSection { padding: 0 0 32px; }
+      .ghCategoryBanner { padding: 36px 0; }
+      .ghCategoryBannerText { font-size: clamp(1.9rem, 8vw, 2.4rem); }
+      .ghSecSubHead { margin-bottom: 16px; }
       .ghGrid { gap: 16px; }
       .ghArticleRow { grid-template-columns: 72px 1fr; gap: 10px; padding: 12px 14px; }
       .ghThumbWrap { width: 72px; height: 52px; }
