@@ -10,25 +10,28 @@ const sections = [
     bg: "white",
     featured: {
       img: "/images/topics/real-estate.jpg",
-      title: "Your Ultimate Guide to Daytona — Live: Neighborhoods & Housing",
+      title: "Your Ultimate Guide to Daytona — Live: Terrazzo Restoration",
       description:
-        "Whether you're relocating from across the country or moving across town, this is your starting point. We cover every neighborhood worth knowing, the real renting vs. buying math, and the moving checklist Daytona locals actually use.",
+        "Daytona's homes are full of stunning vintage terrazzo floors — and most of them haven't seen proper care in decades. Here's how to bring yours back to life the right way, from grinding and polishing to long-term sealing.",
       href: "/daytona/guides/live/",
     },
     articles: [
       {
         img: "/images/topics/city.jpg",
-        title: "Best Neighborhoods in Daytona Beach",
-        href: "/daytona/guides/live/",
-      },
-      {
-        img: "/images/topics/real-estate.jpg",
-        title: "Renting vs. Buying in Daytona: The Real Numbers",
+        title: "Your Ultimate Guide to Daytona — Live: Ormond Neighborhoods",
+        description: "Quiet streets, great schools, and lower price points. Find out which Ormond pockets are worth a closer look.",
         href: "/daytona/guides/live/",
       },
       {
         img: "/images/topics/wellness.jpg",
-        title: "Your Moving to Daytona Checklist",
+        title: "Your Ultimate Guide to Daytona — Live: Hurricane Prep",
+        description: "Daytona sits in the path of Florida's biggest storms. This is the local checklist that actually gets you ready — not the generic one.",
+        href: "/daytona/guides/live/",
+      },
+      {
+        img: "/images/topics/culture.jpg",
+        title: "Your Ultimate Guide to Daytona — Live: Local Gardening",
+        description: "Growing in Zone 9b is a different game. Discover what thrives in Daytona's soil and exactly when to plant it.",
         href: "/daytona/guides/live/",
       },
     ],
@@ -42,25 +45,28 @@ const sections = [
     bg: "grey",
     featured: {
       img: "/images/topics/business.jpg",
-      title: "Your Ultimate Guide to Daytona — Work: Jobs, Coworking & Economy",
+      title: "Your Ultimate Guide to Daytona — Work: Fleet Maintenance",
       description:
-        "From the region's largest employers to the best desks-by-the-day coworking spots, this guide covers what you actually need to know about working in Daytona — whether you commute, freelance, or build here.",
+        "From seasonal tourism fleets to marine service rigs, Volusia County's vehicle economy runs deep. Here's who keeps it moving and how to get your operation into compliance without the runaround.",
       href: "/daytona/guides/work/",
     },
     articles: [
       {
-        img: "/images/topics/business.jpg",
-        title: "Top Employers in the Greater Daytona Area",
+        img: "/images/topics/history.jpg",
+        title: "Your Ultimate Guide to Daytona — Work: Small Business Insurance",
+        description: "Florida's liability landscape is brutal for small operators. Cut through the noise with a guide built for Daytona-area business owners.",
         href: "/daytona/guides/work/",
       },
       {
         img: "/images/topics/culture.jpg",
-        title: "Best Co-Working Spaces in Daytona",
+        title: "Your Ultimate Guide to Daytona — Work: Networking in Volusia",
+        description: "The right room changes everything. These are the events, orgs, and meetups where Daytona's business community actually shows up.",
         href: "/daytona/guides/work/",
       },
       {
-        img: "/images/topics/history.jpg",
-        title: "Remote Work & Freelancing in Daytona",
+        img: "/images/topics/real-estate.jpg",
+        title: "Your Ultimate Guide to Daytona — Work: Coworking Spaces",
+        description: "Skip the coffee-shop WiFi. These Daytona coworking spots offer real desks, fast internet, and people worth meeting.",
         href: "/daytona/guides/work/",
       },
     ],
@@ -74,25 +80,28 @@ const sections = [
     bg: "white",
     featured: {
       img: "/images/topics/events.jpg",
-      title: "Your Ultimate Guide to Daytona — Play: Things to Do & See",
+      title: "Your Ultimate Guide to Daytona — Play: Date Night Spots",
       description:
-        "Beaches, trails, breweries, race week, bike week, and everything in between. If you're trying to figure out how to spend a weekend (or a lifetime) in Daytona, this is the guide you bookmark first.",
+        "Forget the chain restaurants on LPGA. Daytona has a genuine date-night scene — and these are the spots that actually deliver on both the vibe and the food, from waterfront dinners to late-night bites.",
       href: "/daytona/guides/play/",
     },
     articles: [
       {
         img: "/images/topics/sports.jpg",
-        title: "The Best Beaches in Daytona Beach",
-        href: "/daytona/guides/play/",
-      },
-      {
-        img: "/images/topics/events.jpg",
-        title: "Weekend Ideas for Daytona Locals",
+        title: "Your Ultimate Guide to Daytona — Play: Best Surfing Beaches",
+        description: "Daytona's waves are more consistent than people give them credit for. Here's where to paddle out depending on swell and season.",
         href: "/daytona/guides/play/",
       },
       {
         img: "/images/topics/wellness.jpg",
-        title: "Top Parks & Trails Near Daytona",
+        title: "Your Ultimate Guide to Daytona — Play: Hidden Fishing Holes",
+        description: "The locals aren't fishing the pier. Find the backwater spots, creek mouths, and tidal flats worth a sunrise trip.",
+        href: "/daytona/guides/play/",
+      },
+      {
+        img: "/images/topics/city.jpg",
+        title: "Your Ultimate Guide to Daytona — Play: Dog-Friendly Parks",
+        description: "Daytona is surprisingly great for dog owners. These parks, trails, and off-leash zones are worth the car ride.",
         href: "/daytona/guides/play/",
       },
     ],
@@ -191,6 +200,9 @@ const sections = [
                   <div class="ghArticleText">
                     <div class="ghArticleNum">#{i + 1}</div>
                     <div class="ghArticleTitle">{art.title}</div>
+                    {art.description && (
+                      <p class="ghArticleDesc">{art.description}</p>
+                    )}
                   </div>
                 </a>
               ))}
@@ -514,6 +526,16 @@ const sections = [
       transition: color 130ms ease;
     }
     .ghArticleRow:hover .ghArticleTitle { color: var(--link); }
+    .ghArticleDesc {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.45;
+      margin: 2px 0 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
 
     /* ── View All button row ── */
     .ghViewAllRow {
