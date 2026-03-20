@@ -233,16 +233,18 @@ const sections = [
 
     /* ── Page Hero ── */
     .ghHero {
-      padding: 48px 0 40px;
+      padding: 56px 0 72px;
       border-bottom: 2px solid var(--brand1);
+      text-align: center;
     }
     .ghHeroBreadcrumb {
       font-size: 13px;
       font-weight: 600;
       color: var(--faint);
-      margin-bottom: 14px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
     }
     .ghHeroBreadcrumb a {
@@ -254,24 +256,27 @@ const sections = [
 
     .ghHeroTitle {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(2.4rem, 5vw, 3.6rem);
+      font-size: clamp(4rem, 9vw, 8rem);
       font-weight: 900;
-      letter-spacing: -0.03em;
+      font-style: italic;
+      text-transform: uppercase;
+      letter-spacing: -0.02em;
       color: var(--text);
-      margin: 0 0 10px;
-      line-height: 1.05;
+      margin: 0 0 18px;
+      line-height: 1.0;
     }
     .ghHeroLede {
       font-size: 1.1rem;
       color: var(--muted);
       max-width: 600px;
-      margin: 0 0 22px;
+      margin: 0 auto 28px;
       line-height: 1.55;
     }
     .ghTopicPills {
       display: flex;
-      gap: 10px;
+      gap: 14px;
       flex-wrap: wrap;
+      justify-content: center;
     }
     .ghTopicPill {
       display: inline-flex;
@@ -558,7 +563,7 @@ const sections = [
 
     /* ── Mobile stacks ── */
     @media (max-width: 640px) {
-      .ghHero { padding: 32px 0 28px; }
+      .ghHero { padding: 36px 0 48px; }
       .ghSection { padding: 0 0 32px; }
       .ghCategoryBanner { padding: 36px 0; }
       .ghCategoryBannerText { font-size: clamp(2.8rem, 8vw, 4rem) !important; }
