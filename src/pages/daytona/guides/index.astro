@@ -1,114 +1,115 @@
 ---
 import Base from "../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
 
-/* ── Section data — update hrefs once individual sub-guide pages are live ── */
-const sections = [
-  {
-    id: "live",
-    label: "Live",
-    emoji: "🏠",
-    bg: "white",
-    featured: {
-      img: "/images/topics/real-estate.jpg",
-      title: "Your Ultimate Guide to Daytona — Live: Terrazzo Restoration",
-      description:
-        "Daytona's homes are full of stunning vintage terrazzo floors — and most of them haven't seen proper care in decades. Here's how to bring yours back to life the right way, from grinding and polishing to long-term sealing.",
-      href: "/daytona/guides/live/",
-    },
-    articles: [
-      {
-        img: "/images/topics/city.jpg",
-        title: "Your Ultimate Guide to Daytona — Live: Ormond Neighborhoods",
-        description: "Quiet streets, great schools, and lower price points. Find out which Ormond pockets are worth a closer look.",
-        href: "/daytona/guides/live/",
-      },
-      {
-        img: "/images/topics/wellness.jpg",
-        title: "Your Ultimate Guide to Daytona — Live: Hurricane Prep",
-        description: "Daytona sits in the path of Florida's biggest storms. This is the local checklist that actually gets you ready — not the generic one.",
-        href: "/daytona/guides/live/",
-      },
-      {
-        img: "/images/topics/culture.jpg",
-        title: "Your Ultimate Guide to Daytona — Live: Local Gardening",
-        description: "Growing in Zone 9b is a different game. Discover what thrives in Daytona's soil and exactly when to plant it.",
-        href: "/daytona/guides/live/",
-      },
-    ],
-    viewAllHref: "/daytona/guides/live/",
-    viewAllLabel: "View All Live Guides",
-  },
-  {
-    id: "work",
-    label: "Work",
-    emoji: "💼",
-    bg: "grey",
-    featured: {
-      img: "/images/topics/business.jpg",
-      title: "Your Ultimate Guide to Daytona — Work: Fleet Maintenance",
-      description:
-        "From seasonal tourism fleets to marine service rigs, Volusia County's vehicle economy runs deep. Here's who keeps it moving and how to get your operation into compliance without the runaround.",
-      href: "/daytona/guides/work/",
-    },
-    articles: [
-      {
-        img: "/images/topics/history.jpg",
-        title: "Your Ultimate Guide to Daytona — Work: Small Business Insurance",
-        description: "Florida's liability landscape is brutal for small operators. Cut through the noise with a guide built for Daytona-area business owners.",
-        href: "/daytona/guides/work/",
-      },
-      {
-        img: "/images/topics/culture.jpg",
-        title: "Your Ultimate Guide to Daytona — Work: Networking in Volusia",
-        description: "The right room changes everything. These are the events, orgs, and meetups where Daytona's business community actually shows up.",
-        href: "/daytona/guides/work/",
-      },
-      {
-        img: "/images/topics/real-estate.jpg",
-        title: "Your Ultimate Guide to Daytona — Work: Coworking Spaces",
-        description: "Skip the coffee-shop WiFi. These Daytona coworking spots offer real desks, fast internet, and people worth meeting.",
-        href: "/daytona/guides/work/",
-      },
-    ],
-    viewAllHref: "/daytona/guides/work/",
-    viewAllLabel: "View All Work Guides",
-  },
-  {
-    id: "play",
-    label: "Play",
-    emoji: "🎉",
-    bg: "white",
-    featured: {
-      img: "/images/uploads/31_supper_club_ormond_beach_2_fe5e8791-0d93-4d26-9e5f-40fd5ef066ba.jpg",
-      title: "Your Ultimate Guide to Daytona — Play: Date Night Spots",
-      description:
-        "From sunset cocktails on the Intracoastal to hidden gem bistros in Ormond, we've scouted the perfect spots for your next night out. Stop guessing and start GoDo-ing.",
-      href: "/daytona/guides/play/",
-    },
-    articles: [
-      {
-        img: "/images/topics/sports.jpg",
-        title: "Your Ultimate Guide to Daytona — Play: Best Surfing Beaches",
-        description: "Daytona's waves are more consistent than people give them credit for. Here's where to paddle out depending on swell and season.",
-        href: "/daytona/guides/play/",
-      },
-      {
-        img: "/images/topics/wellness.jpg",
-        title: "Your Ultimate Guide to Daytona — Play: Hidden Fishing Holes",
-        description: "The locals aren't fishing the pier. Find the backwater spots, creek mouths, and tidal flats worth a sunrise trip.",
-        href: "/daytona/guides/play/",
-      },
-      {
-        img: "/images/topics/city.jpg",
-        title: "Your Ultimate Guide to Daytona — Play: Dog-Friendly Parks",
-        description: "Daytona is surprisingly great for dog owners. These parks, trails, and off-leash zones are worth the car ride.",
-        href: "/daytona/guides/play/",
-      },
-    ],
-    viewAllHref: "/daytona/guides/play/",
-    viewAllLabel: "View All Play Guides",
-  },
+/* ── Fetch all guides for Daytona from the new Decap collection ── */
+const allGuides = await getCollection("guides", (g) =>
+  g.slug.startsWith("daytona/")
+);
+
+/* ── Helper to extract the URL slug from collection slug ── */
+function guideSlug(g: (typeof allGuides)[number]) {
+  return g.slug.split("/").pop()!;
+}
+
+/* ── Fallback images per topic when a guide has no image ── */
+const fallbackImgs: Record<string, string> = {
+  Live: "/images/topics/real-estate.jpg",
+  Work: "/images/topics/business.jpg",
+  Play: "/images/topics/sports.jpg",
+};
+
+/* ── Build sections dynamically from collection, with hardcoded fallbacks ── */
+type SectionDef = {
+  id: string;
+  label: string;
+  emoji: string;
+  bg: "white" | "grey";
+  featured: { img: string; title: string; description: string; href: string } | null;
+  articles: { img: string; title: string; description: string; href: string }[];
+  viewAllHref: string;
+  viewAllLabel: string;
+};
+
+const topicConfig: { topic: "Live" | "Work" | "Play"; emoji: string; bg: "white" | "grey" }[] = [
+  { topic: "Live", emoji: "🏠", bg: "white" },
+  { topic: "Work", emoji: "💼", bg: "grey" },
+  { topic: "Play", emoji: "🎉", bg: "white" },
 ];
+
+/* ── Hardcoded placeholders shown when a topic has no published guides yet ── */
+const hardcodedFeatured: Record<string, SectionDef["featured"]> = {
+  Live: {
+    img: "/images/topics/real-estate.jpg",
+    title: "Your Ultimate Guide to Daytona — Live: Terrazzo Restoration",
+    description: "Daytona's homes are full of stunning vintage terrazzo floors — and most of them haven't seen proper care in decades. Here's how to bring yours back to life the right way, from grinding and polishing to long-term sealing.",
+    href: "/daytona/guides/live/",
+  },
+  Work: {
+    img: "/images/topics/business.jpg",
+    title: "Your Ultimate Guide to Daytona — Work: Fleet Maintenance",
+    description: "From seasonal tourism fleets to marine service rigs, Volusia County's vehicle economy runs deep. Here's who keeps it moving and how to get your operation into compliance without the runaround.",
+    href: "/daytona/guides/work/",
+  },
+  Play: null, // Play has a real guide, no fallback needed
+};
+
+const hardcodedArticles: Record<string, SectionDef["articles"]> = {
+  Live: [
+    { img: "/images/topics/city.jpg", title: "Your Ultimate Guide to Daytona — Live: Ormond Neighborhoods", description: "Quiet streets, great schools, and lower price points. Find out which Ormond pockets are worth a closer look.", href: "/daytona/guides/live/" },
+    { img: "/images/topics/wellness.jpg", title: "Your Ultimate Guide to Daytona — Live: Hurricane Prep", description: "Daytona sits in the path of Florida's biggest storms. This is the local checklist that actually gets you ready — not the generic one.", href: "/daytona/guides/live/" },
+    { img: "/images/topics/culture.jpg", title: "Your Ultimate Guide to Daytona — Live: Local Gardening", description: "Growing in Zone 9b is a different game. Discover what thrives in Daytona's soil and exactly when to plant it.", href: "/daytona/guides/live/" },
+  ],
+  Work: [
+    { img: "/images/topics/history.jpg", title: "Your Ultimate Guide to Daytona — Work: Small Business Insurance", description: "Florida's liability landscape is brutal for small operators. Cut through the noise with a guide built for Daytona-area business owners.", href: "/daytona/guides/work/" },
+    { img: "/images/topics/culture.jpg", title: "Your Ultimate Guide to Daytona — Work: Networking in Volusia", description: "The right room changes everything. These are the events, orgs, and meetups where Daytona's business community actually shows up.", href: "/daytona/guides/work/" },
+    { img: "/images/topics/real-estate.jpg", title: "Your Ultimate Guide to Daytona — Work: Coworking Spaces", description: "Skip the coffee-shop WiFi. These Daytona coworking spots offer real desks, fast internet, and people worth meeting.", href: "/daytona/guides/work/" },
+  ],
+  Play: [
+    { img: "/images/topics/sports.jpg", title: "Your Ultimate Guide to Daytona — Play: Best Surfing Beaches", description: "Daytona's waves are more consistent than people give them credit for. Here's where to paddle out depending on swell and season.", href: "/daytona/guides/play/" },
+    { img: "/images/topics/wellness.jpg", title: "Your Ultimate Guide to Daytona — Play: Hidden Fishing Holes", description: "The locals aren't fishing the pier. Find the backwater spots, creek mouths, and tidal flats worth a sunrise trip.", href: "/daytona/guides/play/" },
+    { img: "/images/topics/city.jpg", title: "Your Ultimate Guide to Daytona — Play: Dog-Friendly Parks", description: "Daytona is surprisingly great for dog owners. These parks, trails, and off-leash zones are worth the car ride.", href: "/daytona/guides/play/" },
+  ],
+};
+
+const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
+  const topicGuides = allGuides.filter((g) => g.data.topic === topic);
+  const featuredGuide = topicGuides.find((g) => g.data.featured) ?? topicGuides[0] ?? null;
+  const articleGuides = topicGuides.filter((g) => g !== featuredGuide).slice(0, 3);
+
+  const featured: SectionDef["featured"] = featuredGuide
+    ? {
+        img: featuredGuide.data.image ?? fallbackImgs[topic],
+        title: featuredGuide.data.title,
+        description: featuredGuide.data.description,
+        href: `/daytona/guides/${guideSlug(featuredGuide)}/`,
+      }
+    : hardcodedFeatured[topic];
+
+  const collectionArticles = articleGuides.map((g) => ({
+    img: g.data.image ?? fallbackImgs[topic],
+    title: g.data.title,
+    description: g.data.description,
+    href: `/daytona/guides/${guideSlug(g)}/`,
+  }));
+
+  // Fill remaining slots with hardcoded articles so sections always look full
+  const articles = [
+    ...collectionArticles,
+    ...hardcodedArticles[topic].slice(collectionArticles.length),
+  ].slice(0, 3);
+
+  return {
+    id: topic.toLowerCase(),
+    label: topic,
+    emoji,
+    bg,
+    featured,
+    articles,
+    viewAllHref: `/daytona/guides/${topic.toLowerCase()}/`,
+    viewAllLabel: `View All ${topic} Guides`,
+  };
+});
 ---
 
 <Base
@@ -161,6 +162,7 @@ const sections = [
           <div class="ghGrid">
 
             {/* ── Left: Featured Card ── */}
+            {s.featured && (
             <a class="ghFeatCard" href={s.featured.href}>
               <div class="ghFeatImgWrap">
                 <img
@@ -183,6 +185,7 @@ const sections = [
                 <span class="ghFeatCta">Read the guide →</span>
               </div>
             </a>
+            )}
 
             {/* ── Right: 3 Recent Articles ── */}
             <div class="ghArticleList">
