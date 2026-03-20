@@ -8,17 +8,17 @@
  *               /austin/guides/best-tacos/
  *               /[any-city]/guides/[any-slug]/
  *
- * Content:      src/content/guides/[city]/[slug].md
- * Schema:       src/content/config.ts  (guides collection)
+ * Content:      src/content/cityGuides/[city]/[slug].md
+ * Schema:       src/content/config.ts  (cityGuides collection)
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import Base           from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection, render } from "astro:content";
 
-/* ── Build all static paths from the guides collection ─────────────────── */
+/* ── Build all static paths from the cityGuides collection ─────────────────── */
 export async function getStaticPaths() {
-  const guides = await getCollection("guides");
+  const guides = await getCollection("cityGuides");
   return guides.map((guide) => ({
     params: {
       city: guide.data.city,          // "daytona"  → from frontmatter
