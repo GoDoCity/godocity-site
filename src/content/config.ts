@@ -26,58 +26,15 @@ const posts = defineCollection({
 });
 
 const guides = defineCollection({
-  type: "content",
+  type: 'content',
   schema: z.object({
-    city:      z.string(),
-    title:     z.string(),
-    intro:     z.string().optional(),
-    category:  z.string().optional().default("City Guide"),
-    author:    z.string().optional().default("Charles King"),
-    role:      z.string().optional().default("Newsletter Editor"),
-    pubDate:   z.coerce.date().optional(),
-    heroImage: z.string().optional(),
-    items: z.array(z.object({
-      rank:   z.number().int().min(1).max(20),
-      tag:    z.string().optional(),
-      title:  z.string(),
-      body:   z.string(),
-      img:    z.string().optional().default(""),
-      imgAlt: z.string().optional().default(""),
-      href:   z.string().optional().default(""),
-    })).min(1).max(20).optional(),
-    map_locations: z.array(z.object({
-      label:   z.string(),
-      address: z.string().optional(),
-      lat:     z.number().optional(),
-      lng:     z.number().optional(),
-    })).optional(),
-    moreGuides: z.array(z.object({
-      emoji: z.string(),
-      label: z.string(),
-      sub:   z.string(),
-      href:  z.string(),
-    })).optional(),
-    // ── Reader Voting (Best Of series) ──────────────────────────────────
-    // Set votingEnabled: true to activate the voting UI on a guide page.
-    // votingStatus controls the display state of the voting widget:
-    //   "closed"    → voting not yet open (default, no UI shown)
-    //   "open"      → readers can submit a vote
-    //   "tallying"  → polls closed, counting in progress
-    //   "published" → winner announced, results shown
-    votingEnabled: z.boolean().optional().default(false),
-    votingStatus:  z.enum(["closed", "open", "tallying", "published"]).optional().default("closed"),
-    votingDeadline: z.coerce.date().optional(),   // when "open" voting closes
-
-    localSponsor: z.object({
-      brand:   z.string().optional().default(""),
-      tagline: z.string().optional().default(""),
-      body:    z.string().optional().default(""),
-      logo:    z.string().optional(),
-      img:     z.string().optional(),
-      imgAlt:  z.string().optional().default(""),
-      ctaText: z.string().optional().default("Learn more"),
-      ctaHref: z.string().optional().default(""),
-    }).optional(),
+    title: z.string(),
+    topic: z.enum(['Live', 'Work', 'Play']),
+    featured: z.boolean().default(false),
+    showToC: z.boolean().default(true),
+    image: z.string().optional(),
+    description: z.string(),
+    date: z.date().or(z.string()).transform((val) => new Date(val)),
   }),
 });
 
