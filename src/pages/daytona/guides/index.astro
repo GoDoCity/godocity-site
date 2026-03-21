@@ -6,9 +6,12 @@ import { getCollection } from "astro:content";
 /* Decap saves flat to src/content/guides/ so slugs have no "daytona/" prefix */
 const allGuides = await getCollection("guides");
 
-/* ── Use the Astro-generated slug directly (e.g. "2026-03-20-my-guide") ── */
+/* ── Return only the filename segment of the slug (strips "daytona/" prefix) ── */
+/* Guides live at src/content/guides/daytona/<slug>.md so g.slug is         */
+/* "daytona/2026-03-20-my-guide".  The dynamic route [slug].astro captures  */
+/* only the last segment, so we must strip everything before the final "/". */
 function guideSlug(g: (typeof allGuides)[number]) {
-  return g.slug;
+  return g.slug.split("/").pop()!;
 }
 
 /* ── Fallback images per topic when a guide has no image ── */
@@ -125,11 +128,6 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
   subtitle="Your local guide to living, working, and playing in Daytona Beach."
   cityBase="daytona"
 >
-  {/* ── DEBUG: remove once guides are confirmed loading ── */}
-  <p style="background:#fffbe6;border:1px solid #f5c518;padding:6px 14px;font-size:13px;font-family:monospace;margin:0;">
-    DEBUG — guides collection: <strong>{allGuides.length}</strong> file(s) found
-  </p>
-
   <div class="ghWrap">
 
     {/* ── PAGE HERO ── */}
