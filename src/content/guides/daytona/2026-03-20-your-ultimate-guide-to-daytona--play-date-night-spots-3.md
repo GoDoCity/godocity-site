@@ -3,7 +3,6 @@ title: "Your Ultimate Guide to Daytona — Play: Date Night Spots"
 topic: Play
 featured: true
 showToC: true
-image: "/images/uploads/31_supper_club_ormond_beach_2_fe5e8791-0d93-4d26-9e5f-40fd5ef066ba.jpg"
 description: "From sunset cocktails on the Intracoastal to hidden gem bistros in Ormond, we've scouted the perfect spots for your next night out. Stop guessing and start GoDo-ing."
 date: 2026-03-20
 ---
@@ -24,40 +23,17 @@ Tucked beneath street level on Volusia Avenue, **The Cellar** is Daytona's most 
 
 Ormond and Daytona's dining scene punches above its weight. These kitchens are putting out food worth making a reservation for — no tourist traps, no chain menus.
 
-### 63 Sovereign
+### Rose Villa
 
-**63 Sovereign** sits quietly on Granada Boulevard in Ormond Beach, and that's exactly how the regulars like it. The menu rotates seasonally, leaning heavily on Florida's Gulf and Atlantic bounty. The pan-seared snapper is almost always on, and the craft cocktail program is one of the best on the Halifax River corridor. The patio is the move when the weather cooperates.
-
-- **Address:** 63 S Granada Blvd, Ormond Beach, FL 32174
-- **Vibe:** Modern Florida, locally sourced, neighborhood gem
-- **Best for:** Foodies, date nights, any night you want to eat well without pretension
-
-### 31 Supper Club
-
-If Ormond Beach has a crown jewel, **31 Supper Club** is it. Set inside a beautifully restored historic building, the ambiance does the heavy lifting before the food even arrives — and then the food arrives. The filet is exceptional, the cocktails are classic, and the room has the kind of energy that makes a Tuesday feel like a Saturday. Dress the part; this one earns it.
-
-- **Address:** 31 S Beach St, Ormond Beach, FL 32174
-- **Vibe:** Old-school glamour, celebratory, unmistakably Ormond
-- **Best for:** Special occasions, impressing out-of-towners, anyone who wants the full experience
+<!-- Add Rose Villa description here -->
 
 ## After Hours
 
 Dinner doesn't have to be the end of the night. These spots keep the energy up after 10 PM without turning into a crowded bar scene — ideal when you want to extend the evening without starting over.
 
-### The Oyster Pub
+### The Sky Lounge
 
-A Daytona institution, **The Oyster Pub** on Seabreeze Boulevard is low-key in the best possible way. Raw bar, cold beer, locals who've been coming for decades. It's the perfect landing spot after a nicer dinner — casual, loud enough to talk freely, and reliably good any night of the week.
-
-- **Address:** 555 Seabreeze Blvd, Daytona Beach, FL 32118
-- **Vibe:** Local dive, no pretense, consistent
-- **Best for:** Post-dinner drinks, oyster cravings, when you want to feel like a regular
-
-### The Tasting Room at Brown & Brown
-
-For something more refined, the wine bar scene along Beach Street is quietly growing. **Cellar 6** and a few rotating pop-ups offer curated pours in a setting that rewards conversation over volume. Worth checking current schedules on social — hours and programming shift.
-
-- **Vibe:** Wine-forward, intimate, unhurried
-- **Best for:** Couples who'd rather sip and talk than shout over a DJ
+<!-- Add The Sky Lounge description here -->
 
 ## Pro Tips
 
@@ -67,9 +43,9 @@ A few things the locals know that the tourists don't.
 
 **The patio season is real.** Daytona's winters are mild enough that outdoor seating is usable most of the year. Ask for patio when you call — the indoor experience at many spots is fine, but the outdoor tables are often the reason locals choose a place.
 
-**Tuesday and Wednesday are the sweet spots.** Weekend crowds are real. Mid-week visits mean better service, shorter waits, and a quieter atmosphere — especially at spots like The Cellar and 63 Sovereign where the room itself is part of the experience.
+**Tuesday and Wednesday are the sweet spots.** Weekend crowds are real. Mid-week visits mean better service, shorter waits, and a quieter atmosphere — especially at spots like The Cellar where the room itself is part of the experience.
 
-**Trust the specials.** At seasonal-menu spots like 63 Sovereign, the off-menu items are usually what the kitchen is most excited about. Ask your server what's new — it's almost never a mistake.
+**Trust the specials.** At seasonal-menu spots, the off-menu items are usually what the kitchen is most excited about. Ask your server what's new — it's almost never a mistake.
 
 ## Parking Hack
 
