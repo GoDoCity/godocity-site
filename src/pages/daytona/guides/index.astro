@@ -2,14 +2,13 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/* ── Fetch all guides for Daytona from the new Decap collection ── */
-const allGuides = await getCollection("guides", (g) =>
-  g.slug.startsWith("daytona/")
-);
+/* ── Fetch all guides from the Decap collection ── */
+/* Decap saves flat to src/content/guides/ so slugs have no "daytona/" prefix */
+const allGuides = await getCollection("guides");
 
-/* ── Helper to extract the URL slug from collection slug ── */
+/* ── Use the Astro-generated slug directly (e.g. "2026-03-20-my-guide") ── */
 function guideSlug(g: (typeof allGuides)[number]) {
-  return g.slug.split("/").pop()!;
+  return g.slug;
 }
 
 /* ── Fallback images per topic when a guide has no image ── */
@@ -126,6 +125,11 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
   subtitle="Your local guide to living, working, and playing in Daytona Beach."
   cityBase="daytona"
 >
+  {/* ── DEBUG: remove once guides are confirmed loading ── */}
+  <p style="background:#fffbe6;border:1px solid #f5c518;padding:6px 14px;font-size:13px;font-family:monospace;margin:0;">
+    DEBUG — guides collection: <strong>{allGuides.length}</strong> file(s) found
+  </p>
+
   <div class="ghWrap">
 
     {/* ── PAGE HERO ── */}
