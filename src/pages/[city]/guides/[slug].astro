@@ -37,6 +37,10 @@ export async function getStaticPaths() {
     props: { guide, collectionType: "guide" as const },
   }));
 
+  // DEBUG: log all registered guide slugs so we can verify path registration
+  console.log("[getStaticPaths] cityGuide slugs:", cityGuidePaths.map(p => `/${p.params.city}/guides/${p.params.slug}/`));
+  console.log("[getStaticPaths] guides (new) slugs:", newGuidePaths.map(p => `/${p.params.city}/guides/${p.params.slug}/`));
+
   return [...cityGuidePaths, ...newGuidePaths];
 }
 
