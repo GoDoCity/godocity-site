@@ -112,28 +112,56 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 >
 <div class="pageWrap">
 
-  {/* ════════ GUIDE HERO ════════ */}
-  <div class="container">
-    <header class="guideHero">
-      <nav class="breadcrumb" aria-label="Breadcrumb">
-        <a class="bcItem bcLink" href={`/${city}/`}>{city.charAt(0).toUpperCase() + city.slice(1)}</a>
-        <span class="bcSep" aria-hidden="true">›</span>
-        <a class="bcItem bcLink" href={`/${city}/guides/`}>Guides</a>
-        <span class="bcSep" aria-hidden="true">›</span>
-        <span class="bcItem bcCurrent" aria-current="page">{data.title}</span>
-      </nav>
-      <div class="guideKicker">
-        <span class="kPill kCity">{city.charAt(0).toUpperCase() + city.slice(1)}</span>
-        <span class="kPill kCat">{collectionType === "guide" ? ((data as any).topic + " Guide") : ((data as any).category ?? "City Guide")}</span>
+  {/* ════════ HERO: Full-bleed image banner for new guides with image ════════
+      Uses data.image as background; Montserrat 900 overlaid title per brand guidelines.
+      Falls back to plain text hero for cityGuides or guides without an image.
+  ════════════════════════════════════════════════════════════════════════════ */}
+  {collectionType === "guide" && (data as any).image ? (
+    <div class="articleHero" style={`background-image: url('${(data as any).image}')`}>
+      <div class="articleHeroOverlay" />
+      <div class="container articleHeroInner">
+        <nav class="breadcrumb articleHeroBread" aria-label="Breadcrumb">
+          <a class="bcItem bcLink" href={`/${city}/`}>{city.charAt(0).toUpperCase() + city.slice(1)}</a>
+          <span class="bcSep" aria-hidden="true">›</span>
+          <a class="bcItem bcLink" href={`/${city}/guides/`}>Guides</a>
+          <span class="bcSep" aria-hidden="true">›</span>
+          <span class="bcItem bcCurrent" aria-current="page">{data.title}</span>
+        </nav>
+        <div class="guideKicker">
+          <span class="kPill kCity">{city.charAt(0).toUpperCase() + city.slice(1)}</span>
+          <span class="kPill kCat">{(data as any).topic + " Guide"}</span>
+        </div>
+        <h1 class="articleHeroTitle">{data.title}</h1>
+        <p class="articleHeroDesc">{(data as any).description}</p>
+        <div class="guideMeta guideMeta--hero">
+          <span class="gAuthor">By Charles King</span>
+          {pubDateStr && <><span class="gDot" aria-hidden="true">·</span><span class="gDate">{pubDateStr}</span></>}
+        </div>
       </div>
-      <h1 class="guideTitle">{data.title}</h1>
-      <p  class="guideIntro">{collectionType === "guide" ? (data as any).description : (data as any).intro}</p>
-      <div class="guideMeta">
-        <span class="gAuthor">By Charles King</span>
-        {pubDateStr && <><span class="gDot" aria-hidden="true">·</span><span class="gDate">{pubDateStr}</span></>}
-      </div>
-    </header>
-  </div>
+    </div>
+  ) : (
+    <div class="container">
+      <header class="guideHero">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <a class="bcItem bcLink" href={`/${city}/`}>{city.charAt(0).toUpperCase() + city.slice(1)}</a>
+          <span class="bcSep" aria-hidden="true">›</span>
+          <a class="bcItem bcLink" href={`/${city}/guides/`}>Guides</a>
+          <span class="bcSep" aria-hidden="true">›</span>
+          <span class="bcItem bcCurrent" aria-current="page">{data.title}</span>
+        </nav>
+        <div class="guideKicker">
+          <span class="kPill kCity">{city.charAt(0).toUpperCase() + city.slice(1)}</span>
+          <span class="kPill kCat">{collectionType === "guide" ? ((data as any).topic + " Guide") : ((data as any).category ?? "City Guide")}</span>
+        </div>
+        <h1 class="guideTitle">{data.title}</h1>
+        <p  class="guideIntro">{collectionType === "guide" ? (data as any).description : (data as any).intro}</p>
+        <div class="guideMeta">
+          <span class="gAuthor">By Charles King</span>
+          {pubDateStr && <><span class="gDot" aria-hidden="true">·</span><span class="gDate">{pubDateStr}</span></>}
+        </div>
+      </header>
+    </div>
+  )}
 
   {/* ════════ VOTING BANNER ════════
       Shows only when votingEnabled: true AND votingStatus is not "closed".
@@ -174,22 +202,62 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     </div>
   )}
 
-  {/* ════════ NEW GUIDE: simple markdown content ════════ */}
+  {/* ════════ NEW GUIDE: 75/25 layout — body left, ToC + sidebar right ════════
+      <Content /> renders the full markdown body (h2, h3, paragraphs, lists).
+      The ToC script below queries those headings to build the nav panel.
+      Routing note: slugs derived via guide.slug.split("/").pop() preserve the
+      -1 suffix that Decap CMS appends to avoid filename collisions — no special
+      handling needed here; the path is registered correctly in getStaticPaths().
+  ════════════════════════════════════════════════════════════════════════════ */}
   {collectionType === "guide" && (
     <div class="container">
-      <div class="guideMarkdownWrap">
-        {(data as any).image && (
-          <img
-            class="guideFeatImg"
-            src={(data as any).image}
-            alt={data.title}
-            loading="eager"
-            decoding="async"
-          />
-        )}
-        <div class="guideMarkdown prose">
-          <Content />
-        </div>
+      <div class="homeGrid articleGrid">
+
+        {/* ── Main article column ── */}
+        <main>
+          <div class="guideMarkdown" id="article-body">
+            <Content />
+          </div>
+        </main>
+
+        {/* ── Right sidebar ── */}
+        <aside class="homeRail">
+
+          {/* Table of Contents — scans h2/h3 from the rendered markdown body */}
+          {(data as any).showToC !== false && (
+            <nav class="gl-toc" id="guide-toc" aria-label="Table of contents">
+              <div class="gl-toc-head">On This Page</div>
+              <ol class="gl-toc-list" id="toc-list"></ol>
+            </nav>
+          )}
+
+          {/* Newsletter */}
+          <div class="nlBox">
+            <div class="nlBoxHead">
+              <em>Good News <strong>{city.charAt(0).toUpperCase() + city.slice(1)}!</strong></em>
+            </div>
+            <div class="nlBoxSub">Get the best local stories delivered free to your inbox every morning.</div>
+            <form class="nlForm" action={`/${city}/subscribe/`} method="get">
+              <input class="nlInput" type="email" name="email"
+                placeholder="your@email.com" required autocomplete="email" />
+              <button class="nlSubmit" type="submit">SIGN UP</button>
+            </form>
+          </div>
+
+          {/* City Guides links */}
+          <div class="railSection">
+            <div class="railHead">
+              <span class="railTitle">City Guides</span>
+              <a class="railMore" href={`/${city}/guides/`}>See all</a>
+            </div>
+            <div>
+              {moreGuides.slice(0, 5).map((g: any) => (
+                <a class="guideLink" href={g.href}>{g.emoji} {g.label}</a>
+              ))}
+            </div>
+          </div>
+
+        </aside>
       </div>
     </div>
   )}
@@ -478,23 +546,121 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 })();
 </script>
 
+{/* ── Table of Contents builder — scans h2/h3 from article-body ── */}
+<script is:inline>
+(function () {
+  var toc  = document.getElementById("guide-toc");
+  var list = document.getElementById("toc-list");
+  var body = document.getElementById("article-body");
+  if (!toc || !list || !body) return;
+
+  var headings = body.querySelectorAll("h2, h3");
+  if (!headings.length) { toc.style.display = "none"; return; }
+
+  headings.forEach(function (h, i) {
+    if (!h.id) h.id = "toc-" + i;
+    var li = document.createElement("li");
+    li.className = "gl-toc-item" + (h.tagName === "H3" ? " gl-toc-item--sub" : "");
+    var a = document.createElement("a");
+    a.className = "gl-toc-link";
+    a.href = "#" + h.id;
+    a.textContent = h.textContent;
+    li.appendChild(a);
+    list.appendChild(li);
+  });
+
+  /* Scroll-spy: highlight the active section */
+  var links = list.querySelectorAll(".gl-toc-link");
+  function update() {
+    var scrollY = window.scrollY + 130;
+    var active = null;
+    headings.forEach(function (h) { if (h.offsetTop <= scrollY) active = h; });
+    links.forEach(function (a) {
+      a.classList.toggle("gl-toc-link--active", !!(active && a.getAttribute("href") === "#" + active.id));
+    });
+  }
+  window.addEventListener("scroll", update, { passive: true });
+  update();
+})();
+</script>
+
 <style>
   /* ── Global reset (matches homepage) ── */
   :global(html), :global(body) { overflow-x: hidden; width: 100%; position: relative; }
   .pageWrap { min-height: 100vh; overflow-x: hidden; width: 100%; }
 
-  /* ── New guide: simple markdown layout ── */
-  .guideMarkdownWrap {
-    max-width: 780px;
-    margin: 40px auto 64px;
-  }
-  .guideFeatImg {
+  /* ════ FULL-BLEED IMAGE HERO (new guides with data.image) ════ */
+  .articleHero {
+    position: relative;
     width: 100%;
-    aspect-ratio: 16/9;
-    object-fit: cover;
-    border-radius: 14px;
-    margin-bottom: 32px;
+    min-height: 540px;
+    display: flex;
+    align-items: flex-end;
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    margin-bottom: 0;
   }
+  .articleHeroOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.10) 0%,
+      rgba(0,0,0,0.55) 50%,
+      rgba(0,0,0,0.90) 100%
+    );
+    z-index: 1;
+  }
+  .articleHeroInner {
+    position: relative;
+    z-index: 2;
+    padding-top: 80px;
+    padding-bottom: 52px;
+    width: 100%;
+  }
+  .articleHeroTitle {
+    font-family: "Montserrat", sans-serif;
+    font-weight: 900;
+    font-size: clamp(28px, 4vw, 54px);
+    line-height: 1.04;
+    letter-spacing: -0.03em;
+    color: #fff;
+    margin: 0 0 18px;
+    max-width: 840px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.45);
+  }
+  .articleHeroDesc {
+    font-size: clamp(15px, 1.2vw, 18px);
+    color: rgba(255,255,255,0.88);
+    line-height: 1.65;
+    max-width: 620px;
+    margin: 0 0 16px;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.35);
+  }
+  /* Breadcrumb + meta colour overrides inside the hero */
+  .articleHeroBread .bcLink    { color: var(--brand1); }
+  .articleHeroBread .bcSep     { color: rgba(255,255,255,0.45); }
+  .articleHeroBread .bcCurrent { color: rgba(255,255,255,0.55); }
+  .guideMeta--hero             { color: rgba(255,255,255,0.65); }
+  .guideMeta--hero .gAuthor    { color: rgba(255,255,255,0.9); }
+  /* Kicker pills on dark hero */
+  .articleHeroInner .kCity { background: var(--brand1); color: #000; }
+  .articleHeroInner .kCat  {
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.9);
+    border-color: rgba(255,255,255,0.3);
+  }
+  @media (max-width: 768px) {
+    .articleHero       { min-height: 400px; }
+    .articleHeroTitle  { font-size: clamp(24px, 6vw, 36px); }
+    .articleHeroInner  { padding-bottom: 36px; }
+  }
+
+  /* ════ ARTICLE GRID (new guides — reuses homeGrid layout) ════ */
+  .articleGrid { padding-top: 48px; padding-bottom: 64px; }
+
+  /* ── New guide: markdown body styles ── */
   .guideMarkdown :global(h2) {
     font-size: 1.5rem;
     font-weight: 800;
@@ -676,6 +842,33 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .loadBtn:hover { background: var(--brand1); color: var(--accentText); }
   .chevron { transition: transform 200ms; }
   .loadBtn:hover .chevron { transform: translateY(2px); }
+
+  /* ════ TABLE OF CONTENTS (new guide sidebar) ════ */
+  .gl-toc {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--brand1);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .gl-toc-head {
+    font-size: 11px; font-weight: 800; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--brand1); margin-bottom: 14px;
+  }
+  .gl-toc-list {
+    list-style: none; padding: 0; margin: 0;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .gl-toc-item--sub { padding-left: 16px; }
+  .gl-toc-link {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--muted); text-decoration: none; line-height: 1.4;
+    padding: 4px 0 4px 8px;
+    border-left: 2px solid transparent; margin-left: -8px;
+    transition: color 120ms, border-color 120ms;
+  }
+  .gl-toc-link:hover,
+  .gl-toc-link--active { color: var(--text); border-left-color: var(--brand1); }
 
   /* ════ SIDEBAR ════ */
   .homeRail { position: sticky; top: 80px; display: grid; gap: 24px; align-self: start; }
