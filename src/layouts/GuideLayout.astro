@@ -67,7 +67,10 @@ const emoji = topicEmoji[topic] ?? "📖";
 
         {showToC && (
           <nav class="gl-toc" id="guide-toc" aria-label="Table of contents">
-            <div class="gl-toc-head">On This Page</div>
+            <div class="gl-toc-head">
+              <span class="gl-toc-icon" aria-hidden="true">&#10148;</span>
+              Quick Links
+            </div>
             <ol class="gl-toc-list" id="toc-list">
               <!-- Populated by client-side script -->
             </ol>
@@ -269,6 +272,27 @@ const emoji = topicEmoji[topic] ?? "📖";
   </script>
 )}
 
+<!-- ── Image caption builder (wraps article images in <figure> with <figcaption>) ── -->
+<script>
+  (function () {
+    var article = document.getElementById("guide-article");
+    if (!article) return;
+    var imgs = Array.prototype.slice.call(article.querySelectorAll("img"));
+    imgs.forEach(function (img: HTMLImageElement) {
+      var alt = (img.getAttribute("alt") || "").trim();
+      if (!alt) return;
+      /* Skip if already inside a <figure> */
+      if (img.parentElement && img.parentElement.tagName === "FIGURE") return;
+      var figure = document.createElement("figure");
+      img.parentNode!.insertBefore(figure, img);
+      figure.appendChild(img);
+      var caption = document.createElement("figcaption");
+      caption.textContent = alt;
+      figure.appendChild(caption);
+    });
+  })();
+</script>
+
 <!-- ── Sidebar event slider ─────────────────────────────────────────── -->
 <script>
   (function () {
@@ -388,6 +412,15 @@ const emoji = topicEmoji[topic] ?? "📖";
     text-transform: uppercase;
     color: var(--brand1, #ffd24a);
     margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .gl-toc-icon {
+    font-size: 13px;
+    line-height: 1;
+    color: var(--brand1, #ffd24a);
   }
 
   .gl-toc-list {
@@ -414,7 +447,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     transition: color 140ms, border-color 140ms;
     line-height: 1.3;
   }
-  .gl-toc-link:hover { color: var(--text); }
+  .gl-toc-link:hover { color: var(--brand1, #ffd24a); }
   .gl-toc-link--active {
     color: var(--brand1, #ffd24a);
     border-left-color: var(--brand1, #ffd24a);
@@ -439,7 +472,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     font-family: var(--font-head, "Manrope", sans-serif);
     font-size: clamp(1.4rem, 2.5vw, 1.8rem);
     font-weight: 800;
-    margin: 40px 0 12px;
+    margin: 40px 0 20px;
     letter-spacing: -0.03em;
     scroll-margin-top: 80px;
   }
@@ -451,6 +484,24 @@ const emoji = topicEmoji[topic] ?? "📖";
     scroll-margin-top: 80px;
   }
   .gl-article p  { margin: 0 0 18px; }
+
+  /* Auto-generated image captions from alt text */
+  .gl-article figure {
+    margin: 0 0 24px;
+    text-align: center;
+  }
+  .gl-article figure img {
+    max-width: 100%;
+    border-radius: var(--radius, 14px);
+  }
+  .gl-article figcaption {
+    margin-top: 8px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--muted);
+    text-align: center;
+    line-height: 1.4;
+  }
   .gl-article ul,
   .gl-article ol { margin: 0 0 18px; padding-left: 24px; }
   .gl-article li { margin-bottom: 6px; }
