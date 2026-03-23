@@ -1,19 +1,4 @@
 {
   "_instructions": "Quick-Entry: paste event objects into the 'quickEntry' array. They are merged at build time and take precedence over scraped data (dedup by title+date). Required fields: title, eventDate, city. All others optional. Dates must be YYYY-MM-DD. Known venue keys for automatic lat/lng: 'Hard Rock Hotel Daytona Beach', 'The Shores Resort & Spa', 'Daytona International Speedway', 'Ocean Center', 'Peabody Auditorium'.",
-  "quickEntry": [
-    {
-      "_note": "EXAMPLE — delete this object and paste real events below",
-      "title": "Example Event — Replace This Entry",
-      "eventDate": "2099-01-01",
-      "endDate": null,
-      "location": "Hard Rock Hotel Daytona Beach",
-      "city": "daytona beach",
-      "url": "https://www.hardrockhoteldaytona.com/entertainment/",
-      "image": null,
-      "category": "Music & Nightlife",
-      "lat": 29.2373,
-      "lng": -81.0026,
-      "sponsored": false
-    }
-  ]
+  "quickEntry": []
 }
