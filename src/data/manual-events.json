@@ -14,19 +14,6 @@
       "lat": 29.2373,
       "lng": -81.0026,
       "sponsored": false
-    },
-    {
-      "title": "Live Entertainment at Hard Rock Hotel Daytona Beach",
-      "eventDate": "2026-03-20",
-      "endDate": null,
-      "location": "Hard Rock Hotel Daytona Beach",
-      "city": "daytona beach",
-      "url": "https://www.hardrockhoteldaytona.com/entertainment/",
-      "image": null,
-      "category": "Music & Nightlife",
-      "lat": 29.2373,
-      "lng": -81.0026,
-      "sponsored": true
     }
   ]
 }
