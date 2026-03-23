@@ -9,22 +9,21 @@ description: A 30-mile scenic drive through ancient Florida hammock, alongside
   County.
 date: 2026-03-23T10:00:00.000Z
 ---
-
 ## What Is the Ormond Loop?
 
 The Ormond Loop is a 30-mile circular scenic drive that begins and ends on Granada Boulevard in Ormond Beach. It winds through a canopy of ancient live oaks draped in Spanish moss, hugs the western shore of the Halifax River, and cuts through the heart of Tomoka State Park. Locals treat it as their secret — the kind of road that makes visitors question why they ever thought Florida was flat and featureless.
 
 The full loop takes about an hour to drive at a relaxed pace, though most people add another hour or two to stop, walk, and photograph.
 
-## The Route
+## The Route 
 
 The classic loop follows this sequence:
 
-- **Start**: Granada Blvd heading west from A1A
-- **Turn south** onto Old Dixie Highway
-- **Pass through** Tomoka State Park (Walter Boardman Lane)
-- **Head east** on Tomoka Road back toward US-1
-- **Return north** via US-1 or Beach Street back to Granada
+* **Start**: Granada Blvd heading west from A1A
+* **Turn south** onto Old Dixie Highway
+* **Pass through** Tomoka State Park (Walter Boardman Lane)
+* **Head east** on Tomoka Road back toward US-1
+* **Return north** via US-1 or Beach Street back to Granada
 
 The most scenic stretch is the canopy road along **Walter Boardman Lane** — a tunnel of oak and palm where the light filters through in the morning like something out of a nature documentary.
 
@@ -44,18 +43,22 @@ The oak canopy intensifies in color after a storm. The road takes on a dark, glo
 
 ## Stops Along the Way
 
+![](/images/fairchild-oak.webp)
+
 ### Tomoka State Park
 
 Florida's best-kept state park secret. The park sits at the confluence of the Tomoka and Halifax Rivers and contains one of the finest examples of coastal hammock habitat in the state. Amenities include:
 
-- **Kayak and canoe launch** — rent a kayak and explore the tidal creeks for a completely different view of the loop
-- **Campground** — 100+ sites, consistently rated among the best in Florida
-- **Fred Dana Marsh Museum** — small but worthwhile exhibit on the Timucuan people who lived here for centuries
-- **Hiking trails** — the 2.2-mile loop trail passes through hardwood hammock and open marsh
+* **Kayak and canoe launch** — rent a kayak and explore the tidal creeks for a completely different view of the loop
+* **Campground** — 100+ sites, consistently rated among the best in Florida
+* **Fred Dana Marsh Museum** — small but worthwhile exhibit on the Timucuan people who lived here for centuries
+* **Hiking trails** — the 2.2-mile loop trail passes through hardwood hammock and open marsh
 
 Admission is $5 per vehicle.
 
 ### The Casements
+
+![](/images/casements.webp)
 
 Before or after the loop, swing by The Casements on Granada Blvd — the former winter home of John D. Rockefeller. The riverside gardens are free to visit and offer a peaceful stroll with Halifax River views. The main house has free guided tours on weekday mornings.
 
@@ -65,8 +68,8 @@ A small county park tucked off Old Dixie Highway with a boat ramp, picnic tables
 
 ## GoDo Pro-Tips
 
-- **Don't rush it.** The Ormond Loop is not a destination, it's a tempo. Set your playlist, keep the windows down, and follow the 20 mph pace of the canopy road. The whole point is the drive.
-- **The best canopy photo** is taken from a full stop on Walter Boardman Lane looking west about 0.4 miles past the park entrance. Park briefly and walk to the middle of the road for the shot.
-- **Bring bug spray** if you plan to stop at Tomoka State Park — especially in spring and fall when no-see-ums are active at dusk.
-- **Kayak the loop from the water.** Several outfitters rent kayaks near the Granada Blvd bridge. Paddling up the Tomoka River is a completely different (and equally breathtaking) way to experience the same landscape.
-- **Pair it with dinner.** The loop ends naturally in Ormond Beach, putting you 5 minutes from Granada Blvd's restaurant row — 63 Sovereign, Rose Villa, or Corkscrew Bar & Grille all make perfect post-loop dinner spots.
+* **Don't rush it.** The Ormond Loop is not a destination, it's a tempo. Set your playlist, keep the windows down, and follow the 20 mph pace of the canopy road. The whole point is the drive.
+* **The best canopy photo** is taken from a full stop on Walter Boardman Lane looking west about 0.4 miles past the park entrance. Park briefly and walk to the middle of the road for the shot.
+* **Bring bug spray** if you plan to stop at Tomoka State Park — especially in spring and fall when no-see-ums are active at dusk.
+* **Kayak the loop from the water.** Several outfitters rent kayaks near the Granada Blvd bridge. Paddling up the Tomoka River is a completely different (and equally breathtaking) way to experience the same landscape.
+* **Pair it with dinner.** The loop ends naturally in Ormond Beach, putting you 5 minutes from Granada Blvd's restaurant row — 63 Sovereign, Rose Villa, or Corkscrew Bar & Grille all make perfect post-loop dinner spots.
