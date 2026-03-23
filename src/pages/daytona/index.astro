@@ -379,8 +379,10 @@ const guideCards = guideHero
             </a>
           )}
 
+          {guideHero && <hr class="guideDivider" />}
+
           {guideCards.length > 0 && (
-            <div class="cardGrid">
+            <div class="cardGrid guideGrid">
               {guideCards.map((g) => (
                 <a class="articleCard" href={`/daytona/guides/${guideSlug(g)}/`}>
                   <div class="cardImgWrap">
@@ -932,6 +934,13 @@ const guideCards = guideHero
       margin: 0 0 40px;
     }
 
+    /* ── Divider between guide hero and guide cards grid ── */
+    .guideDivider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
     /* ── 3-column cards — gap tightened −25%, images +10% taller ── */
     .cardGrid {
       display: grid;
@@ -940,6 +949,21 @@ const guideCards = guideHero
       margin-bottom: 32px;
     }
     @media (max-width: 640px) { .cardGrid { grid-template-columns: 1fr; gap: 0; } }
+
+    /* ── Guide cards grid: cinematic 16/9 images + vertical breadth ── */
+    .guideGrid {
+      margin-top: 48px;
+    }
+    .guideGrid .cardImg {
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+    .guideGrid .cardImgFallback {
+      aspect-ratio: 16 / 9;
+    }
+    .guideGrid .cardTitle {
+      min-height: 3.6em;
+    }
 
     .articleCard {
       display: flex; flex-direction: column; text-decoration: none;
