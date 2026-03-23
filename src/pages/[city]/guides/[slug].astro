@@ -548,7 +548,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
 {/* ── Table of Contents builder — scans h2/h3 from article-body ── */}
 <script is:inline>
-(function () {
+window.addEventListener('load', function () {
   var toc  = document.getElementById("guide-toc");
   var list = document.getElementById("toc-list");
   var body = document.getElementById("article-body");
@@ -581,7 +581,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   }
   window.addEventListener("scroll", update, { passive: true });
   update();
-})();
+});
 </script>
 
 <style>
