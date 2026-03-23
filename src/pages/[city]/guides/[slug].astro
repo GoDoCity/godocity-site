@@ -546,19 +546,30 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 })();
 </script>
 
-{/* ── Table of Contents builder — scans h2/h3 from article-body ── */}
+{/* ── Table of Contents builder — scans h2/h3 from .guideMarkdown ── */}
 <script is:inline>
 window.addEventListener('load', function () {
   var toc  = document.getElementById("guide-toc");
   var list = document.getElementById("toc-list");
-  var body = document.getElementById("article-body");
-  if (!toc || !list || !body) return;
+  if (!toc || !list) return;
 
-  var headings = body.querySelectorAll("h2, h3");
+  var headings = document.querySelectorAll('.guideMarkdown h2, .guideMarkdown h3');
+  console.log('Headings found:', headings.length);
   if (!headings.length) { toc.style.display = "none"; return; }
 
-  headings.forEach(function (h, i) {
-    if (!h.id) h.id = "toc-" + i;
+  /* Assign slugified IDs to headings that lack one */
+  headings.forEach(function (h) {
+    if (!h.id) {
+      h.id = (h.textContent || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    }
+  });
+
+  headings.forEach(function (h) {
     var li = document.createElement("li");
     li.className = "gl-toc-item" + (h.tagName === "H3" ? " gl-toc-item--sub" : "");
     var a = document.createElement("a");
@@ -692,6 +703,23 @@ window.addEventListener('load', function () {
   .guideMarkdown :global(a) {
     color: var(--link);
     text-decoration: underline;
+  }
+  .guideMarkdown :global(img) {
+    display: block;
+    margin: 40px auto;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    max-width: 90%;
+    height: auto;
+  }
+  .guideMarkdown :global(figcaption) {
+    display: block;
+    text-align: center;
+    font-style: italic;
+    color: var(--faint, #888);
+    font-size: 14px;
+    margin-top: -28px;
+    margin-bottom: 32px;
   }
 
   :global(.container) { max-width: 1260px; margin: 0 auto; padding: 0 2rem; }
