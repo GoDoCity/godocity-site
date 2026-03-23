@@ -709,8 +709,9 @@ window.addEventListener('load', function () {
     margin: 40px auto;
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    max-width: 90%;
-    height: auto;
+    max-width: 80%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
   }
   .guideMarkdown :global(figcaption) {
     display: block;
@@ -718,7 +719,7 @@ window.addEventListener('load', function () {
     font-style: italic;
     color: var(--faint, #888);
     font-size: 14px;
-    margin-top: -28px;
+    margin-top: 12px;
     margin-bottom: 32px;
   }
 
