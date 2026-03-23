@@ -227,15 +227,14 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     if (!eventDate) {
       // No override (or override failed) — use the API date if available
       if (api.eventDate) {
-        const apiParsed = new Date(api.eventDate + "T00:00:00.000Z");
-        const nowMidnight = new Date();
-        nowMidnight.setUTCHours(0, 0, 0, 0);
-        if (apiParsed <= nowMidnight) {
-          // Event is today or in the past and no Col-C override was provided — skip it.
+        // Compare against today in EST so events don't disappear 4–5 h early on a UTC server
+        const todayEst = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+        if (api.eventDate < todayEst) {
+          // Event date is strictly before today in EST — skip it.
           // Add a Date Override in Col C to keep a recurring event in the feed.
           console.log(
-            `[sheet-import] SKIP ${id} "${title}": Eventbrite date ${api.eventDate} is today ` +
-            `or past and no Date Override was set in Col C — excluded from feed.`
+            `[sheet-import] SKIP ${id} "${title}": Eventbrite date ${api.eventDate} is before ` +
+            `today (${todayEst} EST) and no Date Override was set in Col C — excluded from feed.`
           );
           continue;
         } else {
@@ -314,17 +313,15 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     }));
   }
 
-  /* ── 4. Expiry filter — hide events whose date is strictly before today ──────
-     Events are hidden once today's date passes the event date (midnight UTC).
-     This keeps the feed clean without curator action.                          */
-  const now = Date.now();
+  /* ── 4. Expiry filter — hide events whose date is before today in EST ─────────
+     Uses America/New_York so events stay visible until midnight EST (not midnight
+     UTC), preventing events from vanishing 4–5 hours early on a UTC server.    */
+  const todayEst = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
   function isExpired(eventDate) {
     const dateStr = (eventDate || "").slice(0, 10); // "YYYY-MM-DD"
     if (!dateStr || !/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
-    const [yr, mo, dy] = dateStr.split("-").map(Number);
-    // Midnight UTC of the event date — anything before this is expired
-    const startOfDay = Date.UTC(yr, mo - 1, dy, 0, 0, 0);
-    return now > startOfDay + 24 * 60 * 60 * 1000; // expired after end of event day
+    // Event is expired only when its calendar day has fully passed in EST
+    return dateStr < todayEst;
   }
 
   const allMerged = [...sheetEvents, ...discoveredEvents];
@@ -549,8 +546,9 @@ async function searchNearbyEvents(token) {
     return [];
   }
 
-  /* ISO 8601 start of today (UTC) so we don't surface past events */
-  const today = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
+  /* Start of today in EST so we include all events that occur today (not just future hours) */
+  const todayEstDate = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+  const today = todayEstDate + "T00:00:00";
 
   const allEvents = [];
 

@@ -38,11 +38,17 @@ function _tryWriteCache(data) {
 }
 
 // ── Hard global cutoff ────────────────────────────────────────────────────────
-/** Yesterday at midnight — events on or after yesterday always pass the date check. */
-const _yesterday = new Date();
-_yesterday.setDate(_yesterday.getDate() - 1);
-_yesterday.setHours(0, 0, 0, 0);
-export const HARD_CUTOFF = _yesterday.toISOString().split("T")[0];
+/**
+ * Returns a YYYY-MM-DD date string for America/New_York, offset by `offsetDays`.
+ * Forces EST/EDT so events don't disappear 4–5 hours early on a UTC server.
+ */
+function _estDateStr(offsetDays = 0) {
+  const d = new Date(Date.now() + offsetDays * 86_400_000);
+  return d.toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+}
+
+/** Yesterday in EST/EDT — events on or after this date always pass the date check. */
+export const HARD_CUTOFF = _estDateStr(-1);
 
 // ── Shared area set ───────────────────────────────────────────────────────────
 export const GREATER_DAYTONA = new Set([
@@ -104,12 +110,11 @@ function applyCoordOverrides(e) {
 }
 
 // ── Date helpers ──────────────────────────────────────────────────────────────
-/** True when the event date is >= yesterday (start of day), or the event is sponsored. */
+/** True when the event date is >= yesterday (EST/EDT), or the event is sponsored. */
 export function isStrictlyFuture(eventDateRaw, isSponsored = false) {
   if (isSponsored) return true;
   if (!eventDateRaw) return false;
-  const eventDate = new Date(String(eventDateRaw));
-  return !isNaN(eventDate) ? eventDate >= _yesterday : String(eventDateRaw).split("T")[0] >= HARD_CUTOFF;
+  return String(eventDateRaw).split("T")[0] >= HARD_CUTOFF;
 }
 
 function dateSortKey(e) {
