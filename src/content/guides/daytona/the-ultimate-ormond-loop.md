@@ -1,10 +1,12 @@
 ---
-title: "The Ultimate Ormond Loop Guide"
+title: The Ultimate Ormond Loop Guide
 topic: Play
 featured: false
 showToC: true
-image: /images/ormond-loop-guide.jpg
-description: A 30-mile scenic drive through ancient Florida hammock, alongside the Halifax River and Tomoka State Park — the most beautiful road in Volusia County.
+image: /images/tomoka.png
+description: A 30-mile scenic drive through ancient Florida hammock, alongside
+  the Halifax River and Tomoka State Park — the most beautiful road in Volusia
+  County.
 date: 2026-03-23T10:00:00.000Z
 ---
 
