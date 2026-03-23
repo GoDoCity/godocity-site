@@ -1,7 +1,7 @@
 ---
 title: "The Ultimate Guide to the Ormond Loop: Scenic Drives, History, and
   Hidden Stops"
-topic: Play
+topic: Live
 featured: true
 showToC: true
 image: /images/bulow-park.jpg
