@@ -139,6 +139,21 @@ const topics = [
 ────────────────────────────────────────────────────────────────────── */
 
 /* trendingSpots removed — homepage map now shows Live sheet events only */
+
+/* ── Guides Section (main column) ────────────────────────────────────────────
+   Fetch all guides, filter to Daytona, sort newest-first.
+   guideHero  = featured: true guide, or most recent
+   guideCards = up to 3 non-hero guides for the 3-card row                   */
+const allGuides = await getCollection("guides");
+const daytonaGuides = allGuides
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+function guideSlug(g: (typeof allGuides)[number]) {
+  return g.slug.split("/").pop()!;
+}
+const guideHero = daytonaGuides.find((g) => g.data.featured) ?? daytonaGuides[0] ?? null;
+const guideCards = guideHero
+  ? daytonaGuides.filter((g) => g !== guideHero).slice(0, 3)
+  : daytonaGuides.slice(0, 3);
 ---
 
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
@@ -342,6 +357,52 @@ const topics = [
             ))}
           </div>
 
+          {/* ── GUIDES — 1 hero + 3 cards, matches Top Stories layout ── */}
+          <div class="guidesHead">
+            <span class="topicsLabel">City Guides</span>
+            <a class="guidesMoreLink" href="/daytona/guides/">More Guides →</a>
+          </div>
+
+          {guideHero && (
+            <a class="heroCard guideHeroCard" href={`/daytona/guides/${guideSlug(guideHero)}/`}>
+              <div class="heroImgWrap">
+                {guideHero.data.image
+                  ? <img class="heroImg" src={guideHero.data.image} alt={guideHero.data.title ?? ""} loading="lazy" decoding="async" />
+                  : <div class="heroImg heroFallback" aria-hidden="true" />
+                }
+              </div>
+              <div class="heroCopy">
+                <div class="heroKicker">GUIDE — {guideHero.data.topic?.toUpperCase()}</div>
+                <h2 class="heroTitle">{guideHero.data.title}</h2>
+                {guideHero.data.description && <p class="heroDesc">{guideHero.data.description}</p>}
+              </div>
+            </a>
+          )}
+
+          {guideCards.length > 0 && (
+            <div class="cardGrid">
+              {guideCards.map((g) => (
+                <a class="articleCard" href={`/daytona/guides/${guideSlug(g)}/`}>
+                  <div class="cardImgWrap">
+                    {g.data.image
+                      ? <img class="cardImg" src={g.data.image} alt="" loading="lazy" decoding="async" />
+                      : <div class="cardImg cardImgFallback" aria-hidden="true" />
+                    }
+                  </div>
+                  <div class="cardBody">
+                    <div class="cardKicker">GUIDE — {g.data.topic?.toUpperCase()}</div>
+                    <div class="cardTitle">{g.data.title}</div>
+                    {g.data.description && <div class="cardDesc">{g.data.description}</div>}
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          <div class="guidesMoreRow">
+            <a class="viewAllBtn" href="/daytona/guides/">More Guides →</a>
+          </div>
+
         </main>
 
         {/* ── SIDEBAR — aligns top with hero, borderless ── */}
@@ -470,18 +531,6 @@ const topics = [
                 <div class="displayAdCta">Advertise with us →</div>
               </div>
             </a>
-          </div>
-
-          <div class="railSection">
-            <div class="railHead">
-              <span class="railTitle">City Guides</span>
-              <a class="railMore" href="/daytona/guides/">See all</a>
-            </div>
-            <div class="guideList">
-              <a class="guideRow" href="/daytona/guides/live/">🏠 Live in Daytona</a>
-              <a class="guideRow" href="/daytona/guides/work/">💼 Work in Daytona</a>
-              <a class="guideRow" href="/daytona/guides/play/">🎉 Play in Daytona</a>
-            </div>
           </div>
 
         </aside>
@@ -1281,6 +1330,28 @@ const topics = [
       }
     }
 
+    /* ── Guides section header (main column) ── */
+    .guidesHead {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--brand1);
+      margin-bottom: 13px;
+      margin-top: 60px;
+    }
+    .guidesMoreLink {
+      font-size: 13px; font-weight: 700; color: var(--link);
+      text-decoration: none; white-space: nowrap;
+    }
+    .guidesMoreLink:hover { text-decoration: underline; }
+    .guideHeroCard { margin-bottom: 0; }
+    .guidesMoreRow {
+      display: flex; justify-content: center;
+      margin: 24px 0 60px;
+    }
+
+    /* ── Guides + Latest shared "View all" button ── */
     /* ── Editorial Team sidebar block ── */
     .editTeamSection {
       display: grid;

@@ -313,3 +313,14 @@ body > footer { order: 2; }
   border-bottom: none !important;
   box-shadow: none !important;
 }
+
+/* ── Editorial Bold — use class="editorial-bold" in Markdown/MDX ──────────────
+   Designed for large emoji headlines (☀️, 🏎️, 📍) and bold editorial callouts.
+   font-size: 1.5rem / font-weight: 800 per spec.
+   Auto-applied to any paragraph that opens with ***…*** (bold+italic triple).  */
+.editorial-bold {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
