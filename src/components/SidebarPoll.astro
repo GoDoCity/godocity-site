@@ -2,101 +2,215 @@
 export interface Props {
   title?: string;
   question?: string;
-  options?: { label: string; votes: number }[];
+  options?: { label: string }[];
   pollId?: string;
+  formAction?: string;
 }
 
 const {
-  title = "Vibe Check: Best of Daytona",
-  question = "Best Beachside Burger?",
+  title = "Vibe Check: Best of Ormond",
+  question = "Who has the best tacos in Ormond?",
   options = [
-    { label: "Hyde Park", votes: 41 },
-    { label: "31 Supper Club", votes: 29 },
-    { label: "Burger Ten", votes: 19 },
-    { label: "Other", votes: 11 },
+    { label: "La Fiesta" },
+    { label: "Tortilla Republic" },
+    { label: "Cabo's Mexican" },
+    { label: "Other" },
   ],
-  pollId = "beachside-burger",
+  pollId = "ormond-tacos",
+  formAction = "#",
 } = Astro.props;
 
-const total = options.reduce((s, o) => s + o.votes, 0);
+// Vote count is fetched live on the client — no server-baked number
 ---
 
-<div class="pollCard" data-poll-id={pollId}>
+<div class="pollCard" data-poll-id={pollId} data-question={question}>
   <div class="pollTitle">{title}</div>
   <div class="pollQuestion">{question}</div>
 
-  <form class="pollForm" data-poll-form>
-    {options.map((opt, i) => (
+  <!-- Voting form -->
+  <form class="pollForm" data-poll-form action={formAction} method="POST">
+    {options.map((opt) => (
       <label class="pollOption" data-option>
         <input
           class="pollRadio"
           type="radio"
           name={`poll-${pollId}`}
-          value={i}
+          value={opt.label}
         />
         <span class="pollLabel">{opt.label}</span>
-        <span class="pollBar" aria-hidden="true">
-          <span
-            class="pollFill"
-            style={`width: ${Math.round((opt.votes / total) * 100)}%`}
-          ></span>
-        </span>
-        <span class="pollPct">{Math.round((opt.votes / total) * 100)}%</span>
       </label>
     ))}
-
-    <button class="pollBtn" type="submit">Vote</button>
+    <button class="pollBtn" type="submit">Cast My Vote</button>
   </form>
+
+  <!-- Loading state -->
+  <div class="pollLoading" data-poll-loading hidden>
+    <div class="pollSpinner"></div>
+  </div>
+
+  <!-- Results view (shown after voting) -->
+  <div class="pollResults" data-poll-results hidden>
+    {options.map((opt) => (
+      <div class="pollResultRow" data-result-row data-label={opt.label}>
+        <div class="pollResultHeader">
+          <span class="pollResultLabel">{opt.label}</span>
+          <span class="pollResultPct" data-result-pct>—</span>
+        </div>
+        <div class="pollResultBar">
+          <div class="pollResultFill" data-result-fill style="width: 0%"></div>
+        </div>
+      </div>
+    ))}
+  </div>
 
   <div class="pollThanks" data-poll-thanks hidden>
     <span class="pollThanksIcon">✓</span> Thanks for voting!
   </div>
 
-  <div class="pollFooter">{total.toLocaleString()} votes cast</div>
+  <div class="pollFooter" data-poll-footer></div>
 </div>
 
 <script>
-  function initPoll(card: Element) {
+  import { createClient } from "@supabase/supabase-js";
+
+  const supabase = createClient(
+    import.meta.env.PUBLIC_SUPABASE_URL,
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+  );
+
+  function updateResultsView(
+    card: Element,
+    counts: Record<string, number>,
+    combinedTotal: number,
+    realVotes: number
+  ) {
+    card.querySelectorAll<HTMLElement>("[data-result-row]").forEach((row) => {
+      const label = row.dataset.label ?? "";
+      const pct =
+        combinedTotal > 0
+          ? Math.round(((counts[label] ?? 0) / combinedTotal) * 100)
+          : 0;
+      const fill = row.querySelector<HTMLElement>("[data-result-fill]");
+      const pctEl = row.querySelector<HTMLElement>("[data-result-pct]");
+      if (fill) fill.style.width = `${pct}%`;
+      if (pctEl) pctEl.textContent = `${pct}%`;
+    });
+    const footer = card.querySelector<HTMLElement>("[data-poll-footer]");
+    if (footer)
+      footer.textContent = `${combinedTotal.toLocaleString()} votes cast`;
+  }
+
+  function showResultsView(card: Element) {
     const form = card.querySelector<HTMLFormElement>("[data-poll-form]");
+    const results = card.querySelector<HTMLElement>("[data-poll-results]");
+    const loading = card.querySelector<HTMLElement>("[data-poll-loading]");
     const thanks = card.querySelector<HTMLElement>("[data-poll-thanks]");
+    // Forcibly kill spinner before any result element becomes visible
+    if (loading) { loading.hidden = true; loading.style.display = "none"; }
+    if (form) form.remove();
+    // Results and thanks unhide only after spinner is definitively gone
+    if (results) { results.hidden = false; }
+    if (thanks) { thanks.hidden = false; }
+  }
+
+  async function fetchAndShowResults(card: Element, pollId: string) {
+    const loading = card.querySelector<HTMLElement>("[data-poll-loading]");
+    const form = card.querySelector<HTMLFormElement>("[data-poll-form]");
+    if (form) form.style.display = "none";
+    if (loading) loading.hidden = false;
+
+    const { data, error } = await supabase
+      .from("vibe_check_votes")
+      .select("option_selected")
+      .eq("question_text", "ormond-tacos");
+
+    // Kill spinner immediately when data arrives
+    if (loading) { loading.hidden = true; loading.style.display = "none"; }
+
+    console.log("[SidebarPoll] fetchAndShowResults — pollId:", pollId);
+    console.log("[SidebarPoll] data:", data, "| error:", error);
+
+    if (data && data.length > 0) {
+      const realVotes = data.length;
+      const counts: Record<string, number> = {};
+      data.forEach((row) => {
+        counts[row.option_selected] = (counts[row.option_selected] ?? 0) + 1;
+      });
+      updateResultsView(card, counts, realVotes, realVotes);
+    } else {
+      // Zero votes or Supabase error — show 0% for all options
+      updateResultsView(card, {}, 0, 0);
+    }
+    showResultsView(card);
+  }
+
+  async function fetchLiveCount(card: Element, pollId: string) {
+    const footer = card.querySelector<HTMLElement>("[data-poll-footer]");
+    if (!footer) return;
+    try {
+      const { count } = await supabase
+        .from("vibe_check_votes")
+        .select("*", { count: "exact", head: true })
+        .eq("question_text", pollId);
+      footer.textContent = `${(count ?? 0).toLocaleString()} votes cast`;
+    } catch (_) {
+      footer.textContent = "";
+    }
+  }
+
+  async function initPoll(card: Element) {
+    const form = card.querySelector<HTMLFormElement>("[data-poll-form]");
+    const loading = card.querySelector<HTMLElement>("[data-poll-loading]");
     const btn = card.querySelector<HTMLButtonElement>(".pollBtn");
-    if (!form || !thanks || !btn) return;
+    if (!form || !loading || !btn) return;
 
     const pollId = (card as HTMLElement).dataset.pollId ?? "poll";
     const storageKey = `poll-voted-${pollId}`;
 
-    // If already voted this session, show results immediately
-    if (sessionStorage.getItem(storageKey)) {
-      revealResults(card);
-    }
+    // Fetch live count immediately — footer stays empty until this resolves
+    fetchLiveCount(card, pollId);
 
-    form.addEventListener("submit", (e) => {
+    // STRESS-TEST MODE: localStorage check disabled — allows voting multiple times
+    // Re-enable this block when done testing:
+    // if (localStorage.getItem(storageKey)) {
+    //   await fetchAndShowResults(card, pollId);
+    //   return;
+    // }
+
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
+
       const checked = form.querySelector<HTMLInputElement>(
         'input[type="radio"]:checked'
       );
       if (!checked) {
         btn.animate(
-          [{ transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "none" }],
+          [
+            { transform: "translateX(-4px)" },
+            { transform: "translateX(4px)" },
+            { transform: "none" },
+          ],
           { duration: 180, iterations: 2 }
         );
         return;
       }
-      sessionStorage.setItem(storageKey, checked.value);
-      revealResults(card);
-      form.replaceWith(thanks!);
-      thanks!.hidden = false;
-    });
-  }
 
-  function revealResults(card: Element) {
-    card.querySelectorAll<HTMLElement>(".pollBar").forEach((bar) => {
-      bar.style.display = "block";
+      const selectedOption = checked.value;
+      localStorage.setItem(storageKey, selectedOption);
+
+      // Show loading immediately
+      form.style.display = "none";
+      loading.hidden = false;
+
+      // INSERT vote with hardcoded poll ID, then immediately fetch live counts
+      const { error: insertError } = await supabase.from("vibe_check_votes").insert({
+        option_selected: selectedOption,
+        question_text: "ormond-tacos",
+      });
+      console.log("[SidebarPoll] insert — option:", selectedOption, "| pollId: ormond-tacos | error:", insertError);
+
+      await fetchAndShowResults(card, "ormond-tacos");
     });
-    card.querySelectorAll<HTMLElement>(".pollPct").forEach((pct) => {
-      pct.style.display = "block";
-    });
-    card.querySelector<HTMLElement>(".pollBtn")?.remove();
   }
 
   document.querySelectorAll(".pollCard").forEach(initPoll);
@@ -105,15 +219,16 @@ const total = options.reduce((s, o) => s + o.votes, 0);
 <style>
   .pollCard {
     border-radius: 18px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.035);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.035);
     padding: 16px;
+    max-width: 680px;
   }
 
   .pollTitle {
     font-size: 10px;
     font-weight: 900;
-    letter-spacing: .10em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--brand1);
     margin-bottom: 8px;
@@ -121,7 +236,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
 
   .pollQuestion {
     font-weight: 950;
-    font-size: 15px;
+    font-size: 18px;
     line-height: 1.2;
     letter-spacing: -0.01em;
     color: var(--text);
@@ -135,25 +250,23 @@ const total = options.reduce((s, o) => s + o.votes, 0);
 
   .pollOption {
     display: grid;
-    grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
+    grid-template-columns: auto 1fr;
     column-gap: 8px;
-    row-gap: 4px;
     cursor: pointer;
     padding: 8px 10px;
     border-radius: 10px;
-    border: 1px solid rgba(255,255,255,.07);
-    background: rgba(255,255,255,.02);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.02);
     transition: background 120ms, border-color 120ms;
     align-items: center;
   }
   .pollOption:hover {
-    background: rgba(255,255,255,.05);
-    border-color: rgba(255,220,80,.18);
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 220, 80, 0.18);
   }
   .pollOption:has(input:checked) {
-    background: rgba(255,220,80,.08);
-    border-color: rgba(255,220,80,.30);
+    background: rgba(255, 220, 80, 0.08);
+    border-color: rgba(255, 220, 80, 0.3);
   }
 
   .pollRadio {
@@ -165,41 +278,10 @@ const total = options.reduce((s, o) => s + o.votes, 0);
   }
 
   .pollLabel {
-    font-size: 13.5px;
+    font-size: 16.5px;
     font-weight: 700;
     color: var(--text);
     line-height: 1.2;
-    grid-column: 1;
-    grid-row: 1;
-  }
-
-  .pollBar {
-    display: none; /* shown after vote */
-    grid-column: 1 / -1;
-    grid-row: 2;
-    height: 4px;
-    border-radius: 999px;
-    background: rgba(255,255,255,.08);
-    overflow: hidden;
-    margin-top: 2px;
-  }
-
-  .pollFill {
-    display: block;
-    height: 100%;
-    background: var(--brand1);
-    border-radius: 999px;
-    transition: width 500ms cubic-bezier(.4,0,.2,1);
-  }
-
-  .pollPct {
-    display: none; /* shown after vote */
-    grid-column: 2;
-    grid-row: 1;
-    font-size: 12px;
-    font-weight: 800;
-    color: var(--brand1);
-    white-space: nowrap;
   }
 
   .pollBtn {
@@ -212,20 +294,92 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     color: #000;
     font-size: 13px;
     font-weight: 900;
-    letter-spacing: .04em;
+    letter-spacing: 0.04em;
     cursor: pointer;
     text-decoration: underline;
     text-decoration-color: transparent;
     text-underline-offset: 2px;
-    transition: background 140ms, color 140ms, text-decoration-color 140ms, box-shadow 140ms;
+    transition: background 140ms, color 140ms, text-decoration-color 140ms,
+      box-shadow 140ms;
   }
   .pollBtn:hover {
     background: #fff;
     color: #000;
     text-decoration-color: #000;
-    box-shadow: 0 0 0 3px var(--brand1), 0 2px 10px rgba(0,0,0,.18);
+    box-shadow: 0 0 0 3px var(--brand1), 0 2px 10px rgba(0, 0, 0, 0.18);
   }
 
+  /* ── Loading spinner ── */
+  .pollLoading {
+    display: flex;
+    justify-content: center;
+    padding: 20px 0;
+  }
+  .pollSpinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(255, 210, 74, 0.2);
+    border-top-color: #ffd24a;
+    border-radius: 50%;
+    animation: pollSpin 0.6s linear infinite;
+  }
+  @keyframes pollSpin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  /* Force hidden attribute to always win over display declarations */
+  [hidden] { display: none !important; }
+  /* Belt-and-suspenders: spinner stays gone once results are visible */
+  .pollCard:has(.pollResults:not([hidden])) .pollLoading { display: none !important; }
+
+  /* ── Results view ── */
+  .pollResults {
+    display: grid;
+    gap: 10px;
+  }
+
+  .pollResultRow {
+    display: grid;
+    gap: 5px;
+  }
+
+  .pollResultHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .pollResultLabel {
+    font-size: 16.5px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .pollResultPct {
+    font-size: 13px;
+    font-weight: 800;
+    color: #ffd24a;
+    white-space: nowrap;
+    margin-left: 8px;
+  }
+
+  .pollResultBar {
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(16, 24, 36, 0.75);
+    overflow: hidden;
+  }
+
+  .pollResultFill {
+    height: 100%;
+    background: #ffd24a;
+    border-radius: 999px;
+    transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* ── Thank you confirmation ── */
   .pollThanks {
     display: flex;
     align-items: center;
@@ -233,7 +387,7 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     font-size: 13.5px;
     font-weight: 700;
     color: var(--brand1);
-    padding: 10px 4px 4px;
+    padding: 12px 4px 4px;
   }
   .pollThanksIcon {
     display: inline-flex;
@@ -249,10 +403,14 @@ const total = options.reduce((s, o) => s + o.votes, 0);
     flex-shrink: 0;
   }
 
+  /* ── Footer ── */
   .pollFooter {
-    margin-top: 10px;
-    font-size: 11.5px;
-    opacity: .50;
-    color: var(--faint);
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 12.5px;
+    font-weight: 700;
+    opacity: 1;
+    color: var(--muted);
   }
 </style>

@@ -5,8 +5,8 @@ backend:
   auth_type: implicit
   app_id: Ov23lizuiLRTW8pIf2PO
 
-media_folder: "public/images/uploads"
-public_folder: "/images/uploads"
+media_folder: "public/images"
+public_folder: "/images"
 
 collections:
 
@@ -90,6 +90,103 @@ collections:
       - {label: "Event Image", name: "image", widget: "image", required: false}
       - {label: "Featured", name: "featured", widget: "boolean", required: false, default: false, hint: "ON = pinned to top of events list."}
       - {label: "Body", name: "body", widget: "markdown", required: false}
+
+  - name: "diy-guides"
+    label: "DIY Guides"
+    label_singular: "DIY Guide"
+    folder: "src/content/diy"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    summary: "{{title}} — {{cities}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string", hint: "Clear, action-oriented headline (e.g. 'How to Hang Hurricane Shutters')."}
+      - label: "Intro"
+        name: "intro"
+        widget: "text"
+        hint: "Minimum 2 paragraphs (separate with a blank line). Maximum 200 words. No markdown — plain text only."
+      - label: "Materials"
+        name: "materials"
+        widget: "text"
+        hint: "One item per line. Be specific — brand names, sizes, quantities help readers. Each line becomes a checkmark item automatically."
+      - label: "Steps"
+        name: "steps"
+        widget: "text"
+        hint: "One step per line. Write each as a full action sentence. Each line becomes a numbered yellow badge automatically."
+      - label: "Community Note"
+        name: "community_note"
+        widget: "text"
+        required: false
+        hint: "Optional expert tip, warning, or local insight. Rendered as a highlighted blockquote at the bottom of the main column."
+      - label: "Topic"
+        name: "topic"
+        widget: "select"
+        hint: "Select the primary topic for this guide. Determines which topic feed the article appears in."
+        options:
+          - {label: "Clean", value: "Clean"}
+          - {label: "Paint", value: "Paint"}
+          - {label: "Repair", value: "Repair"}
+          - {label: "Decorate", value: "Decorate"}
+          - {label: "Build", value: "Build"}
+          - {label: "Craft", value: "Craft"}
+      - label: "Deploy to Cities"
+        name: "cities"
+        widget: "select"
+        multiple: true
+        min: 1
+        hint: "Select every city site this guide should appear on."
+        options:
+          - {label: "Daytona Beach", value: "daytona"}
+          - {label: "Orlando", value: "orlando"}
+          - {label: "Jacksonville / 904", value: "904"}
+      - {label: "Publish Date", name: "pubDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false}
+      - {label: "Author", name: "author", widget: "string", required: false, default: "Charles King"}
+      - {label: "Hero Image", name: "heroImage", widget: "image", required: false, hint: "Optional banner image displayed above the title."}
+      - {label: "Category", name: "category", widget: "hidden", default: "DIY"}
+
+  - name: "guides"
+    label: "Guides"
+    folder: "src/content/guides/daytona"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - label: "Topic"
+        name: "topic"
+        widget: "select"
+        options:
+          - {label: "Live", value: "Live"}
+          - {label: "Work", value: "Work"}
+          - {label: "Play", value: "Play"}
+      - {label: "Featured", name: "featured", widget: "boolean", default: false}
+      - {label: "Show Table of Contents", name: "showToC", widget: "boolean", default: true}
+      - {label: "Featured Image", name: "image", widget: "image"}
+      - {label: "Description/Hook", name: "description", widget: "text"}
+      - {label: "Publish Date", name: "date", widget: "datetime"}
+      - {label: "Body", name: "body", widget: "markdown"}
+
+  - name: "topics"
+    label: "Topic Boxes"
+    label_singular: "Topic"
+    folder: "src/content/topics"
+    create: true
+    delete: true
+    slug: "{{city}}-{{slug}}"
+    summary: "{{label}} ({{city}})"
+    fields:
+      - {label: "Label", name: "label", widget: "string", hint: "Display name shown on the tile (e.g. 'Business', 'Food')."}
+      - {label: "Slug", name: "slug", widget: "string", hint: "URL-safe topic slug matching the city topic route (e.g. 'business', 'real-estate')."}
+      - {label: "Image", name: "img", widget: "image", media_folder: "/public/images/topics", public_folder: "/images/topics", hint: "Background photo for the topic tile. Recommended: 800×600px, high contrast."}
+      - label: "City"
+        name: "city"
+        widget: "select"
+        default: "daytona"
+        hint: "Which city site this topic tile belongs to."
+        options:
+          - {label: "Daytona Beach", value: "daytona"}
+          - {label: "Orlando", value: "orlando"}
+          - {label: "Jacksonville / 904", value: "904"}
+      - {label: "Sort Order", name: "order", widget: "number", required: false, default: 0, hint: "Lower numbers appear first. Leave 0 for alphabetical."}
 
   - name: "global-sponsors"
     label: "Global Sponsors"

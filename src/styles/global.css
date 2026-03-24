@@ -8,14 +8,14 @@
   --accent:#ffd24a;
 
   /* Layout */
-  --max:1100px;
+  --max:1360px;
   --radius:14px;
   --shadow: 0 10px 30px rgba(0,0,0,.35);
 
   /* Typography */
    /* Fonts */
   --font-body: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-  --font-head: "Space Grotesk", ui-sans-serif, system-ui;
+  --font-head: "Manrope", ui-sans-serif, system-ui;
 
   /* Hero tuning knobs (hub uses gradients; city pages can still use these if needed) */
   --hero-min: 420px;
@@ -75,9 +75,6 @@ h1, h2, h3, h4, h5, h6,
   color: var(--muted);
   max-width: 720px;
 }
-/* Headings can use a separate font */
-.h1, h1, h2, h3 { font-family: var(--font-head); }
-
 /* =========================
    Topbar + brand
    ========================= */
@@ -151,7 +148,7 @@ h1, h2, h3, h4, h5, h6,
 .hero{
   position:relative;
   overflow:hidden;
-  padding:28px 0 10px;
+  padding:25px 0 9px;
   min-height:var(--hero-min);
   isolation:isolate;
 
@@ -223,7 +220,7 @@ h1, h2, h3, h4, h5, h6,
 
 .lede{color:var(--muted);font-size:16px;line-height:1.55;margin:0 0 12px}
 
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:80px}
 @media (max-width:900px){.grid{grid-template-columns:1fr}}
 
 .article{padding:14px;border-top:1px solid var(--line)}
@@ -315,4 +312,15 @@ body > footer { order: 2; }
 .topbar {
   border-bottom: none !important;
   box-shadow: none !important;
+}
+
+/* ── Editorial Bold — use class="editorial-bold" in Markdown/MDX ──────────────
+   Designed for large emoji headlines (☀️, 🏎️, 📍) and bold editorial callouts.
+   font-size: 1.5rem / font-weight: 800 per spec.
+   Auto-applied to any paragraph that opens with ***…*** (bold+italic triple).  */
+.editorial-bold {
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
 }

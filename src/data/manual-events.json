@@ -1,0 +1,4 @@
+{
+  "_instructions": "Quick-Entry: paste event objects into the 'quickEntry' array. They are merged at build time and take precedence over scraped data (dedup by title+date). Required fields: title, eventDate, city. All others optional. Dates must be YYYY-MM-DD. Known venue keys for automatic lat/lng: 'Hard Rock Hotel Daytona Beach', 'The Shores Resort & Spa', 'Daytona International Speedway', 'Ocean Center', 'Peabody Auditorium'.",
+  "quickEntry": []
+}

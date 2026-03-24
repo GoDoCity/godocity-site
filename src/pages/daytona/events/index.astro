@@ -1,204 +1,964 @@
 ---
 import Base from "../../../layouts/Base.astro";
+import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
+import manualFeedData from "../../../data/manual-events.json";
+import {
+  getAllSheetEvents,
+  GREATER_DAYTONA,
+  CITY_DISPLAY,
+  cityDisplayName,
+  isStrictlyFuture,
+  HARD_CUTOFF,
+} from "../../../lib/events.js";
 
-const title = "Events";
-const subtitle = "GoDoDaytona — local events worth knowing about.";
+/* ── City centres for distance label (events page only) ──────────────── */
+const CITY_CENTERS = {
+  "daytona":              { lat: 29.2108, lng: -81.0228 },
+  "daytona beach":        { lat: 29.2108, lng: -81.0228 },
+  "ormond beach":         { lat: 29.2866, lng: -81.0559 },
+  "ormond":               { lat: 29.2866, lng: -81.0559 },
+  "port orange":          { lat: 29.1380, lng: -81.0045 },
+  "daytona beach shores": { lat: 29.1994, lng: -80.9969 },
+  "south daytona":        { lat: 29.1680, lng: -81.0027 },
+  "holly hill":           { lat: 29.2497, lng: -81.0370 },
+  "new smyrna beach":     { lat: 29.0258, lng: -80.9270 },
+  "new smyrna":           { lat: 29.0258, lng: -80.9270 },
+  "flagler beach":        { lat: 29.4730, lng: -81.1267 },
+  "flagler":              { lat: 29.4730, lng: -81.1267 },
+};
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-
-let allEvents = [];
-let collectErr = "";
-try { allEvents = await getCollection("events"); } catch(err) { collectErr = String(err); allEvents = []; }
-
-
-const upcomingEvents = allEvents
-  .filter(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    const evDate = new Date(e.data.eventDate);
-    evDate.setHours(0, 0, 0, 0);
-    return evCity === "daytona" && evDate >= today;
-  })
-  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime());
-
-// Group events by "Month Year" label
-function monthLabel(date) {
-  return new Date(date).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+/* ── Haversine distance from Daytona Beach center ── */
+const CENTER_LAT = 29.2108;
+const CENTER_LNG = -81.0228;
+function distanceMiles(lat, lng) {
+  const R = 3958.8;
+  const dLat = (lat - CENTER_LAT) * Math.PI / 180;
+  const dLng = (lng - CENTER_LNG) * Math.PI / 180;
+  const a = Math.sin(dLat / 2) ** 2 +
+    Math.cos(CENTER_LAT * Math.PI / 180) * Math.cos(lat * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+function distLabel(lat, lng) {
+  if (lat == null || lng == null) return null;
+  const d = distanceMiles(lat, lng);
+  return d < 0.1 ? "< 0.1 mi" : `${d.toFixed(1)} mi`;
 }
 
-const grouped = [];
-for (const event of upcomingEvents) {
-  const label = monthLabel(event.data.eventDate);
-  const last = grouped[grouped.length - 1];
-  if (last && last.label === label) {
-    last.events.push(event);
-  } else {
-    grouped.push({ label, events: [event] });
+function addUtm(url) {
+  if (!url) return url;
+  try {
+    const u = new URL(url);
+    u.searchParams.set("utm_source", "gododaytona");
+    return u.toString();
+  } catch {
+    return url + (url.includes("?") ? "&" : "?") + "utm_source=gododaytona";
   }
 }
+
+let allEvents = [];
+try { allEvents = await getCollection("events"); } catch { allEvents = []; }
+console.log(`[CLEANUP] Markdown directory is empty: ${allEvents.length === 0}`);
+
+/* ── Sheet events — normalised, deduped, date-filtered by events.js ─────────
+   getAllSheetEvents() uses the module-level singleton, so importFromSheet()
+   runs only ONCE per build regardless of how many pages import this module.   */
+let sheetEvents: any[] = [];
+try { sheetEvents = await getAllSheetEvents(); } catch { sheetEvents = []; }
+const scrapedCount = 0; // scraper permanently disabled
+
+/* ── Manual Quick-Entry feed (src/data/manual-events.json) ──────────────────
+   Paste event objects here as a fallback when scrapers are blocked.
+   Manual entries are processed first and win over scraped data on dedup.   */
+const manualEvents = ((manualFeedData as any).quickEntry ?? [])
+  .filter((e: any) => e.title && e.eventDate && !e._note)
+  .map((e: any) => ({
+    slug: `${String(e.city ?? "daytona").replace(/\s+/g, "-")}/manual-${String(e.title ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40)}`,
+    data: {
+      title:     e.title,
+      eventDate: e.eventDate,
+      endDate:   e.endDate   ?? null,
+      location:  e.location  ?? "",
+      city:      e.city      ?? "daytona beach",
+      url:       e.url       ?? null,
+      image:     e.image     ?? null,
+      category:  e.category  ?? null,
+      lat:       e.lat       ?? null,
+      lng:       e.lng       ?? null,
+      sponsored: e.sponsored ?? false,
+    },
+  }));
+
+/* ── Sort key: date string → lexicographic (NaN-safe) ── */
+function sortKey(e: any): string {
+  return String(e.data?.eventDate ?? "").split("T")[0] || "9999-99-99";
+}
+
+/* Merge: markdown → manual → sheet (coord overrides already applied in events.js) */
+const allEventsWithLive = [...allEvents, ...manualEvents, ...sheetEvents];
+
+/* ── Filter: Greater Daytona area + date >= yesterday, with sponsor override ── */
+const upcomingEvents = allEventsWithLive
+  .filter(e => {
+    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+    if (!GREATER_DAYTONA.has(evCity)) return false;
+    // Sponsored events always show (extra visibility window)
+    if (e.data.sponsored === true) return true;
+    // For multi-day events, keep if endDate is still in the future
+    const dateStr    = String(e.data.eventDate ?? "").split("T")[0];
+    const endDateStr = e.data.endDate ? String(e.data.endDate).split("T")[0] : null;
+    return dateStr >= HARD_CUTOFF || (endDateStr !== null && endDateStr >= HARD_CUTOFF);
+  })
+  .sort((a, b) => sortKey(a) < sortKey(b) ? -1 : sortKey(a) > sortKey(b) ? 1 : 0);
+
+console.log(
+  `[events] Markdown: ${allEvents.length} | Manual: ${manualEvents.length} | ` +
+  `Sheet: ${sheetEvents.length} | Scraped: ${scrapedCount} | Total upcoming: ${upcomingEvents.length}`
+);
+
+// Warn about events with no usable coordinates (will be excluded from map)
+upcomingEvents
+  .filter(e => e.data.lat == null || e.data.lng == null || (e.data.lat === 0 && e.data.lng === 0))
+  .forEach(e => console.warn(
+    `[events] missing coords: "${e.data.title}" (${e.data.eventDate}) — add lat/lng to pin on map`
+  ));
+
+/* Featured slider: top 5 sponsored events — auto-cycles every 5 seconds.
+   Sponsored events are NEVER placed in the regular feed — text from a
+   sponsored card must never bleed into a non-sponsored event row. */
+const allSponsored    = upcomingEvents.filter(e => e.data.sponsored === true);
+const sponsoredEvents = allSponsored.slice(0, 5);
+const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
+
+/* ── Map pins — Hide & Seek filter ───────────────────────────────────────────
+   We only plot a pin when we're confident in the coordinates:
+     • Markdown / manual events (no `source` field) — author-provided, trusted
+     • Scraped events with coordSource "hardlock"    — SCRAPER_COORD_OVERRIDES
+     • Scraped events with coordSource "known_venue" — KNOWN_VENUES table
+   Scraped events where coordSource is "schema" are excluded — those coords
+   come from the venue's own JSON-LD and often resolve to city-centre or
+   river-adjacent defaults, producing noisy river/parking-lot pins.
+   ─────────────────────────────────────────────────────────────────────────── */
+const mapPins = upcomingEvents
+  .filter(e => {
+    if (e.data.lat == null || e.data.lng == null) return false;
+    if (e.data.lat === 0 && e.data.lng === 0)     return false;
+    // Scraped (legacy) events require verified coords; sheet + discovered events are trusted
+    const isEventbriteSource = e.data.source === "eventbrite-sheet" || e.data.source === "eventbrite-discovered";
+    if (e.data.source && !isEventbriteSource) {
+      return e.data.coordSource === "hardlock" || e.data.coordSource === "known_venue";
+    }
+    return true; // markdown / manual / sheet / discovered: trust API-sourced or COORD_OVERRIDES coords
+  })
+  .map(e => {
+    const d = new Date(e.data.eventDate);
+    const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return {
+      label:   e.data.title,
+      address: `${dateStr} · ${e.data.location}`,
+      lat:     e.data.lat,
+      lng:     e.data.lng,
+      image:   e.data.image ?? "/images/daytona-placeholder.jpg",
+      url:     e.data.url ?? null,
+    };
+  });
+
+/* Log every pin so water-pin origins are visible in Cloudflare build logs */
+mapPins.forEach(p =>
+  console.log(`[MAP PIN] "${p.label}" → ${p.lat}, ${p.lng}`)
+);
+
+/* ── Month filter options ── */
+const monthKeys = [...new Set(
+  upcomingEvents.map(e => {
+    const d = new Date(e.data.eventDate);
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+  })
+)];
+const monthOptions = monthKeys.map(k => {
+  const [y, m] = k.split("-");
+  const label = new Date(+y, +m - 1, 1).toLocaleDateString("en-US", { month: "long", year: "numeric" });
+  return { key: k, label };
+});
+
+const PAGE_SIZE = 20;
+
+/* ── Unsplash category fallback images ── */
+const CATEGORY_IMG: Record<string, string> = {
+  "Music & Nightlife":    "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&q=75",
+  "Food & Drink":         "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=75",
+  "Arts & Culture":       "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=800&q=75",
+  "Markets & Fairs":      "https://images.unsplash.com/photo-1488459716781-0a04a8a37e6e?w=800&q=75",
+  "Racing & Motorsports": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&q=75",
+  "Outdoors & Sports":    "https://images.unsplash.com/photo-1530549387789-4c161668b269?w=800&q=75",
+};
+const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=75";
 ---
 
-<Base title={title} subtitle={subtitle} cityBase="daytona">
+<Base
+  title="Events — Greater Daytona Beach Area"
+  subtitle="GoDoDaytona — local events worth knowing about."
+  cityBase="daytona"
+>
   <section class="section">
-    <div class="container">
+    <div class="eventsContainer">
 
-<div class="eventsHeader">
-        <h1 class="h1">Events</h1>
-        <p class="lede">Festivals, shows, markets, and what's happening in Daytona Beach.</p>
-      </div>
-
-      {upcomingEvents.length === 0 ? (
-        <p class="noEvents">No upcoming events right now — check back soon.</p>
-      ) : grouped.map(group => (
-        <div class="monthGroup">
-          <h2 class="monthLabel">{group.label}</h2>
-          <div class="eventList">
-            {group.events.map(e => {
-              const d   = new Date(e.data.eventDate);
-              const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-              const day = d.getDate();
-              const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              const evCity = e.data.city ?? e.slug.split("/")[0];
-              const evSlug = e.slug.split("/").pop();
-              const href = e.data.url ?? `/${evCity}/events/${evSlug}/`;
-              const isExternal = !!e.data.url;
-              return (
-                <a
-                  class="eventCard"
-                  href={href}
-                  target={isExternal ? "_blank" : "_self"}
-                  rel={isExternal ? "noopener noreferrer" : ""}
-                >
-                  <div class="eventCal">
-                    <div class="eDow">{dow}</div>
-                    <div class="eDay">{day}</div>
-                    <div class="eMon">{mon}</div>
-                  </div>
-                  <div class="eventInfo">
-                    <div class="eName">{e.data.title}</div>
-                    <div class="eMeta">
-                      <span class="ePlace">{e.data.location}</span>
-                      {e.data.address && <span class="eAddress">{e.data.address}</span>}
-                    </div>
-                    {e.data.category && <span class="eCat">{e.data.category}</span>}
-                  </div>
-                  {isExternal && <span class="eExtIcon" aria-hidden="true">↗</span>}
-                </a>
-              );
-            })}
+      {/* ── NEWSLETTER — full-bleed slim band, edge-to-edge, no curves ── */}
+      <form name="newsletter-signup" data-netlify="true" netlify-honeypot="nl-bot" style="display:none" aria-hidden="true">
+        <input name="form-name" value="newsletter-signup" /><input name="nl-bot" /><input name="email" />
+      </form>
+      <div class="nlWrap">
+        <div class="nlCard">
+          <div class="nlContent" id="nlContent">
+            <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
+            <div class="nlSub">Get the best local events sent to your inbox, <strong>for free.</strong></div>
+            <form class="nlForm" id="nlForm" novalidate>
+              <input type="hidden" name="form-name" value="newsletter-signup" />
+              <p style="display:none" aria-hidden="true"><label>Leave empty: <input name="nl-bot" id="nlBot" /></label></p>
+              <div class="nlRow">
+                <input class="nlInput" id="nlEmail" name="email" type="email"
+                  placeholder="Enter your email address" autocomplete="email" required />
+                <button class="nlBtn" id="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
+              </div>
+            </form>
+          </div>
+          <div class="nlThanks" id="nlThanks" aria-live="polite" style="display:none">
+            Thank you! You're on the list. ✓
           </div>
         </div>
-      ))}
+      </div>
 
-    </div>
+      {/* ── FEATURED GRID — 3-column static row, horizontal scroll if >3 ── */}
+      {sponsoredEvents.length > 0 && (
+        <div class="container">
+          <div class="featuredSection">
+            <div class="featuredHeadRow">
+              <span class="featuredSectionTitle">Featured Events</span>
+              <div class="featuredActions">
+                <a class="featuredActionBtn" href="/daytona/advertise/">Advertise With Us</a>
+                <a class="featuredActionBtn featuredActionBtn--add" href="/submit-event/">+ Add Event</a>
+              </div>
+            </div>
+            <div class="featuredGrid">
+              {sponsoredEvents.map((e, idx) => {
+                const d      = new Date(e.data.eventDate);
+                const mon    = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const day    = isNaN(d) ? "??" : d.getDate();
+                const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+                const evSlug = e.slug.split("/").pop();
+                const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
+                const isExt  = !!e.data.url;
+                const fbUrl  = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " Daytona")}`;
+                return (
+                  <a class="featuredCard"
+                     href={href}
+                     target={isExt ? "_blank" : "_self"}
+                     rel={isExt ? "noopener noreferrer" : ""}
+                     data-external={isExt ? "true" : undefined}
+                     data-fallback={isExt ? fbUrl : undefined}>
+                    <div class="fcImgWrap">
+                      <img class="fcImg"
+                        src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
+                        alt={e.data.title} loading={idx === 0 ? "eager" : "lazy"} />
+                      <span class="fcSponsorBadge">SPONSORED</span>
+                      <div class="fcImgOverlay" aria-hidden="true"></div>
+                      <div class="fcOverlayCopy">
+                        <div class="fcDate">{mon} {day}</div>
+                        <div class="fcTitle">{e.data.title}</div>
+                        <div class="fcCity">{cityDisplayName(evCity)}</div>
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div class="container">
+
+        {/* ── MAP ── */}
+        {mapPins.length > 0 && (
+          <div class="mapBlock">
+            <InteractiveMap locations={mapPins} height="300px" center={[29.2108, -81.0228]} />
+          </div>
+        )}
+
+        {/* ── FILTER BAR ── */}
+        <div class="filterBar">
+          <label class="filterLabel" for="monthFilter">Filter:</label>
+          <select class="filterSelect" id="monthFilter">
+            <option value="all">All upcoming</option>
+            {monthOptions.map(o => (
+              <option value={o.key}>{o.label}</option>
+            ))}
+          </select>
+          <span class="filterCount" id="filterCount">
+            {regularEvents.length} event{regularEvents.length !== 1 ? "s" : ""}
+          </span>
+        </div>
+
+        {/* ── Scraper fallback notice — shown when live fetch returned nothing ── */}
+        {scrapedCount === 0 && (
+          <div class="scrapeNotice">
+            Local events are loading — check back in 5 minutes.
+          </div>
+        )}
+
+        {/* ── EVENT FEED — slim horizontal rows, 125×82px thumbnails ── */}
+        {regularEvents.length === 0 ? (
+          <p class="noEvents">No upcoming events — <a href="/submit-event/">submit one</a>.</p>
+        ) : (
+          <>
+            <div class="eventFeed" id="eventGrid">
+              {regularEvents.map((e, idx) => {
+                const d        = new Date(e.data.eventDate);
+                const mon      = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const day      = isNaN(d) ? "??" : d.getDate();
+                const dow      = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+                const evCity   = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+                const evSlug   = e.slug.split("/").pop();
+                const href     = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
+                const isExt    = !!e.data.url;
+                const hidden   = idx >= PAGE_SIZE;
+                const evLat    = e.data.lat ?? CITY_CENTERS[evCity]?.lat;
+                const evLng    = e.data.lng ?? CITY_CENTERS[evCity]?.lng;
+                const dist     = distLabel(evLat, evLng);
+                const fbUrl    = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " " + cityDisplayName(evCity))}`;
+                return (
+                  <a
+                    class={`evCard${hidden ? " evCard--hidden" : ""}`}
+                    href={href}
+                    target={isExt ? "_blank" : "_self"}
+                    rel={isExt ? "noopener noreferrer" : ""}
+                    data-month={monthKey}
+                    data-idx={String(idx)}
+                    data-external={isExt ? "true" : undefined}
+                    data-fallback={isExt ? fbUrl : undefined}
+                  >
+                    {/* 100×65 thumbnail */}
+                    <div class="evCardImg">
+                      <img
+                        src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
+                        alt={e.data.title} loading="lazy" decoding="async" />
+                    </div>
+
+                    {/* Date column — sits between thumb and text */}
+                    <div class="evCardDate" aria-label={`${mon} ${day}`}>
+                      <span class="evCardMon">{mon}</span>
+                      <span class="evCardDay">{day}</span>
+                    </div>
+
+                    {/* Title + venue + meta */}
+                    <div class="evCardBody">
+                      <div class="evCardTitle">
+                        {e.data.title}
+                        {isExt && <span class="evCardExt" aria-label="External link">↗</span>}
+                      </div>
+                      {e.data.location && (
+                        <div class="evCardVenue">{e.data.location}</div>
+                      )}
+                      <div class="evCardMeta">
+                        <span class="evCardCity">{cityDisplayName(evCity)}</span>
+                        {dist && <span class="evCardDist">{dist}</span>}
+                        {/* Badge only for explicitly sponsored events — no auto-tags */}
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+
+            {regularEvents.length > PAGE_SIZE && (
+              <div class="loadMoreRow">
+                <button class="loadMoreBtn" id="loadMoreBtn" type="button">
+                  Load more events
+                  <span class="loadMoreCount" id="loadMoreCount">
+                    ({Math.min(PAGE_SIZE, regularEvents.length - PAGE_SIZE)} more)
+                  </span>
+                </button>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* ── SUGGEST AN EVENT CTA ── */}
+        <div class="suggestRow">
+          <p class="suggestText">Know about an event we're missing?</p>
+          <a class="suggestBtn" href="/submit-event/">Suggest an Event →</a>
+        </div>
+
+        </div>{/* /.container (map + feed) */}
+
+      {/* ── OWN THE CITY CTA ── */}
+      <div class="container ctaOuter">
+        <div class="ctaBox">
+          <h2 class="ctaHeadline">Own the City.</h2>
+          <p class="ctaBody">
+            GoDoDaytona is built by locals, for locals. If you're a business owner or event
+            organizer, we want to help you grow. Submit your event for free, or ask about our
+            Sponsored Featured spots to stay at the top of the list all week long.
+          </p>
+          <a class="ctaBtn" href="/daytona/advertise/">Get Featured</a>
+        </div>
+      </div>
+
+    </div>{/* /.eventsContainer */}
   </section>
 </Base>
 
+<script is:inline>
+(function () {
+  /* ── Pagination + filter ── */
+  var PAGE_SIZE = 20;
+  var shown     = PAGE_SIZE;
+  var filter    = "all";
+
+  var grid      = document.getElementById("eventGrid");
+  var filterSel = document.getElementById("monthFilter");
+  var countEl   = document.getElementById("filterCount");
+  var moreBtn   = document.getElementById("loadMoreBtn");
+  var moreCount = document.getElementById("loadMoreCount");
+
+  if (grid) {
+    var allCards = Array.prototype.slice.call(grid.querySelectorAll(".evCard"));
+
+    function visibleCards() {
+      return allCards.filter(function (c) {
+        return filter === "all" || c.getAttribute("data-month") === filter;
+      });
+    }
+
+    function applyState() {
+      var visible = visibleCards();
+      var total   = visible.length;
+      allCards.forEach(function (c) { c.classList.add("evCard--hidden"); });
+      visible.slice(0, shown).forEach(function (c) { c.classList.remove("evCard--hidden"); });
+      if (countEl) countEl.textContent = total + " event" + (total !== 1 ? "s" : "");
+      if (moreBtn) {
+        var remaining = total - shown;
+        if (remaining > 0) {
+          moreBtn.style.display = "";
+          if (moreCount) moreCount.textContent = "(" + Math.min(PAGE_SIZE, remaining) + " more)";
+        } else {
+          moreBtn.style.display = "none";
+        }
+      }
+    }
+
+    if (filterSel) {
+      filterSel.addEventListener("change", function () {
+        filter = filterSel.value; shown = PAGE_SIZE; applyState();
+      });
+    }
+    if (moreBtn) {
+      moreBtn.addEventListener("click", function () { shown += PAGE_SIZE; applyState(); });
+    }
+    applyState();
+  }
+
+  /* ── Newsletter signup ── */
+  var nlForm    = document.getElementById("nlForm");
+  var nlBtn     = document.getElementById("nlBtn");
+  var nlEmail   = document.getElementById("nlEmail");
+  var nlContent = document.getElementById("nlContent");
+  var nlThanks  = document.getElementById("nlThanks");
+
+  if (nlForm) {
+    nlForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      var email = (nlEmail ? nlEmail.value : "").trim();
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        if (nlEmail) nlEmail.focus();
+        return;
+      }
+
+      nlBtn.disabled    = true;
+      nlBtn.textContent = "SIGNING UP…";
+
+      var botVal = document.getElementById("nlBot") ? document.getElementById("nlBot").value : "";
+      var body   = "form-name=newsletter-signup&email=" + encodeURIComponent(email);
+      if (botVal) body += "&nl-bot=" + encodeURIComponent(botVal);
+
+      fetch("/", {
+        method:  "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body:    body,
+      })
+        .then(function (res) {
+          if (res.ok || res.status === 303) {
+            if (nlContent) nlContent.style.display = "none";
+            if (nlThanks)  nlThanks.style.display  = "";
+          } else {
+            throw new Error(res.status);
+          }
+        })
+        .catch(function () {
+          nlBtn.disabled    = false;
+          nlBtn.textContent = "SIGN UP, IT'S FREE!";
+        });
+    });
+  }
+
+  /* ── Link validator: catch dead external URLs → Google Search fallback ── */
+  document.querySelectorAll("[data-external='true']").forEach(function (el) {
+    var fallback = el.getAttribute("data-fallback");
+    if (!fallback) return;
+    el.addEventListener("click", function () {
+      var ctrl = typeof AbortController !== "undefined" ? new AbortController() : null;
+      var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, 5000) : null;
+      var opts = { mode: "no-cors" };
+      if (ctrl) opts.signal = ctrl.signal;
+      fetch(el.href, opts)
+        .then(function () { if (timer) clearTimeout(timer); })
+        .catch(function () {
+          if (timer) clearTimeout(timer);
+          window.open(fallback, "_blank", "noopener,noreferrer");
+        });
+    });
+  });
+})();
+</script>
+
 <style>
-  .eventsHeader {
-    padding: 12px 0 24px;
-  }
+  /* overflow-x:clip prevents the 100vw negative-margin from creating a scrollbar
+     without creating a new block-formatting context (unlike overflow:hidden) */
+  .eventsContainer { padding-bottom: 64px; overflow-x: clip; }
 
-  .noEvents {
-    color: var(--muted);
-    font-size: 16px;
-    padding: 32px 0;
+  /* ── Newsletter — full-bleed slim band, strict 180px, no curves ── */
+  .nlWrap {
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-bottom: 28px;
   }
-
-  .monthGroup {
-    margin-bottom: 36px;
-  }
-
-  .monthLabel {
-    font-size: 13px;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: .1em;
-    color: var(--muted);
-    margin: 0 0 12px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid rgba(255,255,255,.08);
-  }
-
-  .eventList {
-    display: grid;
-    gap: 4px;
-  }
-
-  .eventCard {
-    display: grid;
-    grid-template-columns: 56px 1fr auto;
-    gap: 14px;
+  .nlCard {
+    background: linear-gradient(135deg, var(--brand1), var(--brand2));
+    /* No border-radius — hard edge to edge */
+    height: 180px;
+    max-height: 180px;
+    overflow: hidden;
+    display: flex;
     align-items: center;
-    text-decoration: none;
-    padding: 14px 16px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.07);
-    background: rgba(255,255,255,.02);
-    transition: border-color 140ms, background 140ms;
+    justify-content: center;
+    padding: 0 1.5rem;
   }
-  .eventCard:hover {
-    border-color: rgba(255,255,255,.15);
-    background: rgba(255,255,255,.05);
-  }
-
-  .eventCal {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
-    background: rgba(255,255,255,.06);
-    display: grid;
-    place-items: center;
-    text-align: center;
-    line-height: 1;
-    flex-shrink: 0;
-  }
-  .eDow { font-size: 9px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
-  .eDay { font-size: 20px; font-weight: 900; color: var(--text); margin: 1px 0; }
-  .eMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
-
-  .eventInfo {
+  .nlContent {
+    max-width: 520px;
+    width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    min-width: 0;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
   }
-  .eName {
-    font-weight: 800;
+  .nlHead {
+    font-size: clamp(26px, 3.2vw, 38px);
+    font-weight: 900;
+    font-style: italic;
+    color: var(--accentText);
+    line-height: 1.0;
+    letter-spacing: -0.04em;
+    margin: 0;
+  }
+  .nlCity { font-style: italic; font-weight: 900; }
+  .nlSub {
     font-size: 16px;
-    color: var(--text);
-    line-height: 1.2;
+    font-weight: 400;
+    color: var(--accentText);
+    opacity: .85;
+    line-height: 1.3;
+    margin: 0;
   }
-  .eMeta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 8px;
-    font-size: 13px;
-    color: var(--faint);
+  .nlSub strong { font-weight: 900; opacity: 1; }
+  .nlForm { width: 100%; max-width: 420px; margin-top: 6px; }
+  .nlRow { display: flex; height: 46px; width: 100%; }
+  .nlInput {
+    flex: 1; min-width: 0;
+    border-radius: 8px 0 0 8px;
+    border: 2px solid rgba(0,0,0,.4);
+    border-right: none;
+    background: #fff;
+    color: #111;
+    padding: 0 14px;
+    font-size: 15px; font-weight: 500; font-family: inherit;
+    outline: none;
+    transition: border-color 150ms;
   }
-  .eAddress::before { content: "·  "; }
-  .eCat {
-    display: inline-block;
-    font-size: 11px;
-    font-weight: 800;
-    padding: 2px 8px;
-    border-radius: 999px;
-    background: rgba(255,212,74,.12);
-    color: var(--accent);
-    width: fit-content;
-    margin-top: 2px;
+  .nlInput::placeholder { color: #999; }
+  .nlInput:focus { border-color: rgba(0,0,0,.75); }
+  .nlBtn {
+    flex-shrink: 0; padding: 0 18px;
+    border-radius: 0 8px 8px 0;
+    border: none;
+    background: #000;
+    color: #fff;
+    font-size: 12px; font-weight: 900; font-family: inherit;
+    letter-spacing: .04em;
+    cursor: pointer; white-space: nowrap;
+    transition: background 140ms;
+  }
+  .nlBtn:hover { background: #222; }
+  .nlBtn:disabled { opacity: .5; cursor: default; }
+  .nlFine {
+    font-size: 11px; color: var(--accentText); opacity: .55; margin-top: 2px;
+  }
+  .nlThanks {
+    font-size: clamp(22px, 2.8vw, 32px);
+    font-weight: 900;
+    color: var(--accentText);
+    text-align: center;
+    padding: 8px 0;
   }
 
-  .eExtIcon {
-    font-size: 14px;
+  /* ── Newsletter mobile overhaul (< 768px) ── */
+  @media (max-width: 767px) {
+    /* 1. Reset any restrictive parent containers */
+    .nlCard, .nlContent, .nlForm, .nlInner {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 15px 0 !important;
+      overflow: visible !important;
+    }
+
+    /* 2. Breakout Header: Single line and centered */
+    .nlHead {
+      font-size: 1.85rem !important;
+      white-space: nowrap !important;
+      display: block !important;
+      width: 100vw !important;
+      text-align: center !important;
+      margin-left: calc(-50vw + 50%) !important;
+    }
+
+    /* 3. Breakout Form: Stacks elements at fixed width */
+    .nlRow {
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      width: 100vw !important;
+      margin-left: calc(-50vw + 50%) !important;
+      gap: 12px !important;
+    }
+
+    /* 4. Uniform Sizing: Identical width and height */
+    .nlInput, .nlBtn {
+      width: 320px !important;
+      min-width: 320px !important;
+      max-width: 320px !important;
+      height: 48px !important;
+      margin: 0 auto !important;
+      display: block !important;
+      box-sizing: border-box !important;
+      border-radius: 8px !important;
+    }
+
+    /* 5. Polish: Bold the 'for free' text */
+    .nlSub strong {
+      font-weight: 900 !important;
+    }
+  }
+
+  /* ── Featured Section — 3-column static grid ── */
+  .featuredSection { width: 100%; margin-bottom: 24px; }
+  .featuredHeadRow {
+    width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px; gap: 10px; flex-wrap: wrap;
+  }
+  .featuredSectionTitle {
+    font-size: 11px; font-weight: 900; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--brand1);
+  }
+  .featuredActions { display: flex; gap: 6px; }
+  .featuredActionBtn {
+    display: inline-flex; align-items: center;
+    height: 28px; padding: 0 12px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.2);
+    background: transparent; color: var(--muted);
+    font-size: 11px; font-weight: 700; text-decoration: none;
+    transition: border-color 140ms, color 140ms;
+    white-space: nowrap;
+  }
+  .featuredActionBtn:hover { border-color: var(--brand1); color: var(--brand1); }
+  .featuredActionBtn--add {
+    border-color: rgba(249,217,0,.35); color: var(--brand1);
+  }
+  .featuredActionBtn--add:hover { border-color: var(--brand1); background: rgba(249,217,0,.08); }
+
+  /* 3-column grid — scrollable horizontally if >3 cards */
+  .featuredGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+    gap: 14px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px; /* room for scrollbar */
+  }
+  .featuredGrid::-webkit-scrollbar { height: 4px; }
+  .featuredGrid::-webkit-scrollbar-track { background: rgba(255,255,255,.04); border-radius: 999px; }
+  .featuredGrid::-webkit-scrollbar-thumb { background: rgba(249,217,0,.35); border-radius: 999px; }
+
+  .featuredCard {
+    flex-shrink: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    scroll-snap-align: start;
+    transition: transform 150ms, box-shadow 150ms;
+  }
+  .featuredCard:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+
+  .fcImgWrap { position: relative; height: 200px; background: rgba(255,255,255,.05); overflow: hidden; }
+  .fcImg { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .fcImgOverlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.20) 55%, transparent 100%);
+  }
+  .fcSponsorBadge {
+    position: absolute; top: 10px; right: 10px; z-index: 2;
+    font-size: 10px; font-weight: 900; letter-spacing: .08em;
+    background: var(--brand1); color: #000; padding: 3px 9px; border-radius: 999px;
+  }
+  .fcOverlayCopy { position: absolute; bottom: 14px; left: 14px; right: 14px; z-index: 2; }
+  .fcDate  { font-size: 11px; font-weight: 900; color: var(--brand1); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px; }
+  .fcTitle { font-size: 16px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 3px; }
+  .fcCity  { font-size: 12px; color: rgba(255,255,255,.65); }
+
+  @media (max-width: 640px) {
+    .featuredGrid { grid-template-columns: repeat(3, minmax(180px, 1fr)); }
+    .fcImgWrap { height: 160px; }
+    .fcTitle { font-size: 14px; }
+  }
+
+  /* Map */
+  .mapBlock { margin-bottom: 20px; }
+
+  /* ── Filter Bar ── */
+  .filterBar { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; flex-wrap: wrap; }
+  .filterLabel { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
+  .filterSelect {
+    height: 32px; padding: 0 28px 0 10px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.05);
+    color: var(--text); font-size: 13px; font-family: inherit;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 9px center;
+    cursor: pointer; outline: none;
+  }
+  .filterSelect:focus { border-color: var(--brand1); }
+  .filterSelect option { background: #1a1a1a; }
+  .filterCount { font-size: 12px; color: var(--faint); margin-left: auto; }
+
+  /* ── EVENT FEED — NOOGA slim 3-column rows ── */
+  .eventFeed {
+    display: flex; flex-direction: column;
+    margin-bottom: 24px;
+  }
+
+  .evCard {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    border-bottom: 1px solid #242424;
+    padding: 12px 0;
+    transition: opacity 120ms;
+  }
+  .evCard:first-child { border-top: 1px solid #242424; }
+  .evCard:hover { opacity: .82; }
+  .evCard--hidden { display: none !important; }
+
+  /* Col 1 — 125×82px landscape thumbnail (+25%) */
+  .evCardImg {
+    flex-shrink: 0;
+    width: 125px;
+    height: 82px;
+    overflow: hidden;
+    border-radius: 6px;
+    background: rgba(255,255,255,.05);
+    margin-right: 1.5rem;
+  }
+  .evCardImg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  /* Col 2 — Date block: mini-calendar icon, yellow month tab + large day */
+  .evCardDate {
+    flex-shrink: 0;
+    width: 44px;
+    margin-right: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    border: 2px solid var(--brand1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .evCardMon {
+    background: var(--brand1);
+    color: #000;
+    font-size: 9px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    line-height: 1;
+    text-align: center;
+    padding: 3px 0;
+  }
+  .evCardDay {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--text);
+    text-align: center;
+    line-height: 1;
+    padding: 5px 0 6px;
+    background: rgba(255,255,255,.05);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top: 1px solid rgba(255,215,0,.35);
+  }
+
+  /* Col 3 — Text: title, venue, meta */
+  .evCardBody { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+
+  .evCardTitle {
+    font-size: 18px; font-weight: 800; color: var(--text);
+    line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .evCardExt { font-size: 11px; color: var(--faint); margin-left: 4px; }
+
+  .evCardVenue {
+    font-size: 15px; font-weight: 700; color: var(--brand1);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .evCardMeta { display: flex; align-items: center; gap: 5px; }
+  .evCardCity { font-size: 15px; font-weight: 600; color: var(--muted); }
+  .evCardDist {
+    font-size: 15px; font-weight: 700; color: var(--brand1);
+    background: rgba(249,217,0,.10); padding: 1px 6px; border-radius: 999px;
+  }
+
+  /* ── Source badges — Community Event / Featured ── */
+  .evSrcBadge {
+    display: inline-block;
+    font-size: 10px; font-weight: 700; letter-spacing: .04em;
+    padding: 2px 7px; border-radius: 999px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .evSrcBadge--featured {
+    background: rgba(249,217,0,.12);
+    color: var(--brand1);
+    border: 1px solid rgba(249,217,0,.3);
+  }
+  .evSrcBadge--community {
+    background: rgba(255,255,255,.06);
     color: var(--muted);
-    opacity: .6;
-    align-self: center;
+    border: 1px solid rgba(255,255,255,.12);
+  }
+
+  /* Load More */
+  .loadMoreRow { display: flex; justify-content: center; padding: 12px 0; }
+  .loadMoreBtn {
+    height: 40px; padding: 0 24px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: transparent; color: var(--text);
+    font-size: 13px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: border-color 140ms, background 140ms;
+  }
+  .loadMoreBtn:hover { border-color: var(--brand1); background: rgba(249,217,0,.06); }
+  .loadMoreCount { color: var(--faint); font-weight: 400; margin-left: 4px; }
+
+  /* ── Suggest an Event CTA ── */
+  .suggestRow {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; flex-wrap: wrap;
+    padding: 20px 0 8px;
+    border-top: 1px solid #2a2a2a;
+  }
+  .suggestText { font-size: 14px; color: var(--muted); margin: 0; }
+  .suggestBtn {
+    display: inline-flex; align-items: center;
+    height: 36px; padding: 0 18px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.2);
+    background: transparent; color: var(--text);
+    font-size: 13px; font-weight: 700; text-decoration: none;
+    transition: border-color 140ms, color 140ms;
+    white-space: nowrap;
+  }
+  .suggestBtn:hover { border-color: var(--brand1); color: var(--brand1); }
+
+  .noEvents { color: var(--muted); font-size: 15px; padding: 24px 0; }
+  .noEvents a { color: var(--brand1); }
+
+  /* Scraper zero-results notice */
+  .scrapeNotice {
+    font-size: 13px; color: var(--muted);
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
   }
 
   @media (max-width: 520px) {
-    .eventCard { grid-template-columns: 56px 1fr; padding: 12px; }
-    .eExtIcon { display: none; }
+    .nlCard       { padding: 24px 1.25rem; }
+    .nlRow        { flex-direction: column; height: auto; gap: 8px; }
+    .nlInput      { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
+    .nlBtn        { border-radius: 8px; height: 46px; }
+    .filterBar    { gap: 6px; }
+    .filterCount  { margin-left: 0; width: 100%; }
+    .evCardTitle  { font-size: 16px; }
+    .evCardVenue  { font-size: 13px; }
+    .evCardCity   { font-size: 13px; }
+    .evCardDist   { font-size: 13px; }
   }
+
+  /* ── Own the City CTA ─────────────────────────────────────────────────── */
+  .ctaOuter {
+    padding-top: 40px;
+    padding-bottom: 16px;
+  }
+  .ctaBox {
+    width: 100%;
+    background: #0d0d0d;
+    border: 1px solid rgba(249,217,0,.25);
+    border-radius: 16px;
+    padding: clamp(32px, 5vw, 56px) clamp(24px, 6vw, 64px);
+    text-align: center;
+    box-shadow: 0 0 40px rgba(249,217,0,.06);
+  }
+  .ctaHeadline {
+    margin: 0 0 16px;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 900;
+    letter-spacing: -.02em;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .ctaBody {
+    margin: 0 auto 32px;
+    max-width: 640px;
+    font-size: clamp(15px, 1.6vw, 18px);
+    color: rgba(255,255,255,.72);
+    line-height: 1.65;
+  }
+  .ctaBtn {
+    display: inline-flex; align-items: center; justify-content: center;
+    height: 52px; padding: 0 36px;
+    border-radius: 999px;
+    background: var(--brand1);
+    color: #000;
+    font-size: 15px; font-weight: 900;
+    letter-spacing: .04em; text-transform: uppercase;
+    text-decoration: none;
+    transition: filter 140ms, transform 120ms;
+  }
+  .ctaBtn:hover { filter: brightness(1.1); transform: translateY(-1px); }
 </style>

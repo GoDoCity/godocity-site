@@ -1,0 +1,72 @@
+---
+/**
+ * src/pages/[city]/diy/[slug].astro
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Dynamic DIY guide page.
+ *
+ * URL pattern:  /daytona/diy/hang-hurricane-shutters/
+ *               /orlando/diy/fix-your-screen-door/
+ *               /[any-city]/diy/[slug]/
+ *
+ * Multi-city:   A single Markdown file can deploy to multiple cities by listing
+ *               them in the `cities` frontmatter array:
+ *                 cities: [daytona, orlando, 904]
+ *               getStaticPaths() expands each entry across all declared cities.
+ *
+ * Content:      src/content/diy/[slug].md
+ * Schema:       src/content/config.ts  (diy collection)
+ * Component:    src/components/DiyPill.astro
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+import Base    from "../../../layouts/Base.astro";
+import DiyPill from "../../../components/DiyPill.astro";
+import { getCollection } from "astro:content";
+
+/* ── Build static paths — one route per (city × slug) combination ───────── */
+export async function getStaticPaths() {
+  const entries = await getCollection("diy");
+  const paths: { params: { city: string; slug: string }; props: { entry: typeof entries[number] } }[] = [];
+
+  for (const entry of entries) {
+    for (const city of entry.data.cities) {
+      paths.push({
+        params: { city, slug: entry.slug },
+        props:  { entry },
+      });
+    }
+  }
+  return paths;
+}
+
+/* ── Per-page data ──────────────────────────────────────────────────────── */
+const { entry }  = Astro.props;
+const { data }   = entry;
+const city       = Astro.params.city as string;
+const cityLabel  = city.charAt(0).toUpperCase() + city.slice(1);
+---
+
+<Base
+  title={`${data.title} | GoDo${cityLabel}`}
+  subtitle={data.title}
+  cityBase={city}
+>
+  <div class="diyPageWrap">
+    <DiyPill
+      title={data.title}
+      intro={data.intro}
+      materials={data.materials}
+      steps={data.steps}
+      community_note={data.community_note}
+      city={city}
+      topic={data.topic}
+      author={data.author}
+      pubDate={data.pubDate}
+      heroImage={data.heroImage}
+    />
+  </div>
+</Base>
+
+<style>
+  .diyPageWrap { max-width: 1260px !important; margin: 0 auto !important; }
+  :global(.diyPageWrap .container) { max-width: 1260px !important; margin: 0 auto !important; }
+</style>

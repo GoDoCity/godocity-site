@@ -1,0 +1,456 @@
+---
+import Base from "../layouts/Base.astro";
+
+const CITIES = [
+  "Daytona Beach",
+  "Ormond Beach",
+  "Port Orange",
+  "Daytona Beach Shores",
+  "South Daytona",
+  "Holly Hill",
+  "New Smyrna Beach",
+  "Flagler Beach",
+];
+
+const CATEGORIES = [
+  "Arts & Culture",
+  "Community",
+  "Family",
+  "Festival",
+  "Food & Drink",
+  "Markets & Fairs",
+  "Music & Nightlife",
+  "Outdoors & Sports",
+  "Racing & Motorsports",
+  "Wellness",
+];
+---
+
+<Base
+  title="Submit an Event — GoDoDaytona"
+  subtitle="Submit a local event to GoDoDaytona and reach thousands of Greater Daytona readers."
+  cityBase="daytona"
+>
+  <section class="section">
+    <div class="container">
+
+      <div class="formWrap">
+
+        <div class="formHead">
+          <h1 class="formTitle">Submit an Event</h1>
+          <p class="formSubtitle">
+            Reach thousands of Greater Daytona Beach locals. Submissions are reviewed within
+            one business day. Free listings for community events — sponsored placements available.
+          </p>
+        </div>
+
+        <!--
+          Form submissions are handled by netlify/functions/submit-event.js
+          — no Netlify Forms required, no shadow form, no 405 errors.
+        -->
+        <div
+          class="submitForm"
+          id="eventSubmitForm"
+        >
+          <p class="hidden" aria-hidden="true">
+            <label>Don't fill this out: <input name="bot-field" id="botField" /></label>
+          </p>
+
+          {/* ── Section 1: Event Details ── */}
+          <fieldset class="formSection">
+            <legend class="sectionLabel">Event Details</legend>
+
+            <div class="fieldGroup">
+              <label class="fieldLabel" for="event-title">
+                Event Name <span class="req" aria-label="required">*</span>
+              </label>
+              <input
+                class="fieldInput"
+                id="event-title"
+                name="event-title"
+                type="text"
+                placeholder="e.g. Daytona Farmers Market"
+                required
+                maxlength="120"
+              />
+            </div>
+
+            <div class="fieldRow">
+              <div class="fieldGroup">
+                <label class="fieldLabel" for="event-date">
+                  Start Date <span class="req" aria-label="required">*</span>
+                </label>
+                <input
+                  class="fieldInput"
+                  id="event-date"
+                  name="event-date"
+                  type="date"
+                  required
+                />
+              </div>
+              <div class="fieldGroup">
+                <label class="fieldLabel" for="event-end-date">End Date (if multi-day)</label>
+                <input
+                  class="fieldInput"
+                  id="event-end-date"
+                  name="event-end-date"
+                  type="date"
+                />
+              </div>
+            </div>
+
+            <div class="fieldGroup">
+              <label class="fieldLabel" for="event-category">Category</label>
+              <select class="fieldInput fieldSelect" id="event-category" name="event-category">
+                <option value="">— Select a category —</option>
+                {CATEGORIES.map(c => <option value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div class="fieldGroup">
+              <label class="fieldLabel" for="event-description">
+                Short Description <span class="req" aria-label="required">*</span>
+              </label>
+              <textarea
+                class="fieldInput fieldTextarea"
+                id="event-description"
+                name="event-description"
+                placeholder="2–3 sentences about the event. What makes it worth attending?"
+                required
+                maxlength="500"
+                rows="4"
+              ></textarea>
+              <span class="fieldHint">Max 500 characters.</span>
+            </div>
+
+            <div class="fieldGroup">
+              <label class="fieldLabel" for="event-url">Event URL or Ticket Link</label>
+              <input
+                class="fieldInput"
+                id="event-url"
+                name="event-url"
+                type="url"
+                placeholder="https://..."
+              />
+            </div>
+          </fieldset>
+
+          {/* ── Section 2: Location ── */}
+          <fieldset class="formSection">
+            <legend class="sectionLabel">Location</legend>
+
+            <div class="fieldGroup">
+              <label class="fieldLabel" for="event-city">
+                City / Area <span class="req" aria-label="required">*</span>
+              </label>
+              <select class="fieldInput fieldSelect" id="event-city" name="event-city" required>
+                <option value="">— Select a city —</option>
+                {CITIES.map(c => <option value={c}>{c}</option>)}
+              </select>
+            </div>
+
+            <div class="fieldGroup">
+              <label class="fieldLabel" for="event-venue">
+                Venue / Location Name <span class="req" aria-label="required">*</span>
+              </label>
+              <input
+                class="fieldInput"
+                id="event-venue"
+                name="event-venue"
+                type="text"
+                placeholder="e.g. Daytona International Speedway"
+                required
+              />
+            </div>
+
+            <div class="fieldGroup">
+              <label class="fieldLabel" for="event-address">Street Address</label>
+              <input
+                class="fieldInput"
+                id="event-address"
+                name="event-address"
+                type="text"
+                placeholder="e.g. 1801 W International Speedway Blvd"
+              />
+            </div>
+          </fieldset>
+
+          {/* ── Section 3: Your Contact ── */}
+          <fieldset class="formSection">
+            <legend class="sectionLabel">Your Contact</legend>
+
+            <div class="fieldRow">
+              <div class="fieldGroup">
+                <label class="fieldLabel" for="contact-name">
+                  Your Name <span class="req" aria-label="required">*</span>
+                </label>
+                <input
+                  class="fieldInput"
+                  id="contact-name"
+                  name="contact-name"
+                  type="text"
+                  placeholder="Full name"
+                  required
+                />
+              </div>
+              <div class="fieldGroup">
+                <label class="fieldLabel" for="contact-email">
+                  Email <span class="req" aria-label="required">*</span>
+                </label>
+                <input
+                  class="fieldInput"
+                  id="contact-email"
+                  name="contact-email"
+                  type="email"
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="fieldGroup">
+              <label class="fieldLabel" for="contact-org">Organization (optional)</label>
+              <input
+                class="fieldInput"
+                id="contact-org"
+                name="contact-org"
+                type="text"
+                placeholder="e.g. City of Daytona Beach Parks & Rec"
+              />
+            </div>
+          </fieldset>
+
+          <div class="formFooter">
+            <p class="formNote">
+              <span class="req">*</span> Required. We review every submission and may edit for clarity
+              and length. Commercial events may be offered a sponsored placement.
+            </p>
+            <button class="submitBtn" id="submitBtn" type="button">Submit Event →</button>
+          </div>
+          <p class="formError" id="formError" role="alert" aria-live="polite"></p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .formWrap {
+    max-width: 640px;
+    padding: 16px 0 56px;
+  }
+
+  .formHead {
+    margin-bottom: 32px;
+  }
+
+  .formTitle {
+    font-size: clamp(26px, 3.5vw, 40px);
+    font-weight: 900;
+    line-height: 1.1;
+    margin: 0 0 10px;
+  }
+
+  .formSubtitle {
+    font-size: 16px;
+    color: var(--muted);
+    line-height: 1.55;
+    margin: 0;
+    max-width: 540px;
+  }
+
+  /* ── Form sections ── */
+  .formSection {
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    padding: 24px 24px 20px;
+    margin: 0 0 20px;
+    background: rgba(255,255,255,.02);
+  }
+
+  .sectionLabel {
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--brand1);
+    padding: 0 4px;
+  }
+
+  .fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 18px;
+  }
+  .fieldGroup:first-of-type { margin-top: 16px; }
+
+  .fieldRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 18px;
+  }
+
+  .fieldLabel {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .req { color: var(--brand1); font-weight: 900; }
+
+  .fieldInput {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 16px;      /* larger touch target for mobile */
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.12);
+    background: rgba(255,255,255,.05);
+    color: var(--text);
+    font-size: 16px;         /* ≥16px prevents iOS auto-zoom on focus */
+    font-family: inherit;
+    outline: none;
+    transition: border-color 150ms;
+    -webkit-appearance: none; /* removes iOS inner shadow on inputs */
+  }
+  .fieldInput:focus { border-color: var(--brand1); }
+  .fieldInput::placeholder { color: rgba(255,255,255,.28); }
+
+  .fieldSelect {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+    cursor: pointer;
+  }
+  .fieldSelect option { background: #1a1a1a; color: #fff; }
+
+  .fieldTextarea { resize: vertical; min-height: 100px; line-height: 1.5; }
+
+  .fieldHint { font-size: 12px; color: var(--faint); }
+
+  /* ── Footer ── */
+  .formFooter {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+
+  .formNote {
+    font-size: 13px;
+    color: var(--faint);
+    line-height: 1.5;
+    max-width: 380px;
+    margin: 0;
+    flex: 1;
+  }
+
+  .submitBtn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 999px;
+    border: none;
+    background: var(--brand1);
+    color: #000;
+    font-size: 14px;
+    font-weight: 900;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 140ms;
+  }
+  .submitBtn:hover { opacity: .82; }
+
+  .hidden { display: none; }
+
+  .formError {
+    margin-top: 12px;
+    font-size: 14px;
+    color: #ff6b6b;
+    min-height: 20px;
+  }
+
+  @media (max-width: 520px) {
+    .formSection { padding: 18px 16px 16px; }
+    .fieldRow { grid-template-columns: 1fr; }
+    .formFooter { flex-direction: column; }
+    .submitBtn { width: 100%; justify-content: center; }
+  }
+</style>
+
+<script is:inline>
+(function () {
+  var wrap  = document.getElementById("eventSubmitForm");
+  var btn   = document.getElementById("submitBtn");
+  var errEl = document.getElementById("formError");
+
+  if (!wrap || !btn) return;
+
+  /* Validate all [required] inputs/selects/textareas inside the div */
+  function validateFields() {
+    var required = wrap.querySelectorAll("[required]");
+    for (var i = 0; i < required.length; i++) {
+      if (!required[i].value.trim()) {
+        required[i].focus();
+        var label = required[i].labels && required[i].labels[0];
+        var name  = label ? label.textContent.replace("*","").trim() : "Field";
+        return name + " is required.";
+      }
+    }
+    return null;
+  }
+
+  /* Collect all named inputs/selects/textareas into URLSearchParams */
+  function collectBody() {
+    var params = new URLSearchParams();
+    var els = wrap.querySelectorAll("[name]");
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (el.name) params.set(el.name, el.value);
+    }
+    return params.toString();
+  }
+
+  btn.addEventListener("click", function () {
+    errEl.textContent = "";
+
+    var err = validateFields();
+    if (err) { errEl.textContent = err; return; }
+
+    /* Honeypot check */
+    var botVal = document.getElementById("botField");
+    if (botVal && botVal.value) return;
+
+    btn.disabled    = true;
+    btn.textContent = "Submitting…";
+
+    fetch("/api/submit", {
+      method:  "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body:    collectBody(),
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.ok) {
+          window.location.href = "/submit-success/";
+        } else {
+          throw new Error(data.error || "Submission failed.");
+        }
+      })
+      .catch(function (fetchErr) {
+        console.error("[submit-event] fetch error:", fetchErr);
+        errEl.textContent =
+          "Something went wrong — please try again or email us directly.";
+        btn.disabled    = false;
+        btn.textContent = "Submit Event →";
+      });
+  });
+})();
+</script>

@@ -1,0 +1,456 @@
+---
+/**
+ * src/components/ArticleSidebar.astro
+ * Unified article sidebar — used by every article/post layout.
+ *
+ * Event data comes from src/lib/events.js, which calls importFromSheet()
+ * exactly ONCE per build via a module-level singleton promise.  All article
+ * pages therefore share the same pre-filtered, pre-sorted event list.
+ *
+ * Upcoming Events layout:
+ *  - Slot 1: Smart Slider — top 5 Sponsored events, auto-cycles every 5 s
+ *  - Slots 2+: Static chronological list of regular (non-sponsored) events
+ */
+import { getGreaterDaytonaEvents, cityDisplayName } from "../lib/events.js";
+
+interface Props {
+  city: string;
+}
+
+const { city } = Astro.props;
+const cityCap = city.charAt(0).toUpperCase() + city.slice(1);
+
+// Single call — returns cached data on every article page after the first
+const allEvents    = await getGreaterDaytonaEvents();
+const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
+const regularList     = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
+
+const hasSlider = sponsoredSlides.length > 0;
+const hasList   = regularList.length > 0;
+const hasEvents = hasSlider || hasList;
+---
+
+<aside class="articleSidebar">
+
+  <!-- 1 — Newsletter -->
+  <div class="nlStickyWrap">
+    <div class="nlBox">
+      <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
+      <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
+      <form class="nlForm" action={`/${city}/subscribe/`} method="get">
+        <input class="nlInput" type="email" name="email"
+          placeholder="your@email.com" required autocomplete="email" />
+        <button class="nlSubmit" type="submit">SIGN UP</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 2 — Upcoming Events -->
+  <div class="railSection">
+    <div class="railHead">
+      <span class="railTitle">Upcoming Events</span>
+      <a class="railMore" href={`/${city}/events/`}>See all</a>
+    </div>
+
+    {!hasEvents ? (
+      <p class="noEvents">No upcoming events yet.</p>
+    ) : (
+      <div class="eventList">
+
+        {/* ── Smart Slider: top 5 sponsored events, fades every 5 s ── */}
+        {hasSlider && (
+          <div class="evSlider" id="sbSlider" aria-label="Featured sponsored events">
+            {sponsoredSlides.map((e: any, idx: number) => {
+              const d      = new Date(e.data.eventDate);
+              const dow    = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+              const day    = d.getDate();
+              const eMon   = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const mon    = d.toLocaleDateString("en-US", { month: "short" });
+              const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+              const cityLabel = cityDisplayName(evCity);
+              return (
+                <a class={`evSlide${idx === 0 ? " evSlide--active" : ""}${e.data.proTip ? " evSlide--hasTip" : ""}`}
+                   href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
+                   target={e.data.url ? "_blank" : "_self"}
+                   rel={e.data.url ? "noopener" : ""}
+                   aria-hidden={idx !== 0 ? "true" : undefined}
+                   data-slide-idx={String(idx)}>
+                  <div class="eventCal">
+                    <div class="eDow">{dow}</div>
+                    <div class="eDay">{day}</div>
+                    <div class="eMon">{eMon}</div>
+                  </div>
+                  <div class="eventInfo">
+                    <div class="eName">
+                      {e.data.title}
+                      {e.data.proTip && <span class="proTipIcon" title="Pro Tip">💡</span>}
+                    </div>
+                    <div class="ePlace">
+                      <span>{mon} {day}</span>
+                      <span class="evCitySep">|</span>
+                      <span class="evCityName">{cityLabel}</span>
+                      <span class="sponsoredBadge">SPONSORED</span>
+                    </div>
+                  </div>
+                  {e.data.proTip && (
+                    <div class="proTipOverlay">
+                      <span class="proTipOverlayIcon">💡</span>
+                      <span class="proTipOverlayText">{e.data.proTip}</span>
+                    </div>
+                  )}
+                </a>
+              );
+            })}
+            {/* Dots for slider */}
+            {sponsoredSlides.length > 1 && (
+              <div class="sbDots" id="sbDots">
+                {sponsoredSlides.map((_: any, idx: number) => (
+                  <button
+                    class={`sbDot${idx === 0 ? " sbDot--active" : ""}`}
+                    aria-label={`Go to slide ${idx + 1}`}
+                    data-sb-dot={String(idx)}
+                    type="button"
+                  ></button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Static list: regular upcoming events ── */}
+        {hasList && regularList.map((e: any) => {
+          const d       = new Date(e.data.eventDate);
+          const dow     = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+          const day     = d.getDate();
+          const eMon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+          const mon     = d.toLocaleDateString("en-US", { month: "short" });
+          const evCity  = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+          const cityLabel = cityDisplayName(evCity);
+          return (
+            <a class="eventRow"
+               href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
+               target={e.data.url ? "_blank" : "_self"}
+               rel={e.data.url ? "noopener" : ""}>
+              <div class="eventCal">
+                <div class="eDow">{dow}</div>
+                <div class="eDay">{day}</div>
+                <div class="eMon">{eMon}</div>
+              </div>
+              <div class="eventInfo">
+                <div class="eName">{e.data.title}</div>
+                <div class="ePlace">
+                  <span>{mon} {day}</span>
+                  <span class="evCitySep">|</span>
+                  <span class="evCityName">{cityLabel}</span>
+                </div>
+              </div>
+            </a>
+          );
+        })}
+
+      </div>
+    )}
+    <a class="submitEventLink" href="/submit-event/">+ Submit an event →</a>
+  </div>
+
+  <!-- 3 — Advertisement -->
+  <div class="displayAdSlot">
+    <div class="adSlotLabel">Advertisement</div>
+    <a class="displayAdCard" href={`/${city}/advertise/`}>
+      <div class="displayAdInner">
+        <div class="displayAdIcon">📢</div>
+        <div class="displayAdTitle">Your Ad Here</div>
+        <div class="displayAdDesc">Reach thousands of {cityCap} locals</div>
+        <div class="displayAdCta">Advertise with us →</div>
+      </div>
+    </a>
+  </div>
+
+  <!-- 3b — Community Alert bar (links to Vibe Check landing page) -->
+  <a class="communityAlert" href="/daytona/vibe-check/">
+    🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="caVote">Vote Now</span>
+  </a>
+
+  <!-- 4 — City Guides -->
+  <div class="railSection">
+    <div class="railHead">
+      <span class="railTitle">City Guides</span>
+      <a class="railMore" href={`/${city}/guides/`}>See all</a>
+    </div>
+    <div class="guideList">
+      <a class="guideRow" href={`/${city}/guides/live/`}>🏠 Live in {cityCap}</a>
+      <a class="guideRow" href={`/${city}/guides/work/`}>💼 Work in {cityCap}</a>
+      <a class="guideRow" href={`/${city}/guides/play/`}>🎉 Play in {cityCap}</a>
+      <a class="guideRow" href={`/${city}/guides/best-restaurants/`}>🍽️ Best Restaurants</a>
+    </div>
+  </div>
+
+</aside>
+
+<script>
+  /* ── Sidebar Smart Slider ── */
+  (function () {
+    var slider = document.getElementById("sbSlider");
+    if (!slider) return;
+
+    var slides  = Array.prototype.slice.call(slider.querySelectorAll(".evSlide"));
+    var dotsEl  = document.getElementById("sbDots");
+    var dots    = dotsEl ? Array.prototype.slice.call(dotsEl.querySelectorAll(".sbDot")) : [];
+    var current = 0;
+    var total   = slides.length;
+    var timer: ReturnType<typeof setInterval> | null = null;
+
+    if (total <= 1) return;
+
+    function goTo(idx: number) {
+      slides[current].classList.remove("evSlide--active");
+      slides[current].setAttribute("aria-hidden", "true");
+      if (dots[current]) { dots[current].classList.remove("sbDot--active"); }
+
+      current = (idx + total) % total;
+
+      slides[current].classList.add("evSlide--active");
+      slides[current].removeAttribute("aria-hidden");
+      if (dots[current]) { dots[current].classList.add("sbDot--active"); }
+    }
+
+    function startAuto() {
+      timer = setInterval(function () { goTo(current + 1); }, 5000);
+    }
+    function resetAuto() {
+      if (timer) clearInterval(timer);
+      startAuto();
+    }
+
+    dots.forEach(function (dot, i) {
+      dot.addEventListener("click", function () { goTo(i); resetAuto(); });
+    });
+
+    /* Pause on hover */
+    slider.addEventListener("mouseenter", function () { if (timer) clearInterval(timer); });
+    slider.addEventListener("mouseleave", startAuto);
+
+    startAuto();
+  })();
+</script>
+
+<style>
+  .articleSidebar {
+    display: grid;
+    gap: 24px;
+    align-self: start;
+    min-width: 0;
+  }
+
+  /* ── Newsletter ── */
+  .nlStickyWrap { position: -webkit-sticky; position: sticky; top: 20px; z-index: 10; }
+  .nlBox {
+    padding: 40px 26px;
+    border-radius: 16px;
+    background: #f9d900;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .nlBoxHead {
+    font-size: 28px; font-weight: 900; font-style: italic;
+    color: #000; line-height: 1.05; letter-spacing: -0.04em;
+  }
+  .nlBoxHead strong { font-weight: 900; }
+  .nlBoxSub { font-size: 15px; color: rgba(0,0,0,.8); line-height: 1.45; }
+  .nlForm { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .nlInput {
+    width: 100%; box-sizing: border-box;
+    padding: 14px 16px; border-radius: 10px;
+    border: none; background: #fff;
+    font-size: 15px; color: #111;
+    box-shadow: 0 2px 8px rgba(0,0,0,.12);
+    outline: 2px solid transparent; transition: outline-color 150ms;
+  }
+  .nlInput:focus { outline-color: #000; }
+  .nlInput::placeholder { color: #aaa; }
+  .nlSubmit {
+    width: 100%; padding: 14px 0; border-radius: 999px;
+    border: none; background: #000; color: #f9d900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 15px; font-weight: 900; letter-spacing: .08em;
+    cursor: pointer; transition: opacity 150ms;
+    box-sizing: border-box;
+  }
+  .nlSubmit:hover { opacity: .82; }
+
+  /* ── Rail sections ── */
+  .railSection { display: grid; gap: 0; }
+  .railHead {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: 10px; border-bottom: 2px solid var(--brand1);
+  }
+  .railTitle {
+    font-size: 16px; font-weight: 900; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text);
+  }
+  .railMore { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
+  .railMore:hover { text-decoration: underline; }
+
+  /* ── Events list ── */
+  .eventList { display: grid; }
+
+  /* ── Smart Slider (sponsored) ── */
+  /* CSS grid overlap trick: all slides share one cell → container auto-sizes */
+  .evSlider {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .evSlide {
+    grid-row: 1;
+    grid-column: 1;
+    display: grid; grid-template-columns: 48px 1fr; gap: 12px;
+    align-items: center; text-decoration: none;
+    padding: 13px 10px;
+    background: rgba(249,217,0,.06);
+    border-radius: 8px;
+    margin: 8px -8px 0;
+    opacity: 0;
+    transition: opacity 500ms ease;
+    pointer-events: none;
+  }
+  .evSlide--active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Dots row is a separate grid row, not overlapping */
+  .sbDots { grid-row: 2; grid-column: 1; }
+
+  /* Dots for slider */
+  .sbDots {
+    display: flex; gap: 5px; justify-content: center;
+    padding: 8px 0 4px;
+  }
+  .sbDot {
+    width: 6px; height: 6px; border-radius: 50%;
+    border: none; padding: 0;
+    background: rgba(255,255,255,.25);
+    cursor: pointer;
+    transition: background 200ms, transform 200ms;
+  }
+  .sbDot--active {
+    background: var(--brand1);
+    transform: scale(1.3);
+  }
+
+  .eventRow {
+    display: grid; grid-template-columns: 48px 1fr; gap: 12px;
+    align-items: center; text-decoration: none;
+    padding: 13px 0; border-bottom: 1px solid var(--border);
+    transition: opacity 140ms;
+  }
+  .eventRow:last-child { border-bottom: none; }
+  .eventRow:hover { opacity: .76; }
+
+  .eventCal {
+    width: 48px; height: 48px; border-radius: 10px;
+    background: var(--pillBg); border: 1px solid var(--pillBorder);
+    display: grid; place-items: center; text-align: center; line-height: 1;
+  }
+  .eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
+  .eDay { font-size: 19px; font-weight: 900; color: var(--text); margin-top: 1px; }
+  .eMon { font-size: 8px; font-weight: 700; letter-spacing: .08em; color: var(--faint); text-transform: uppercase; }
+  .eventInfo { display: flex; flex-direction: column; gap: 2px; }
+  .eName { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
+  .ePlace { font-size: 12px; color: var(--faint); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .evCitySep { opacity: .4; }
+  .evCityName { color: var(--brand1); font-weight: 700; }
+  .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
+
+  .sponsoredBadge {
+    display: inline-block;
+    font-size: 8px; font-weight: 900; letter-spacing: .08em;
+    background: rgba(249,217,0,.18); color: var(--brand1);
+    border: 1px solid rgba(249,217,0,.35);
+    padding: 1px 5px; border-radius: 999px;
+    white-space: nowrap;
+  }
+  .submitEventLink {
+    display: block; margin-top: 12px;
+    font-size: 12.5px; font-weight: 700;
+    color: var(--brand1); text-decoration: none;
+    opacity: .85; transition: opacity 120ms;
+  }
+  .submitEventLink:hover { opacity: 1; }
+
+  /* ── Ad slot ── */
+  .displayAdSlot { display: grid; gap: 5px; }
+  .adSlotLabel {
+    font-size: 8.5px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--faint); text-align: center;
+  }
+  .displayAdCard {
+    display: block; text-decoration: none; border-radius: 13px; overflow: hidden;
+    background: #f9d900; transition: opacity 140ms;
+  }
+  .displayAdCard:hover { opacity: .9; }
+  .displayAdInner { padding: 22px 14px; text-align: center; display: grid; gap: 5px; place-items: center; }
+  .displayAdIcon { font-size: 24px; margin-bottom: 2px; }
+  .displayAdTitle { font-size: 16px; font-weight: 900; color: #000; }
+  .displayAdDesc { font-size: 14px; color: rgba(0,0,0,.78); line-height: 1.3; }
+  .displayAdCta {
+    margin-top: 6px; display: inline-flex; align-items: center;
+    height: 30px; padding: 0 13px; border-radius: 999px;
+    background: #000; color: #f9d900; font-size: 11.5px; font-weight: 800;
+  }
+
+  /* ── Community Alert bar ── */
+  .communityAlert {
+    display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap;
+    padding: 2px 12px !important; border-radius: 10px;
+    background: #2E3E52; color: #E8EDF4;
+    font-size: 15.5px; font-weight: 700; line-height: 1.3;
+    text-decoration: none; text-align: center;
+    transition: opacity 140ms, background 140ms;
+  }
+  .communityAlert:hover { background: #3a4f68; }
+  .communityAlert strong { font-weight: 900; color: #FFD24A; }
+  .caVote {
+    display: inline-flex; align-items: center;
+    padding: 3px 10px; border-radius: 999px;
+    background: #FFD24A; color: #0B0D10;
+    font-size: 12px; font-weight: 900; letter-spacing: .04em;
+    white-space: nowrap;
+  }
+
+  /* ── Pro Tip overlay on sponsored slides ── */
+  .evSlide--hasTip { position: relative; overflow: hidden; }
+  .proTipIcon { font-size: 13px; margin-left: 4px; vertical-align: middle; cursor: help; }
+  .proTipOverlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; align-items: flex-start; gap: 6px;
+    padding: 8px 10px;
+    background: rgba(0,0,0,.72);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    font-size: 11.5px; line-height: 1.35; color: #fff;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 200ms ease, transform 200ms ease;
+    pointer-events: none;
+    border-radius: 0 0 8px 8px;
+  }
+  .evSlide--hasTip:hover .proTipOverlay,
+  .evSlide--hasTip:focus .proTipOverlay {
+    opacity: 1; transform: translateY(0);
+  }
+  .proTipOverlayIcon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .proTipOverlayText { font-weight: 600; }
+
+  /* ── City Guides ── */
+  .guideList { display: grid; }
+  .guideRow {
+    display: block; text-decoration: none; font-size: 15px; font-weight: 700;
+    color: var(--text); padding: 11px 0; border-bottom: 1px solid var(--border);
+    line-height: 1.3; transition: color 120ms;
+  }
+  .guideRow:last-child { border-bottom: none; }
+  .guideRow:hover { color: var(--link); }
+</style>

@@ -1,6 +1,7 @@
 ---
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
+import ArticleSidebar from "../../../components/ArticleSidebar.astro";
 
 /* Featured flag normalization */
 function isFeatured(post) {
@@ -32,9 +33,11 @@ function sortNewestFirst(a, b) {
   return new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime();
 }
 
-/* Hero image field */
+/* Hero image field — checks all common frontmatter aliases */
+const FALLBACK_IMG = "/images/gododaytona-bg.png";
 function heroImage(post) {
-  return String(post?.data?.heroImage ?? "").trim();
+  const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.thumbnail ?? "";
+  return String(v).trim() || FALLBACK_IMG;
 }
 
 /* Related posts */
@@ -123,20 +126,6 @@ const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
 const featured = isFeatured(post);
 const hero = heroImage(post);
 
-/* Upcoming events */
-const todayE = new Date();
-todayE.setHours(0, 0, 0, 0);
-let allEvents = [];
-try { allEvents = await getCollection("events"); } catch { allEvents = []; }
-const upcomingEvents = allEvents
-  .filter(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    const evDate = new Date(e.data.eventDate);
-    evDate.setHours(0, 0, 0, 0);
-    return evCity === "daytona" && evDate >= todayE;
-  })
-  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
-  .slice(0, 4);
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona">
@@ -160,11 +149,10 @@ const upcomingEvents = allEvents
             {featured && <span class="featuredPill">FEATURED</span>}
           </div>
 
-          {hero && (
-            <figure class="heroFigure">
-              <img class="heroFull" src={hero} alt={post.data.title ?? "Post image"} loading="eager" decoding="async" />
-            </figure>
-          )}
+          <figure class="heroFigure">
+            <img class="heroFull" src={hero} alt={post.data.title ?? "Post image"} loading="eager" decoding="async"
+              onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+          </figure>
 
           <article class="postBody">
             <Content />
@@ -183,11 +171,8 @@ const upcomingEvents = allEvents
                   return (
                     <a class="relatedRow" href={`/daytona/posts/${p.slug}/`}>
                       <div class="relatedThumb">
-                        {img ? (
-                          <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async" />
-                        ) : (
-                          <div class="relatedImg relatedFallback" aria-hidden="true"></div>
-                        )}
+                        <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async"
+                          onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
                       </div>
                       <div class="relatedText">
                         <div class="relatedTitle">{t}</div>
@@ -208,36 +193,7 @@ const upcomingEvents = allEvents
           </p>
         </div>
 
-        <aside class="postSidebar">
-          <div class="sidebarCard">
-            <div class="sidebarHead">Upcoming Events</div>
-            {upcomingEvents.length > 0 ? upcomingEvents.map(e => {
-              const d = new Date(e.data.eventDate);
-              const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-              const day = d.getDate();
-              const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              return (
-                <a class="eventRow"
-                   href={e.data.url ?? `/daytona/events/${e.slug.split("/").pop()}/`}
-                   target={e.data.url ? "_blank" : "_self"}
-                   rel={e.data.url ? "noopener" : ""}>
-                  <div class="eventCal">
-                    <div class="eDow">{dow}</div>
-                    <div class="eDay">{day}</div>
-                    <div class="eMon">{mon}</div>
-                  </div>
-                  <div class="eventInfo">
-                    <div class="eName">{e.data.title}</div>
-                    <div class="ePlace">{e.data.location}</div>
-                  </div>
-                </a>
-              );
-            }) : (
-              <p style="color:var(--muted);font-size:14px;margin:0">No upcoming events.</p>
-            )}
-            <a class="seeAll" href="/daytona/events/">See all events →</a>
-          </div>
-        </aside>
+        <ArticleSidebar city="daytona" />
 
       </div>
     </div>
@@ -245,6 +201,11 @@ const upcomingEvents = allEvents
 </Base>
 
 <style>
+  /* ── Width lock: 1260px + 32px gutters ── */
+  .section { padding: 24px 0; }
+  :global(.container) { max-width: 1260px !important; margin: 0 auto; padding: 0 2rem !important; }
+  @media (max-width: 768px) { :global(.container) { padding: 0 1.25rem !important; } }
+
   .postLayout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) 280px;
@@ -254,41 +215,9 @@ const upcomingEvents = allEvents
   }
   @media (max-width: 860px) {
     .postLayout { grid-template-columns: 1fr; }
-    .postSidebar { position: static; }
   }
 
   .postMain { min-width: 0; }
-  .postSidebar { position: sticky; top: 80px; min-width: 0; }
-
-  .sidebarCard {
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
-    border-radius: 16px;
-    padding: 14px;
-  }
-  .sidebarHead {
-    font-weight: 900; font-size: 14px; text-transform: uppercase;
-    letter-spacing: .1em; color: var(--muted); margin-bottom: 10px;
-  }
-
-  .eventRow {
-    display: grid; grid-template-columns: 48px 1fr; gap: 10px;
-    align-items: center; text-decoration: none;
-    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.08);
-  }
-  .eventRow:last-of-type { border-bottom: none; }
-  .eventCal {
-    width: 48px; height: 48px; border-radius: 10px;
-    background: rgba(255,255,255,.06);
-    display: grid; place-items: center; text-align: center; line-height: 1;
-  }
-  .eDow { font-size: 9px; font-weight: 900; color: var(--brand1); text-transform: uppercase; }
-  .eDay { font-size: 18px; font-weight: 900; color: var(--text); }
-  .eMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; }
-  .eventInfo { display: flex; flex-direction: column; gap: 2px; }
-  .eName { font-weight: 800; font-size: 14px; color: var(--text); line-height: 1.2; }
-  .ePlace { font-size: 12px; color: var(--faint); }
-  .seeAll { display: block; margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
 
   .postTitle {
     margin: 0 0 8px;

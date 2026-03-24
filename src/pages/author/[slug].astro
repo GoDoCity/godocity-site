@@ -48,6 +48,12 @@ export async function getStaticPaths() {
 const { slug } = Astro.params;
 const { authorName } = Astro.props;
 
+/* Author bios — add entries here as the team grows */
+const authorBios: Record<string, string> = {
+  "charles-king": "Charles King is the founding editor of GoDoDaytona. A Daytona Beach native, he covers food, culture, motorsports, and real estate — with an unhealthy obsession for the perfect beachside burger and anything with a V8.",
+};
+const bio = authorBios[slug as string] ?? "";
+
 const all = await getCollection("posts");
 const posts = all
   .filter(p => {
@@ -69,6 +75,7 @@ const posts = all
         </div>
         <div class="authorInfo">
           <h1 class="authorName">{authorName}</h1>
+          {bio && <p class="authorBio">{bio}</p>}
           <p class="authorMeta">{posts.length} {posts.length === 1 ? "article" : "articles"} on GoDoCity</p>
         </div>
       </header>
@@ -145,7 +152,14 @@ const posts = all
     flex-shrink: 0;
     letter-spacing: -0.03em;
   }
-  .authorInfo { display: flex; flex-direction: column; gap: 4px; }
+  .authorInfo { display: flex; flex-direction: column; gap: 6px; }
+  .authorBio {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 4px 0 0;
+    max-width: 600px;
+  }
   .authorName {
     font-size: clamp(28px, 3vw, 40px);
     font-weight: 900;
@@ -235,7 +249,7 @@ const posts = all
     -webkit-box-orient: vertical; overflow: hidden;
     transition: color 130ms;
   }
-  .authorCard:hover .cardTitle { color: var(--link); }
+  .authorCard:hover .cardTitle { color: var(--brand1); }
   .cardDesc {
     font-size: 13.5px; color: var(--muted); line-height: 1.45;
     display: -webkit-box; -webkit-line-clamp: 2;

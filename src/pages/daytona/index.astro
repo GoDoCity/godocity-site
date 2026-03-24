@@ -1,6 +1,8 @@
 ---
 import Base from "../../layouts/Base.astro";
+import InteractiveMap from "../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
+import { getGreaterDaytonaEvents, cityDisplayName } from "../../lib/events.js";
 
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
@@ -74,19 +76,30 @@ const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 const latest = feed.slice(0, 3);
 const listFeed = feed.slice(3, 7);  /* ── Latest Feed — exactly 4 rows below the 3-card grid (Rule of 4) ── */
 
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-let allEvents = [];
-try { allEvents = await getCollection("events"); } catch { allEvents = []; }
-const upcomingEvents = allEvents
-  .filter(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    const evDate = new Date(e.data.eventDate);
-    evDate.setHours(0, 0, 0, 0);
-    return evCity === "daytona" && evDate >= today;
-  })
-  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
-  .slice(0, 4);
+/* ── Sheet events via centralised singleton ──────────────────────────────────
+   getGreaterDaytonaEvents() shares the same module-level promise as the Events
+   page and ArticleSidebar — importFromSheet() runs only ONCE per build.       */
+const allDaytona = await getGreaterDaytonaEvents();
+
+/* Home sidebar: sponsored slider (up to 5) + up to 3 regular events */
+const homeSponsored = allDaytona.filter((e: any) => e.data.sponsored === true).slice(0, 5);
+const homeRegular   = allDaytona.filter((e: any) => !e.data.sponsored).slice(0, 3);
+
+/* Map pins — events with valid non-ocean coordinates */
+const homePins = allDaytona
+  .filter((e: any) => e.data.lat != null && e.data.lng != null && (e.data.lat !== 0 || e.data.lng !== 0))
+  .map((e: any) => {
+    const d = new Date(e.data.eventDate);
+    const dateStr = d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return {
+      label:   e.data.title,
+      address: `${dateStr} · ${e.data.location ?? ""}`,
+      lat:     e.data.lat,
+      lng:     e.data.lng,
+      image:   e.data.image ?? "/images/daytona-placeholder.jpg",
+      url:     e.data.url ?? null,
+    };
+  });
 
 const featuredAd = {
   tag: "Featured Business",
@@ -97,12 +110,13 @@ const featuredAd = {
   img: "",
 };
 
-/* ── 3×3 Topics Grid — strict 9 tiles, no overflow ─────────────────
-   Row 1: Biz · City · Culture
-   Row 2: Events · Food · History
+/* ── 3×3 Topics Grid ─────────────────────────────────────────────────────────
+   Loads from the Decap 'topics' CMS collection (city=daytona, sorted by order).
+   Falls back to the hardcoded 9-tile set when no CMS entries exist yet.
+   Row 1: Biz · City · Culture  |  Row 2: Events · Food · History
    Row 3: Real Estate · Sports · Wellness
-──────────────────────────────────────────────────────────────────── */
-const topics = [
+──────────────────────────────────────────────────────────────────────────── */
+const _hardcodedTopics = [
   { label: "Business",    slug: "business",     img: "/images/topics/business.jpg" },
   { label: "City",        slug: "city",         img: "/images/topics/city.jpg" },
   { label: "Culture",     slug: "culture",      img: "/images/topics/culture.jpg" },
@@ -113,6 +127,25 @@ const topics = [
   { label: "Sports",      slug: "sports",       img: "/images/topics/sports.jpg" },
   { label: "Wellness",    slug: "wellness",     img: "/images/topics/wellness.jpg" },
 ];
+
+let _cmsTopics: { label: string; slug: string; img: string }[] = [];
+try {
+  const _topicsRaw = await getCollection("topics");
+  const _filtered = _topicsRaw
+    .filter((t: any) => (t.data.city ?? "daytona") === "daytona")
+    .sort((a: any, b: any) => (a.data.order ?? 0) - (b.data.order ?? 0));
+  if (_filtered.length > 0) {
+    _cmsTopics = _filtered.map((t: any) => ({
+      label: t.data.label,
+      slug:  t.data.slug,
+      img:   t.data.img || `/images/topics/${t.data.slug}.jpg`,
+    }));
+  }
+} catch {
+  /* topics collection not yet populated — use hardcoded fallback */
+}
+
+const topics = _cmsTopics.length > 0 ? _cmsTopics : _hardcodedTopics;
 /* ── TOPIC IMAGE GUIDE (save to /public/images/topics/) ──────────────
    biz.jpg         → Local storefronts or Main Street Daytona aerial
    city.jpg        → Drone shot of Daytona Beach coastline at golden hour
@@ -124,6 +157,23 @@ const topics = [
    sports.jpg      → Motion-blur race car or surfer at New Smyrna Beach
    wellness.jpg    → Yoga on the beach, sunrise run, or spa interior
 ────────────────────────────────────────────────────────────────────── */
+
+/* trendingSpots removed — homepage map now shows Live sheet events only */
+
+/* ── Guides Section (main column) ────────────────────────────────────────────
+   Fetch all guides, filter to Daytona, sort newest-first.
+   guideHero  = featured: true guide, or most recent
+   guideCards = up to 3 non-hero guides for the 3-card row                   */
+const allGuides = await getCollection("guides");
+const daytonaGuides = allGuides
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+function guideSlug(g: (typeof allGuides)[number]) {
+  return g.slug.split("/").pop()!;
+}
+const guideHero = daytonaGuides.find((g) => g.data.featured) ?? daytonaGuides[0] ?? null;
+const guideCards = guideHero
+  ? daytonaGuides.filter((g) => g !== guideHero).slice(0, 3)
+  : daytonaGuides.slice(0, 3);
 ---
 
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
@@ -169,6 +219,8 @@ const topics = [
         }
         makeBleed(document.getElementById('nlBand'));
         makeBleed(document.getElementById('adBand'));
+        makeBleed(document.getElementById('alertBand'));
+        makeBleed(document.getElementById('alertBarLine'));
       }
       if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', bleedFix);
@@ -189,6 +241,12 @@ const topics = [
       });
     })();
     </script>
+
+    {/* ── COMMUNITY ALERT BAR — thin strip under email band ── */}
+    <a class="homeAlertBar" id="alertBand" href="/daytona/vibe-check/">
+      🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="habVote">Vote Now →</span>
+    </a>
+    <div class="alertBarLine" id="alertBarLine"></div>
 
     <div class="container">
       <div class="homeGrid">
@@ -237,6 +295,15 @@ const topics = [
                 </div>
               </a>
             ))}
+          </div>
+
+          {/* ── TRENDING NOW MAP ── */}
+          <div class="masterMapBlock">
+            <div class="masterMapHead">
+              <span class="masterMapTitle">Go Do Daytona: Live Events</span>
+              <span class="masterMapSub">{homePins.length} event{homePins.length !== 1 ? "s" : ""} on the map</span>
+            </div>
+            <InteractiveMap locations={homePins} height="450px" center={[29.2108, -81.0228]} />
           </div>
 
           {/* ── FEATURED AD — "FEATURED" label, never "Sponsored" ── */}
@@ -303,11 +370,59 @@ const topics = [
           <div class="topicsGrid">
             {topics.map((t) => (
               <a class="topicTile" href={t.slug === "events" ? `/daytona/events/` : `/daytona/${t.slug}/`}>
-                <img class="topicImg" src={t.img} alt={t.label} loading="lazy" decoding="async" onerror="this.style.opacity='0'" />
+                <div class="topicBg" style={`background-image: url('${t.img}')`} aria-hidden="true" />
                 <div class="topicGrad" aria-hidden="true" />
                 <span class="topicLabel">{t.label}</span>
               </a>
             ))}
+          </div>
+
+          {/* ── GUIDES — 1 hero + 3 cards, matches Top Stories layout ── */}
+          <div class="guidesHead">
+            <span class="topicsLabel">City Guides</span>
+            <a class="guidesMoreLink" href="/daytona/guides/">More Guides →</a>
+          </div>
+
+          {guideHero && (
+            <a class="heroCard guideHeroCard" href={`/daytona/guides/${guideSlug(guideHero)}/`}>
+              <div class="heroImgWrap">
+                {guideHero.data.image
+                  ? <img class="heroImg" src={guideHero.data.image} alt={guideHero.data.title ?? ""} loading="lazy" decoding="async" />
+                  : <div class="heroImg heroFallback" aria-hidden="true" />
+                }
+              </div>
+              <div class="heroCopy">
+                <div class="heroKicker">GUIDE — {guideHero.data.topic?.toUpperCase()}</div>
+                <h2 class="heroTitle">{guideHero.data.title}</h2>
+                {guideHero.data.description && <p class="heroDesc">{guideHero.data.description}</p>}
+              </div>
+            </a>
+          )}
+
+          {guideHero && <hr class="guideDivider" />}
+
+          {guideCards.length > 0 && (
+            <div class="cardGrid guideGrid">
+              {guideCards.map((g) => (
+                <a class="articleCard" href={`/daytona/guides/${guideSlug(g)}/`}>
+                  <div class="cardImgWrap">
+                    {g.data.image
+                      ? <img class="cardImg" src={g.data.image} alt="" loading="lazy" decoding="async" />
+                      : <div class="cardImg cardImgFallback" aria-hidden="true" />
+                    }
+                  </div>
+                  <div class="cardBody">
+                    <div class="cardKicker">GUIDE — {g.data.topic?.toUpperCase()}</div>
+                    <div class="cardTitle">{g.data.title}</div>
+                    {g.data.description && <div class="cardDesc">{g.data.description}</div>}
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+
+          <div class="guidesMoreRow">
+            <a class="viewAllBtn" href="/daytona/guides/">More Guides →</a>
           </div>
 
         </main>
@@ -343,33 +458,89 @@ const topics = [
               <span class="railTitle">Upcoming Events</span>
               <a class="railMore" href="/daytona/events/">See all</a>
             </div>
-            <div class="eventList">
-              {upcomingEvents.length > 0 ? upcomingEvents.map(e => {
-                const d   = new Date(e.data.eventDate);
-                const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                const day = d.getDate();
-                const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                const evSlug = e.slug.split("/").pop();
-                return (
-                  <a class="eventRow"
-                     href={e.data.url ?? `/daytona/events/${evSlug}/`}
-                     target={e.data.url ? "_blank" : "_self"}
-                     rel={e.data.url ? "noopener" : ""}>
-                    <div class="eventCal">
-                      <div class="eDow">{dow}</div>
-                      <div class="eDay">{day}</div>
-                      <div class="eMon">{mon}</div>
-                    </div>
-                    <div class="eventInfo">
-                      <div class="eName">{e.data.title}</div>
-                      <div class="ePlace">{e.data.location}</div>
-                    </div>
-                  </a>
-                );
-              }) : (
-                <p class="noEvents">No upcoming events — check back soon.</p>
-              )}
-            </div>
+
+            {(homeSponsored.length === 0 && homeRegular.length === 0) ? (
+              <p class="noEvents">No upcoming events — check back soon.</p>
+            ) : (
+              <div class="eventList">
+
+                {/* ── Smart Slider: sponsored events, fades every 5 s ── */}
+                {homeSponsored.length > 0 && (
+                  <div class="evSlider" id="homeSlider" aria-label="Featured sponsored events">
+                    {homeSponsored.map((e: any, idx: number) => {
+                      const d      = new Date(e.data.eventDate);
+                      const dow    = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                      const day    = d.getDate();
+                      const eMon   = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                      const mon    = d.toLocaleDateString("en-US", { month: "short" });
+                      const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+                      const evSlug = e.slug.split("/").pop();
+                      return (
+                        <a class={`evSlide${idx === 0 ? " evSlide--active" : ""}`}
+                           href={e.data.url ?? `/daytona/events/${evSlug}/`}
+                           target={e.data.url ? "_blank" : "_self"}
+                           rel={e.data.url ? "noopener" : ""}
+                           aria-hidden={idx !== 0 ? "true" : undefined}
+                           data-slide-idx={String(idx)}>
+                          <div class="eventCal">
+                            <div class="eDow">{dow}</div>
+                            <div class="eDay">{day}</div>
+                            <div class="eMon">{eMon}</div>
+                          </div>
+                          <div class="eventInfo">
+                            <div class="eName">{e.data.title}</div>
+                            <div class="ePlace">
+                              <span>{mon} {day}</span>
+                              <span class="evCitySep">|</span>
+                              <span class="evCityName">{cityDisplayName(evCity)}</span>
+                              <span class="evSrcBadge evSrcBadge--featured">Sponsored</span>
+                            </div>
+                          </div>
+                        </a>
+                      );
+                    })}
+                    {homeSponsored.length > 1 && (
+                      <div class="sbDots" id="homeDots">
+                        {homeSponsored.map((_: any, idx: number) => (
+                          <button
+                            class={`sbDot${idx === 0 ? " sbDot--active" : ""}`}
+                            aria-label={`Go to slide ${idx + 1}`}
+                            data-sb-dot={String(idx)}
+                            type="button"
+                          ></button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* ── Static list: regular upcoming events ── */}
+                {homeRegular.map((e: any) => {
+                  const d      = new Date(e.data.eventDate);
+                  const dow    = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+                  const day    = d.getDate();
+                  const mon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                  const evSlug = e.slug.split("/").pop();
+                  return (
+                    <a class="eventRow"
+                       href={e.data.url ?? `/daytona/events/${evSlug}/`}
+                       target={e.data.url ? "_blank" : "_self"}
+                       rel={e.data.url ? "noopener" : ""}>
+                      <div class="eventCal">
+                        <div class="eDow">{dow}</div>
+                        <div class="eDay">{day}</div>
+                        <div class="eMon">{mon}</div>
+                      </div>
+                      <div class="eventInfo">
+                        <div class="eName">{e.data.title}</div>
+                        <div class="ePlace">{e.data.location}</div>
+                      </div>
+                    </a>
+                  );
+                })}
+
+              </div>
+            )}
           </div>
 
           <div class="displayAdSlot">
@@ -384,18 +555,6 @@ const topics = [
             </a>
           </div>
 
-          <div class="railSection">
-            <div class="railHead">
-              <span class="railTitle">City Guides</span>
-              <a class="railMore" href="/daytona/guides/">See all</a>
-            </div>
-            <div class="guideList">
-              <a class="guideRow" href="/daytona/guides/live/">🏠 Live in Daytona</a>
-              <a class="guideRow" href="/daytona/guides/work/">💼 Work in Daytona</a>
-              <a class="guideRow" href="/daytona/guides/play/">🎉 Play in Daytona</a>
-            </div>
-          </div>
-
         </aside>
       </div>
 
@@ -407,11 +566,11 @@ const topics = [
         <div class="adCopy">
           <div class="adEyebrow">Grow your business</div>
           <div class="adHead">Advertise with GoDo Daytona.</div>
-          <div class="adDesc">Reach thousands of engaged Daytona locals every day. Featured stories, display ads, event promotion, and newsletter placements — built for local businesses that want real results.</div>
-        </div>
-        <div class="adActions">
-          <a class="adBtnPrimary" href="/daytona/advertise/">Get started →</a>
-          <a class="adBtnGhost" href="/daytona/advertise/">See our rates</a>
+          <div class="ad-description">Reach thousands of engaged Daytona locals every day. Featured stories, display ads, event promotion, and newsletter placements — built for local businesses that want real results.</div>
+          <div class="adActions">
+            <a class="adBtnPrimary" href="/daytona/advertise/">Get started →</a>
+            <a class="adBtnGhost" href="/daytona/advertise/">See our rates</a>
+          </div>
         </div>
       </div>
     </div>
@@ -447,12 +606,75 @@ const topics = [
         padding-left: 1.25rem;    /* 20px each side as specified   */
         padding-right: 1.25rem;
       }
+      /* ── Newsletter mobile fixes (under 768px) — Nooga style ── */
+      /* 5. Container — more breathing room in the yellow box */
+      .nlInner {
+        padding: 1.5rem 1rem !important;
+        width: 100%;
+      }
+      /* 1. Header — single line, Montserrat Black 900, tight tracking for extra punch */
+      .nlHead {
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: 900 !important;
+        font-size: 1.85rem !important;
+        letter-spacing: -0.02em !important;
+        text-align: center;
+        margin-bottom: 0.5rem;
+        white-space: nowrap !important;
+      }
+      /* 4. Description — allow wrapping, constrain width so "for free." stays tidy */
+      .nlSub {
+        white-space: normal;      /* prevent "for free." from hanging */
+        font-size: 1.2rem;
+        width: 100%;
+        max-width: 90%;           /* forces natural break, no orphan "for free" */
+        text-align: center;
+        margin: 0 auto;
+      }
+      /* Form container — stacks input above button as full-width blocks */
+      .nlForm {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 100%;
+        gap: 1rem;
+      }
+      .nlRow {
+        display: flex;
+        flex-direction: column;   /* stack input above button */
+        gap: 0.75rem;             /* 12px between input and button */
+        height: auto;
+        width: 100%;
+        align-items: stretch;     /* both children span full width */
+      }
+      /* 2. Input — full width, 48px tall (visually dominant over button) */
+      .nlInput {
+        width: 100% !important;
+        max-width: none;
+        padding-left: 1rem;
+        border-radius: 8px !important;
+        border-right: 2px solid rgba(0,0,0,.4);
+        height: 48px !important;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important;
+      }
+      /* 3. Button — 42px, 6px shorter than input for clear visual hierarchy */
+      .nlBtn {
+        width: 100% !important;
+        max-width: none;
+        border-radius: 8px !important;
+        height: 42px !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.1em !important;
+      }
+      /* 4. Bold hook — "for free." stays extra-bold */
+      .nlSub strong { font-weight: 900 !important; }
     }
 
-    /* ── Newsletter — breathing room above, 60px below ── */
+    /* ── Newsletter — breathing room above, alert bar directly below ── */
     .nlBand {
       background: var(--brand1);
-      margin: 24px 0 60px;   /* 24px gap between nav pills and banner */
+      margin: 24px 0 0;   /* 24px gap between nav pills and banner; alert bar sits flush below */
       width: 100%;
       display: flex;
       align-items: stretch;
@@ -478,7 +700,8 @@ const topics = [
       gap: 6px;
     }
     .nlHead {
-      font-size: clamp(29px, 3.2vw, 38px);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 3.5rem;
       font-weight: 900;
       font-style: italic;          /* "Speedway" lean — slanted heavy sans */
       color: #000;
@@ -501,10 +724,19 @@ const topics = [
     /* "for free." — Extra Bold emphasis, value hook */
     .nlSub strong { font-weight: 900; color: #000; }
     .nlForm { width: 100%; max-width: 480px; }
-    .nlRow { display: flex; height: 48px; width: 100%; }
+    .nlRow {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+      height: auto;
+      width: 100%;
+    }
     .nlInput {
-      flex: 1; min-width: 0;
-      border-radius: 8px 0 0 8px;
+      width: 350px !important;
+      height: 44px !important;
+      border-radius: 4px 0 0 4px;
       border: 2px solid rgba(0,0,0,.4);
       border-right: none;
       background: #fff; color: #111;
@@ -515,8 +747,10 @@ const topics = [
     .nlInput::placeholder { color: #999; }
     .nlInput:focus { border-color: rgba(0,0,0,.75); }
     .nlBtn {
-      flex-shrink: 0; padding: 0 20px;
-      border-radius: 0 8px 8px 0;
+      width: auto !important;
+      padding: 0 25px;
+      height: 44px !important;
+      border-radius: 0 4px 4px 0;
       border: none;
       background: #000;
       color: #fff;
@@ -542,14 +776,62 @@ const topics = [
       padding: 28px 2.5rem;
       width: 100%;
     }
-    @media (max-width: 700px) {
-      .nlBand { margin-top: 16px; margin-bottom: 32px; }
-      .nlInner { padding: 20px 1.25rem; justify-content: center; text-align: center; }
+    @media (max-width: 768px) {
+      .nlBand { margin-top: 16px; margin-bottom: 0; }
+      /* 5. Container — Nooga breathing room */
+      .nlInner { padding: 1.5rem 1rem !important; width: 100%; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
-      .nlSub { white-space: normal; font-size: 15px; text-align: center; }
-      .nlRow { flex-direction: column; height: auto; gap: 8px; align-items: center; }
-      .nlInput { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
-      .nlBtn { border-radius: 8px; height: 46px; width: 100%; }
+      /* 1. Header — single line, Montserrat Black 900, tight tracking for extra punch */
+      .nlHead {
+        font-family: 'Montserrat', sans-serif !important;
+        font-weight: 900 !important;
+        font-size: 1.85rem !important;
+        letter-spacing: -0.02em !important;
+        margin-bottom: 0.5rem;
+        white-space: nowrap !important;
+      }
+      /* 4. Description — max-width: 90% keeps "for free." from widowing */
+      .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; width: 100%; max-width: 90%; margin: 0 auto; }
+      /* "for free." stays extra-bold */
+      .nlSub strong { font-weight: 900 !important; }
+      /* Form column stack */
+      .nlForm { display: flex; flex-direction: column; width: 100%; max-width: 100%; gap: 1rem; }
+      .nlRow { flex-direction: column; height: auto; gap: 0.75rem; width: 100%; align-items: stretch; }
+      /* 2. Input — 48px tall, clearly dominant over button, with depth shadow */
+      .nlInput { border-radius: 8px !important; border-right: 2px solid rgba(0,0,0,.4); height: 48px !important; width: 100% !important; max-width: none; font-size: 1.1rem; padding-left: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1) !important; }
+      /* 3. Button — 42px, 6px shorter than input for clear visual hierarchy */
+      .nlBtn { border-radius: 8px !important; height: 42px !important; width: 100% !important; max-width: none; font-weight: 700 !important; letter-spacing: 0.1em !important; }
+    }
+
+    @media (max-width: 767px) {
+      /* 1. Row: forced flex column, full-width, centered */
+      .nlRow {
+        display: flex !important;
+        flex-direction: column !important;
+        width: 100% !important;
+        align-items: center !important;
+      }
+      /* 2. Input: full-width, no side margins pinching */
+      .nlInput {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 100% !important;
+        box-sizing: border-box !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      /* 3. Button: full-width, no side margins pinching */
+      .nlBtn {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+      }
+      /* 4. Header: single line, punchy size */
+      .nlHead {
+        white-space: nowrap !important;
+        font-size: 1.85rem !important;
+      }
     }
 
     /* ── Home grid 75/25 inside 1280px container ── */
@@ -672,6 +954,13 @@ const topics = [
       margin: 0 0 40px;
     }
 
+    /* ── Divider between guide hero and guide cards grid ── */
+    .guideDivider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
     /* ── 3-column cards — gap tightened −25%, images +10% taller ── */
     .cardGrid {
       display: grid;
@@ -680,6 +969,21 @@ const topics = [
       margin-bottom: 32px;
     }
     @media (max-width: 640px) { .cardGrid { grid-template-columns: 1fr; gap: 0; } }
+
+    /* ── Guide cards grid: cinematic 16/9 images + vertical breadth ── */
+    .guideGrid {
+      margin-top: 48px;
+    }
+    .guideGrid .cardImg {
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+    }
+    .guideGrid .cardImgFallback {
+      aspect-ratio: 16 / 9;
+    }
+    .guideGrid .cardTitle {
+      min-height: 3.6em;
+    }
 
     .articleCard {
       display: flex; flex-direction: column; text-decoration: none;
@@ -765,6 +1069,56 @@ const topics = [
       text-decoration: none; transition: filter 130ms;
     }
     .featuredCta:hover { filter: brightness(.92); }
+
+    /* Master map section */
+    .masterMapBlock { margin: 6px 0 4px; }
+    .masterMapHead {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--brand1);
+      margin-bottom: 16px;
+    }
+    .masterMapTitle {
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--text);
+    }
+    .masterMapSub {
+      font-size: 12.5px;
+      color: var(--faint);
+      font-weight: 500;
+    }
+
+    /* ── Home Alert Bar ── */
+    .homeAlertBar {
+      display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+      padding: 12px 20px; margin-bottom: 0;
+      background: #2E3E52; color: #E8EDF4;
+      font-size: 16px; font-weight: 700; line-height: 1.3;
+      text-decoration: none; text-align: center;
+      transition: opacity 140ms, background 140ms;
+    }
+    .homeAlertBar:hover { background: #3a4f68; }
+    .homeAlertBar strong { font-weight: 900; color: #FFD24A; }
+    .alertBarLine {
+      display: block;
+      height: 3px;
+      background: rgba(255, 210, 74, 0.80);
+      box-shadow: 0 0 8px rgba(255, 210, 74, 0.25);
+      margin-top: 0px;
+      margin-bottom: 60px;
+    }
+    .habVote {
+      display: inline-flex; align-items: center;
+      padding: 4px 13px; border-radius: 999px;
+      background: #FFD24A; color: #0B0D10;
+      font-size: 13px; font-weight: 900; letter-spacing: .04em;
+      white-space: nowrap;
+    }
 
     /* View all */
     .viewAllRow { padding: 4px 0 24px; text-align: center; }
@@ -961,21 +1315,22 @@ const topics = [
       background: var(--surface2);
       border: 1px solid var(--border);
     }
-    .topicImg {
+    /* Background image lives in a child div so only IT zooms — label stays locked */
+    .topicBg {
       position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 360ms ease;         /* smooth zoom on hover */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: transform 360ms ease;
       will-change: transform;
     }
-    /* Image zooms in — text wrapper stays perfectly static */
-    .topicTile:hover .topicImg { transform: scale(1.07); }
+    .topicTile:hover .topicBg { transform: scale(1.05); }
     .topicGrad {
       position: absolute; inset: 0;
-      background: rgba(0,0,0,.50);              /* 50% dark overlay per spec */
-      /* grad does NOT transition — keeps text contrast constant during zoom */
+      background: linear-gradient(to bottom, rgba(0,0,0,.12) 0%, rgba(0,0,0,.72) 100%);
+      transition: opacity 360ms ease;
     }
+    .topicTile:hover .topicGrad { opacity: 1.0; background: linear-gradient(to bottom, rgba(0,0,0,.20) 0%, rgba(0,0,0,.82) 100%); }
     .topicLabel {
       position: absolute; inset: 0;
       display: flex;
@@ -1020,6 +1375,28 @@ const topics = [
       }
     }
 
+    /* ── Guides section header (main column) ── */
+    .guidesHead {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--brand1);
+      margin-bottom: 13px;
+      margin-top: 60px;
+    }
+    .guidesMoreLink {
+      font-size: 13px; font-weight: 700; color: var(--link);
+      text-decoration: none; white-space: nowrap;
+    }
+    .guidesMoreLink:hover { text-decoration: underline; }
+    .guideHeroCard { margin-bottom: 0; }
+    .guidesMoreRow {
+      display: flex; justify-content: center;
+      margin: 24px 0 60px;
+    }
+
+    /* ── Guides + Latest shared "View all" button ── */
     /* ── Editorial Team sidebar block ── */
     .editTeamSection {
       display: grid;
@@ -1125,7 +1502,51 @@ const topics = [
     .eDay { font-size: 19px; font-weight: 900; color: var(--text); margin-top: 1px; }
     .eMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; }
     .eName { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
-    .ePlace { font-size: 13px; color: var(--faint); margin-top: 2px; }
+    .ePlace { font-size: 13px; color: var(--faint); margin-top: 2px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .evCitySep { opacity: .4; }
+    .evCityName { color: var(--brand1); font-weight: 700; }
+    .evSrcBadge {
+      display: inline-block;
+      font-size: 9px; font-weight: 700; letter-spacing: .04em;
+      padding: 1px 6px; border-radius: 999px; white-space: nowrap;
+    }
+    .evSrcBadge--featured {
+      background: rgba(249,217,0,.12); color: var(--brand1);
+      border: 1px solid rgba(249,217,0,.3);
+    }
+    .evSrcBadge--community {
+      background: rgba(255,255,255,.06); color: var(--muted);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    /* ── Upcoming Events Smart Slider ── */
+    .evSlider {
+      display: grid;
+      grid-template-columns: 1fr;
+      margin-bottom: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+    .evSlide {
+      grid-row: 1;
+      grid-column: 1;
+      display: grid; grid-template-columns: 48px 1fr; gap: 12px;
+      align-items: center; text-decoration: none;
+      padding: 13px 10px;
+      background: rgba(249,217,0,.06);
+      border-radius: 8px;
+      margin: 8px -8px 0;
+      opacity: 0;
+      transition: opacity 500ms ease;
+      pointer-events: none;
+    }
+    .evSlide--active { opacity: 1; pointer-events: auto; }
+    .sbDots { grid-row: 2; grid-column: 1; display: flex; gap: 5px; justify-content: center; padding: 8px 0 4px; }
+    .sbDot {
+      width: 6px; height: 6px; border-radius: 50%;
+      border: none; padding: 0;
+      background: rgba(128,128,128,.25);
+      cursor: pointer; transition: background 200ms, transform 200ms;
+    }
+    .sbDot--active { background: var(--brand1); transform: scale(1.3); }
     .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
 
     /* Display ad */
@@ -1182,19 +1603,27 @@ const topics = [
       justify-content: space-between; gap: 28px; flex-wrap: wrap;
     }
     .adEyebrow {
-      font-size: 11px; font-weight: 800; letter-spacing: .16em;
+      font-size: 1.1rem !important; font-weight: 800; letter-spacing: 0.1em;
       text-transform: uppercase; color: var(--accentText); opacity: .82; margin-bottom: 5px;
     }
     .adHead {
-      font-size: clamp(18px, 2vw, 24px); font-weight: 950;
-      color: var(--accentText); letter-spacing: -0.4px; margin-bottom: 5px; line-height: 1.05;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 3.5rem !important;
+      font-weight: 900 !important;
+      line-height: 1.1;
+      letter-spacing: -0.05rem;
+      display: block;
+      color: #000000;
+      margin-bottom: 5px;
     }
-    .adDesc {
-      font-size: clamp(13px, 1.1vw, 14.5px); font-weight: 400;
-      color: var(--accentText);
-      opacity: .88; line-height: 1.5; max-width: 420px;
+    .ad-description {
+      font-size: 1.6rem !important;
+      font-weight: 500;
+      line-height: 1.4;
+      color: #1a1a1a;
+      max-width: 850px;
     }
-    .adActions { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+    .adActions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 2rem; }
     .adBtnPrimary {
       display: inline-flex; align-items: center;
       height: 42px; padding: 0 20px; border-radius: 11px;
@@ -1212,6 +1641,13 @@ const topics = [
       text-decoration: none; white-space: nowrap; transition: border-color 140ms;
     }
     .adBtnGhost:hover { border-color: rgba(255,255,255,.85); }
+    @media (max-width: 768px) {
+      .adHead { font-size: 2.2rem !important; }
+      .ad-description { font-size: 1.2rem !important; max-width: 100%; }
+      .adBandInner { padding: 3rem 1.5rem !important; }
+      .adActions { flex-direction: column; width: 100%; gap: 1rem; }
+      .adBtnPrimary, .adBtnGhost { width: 100%; justify-content: center; padding: 1rem; height: auto; }
+    }
     @media (max-width: 640px) {
       .adBand { padding: 16px 0 24px; }
       .adBandInner {
@@ -1221,10 +1657,70 @@ const topics = [
         flex-direction: column; align-items: center; text-align: center; gap: 12px;
       }
       .adCopy { display: flex; flex-direction: column; align-items: center; text-align: center; }
-      .adEyebrow, .adHead, .adDesc { text-align: center; }
-      .adDesc { max-width: 100%; }
-      .adActions { width: 100%; justify-content: center; gap: 8px; margin-top: 4px; }
+      .adEyebrow, .adHead, .ad-description { text-align: center; }
+      .ad-description { max-width: 100%; }
+      .adActions { width: 100%; justify-content: center; gap: 1rem; margin-top: 4px; }
       .adBtnPrimary, .adBtnGhost { flex: 1; justify-content: center; }
     }
   </style>
+
+  <script is:inline>
+    /* ── Community Pulse poll interaction ── */
+    (function () {
+      var form = document.querySelector(".cpPollForm");
+      var thanks = document.querySelector(".cpThanks");
+      var btn = document.querySelector(".cpVoteBtn");
+      if (!form || !thanks || !btn) return;
+
+      form.addEventListener("submit", function (e) {
+        var checked = form.querySelector('input[type="radio"]:checked');
+        if (!checked) {
+          e.preventDefault();
+          btn.animate(
+            [{ transform: "translateX(-4px)" }, { transform: "translateX(4px)" }, { transform: "none" }],
+            { duration: 180, iterations: 2 }
+          );
+          return;
+        }
+        // Show bars + percentages immediately, then thank-you message
+        form.querySelectorAll(".cpBar").forEach(function (b) { b.style.display = "block"; });
+        form.querySelectorAll(".cpPct").forEach(function (p) { p.style.display = "block"; });
+        setTimeout(function () {
+          form.style.display = "none";
+          thanks.hidden = false;
+        }, 80);
+      });
+    })();
+  </script>
+  <script is:inline>
+    /* ── Home Sidebar Smart Slider ── */
+    (function () {
+      var slider = document.getElementById("homeSlider");
+      if (!slider) return;
+      var slides  = Array.prototype.slice.call(slider.querySelectorAll(".evSlide"));
+      var dotsEl  = document.getElementById("homeDots");
+      var dots    = dotsEl ? Array.prototype.slice.call(dotsEl.querySelectorAll(".sbDot")) : [];
+      var current = 0;
+      var total   = slides.length;
+      var timer   = null;
+      if (total <= 1) return;
+      function goTo(idx) {
+        slides[current].classList.remove("evSlide--active");
+        slides[current].setAttribute("aria-hidden", "true");
+        if (dots[current]) { dots[current].classList.remove("sbDot--active"); }
+        current = (idx + total) % total;
+        slides[current].classList.add("evSlide--active");
+        slides[current].removeAttribute("aria-hidden");
+        if (dots[current]) { dots[current].classList.add("sbDot--active"); }
+      }
+      function startAuto() { timer = setInterval(function () { goTo(current + 1); }, 5000); }
+      function resetAuto() { if (timer) clearInterval(timer); startAuto(); }
+      dots.forEach(function (dot, i) {
+        dot.addEventListener("click", function () { goTo(i); resetAuto(); });
+      });
+      slider.addEventListener("mouseenter", function () { if (timer) clearInterval(timer); });
+      slider.addEventListener("mouseleave", startAuto);
+      startAuto();
+    })();
+  </script>
 </Base>

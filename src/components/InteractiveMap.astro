@@ -1,0 +1,254 @@
+---
+export interface MapLocation {
+  label: string;
+  address?: string;
+  lat?: number;
+  lng?: number;
+  image?: string;
+  url?: string;
+  articleHref?: string;
+  articleTitle?: string;
+}
+
+export interface Props {
+  locations: MapLocation[];
+  height?: string;
+  zoom?: number;   // force a fixed zoom instead of fitBounds (e.g. 12 for city-wide view)
+  center?: [number, number]; // [lat, lng] — default view center when zoom is set
+}
+
+const { locations = [], height = "400px", zoom, center } = Astro.props;
+
+/* Mapbox token — bound from MAPBOX_ACCESS_TOKEN in Cloudflare Pages env vars.
+   GitHub push protection permanently rejects pk.eyJ1 literals in source, so
+   the token must live exclusively in the Cloudflare dashboard.                */
+const mapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
+
+/* ── Ocean-pin guard ──────────────────────────────────────────────────────
+   Skip any pin that has no coordinates (null/undefined) OR lands at (0, 0)
+   which is the mid-Atlantic ocean — the default when geocoding fails.     */
+const pins = locations
+  .filter((l) => l.lat != null && l.lng != null && (l.lat !== 0 || l.lng !== 0))
+  .map((l, i) => ({ ...l, num: i + 1 }));
+
+if (pins.length === 0) return;
+
+/* Unique ID so multiple maps on a page don't collide */
+const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
+---
+
+<!-- Leaflet CSS — no SRI so Cloudflare edge caching never blocks it -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+
+<div
+  class="imapWrap"
+  style={`height: ${height} !important; min-height: ${height} !important; width: 100% !important; display: block !important;`}
+>
+  <div
+    id={mapId}
+    class="imapEl"
+    data-pins={JSON.stringify(pins)}
+    data-zoom={zoom != null ? String(zoom) : ""}
+    data-center={center != null ? JSON.stringify(center) : ""}
+    data-mapbox-token={mapboxToken}
+    style={`height: ${height} !important; width: 100% !important; display: block !important;`}
+  ></div>
+</div>
+
+<script is:inline>
+(function () {
+  var LEAFLET_JS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+
+  function initAllMaps() {
+    var els = document.querySelectorAll('.imapEl[data-pins]');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (el._leaflet_id) continue;
+      try {
+        var forcedZoom  = parseInt(el.getAttribute('data-zoom') || '0', 10) || null;
+        var centerRaw   = el.getAttribute('data-center') || '';
+        var defaultCenter = centerRaw ? JSON.parse(centerRaw) : null;
+        var mapboxToken = el.getAttribute('data-mapbox-token') || '';
+        initMap(el.id, JSON.parse(el.getAttribute('data-pins')), forcedZoom, defaultCenter, mapboxToken);
+      } catch (e) {
+        console.warn('[InteractiveMap] init failed for', el.id, e);
+      }
+    }
+  }
+
+  function initMap(mapId, pins, forcedZoom, defaultCenter, mapboxToken) {
+    var container = document.getElementById(mapId);
+    if (!container || !window.L) return;
+    if (container._leaflet_id) return;
+
+    /* Read real pixel height from wrapper, fall back to 400 */
+    var wrapEl = container.parentElement;
+    var pxH = wrapEl ? wrapEl.offsetHeight : 400;
+    if (!pxH || pxH < 50) pxH = 400;
+    container.style.setProperty('height',  pxH + 'px', 'important');
+    container.style.setProperty('width',   '100%',     'important');
+    container.style.setProperty('display', 'block',    'important');
+
+    var map = window.L.map(mapId, { scrollWheelZoom: true, zoomControl: false });
+    window.L.control.zoom({ position: 'topright' }).addTo(map);
+    map.attributionControl.setPrefix(''); /* remove 'Leaflet' watermark */
+
+    var mbLayer = window.L.tileLayer(
+      'https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=' + mapboxToken,
+      { attribution: '&copy; Mapbox', tileSize: 512, zoomOffset: -1, maxZoom: 22 }
+    );
+    mbLayer.on('tileerror', function () {
+      container.style.setProperty('background', 'red', 'important');
+      console.error('[InteractiveMap] Mapbox tile load failed — check token');
+    });
+    mbLayer.addTo(map);
+
+    var bounds = [];
+    for (var j = 0; j < pins.length; j++) {
+      var pin    = pins[j];
+      var latlng = [pin.lat, pin.lng];
+      bounds.push(latlng);
+
+      /* ── Numbered yellow pin ── */
+      var numberedPin = window.L.divIcon({
+        className: '',
+        html: '<div class="imap-pin" aria-label="Location ' + pin.num + '">' + pin.num + '</div>',
+        iconSize:    [30, 30],
+        iconAnchor:  [15, 15],
+        popupAnchor: [0, -18],
+      });
+
+      /* ── Popup content ── */
+      var popup = '';
+      if (pin.image) {
+        popup += '<img src="' + pin.image + '" alt="" '
+          + 'style="width:100%;height:80px;object-fit:cover;border-radius:6px;'
+          + 'margin-bottom:6px;display:block;" '
+          + 'onerror="this.style.display=\'none\'" />';
+      }
+      popup += '<strong style="font-size:14px;">' + pin.label + '</strong>';
+      if (pin.address) {
+        popup += '<br><span style="font-size:12px;color:#666;line-height:1.5;">' + pin.address + '</span>';
+      }
+
+      if (pin.articleHref) {
+        /* Master map on landing page → "Read Guide" pill */
+        var lbl = pin.articleTitle ? 'Read: ' + pin.articleTitle : 'Read Guide \u2192';
+        popup += '<br><a href="' + pin.articleHref + '"'
+          + ' style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;'
+          + 'color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;'
+          + 'text-decoration:none;line-height:1.4;">' + lbl + '</a>';
+      } else {
+        /* Event map → link to Eventbrite URL if available, else anchor to list item */
+        var detailHref = pin.url || ('#spot-' + pin.num);
+        var detailTarget = pin.url ? ' target="_blank" rel="noopener noreferrer"' : '';
+        popup += '<br><a href="' + detailHref + '"' + detailTarget
+          + ' style="display:inline-block;margin-top:8px;font-size:12.5px;font-weight:700;'
+          + 'color:#000;background:#f9d900;padding:4px 10px;border-radius:6px;'
+          + 'text-decoration:none;line-height:1.4;">View Details \u2192</a>';
+      }
+
+      window.L.marker(latlng, { icon: numberedPin })
+        .bindPopup(popup, { maxWidth: 240 })
+        .addTo(map);
+    }
+
+    if (defaultCenter && forcedZoom) {
+      /* Explicit center + zoom: always start here regardless of pin positions */
+      map.setView(defaultCenter, forcedZoom);
+    } else if (forcedZoom && bounds.length > 0) {
+      /* Fixed zoom, no explicit center: centre on the average of all pins */
+      var sumLat = 0, sumLng = 0;
+      for (var k = 0; k < bounds.length; k++) { sumLat += bounds[k][0]; sumLng += bounds[k][1]; }
+      map.setView([sumLat / bounds.length, sumLng / bounds.length], forcedZoom);
+    } else if (defaultCenter) {
+      map.setView(defaultCenter, forcedZoom || 12);
+    } else if (bounds.length === 1) {
+      map.setView(bounds[0], 15);
+    } else {
+      map.fitBounds(bounds, { padding: [36, 36] });
+    }
+
+    /* 200ms delay lets the browser finish layout before Leaflet recalculates */
+    setTimeout(function () { map.invalidateSize(); }, 200);
+  }
+
+  function run() {
+    if (typeof window.L !== 'undefined') {
+      initAllMaps();
+      return;
+    }
+    var s = document.createElement('script');
+    s.src         = LEAFLET_JS;
+    s.crossOrigin = '';
+    s.onload      = initAllMaps;
+    s.onerror     = function () {
+      console.error('[InteractiveMap] Failed to load Leaflet from', LEAFLET_JS);
+    };
+    document.head.appendChild(s);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', run);
+  } else {
+    run();
+  }
+})();
+</script>
+
+<style>
+  .imapWrap {
+    display: block !important;
+    width: 100% !important;
+    border-radius: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    margin: 0 0 28px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .imapEl {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* ── Numbered yellow pin ── */
+  :global(.imap-pin) {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #f9d900;
+    border: 2.5px solid #000;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    text-align: center;
+    line-height: 25px;   /* (30px height − 2 × 2.5px border) */
+    font-size: 12px;
+    font-weight: 900;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #000;
+    transition: transform 120ms ease;
+  }
+
+  :global(.leaflet-marker-icon:hover .imap-pin) {
+    transform: scale(1.2);
+  }
+
+  /* ── Leaflet chrome ── */
+  :global(.leaflet-container) { font-family: inherit !important; }
+
+  :global(.leaflet-popup-content-wrapper) {
+    border-radius: 10px !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.18) !important;
+    font-family: inherit !important;
+    padding: 4px 2px !important;
+  }
+
+  :global(.leaflet-popup-content) {
+    margin: 10px 14px !important;
+    font-size: 13.5px !important;
+    line-height: 1.5 !important;
+  }
+
+  :global(.leaflet-popup-tip) { box-shadow: none !important; }
+  :global(.leaflet-container:focus) { outline: none; }
+</style>
