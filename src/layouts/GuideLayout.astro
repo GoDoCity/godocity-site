@@ -248,7 +248,7 @@ const emoji = topicEmoji[topic] ?? "📖";
       var summary = document.createElement("summary");
       summary.className   = "gl-itoc-summary";
       summary.innerHTML   =
-        '<span class="gl-itoc-hamburger" aria-hidden="true"><span></span><span></span><span></span></span>In this guide <span class="gl-itoc-chevron" aria-hidden="true">&#8250;</span>';
+        '<svg class="gl-itoc-hamburger" aria-hidden="true" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="18" height="2" rx="1" fill="#ffd24a"/><rect x="0" y="5.5" width="18" height="2" rx="1" fill="#ffd24a"/><rect x="0" y="11" width="18" height="2" rx="1" fill="#ffd24a"/></svg>In this guide <span class="gl-itoc-chevron" aria-hidden="true">&#8250;</span>';
       details.appendChild(summary);
 
       var list = document.createElement("ul");
@@ -407,9 +407,9 @@ const emoji = topicEmoji[topic] ?? "📖";
   }
 
   /* ── Inline collapsible ToC accordion (global — applied to JS-created elements) ── */
-  :global(.gl-itoc) {
-    background: transparent;
-    border: 1px solid #ffd24a;
+  :global(#guide-toc.gl-itoc) {
+    background-color: #000000 !important;
+    border: 1px solid #ffd24a !important;
     border-radius: 12px;
     padding: 16px 20px;
     margin-bottom: 32px;
@@ -432,26 +432,20 @@ const emoji = topicEmoji[topic] ?? "📖";
     user-select: none;
     gap: 8px;
   }
-  /* Hide the default browser disclosure triangle */
-  :global(.gl-itoc-summary::-webkit-details-marker) { display: none; }
-  :global(.gl-itoc-summary::marker) { display: none; }
+  /* Hide the default browser disclosure triangle — multiple selectors for full coverage */
+  :global(.gl-itoc-summary::-webkit-details-marker) { display: none !important; }
+  :global(summary.gl-itoc-summary::-webkit-details-marker) { display: none !important; }
+  :global(.gl-itoc-summary::marker) { display: none !important; }
+  :global(summary.gl-itoc-summary) { list-style: none; }
 
-  /* Hamburger icon — three horizontal bars, left of the header label */
+  /* Hamburger icon — inline SVG, left of the header label */
   :global(.gl-itoc-hamburger) {
-    display: inline-flex;
-    flex-direction: column;
-    justify-content: space-between;
+    display: inline-block;
     width: 18px;
     height: 13px;
     flex-shrink: 0;
     margin-right: 2px;
-  }
-  :global(.gl-itoc-hamburger span) {
-    display: block;
-    width: 100%;
-    height: 2px;
-    background: #ffd24a;
-    border-radius: 1px;
+    vertical-align: middle;
   }
 
   :global(.gl-itoc-chevron) {
@@ -474,13 +468,14 @@ const emoji = topicEmoji[topic] ?? "📖";
     gap: 0;
   }
 
-  :global(.gl-itoc-item) { padding: 0; }
-  :global(.gl-itoc-item--sub) { padding-left: 16px; }
+  :global(.gl-itoc li) { margin: 0 !important; padding: 2px 0 !important; }
+  :global(.gl-itoc-item) { padding: 2px 0 !important; }
+  :global(.gl-itoc-item--sub) { padding-left: 16px; padding-top: 2px !important; padding-bottom: 2px !important; }
 
   :global(.gl-itoc-link) {
     display: block;
     padding: 2px 0;
-    font-size: 1rem;
+    font-size: 1.15rem;
     font-weight: 600;
     color: var(--text, #e8e8e8);
     text-decoration: none;
@@ -781,9 +776,10 @@ const emoji = topicEmoji[topic] ?? "📖";
     .gl-sidebar { order: -1; }
 
     /* Full-width ToC accordion on mobile */
-    :global(.gl-itoc) {
+    :global(#guide-toc.gl-itoc) {
       width: 100%;
       border-radius: 10px;
+      background-color: #000000 !important;
     }
   }
 
