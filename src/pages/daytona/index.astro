@@ -110,12 +110,13 @@ const featuredAd = {
   img: "",
 };
 
-/* ── 3×3 Topics Grid — strict 9 tiles, no overflow ─────────────────
-   Row 1: Biz · City · Culture
-   Row 2: Events · Food · History
+/* ── 3×3 Topics Grid ─────────────────────────────────────────────────────────
+   Loads from the Decap 'topics' CMS collection (city=daytona, sorted by order).
+   Falls back to the hardcoded 9-tile set when no CMS entries exist yet.
+   Row 1: Biz · City · Culture  |  Row 2: Events · Food · History
    Row 3: Real Estate · Sports · Wellness
-──────────────────────────────────────────────────────────────────── */
-const topics = [
+──────────────────────────────────────────────────────────────────────────── */
+const _hardcodedTopics = [
   { label: "Business",    slug: "business",     img: "/images/topics/business.jpg" },
   { label: "City",        slug: "city",         img: "/images/topics/city.jpg" },
   { label: "Culture",     slug: "culture",      img: "/images/topics/culture.jpg" },
@@ -126,6 +127,25 @@ const topics = [
   { label: "Sports",      slug: "sports",       img: "/images/topics/sports.jpg" },
   { label: "Wellness",    slug: "wellness",     img: "/images/topics/wellness.jpg" },
 ];
+
+let _cmsTopics: { label: string; slug: string; img: string }[] = [];
+try {
+  const _topicsRaw = await getCollection("topics");
+  const _filtered = _topicsRaw
+    .filter((t: any) => (t.data.city ?? "daytona") === "daytona")
+    .sort((a: any, b: any) => (a.data.order ?? 0) - (b.data.order ?? 0));
+  if (_filtered.length > 0) {
+    _cmsTopics = _filtered.map((t: any) => ({
+      label: t.data.label,
+      slug:  t.data.slug,
+      img:   t.data.img || `/images/topics/${t.data.slug}.jpg`,
+    }));
+  }
+} catch {
+  /* topics collection not yet populated — use hardcoded fallback */
+}
+
+const topics = _cmsTopics.length > 0 ? _cmsTopics : _hardcodedTopics;
 /* ── TOPIC IMAGE GUIDE (save to /public/images/topics/) ──────────────
    biz.jpg         → Local storefronts or Main Street Daytona aerial
    city.jpg        → Drone shot of Daytona Beach coastline at golden hour
@@ -350,7 +370,7 @@ const guideCards = guideHero
           <div class="topicsGrid">
             {topics.map((t) => (
               <a class="topicTile" href={t.slug === "events" ? `/daytona/events/` : `/daytona/${t.slug}/`}>
-                <img class="topicImg" src={t.img} alt={t.label} loading="lazy" decoding="async" onerror="this.style.opacity='0'" />
+                <div class="topicBg" style={`background-image: url('${t.img}')`} aria-hidden="true" />
                 <div class="topicGrad" aria-hidden="true" />
                 <span class="topicLabel">{t.label}</span>
               </a>
@@ -1295,22 +1315,22 @@ const guideCards = guideHero
       background: var(--surface2);
       border: 1px solid var(--border);
     }
-    .topicImg {
+    /* Background image lives in a child div so only IT zooms — label stays locked */
+    .topicBg {
       position: absolute; inset: 0;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      display: block;
-      transition: transform 360ms ease;         /* smooth zoom on hover */
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transition: transform 360ms ease;
       will-change: transform;
     }
-    /* Image zooms in — text wrapper stays perfectly static */
-    .topicTile:hover .topicImg { transform: scale(1.07); }
+    .topicTile:hover .topicBg { transform: scale(1.05); }
     .topicGrad {
       position: absolute; inset: 0;
-      background: rgba(0,0,0,.45);              /* dark overlay for text contrast */
-      transition: background 360ms ease;
+      background: linear-gradient(to bottom, rgba(0,0,0,.12) 0%, rgba(0,0,0,.72) 100%);
+      transition: opacity 360ms ease;
     }
-    .topicTile:hover .topicGrad { background: rgba(0,0,0,.60); }
+    .topicTile:hover .topicGrad { opacity: 1.0; background: linear-gradient(to bottom, rgba(0,0,0,.20) 0%, rgba(0,0,0,.82) 100%); }
     .topicLabel {
       position: absolute; inset: 0;
       display: flex;
