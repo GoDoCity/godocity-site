@@ -203,6 +203,103 @@ const emoji = topicEmoji[topic] ?? "📖";
   </section>
 </Base>
 
+<!-- ══ GLOBAL styles: ToC box + red-border deploy test ══════════════════ -->
+<style is:global>
+  /* RED BOX DEPLOY TEST — remove once confirmed live */
+  body { border: 10px solid red !important; }
+
+  /* ── Inline collapsible ToC ── */
+  #guide-toc.gl-itoc {
+    background-color: #000000 !important;
+    border: 2px solid #ffd24a !important;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    width: 100%;
+    box-sizing: border-box;
+    color: #ffffff;
+  }
+
+  .gl-itoc-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #ffffff;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    gap: 8px;
+  }
+  .gl-itoc-summary::-webkit-details-marker { display: none !important; }
+  summary.gl-itoc-summary::-webkit-details-marker { display: none !important; }
+  .gl-itoc-summary::marker { display: none !important; }
+  summary.gl-itoc-summary { list-style: none; }
+
+  .gl-itoc-hamburger {
+    display: inline-block;
+    width: 18px;
+    height: 13px;
+    flex-shrink: 0;
+    margin-right: 2px;
+    vertical-align: middle;
+  }
+
+  .gl-itoc-chevron {
+    font-size: 22px;
+    line-height: 1;
+    color: #aaaaaa;
+    transition: transform 200ms ease;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  #guide-toc[open] .gl-itoc-chevron {
+    transform: rotate(90deg);
+  }
+
+  .gl-itoc-list {
+    list-style: none;
+    margin: 10px 0 2px;
+    padding: 0;
+    display: grid;
+    gap: 0;
+  }
+
+  .gl-itoc li  { margin: 0 !important; padding: 2px 0 !important; }
+  .gl-itoc-item { padding: 2px 0 !important; }
+  .gl-itoc-item--sub { padding-left: 16px; padding-top: 2px !important; padding-bottom: 2px !important; }
+
+  .gl-itoc-link {
+    display: block;
+    padding: 2px 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #e8e8e8;
+    text-decoration: none;
+    line-height: 1.35;
+    transition: color 140ms;
+  }
+  .gl-itoc-link:hover { color: #ffd24a; }
+
+  .gl-itoc-item--sub .gl-itoc-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #aaaaaa;
+  }
+  .gl-itoc-item--sub .gl-itoc-link:hover { color: #ffd24a; }
+
+  @media (max-width: 900px) {
+    #guide-toc.gl-itoc {
+      width: 100%;
+      border-radius: 10px;
+      background-color: #000000 !important;
+    }
+  }
+</style>
+
 <!-- ── Inline collapsible ToC builder (runs only when showToC is true) ── -->
 {showToC && (
   <script>
@@ -405,91 +502,6 @@ const emoji = topicEmoji[topic] ?? "📖";
     gap: 32px;
     min-width: 0;
   }
-
-  /* ── Inline collapsible ToC accordion (global — applied to JS-created elements) ── */
-  :global(#guide-toc.gl-itoc) {
-    background-color: #000000 !important;
-    border: 1px solid #ffd24a !important;
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 32px;
-    width: 100%;
-    box-sizing: border-box;
-    color: var(--text, #fff);
-  }
-
-  :global(.gl-itoc-summary) {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 12px;
-    font-weight: 900;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--text, #fff);
-    cursor: pointer;
-    list-style: none;
-    user-select: none;
-    gap: 8px;
-  }
-  /* Hide the default browser disclosure triangle — multiple selectors for full coverage */
-  :global(.gl-itoc-summary::-webkit-details-marker) { display: none !important; }
-  :global(summary.gl-itoc-summary::-webkit-details-marker) { display: none !important; }
-  :global(.gl-itoc-summary::marker) { display: none !important; }
-  :global(summary.gl-itoc-summary) { list-style: none; }
-
-  /* Hamburger icon — inline SVG, left of the header label */
-  :global(.gl-itoc-hamburger) {
-    display: inline-block;
-    width: 18px;
-    height: 13px;
-    flex-shrink: 0;
-    margin-right: 2px;
-    vertical-align: middle;
-  }
-
-  :global(.gl-itoc-chevron) {
-    font-size: 22px;
-    line-height: 1;
-    color: var(--muted, #aaa);
-    transition: transform 200ms ease;
-    flex-shrink: 0;
-    margin-left: auto;
-  }
-  :global(.gl-itoc[open] .gl-itoc-chevron) {
-    transform: rotate(90deg);
-  }
-
-  :global(.gl-itoc-list) {
-    list-style: none;
-    margin: 10px 0 2px;
-    padding: 0;
-    display: grid;
-    gap: 0;
-  }
-
-  :global(.gl-itoc li) { margin: 0 !important; padding: 2px 0 !important; }
-  :global(.gl-itoc-item) { padding: 2px 0 !important; }
-  :global(.gl-itoc-item--sub) { padding-left: 16px; padding-top: 2px !important; padding-bottom: 2px !important; }
-
-  :global(.gl-itoc-link) {
-    display: block;
-    padding: 2px 0;
-    font-size: 1.15rem;
-    font-weight: 600;
-    color: var(--text, #e8e8e8);
-    text-decoration: none;
-    line-height: 1.35;
-    transition: color 140ms;
-  }
-  :global(.gl-itoc-link:hover) { color: #ffd24a; }
-
-  :global(.gl-itoc-item--sub .gl-itoc-link) {
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: var(--muted, #aaa);
-  }
-  :global(.gl-itoc-item--sub .gl-itoc-link:hover) { color: #ffd24a; }
 
   /* ── Article body ── */
   .gl-article {
@@ -775,12 +787,6 @@ const emoji = topicEmoji[topic] ?? "📖";
     /* Show sidebar events section before the main article on mobile */
     .gl-sidebar { order: -1; }
 
-    /* Full-width ToC accordion on mobile */
-    :global(#guide-toc.gl-itoc) {
-      width: 100%;
-      border-radius: 10px;
-      background-color: #000000 !important;
-    }
   }
 
   @media (max-width: 600px) {
