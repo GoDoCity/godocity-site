@@ -165,6 +165,29 @@ collections:
       - {label: "Publish Date", name: "date", widget: "datetime"}
       - {label: "Body", name: "body", widget: "markdown"}
 
+  - name: "topics"
+    label: "Topic Boxes"
+    label_singular: "Topic"
+    folder: "src/content/topics"
+    create: true
+    delete: true
+    slug: "{{city}}-{{slug}}"
+    summary: "{{label}} ({{city}})"
+    fields:
+      - {label: "Label", name: "label", widget: "string", hint: "Display name shown on the tile (e.g. 'Business', 'Food')."}
+      - {label: "Slug", name: "slug", widget: "string", hint: "URL-safe topic slug matching the city topic route (e.g. 'business', 'real-estate')."}
+      - {label: "Image", name: "img", widget: "image", media_folder: "/public/images/topics", public_folder: "/images/topics", hint: "Background photo for the topic tile. Recommended: 800×600px, high contrast."}
+      - label: "City"
+        name: "city"
+        widget: "select"
+        default: "daytona"
+        hint: "Which city site this topic tile belongs to."
+        options:
+          - {label: "Daytona Beach", value: "daytona"}
+          - {label: "Orlando", value: "orlando"}
+          - {label: "Jacksonville / 904", value: "904"}
+      - {label: "Sort Order", name: "order", widget: "number", required: false, default: 0, hint: "Lower numbers appear first. Leave 0 for alphabetical."}
+
   - name: "global-sponsors"
     label: "Global Sponsors"
     label_singular: "Sponsor Campaign"
