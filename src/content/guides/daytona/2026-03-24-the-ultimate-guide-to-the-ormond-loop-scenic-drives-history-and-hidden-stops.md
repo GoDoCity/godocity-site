@@ -3,13 +3,13 @@ title: "The Ultimate Guide to the Ormond Loop: Scenic Drives, History, and
   Hidden Stops"
 topic: Play
 featured: true
-showToC: true
+showToC: false
 image: /images/bulow-park.jpg
 description: Spanning 30+ miles of moss-draped oaks and salt marshes, "The Loop"
   is the crown jewel of Ormond Beach. Here is how to experience it like a local.
 date: 2026-03-24T12:52:00.000Z
 ---
-**\## The Route: Where to Start**
+# **\## The Route: Where to Start**
 
 ![](/images/ob-loop.jpg)
 
