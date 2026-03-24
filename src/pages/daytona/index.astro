@@ -1307,9 +1307,10 @@ const guideCards = guideHero
     .topicTile:hover .topicImg { transform: scale(1.07); }
     .topicGrad {
       position: absolute; inset: 0;
-      background: rgba(0,0,0,.50);              /* 50% dark overlay per spec */
-      /* grad does NOT transition — keeps text contrast constant during zoom */
+      background: rgba(0,0,0,.45);              /* dark overlay for text contrast */
+      transition: background 360ms ease;
     }
+    .topicTile:hover .topicGrad { background: rgba(0,0,0,.60); }
     .topicLabel {
       position: absolute; inset: 0;
       display: flex;
