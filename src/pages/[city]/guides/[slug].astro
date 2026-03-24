@@ -215,21 +215,13 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
         {/* ── Main article column ── */}
         <main>
-          <div class="guideMarkdown" id="article-body">
+          <div class="guideMarkdown" id="article-body" data-show-toc={(data as any).showToC !== false ? "true" : "false"}>
             <Content />
           </div>
         </main>
 
         {/* ── Right sidebar ── */}
         <aside class="homeRail">
-
-          {/* Table of Contents — scans h2/h3 from the rendered markdown body */}
-          {(data as any).showToC !== false && (
-            <nav class="gl-toc" id="guide-toc" aria-label="Table of contents">
-              <div class="gl-toc-head">On This Page</div>
-              <ol class="gl-toc-list" id="toc-list"></ol>
-            </nav>
-          )}
 
           {/* Newsletter */}
           <div class="nlBox">
@@ -546,52 +538,83 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 })();
 </script>
 
-{/* ── Table of Contents builder — scans h2/h3 from .guideMarkdown ── */}
+{/* ── Inline ToC builder — repairs buried headings, injects <details> before first <h2> ── */}
 <script is:inline>
 window.addEventListener('load', function () {
-  var toc  = document.getElementById("guide-toc");
-  var list = document.getElementById("toc-list");
-  if (!toc || !list) return;
+  var article = document.getElementById("article-body");
+  if (!article) return;
 
-  var headings = document.querySelectorAll('.guideMarkdown h2, .guideMarkdown h3');
-  console.log('Headings found:', headings.length);
-  if (!headings.length) { toc.style.display = "none"; return; }
+  /* ── PASS 0: Repair headings buried in ** bold / * italic markers ──────
+     Handles: <p><strong>## Section Title</strong></p>
+              <p>## Section Title</p>
+     e.g. when author writes **## Heading** in Decap CMS editor            */
+  var pars = Array.prototype.slice.call(article.querySelectorAll("p"));
+  pars.forEach(function (p) {
+    var raw = (p.textContent || "").replace(/^\s*\*+\s*/, "").trim();
+    var h3m = raw.match(/^###\s+([\s\S]+)/);
+    var h2m = !h3m && raw.match(/^##\s+([\s\S]+)/);
+    if (!h2m && !h3m) return;
+    var level = h3m ? "h3" : "h2";
+    var cleanText = ((h3m || h2m)[1] || "").replace(/\*+\s*$/, "").trim();
+    if (!cleanText) return;
+    var newH = document.createElement(level);
+    newH.textContent = cleanText;
+    if (p.parentNode) p.parentNode.replaceChild(newH, p);
+  });
 
-  /* Assign slugified IDs to headings that lack one */
-  headings.forEach(function (h) {
+  /* Skip ToC if disabled in frontmatter */
+  if (article.dataset.showToc === "false") return;
+
+  /* ── PASS 1: Build inline <details> ToC ── */
+  var headings = Array.prototype.slice.call(article.querySelectorAll("h2, h3"));
+  if (!headings.length) return;
+
+  /* Assign slugified IDs */
+  headings.forEach(function (h, i) {
     if (!h.id) {
-      h.id = (h.textContent || '')
-        .toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, '')
-        .replace(/[\s_]+/g, '-')
-        .replace(/^-+|-+$/g, '');
+      var slug = (h.textContent || "")
+        .toLowerCase().trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+      h.id = slug || ("toc-" + i);
     }
   });
 
+  /* Build <details> accordion matching GuideLayout style */
+  var details = document.createElement("details");
+  details.id        = "guide-toc";
+  details.className = "gl-itoc";
+  details.open      = window.innerWidth >= 900;
+
+  var summary = document.createElement("summary");
+  summary.className = "gl-itoc-summary";
+  summary.innerHTML = 'In this guide <span class="gl-itoc-chevron" aria-hidden="true">&#8250;</span>';
+  details.appendChild(summary);
+
+  var list = document.createElement("ul");
+  list.className = "gl-itoc-list";
+
   headings.forEach(function (h) {
     var li = document.createElement("li");
-    li.className = "gl-toc-item" + (h.tagName === "H3" ? " gl-toc-item--sub" : "");
+    li.className = h.tagName === "H3" ? "gl-itoc-item gl-itoc-item--sub" : "gl-itoc-item";
     var a = document.createElement("a");
-    a.className = "gl-toc-link";
-    a.href = "#" + h.id;
+    a.href      = "#" + h.id;
     a.textContent = h.textContent;
+    a.className = "gl-itoc-link";
     li.appendChild(a);
     list.appendChild(li);
   });
 
-  /* Scroll-spy: highlight the active section */
-  var links = list.querySelectorAll(".gl-toc-link");
-  function update() {
-    var scrollY = window.scrollY + 130;
-    var active = null;
-    headings.forEach(function (h) { if (h.offsetTop <= scrollY) active = h; });
-    links.forEach(function (a) {
-      a.classList.toggle("gl-toc-link--active", !!(active && a.getAttribute("href") === "#" + active.id));
-    });
+  details.appendChild(list);
+
+  /* Inject immediately before the first h2 */
+  var firstH2 = article.querySelector("h2");
+  if (firstH2) {
+    article.insertBefore(details, firstH2);
+  } else {
+    article.insertBefore(details, article.firstChild);
   }
-  window.addEventListener("scroll", update, { passive: true });
-  update();
 });
 </script>
 
@@ -675,7 +698,7 @@ window.addEventListener('load', function () {
   .guideMarkdown :global(h2) {
     font-size: 2.2rem;
     font-weight: 800;
-    color: var(--text, #e8edf4);
+    color: #ffffff;
     margin: 2rem 0 1rem;
     letter-spacing: -0.03em;
     scroll-margin-top: 80px;
@@ -874,32 +897,63 @@ window.addEventListener('load', function () {
   .chevron { transition: transform 200ms; }
   .loadBtn:hover .chevron { transform: translateY(2px); }
 
-  /* ════ TABLE OF CONTENTS (new guide sidebar) ════ */
-  .gl-toc {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--brand1);
+  /* ════ INLINE TABLE OF CONTENTS (injected by JS before first h2) ════ */
+  :global(.gl-itoc) {
+    background: #f9f9f9;
+    border: 1px solid #ddd;
     border-radius: 12px;
-    padding: 20px 24px;
+    padding: 16px 20px;
+    margin-bottom: 32px;
+    width: 100%;
+    box-sizing: border-box;
+    color: #111;
   }
-  .gl-toc-head {
-    font-size: 11px; font-weight: 800; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--brand1); margin-bottom: 14px;
+  :global(.gl-itoc-summary) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #111;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    gap: 8px;
   }
-  .gl-toc-list {
-    list-style: none; padding: 0; margin: 0;
-    display: flex; flex-direction: column; gap: 2px;
+  :global(.gl-itoc-summary::-webkit-details-marker) { display: none; }
+  :global(.gl-itoc-summary::marker) { display: none; }
+  :global(.gl-itoc-chevron) {
+    font-size: 22px;
+    line-height: 1;
+    color: #555;
+    transition: transform 200ms ease;
+    flex-shrink: 0;
   }
-  .gl-toc-item--sub { padding-left: 16px; }
-  .gl-toc-link {
-    display: block; font-size: 13px; font-weight: 600;
-    color: var(--muted); text-decoration: none; line-height: 1.4;
-    padding: 4px 0 4px 8px;
-    border-left: 2px solid transparent; margin-left: -8px;
-    transition: color 120ms, border-color 120ms;
+  :global(.gl-itoc[open] .gl-itoc-chevron) { transform: rotate(90deg); }
+  :global(.gl-itoc-list) {
+    list-style: none;
+    margin: 14px 0 2px;
+    padding: 0;
+    display: grid;
+    gap: 1px;
   }
-  .gl-toc-link:hover,
-  .gl-toc-link--active { color: var(--text); border-left-color: var(--brand1); }
+  :global(.gl-itoc-item) { padding: 0; }
+  :global(.gl-itoc-item--sub) { padding-left: 16px; }
+  :global(.gl-itoc-link) {
+    display: block;
+    padding: 5px 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    text-decoration: none;
+    line-height: 1.3;
+    transition: color 140ms;
+  }
+  :global(.gl-itoc-link:hover) { color: #ffd24a; }
+  :global(.gl-itoc-item--sub .gl-itoc-link) { font-size: 13px; font-weight: 500; color: #555; }
+  :global(.gl-itoc-item--sub .gl-itoc-link:hover) { color: #ffd24a; }
 
   /* ════ SIDEBAR ════ */
   .homeRail { position: sticky; top: 80px; display: grid; gap: 24px; align-self: start; }

@@ -164,4 +164,15 @@ const diy = defineCollection({
   }),
 });
 
-export const collections = { posts, guides, cityGuides, globalSponsors, events, diy };
+const topics = defineCollection({
+  type: "content",
+  schema: z.object({
+    label: z.string(),
+    slug:  z.string(),
+    img:   z.string().optional().transform(v => v === "" ? undefined : v),
+    city:  z.string().default("daytona"),
+    order: z.number().optional().default(0),
+  }),
+});
+
+export const collections = { posts, guides, cityGuides, globalSponsors, events, diy, topics };
