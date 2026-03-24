@@ -248,7 +248,7 @@ const emoji = topicEmoji[topic] ?? "📖";
       var summary = document.createElement("summary");
       summary.className   = "gl-itoc-summary";
       summary.innerHTML   =
-        'In this guide <span class="gl-itoc-chevron" aria-hidden="true">&#8250;</span>';
+        '<span class="gl-itoc-hamburger" aria-hidden="true"><span></span><span></span><span></span></span>In this guide <span class="gl-itoc-chevron" aria-hidden="true">&#8250;</span>';
       details.appendChild(summary);
 
       var list = document.createElement("ul");
@@ -408,14 +408,14 @@ const emoji = topicEmoji[topic] ?? "📖";
 
   /* ── Inline collapsible ToC accordion (global — applied to JS-created elements) ── */
   :global(.gl-itoc) {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
+    background: transparent;
+    border: 1px solid #ffd24a;
     border-radius: 12px;
     padding: 16px 20px;
     margin-bottom: 32px;
     width: 100%;
     box-sizing: border-box;
-    color: #111;
+    color: var(--text, #fff);
   }
 
   :global(.gl-itoc-summary) {
@@ -426,7 +426,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     font-weight: 900;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: #111;
+    color: var(--text, #fff);
     cursor: pointer;
     list-style: none;
     user-select: none;
@@ -436,12 +436,31 @@ const emoji = topicEmoji[topic] ?? "📖";
   :global(.gl-itoc-summary::-webkit-details-marker) { display: none; }
   :global(.gl-itoc-summary::marker) { display: none; }
 
+  /* Hamburger icon — three horizontal bars, left of the header label */
+  :global(.gl-itoc-hamburger) {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 18px;
+    height: 13px;
+    flex-shrink: 0;
+    margin-right: 2px;
+  }
+  :global(.gl-itoc-hamburger span) {
+    display: block;
+    width: 100%;
+    height: 2px;
+    background: #ffd24a;
+    border-radius: 1px;
+  }
+
   :global(.gl-itoc-chevron) {
     font-size: 22px;
     line-height: 1;
-    color: #555;
+    color: var(--muted, #aaa);
     transition: transform 200ms ease;
     flex-shrink: 0;
+    margin-left: auto;
   }
   :global(.gl-itoc[open] .gl-itoc-chevron) {
     transform: rotate(90deg);
@@ -449,10 +468,10 @@ const emoji = topicEmoji[topic] ?? "📖";
 
   :global(.gl-itoc-list) {
     list-style: none;
-    margin: 14px 0 2px;
+    margin: 10px 0 2px;
     padding: 0;
     display: grid;
-    gap: 1px;
+    gap: 0;
   }
 
   :global(.gl-itoc-item) { padding: 0; }
@@ -460,20 +479,20 @@ const emoji = topicEmoji[topic] ?? "📖";
 
   :global(.gl-itoc-link) {
     display: block;
-    padding: 5px 0;
-    font-size: 14px;
+    padding: 2px 0;
+    font-size: 1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--text, #e8e8e8);
     text-decoration: none;
-    line-height: 1.3;
+    line-height: 1.35;
     transition: color 140ms;
   }
   :global(.gl-itoc-link:hover) { color: #ffd24a; }
 
   :global(.gl-itoc-item--sub .gl-itoc-link) {
-    font-size: 13px;
+    font-size: 0.875rem;
     font-weight: 500;
-    color: #555;
+    color: var(--muted, #aaa);
   }
   :global(.gl-itoc-item--sub .gl-itoc-link:hover) { color: #ffd24a; }
 
