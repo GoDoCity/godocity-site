@@ -324,3 +324,6 @@ body > footer { order: 2; }
   line-height: 1.3;
   letter-spacing: -0.01em;
 }
+
+/* ── Kill switch: hide legacy ghHero banner on guide category pages ── */
+.ghHero { display: none !important; }
