@@ -900,9 +900,9 @@ window.addEventListener('load', function () {
   /* ════ INLINE TABLE OF CONTENTS (injected by JS before first h2) ════ */
   :global(.gl-itoc) {
     background-color: transparent !important;
-    border: none !important;
+    border: 2px solid #ffd24a !important;
     border-radius: 12px;
-    padding: 15px !important;
+    padding: 14px 20px 14px !important;
     margin-bottom: 32px;
     width: 100%;
     box-sizing: border-box;
@@ -910,9 +910,9 @@ window.addEventListener('load', function () {
   }
   :global(.gl-itoc-summary) {
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     font-size: 12px;
     font-weight: 900;
     letter-spacing: 0.09em;
@@ -931,8 +931,9 @@ window.addEventListener('load', function () {
     width: 18px;
     height: 13px;
     flex-shrink: 0;
-    margin-right: 2px;
     vertical-align: middle;
+    order: 1;
+    margin-left: auto;
   }
   :global(.gl-itoc-chevron) {
     font-size: 22px;
@@ -940,7 +941,6 @@ window.addEventListener('load', function () {
     color: #aaaaaa;
     transition: transform 200ms ease;
     flex-shrink: 0;
-    margin-left: auto;
   }
   :global(.gl-itoc[open] .gl-itoc-chevron) { transform: rotate(90deg); }
   :global(.gl-itoc-list) {
