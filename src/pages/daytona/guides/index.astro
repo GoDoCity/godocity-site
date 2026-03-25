@@ -321,11 +321,25 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
       background-color: #1c2028;
     }
 
-    /* Distinct tonal placeholder shades per block */
-    .ghBlock--coast      { background-color: #1e2530; }
-    .ghBlock--drive      { background-color: #1a2020; }
-    .ghBlock--surf       { background-color: #1c2030; }
-    .ghBlock--essentials { background-color: #201c28; }
+    /* ── Block background images — drop matching files into /public/images/guides/
+         coast-bg.jpg, drive-bg.jpg, surf-bg.jpg, essentials-bg.jpg
+         The grey-shade background-color acts as a fallback until images are added. ── */
+    .ghBlock--coast {
+      --block-bg-img: url('/images/guides/coast-bg.jpg');
+      background-color: #1e2530;
+    }
+    .ghBlock--drive {
+      --block-bg-img: url('/images/guides/drive-bg.jpg');
+      background-color: #1a2020;
+    }
+    .ghBlock--surf {
+      --block-bg-img: url('/images/guides/surf-bg.jpg');
+      background-color: #1c2030;
+    }
+    .ghBlock--essentials {
+      --block-bg-img: url('/images/guides/essentials-bg.jpg');
+      background-color: #201c28;
+    }
 
     /* Dark gradient overlay — ensures white text always pops */
     .ghBlockOverlay {
@@ -435,20 +449,13 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
       border-bottom: 1px solid rgba(255,255,255,0.06);
     }
 
-    /* ── Mobile: stack 2 wide → 1 wide, shorter blocks ── */
+    /* ── Mobile: single-column stack — text stays readable ── */
     @media (max-width: 640px) {
-      .ghBlocks {
-        grid-template-columns: 1fr 1fr;
-        grid-template-rows: 180px 180px;
-      }
-      .ghBlockContent { padding: 16px 18px; }
-    }
-
-    @media (max-width: 400px) {
       .ghBlocks {
         grid-template-columns: 1fr;
         grid-template-rows: repeat(4, 160px);
       }
+      .ghBlockContent { padding: 16px 18px; }
       .ghBlock--drive,
       .ghBlock--essentials {
         justify-content: flex-start;

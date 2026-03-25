@@ -83,51 +83,49 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
 >
   <div class="ghWrap">
 
-    {/* ── PAGE HERO ── */}
-    <div class="ghHero">
-      <div class="container">
-        <div class="ghHeroBreadcrumb">
-          <a href="/daytona/">GoDo Daytona</a>
-          <span class="ghCrumbSep">›</span>
-          <a href="/daytona/guides/">Guides</a>
-          <span class="ghCrumbSep">›</span>
-          <span>{topic}</span>
+    {/* ── CATEGORY HEADER + RIBBON (flush together) ── */}
+    <div class="ghHeaderStack">
+
+      {/* Breadcrumb */}
+      <div class="ghHeaderBreadcrumb container">
+        <a href="/daytona/">GoDo Daytona</a>
+        <span class="ghCrumbSep">›</span>
+        <a href="/daytona/guides/">Guides</a>
+        <span class="ghCrumbSep">›</span>
+        <span>{topic}</span>
+      </div>
+
+      {/* ── PRIMARY HEADER BLOCK ── */}
+      <div class="ghCategoryBanner">
+        <div class="ghCategoryBannerInner">
+          <h1 class="ghCategoryBannerText">
+            <span class="ghBannerAction">{topic.toUpperCase()}</span>
+            {section === "play" && <span class="ghBannerCategory">[Play]</span>}
+            {section === "live" && <span class="ghBannerCategory">[Live]</span>}
+            {section === "work" && <span class="ghBannerCategory">[Work]</span>}
+            {section === "best" && <span class="ghBannerCategory">[Best]</span>}
+          </h1>
         </div>
-        <h1 class="ghHeroTitle">{emoji} {topic} Guides</h1>
-        <p class="ghHeroLede">
-          Everything you need to know about {topic.toLowerCase()} in Daytona Beach.
-        </p>
       </div>
-    </div>
 
-    {/* ── FULL-WIDTH CATEGORY BANNER ── */}
-    <div class="ghCategoryBanner">
-      <h2 class="ghCategoryBannerText">
-        <span class="ghBannerAction">{topic.toUpperCase()}</span>
-        {/* Stylistic category bracket — e.g. Play → [Play] */}
-        {section === "play" && <span class="ghBannerCategory">[Play]</span>}
-        {section === "live" && <span class="ghBannerCategory">[Live]</span>}
-        {section === "work" && <span class="ghBannerCategory">[Work]</span>}
-        {section === "best" && <span class="ghBannerCategory">[Best]</span>}
-      </h2>
-    </div>
+      {/* ── STICKY JUMP RIBBON — flush below header ── */}
+      {ribbonItems.length > 0 && (
+        <div class="ghRibbonOuter" id="ghRibbon">
+          <nav class="ghRibbon" aria-label={`${topic} sub-categories`}>
+            {ribbonItems.map((item) => (
+              <a
+                class="ghRibbonItem"
+                href={item.href}
+                data-ribbon-id={item.id}
+              >
+                {item.label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      )}
 
-    {/* ── STICKY JUMP RIBBON ── */}
-    {ribbonItems.length > 0 && (
-      <div class="ghRibbonOuter" id="ghRibbon">
-        <nav class="ghRibbon" aria-label={`${topic} sub-categories`}>
-          {ribbonItems.map((item) => (
-            <a
-              class="ghRibbonItem"
-              href={item.href}
-              data-ribbon-id={item.id}
-            >
-              {item.label}
-            </a>
-          ))}
-        </nav>
-      </div>
-    )}
+    </div>{/* end .ghHeaderStack */}
 
     {/* ── GUIDES SECTION ── */}
     <section class="ghSection ghSection--white">
@@ -207,72 +205,55 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
   <style>
     .ghWrap { min-height: 100vh; }
 
-    /* ── Hero ── */
-    .ghHero {
-      padding: 56px 0 48px;
-      border-bottom: 2px solid var(--brand1);
-      text-align: center;
+    /* ── Header stack — banner + ribbon as a single flush unit ── */
+    .ghHeaderStack {
+      width: 100%;
     }
-    .ghHeroBreadcrumb {
+
+    /* Breadcrumb inside header */
+    .ghHeaderBreadcrumb {
       font-size: 13px;
       font-weight: 600;
       color: var(--faint);
-      margin-bottom: 20px;
+      padding: 14px 0 10px;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
     }
-    .ghHeroBreadcrumb a {
+    .ghHeaderBreadcrumb a {
       color: var(--brand1);
       text-decoration: none;
     }
-    .ghHeroBreadcrumb a:hover { text-decoration: underline; }
+    .ghHeaderBreadcrumb a:hover { text-decoration: underline; }
     .ghCrumbSep { opacity: .5; }
 
-    .ghHeroTitle {
-      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(3.5rem, 8vw, 7rem);
-      font-weight: 900;
-      font-style: italic;
-      text-transform: uppercase;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      margin: 0 0 18px;
-      line-height: 1.0;
-    }
-    .ghHeroLede {
-      font-size: 1.1rem;
-      color: var(--muted);
-      max-width: 600px;
-      margin: 0 auto;
-      line-height: 1.55;
-    }
-
-    /* ── Category Banner ── */
+    /* ── Primary Category Header Block ── */
     .ghCategoryBanner {
       width: 100vw !important;
       background: #2E3E52;
-      padding: 48px 0 44px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      padding: 40px 0 36px;
       margin-bottom: 0;
       border-top: 4px solid #FFD700 !important;
       border-bottom: 4px solid #FFD700 !important;
+    }
+    /* Inner wrapper aligns content to the left, respects container max-width */
+    .ghCategoryBannerInner {
+      max-width: var(--max, 1280px);
+      margin: 0 auto;
+      padding: 0 2.5rem;
     }
     .ghCategoryBannerText {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
       font-weight: 900;
       margin: 0;
       line-height: 1;
-      text-align: center;
+      text-align: left;
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: flex-start;
       gap: 6px;
     }
-    /* Action word: SURF / COAST / DRIVE — bold, uppercase, large */
+    /* Action word: LIVE / WORK / PLAY — bold, uppercase, large */
     .ghBannerAction {
       font-size: clamp(4.4rem, 8vw, 5.8rem);
       letter-spacing: 0.08em;
@@ -280,7 +261,7 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       color: #ffffff;
       display: block;
     }
-    /* Category word: [Play] — lighter, ~20% smaller */
+    /* Category word: [Live] — lighter, ~20% smaller */
     .ghBannerCategory {
       font-size: clamp(1.8rem, 3.2vw, 2.8rem);
       font-weight: 300;
@@ -567,9 +548,10 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
 
     /* ── Mobile ── */
     @media (max-width: 640px) {
-      .ghHero { padding: 36px 0 32px; }
+      .ghHeaderBreadcrumb { padding: 10px 0 8px; font-size: 12px; }
       .ghSection { padding: 20px 0 32px; }
-      .ghCategoryBanner { padding: 36px 0 30px; }
+      .ghCategoryBanner { padding: 28px 0 24px; }
+      .ghCategoryBannerInner { padding: 0 1.25rem; }
       .ghBannerAction { font-size: clamp(2.8rem, 8vw, 4rem); }
       .ghBannerCategory { font-size: clamp(1.2rem, 3vw, 1.8rem); }
       .ghGrid { gap: 16px; }
