@@ -112,11 +112,6 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 >
 <div class="pageWrap">
 
-  {/* ════════ PROOF-OF-LIFE BANNER — remove once confirmed live ════════ */}
-  <div style="background:#ffd24a;color:#000000;font-size:1.5rem;font-weight:900;text-align:center;padding:18px 24px;letter-spacing:0.05em;width:100%;box-sizing:border-box;">
-    CLAUDE IS LIVE
-  </div>
-
   {/* ════════ HERO: Full-bleed image banner for new guides with image ════════
       Uses data.image as background; Montserrat 900 overlaid title per brand guidelines.
       Falls back to plain text hero for cityGuides or guides without an image.
@@ -904,8 +899,8 @@ window.addEventListener('load', function () {
 
   /* ════ INLINE TABLE OF CONTENTS (injected by JS before first h2) ════ */
   :global(.gl-itoc) {
-    background-color: #000000 !important;
-    border: 2px solid #ffd24a !important;
+    background-color: transparent !important;
+    border: none !important;
     border-radius: 12px;
     padding: 15px !important;
     margin-bottom: 32px;
@@ -915,6 +910,7 @@ window.addEventListener('load', function () {
   }
   :global(.gl-itoc-summary) {
     display: flex;
+    flex-direction: row-reverse;
     align-items: center;
     justify-content: space-between;
     font-size: 12px;
@@ -929,6 +925,7 @@ window.addEventListener('load', function () {
   }
   :global(.gl-itoc-summary::-webkit-details-marker) { display: none; }
   :global(.gl-itoc-summary::marker) { display: none; }
+  :global(.gl-itoc-summary) { list-style: none; }
   :global(.gl-itoc-hamburger) {
     display: inline-block;
     width: 18px;
