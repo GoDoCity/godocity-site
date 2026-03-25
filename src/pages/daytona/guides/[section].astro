@@ -37,6 +37,30 @@ const fallbackImgs: Record<string, string> = {
 const topic = topicMap[section] ?? "";
 const emoji = emojiMap[section] ?? "";
 
+/* ── Jump ribbon configuration per section ── */
+type RibbonItem = { label: string; href: string; id: string };
+const ribbonConfig: Record<string, RibbonItem[]> = {
+  play: [
+    { label: "Food & Drink",       href: "#food-drink",       id: "food-drink"       },
+    { label: "Outdoors & Trails",  href: "#outdoors-trails",  id: "outdoors-trails"  },
+    { label: "Arts & Culture",     href: "#arts-culture",     id: "arts-culture"     },
+    { label: "Date Night",         href: "#date-night",       id: "date-night"       },
+  ],
+  live: [
+    { label: "Neighborhoods", href: "#neighborhoods", id: "neighborhoods" },
+    { label: "Home & Garden", href: "#home-garden",   id: "home-garden"   },
+    { label: "Schools",       href: "#schools",       id: "schools"       },
+    { label: "Services",      href: "#services",      id: "services"      },
+  ],
+  work: [
+    { label: "Small Business", href: "#small-business", id: "small-business" },
+    { label: "Coworking",      href: "#coworking",      id: "coworking"      },
+    { label: "Networking",     href: "#networking",     id: "networking"     },
+    { label: "Resources",      href: "#resources",      id: "resources"      },
+  ],
+};
+const ribbonItems: RibbonItem[] = ribbonConfig[section] ?? [];
+
 /* Query the guides collection and filter by topic */
 const allGuides = await getCollection("guides");
 const topicGuides = allGuides
@@ -78,8 +102,32 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
 
     {/* ── FULL-WIDTH CATEGORY BANNER ── */}
     <div class="ghCategoryBanner">
-      <h2 class="ghCategoryBannerText">{topic.toUpperCase()}</h2>
+      <h2 class="ghCategoryBannerText">
+        <span class="ghBannerAction">{topic.toUpperCase()}</span>
+        {/* Stylistic category bracket — e.g. Play → [Play] */}
+        {section === "play" && <span class="ghBannerCategory">[Play]</span>}
+        {section === "live" && <span class="ghBannerCategory">[Live]</span>}
+        {section === "work" && <span class="ghBannerCategory">[Work]</span>}
+        {section === "best" && <span class="ghBannerCategory">[Best]</span>}
+      </h2>
     </div>
+
+    {/* ── STICKY JUMP RIBBON ── */}
+    {ribbonItems.length > 0 && (
+      <div class="ghRibbonOuter" id="ghRibbon">
+        <nav class="ghRibbon" aria-label={`${topic} sub-categories`}>
+          {ribbonItems.map((item) => (
+            <a
+              class="ghRibbonItem"
+              href={item.href}
+              data-ribbon-id={item.id}
+            >
+              {item.label}
+            </a>
+          ))}
+        </nav>
+      </div>
+    )}
 
     {/* ── GUIDES SECTION ── */}
     <section class="ghSection ghSection--white">
@@ -205,28 +253,106 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
     .ghCategoryBanner {
       width: 100vw !important;
       background: #2E3E52;
-      padding: 56px 0;
+      padding: 48px 0 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 28px;
+      margin-bottom: 0;
       border-top: 4px solid #FFD700 !important;
       border-bottom: 4px solid #FFD700 !important;
     }
     .ghCategoryBannerText {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(4.4rem, 8vw, 5.8rem) !important;
       font-weight: 900;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #ffffff;
       margin: 0;
       line-height: 1;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    /* Action word: SURF / COAST / DRIVE — bold, uppercase, large */
+    .ghBannerAction {
+      font-size: clamp(4.4rem, 8vw, 5.8rem);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffffff;
+      display: block;
+    }
+    /* Category word: [Play] — lighter, ~20% smaller */
+    .ghBannerCategory {
+      font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+      font-weight: 300;
+      letter-spacing: 0.18em;
+      color: rgba(255,255,255,0.78);
+      display: block;
+    }
+
+    /* ── Sticky Jump Ribbon ── */
+    .ghRibbonOuter {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #0b0d10;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.45);
+    }
+    .ghRibbon {
+      display: flex;
+      align-items: stretch;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      max-width: var(--max, 1280px);
+      margin: 0 auto;
+      padding: 0 16px;
+    }
+    .ghRibbon::-webkit-scrollbar { display: none; }
+
+    .ghRibbonItem {
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 18px;
+      height: 46px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: rgba(232,237,244,0.65);
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      transition: color 140ms, border-color 140ms;
+      white-space: nowrap;
+    }
+    .ghRibbonItem:hover {
+      color: #ffffff;
+      border-bottom-color: rgba(255,210,74,0.45);
+    }
+    /* Active ribbon item: 2px Racing Yellow underline */
+    .ghRibbonItem.is-active,
+    .ghRibbonItem[aria-current="true"] {
+      color: #ffd24a;
+      border-bottom-color: #ffd24a;
+    }
+
+    /* Pipe separators between ribbon items */
+    .ghRibbonItem + .ghRibbonItem {
+      border-left: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* ── Mobile ribbon ── */
+    @media (max-width: 640px) {
+      .ghRibbonItem {
+        padding: 0 14px;
+        font-size: 11px;
+        height: 40px;
+      }
     }
 
     /* ── Section ── */
-    .ghSection { padding: 0 0 48px; }
+    .ghSection { padding: 28px 0 48px; }
     .ghSection--white { background: var(--surface); }
 
     .lede {
@@ -442,9 +568,10 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
     /* ── Mobile ── */
     @media (max-width: 640px) {
       .ghHero { padding: 36px 0 32px; }
-      .ghSection { padding: 0 0 32px; }
-      .ghCategoryBanner { padding: 36px 0; }
-      .ghCategoryBannerText { font-size: clamp(2.8rem, 8vw, 4rem) !important; }
+      .ghSection { padding: 20px 0 32px; }
+      .ghCategoryBanner { padding: 36px 0 30px; }
+      .ghBannerAction { font-size: clamp(2.8rem, 8vw, 4rem); }
+      .ghBannerCategory { font-size: clamp(1.2rem, 3vw, 1.8rem); }
       .ghGrid { gap: 16px; }
       .ghArticleRow { grid-template-columns: 72px 1fr; gap: 10px; padding: 12px 14px; }
       .ghThumbWrap { width: 72px; height: 52px; }
@@ -453,3 +580,36 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
     }
   </style>
 </Base>
+
+{/* ── Ribbon active-state script ── */}
+<script>
+  (function () {
+    var ribbon = document.getElementById("ghRibbon");
+    if (!ribbon) return;
+    var items = Array.prototype.slice.call(ribbon.querySelectorAll(".ghRibbonItem"));
+    if (!items.length) return;
+
+    /* Activate the ribbon item whose hash matches the current URL hash */
+    function syncActive() {
+      var hash = window.location.hash || "";
+      var matched = false;
+      items.forEach(function (item) {
+        var id = item.getAttribute("data-ribbon-id") || "";
+        var active = hash === "#" + id;
+        item.classList.toggle("is-active", active);
+        if (active) {
+          matched = true;
+          /* Scroll active item into view on mobile */
+          item.scrollIntoView({ inline: "nearest", block: "nearest" });
+        }
+      });
+      /* Default: highlight first item when no hash */
+      if (!matched && items[0]) {
+        items[0].classList.add("is-active");
+      }
+    }
+
+    syncActive();
+    window.addEventListener("hashchange", syncActive);
+  })();
+</script>

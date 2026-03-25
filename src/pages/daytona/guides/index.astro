@@ -130,26 +130,57 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
 >
   <div class="ghWrap">
 
-    {/* ── PAGE HERO ── */}
-    <div class="ghHero">
-      <div class="container">
-        <div class="ghHeroBreadcrumb">
-          <a href="/daytona/">GoDo Daytona</a>
-          <span class="ghCrumbSep">›</span>
-          <span>Guides</span>
-        </div>
-        <h1 class="ghHeroTitle">Daytona Guides</h1>
-        <p class="ghHeroLede">
-          Your local playbook for Daytona Beach — how to live here, work here,
-          and make the most of it.
-        </p>
-        <div class="ghTopicPills">
-          <a class="ghTopicPill" href="/daytona/guides/live/">🏠 Live</a>
-          <a class="ghTopicPill" href="/daytona/guides/work/">💼 Work</a>
-          <a class="ghTopicPill" href="/daytona/guides/play/">🎉 Play</a>
-        </div>
+    {/* ── PAGE HERO: 4-BLOCK GRID ── */}
+    <div class="ghHeroGrid">
+
+      {/* Breadcrumb above grid */}
+      <div class="ghGridBreadcrumb">
+        <a href="/daytona/">GoDo Daytona</a>
+        <span class="ghCrumbSep">›</span>
+        <span>Guides</span>
       </div>
-    </div>
+
+      {/* 2×2 Hero Blocks */}
+      <div class="ghBlocks">
+
+        {/* Block 1 — COAST [Live] */}
+        <a class="ghBlock ghBlock--coast" href="/daytona/guides/live/" aria-label="COAST — Live guides">
+          <div class="ghBlockOverlay"></div>
+          <div class="ghBlockContent">
+            <span class="ghBlockAction">COAST</span>
+            <span class="ghBlockCategory">[Live]</span>
+          </div>
+        </a>
+
+        {/* Block 2 — DRIVE [Work] */}
+        <a class="ghBlock ghBlock--drive" href="/daytona/guides/work/" aria-label="DRIVE — Work guides">
+          <div class="ghBlockOverlay"></div>
+          <div class="ghBlockContent">
+            <span class="ghBlockAction">DRIVE</span>
+            <span class="ghBlockCategory">[Work]</span>
+          </div>
+        </a>
+
+        {/* Block 3 — SURF [Play] */}
+        <a class="ghBlock ghBlock--surf" href="/daytona/guides/play/" aria-label="SURF — Play guides">
+          <div class="ghBlockOverlay"></div>
+          <div class="ghBlockContent">
+            <span class="ghBlockAction">SURF</span>
+            <span class="ghBlockCategory">[Play]</span>
+          </div>
+        </a>
+
+        {/* Block 4 — ESSENTIALS [Best] */}
+        <a class="ghBlock ghBlock--essentials" href="/daytona/guides/best/" aria-label="ESSENTIALS — Best guides">
+          <div class="ghBlockOverlay"></div>
+          <div class="ghBlockContent">
+            <span class="ghBlockAction">ESSENTIALS</span>
+            <span class="ghBlockCategory">[Best]</span>
+          </div>
+        </a>
+
+      </div>{/* end .ghBlocks */}
+    </div>{/* end .ghHeroGrid */}
 
     {/* ── THREE STACKED SECTIONS ── */}
     {sections.map((s) => (
@@ -245,72 +276,195 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
       min-height: 100vh;
     }
 
-    /* ── Page Hero ── */
-    .ghHero {
-      padding: 56px 0 72px;
-      border-bottom: 2px solid var(--brand1);
-      text-align: center;
+    /* ══ 4-BLOCK HERO GRID ══════════════════════════════════════════════ */
+
+    .ghHeroGrid {
+      border-bottom: 2px solid var(--brand1, #ffd24a);
+      margin-bottom: 0;
     }
-    .ghHeroBreadcrumb {
+
+    /* Breadcrumb above the grid */
+    .ghGridBreadcrumb {
       font-size: 13px;
       font-weight: 600;
       color: var(--faint);
-      margin-bottom: 20px;
+      padding: 16px 24px 12px;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 6px;
+      background: var(--surface);
     }
-    .ghHeroBreadcrumb a {
-      color: var(--brand1);
+    .ghGridBreadcrumb a {
+      color: var(--brand1, #ffd24a);
       text-decoration: none;
     }
-    .ghHeroBreadcrumb a:hover { text-decoration: underline; }
+    .ghGridBreadcrumb a:hover { text-decoration: underline; }
     .ghCrumbSep { opacity: .5; }
 
-    .ghHeroTitle {
-      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(4rem, 9vw, 8rem);
-      font-weight: 900;
-      font-style: italic;
-      text-transform: uppercase;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      margin: 0 0 18px;
-      line-height: 1.0;
+    /* 2×2 grid container */
+    .ghBlocks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 260px 260px;
+      width: 100%;
     }
-    .ghHeroLede {
-      font-size: 1.1rem;
-      color: var(--muted);
-      max-width: 600px;
-      margin: 0 auto 28px;
-      line-height: 1.55;
-    }
-    .ghTopicPills {
+
+    /* Individual hero block */
+    .ghBlock {
+      position: relative;
       display: flex;
-      gap: 14px;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .ghTopicPill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 18px;
-      border-radius: 999px;
-      border: 1px solid var(--pillBorder);
-      background: var(--pillBg);
-      color: var(--text);
-      font-size: 14px;
-      font-weight: 700;
+      align-items: flex-end;
+      justify-content: flex-start;
+      overflow: hidden;
       text-decoration: none;
-      transition: border-color 130ms, box-shadow 130ms, background 130ms;
+      /* Dark-grey placeholder background (photos pending) */
+      background-color: #1c2028;
     }
-    .ghTopicPill:hover {
-      border-color: var(--brand1);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand1) 18%, transparent);
-      background: color-mix(in srgb, var(--brand1) 10%, var(--pillBg));
+
+    /* Distinct tonal placeholder shades per block */
+    .ghBlock--coast      { background-color: #1e2530; }
+    .ghBlock--drive      { background-color: #1a2020; }
+    .ghBlock--surf       { background-color: #1c2030; }
+    .ghBlock--essentials { background-color: #201c28; }
+
+    /* Dark gradient overlay — ensures white text always pops */
+    .ghBlockOverlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        160deg,
+        rgba(0,0,0,0.15) 0%,
+        rgba(0,0,0,0.55) 60%,
+        rgba(0,0,0,0.80) 100%
+      );
+      transition: background 280ms ease;
     }
+
+    /* Hover: slightly lighten overlay + zoom background */
+    .ghBlock:hover .ghBlockOverlay {
+      background: linear-gradient(
+        160deg,
+        rgba(0,0,0,0.05) 0%,
+        rgba(0,0,0,0.38) 60%,
+        rgba(0,0,0,0.65) 100%
+      );
+    }
+    /* Future: when real photos are added, this scales the bg image */
+    .ghBlock::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: var(--block-bg-img, none);
+      background-size: cover;
+      background-position: center;
+      transition: transform 380ms ease;
+    }
+    .ghBlock:hover::before {
+      transform: scale(1.04);
+    }
+
+    /* Text content — sits above the overlay */
+    .ghBlockContent {
+      position: relative;
+      z-index: 1;
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      /* Right-align on large grid for DRIVE and ESSENTIALS (right column) */
+    }
+
+    /* Action word: COAST / DRIVE / SURF / ESSENTIALS */
+    .ghBlockAction {
+      display: block;
+      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+      font-size: clamp(2.2rem, 4.5vw, 4.2rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: #ffffff;
+      line-height: 1;
+      transition: color 200ms ease;
+    }
+
+    /* Category word: [Live] / [Work] / [Play] / [Best] — lighter, 20% smaller */
+    .ghBlockCategory {
+      display: block;
+      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+      font-size: clamp(1.0rem, 2vw, 1.6rem); /* ~20% smaller than action word */
+      font-weight: 300;
+      letter-spacing: 0.14em;
+      color: rgba(255,255,255,0.82);
+      line-height: 1;
+      transition: color 200ms ease;
+    }
+
+    /* Hover: action word picks up brand yellow tint */
+    .ghBlock:hover .ghBlockAction   { color: #ffd24a; }
+    .ghBlock:hover .ghBlockCategory { color: rgba(255,210,74,0.72); }
+
+    /* Right-column blocks: align text to the right */
+    .ghBlock--drive,
+    .ghBlock--essentials {
+      justify-content: flex-end;
+    }
+    .ghBlock--drive .ghBlockContent,
+    .ghBlock--essentials .ghBlockContent {
+      text-align: right;
+    }
+
+    /* Racing Yellow accent line at the top of the SURF block */
+    .ghBlock--surf::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #ffd24a;
+      z-index: 2;
+    }
+
+    /* Thin divider lines between grid cells */
+    .ghBlock--coast,
+    .ghBlock--surf {
+      border-right: 1px solid rgba(255,255,255,0.06);
+    }
+    .ghBlock--coast,
+    .ghBlock--drive {
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+
+    /* ── Mobile: stack 2 wide → 1 wide, shorter blocks ── */
+    @media (max-width: 640px) {
+      .ghBlocks {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 180px 180px;
+      }
+      .ghBlockContent { padding: 16px 18px; }
+    }
+
+    @media (max-width: 400px) {
+      .ghBlocks {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, 160px);
+      }
+      .ghBlock--drive,
+      .ghBlock--essentials {
+        justify-content: flex-start;
+      }
+      .ghBlock--drive .ghBlockContent,
+      .ghBlock--essentials .ghBlockContent {
+        text-align: left;
+      }
+      .ghBlock--coast,
+      .ghBlock--surf { border-right: none; }
+      .ghBlock--coast,
+      .ghBlock--drive,
+      .ghBlock--surf { border-bottom: 1px solid rgba(255,255,255,0.06); }
+    }
+
+    /* ══ END HERO GRID ══════════════════════════════════════════════════ */
 
     /* ── Section shells — alternating backgrounds ── */
     .ghSection {
