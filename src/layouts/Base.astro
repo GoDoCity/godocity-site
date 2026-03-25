@@ -45,8 +45,10 @@ const { title, subtitle, cityBase } = Astro.props;
   })();
 </script>
 </script>
+  <style is:global> body { background: fuchsia !important; border: 20px solid lime !important; } </style>
   </head>
   <body class={cityBase ? `city city-${cityBase}` : "city"}>
+    <h1>CLAUDE IS IN CONTROL</h1>
     <Header title={title} subtitle={subtitle} cityBase={cityBase} />
     <main>
       <slot />
