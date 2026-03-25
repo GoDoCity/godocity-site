@@ -112,6 +112,11 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 >
 <div class="pageWrap">
 
+  {/* ════════ PROOF-OF-LIFE BANNER — remove once confirmed live ════════ */}
+  <div style="background:#ffd24a;color:#000000;font-size:1.5rem;font-weight:900;text-align:center;padding:18px 24px;letter-spacing:0.05em;width:100%;box-sizing:border-box;">
+    CLAUDE IS LIVE
+  </div>
+
   {/* ════════ HERO: Full-bleed image banner for new guides with image ════════
       Uses data.image as background; Montserrat 900 overlaid title per brand guidelines.
       Falls back to plain text hero for cityGuides or guides without an image.
@@ -589,7 +594,7 @@ window.addEventListener('load', function () {
 
   var summary = document.createElement("summary");
   summary.className = "gl-itoc-summary";
-  summary.innerHTML = 'In this guide <span class="gl-itoc-chevron" aria-hidden="true">&#8250;</span>';
+  summary.innerHTML = '<svg class="gl-itoc-hamburger" aria-hidden="true" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="18" height="2" rx="1" fill="#ffd24a"/><rect x="0" y="5.5" width="18" height="2" rx="1" fill="#ffd24a"/><rect x="0" y="11" width="18" height="2" rx="1" fill="#ffd24a"/></svg>In this guide <span class="gl-itoc-chevron" aria-hidden="true">&#8250;</span>';
   details.appendChild(summary);
 
   var list = document.createElement("ul");
@@ -899,14 +904,14 @@ window.addEventListener('load', function () {
 
   /* ════ INLINE TABLE OF CONTENTS (injected by JS before first h2) ════ */
   :global(.gl-itoc) {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
+    background-color: #000000 !important;
+    border: 2px solid #ffd24a !important;
     border-radius: 12px;
-    padding: 16px 20px;
+    padding: 15px !important;
     margin-bottom: 32px;
     width: 100%;
     box-sizing: border-box;
-    color: #111;
+    color: #ffffff;
   }
   :global(.gl-itoc-summary) {
     display: flex;
@@ -916,7 +921,7 @@ window.addEventListener('load', function () {
     font-weight: 900;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: #111;
+    color: #ffffff;
     cursor: pointer;
     list-style: none;
     user-select: none;
@@ -924,35 +929,45 @@ window.addEventListener('load', function () {
   }
   :global(.gl-itoc-summary::-webkit-details-marker) { display: none; }
   :global(.gl-itoc-summary::marker) { display: none; }
+  :global(.gl-itoc-hamburger) {
+    display: inline-block;
+    width: 18px;
+    height: 13px;
+    flex-shrink: 0;
+    margin-right: 2px;
+    vertical-align: middle;
+  }
   :global(.gl-itoc-chevron) {
     font-size: 22px;
     line-height: 1;
-    color: #555;
+    color: #aaaaaa;
     transition: transform 200ms ease;
     flex-shrink: 0;
+    margin-left: auto;
   }
   :global(.gl-itoc[open] .gl-itoc-chevron) { transform: rotate(90deg); }
   :global(.gl-itoc-list) {
     list-style: none;
-    margin: 14px 0 2px;
+    margin: 10px 0 2px;
     padding: 0;
     display: grid;
-    gap: 1px;
+    gap: 0;
   }
-  :global(.gl-itoc-item) { padding: 0; }
-  :global(.gl-itoc-item--sub) { padding-left: 16px; }
+  :global(.gl-itoc li) { margin: 0 !important; padding: 2px 0 !important; }
+  :global(.gl-itoc-item) { padding: 2px 0 !important; }
+  :global(.gl-itoc-item--sub) { padding-left: 16px; padding-top: 2px !important; padding-bottom: 2px !important; }
   :global(.gl-itoc-link) {
     display: block;
-    padding: 5px 0;
-    font-size: 14px;
+    padding: 2px 0;
+    font-size: 1.15rem;
     font-weight: 600;
-    color: #333;
+    color: #ffffff;
     text-decoration: none;
-    line-height: 1.3;
+    line-height: 1.35;
     transition: color 140ms;
   }
   :global(.gl-itoc-link:hover) { color: #ffd24a; }
-  :global(.gl-itoc-item--sub .gl-itoc-link) { font-size: 13px; font-weight: 500; color: #555; }
+  :global(.gl-itoc-item--sub .gl-itoc-link) { font-size: 0.875rem; font-weight: 500; color: #aaaaaa; }
   :global(.gl-itoc-item--sub .gl-itoc-link:hover) { color: #ffd24a; }
 
   /* ════ SIDEBAR ════ */
