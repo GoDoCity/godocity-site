@@ -348,6 +348,23 @@ function guideSlug(g: (typeof allGuides)[number]) {
       text-align: center;
       text-shadow: 0 2px 16px rgba(0,0,0,0.5);
     }
+    /* Neon sign colors per category banner */
+    .ghCategoryBanner--live .ghBannerAction {
+      color: #00e5ff;
+      text-shadow: 0 0 8px rgba(0,229,255,1), 0 0 20px rgba(0,229,255,0.7), 0 0 45px rgba(0,229,255,0.4), 0 2px 16px rgba(0,0,0,0.5);
+    }
+    .ghCategoryBanner--work .ghBannerAction {
+      color: #00ff6e;
+      text-shadow: 0 0 8px rgba(0,255,110,1), 0 0 20px rgba(0,255,110,0.7), 0 0 45px rgba(0,255,110,0.4), 0 2px 16px rgba(0,0,0,0.5);
+    }
+    .ghCategoryBanner--play .ghBannerAction {
+      color: #ff00cc;
+      text-shadow: 0 0 8px rgba(255,0,204,1), 0 0 20px rgba(255,0,204,0.7), 0 0 45px rgba(255,0,204,0.4), 0 2px 16px rgba(0,0,0,0.5);
+    }
+    .ghCategoryBanner--best .ghBannerAction {
+      color: #ffff00;
+      text-shadow: 0 0 8px rgba(255,255,0,1), 0 0 20px rgba(255,255,0,0.7), 0 0 45px rgba(255,255,0,0.4), 0 2px 16px rgba(0,0,0,0.5);
+    }
     .ghBannerCategory {
       font-size: clamp(1.4rem, 2.8vw, 2.2rem);
       font-weight: 300;
@@ -356,6 +373,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
       display: block;
       text-align: center;
       width: 100%;
+      margin: 0 auto;
     }
 
     /* ── Sticky Jump Ribbon ── */
@@ -525,7 +543,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
     .ghCardImgWrap {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 9;
+      aspect-ratio: 16 / 8;
       overflow: hidden;
       background: var(--surface2);
       flex-shrink: 0;
@@ -565,7 +583,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
     .ghCardKickerEmoji { font-size: 13px; letter-spacing: 0; }
     .ghCardTitle {
-      font-size: 16px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--text);
       line-height: 1.25;
@@ -578,7 +596,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
     .ghArticleCard:hover .ghCardTitle { color: #ffd24a; }
     .ghCardDesc {
-      font-size: 13px;
+      font-size: 17px;
       color: var(--muted);
       line-height: 1.5;
       margin: 0;
