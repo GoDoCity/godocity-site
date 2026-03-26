@@ -315,18 +315,16 @@ function guideSlug(g: (typeof allGuides)[number]) {
     .ghCategoryBannerOverlay {
       position: absolute;
       inset: 0;
-      background: linear-gradient(
-        100deg,
-        rgba(0,0,0,0.78) 0%,
-        rgba(0,0,0,0.45) 55%,
-        rgba(0,0,0,0.22) 100%
-      );
+      background: rgba(0,0,0,0.58);
     }
 
     .ghCategoryBannerContent {
       position: relative;
       z-index: 1;
       padding: 40px 0 36px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
     }
 
     .ghCategoryBannerText {
@@ -334,11 +332,12 @@ function guideSlug(g: (typeof allGuides)[number]) {
       font-weight: 900;
       margin: 0;
       line-height: 1;
-      text-align: left;
+      text-align: center;
       display: flex;
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
       gap: 6px;
+      width: 100%;
     }
     .ghBannerAction {
       font-size: clamp(3.2rem, 7vw, 5rem);
@@ -346,6 +345,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
       text-transform: uppercase;
       color: #ffffff;
       display: block;
+      text-align: center;
       text-shadow: 0 2px 16px rgba(0,0,0,0.5);
     }
     .ghBannerCategory {
@@ -354,6 +354,8 @@ function guideSlug(g: (typeof allGuides)[number]) {
       letter-spacing: 0.18em;
       color: rgba(255,255,255,0.82);
       display: block;
+      text-align: center;
+      width: 100%;
     }
 
     /* ── Sticky Jump Ribbon ── */
@@ -379,9 +381,9 @@ function guideSlug(g: (typeof allGuides)[number]) {
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
-      padding: 0 20px;
-      height: 46px;
-      font-size: 12px;
+      padding: 0 28px;
+      height: 72px;
+      font-size: 24px;
       font-weight: 800;
       letter-spacing: 0.09em;
       text-transform: uppercase;
@@ -405,7 +407,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
 
     @media (max-width: 640px) {
-      .ghRibbonItem { padding: 0 14px; font-size: 11px; height: 40px; }
+      .ghRibbonItem { padding: 0 16px; font-size: 16px; height: 52px; }
     }
 
     /* ── Section shells ── */
@@ -626,9 +628,9 @@ function guideSlug(g: (typeof allGuides)[number]) {
       .ghHeaderBreadcrumb { padding: 10px 0 8px; font-size: 12px; }
       .ghSection { padding: 20px 0 32px; }
       .ghCategoryBanner { min-height: 160px; }
-      .ghCategoryBannerContent { padding: 28px 0 24px; }
-      .ghBannerAction { font-size: clamp(2.2rem, 8vw, 3.2rem); }
-      .ghBannerCategory { font-size: clamp(1rem, 3vw, 1.4rem); }
+      .ghCategoryBannerContent { padding: 28px 0 24px; justify-content: center; }
+      .ghBannerAction { font-size: clamp(2.2rem, 8vw, 3.2rem); text-align: center; }
+      .ghBannerCategory { font-size: clamp(1rem, 3vw, 1.4rem); text-align: center; }
       .ghCatHeading { margin-bottom: 18px; }
     }
   </style>
