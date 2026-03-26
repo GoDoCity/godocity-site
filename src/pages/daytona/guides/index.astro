@@ -148,46 +148,51 @@ const sections: SectionDef[] = [
 >
   <div class="ghWrap">
 
-    {/* ── PAGE HERO: 4-BLOCK NAV GRID ── */}
-    <div class="ghHeroGrid">
+    {/* ── BREADCRUMB ── */}
+    <div class="ghGridBreadcrumb">
+      <a href="/daytona/">GoDo Daytona</a>
+      <span class="ghCrumbSep">›</span>
+      <span>Guides</span>
+    </div>
 
-      <div class="ghGridBreadcrumb">
-        <a href="/daytona/">GoDo Daytona</a>
-        <span class="ghCrumbSep">›</span>
-        <span>Guides</span>
+    {/* ── PAGE HERO: "Daytona's Guide" banner with 4-block nav inside ── */}
+    <div class="ghPageHero">
+      <div class="ghPageHeroOverlay"></div>
+      <div class="ghPageHeroContent">
+        <h1 class="ghPageHeroTitle">Daytona's Guide</h1>
+        <p class="ghPageHeroTagline">Your local guide to living, working, and playing in Daytona Beach.</p>
+        <div class="ghBlocks">
+          <a class="ghBlock ghBlock--coast" href="/daytona/guides/live/" aria-label="COAST — Live guides">
+            <div class="ghBlockOverlay"></div>
+            <div class="ghBlockContent">
+              <span class="ghBlockAction">COAST</span>
+              <span class="ghBlockCategory">[Live]</span>
+            </div>
+          </a>
+          <a class="ghBlock ghBlock--drive" href="/daytona/guides/work/" aria-label="DRIVE — Work guides">
+            <div class="ghBlockOverlay"></div>
+            <div class="ghBlockContent">
+              <span class="ghBlockAction">DRIVE</span>
+              <span class="ghBlockCategory">[Work]</span>
+            </div>
+          </a>
+          <a class="ghBlock ghBlock--surf" href="/daytona/guides/play/" aria-label="SURF — Play guides">
+            <div class="ghBlockOverlay"></div>
+            <div class="ghBlockContent">
+              <span class="ghBlockAction">SURF</span>
+              <span class="ghBlockCategory">[Play]</span>
+            </div>
+          </a>
+          <a class="ghBlock ghBlock--essentials" href="/daytona/guides/best/" aria-label="ESSENTIALS — Best guides">
+            <div class="ghBlockOverlay"></div>
+            <div class="ghBlockContent">
+              <span class="ghBlockAction">ESSENTIALS</span>
+              <span class="ghBlockCategory">[Best]</span>
+            </div>
+          </a>
+        </div>
       </div>
-
-      <div class="ghBlocks">
-        <a class="ghBlock ghBlock--coast" href="/daytona/guides/live/" aria-label="COAST — Live guides">
-          <div class="ghBlockOverlay"></div>
-          <div class="ghBlockContent">
-            <span class="ghBlockAction">COAST</span>
-            <span class="ghBlockCategory">[Live]</span>
-          </div>
-        </a>
-        <a class="ghBlock ghBlock--drive" href="/daytona/guides/work/" aria-label="DRIVE — Work guides">
-          <div class="ghBlockOverlay"></div>
-          <div class="ghBlockContent">
-            <span class="ghBlockAction">DRIVE</span>
-            <span class="ghBlockCategory">[Work]</span>
-          </div>
-        </a>
-        <a class="ghBlock ghBlock--surf" href="/daytona/guides/play/" aria-label="SURF — Play guides">
-          <div class="ghBlockOverlay"></div>
-          <div class="ghBlockContent">
-            <span class="ghBlockAction">SURF</span>
-            <span class="ghBlockCategory">[Play]</span>
-          </div>
-        </a>
-        <a class="ghBlock ghBlock--essentials" href="/daytona/guides/best/" aria-label="ESSENTIALS — Best guides">
-          <div class="ghBlockOverlay"></div>
-          <div class="ghBlockContent">
-            <span class="ghBlockAction">ESSENTIALS</span>
-            <span class="ghBlockCategory">[Best]</span>
-          </div>
-        </a>
-      </div>
-    </div>{/* end .ghHeroGrid */}
+    </div>
 
     {/* ── FOUR STACKED SECTIONS ── */}
     {sections.map((s) => (
@@ -257,33 +262,86 @@ const sections: SectionDef[] = [
     /* ── Wrap ── */
     .ghWrap { min-height: 100vh; }
 
-    /* ══ 4-BLOCK NAV GRID ═══════════════════════════════════════════════ */
-
-    .ghHeroGrid {
-      border-bottom: 2px solid var(--brand1, #ffd24a);
-    }
-
+    /* ── Breadcrumb (above hero) ── */
     .ghGridBreadcrumb {
       font-size: 13px;
       font-weight: 600;
       color: var(--faint);
-      padding: 16px 24px 12px;
+      padding: 14px 24px 10px;
       display: flex;
       align-items: center;
       gap: 6px;
       background: var(--surface);
+      border-bottom: 1px solid var(--border);
     }
     .ghGridBreadcrumb a { color: var(--brand1, #ffd24a); text-decoration: none; }
     .ghGridBreadcrumb a:hover { text-decoration: underline; }
     .ghCrumbSep { opacity: .5; }
 
-    /* 4×1 nav card row */
+    /* ══ PAGE HERO — "Daytona's Guide" banner with nav blocks ══════════ */
+    .ghPageHero {
+      position: relative;
+      width: 100%;
+      min-height: 320px;
+      display: flex;
+      align-items: stretch;
+      background: linear-gradient(135deg, #080f1c 0%, #111e30 45%, #182030 100%);
+      background-image: url('/images/guides/coast-banner.jpg');
+      background-size: cover;
+      background-position: center top;
+      border-bottom: 3px solid #ffd24a;
+      overflow: hidden;
+    }
+
+    .ghPageHeroOverlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        160deg,
+        rgba(0,0,0,0.88) 0%,
+        rgba(0,0,0,0.70) 45%,
+        rgba(0,0,0,0.52) 100%
+      );
+    }
+
+    .ghPageHeroContent {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: var(--max, 1360px);
+      margin: 0 auto;
+      padding: 40px 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ghPageHeroTitle {
+      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+      font-size: clamp(2.6rem, 5.5vw, 4.2rem);
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #ffffff;
+      margin: 0;
+      line-height: 1;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.55);
+    }
+
+    .ghPageHeroTagline {
+      font-size: clamp(0.88rem, 1.5vw, 1.05rem);
+      color: rgba(255,255,255,0.72);
+      margin: 0 0 18px;
+      font-weight: 400;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
+    }
+
+    /* 4-block nav row inside hero */
     .ghBlocks {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      padding: 14px 20px 18px;
-      background: var(--surface);
+      gap: 12px;
+      width: 100%;
     }
 
     .ghBlock {
@@ -371,15 +429,17 @@ const sections: SectionDef[] = [
     }
 
     @media (max-width: 860px) {
-      .ghBlocks { grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 16px 16px; }
+      .ghBlocks { grid-template-columns: 1fr 1fr; gap: 8px; }
     }
     @media (max-width: 640px) {
-      .ghBlocks { grid-template-columns: 1fr 1fr; gap: 6px; padding: 10px 12px 14px; }
+      .ghBlocks { grid-template-columns: 1fr 1fr; gap: 6px; }
       .ghBlock { min-height: 88px; }
       .ghBlockContent { padding: 10px 12px; }
+      .ghPageHeroContent { padding: 28px 16px 20px; }
+      .ghPageHeroTagline { margin-bottom: 12px; }
     }
 
-    /* ══ END NAV GRID ════════════════════════════════════════════════════ */
+    /* ══ END PAGE HERO ═══════════════════════════════════════════════════ */
 
     /* ── Section shells ── */
     .ghSection { padding: 0 0 48px; }
@@ -479,16 +539,13 @@ const sections: SectionDef[] = [
       border-bottom-color: #ffd24a;
     }
 
-    /* ── Uniform 4-article grid ── */
+    /* ── 2×2 article grid (4 articles per category section) ── */
     .ghArticleGrid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 20px;
     }
 
-    @media (max-width: 1024px) {
-      .ghArticleGrid { grid-template-columns: repeat(2, 1fr); }
-    }
     @media (max-width: 480px) {
       .ghArticleGrid { grid-template-columns: 1fr; }
     }
@@ -497,6 +554,7 @@ const sections: SectionDef[] = [
     .ghArticleCard {
       display: flex;
       flex-direction: column;
+      height: 100%;
       text-decoration: none;
       border-radius: 12px;
       overflow: hidden;
