@@ -469,13 +469,12 @@ const sections: SectionDef[] = [
     }
     .ghBlockAction {
       display: block;
-      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(1.575rem, 2.55vw, 2.175rem);
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
+      font-family: "Yellowtail", cursive;
+      font-size: clamp(2rem, 3.2vw, 2.8rem);
+      font-weight: 400;
+      letter-spacing: 0;
       color: #ffffff;
-      line-height: 1;
+      line-height: 1.1;
       text-align: center;
       transition: color 200ms ease, text-shadow 200ms ease;
     }
@@ -583,14 +582,13 @@ const sections: SectionDef[] = [
     }
 
     .ghSectionHeroTitle {
-      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(2.2rem, 5vw, 3.8rem);
-      font-weight: 900;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
+      font-family: "Yellowtail", cursive;
+      font-size: clamp(3rem, 6.5vw, 5rem);
+      font-weight: 400;
+      letter-spacing: 0;
       color: #ffffff;
       margin: 0 auto;
-      line-height: 1;
+      line-height: 1.1;
       text-align: center;
       text-shadow: 0 2px 12px rgba(0,0,0,0.5);
     }
@@ -630,6 +628,9 @@ const sections: SectionDef[] = [
 
     /* ── Subcategory ribbon (below hero banner) ── */
     .ghSubRibbonOuter {
+      display: flex;
+      justify-content: center;
+      width: 100%;
       background: var(--surface);
       border-bottom: 2px solid var(--border);
       margin-bottom: 28px;
@@ -642,6 +643,7 @@ const sections: SectionDef[] = [
       display: flex;
       align-items: stretch;
       justify-content: center;
+      width: 100%;
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
@@ -725,14 +727,14 @@ const sections: SectionDef[] = [
     }
 
     .ghCardBody {
-      padding: 14px 22px 17px;
+      padding: 10px 22px 13px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       flex: 1;
     }
     .ghCardTitle {
-      font-size: 25px;
+      font-size: 22px;
       font-weight: 700;
       color: var(--text);
       line-height: 1.25;
@@ -741,13 +743,13 @@ const sections: SectionDef[] = [
     }
     .ghArticleCard:hover .ghCardTitle { color: #ffd24a; }
     .ghCardDesc {
-      font-size: 18px;
+      font-size: 15px;
       color: var(--muted);
       line-height: 1.5;
       margin: 0;
     }
     .ghCardExternalBadge {
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 700;
       color: #ffd24a;
       letter-spacing: 0.06em;
@@ -790,9 +792,9 @@ const sections: SectionDef[] = [
       .ghSectionHeroTitle { font-size: clamp(1.6rem, 7vw, 2.2rem); }
       .ghArticleGrid { gap: 14px; }
       .ghViewMoreRow { margin-top: 20px; }
-      .ghCardTitle { font-size: 18px; }
-      .ghCardDesc { font-size: 15px; }
-      .ghCardBody { padding: 14px 14px 18px; gap: 6px; }
+      .ghCardTitle { font-size: 17px; }
+      .ghCardDesc { font-size: 13px; }
+      .ghCardBody { padding: 8px 14px 11px; gap: 5px; }
     }
   </style>
 </Base>
