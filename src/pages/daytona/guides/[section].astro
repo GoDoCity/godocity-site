@@ -20,10 +20,18 @@ const topicMap: Record<string, string> = {
   best: "Best",
 };
 
+/* Brand names shown in the header and ribbon */
+const brandMap: Record<string, string> = {
+  live: "COAST",
+  work: "DRIVE",
+  play: "SURF",
+  best: "ESSENTIALS",
+};
+
 const emojiMap: Record<string, string> = {
-  live: "🏠",
-  work: "💼",
-  play: "🎉",
+  live: "🌊",
+  work: "🚗",
+  play: "🏄",
   best: "⭐",
 };
 
@@ -35,6 +43,7 @@ const fallbackImgs: Record<string, string> = {
 };
 
 const topic = topicMap[section] ?? "";
+const brand = brandMap[section] ?? topic.toUpperCase();
 const emoji = emojiMap[section] ?? "";
 
 /* ── Jump ribbon configuration per section ── */
@@ -48,15 +57,15 @@ const ribbonConfig: Record<string, RibbonItem[]> = {
   ],
   live: [
     { label: "Neighborhoods", href: "#neighborhoods", id: "neighborhoods" },
-    { label: "Home & Garden", href: "#home-garden",   id: "home-garden"   },
     { label: "Schools",       href: "#schools",       id: "schools"       },
-    { label: "Services",      href: "#services",      id: "services"      },
+    { label: "Healthcare",    href: "#healthcare",    id: "healthcare"    },
+    { label: "Need to Know",  href: "#need-to-know",  id: "need-to-know"  },
   ],
   work: [
-    { label: "Small Business", href: "#small-business", id: "small-business" },
-    { label: "Coworking",      href: "#coworking",      id: "coworking"      },
-    { label: "Networking",     href: "#networking",     id: "networking"     },
-    { label: "Resources",      href: "#resources",      id: "resources"      },
+    { label: "Entrepreneurship", href: "#entrepreneurship", id: "entrepreneurship" },
+    { label: "Industry",         href: "#industry",         id: "industry"         },
+    { label: "Networking",       href: "#networking",       id: "networking"       },
+    { label: "Coworking",        href: "#coworking",        id: "coworking"        },
   ],
 };
 const ribbonItems: RibbonItem[] = ribbonConfig[section] ?? [];
@@ -99,11 +108,8 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       <div class="ghCategoryBanner">
         <div class="container">
           <h1 class="ghCategoryBannerText">
-            <span class="ghBannerAction">{topic.toUpperCase()}</span>
-            {section === "play" && <span class="ghBannerCategory">[Play]</span>}
-            {section === "live" && <span class="ghBannerCategory">[Live]</span>}
-            {section === "work" && <span class="ghBannerCategory">[Work]</span>}
-            {section === "best" && <span class="ghBannerCategory">[Best]</span>}
+            <span class="ghBannerAction">{brand}</span>
+            <span class="ghBannerCategory">[{topic}]</span>
           </h1>
         </div>
       </div>
@@ -129,78 +135,159 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
 
     </div>{/* end .ghHeaderStack */}
 
-    {/* ── GUIDES SECTION ── */}
-    <section class="ghSection ghSection--white">
-      <div class="container">
+    {/* ── GUIDES CONTENT — per-category anchor sections ── */}
+    {ribbonItems.length > 0 ? (
+      ribbonItems.map((cat, catIdx) => {
+        /* First category gets all the real guides; others show a placeholder */
+        const catFeatured = catIdx === 0 ? featuredGuide : null;
+        const catArticles = catIdx === 0 ? articleGuides : [];
+        const hasContent  = catIdx === 0 && topicGuides.length > 0;
+        return (
+          <section class={`ghSection ghSection--${catIdx % 2 === 0 ? "white" : "alt"}`} id={cat.id}>
+            <div class="container">
+              <h2 class="ghCatHeading">{cat.label}</h2>
 
-        {topicGuides.length === 0 ? (
-          <p class="lede">No {topic.toLowerCase()} guides yet — check back soon!</p>
-        ) : (
-          <div class={`ghGrid${articleGuides.length === 0 ? " ghGrid--single" : ""}`}>
+              {!hasContent ? (
+                <p class="ghCatEmpty">
+                  {catIdx === 0
+                    ? `No ${topic.toLowerCase()} guides yet — check back soon!`
+                    : `More ${cat.label} guides coming soon.`}
+                </p>
+              ) : (
+                <div class={`ghGrid${catArticles.length === 0 ? " ghGrid--single" : ""}`}>
 
-            {/* ── Featured Card ── */}
-            {featuredGuide && (
-              <a class="ghFeatCard" href={`/daytona/guides/${guideSlug(featuredGuide)}/`}>
-                <div class="ghFeatImgWrap">
-                  <img
-                    class="ghFeatImg"
-                    src={featuredGuide.data.image ?? fallbackImgs[topic]}
-                    alt={featuredGuide.data.title}
-                    loading="lazy"
-                    decoding="async"
-                    onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-                  />
-                  <div class="ghFeatImgFallback" aria-hidden="true"></div>
+                  {/* ── Featured Card ── */}
+                  {catFeatured && (
+                    <a class="ghFeatCard" href={`/daytona/guides/${guideSlug(catFeatured)}/`}>
+                      <div class="ghFeatImgWrap">
+                        <img
+                          class="ghFeatImg"
+                          src={catFeatured.data.image ?? fallbackImgs[topic]}
+                          alt={catFeatured.data.title}
+                          loading="lazy"
+                          decoding="async"
+                          onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+                        />
+                        <div class="ghFeatImgFallback" aria-hidden="true"></div>
+                      </div>
+                      <div class="ghFeatBody">
+                        <div class="ghFeatKicker">
+                          <span class="ghFeatKickerEmoji">{emoji}</span>
+                          {brand} — {cat.label}
+                        </div>
+                        <h3 class="ghFeatTitle">{catFeatured.data.title}</h3>
+                        <p class="ghFeatDesc">{catFeatured.data.description}</p>
+                        <span class="ghFeatCta">Read the guide →</span>
+                      </div>
+                    </a>
+                  )}
+
+                  {/* ── Article List ── */}
+                  {catArticles.length > 0 && (
+                    <div class="ghArticleList">
+                      {catArticles.map((g, i) => (
+                        <a class="ghArticleRow" href={`/daytona/guides/${guideSlug(g)}/`}>
+                          <div class="ghThumbWrap">
+                            <img
+                              class="ghThumb"
+                              src={g.data.image ?? fallbackImgs[topic]}
+                              alt=""
+                              loading="lazy"
+                              decoding="async"
+                              onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+                            />
+                            <div class="ghThumbFallback" aria-hidden="true"></div>
+                          </div>
+                          <div class="ghArticleText">
+                            <div class="ghArticleNum">#{i + 1}</div>
+                            <div class="ghArticleTitle">{g.data.title}</div>
+                            {g.data.description && (
+                              <p class="ghArticleDesc">{g.data.description}</p>
+                            )}
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  )}
+
                 </div>
-                <div class="ghFeatBody">
-                  <div class="ghFeatKicker">
-                    <span class="ghFeatKickerEmoji">{emoji}</span>
-                    {topic} Guide
+              )}
+
+            </div>
+          </section>
+        );
+      })
+    ) : (
+      /* No ribbon (e.g. best/essentials) — flat single section */
+      <section class="ghSection ghSection--white">
+        <div class="container">
+          {topicGuides.length === 0 ? (
+            <p class="lede">No {topic.toLowerCase()} guides yet — check back soon!</p>
+          ) : (
+            <div class={`ghGrid${articleGuides.length === 0 ? " ghGrid--single" : ""}`}>
+
+              {featuredGuide && (
+                <a class="ghFeatCard" href={`/daytona/guides/${guideSlug(featuredGuide)}/`}>
+                  <div class="ghFeatImgWrap">
+                    <img
+                      class="ghFeatImg"
+                      src={featuredGuide.data.image ?? fallbackImgs[topic]}
+                      alt={featuredGuide.data.title}
+                      loading="lazy"
+                      decoding="async"
+                      onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+                    />
+                    <div class="ghFeatImgFallback" aria-hidden="true"></div>
                   </div>
-                  <h3 class="ghFeatTitle">{featuredGuide.data.title}</h3>
-                  <p class="ghFeatDesc">{featuredGuide.data.description}</p>
-                  <span class="ghFeatCta">Read the guide →</span>
+                  <div class="ghFeatBody">
+                    <div class="ghFeatKicker">
+                      <span class="ghFeatKickerEmoji">{emoji}</span>
+                      {brand} Guide
+                    </div>
+                    <h3 class="ghFeatTitle">{featuredGuide.data.title}</h3>
+                    <p class="ghFeatDesc">{featuredGuide.data.description}</p>
+                    <span class="ghFeatCta">Read the guide →</span>
+                  </div>
+                </a>
+              )}
+
+              {articleGuides.length > 0 && (
+                <div class="ghArticleList">
+                  {articleGuides.map((g, i) => (
+                    <a class="ghArticleRow" href={`/daytona/guides/${guideSlug(g)}/`}>
+                      <div class="ghThumbWrap">
+                        <img
+                          class="ghThumb"
+                          src={g.data.image ?? fallbackImgs[topic]}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+                        />
+                        <div class="ghThumbFallback" aria-hidden="true"></div>
+                      </div>
+                      <div class="ghArticleText">
+                        <div class="ghArticleNum">#{i + 1}</div>
+                        <div class="ghArticleTitle">{g.data.title}</div>
+                        {g.data.description && (
+                          <p class="ghArticleDesc">{g.data.description}</p>
+                        )}
+                      </div>
+                    </a>
+                  ))}
                 </div>
-              </a>
-            )}
+              )}
 
-            {/* ── Article List ── */}
-            {articleGuides.length > 0 && (
-              <div class="ghArticleList">
-                {articleGuides.map((g, i) => (
-                  <a class="ghArticleRow" href={`/daytona/guides/${guideSlug(g)}/`}>
-                    <div class="ghThumbWrap">
-                      <img
-                        class="ghThumb"
-                        src={g.data.image ?? fallbackImgs[topic]}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                        onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-                      />
-                      <div class="ghThumbFallback" aria-hidden="true"></div>
-                    </div>
-                    <div class="ghArticleText">
-                      <div class="ghArticleNum">#{i + 1}</div>
-                      <div class="ghArticleTitle">{g.data.title}</div>
-                      {g.data.description && (
-                        <p class="ghArticleDesc">{g.data.description}</p>
-                      )}
-                    </div>
-                  </a>
-                ))}
-              </div>
-            )}
-
-          </div>
-        )}
-
-        <div class="ghViewAllRow">
-          <a class="ghViewAllBtn" href="/daytona/guides/">← All Guides</a>
+            </div>
+          )}
         </div>
+      </section>
+    )}
 
-      </div>
-    </section>
+    {/* ── Back to all guides ── */}
+    <div class="ghBackRow">
+      <a class="ghViewAllBtn" href="/daytona/guides/">← All Guides</a>
+    </div>
 
   </div>{/* end .ghWrap */}
 
@@ -331,6 +418,34 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
     /* ── Section ── */
     .ghSection { padding: 28px 0 48px; }
     .ghSection--white { background: var(--surface); }
+    .ghSection--alt   { background: var(--surface2); border-bottom: 1px solid var(--border); }
+
+    /* Category section heading (per ribbon item) */
+    .ghCatHeading {
+      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+      font-size: clamp(1.3rem, 2.5vw, 1.9rem);
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text);
+      margin: 0 0 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--brand1, #ffd24a);
+    }
+
+    /* Placeholder when a category has no articles yet */
+    .ghCatEmpty {
+      font-size: 1rem;
+      color: var(--muted);
+      padding: 24px 0 8px;
+      font-style: italic;
+    }
+
+    /* Back-to-guides row */
+    .ghBackRow {
+      text-align: center;
+      padding: 32px 0 48px;
+    }
 
     .lede {
       font-size: 1.1rem;
