@@ -25,6 +25,7 @@ const fallbackImgs: Record<string, string> = {
 type SectionDef = {
   id: string;
   label: string;
+  brand: string;
   emoji: string;
   bg: "white" | "grey";
   featured: { img: string; title: string; description: string; href: string } | null;
@@ -33,10 +34,10 @@ type SectionDef = {
   viewAllLabel: string;
 };
 
-const topicConfig: { topic: "Live" | "Work" | "Play"; emoji: string; bg: "white" | "grey" }[] = [
-  { topic: "Live", emoji: "🏠", bg: "white" },
-  { topic: "Work", emoji: "💼", bg: "grey" },
-  { topic: "Play", emoji: "🎉", bg: "white" },
+const topicConfig: { topic: "Live" | "Work" | "Play"; brand: string; emoji: string; bg: "white" | "grey" }[] = [
+  { topic: "Live", brand: "COAST", emoji: "🌊", bg: "white" },
+  { topic: "Work", brand: "DRIVE", emoji: "🚗", bg: "grey" },
+  { topic: "Play", brand: "SURF",  emoji: "🏄", bg: "white" },
 ];
 
 /* ── Hardcoded placeholders shown when a topic has no published guides yet ── */
@@ -79,7 +80,7 @@ const hardcodedArticles: Record<string, SectionDef["articles"]> = {
   ],
 };
 
-const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
+const sections: SectionDef[] = topicConfig.map(({ topic, brand, emoji, bg }) => {
   // Sort by date descending so the most recent guide is first
   const topicGuides = allGuides
     .filter((g) => g.data.topic === topic)
@@ -113,12 +114,13 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
   return {
     id: topic.toLowerCase(),
     label: topic,
+    brand,
     emoji,
     bg,
     featured,
     articles,
     viewAllHref: `/daytona/guides/${topic.toLowerCase()}/`,
-    viewAllLabel: `View All ${topic} Guides`,
+    viewAllLabel: `View All ${brand} Guides`,
   };
 });
 ---
@@ -188,7 +190,7 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
 
         {/* Full-width category banner */}
         <div class="ghCategoryBanner">
-          <h2 class="ghCategoryBannerText">{s.label.toUpperCase()}</h2>
+          <h2 class="ghCategoryBannerText">{s.brand}</h2>
         </div>
 
         <div class="container">
@@ -196,7 +198,7 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
           {/* Sub-header row: just the "View all" link */}
           <div class="ghSecSubHead">
             <a class="ghSecMore" href={s.viewAllHref}>
-              View all {s.label} Guides →
+              View all {s.brand} Guides →
             </a>
           </div>
 
@@ -220,7 +222,7 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
               <div class="ghFeatBody">
                 <div class="ghFeatKicker">
                   <span class="ghFeatKickerEmoji">{s.emoji}</span>
-                  {s.label} Guide
+                  {s.brand} Guide
                 </div>
                 <h3 class="ghFeatTitle">{s.featured.title}</h3>
                 <p class="ghFeatDesc">{s.featured.description}</p>
