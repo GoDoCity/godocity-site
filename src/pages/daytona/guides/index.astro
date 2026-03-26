@@ -301,15 +301,16 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
     .ghGridBreadcrumb a:hover { text-decoration: underline; }
     .ghCrumbSep { opacity: .5; }
 
-    /* 2×2 grid container */
+    /* 4×1 nav card row (collapses to 2×2 on tablet) */
     .ghBlocks {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 260px 260px;
-      width: 100%;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 14px 20px 18px;
+      background: var(--surface);
     }
 
-    /* Individual hero block */
+    /* Individual nav card */
     .ghBlock {
       position: relative;
       display: flex;
@@ -317,8 +318,16 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
       justify-content: flex-start;
       overflow: hidden;
       text-decoration: none;
-      /* Dark-grey placeholder background (photos pending) */
       background-color: #1c2028;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.08);
+      min-height: 110px;
+      transition: border-color 220ms ease, box-shadow 220ms ease, transform 160ms ease;
+    }
+    .ghBlock:hover {
+      border-color: rgba(255,210,74,0.45);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.35);
+      transform: translateY(-2px);
     }
 
     /* ── Block background images — drop matching files into /public/images/guides/
@@ -381,53 +390,42 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
     .ghBlockContent {
       position: relative;
       z-index: 1;
-      padding: 24px 28px;
+      padding: 14px 16px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
-      /* Right-align on large grid for DRIVE and ESSENTIALS (right column) */
+      gap: 3px;
     }
 
     /* Action word: COAST / DRIVE / SURF / ESSENTIALS */
     .ghBlockAction {
       display: block;
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(2.2rem, 4.5vw, 4.2rem);
+      font-size: clamp(1.05rem, 1.7vw, 1.45rem);
       font-weight: 900;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
       color: #ffffff;
       line-height: 1;
       transition: color 200ms ease;
     }
 
-    /* Category word: [Live] / [Work] / [Play] / [Best] — lighter, 20% smaller */
+    /* Category label: [Live] / [Work] / [Play] / [Best] — gold accent */
     .ghBlockCategory {
       display: block;
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(1.0rem, 2vw, 1.6rem); /* ~20% smaller than action word */
-      font-weight: 300;
-      letter-spacing: 0.14em;
-      color: rgba(255,255,255,0.82);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #ffd24a;
       line-height: 1;
       transition: color 200ms ease;
     }
 
     /* Hover: action word picks up brand yellow tint */
     .ghBlock:hover .ghBlockAction   { color: #ffd24a; }
-    .ghBlock:hover .ghBlockCategory { color: rgba(255,210,74,0.72); }
+    .ghBlock:hover .ghBlockCategory { color: rgba(255,210,74,0.85); }
 
-    /* Right-column blocks: align text to the right */
-    .ghBlock--drive,
-    .ghBlock--essentials {
-      justify-content: flex-end;
-    }
-    .ghBlock--drive .ghBlockContent,
-    .ghBlock--essentials .ghBlockContent {
-      text-align: right;
-    }
-
-    /* Racing Yellow accent line at the top of the SURF block */
+    /* Gold top accent on SURF card */
     .ghBlock--surf::after {
       content: "";
       position: absolute;
@@ -439,36 +437,24 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
       z-index: 2;
     }
 
-    /* Thin divider lines between grid cells */
-    .ghBlock--coast,
-    .ghBlock--surf {
-      border-right: 1px solid rgba(255,255,255,0.06);
-    }
-    .ghBlock--coast,
-    .ghBlock--drive {
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+    /* ── Tablet: 2×2 grid ── */
+    @media (max-width: 860px) {
+      .ghBlocks {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        padding: 12px 16px 16px;
+      }
     }
 
-    /* ── Mobile: single-column stack — text stays readable ── */
+    /* ── Mobile: 2×2 compact ── */
     @media (max-width: 640px) {
       .ghBlocks {
-        grid-template-columns: 1fr;
-        grid-template-rows: repeat(4, 160px);
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        padding: 10px 12px 14px;
       }
-      .ghBlockContent { padding: 16px 18px; }
-      .ghBlock--drive,
-      .ghBlock--essentials {
-        justify-content: flex-start;
-      }
-      .ghBlock--drive .ghBlockContent,
-      .ghBlock--essentials .ghBlockContent {
-        text-align: left;
-      }
-      .ghBlock--coast,
-      .ghBlock--surf { border-right: none; }
-      .ghBlock--coast,
-      .ghBlock--drive,
-      .ghBlock--surf { border-bottom: 1px solid rgba(255,255,255,0.06); }
+      .ghBlock { min-height: 88px; }
+      .ghBlockContent { padding: 10px 12px; }
     }
 
     /* ══ END HERO GRID ══════════════════════════════════════════════════ */
@@ -485,23 +471,23 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
       border-bottom: 1px solid var(--border);
     }
 
-    /* ── Full-width category banner ── */
+    /* ── Section category banner (compact) ── */
     .ghCategoryBanner {
       width: 100vw !important;
       background: #2E3E52;
-      padding: 56px 0;
+      padding: 20px 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 28px;
-      border-top: 4px solid #FFD700 !important;
-      border-bottom: 4px solid #FFD700 !important;
+      margin-bottom: 24px;
+      border-top: 3px solid #ffd24a;
+      border-bottom: 3px solid #ffd24a;
     }
     .ghCategoryBannerText {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(4.4rem, 8vw, 5.8rem) !important;
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem) !important;
       font-weight: 900;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       color: #ffffff;
       margin: 0;
@@ -740,8 +726,8 @@ const sections: SectionDef[] = topicConfig.map(({ topic, emoji, bg }) => {
     @media (max-width: 640px) {
       .ghHero { padding: 36px 0 48px; }
       .ghSection { padding: 0 0 32px; }
-      .ghCategoryBanner { padding: 36px 0; }
-      .ghCategoryBannerText { font-size: clamp(2.8rem, 8vw, 4rem) !important; }
+      .ghCategoryBanner { padding: 14px 0; }
+      .ghCategoryBannerText { font-size: clamp(1.2rem, 6vw, 1.7rem) !important; }
       .ghSecSubHead { margin-bottom: 16px; }
       .ghGrid { gap: 16px; }
       .ghArticleRow { grid-template-columns: 72px 1fr; gap: 10px; padding: 12px 14px; }
