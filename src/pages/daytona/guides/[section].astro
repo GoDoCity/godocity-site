@@ -81,7 +81,6 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
   subtitle={`GoDo guides for ${topic.toLowerCase()} in Daytona Beach.`}
   cityBase="daytona"
 >
-  <div style="background: red; color: white; text-align: center; padding: 20px; font-weight: bold;">VERIFIED: CLAUDE IS EDITING THIS PAGE</div>
   <div class="ghWrap">
 
     {/* ── CATEGORY HEADER + RIBBON (flush together) ── */}
@@ -98,7 +97,7 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
 
       {/* ── PRIMARY HEADER BLOCK ── */}
       <div class="ghCategoryBanner">
-        <div class="ghCategoryBannerInner">
+        <div class="container">
           <h1 class="ghCategoryBannerText">
             <span class="ghBannerAction">{topic.toUpperCase()}</span>
             {section === "play" && <span class="ghBannerCategory">[Play]</span>}
@@ -112,17 +111,19 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       {/* ── STICKY JUMP RIBBON — flush below header ── */}
       {ribbonItems.length > 0 && (
         <div class="ghRibbonOuter" id="ghRibbon">
-          <nav class="ghRibbon" aria-label={`${topic} sub-categories`}>
-            {ribbonItems.map((item) => (
-              <a
-                class="ghRibbonItem"
-                href={item.href}
-                data-ribbon-id={item.id}
-              >
-                {item.label}
-              </a>
-            ))}
-          </nav>
+          <div class="container">
+            <nav class="ghRibbon" aria-label={`${topic} sub-categories`}>
+              {ribbonItems.map((item) => (
+                <a
+                  class="ghRibbonItem"
+                  href={item.href}
+                  data-ribbon-id={item.id}
+                >
+                  {item.label}
+                </a>
+              ))}
+            </nav>
+          </div>
         </div>
       )}
 
@@ -209,6 +210,9 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
     /* ── Header stack — banner + ribbon as a single flush unit ── */
     .ghHeaderStack {
       width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
     }
 
     /* Breadcrumb inside header */
@@ -236,12 +240,6 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       margin-bottom: 0;
       border-top: 4px solid #FFD700 !important;
       border-bottom: 4px solid #FFD700 !important;
-    }
-    /* Inner wrapper aligns content to the left, respects container max-width */
-    .ghCategoryBannerInner {
-      max-width: var(--max, 1280px);
-      margin: 0 auto;
-      padding: 0 2.5rem;
     }
     .ghCategoryBannerText {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
@@ -276,9 +274,9 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       position: sticky;
       top: 0;
       z-index: 100;
-      background: #0b0d10;
-      border-bottom: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 2px 12px rgba(0,0,0,0.45);
+      background: #ffffff;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
     }
     .ghRibbon {
       display: flex;
@@ -286,9 +284,6 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
-      max-width: var(--max, 1280px);
-      margin: 0 auto;
-      padding: 0 16px;
     }
     .ghRibbon::-webkit-scrollbar { display: none; }
 
@@ -302,26 +297,26 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       font-weight: 800;
       letter-spacing: 0.09em;
       text-transform: uppercase;
-      color: rgba(232,237,244,0.65);
+      color: rgba(46,62,82,0.6);
       text-decoration: none;
-      border-bottom: 2px solid transparent;
+      border-bottom: 3px solid transparent;
       transition: color 140ms, border-color 140ms;
       white-space: nowrap;
     }
     .ghRibbonItem:hover {
-      color: #ffffff;
-      border-bottom-color: rgba(255,210,74,0.45);
+      color: #2E3E52;
+      border-bottom-color: rgba(255,210,74,0.5);
     }
-    /* Active ribbon item: 2px Racing Yellow underline */
+    /* Active ribbon item: 3px Racing Yellow underline */
     .ghRibbonItem.is-active,
     .ghRibbonItem[aria-current="true"] {
-      color: #ffd24a;
-      border-bottom-color: #ffd24a;
+      color: #2E3E52;
+      border-bottom: 3px solid #ffd24a;
     }
 
     /* Pipe separators between ribbon items */
     .ghRibbonItem + .ghRibbonItem {
-      border-left: 1px solid rgba(255,255,255,0.1);
+      border-left: 1px solid rgba(0,0,0,0.08);
     }
 
     /* ── Mobile ribbon ── */
@@ -552,7 +547,6 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       .ghHeaderBreadcrumb { padding: 10px 0 8px; font-size: 12px; }
       .ghSection { padding: 20px 0 32px; }
       .ghCategoryBanner { padding: 28px 0 24px; }
-      .ghCategoryBannerInner { padding: 0 1.25rem; }
       .ghBannerAction { font-size: clamp(2.8rem, 8vw, 4rem); }
       .ghBannerCategory { font-size: clamp(1.2rem, 3vw, 1.8rem); }
       .ghGrid { gap: 16px; }
