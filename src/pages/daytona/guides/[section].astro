@@ -325,12 +325,13 @@ function guideSlug(g: (typeof allGuides)[number]) {
       width: 100%;
       display: flex;
       justify-content: center;
+      text-align: center;
     }
 
     .ghCategoryBannerText {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
       font-weight: 900;
-      margin: 0;
+      margin: 0 auto;
       line-height: 1;
       text-align: center;
       display: flex;
@@ -348,22 +349,38 @@ function guideSlug(g: (typeof allGuides)[number]) {
       text-align: center;
       text-shadow: 0 2px 16px rgba(0,0,0,0.5);
     }
-    /* Neon sign colors per category banner */
+    /* Neon sign colors per category banner — tubular: white core + layered color glow */
     .ghCategoryBanner--live .ghBannerAction {
       color: #00e5ff;
-      text-shadow: 0 0 8px rgba(0,229,255,1), 0 0 20px rgba(0,229,255,0.7), 0 0 45px rgba(0,229,255,0.4), 0 2px 16px rgba(0,0,0,0.5);
+      text-shadow:
+        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
+        0 0 10px rgba(0,229,255,1), 0 0 22px rgba(0,229,255,0.85),
+        0 0 50px rgba(0,229,255,0.5), 0 0 90px rgba(0,229,255,0.25),
+        0 2px 16px rgba(0,0,0,0.5);
     }
     .ghCategoryBanner--work .ghBannerAction {
       color: #00ff6e;
-      text-shadow: 0 0 8px rgba(0,255,110,1), 0 0 20px rgba(0,255,110,0.7), 0 0 45px rgba(0,255,110,0.4), 0 2px 16px rgba(0,0,0,0.5);
+      text-shadow:
+        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
+        0 0 10px rgba(0,255,110,1), 0 0 22px rgba(0,255,110,0.85),
+        0 0 50px rgba(0,255,110,0.5), 0 0 90px rgba(0,255,110,0.25),
+        0 2px 16px rgba(0,0,0,0.5);
     }
     .ghCategoryBanner--play .ghBannerAction {
       color: #ff00cc;
-      text-shadow: 0 0 8px rgba(255,0,204,1), 0 0 20px rgba(255,0,204,0.7), 0 0 45px rgba(255,0,204,0.4), 0 2px 16px rgba(0,0,0,0.5);
+      text-shadow:
+        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
+        0 0 10px rgba(255,0,204,1), 0 0 22px rgba(255,0,204,0.85),
+        0 0 50px rgba(255,0,204,0.5), 0 0 90px rgba(255,0,204,0.25),
+        0 2px 16px rgba(0,0,0,0.5);
     }
     .ghCategoryBanner--best .ghBannerAction {
       color: #ffff00;
-      text-shadow: 0 0 8px rgba(255,255,0,1), 0 0 20px rgba(255,255,0,0.7), 0 0 45px rgba(255,255,0,0.4), 0 2px 16px rgba(0,0,0,0.5);
+      text-shadow:
+        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
+        0 0 10px rgba(255,255,0,1), 0 0 22px rgba(255,255,0,0.85),
+        0 0 50px rgba(255,255,0,0.5), 0 0 90px rgba(255,255,0,0.25),
+        0 2px 16px rgba(0,0,0,0.5);
     }
     .ghBannerCategory {
       font-size: clamp(1.4rem, 2.8vw, 2.2rem);
@@ -374,6 +391,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
       text-align: center;
       width: 100%;
       margin: 0 auto;
+      align-self: center;
     }
 
     /* ── Sticky Jump Ribbon ── */
@@ -389,6 +407,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
       display: flex;
       align-items: stretch;
       justify-content: center;
+      width: 100%;
       overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
@@ -565,10 +584,10 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
 
     .ghCardBody {
-      padding: 16px 18px 20px;
+      padding: 14px 18px 17px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
       flex: 1;
     }
     .ghCardKicker {
@@ -596,7 +615,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
     .ghArticleCard:hover .ghCardTitle { color: #ffd24a; }
     .ghCardDesc {
-      font-size: 17px;
+      font-size: 14px;
       color: var(--muted);
       line-height: 1.5;
       margin: 0;
