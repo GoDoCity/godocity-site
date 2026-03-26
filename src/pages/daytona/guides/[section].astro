@@ -20,7 +20,6 @@ const topicMap: Record<string, string> = {
   best: "Best",
 };
 
-/* Brand names shown in the header and ribbon */
 const brandMap: Record<string, string> = {
   live: "COAST",
   work: "DRIVE",
@@ -49,12 +48,6 @@ const emoji = emojiMap[section] ?? "";
 /* ── Jump ribbon configuration per section ── */
 type RibbonItem = { label: string; href: string; id: string };
 const ribbonConfig: Record<string, RibbonItem[]> = {
-  play: [
-    { label: "Food & Drink",       href: "#food-drink",       id: "food-drink"       },
-    { label: "Outdoors & Trails",  href: "#outdoors-trails",  id: "outdoors-trails"  },
-    { label: "Arts & Culture",     href: "#arts-culture",     id: "arts-culture"     },
-    { label: "Date Night",         href: "#date-night",       id: "date-night"       },
-  ],
   live: [
     { label: "Neighborhoods", href: "#neighborhoods", id: "neighborhoods" },
     { label: "Schools",       href: "#schools",       id: "schools"       },
@@ -67,10 +60,32 @@ const ribbonConfig: Record<string, RibbonItem[]> = {
     { label: "Networking",       href: "#networking",       id: "networking"       },
     { label: "Coworking",        href: "#coworking",        id: "coworking"        },
   ],
+  play: [
+    { label: "Outdoors",       href: "#outdoors",      id: "outdoors"      },
+    { label: "Arts & Culture", href: "#arts-culture",  id: "arts-culture"  },
+    { label: "Dining",         href: "#dining",        id: "dining"        },
+    { label: "Attractions",    href: "#attractions",   id: "attractions"   },
+  ],
+  best: [
+    { label: "Basics & Pets",  href: "#basics-pets",   id: "basics-pets"   },
+    { label: "Health",         href: "#health",         id: "health"        },
+    { label: "Home Services",  href: "#home-services",  id: "home-services" },
+    { label: "City & Safety",  href: "#city-safety",    id: "city-safety"   },
+  ],
 };
 const ribbonItems: RibbonItem[] = ribbonConfig[section] ?? [];
 
-/* Query the guides collection and filter by topic */
+/* ── External links allowed in City & Safety for Volusia County resources ── */
+type ExternalLink = { label: string; href: string; description?: string };
+const citySafetyLinks: ExternalLink[] = [
+  {
+    label: "Volusia County Emergency Management",
+    href: "https://www.volusia.org/services/public-protection/emergency-management/",
+    description: "Official county emergency preparedness resources, alerts, and evacuation info.",
+  },
+];
+
+/* ── Query guides collection and filter by topic ── */
 const allGuides = await getCollection("guides");
 const topicGuides = allGuides
   .filter((g) => g.data.topic === topic)
@@ -79,34 +94,30 @@ const topicGuides = allGuides
 function guideSlug(g: (typeof allGuides)[number]) {
   return g.slug.split("/").pop()!;
 }
-
-/* Featured: explicit featured flag wins; otherwise most-recent */
-const featuredGuide = topicGuides.find((g) => g.data.featured) ?? topicGuides[0] ?? null;
-const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
 ---
 
 <Base
-  title={`${topic} Guides | GoDoDaytona`}
+  title={`${brand} Guides | GoDoDaytona`}
   subtitle={`GoDo guides for ${topic.toLowerCase()} in Daytona Beach.`}
   cityBase="daytona"
 >
   <div class="ghWrap">
 
-    {/* ── CATEGORY HEADER + RIBBON (flush together) ── */}
+    {/* ── CATEGORY HEADER + RIBBON ── */}
     <div class="ghHeaderStack">
 
-      {/* Breadcrumb */}
       <div class="ghHeaderBreadcrumb container">
         <a href="/daytona/">GoDo Daytona</a>
         <span class="ghCrumbSep">›</span>
         <a href="/daytona/guides/">Guides</a>
         <span class="ghCrumbSep">›</span>
-        <span>{topic}</span>
+        <span>{brand}</span>
       </div>
 
-      {/* ── PRIMARY HEADER BLOCK ── */}
-      <div class="ghCategoryBanner">
-        <div class="container">
+      {/* Category banner with background photo support */}
+      <div class={`ghCategoryBanner ghCategoryBanner--${section}`}>
+        <div class="ghCategoryBannerOverlay"></div>
+        <div class="container ghCategoryBannerContent">
           <h1 class="ghCategoryBannerText">
             <span class="ghBannerAction">{brand}</span>
             <span class="ghBannerCategory">[{topic}]</span>
@@ -114,11 +125,11 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
         </div>
       </div>
 
-      {/* ── STICKY JUMP RIBBON — flush below header ── */}
+      {/* ── STICKY JUMP RIBBON ── */}
       {ribbonItems.length > 0 && (
         <div class="ghRibbonOuter" id="ghRibbon">
           <div class="container">
-            <nav class="ghRibbon" aria-label={`${topic} sub-categories`}>
+            <nav class="ghRibbon" aria-label={`${brand} sub-categories`}>
               {ribbonItems.map((item) => (
                 <a
                   class="ghRibbonItem"
@@ -135,149 +146,114 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
 
     </div>{/* end .ghHeaderStack */}
 
-    {/* ── GUIDES CONTENT — per-category anchor sections ── */}
+    {/* ── GUIDES CONTENT — per-subcategory anchor sections ── */}
     {ribbonItems.length > 0 ? (
       ribbonItems.map((cat, catIdx) => {
-        /* First category gets all the real guides; others show a placeholder */
-        const catFeatured = catIdx === 0 ? featuredGuide : null;
-        const catArticles = catIdx === 0 ? articleGuides : [];
-        const hasContent  = catIdx === 0 && topicGuides.length > 0;
+        /* All real guides are displayed in the first ribbon section;
+           subsequent sections will fill as content is categorized */
+        const catGuides = catIdx === 0 ? topicGuides : [];
+        const hasContent = catGuides.length > 0;
+        const isCitySafety = cat.id === "city-safety";
+
         return (
           <section class={`ghSection ghSection--${catIdx % 2 === 0 ? "white" : "alt"}`} id={cat.id}>
             <div class="container">
               <h2 class="ghCatHeading">{cat.label}</h2>
 
-              {!hasContent ? (
-                <p class="ghCatEmpty">
-                  {catIdx === 0
-                    ? `No ${topic.toLowerCase()} guides yet — check back soon!`
-                    : `More ${cat.label} guides coming soon.`}
-                </p>
-              ) : (
-                <div class={`ghGrid${catArticles.length === 0 ? " ghGrid--single" : ""}`}>
-
-                  {/* ── Featured Card ── */}
-                  {catFeatured && (
-                    <a class="ghFeatCard" href={`/daytona/guides/${guideSlug(catFeatured)}/`}>
-                      <div class="ghFeatImgWrap">
-                        <img
-                          class="ghFeatImg"
-                          src={catFeatured.data.image ?? fallbackImgs[topic]}
-                          alt={catFeatured.data.title}
-                          loading="lazy"
-                          decoding="async"
-                          onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-                        />
-                        <div class="ghFeatImgFallback" aria-hidden="true"></div>
-                      </div>
-                      <div class="ghFeatBody">
-                        <div class="ghFeatKicker">
-                          <span class="ghFeatKickerEmoji">{emoji}</span>
-                          {brand} — {cat.label}
-                        </div>
-                        <h3 class="ghFeatTitle">{catFeatured.data.title}</h3>
-                        <p class="ghFeatDesc">{catFeatured.data.description}</p>
-                        <span class="ghFeatCta">Read the guide →</span>
-                      </div>
-                    </a>
-                  )}
-
-                  {/* ── Article List ── */}
-                  {catArticles.length > 0 && (
-                    <div class="ghArticleList">
-                      {catArticles.map((g, i) => (
-                        <a class="ghArticleRow" href={`/daytona/guides/${guideSlug(g)}/`}>
-                          <div class="ghThumbWrap">
-                            <img
-                              class="ghThumb"
-                              src={g.data.image ?? fallbackImgs[topic]}
-                              alt=""
-                              loading="lazy"
-                              decoding="async"
-                              onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-                            />
-                            <div class="ghThumbFallback" aria-hidden="true"></div>
-                          </div>
-                          <div class="ghArticleText">
-                            <div class="ghArticleNum">#{i + 1}</div>
-                            <div class="ghArticleTitle">{g.data.title}</div>
-                            {g.data.description && (
-                              <p class="ghArticleDesc">{g.data.description}</p>
-                            )}
-                          </div>
-                        </a>
-                      ))}
-                    </div>
-                  )}
-
+              {/* External resources block for City & Safety */}
+              {isCitySafety && citySafetyLinks.length > 0 && (
+                <div class="ghExtLinksBlock">
+                  <p class="ghExtLinksLabel">Official Resources</p>
+                  <div class="ghExtLinks">
+                    {citySafetyLinks.map((link) => (
+                      <a
+                        class="ghExtLinkCard"
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span class="ghExtLinkArrow">↗</span>
+                        <span class="ghExtLinkInner">
+                          <span class="ghExtLinkTitle">{link.label}</span>
+                          {link.description && <span class="ghExtLinkDesc">{link.description}</span>}
+                        </span>
+                      </a>
+                    ))}
+                  </div>
                 </div>
               )}
 
-            </div>
-          </section>
-        );
-      })
-    ) : (
-      /* No ribbon (e.g. best/essentials) — flat single section */
-      <section class="ghSection ghSection--white">
-        <div class="container">
-          {topicGuides.length === 0 ? (
-            <p class="lede">No {topic.toLowerCase()} guides yet — check back soon!</p>
-          ) : (
-            <div class={`ghGrid${articleGuides.length === 0 ? " ghGrid--single" : ""}`}>
-
-              {featuredGuide && (
-                <a class="ghFeatCard" href={`/daytona/guides/${guideSlug(featuredGuide)}/`}>
-                  <div class="ghFeatImgWrap">
-                    <img
-                      class="ghFeatImg"
-                      src={featuredGuide.data.image ?? fallbackImgs[topic]}
-                      alt={featuredGuide.data.title}
-                      loading="lazy"
-                      decoding="async"
-                      onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-                    />
-                    <div class="ghFeatImgFallback" aria-hidden="true"></div>
-                  </div>
-                  <div class="ghFeatBody">
-                    <div class="ghFeatKicker">
-                      <span class="ghFeatKickerEmoji">{emoji}</span>
-                      {brand} Guide
-                    </div>
-                    <h3 class="ghFeatTitle">{featuredGuide.data.title}</h3>
-                    <p class="ghFeatDesc">{featuredGuide.data.description}</p>
-                    <span class="ghFeatCta">Read the guide →</span>
-                  </div>
-                </a>
-              )}
-
-              {articleGuides.length > 0 && (
-                <div class="ghArticleList">
-                  {articleGuides.map((g, i) => (
-                    <a class="ghArticleRow" href={`/daytona/guides/${guideSlug(g)}/`}>
-                      <div class="ghThumbWrap">
+              {!hasContent ? (
+                <p class="ghCatEmpty">
+                  {catIdx === 0
+                    ? `No ${brand.toLowerCase()} guides yet — check back soon!`
+                    : `More ${cat.label} guides coming soon.`}
+                </p>
+              ) : (
+                /* Uniform 3-column grid — all articles the same size */
+                <div class="ghUniformGrid">
+                  {catGuides.map((g) => (
+                    <a class="ghArticleCard" href={`/daytona/guides/${guideSlug(g)}/`}>
+                      <div class="ghCardImgWrap">
                         <img
-                          class="ghThumb"
+                          class="ghCardImg"
                           src={g.data.image ?? fallbackImgs[topic]}
-                          alt=""
+                          alt={g.data.title}
                           loading="lazy"
                           decoding="async"
                           onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
                         />
-                        <div class="ghThumbFallback" aria-hidden="true"></div>
+                        <div class="ghCardImgFallback" aria-hidden="true"></div>
                       </div>
-                      <div class="ghArticleText">
-                        <div class="ghArticleNum">#{i + 1}</div>
-                        <div class="ghArticleTitle">{g.data.title}</div>
-                        {g.data.description && (
-                          <p class="ghArticleDesc">{g.data.description}</p>
-                        )}
+                      <div class="ghCardBody">
+                        <div class="ghCardKicker">
+                          <span class="ghCardKickerEmoji">{emoji}</span>
+                          {brand} — {cat.label}
+                        </div>
+                        <h3 class="ghCardTitle">{g.data.title}</h3>
+                        {g.data.description && <p class="ghCardDesc">{g.data.description}</p>}
+                        <span class="ghCardCta">Read the guide →</span>
                       </div>
                     </a>
                   ))}
                 </div>
               )}
-
+            </div>
+          </section>
+        );
+      })
+    ) : (
+      /* No ribbon — flat single-section fallback */
+      <section class="ghSection ghSection--white">
+        <div class="container">
+          {topicGuides.length === 0 ? (
+            <p class="ghCatEmpty">No {topic.toLowerCase()} guides yet — check back soon!</p>
+          ) : (
+            <div class="ghUniformGrid">
+              {topicGuides.map((g) => (
+                <a class="ghArticleCard" href={`/daytona/guides/${guideSlug(g)}/`}>
+                  <div class="ghCardImgWrap">
+                    <img
+                      class="ghCardImg"
+                      src={g.data.image ?? fallbackImgs[topic]}
+                      alt={g.data.title}
+                      loading="lazy"
+                      decoding="async"
+                      onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+                    />
+                    <div class="ghCardImgFallback" aria-hidden="true"></div>
+                  </div>
+                  <div class="ghCardBody">
+                    <div class="ghCardKicker">
+                      <span class="ghCardKickerEmoji">{emoji}</span>
+                      {brand} Guide
+                    </div>
+                    <h3 class="ghCardTitle">{g.data.title}</h3>
+                    {g.data.description && <p class="ghCardDesc">{g.data.description}</p>}
+                    <span class="ghCardCta">Read the guide →</span>
+                  </div>
+                </a>
+              ))}
             </div>
           )}
         </div>
@@ -286,7 +262,7 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
 
     {/* ── Back to all guides ── */}
     <div class="ghBackRow">
-      <a class="ghViewAllBtn" href="/daytona/guides/">← All Guides</a>
+      <a class="ghBackBtn" href="/daytona/guides/">← All Guides</a>
     </div>
 
   </div>{/* end .ghWrap */}
@@ -294,7 +270,7 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
   <style>
     .ghWrap { min-height: 100vh; }
 
-    /* ── Header stack — banner + ribbon as a single flush unit ── */
+    /* ── Header stack ── */
     .ghHeaderStack {
       width: 100%;
       display: flex;
@@ -302,7 +278,6 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       gap: 0;
     }
 
-    /* Breadcrumb inside header */
     .ghHeaderBreadcrumb {
       font-size: 13px;
       font-weight: 600;
@@ -312,22 +287,48 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       align-items: center;
       gap: 6px;
     }
-    .ghHeaderBreadcrumb a {
-      color: var(--brand1);
-      text-decoration: none;
-    }
+    .ghHeaderBreadcrumb a { color: var(--brand1); text-decoration: none; }
     .ghHeaderBreadcrumb a:hover { text-decoration: underline; }
     .ghCrumbSep { opacity: .5; }
 
-    /* ── Primary Category Header Block ── */
+    /* ── Category banner with photo support ── */
     .ghCategoryBanner {
-      width: 100vw !important;
-      background: #2E3E52;
-      padding: 40px 0 36px;
+      position: relative;
+      width: 100%;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      background-color: #2E3E52;
+      background-size: cover;
+      background-position: center;
+      border-top: 4px solid #ffd24a;
+      border-bottom: 4px solid #ffd24a;
       margin-bottom: 0;
-      border-top: 4px solid #FFD700 !important;
-      border-bottom: 4px solid #FFD700 !important;
     }
+
+    /* Background images — add matching files to /public/images/guides/ */
+    .ghCategoryBanner--live { background-image: url('/images/guides/coast-banner.jpg'); }
+    .ghCategoryBanner--work { background-image: url('/images/guides/drive-banner.jpg'); }
+    .ghCategoryBanner--play { background-image: url('/images/guides/surf-banner.jpg');  }
+    .ghCategoryBanner--best { background-image: url('/images/guides/essentials-banner.jpg'); }
+
+    .ghCategoryBannerOverlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        100deg,
+        rgba(0,0,0,0.78) 0%,
+        rgba(0,0,0,0.45) 55%,
+        rgba(0,0,0,0.22) 100%
+      );
+    }
+
+    .ghCategoryBannerContent {
+      position: relative;
+      z-index: 1;
+      padding: 40px 0 36px;
+    }
+
     .ghCategoryBannerText {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
       font-weight: 900;
@@ -339,20 +340,19 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       align-items: flex-start;
       gap: 6px;
     }
-    /* Action word: LIVE / WORK / PLAY — bold, uppercase, large */
     .ghBannerAction {
-      font-size: clamp(4.4rem, 8vw, 5.8rem);
+      font-size: clamp(3.2rem, 7vw, 5rem);
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: #ffffff;
       display: block;
+      text-shadow: 0 2px 16px rgba(0,0,0,0.5);
     }
-    /* Category word: [Live] — lighter, ~20% smaller */
     .ghBannerCategory {
-      font-size: clamp(1.8rem, 3.2vw, 2.8rem);
+      font-size: clamp(1.4rem, 2.8vw, 2.2rem);
       font-weight: 300;
       letter-spacing: 0.18em;
-      color: rgba(255,255,255,0.78);
+      color: rgba(255,255,255,0.82);
       display: block;
     }
 
@@ -361,9 +361,9 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       position: sticky;
       top: 0;
       z-index: 100;
-      background: #ffffff;
-      border-bottom: 1px solid rgba(0,0,0,0.08);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+      background: var(--surface);
+      border-bottom: 2px solid var(--border);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
     }
     .ghRibbon {
       display: flex;
@@ -378,49 +378,41 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
-      padding: 0 18px;
+      padding: 0 20px;
       height: 46px;
       font-size: 12px;
       font-weight: 800;
       letter-spacing: 0.09em;
       text-transform: uppercase;
-      color: rgba(46,62,82,0.6);
+      color: var(--muted);
       text-decoration: none;
       border-bottom: 3px solid transparent;
-      transition: color 140ms, border-color 140ms;
+      transition: color 140ms ease, border-color 140ms ease;
       white-space: nowrap;
     }
-    .ghRibbonItem:hover {
-      color: #2E3E52;
-      border-bottom-color: rgba(255,210,74,0.5);
+    .ghRibbonItem + .ghRibbonItem {
+      border-left: 1px solid var(--border);
     }
-    /* Active ribbon item: 3px Racing Yellow underline */
+    .ghRibbonItem:hover {
+      color: #ffd24a;
+      border-bottom-color: #ffd24a;
+    }
     .ghRibbonItem.is-active,
     .ghRibbonItem[aria-current="true"] {
-      color: #2E3E52;
-      border-bottom: 3px solid #ffd24a;
+      color: var(--text);
+      border-bottom-color: #ffd24a;
     }
 
-    /* Pipe separators between ribbon items */
-    .ghRibbonItem + .ghRibbonItem {
-      border-left: 1px solid rgba(0,0,0,0.08);
-    }
-
-    /* ── Mobile ribbon ── */
     @media (max-width: 640px) {
-      .ghRibbonItem {
-        padding: 0 14px;
-        font-size: 11px;
-        height: 40px;
-      }
+      .ghRibbonItem { padding: 0 14px; font-size: 11px; height: 40px; }
     }
 
-    /* ── Section ── */
-    .ghSection { padding: 28px 0 48px; }
+    /* ── Section shells ── */
+    .ghSection { padding: 32px 0 48px; }
     .ghSection--white { background: var(--surface); }
     .ghSection--alt   { background: var(--surface2); border-bottom: 1px solid var(--border); }
 
-    /* Category section heading (per ribbon item) */
+    /* Section heading with gold underline */
     .ghCatHeading {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
       font-size: clamp(1.3rem, 2.5vw, 1.9rem);
@@ -428,66 +420,113 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--text);
-      margin: 0 0 20px;
+      margin: 0 0 24px;
       padding-bottom: 12px;
-      border-bottom: 2px solid var(--brand1, #ffd24a);
+      border-bottom: 2px solid #ffd24a;
     }
 
-    /* Placeholder when a category has no articles yet */
+    /* Placeholder text when no articles */
     .ghCatEmpty {
       font-size: 1rem;
       color: var(--muted);
-      padding: 24px 0 8px;
+      padding: 16px 0 8px;
       font-style: italic;
     }
 
-    /* Back-to-guides row */
-    .ghBackRow {
-      text-align: center;
-      padding: 32px 0 48px;
+    /* ── External resource links (City & Safety) ── */
+    .ghExtLinksBlock {
+      margin-bottom: 28px;
     }
-
-    .lede {
-      font-size: 1.1rem;
+    .ghExtLinksLabel {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #ffd24a;
+      margin: 0 0 10px;
+    }
+    .ghExtLinks {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .ghExtLinkCard {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 18px;
+      border: 1px solid var(--border);
+      border-left: 4px solid #ffd24a;
+      border-radius: 10px;
+      background: var(--panel);
+      text-decoration: none;
+      transition: box-shadow 160ms ease, background 160ms ease;
+    }
+    .ghExtLinkCard:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      background: color-mix(in srgb, #ffd24a 6%, var(--panel));
+    }
+    .ghExtLinkArrow {
+      font-size: 18px;
+      color: #ffd24a;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .ghExtLinkInner {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .ghExtLinkTitle {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .ghExtLinkDesc {
+      font-size: 13px;
       color: var(--muted);
-      padding: 32px 0;
+      line-height: 1.45;
     }
 
-    /* ── 1+N Grid ── */
-    .ghGrid {
+    /* ── Uniform 3-column article grid ── */
+    .ghUniformGrid {
       display: grid;
-      grid-template-columns: 1fr 340px;
-      gap: 28px;
-      align-items: start;
-      padding-top: 4px;
-    }
-    .ghGrid--single {
-      grid-template-columns: 1fr;
-      max-width: 720px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
     }
     @media (max-width: 900px) {
-      .ghGrid { grid-template-columns: 1fr; gap: 20px; }
+      .ghUniformGrid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
+    }
+    @media (max-width: 480px) {
+      .ghUniformGrid { grid-template-columns: 1fr; gap: 14px; }
     }
 
-    /* ── Featured Card ── */
-    .ghFeatCard {
-      display: block;
+    /* ── Article card (uniform) ── */
+    .ghArticleCard {
+      display: flex;
+      flex-direction: column;
       text-decoration: none;
-      border-radius: 14px;
+      border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--border);
       background: var(--panel);
-      transition: box-shadow 200ms ease;
+      transition: box-shadow 200ms ease, transform 200ms ease;
     }
-    .ghFeatCard:hover { box-shadow: 0 8px 32px rgba(0,0,0,.28); }
-    .ghFeatImgWrap {
+    .ghArticleCard:hover {
+      box-shadow: 0 8px 28px rgba(0,0,0,0.28);
+      transform: translateY(-3px);
+    }
+
+    .ghCardImgWrap {
       position: relative;
       width: 100%;
-      aspect-ratio: 16/9;
+      aspect-ratio: 16 / 9;
       overflow: hidden;
       background: var(--surface2);
+      flex-shrink: 0;
     }
-    .ghFeatImg {
+    .ghCardImg {
       display: block;
       width: 100%;
       height: 100%;
@@ -495,180 +534,100 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
       object-position: center;
       transition: transform 320ms ease;
     }
-    .ghFeatCard:hover .ghFeatImg { transform: scale(1.04); }
-    .ghFeatImgFallback {
+    .ghArticleCard:hover .ghCardImg { transform: scale(1.04); }
+    .ghCardImgFallback {
       display: none;
       position: absolute;
       inset: 0;
       background: var(--surface2);
     }
-    .ghFeatBody { padding: 20px 22px 22px; }
-    .ghFeatKicker {
+
+    .ghCardBody {
+      padding: 16px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .ghCardKicker {
       font-size: 11px;
       font-weight: 800;
-      letter-spacing: .09em;
+      letter-spacing: 0.09em;
       text-transform: uppercase;
-      color: var(--brand1);
-      margin-bottom: 8px;
+      color: var(--brand1, #ffd24a);
       display: flex;
       align-items: center;
-      gap: 5px;
-    }
-    .ghFeatKickerEmoji { font-size: 14px; letter-spacing: 0; }
-    .ghFeatTitle {
-      font-size: clamp(1.1rem, 1.9vw, 1.45rem);
-      font-weight: 900;
-      color: var(--text);
-      line-height: 1.18;
-      letter-spacing: -0.25px;
-      margin: 0 0 10px;
-      transition: color 130ms;
-    }
-    .ghFeatCard:hover .ghFeatTitle { color: var(--link); }
-    .ghFeatDesc {
-      font-size: 15px;
-      color: var(--muted);
-      line-height: 1.55;
-      margin: 0 0 14px;
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    .ghFeatCta {
-      display: inline-flex;
-      align-items: center;
-      height: 34px;
-      padding: 0 16px;
-      border-radius: 999px;
-      background: var(--brand1);
-      color: var(--accentText);
-      font-size: 13px;
-      font-weight: 800;
-      text-decoration: none;
-      transition: filter 130ms;
-    }
-    .ghFeatCard:hover .ghFeatCta { filter: brightness(.92); }
-
-    /* ── Article List ── */
-    .ghArticleList {
-      display: flex;
-      flex-direction: column;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-      background: var(--panel);
-    }
-    .ghArticleRow {
-      display: grid;
-      grid-template-columns: 88px 1fr;
-      gap: 12px;
-      align-items: center;
-      padding: 14px 16px;
-      border-bottom: 1px solid var(--border);
-      text-decoration: none;
-      transition: background 130ms ease;
-    }
-    .ghArticleRow:last-child { border-bottom: none; }
-    .ghArticleRow:hover {
-      background: color-mix(in srgb, var(--brand1) 6%, var(--panel));
-    }
-    .ghThumbWrap {
-      width: 88px;
-      height: 64px;
-      border-radius: 8px;
-      overflow: hidden;
-      flex-shrink: 0;
-      background: var(--surface2);
-      position: relative;
-    }
-    .ghThumb {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      transition: transform 280ms ease;
-    }
-    .ghArticleRow:hover .ghThumb { transform: scale(1.06); }
-    .ghThumbFallback {
-      display: none;
-      position: absolute;
-      inset: 0;
-      background: var(--surface2);
-    }
-    .ghArticleText {
-      display: flex;
-      flex-direction: column;
       gap: 4px;
-      min-width: 0;
     }
-    .ghArticleNum {
-      font-size: 10px;
-      font-weight: 800;
-      letter-spacing: .07em;
-      color: var(--brand1);
-      text-transform: uppercase;
-    }
-    .ghArticleTitle {
-      font-size: 15px;
+    .ghCardKickerEmoji { font-size: 13px; letter-spacing: 0; }
+    .ghCardTitle {
+      font-size: 16px;
       font-weight: 700;
       color: var(--text);
       line-height: 1.25;
-      letter-spacing: -0.1px;
+      margin: 0;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
       transition: color 130ms ease;
     }
-    .ghArticleRow:hover .ghArticleTitle { color: var(--link); }
-    .ghArticleDesc {
-      font-size: 12px;
+    .ghArticleCard:hover .ghCardTitle { color: #ffd24a; }
+    .ghCardDesc {
+      font-size: 13px;
       color: var(--muted);
-      line-height: 1.45;
-      margin: 2px 0 0;
+      line-height: 1.5;
+      margin: 0;
       display: -webkit-box;
-      -webkit-line-clamp: 2;
+      -webkit-line-clamp: 3;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    .ghCardCta {
+      display: inline-flex;
+      align-items: center;
+      margin-top: auto;
+      padding-top: 8px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #ffd24a;
+      letter-spacing: 0.02em;
+    }
 
-    /* ── View All Row ── */
-    .ghViewAllRow { margin-top: 28px; text-align: center; }
-    .ghViewAllBtn {
+    /* ── Back row ── */
+    .ghBackRow {
+      text-align: center;
+      padding: 32px 0 48px;
+    }
+    .ghBackBtn {
       display: inline-flex;
       align-items: center;
       height: 40px;
       padding: 0 24px;
       border-radius: 999px;
-      border: 1.5px solid var(--pillBorder);
-      background: var(--pillBg);
-      color: var(--link);
+      border: 1.5px solid var(--border);
+      background: var(--panel);
+      color: var(--muted);
       font-size: 14px;
-      font-weight: 800;
+      font-weight: 700;
       text-decoration: none;
-      letter-spacing: .02em;
-      transition: background 140ms, border-color 140ms, box-shadow 140ms;
+      transition: border-color 140ms, color 140ms, background 140ms;
     }
-    .ghViewAllBtn:hover {
-      background: color-mix(in srgb, var(--brand1) 14%, var(--pillBg));
-      border-color: var(--brand1);
-      box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand1) 16%, transparent);
+    .ghBackBtn:hover {
+      border-color: #ffd24a;
+      color: #ffd24a;
+      background: color-mix(in srgb, #ffd24a 8%, var(--panel));
     }
 
     /* ── Mobile ── */
     @media (max-width: 640px) {
       .ghHeaderBreadcrumb { padding: 10px 0 8px; font-size: 12px; }
       .ghSection { padding: 20px 0 32px; }
-      .ghCategoryBanner { padding: 28px 0 24px; }
-      .ghBannerAction { font-size: clamp(2.8rem, 8vw, 4rem); }
-      .ghBannerCategory { font-size: clamp(1.2rem, 3vw, 1.8rem); }
-      .ghGrid { gap: 16px; }
-      .ghArticleRow { grid-template-columns: 72px 1fr; gap: 10px; padding: 12px 14px; }
-      .ghThumbWrap { width: 72px; height: 52px; }
-      .ghFeatBody { padding: 14px 16px 16px; }
-      .ghFeatDesc { -webkit-line-clamp: 2; }
+      .ghCategoryBanner { min-height: 160px; }
+      .ghCategoryBannerContent { padding: 28px 0 24px; }
+      .ghBannerAction { font-size: clamp(2.2rem, 8vw, 3.2rem); }
+      .ghBannerCategory { font-size: clamp(1rem, 3vw, 1.4rem); }
+      .ghCatHeading { margin-bottom: 18px; }
     }
   </style>
 </Base>
@@ -681,7 +640,6 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
     var items = Array.prototype.slice.call(ribbon.querySelectorAll(".ghRibbonItem"));
     if (!items.length) return;
 
-    /* Activate the ribbon item whose hash matches the current URL hash */
     function syncActive() {
       var hash = window.location.hash || "";
       var matched = false;
@@ -691,11 +649,9 @@ const articleGuides = topicGuides.filter((g) => g !== featuredGuide);
         item.classList.toggle("is-active", active);
         if (active) {
           matched = true;
-          /* Scroll active item into view on mobile */
           item.scrollIntoView({ inline: "nearest", block: "nearest" });
         }
       });
-      /* Default: highlight first item when no hash */
       if (!matched && items[0]) {
         items[0].classList.add("is-active");
       }
