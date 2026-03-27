@@ -89,7 +89,6 @@ const pills = [
                     </a>
                   ))}
                 </div>
-                <a class="dropFooter guidesFooter" href={`${cityBase}/guides/`}>All city guides →</a>
               </div>
             </div>
           )}
@@ -197,16 +196,20 @@ const pills = [
         drop.addEventListener("mouseleave", scheduleClose);
       }
 
-      /* Click toggle */
-      pill.addEventListener("click", function (e) {
-        e.preventDefault();
-        if (wrap.classList.contains("open")) {
-          wrap.classList.remove("open");
-          pill.setAttribute("aria-expanded", "false");
-        } else {
-          openWrap();
-        }
-      });
+      /* Arrow click — toggle dropdown without navigating away */
+      var arrow = wrap.querySelector(".dropArrow");
+      if (arrow) {
+        arrow.addEventListener("click", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (wrap.classList.contains("open")) {
+            wrap.classList.remove("open");
+            pill.setAttribute("aria-expanded", "false");
+          } else {
+            openWrap();
+          }
+        });
+      }
     });
 
     /* Close on outside click */
