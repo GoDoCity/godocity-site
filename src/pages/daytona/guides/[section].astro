@@ -386,17 +386,20 @@ function guideSlug(g: (typeof allGuides)[number]) {
       position: sticky;
       top: 0;
       z-index: 100;
+      width: 100%;
       display: flex;
       justify-content: center;
-      width: 100%;
       background: var(--surface);
       border-bottom: 2px solid var(--border);
       box-shadow: 0 2px 10px rgba(0,0,0,0.12);
     }
+    /* Override any global .container max-width / padding so ribbon stays centered */
     .ghRibbonOuter .container {
+      width: 100%;
+      max-width: none;
+      padding: 0;
       display: flex;
       justify-content: center;
-      width: 100%;
     }
     .ghRibbon {
       display: flex;
@@ -405,17 +408,11 @@ function guideSlug(g: (typeof allGuides)[number]) {
       justify-content: center;
       width: 100%;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
     .ghRibbon::-webkit-scrollbar { display: none; }
-
-    /* Ensure ribbon container parent is fully centered */
-    .ghRibbonOuter {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-    }
 
     .ghRibbonItem {
       flex-shrink: 0;
@@ -453,11 +450,12 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
 
     @media (max-width: 640px) {
-      /* Mobile: no wrap, horizontal swipe */
+      /* Mobile: single-line horizontal swipe, never stacks */
       .ghRibbon {
         flex-wrap: nowrap;
         overflow-x: auto;
         justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
       }
       .ghRibbonItem {
         padding: 0 14px;
@@ -583,7 +581,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
     .ghCardImgWrap {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 6;
+      aspect-ratio: 16 / 7;
       overflow: hidden;
       background: var(--surface2);
       flex-shrink: 0;
@@ -605,7 +603,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
 
     .ghCardBody {
-      padding: 10px 18px 12px;
+      padding: 9px 18px 10px;
       display: flex;
       flex-direction: column;
       gap: 4px;
@@ -636,7 +634,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
     .ghArticleCard:hover .ghCardTitle { color: #ffd24a; }
     .ghCardDesc {
-      font-size: 19px;
+      font-size: 28px;
       color: var(--muted);
       line-height: 1.5;
       margin: 0;
@@ -687,8 +685,9 @@ function guideSlug(g: (typeof allGuides)[number]) {
       .ghSection { padding: 20px 0 32px; }
       .ghCategoryBanner { min-height: 160px; }
       .ghCategoryBannerContent { padding: 28px 0 24px; justify-content: center; }
-      .ghBannerAction { font-size: clamp(2.2rem, 8vw, 3.2rem); text-align: center; }
-      .ghBannerCategory { font-size: clamp(1rem, 3vw, 1.4rem); text-align: center; }
+      /* +40% neon title and sub-label scaling on mobile */
+      .ghBannerAction { font-size: clamp(3.1rem, 11.2vw, 4.5rem); text-align: center; }
+      .ghBannerCategory { font-size: clamp(1.4rem, 4.2vw, 2rem); text-align: center; }
       .ghCatHeading { margin-bottom: 18px; }
     }
   </style>

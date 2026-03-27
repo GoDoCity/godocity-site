@@ -506,7 +506,9 @@ const sections: SectionDef[] = [
       .ghBlocks { grid-template-columns: 1fr 1fr; gap: 6px; }
       .ghBlock { min-height: 58px; }
       .ghBlockContent { padding: 8px 10px; }
-      .ghBlockAction { font-size: clamp(0.9rem, 3.5vw, 1.3rem); }
+      /* +40% neon title scaling on mobile — plenty of horizontal room */
+      .ghBlockAction { font-size: clamp(1.26rem, 4.9vw, 1.82rem); }
+      .ghBlockCategory { font-size: 1rem; }
       .ghPageHeroContent { padding: 28px 16px 20px; }
       .ghPageHeroTagline { margin-bottom: 12px; }
       /* Mobile ribbon: no wrap, horizontal swipe */
@@ -514,6 +516,7 @@ const sections: SectionDef[] = [
         flex-wrap: nowrap;
         overflow-x: auto;
         justify-content: flex-start;
+        -webkit-overflow-scrolling: touch;
       }
       .ghSubRibbonItem {
         padding: 0 14px;
@@ -714,7 +717,7 @@ const sections: SectionDef[] = [
     }
 
     .ghCardBody {
-      padding: 5px 22px 7px;
+      padding: 4px 22px 6px;
       display: flex;
       flex-direction: column;
       gap: 3px;
@@ -730,7 +733,7 @@ const sections: SectionDef[] = [
     }
     .ghArticleCard:hover .ghCardTitle { color: #ffd24a; }
     .ghCardDesc {
-      font-size: 13px;
+      font-size: 32px;
       color: var(--muted);
       line-height: 1.5;
       margin: 0;
@@ -776,11 +779,12 @@ const sections: SectionDef[] = [
       .ghSection { padding: 0 0 32px; }
       .ghSectionHero { min-height: 140px; }
       .ghSectionHeroContent { padding: 24px 0; }
-      .ghSectionHeroTitle { font-size: clamp(1.6rem, 7vw, 2.2rem); }
+      /* +40% section banner neon title on mobile */
+      .ghSectionHeroTitle { font-size: clamp(2.2rem, 9.8vw, 3.1rem); }
       .ghArticleGrid { gap: 14px; }
       .ghViewMoreRow { margin-top: 20px; }
       .ghCardTitle { font-size: 26px; }
-      .ghCardDesc { font-size: 11px; }
+      .ghCardDesc { font-size: 23px; }
       .ghCardBody { padding: 4px 14px 6px; gap: 3px; }
     }
   </style>
