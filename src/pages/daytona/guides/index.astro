@@ -457,8 +457,8 @@ const sections: SectionDef[] = [
     }
     .ghBlockAction {
       display: block;
-      font-family: 'Neonderthaw', cursive;
-      font-size: clamp(2rem, 3.2vw, 2.8rem);
+      font-family: 'Monoton', cursive;
+      font-size: clamp(1.4rem, 2.4vw, 2.2rem);
       font-weight: 400;
       letter-spacing: 0;
       color: #ffffff;
@@ -467,30 +467,22 @@ const sections: SectionDef[] = [
       -webkit-font-smoothing: antialiased;
       transition: color 200ms ease, text-shadow 200ms ease;
     }
-    /* Neon sign colors per category block — 2-layer: white core + color glow */
+    /* Neon sign colors per category block — clean tight glow */
     .ghBlock--coast .ghBlockAction {
       color: #00eaff;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 20px #00eaff, 0 0 40px #00eaff;
+      text-shadow: 0 0 4px #00eaff;
     }
     .ghBlock--drive .ghBlockAction {
       color: #00ff88;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 20px #00ff88, 0 0 40px #00ff88;
+      text-shadow: 0 0 4px #00ff88;
     }
     .ghBlock--surf .ghBlockAction {
-      color: #ff00cc;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 20px #ff00cc, 0 0 40px #ff00cc;
+      color: #ff2bd6;
+      text-shadow: 0 0 4px #ff2bd6;
     }
     .ghBlock--essentials .ghBlockAction {
       color: #ffd24a;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 20px #ffd24a, 0 0 40px #ffd24a;
+      text-shadow: 0 0 4px #ffd24a;
     }
     .ghBlockCategory {
       display: block;
@@ -504,7 +496,7 @@ const sections: SectionDef[] = [
       width: 100%;
       margin: 2px auto 0;
     }
-    .ghBlock:hover .ghBlockAction   { color: #ffd24a; text-shadow: 0 0 4px #fff, 0 0 16px rgba(255,210,74,0.9); }
+    .ghBlock:hover .ghBlockAction   { color: #ffd24a; text-shadow: 0 0 4px #ffd24a; }
     .ghBlock:hover .ghBlockCategory { color: rgba(255,210,74,0.85); }
 
     @media (max-width: 860px) {
@@ -514,20 +506,21 @@ const sections: SectionDef[] = [
       .ghBlocks { grid-template-columns: 1fr 1fr; gap: 6px; }
       .ghBlock { min-height: 58px; }
       .ghBlockContent { padding: 8px 10px; }
-      .ghBlockAction { font-size: clamp(1.2rem, 4vw, 1.575rem); }
+      .ghBlockAction { font-size: clamp(0.9rem, 3.5vw, 1.3rem); }
       .ghPageHeroContent { padding: 28px 16px 20px; }
       .ghPageHeroTagline { margin-bottom: 12px; }
+      /* Mobile ribbon: no wrap, horizontal swipe */
       .ghSubRibbon {
-        flex-wrap: wrap;
-        overflow-x: hidden;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        justify-content: flex-start;
       }
       .ghSubRibbonItem {
-        padding: 0 16px;
-        font-size: 16px;
+        padding: 0 14px;
+        font-size: 14px;
         height: 48px;
-        flex-shrink: 1;
-        white-space: normal;
-        text-align: center;
+        flex-shrink: 0;
+        white-space: nowrap;
       }
     }
 
@@ -578,8 +571,8 @@ const sections: SectionDef[] = [
     }
 
     .ghSectionHeroTitle {
-      font-family: 'Neonderthaw', cursive;
-      font-size: clamp(3rem, 6.5vw, 5rem);
+      font-family: 'Monoton', cursive;
+      font-size: clamp(2.2rem, 5vw, 4rem);
       font-weight: 400;
       letter-spacing: 0;
       color: #ffffff;
@@ -587,32 +580,23 @@ const sections: SectionDef[] = [
       line-height: 1.1;
       text-align: center;
       -webkit-font-smoothing: antialiased;
-      text-shadow: 0 2px 12px rgba(0,0,0,0.5);
     }
-    /* Neon sign colors on section banners — 2-layer: white core + color glow */
+    /* Neon sign colors on section banners — clean tight glow */
     .ghSectionHero--live .ghSectionHeroTitle {
       color: #00eaff;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 20px #00eaff, 0 0 50px #00eaff, 0 0 90px rgba(0,234,255,0.4);
+      text-shadow: 0 0 4px #00eaff;
     }
     .ghSectionHero--work .ghSectionHeroTitle {
       color: #00ff88;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 20px #00ff88, 0 0 50px #00ff88, 0 0 90px rgba(0,255,136,0.4);
+      text-shadow: 0 0 4px #00ff88;
     }
     .ghSectionHero--play .ghSectionHeroTitle {
-      color: #ff00cc;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 20px #ff00cc, 0 0 50px #ff00cc, 0 0 90px rgba(255,0,204,0.4);
+      color: #ff2bd6;
+      text-shadow: 0 0 4px #ff2bd6;
     }
     .ghSectionHero--best .ghSectionHeroTitle {
       color: #ffd24a;
-      text-shadow:
-        0 0 4px #fff,
-        0 0 20px #ffd24a, 0 0 50px #ffd24a, 0 0 90px rgba(255,210,74,0.4);
+      text-shadow: 0 0 4px #ffd24a;
     }
 
     /* ── Subcategory ribbon (below hero banner) ── */
@@ -636,12 +620,12 @@ const sections: SectionDef[] = [
 
     .ghSubRibbon {
       display: flex;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       align-items: stretch;
       justify-content: center;
       width: 100%;
       margin: 0 auto;
-      overflow-x: hidden;
+      overflow-x: auto;
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
@@ -651,9 +635,9 @@ const sections: SectionDef[] = [
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
-      padding: 0 28px;
-      height: 72px;
-      font-size: 24px;
+      padding: 0 20px;
+      height: 56px;
+      font-size: 18px;
       font-weight: 800;
       letter-spacing: 0.09em;
       text-transform: uppercase;
@@ -663,8 +647,14 @@ const sections: SectionDef[] = [
       transition: color 140ms ease, border-color 140ms ease;
       white-space: nowrap;
     }
-    .ghSubRibbonItem + .ghSubRibbonItem {
-      border-left: 1px solid var(--border);
+    /* Dot separator — replaces border-left */
+    .ghSubRibbonItem + .ghSubRibbonItem::before {
+      content: "•";
+      margin-right: 20px;
+      color: var(--muted);
+      opacity: 0.5;
+      font-weight: 400;
+      font-size: 14px;
     }
     .ghSubRibbonItem:hover {
       color: #ffd24a;
@@ -702,7 +692,7 @@ const sections: SectionDef[] = [
     .ghCardImgWrap {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 7;
+      aspect-ratio: 16 / 6;
       overflow: hidden;
       background: var(--surface2);
       flex-shrink: 0;
@@ -724,7 +714,7 @@ const sections: SectionDef[] = [
     }
 
     .ghCardBody {
-      padding: 6px 22px 8px;
+      padding: 5px 22px 7px;
       display: flex;
       flex-direction: column;
       gap: 3px;
@@ -740,7 +730,7 @@ const sections: SectionDef[] = [
     }
     .ghArticleCard:hover .ghCardTitle { color: #ffd24a; }
     .ghCardDesc {
-      font-size: 16px;
+      font-size: 13px;
       color: var(--muted);
       line-height: 1.5;
       margin: 0;
@@ -790,8 +780,8 @@ const sections: SectionDef[] = [
       .ghArticleGrid { gap: 14px; }
       .ghViewMoreRow { margin-top: 20px; }
       .ghCardTitle { font-size: 26px; }
-      .ghCardDesc { font-size: 13px; }
-      .ghCardBody { padding: 5px 14px 7px; gap: 3px; }
+      .ghCardDesc { font-size: 11px; }
+      .ghCardBody { padding: 4px 14px 6px; gap: 3px; }
     }
   </style>
 </Base>
