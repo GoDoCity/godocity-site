@@ -341,7 +341,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
       width: 100%;
     }
     .ghBannerAction {
-      font-family: "Yellowtail", cursive;
+      font-family: 'CustomNeon', "Yellowtail", cursive;
       font-size: clamp(4rem, 8.5vw, 6.5rem);
       font-weight: 400;
       letter-spacing: 0;
@@ -423,6 +423,13 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
     .ghRibbon::-webkit-scrollbar { display: none; }
 
+    /* Ensure ribbon container parent is fully centered */
+    .ghRibbonOuter {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+
     .ghRibbonItem {
       flex-shrink: 0;
       display: inline-flex;
@@ -453,7 +460,18 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
 
     @media (max-width: 640px) {
-      .ghRibbonItem { padding: 0 16px; font-size: 16px; height: 52px; }
+      .ghRibbon {
+        flex-wrap: wrap;
+        overflow-x: hidden;
+      }
+      .ghRibbonItem {
+        padding: 0 16px;
+        font-size: 16px;
+        height: 48px;
+        flex-shrink: 1;
+        white-space: normal;
+        text-align: center;
+      }
     }
 
     /* ── Section shells ── */
@@ -593,10 +611,10 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
 
     .ghCardBody {
-      padding: 14px 18px 17px;
+      padding: 12px 18px 14px;
       display: flex;
       flex-direction: column;
-      gap: 5px;
+      gap: 4px;
       flex: 1;
     }
     .ghCardKicker {
@@ -624,7 +642,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
     .ghArticleCard:hover .ghCardTitle { color: #ffd24a; }
     .ghCardDesc {
-      font-size: 18px;
+      font-size: 15px;
       color: var(--muted);
       line-height: 1.5;
       margin: 0;
