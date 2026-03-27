@@ -358,63 +358,54 @@ const sections: SectionDef[] = [
       text-decoration: none;
       background-color: #1c2028;
       border-radius: 16px;
-      border: 2px solid rgba(255,255,255,0.12);
+      border: none;
       min-height: 72px;
-      transition: border-color 220ms ease, box-shadow 220ms ease, transform 160ms ease;
+      transition: box-shadow 220ms ease, transform 160ms ease;
     }
     .ghBlock:hover {
       box-shadow: 0 6px 24px rgba(0,0,0,0.35);
       transform: translateY(-2px);
     }
 
-    /* Neon accent borders per category — tubular glass style */
+    /* Neon glow per category — no borders, clean background */
     .ghBlock--coast    {
       --block-bg-img: url('/images/guides/coast-bg.jpg');
       background-color: #1e2530;
-      border-color: #00e5ff;
       border-radius: 16px;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.18),
-        0 0 10px rgba(0,229,255,0.5),
-        0 0 24px rgba(0,229,255,0.25);
+        0 0 10px rgba(0,234,255,0.5),
+        0 0 24px rgba(0,234,255,0.25);
     }
     .ghBlock--coast:hover {
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.22),
-        0 0 22px rgba(0,229,255,0.75),
-        0 0 45px rgba(0,229,255,0.4),
+        0 0 22px rgba(0,234,255,0.75),
+        0 0 45px rgba(0,234,255,0.4),
         0 6px 24px rgba(0,0,0,0.35);
     }
     .ghBlock--drive    {
       --block-bg-img: url('/images/guides/drive-bg.jpg');
       background-color: #1a2020;
-      border-color: #00ff6e;
       border-radius: 16px;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.18),
-        0 0 10px rgba(0,255,110,0.5),
-        0 0 24px rgba(0,255,110,0.25);
+        0 0 10px rgba(0,255,136,0.5),
+        0 0 24px rgba(0,255,136,0.25);
     }
     .ghBlock--drive:hover {
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.22),
-        0 0 22px rgba(0,255,110,0.75),
-        0 0 45px rgba(0,255,110,0.4),
+        0 0 22px rgba(0,255,136,0.75),
+        0 0 45px rgba(0,255,136,0.4),
         0 6px 24px rgba(0,0,0,0.35);
     }
     .ghBlock--surf     {
       --block-bg-img: url('/images/guides/surf-bg.jpg');
       background-color: #1c2030;
-      border-color: #ff00cc;
       border-radius: 16px;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.18),
         0 0 10px rgba(255,0,204,0.5),
         0 0 24px rgba(255,0,204,0.25);
     }
     .ghBlock--surf:hover {
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.22),
         0 0 22px rgba(255,0,204,0.75),
         0 0 45px rgba(255,0,204,0.4),
         0 6px 24px rgba(0,0,0,0.35);
@@ -422,18 +413,15 @@ const sections: SectionDef[] = [
     .ghBlock--essentials {
       --block-bg-img: url('/images/guides/essentials-bg.jpg');
       background-color: #201c28;
-      border-color: #ffff00;
       border-radius: 16px;
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.18),
-        0 0 10px rgba(255,255,0,0.5),
-        0 0 24px rgba(255,255,0,0.25);
+        0 0 10px rgba(255,210,74,0.5),
+        0 0 24px rgba(255,210,74,0.25);
     }
     .ghBlock--essentials:hover {
       box-shadow:
-        inset 0 1px 0 rgba(255,255,255,0.22),
-        0 0 22px rgba(255,255,0,0.75),
-        0 0 45px rgba(255,255,0,0.4),
+        0 0 22px rgba(255,210,74,0.75),
+        0 0 45px rgba(255,210,74,0.4),
         0 6px 24px rgba(0,0,0,0.35);
     }
 
@@ -469,43 +457,40 @@ const sections: SectionDef[] = [
     }
     .ghBlockAction {
       display: block;
-      font-family: 'CustomNeon', "Yellowtail", cursive;
+      font-family: 'Neonderthaw', cursive;
       font-size: clamp(2rem, 3.2vw, 2.8rem);
       font-weight: 400;
       letter-spacing: 0;
       color: #ffffff;
       line-height: 1.1;
       text-align: center;
+      -webkit-font-smoothing: antialiased;
       transition: color 200ms ease, text-shadow 200ms ease;
     }
-    /* Neon sign colors per category block — tubular: white core + layered color glow */
+    /* Neon sign colors per category block — 2-layer: white core + color glow */
     .ghBlock--coast .ghBlockAction {
-      color: #00e5ff;
+      color: #00eaff;
       text-shadow:
-        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
-        0 0 8px rgba(0,229,255,1), 0 0 18px rgba(0,229,255,0.9),
-        0 0 35px rgba(0,229,255,0.6), 0 0 65px rgba(0,229,255,0.3);
+        0 0 4px #fff,
+        0 0 20px #00eaff, 0 0 40px #00eaff;
     }
     .ghBlock--drive .ghBlockAction {
-      color: #00ff6e;
+      color: #00ff88;
       text-shadow:
-        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
-        0 0 8px rgba(0,255,110,1), 0 0 18px rgba(0,255,110,0.9),
-        0 0 35px rgba(0,255,110,0.6), 0 0 65px rgba(0,255,110,0.3);
+        0 0 4px #fff,
+        0 0 20px #00ff88, 0 0 40px #00ff88;
     }
     .ghBlock--surf .ghBlockAction {
       color: #ff00cc;
       text-shadow:
-        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
-        0 0 8px rgba(255,0,204,1), 0 0 18px rgba(255,0,204,0.9),
-        0 0 35px rgba(255,0,204,0.6), 0 0 65px rgba(255,0,204,0.3);
+        0 0 4px #fff,
+        0 0 20px #ff00cc, 0 0 40px #ff00cc;
     }
     .ghBlock--essentials .ghBlockAction {
-      color: #ffff00;
+      color: #ffd24a;
       text-shadow:
-        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
-        0 0 8px rgba(255,255,0,1), 0 0 18px rgba(255,255,0,0.9),
-        0 0 35px rgba(255,255,0,0.6), 0 0 65px rgba(255,255,0,0.3);
+        0 0 4px #fff,
+        0 0 20px #ffd24a, 0 0 40px #ffd24a;
     }
     .ghBlockCategory {
       display: block;
@@ -517,9 +502,9 @@ const sections: SectionDef[] = [
       line-height: 1;
       text-align: center;
       width: 100%;
-      margin: 0 auto;
+      margin: 2px auto 0;
     }
-    .ghBlock:hover .ghBlockAction   { color: #ffd24a; text-shadow: 0 0 8px rgba(255,210,74,0.8); }
+    .ghBlock:hover .ghBlockAction   { color: #ffd24a; text-shadow: 0 0 4px #fff, 0 0 16px rgba(255,210,74,0.9); }
     .ghBlock:hover .ghBlockCategory { color: rgba(255,210,74,0.85); }
 
     @media (max-width: 860px) {
@@ -593,7 +578,7 @@ const sections: SectionDef[] = [
     }
 
     .ghSectionHeroTitle {
-      font-family: 'CustomNeon', "Yellowtail", cursive;
+      font-family: 'Neonderthaw', cursive;
       font-size: clamp(3rem, 6.5vw, 5rem);
       font-weight: 400;
       letter-spacing: 0;
@@ -601,40 +586,33 @@ const sections: SectionDef[] = [
       margin: 0 auto;
       line-height: 1.1;
       text-align: center;
+      -webkit-font-smoothing: antialiased;
       text-shadow: 0 2px 12px rgba(0,0,0,0.5);
     }
-    /* Neon sign colors on section banners — tubular: white core + layered color glow */
+    /* Neon sign colors on section banners — 2-layer: white core + color glow */
     .ghSectionHero--live .ghSectionHeroTitle {
-      color: #00e5ff;
+      color: #00eaff;
       text-shadow:
-        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
-        0 0 10px rgba(0,229,255,1), 0 0 22px rgba(0,229,255,0.85),
-        0 0 50px rgba(0,229,255,0.5), 0 0 90px rgba(0,229,255,0.25),
-        0 2px 12px rgba(0,0,0,0.5);
+        0 0 4px #fff,
+        0 0 20px #00eaff, 0 0 50px #00eaff, 0 0 90px rgba(0,234,255,0.4);
     }
     .ghSectionHero--work .ghSectionHeroTitle {
-      color: #00ff6e;
+      color: #00ff88;
       text-shadow:
-        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
-        0 0 10px rgba(0,255,110,1), 0 0 22px rgba(0,255,110,0.85),
-        0 0 50px rgba(0,255,110,0.5), 0 0 90px rgba(0,255,110,0.25),
-        0 2px 12px rgba(0,0,0,0.5);
+        0 0 4px #fff,
+        0 0 20px #00ff88, 0 0 50px #00ff88, 0 0 90px rgba(0,255,136,0.4);
     }
     .ghSectionHero--play .ghSectionHeroTitle {
       color: #ff00cc;
       text-shadow:
-        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
-        0 0 10px rgba(255,0,204,1), 0 0 22px rgba(255,0,204,0.85),
-        0 0 50px rgba(255,0,204,0.5), 0 0 90px rgba(255,0,204,0.25),
-        0 2px 12px rgba(0,0,0,0.5);
+        0 0 4px #fff,
+        0 0 20px #ff00cc, 0 0 50px #ff00cc, 0 0 90px rgba(255,0,204,0.4);
     }
     .ghSectionHero--best .ghSectionHeroTitle {
-      color: #ffff00;
+      color: #ffd24a;
       text-shadow:
-        0 0 2px #fff, 0 0 5px rgba(255,255,255,0.8),
-        0 0 10px rgba(255,255,0,1), 0 0 22px rgba(255,255,0,0.85),
-        0 0 50px rgba(255,255,0,0.5), 0 0 90px rgba(255,255,0,0.25),
-        0 2px 12px rgba(0,0,0,0.5);
+        0 0 4px #fff,
+        0 0 20px #ffd24a, 0 0 50px #ffd24a, 0 0 90px rgba(255,210,74,0.4);
     }
 
     /* ── Subcategory ribbon (below hero banner) ── */
@@ -658,10 +636,12 @@ const sections: SectionDef[] = [
 
     .ghSubRibbon {
       display: flex;
+      flex-wrap: wrap;
       align-items: stretch;
       justify-content: center;
       width: 100%;
-      overflow-x: auto;
+      margin: 0 auto;
+      overflow-x: hidden;
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
@@ -722,7 +702,7 @@ const sections: SectionDef[] = [
     .ghCardImgWrap {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 8;
+      aspect-ratio: 16 / 7;
       overflow: hidden;
       background: var(--surface2);
       flex-shrink: 0;
@@ -744,14 +724,14 @@ const sections: SectionDef[] = [
     }
 
     .ghCardBody {
-      padding: 9px 22px 11px;
+      padding: 6px 22px 8px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
       flex: 1;
     }
     .ghCardTitle {
-      font-size: 28px;
+      font-size: 35px;
       font-weight: 700;
       color: var(--text);
       line-height: 1.25;
@@ -760,7 +740,7 @@ const sections: SectionDef[] = [
     }
     .ghArticleCard:hover .ghCardTitle { color: #ffd24a; }
     .ghCardDesc {
-      font-size: 19px;
+      font-size: 16px;
       color: var(--muted);
       line-height: 1.5;
       margin: 0;
@@ -809,9 +789,9 @@ const sections: SectionDef[] = [
       .ghSectionHeroTitle { font-size: clamp(1.6rem, 7vw, 2.2rem); }
       .ghArticleGrid { gap: 14px; }
       .ghViewMoreRow { margin-top: 20px; }
-      .ghCardTitle { font-size: 21px; }
-      .ghCardDesc { font-size: 15px; }
-      .ghCardBody { padding: 8px 14px 10px; gap: 4px; }
+      .ghCardTitle { font-size: 26px; }
+      .ghCardDesc { font-size: 13px; }
+      .ghCardBody { padding: 5px 14px 7px; gap: 3px; }
     }
   </style>
 </Base>
