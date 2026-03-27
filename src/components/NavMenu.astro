@@ -23,10 +23,10 @@ const topicItems = [
 ];
 
 const guideItems = [
-  { label: "COAST",      emoji: "🌊", href: `${cityBase}/guides/live/` },
-  { label: "DRIVE",      emoji: "🚗", href: `${cityBase}/guides/work/` },
-  { label: "SURF",       emoji: "🏄", href: `${cityBase}/guides/play/` },
-  { label: "ESSENTIALS", emoji: "⭐", href: `${cityBase}/guides/best/` },
+  { label: "COAST",      emoji: "🌊", href: `${cityBase}/guides/live/`, key: "coast",      color: "#00eaff" },
+  { label: "DRIVE",      emoji: "🚗", href: `${cityBase}/guides/work/`, key: "drive",      color: "#00ff88" },
+  { label: "SURF",       emoji: "🏄", href: `${cityBase}/guides/play/`, key: "surf",       color: "#ff00cc" },
+  { label: "ESSENTIALS", emoji: "⭐", href: `${cityBase}/guides/best/`, key: "essentials", color: "#ffd24a" },
 ];
 
 const diyItems = [
@@ -41,7 +41,7 @@ const diyItems = [
 const pills = [
   { label: "Home",      href: `${cityBase}/`,           dropdown: null },
   { label: "Topics",    href: `${cityBase}/topics/`,    dropdown: "topics" },
-  { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: null },
+  { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides" },
   { label: "Events",    href: `${cityBase}/events/`,    dropdown: null },
   { label: "DIY",       href: `${cityBase}/diy/`,       dropdown: "diy" },
   { label: "Advertise", href: `${cityBase}/advertise/`, dropdown: null },
@@ -79,16 +79,17 @@ const pills = [
           {p.dropdown === "guides" && (
             <div class="dropdown guidesDropdown" role="menu">
               <div class="dropBridge" aria-hidden="true"></div>
-              <div class="dropInner">
+              <div class="dropInner guidesDropInner">
                 <div class="guideList">
                   {guideItems.map((g) => (
-                    <a class="guideDropItem" href={g.href} role="menuitem">
+                    <a class="guideDropItem" href={g.href} role="menuitem"
+                       data-guide={g.key} style={`--guide-color:${g.color}`}>
                       <span class="guideIcon">{g.emoji}</span>
                       <span class="guideItemLabel">{g.label}</span>
                     </a>
                   ))}
                 </div>
-                <a class="dropFooter" href={`${cityBase}/guides/`}>All city guides →</a>
+                <a class="dropFooter guidesFooter" href={`${cityBase}/guides/`}>All city guides →</a>
               </div>
             </div>
           )}
@@ -326,10 +327,12 @@ const pills = [
 
   /* The visible panel lives inside dropInner */
   .dropInner {
-    background: var(--bg, #0b0d10);
+    background: rgba(11,13,16,.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border: 1px solid var(--border, rgba(255,255,255,.12));
     border-radius: 16px;
-    box-shadow: 0 16px 48px rgba(0,0,0,.45), 0 2px 8px rgba(0,0,0,.3);
+    box-shadow: 0 16px 48px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.35);
     overflow: hidden;
   }
 
@@ -371,17 +374,31 @@ const pills = [
     background: color-mix(in srgb, var(--brand1) 14%, transparent);
   }
 
-  .guidesDropdown { min-width: 200px; }
-  .guideList { padding: 12px 12px 8px; display: grid; gap: 4px; }
+  .guidesDropdown { min-width: 210px; }
+  .guidesDropInner { border-color: rgba(255,255,255,.15); }
+  .guideList { padding: 10px 10px 6px; display: grid; gap: 3px; }
   .guideDropItem {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 12px; border-radius: 10px;
     text-decoration: none; color: var(--text);
-    font-size: 15px; font-weight: 800;
-    transition: background 140ms;
+    transition: background 150ms, color 150ms, box-shadow 150ms;
   }
-  .guideDropItem:hover { background: var(--pillBg); color: var(--brand1); }
+  .guideDropItem:hover {
+    background: color-mix(in srgb, var(--guide-color) 14%, transparent);
+    color: var(--guide-color);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--guide-color) 35%, transparent);
+  }
   .guideIcon { font-size: 18px; flex-shrink: 0; }
+  .guideItemLabel {
+    font-family: 'Monoton', cursive;
+    font-size: 11.5px;
+    letter-spacing: 0.04em;
+    transition: text-shadow 150ms;
+  }
+  .guideDropItem:hover .guideItemLabel {
+    text-shadow: 0 0 8px var(--guide-color), 0 0 20px color-mix(in srgb, var(--guide-color) 60%, transparent);
+  }
+  .guidesFooter { border-top-color: rgba(255,255,255,.10); }
 
   .dropFooter {
     display: block;
