@@ -179,17 +179,6 @@ const guideCards = guideHero
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
   <div class="pageWrap">
 
-    {/* ── DIAGNOSTIC: Inline Easter Egg SVG — forced visible, red border confirms box ── */}
-    <svg viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"
-         style="position: absolute; z-index: 9999; top: 50%; left: 50%; width: 300px; height: 400px; border: 2px solid red; transform: translate(-50%, -50%); pointer-events: none;">
-      <!-- Egg outline -->
-      <path d="M50,6 C26,6 11,34 11,65 C11,97 28,124 50,124 C72,124 89,97 89,65 C89,34 74,6 50,6 Z"
-            fill="none" stroke="#bf94ff" stroke-width="2.5"/>
-      <!-- Pastel stripes -->
-      <path d="M16,55 Q50,48 84,55" fill="none" stroke="#ff6ad5" stroke-width="1.8" opacity="0.85"/>
-      <path d="M13,72 Q50,64 87,72" fill="none" stroke="#00ff9d" stroke-width="1.8" opacity="0.85"/>
-      <path d="M16,89 Q50,82 84,89" fill="none" stroke="#ffef78" stroke-width="1.8" opacity="0.85"/>
-    </svg>
 
     {/* ── NEWSLETTER BAND — 160px compact utility strip ── */}
     <div class="nlBand" id="nlBand">
@@ -391,7 +380,16 @@ const guideCards = guideHero
 
           {/* ── GUIDES — 1 hero + 3 cards, matches Top Stories layout ── */}
           <div class="guidesHead">
-            <span class="topicsLabel">City Guides</span>
+            <div class="easter-title-wrap">
+              <svg class="easter-egg-svg" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M50,6 C26,6 11,34 11,65 C11,97 28,124 50,124 C72,124 89,97 89,65 C89,34 74,6 50,6 Z"
+                      fill="none" stroke="#bf94ff" stroke-width="2.5"/>
+                <path d="M16,55 Q50,48 84,55" fill="none" stroke="#bf94ff" stroke-width="1.4" opacity="0.6"/>
+                <path d="M13,72 Q50,64 87,72" fill="none" stroke="#bf94ff" stroke-width="1.4" opacity="0.6"/>
+                <path d="M16,89 Q50,82 84,89" fill="none" stroke="#bf94ff" stroke-width="1.4" opacity="0.6"/>
+              </svg>
+              <span class="topicsLabel" style="position:relative;z-index:2;">DAYTONA'S GUIDE</span>
+            </div>
             <a class="guidesMoreLink" href="/daytona/guides/">More Guides →</a>
           </div>
 
@@ -590,6 +588,30 @@ const guideCards = guideHero
   </div>{/* end .pageWrap */}
 
   <style>
+    /* ── Easter Egg — Spring decoration behind "DAYTONA'S GUIDE" ── */
+    .easter-title-wrap {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+    .easter-egg-svg {
+      display: block;
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 70px;
+      height: 90px;
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px rgba(191,148,255,0.7));
+      animation: springEggPulse 2.8s ease-in-out infinite;
+      z-index: 1;
+    }
+    @keyframes springEggPulse {
+      0%, 100% { opacity: 0.35; }
+      50%       { opacity: 0.75; }
+    }
+
     /* ── Century Gothic / Arial fallback across entire site ── */
     :global(html), :global(body) {
       font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
