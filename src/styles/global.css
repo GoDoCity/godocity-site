@@ -2,8 +2,8 @@
   /* Core palette */
   --bg:#0b0d10;
   --panel:#10141a;
-  --text:#e8edf4;
-  --muted:#a8b3c2;
+  --text:#ffffff;
+  --muted:#E0E0E0;
   --line:#1f2631;
   --accent:#ffd24a;
 
@@ -41,6 +41,8 @@ html,body{
   color:var(--text);
   line-height:1.6;
   overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
 }
 
 /* ── Custom Neon Font (tubular look) ── */
