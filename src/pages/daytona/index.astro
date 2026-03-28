@@ -180,9 +180,9 @@ const guideCards = guideHero
   <div class="pageWrap">
     {/* ── NEWSLETTER BAND — 160px compact utility strip ── */}
     <div class="nlBand" id="nlBand">
-      {/* Spring Glow — two bookend eggs flanking "Good News Daytona!" */}
-      <span class="nlEgg nlEgg--left" aria-hidden="true">🥚</span>
-      <span class="nlEgg nlEgg--right" aria-hidden="true">🥚</span>
+      {/* Spring Glow — two bookend bunnies flanking "Good News Daytona!" */}
+      <span class="nlEgg nlEgg--left" aria-hidden="true">🐰</span>
+      <span class="nlEgg nlEgg--right" aria-hidden="true">🐰</span>
       <div class="nlInner">
         <div class="nlContent" id="nlContent">
           <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
@@ -684,20 +684,31 @@ const guideCards = guideHero
       overflow: hidden;
       transition: height 350ms ease;
     }
-    /* Spring Glow — two bookend eggs flanking "Good News Daytona!" */
+    /* Spring Glow — two bookend bunnies flanking "Good News Daytona!" */
+    @keyframes nlBunnyJiggle {
+      0%, 80%, 100% { transform: translateY(-50%) rotate(0deg); }
+      83%            { transform: translateY(-50%) rotate(-10deg); }
+      86%            { transform: translateY(-50%) rotate(10deg); }
+      89%            { transform: translateY(-50%) rotate(-5deg); }
+      92%            { transform: translateY(-50%) rotate(0deg); }
+    }
     .nlEgg {
       position: absolute;
       top: 50%;
       font-size: 80px;
       line-height: 1;
-      opacity: 0.8;
+      opacity: 0.88;
       pointer-events: none;
       user-select: none;
       z-index: 0;
-      filter: drop-shadow(0 0 10px rgba(191,148,255,0.7));
+      filter:
+        drop-shadow(0 -4px 10px #bf94ff)
+        drop-shadow(0  4px 10px #ff8da1)
+        drop-shadow(0  0   16px #ffef78);
+      animation: nlBunnyJiggle 5s ease-in-out infinite;
     }
-    .nlEgg--left  { left: 24px;  transform: translateY(-50%); }
-    .nlEgg--right { right: 24px; left: auto; transform: translateY(-50%); }
+    .nlEgg--left  { left: clamp(12px, 2vw, 24px);  transform: translateY(-50%); }
+    .nlEgg--right { right: clamp(12px, 2vw, 24px); left: auto; transform: translateY(-50%); }
     .nlInner {
       width: 100%;
       max-width: 1280px;
