@@ -336,7 +336,7 @@ body > footer { order: 2; }
   right: 0;
   height: 2px;
   background: linear-gradient(90deg, #ff6ad5, #00ff9d, #bf94ff);
-  box-shadow: 0 0 8px rgba(0,255,157,0.5), 0 0 4px rgba(191,148,255,0.4);
+  box-shadow: 0 0 8px rgba(230, 230, 250, 0.8), 0 0 14px rgba(191,148,255,0.6), 0 0 6px rgba(0,255,157,0.5);
   pointer-events: none;
   z-index: 1;
 }
