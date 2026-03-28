@@ -321,10 +321,12 @@ body > footer { order: 2; }
 .siteFooter {
   position: static !important;
 }
-/* Remove the divider line under nav pills */
+/* DIAGNOSTIC: Hot Pink nav connectivity test — remove after confirming */
 .topbar {
   border-bottom: none !important;
   box-shadow: none !important;
+  background: #ff00cc !important;
+  position: relative;           /* ensures ::after is contained */
 }
 
 /* Spring Glow — Holiday Ribbon (temporary Easter override) */
