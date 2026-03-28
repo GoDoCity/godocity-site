@@ -159,8 +159,9 @@ const sections: SectionDef[] = [
     <div class="ghPageHero">
       <div class="ghPageHeroOverlay"></div>
       <div class="ghPageHeroContent">
-        {/* Easter Egg — subtle pulsing egg centered behind "Daytona's Guide" */}
-        <span class="ghHeroEgg" aria-hidden="true">🥚</span>
+        {/* Spring Glow — two bookend eggs flanking "Daytona's Guide" */}
+        <span class="ghHeroEgg ghHeroEgg--left" aria-hidden="true">🥚</span>
+        <span class="ghHeroEgg ghHeroEgg--right" aria-hidden="true">🥚</span>
         <h1 class="ghPageHeroTitle">Daytona's Guide</h1>
         <p class="ghPageHeroTagline">Your local guide to living, working, and playing in Daytona Beach.</p>
         <div class="ghBlocks">
@@ -343,25 +344,20 @@ const sections: SectionDef[] = [
       text-align: center;
     }
 
-    /* Easter Egg — pulsing egg centered behind "Daytona's Guide" */
+    /* Spring Glow — two bookend eggs flanking "Daytona's Guide" */
     .ghHeroEgg {
       position: absolute;
-      left: 50%;
-      top: 40%;
-      transform: translate(-50%, -50%);
-      font-size: 130px;
+      top: 38%;
+      font-size: 150px;
       line-height: 1;
-      opacity: 0.10;
+      opacity: 0.8;
       pointer-events: none;
       user-select: none;
-      z-index: -1;
-      filter: drop-shadow(0 0 14px rgba(191,148,255,0.6));
-      animation: ghEggPulse 4s ease-in-out infinite;
+      z-index: 2;
+      filter: drop-shadow(0 0 14px rgba(191,148,255,0.7));
     }
-    @keyframes ghEggPulse {
-      0%, 100% { opacity: 0.07; transform: translate(-50%, -50%) scale(0.95); }
-      50%       { opacity: 0.16; transform: translate(-50%, -50%) scale(1.05); }
-    }
+    .ghHeroEgg--left  { left: 24px;  transform: translateY(-50%); }
+    .ghHeroEgg--right { right: 24px; left: auto; transform: translateY(-50%); }
 
     /* 4-block nav row inside hero */
     .ghBlocks {
