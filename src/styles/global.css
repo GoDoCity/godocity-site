@@ -321,22 +321,10 @@ body > footer { order: 2; }
 .siteFooter {
   position: static !important;
 }
-/* Spring Glow — Holiday Ribbon */
+/* Spring Glow — Holiday Ribbon (direct border, no pseudo-element) */
 .topbar {
-  position: relative;           /* ensures ::after is contained */
-}
-
-.topbar::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, #ff6ad5, #00ff9d, #bf94ff);
-  box-shadow: 0 0 8px rgba(230, 230, 250, 0.8), 0 0 14px rgba(191,148,255,0.6), 0 0 6px rgba(0,255,157,0.5);
-  pointer-events: none;
-  z-index: 1;
+  border-bottom: 3px solid #bf94ff !important;
+  box-shadow: 0 4px 10px rgba(191, 148, 255, 0.6) !important;
 }
 
 /* ── Editorial Bold — use class="editorial-bold" in Markdown/MDX ──────────────
