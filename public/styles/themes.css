@@ -2,9 +2,9 @@
 
 :root {
   --bg: #0b0d10;
-  --text: rgba(232,237,244,.96);
-  --muted: rgba(232,237,244,.80);
-  --faint: rgba(232,237,244,.58);
+  --text: #ffffff;
+  --muted: #E0E0E0;
+  --faint: rgba(224,224,224,.58);
   --border: rgba(255,255,255,.12);
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
@@ -24,9 +24,9 @@ html[data-theme="dark-yellow"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
-  --text: rgba(232,237,244,.96);
-  --muted: rgba(232,237,244,.80);
-  --faint: rgba(232,237,244,.58);
+  --text: #ffffff;
+  --muted: #E0E0E0;
+  --faint: rgba(224,224,224,.58);
   --border: rgba(255,255,255,.12);
   --accent: #ffd24a;
   --accent2: #ffc400;
@@ -44,9 +44,9 @@ html[data-theme="dark-red"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
-  --text: rgba(232,237,244,.96);
-  --muted: rgba(232,237,244,.80);
-  --faint: rgba(232,237,244,.58);
+  --text: #ffffff;
+  --muted: #E0E0E0;
+  --faint: rgba(224,224,224,.58);
   --border: rgba(255,255,255,.12);
   --accent: #e0192d;
   --accent2: #9f0f1c;
@@ -124,9 +124,9 @@ html[data-theme="valentine"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.035);
   --surface2: rgba(255,255,255,.06);
-  --text: rgba(232,237,244,.96);
-  --muted: rgba(232,237,244,.80);
-  --faint: rgba(232,237,244,.58);
+  --text: #ffffff;
+  --muted: #E0E0E0;
+  --faint: rgba(224,224,224,.58);
   --border: rgba(255,255,255,.12);
   --accent: #ff4d88;
   --accent2: #e0192d;
@@ -144,9 +144,9 @@ html[data-theme="patriotic"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
-  --text: rgba(232,237,244,.96);
-  --muted: rgba(232,237,244,.80);
-  --faint: rgba(232,237,244,.58);
+  --text: #ffffff;
+  --muted: #E0E0E0;
+  --faint: rgba(224,224,224,.58);
   --border: rgba(255,255,255,.12);
   --accent: #1e63ff;
   --accent2: #e0192d;
@@ -164,9 +164,9 @@ html[data-theme="halloween"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
-  --text: rgba(232,237,244,.96);
-  --muted: rgba(232,237,244,.80);
-  --faint: rgba(232,237,244,.58);
+  --text: #ffffff;
+  --muted: #E0E0E0;
+  --faint: rgba(224,224,224,.58);
   --border: rgba(255,255,255,.12);
   --accent: #ff8a00;
   --accent2: #ff4d00;
@@ -184,9 +184,9 @@ html[data-theme="thanksgiving"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
-  --text: rgba(232,237,244,.96);
-  --muted: rgba(232,237,244,.80);
-  --faint: rgba(232,237,244,.58);
+  --text: #ffffff;
+  --muted: #E0E0E0;
+  --faint: rgba(224,224,224,.58);
   --border: rgba(255,255,255,.12);
   --accent: #d98c2b;
   --accent2: #8a4b1c;
@@ -204,9 +204,9 @@ html[data-theme="christmas"] {
   --bg: #0b0d10;
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
-  --text: rgba(232,237,244,.96);
-  --muted: rgba(232,237,244,.80);
-  --faint: rgba(232,237,244,.58);
+  --text: #ffffff;
+  --muted: #E0E0E0;
+  --faint: rgba(224,224,224,.58);
   --border: rgba(255,255,255,.12);
   --accent: #20c05c;
   --accent2: #e0192d;

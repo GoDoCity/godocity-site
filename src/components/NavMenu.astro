@@ -10,6 +10,12 @@
 const base = Astro.props?.cityBase ? `/${Astro.props.cityBase}` : "";
 const cityBase = base || "/daytona";
 
+const currentPath = Astro.url.pathname;
+function isActive(href: string): boolean {
+  if (href === `${cityBase}/`) return currentPath === href;
+  return currentPath.startsWith(href);
+}
+
 const topicItems = [
   { label: "Business", short: "Biz", href: `${cityBase}/business/` },
   { label: "City",              href: `${cityBase}/city/` },
@@ -54,7 +60,7 @@ const pills = [
     {pills.map((p) => (
       p.dropdown ? (
         <div class="dropWrap" data-drop={p.dropdown}>
-          <a class="pill pillDrop" href={p.href} aria-haspopup="true" aria-expanded="false">
+          <a class="pill pillDrop" href={p.href} aria-haspopup="true" aria-expanded="false" aria-current={isActive(p.href) ? "page" : undefined}>
             {p.label}
             <svg class="dropArrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
               <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -108,7 +114,7 @@ const pills = [
           )}
         </div>
       ) : (
-        <a class="pill" href={p.href}>{p.label}</a>
+        <a class="pill" href={p.href} aria-current={isActive(p.href) ? "page" : undefined}>{p.label}</a>
       )
     ))}
   </div>
