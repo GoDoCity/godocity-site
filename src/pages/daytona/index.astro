@@ -178,12 +178,10 @@ const guideCards = guideHero
 
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
   <div class="pageWrap">
-    {/* ── EASTER EGG TEST — TOP OF PAGE ── */}
-    <div style="font-size: 50px; text-align: center; filter: drop-shadow(0 0 10px #bf94ff);">🥚 TOP OF PAGE TEST 🥚</div>
-
-
     {/* ── NEWSLETTER BAND — 160px compact utility strip ── */}
     <div class="nlBand" id="nlBand">
+      {/* Easter Egg — subtle pulsing egg centered behind "Good News Daytona!" */}
+      <span class="nlEgg" aria-hidden="true">🥚</span>
       <div class="nlInner">
         <div class="nlContent" id="nlContent">
           <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
@@ -676,6 +674,7 @@ const guideCards = guideHero
 
     /* ── Newsletter — breathing room above, alert bar directly below ── */
     .nlBand {
+      position: relative;
       background: var(--brand1);
       margin: 24px 0 0;   /* 24px gap between nav pills and banner; alert bar sits flush below */
       width: 100%;
@@ -683,6 +682,25 @@ const guideCards = guideHero
       align-items: stretch;
       overflow: hidden;
       transition: height 350ms ease;
+    }
+    /* Easter Egg — pulsing egg behind "Good News Daytona!" */
+    .nlEgg {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 90px;
+      line-height: 1;
+      opacity: 0.13;
+      pointer-events: none;
+      user-select: none;
+      z-index: 0;
+      filter: drop-shadow(0 0 10px rgba(191,148,255,0.55));
+      animation: nlEggPulse 4s ease-in-out infinite;
+    }
+    @keyframes nlEggPulse {
+      0%, 100% { opacity: 0.10; transform: translate(-50%, -50%) scale(0.95); }
+      50%       { opacity: 0.20; transform: translate(-50%, -50%) scale(1.05); }
     }
     .nlInner {
       width: 100%;
