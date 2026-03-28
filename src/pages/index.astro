@@ -27,11 +27,15 @@ const cities = [
       <div class="card card-pad">
         <div class="kicker">Launching first</div>
         <div class="easter-title-wrap">
-          <svg class="easter-egg-svg" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <svg class="easter-egg-svg easter-egg--left" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
             <path d="M50,6 C26,6 11,34 11,65 C11,97 28,124 50,124 C72,124 89,97 89,65 C89,34 74,6 50,6 Z"
                   fill="none" stroke="#bf94ff" stroke-width="1.8"/>
           </svg>
           <h2 style="margin:10px 0 6px">GoDoDaytona</h2>
+          <svg class="easter-egg-svg easter-egg--right" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M50,6 C26,6 11,34 11,65 C11,97 28,124 50,124 C72,124 89,97 89,65 C89,34 74,6 50,6 Z"
+                  fill="none" stroke="#bf94ff" stroke-width="1.8"/>
+          </svg>
         </div>
         <p class="lede" style="margin:0">
           Primary brand: <strong>GoDoDaytona</strong> • Nickname: <strong>GoDo386</strong>
@@ -47,31 +51,26 @@ const cities = [
   </section>
 
   <style>
-    /* Spring Glow — Easter Egg hero decoration (temporary Easter override) */
+    /* Spring Glow — two bookend eggs flanking "GoDoDaytona" h2 */
     .easter-title-wrap {
       position: relative;
-      display: inline-block;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
     }
     .easter-egg-svg {
       display: block !important;
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      width: 110px;
-      height: 140px;
+      width: 80px;
+      height: 104px;
+      flex-shrink: 0;
       pointer-events: none;
       filter: drop-shadow(0 0 12px #bf94ff);
-      animation: springEggPulse 2.8s ease-in-out infinite;
-      z-index: 1;
+      opacity: 0.8;
     }
     .easter-title-wrap h2 {
       position: relative;
-      z-index: 2;
-    }
-    @keyframes springEggPulse {
-      0%, 100% { opacity: 0.4; }
-      50%       { opacity: 0.8; }
+      z-index: 1;
     }
   </style>
 

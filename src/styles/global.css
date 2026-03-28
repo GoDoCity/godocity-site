@@ -321,10 +321,20 @@ body > footer { order: 2; }
 .siteFooter {
   position: static !important;
 }
-/* Spring Glow — Holiday Ribbon (direct border, no pseudo-element) */
+/* Spring Glow — Holiday Ribbon with navStrobe animation */
 .topbar {
   border-bottom: 3px solid #bf94ff !important;
-  box-shadow: 0 4px 10px rgba(191, 148, 255, 0.6) !important;
+  padding-bottom: 1px;
+  box-shadow: 0 4px 10px rgba(191, 148, 255, 0.6);
+  animation: navStrobe 2s ease-in-out infinite;
+}
+@keyframes navStrobe {
+  0%, 100% {
+    box-shadow: 0 4px 10px rgba(191, 148, 255, 0.6);
+  }
+  50% {
+    box-shadow: 0 4px 24px rgba(191, 148, 255, 1.0), 0 0 12px rgba(191, 148, 255, 0.8);
+  }
 }
 
 /* ── Editorial Bold — use class="editorial-bold" in Markdown/MDX ──────────────

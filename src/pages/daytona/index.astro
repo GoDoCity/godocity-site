@@ -180,8 +180,9 @@ const guideCards = guideHero
   <div class="pageWrap">
     {/* ── NEWSLETTER BAND — 160px compact utility strip ── */}
     <div class="nlBand" id="nlBand">
-      {/* Easter Egg — subtle pulsing egg centered behind "Good News Daytona!" */}
-      <span class="nlEgg" aria-hidden="true">🥚</span>
+      {/* Spring Glow — two bookend eggs flanking "Good News Daytona!" */}
+      <span class="nlEgg nlEgg--left" aria-hidden="true">🥚</span>
+      <span class="nlEgg nlEgg--right" aria-hidden="true">🥚</span>
       <div class="nlInner">
         <div class="nlContent" id="nlContent">
           <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
@@ -683,25 +684,20 @@ const guideCards = guideHero
       overflow: hidden;
       transition: height 350ms ease;
     }
-    /* Easter Egg — pulsing egg behind "Good News Daytona!" */
+    /* Spring Glow — two bookend eggs flanking "Good News Daytona!" */
     .nlEgg {
       position: absolute;
-      left: 50%;
       top: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 90px;
+      font-size: 80px;
       line-height: 1;
-      opacity: 0.13;
+      opacity: 0.8;
       pointer-events: none;
       user-select: none;
       z-index: 0;
-      filter: drop-shadow(0 0 10px rgba(191,148,255,0.55));
-      animation: nlEggPulse 4s ease-in-out infinite;
+      filter: drop-shadow(0 0 10px rgba(191,148,255,0.7));
     }
-    @keyframes nlEggPulse {
-      0%, 100% { opacity: 0.10; transform: translate(-50%, -50%) scale(0.95); }
-      50%       { opacity: 0.20; transform: translate(-50%, -50%) scale(1.05); }
-    }
+    .nlEgg--left  { left: 24px;  transform: translateY(-50%); }
+    .nlEgg--right { right: 24px; left: auto; transform: translateY(-50%); }
     .nlInner {
       width: 100%;
       max-width: 1280px;
