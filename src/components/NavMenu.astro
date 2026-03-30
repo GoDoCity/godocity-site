@@ -45,12 +45,12 @@ const diyItems = [
 ];
 
 const pills = [
-  { label: "Home",      href: `${cityBase}/`,           dropdown: null },
-  { label: "Topics",    href: `${cityBase}/topics/`,    dropdown: "topics" },
-  { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides" },
-  { label: "Events",    href: `${cityBase}/events/`,    dropdown: null },
-  { label: "DIY",       href: `${cityBase}/diy/`,       dropdown: "diy" },
-  { label: "Advertise", href: `${cityBase}/advertise/`, dropdown: null },
+  { label: "Home",      href: `${cityBase}/`,           dropdown: null,      colorGroup: "ab" },
+  { label: "Topics",    href: `${cityBase}/topics/`,    dropdown: "topics",  colorGroup: "ab" },
+  { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides",  colorGroup: "cd" },
+  { label: "Events",    href: `${cityBase}/events/`,    dropdown: null,      colorGroup: "cd" },
+  { label: "DIY",       href: `${cityBase}/diy/`,       dropdown: "diy",     colorGroup: "ef" },
+  { label: "Advertise", href: `${cityBase}/advertise/`, dropdown: null,      colorGroup: "ef" },
 ];
 ---
 
@@ -60,7 +60,7 @@ const pills = [
     {pills.map((p) => (
       p.dropdown ? (
         <div class="dropWrap" data-drop={p.dropdown}>
-          <a class="pill pillDrop" href={p.href} aria-haspopup="true" aria-expanded="false" aria-current={isActive(p.href) ? "page" : undefined}>
+          <a class={`pill pillDrop pill--${p.colorGroup}`} href={p.href} aria-haspopup="true" aria-expanded="false" aria-current={isActive(p.href) ? "page" : undefined}>
             {p.label}
             <svg class="dropArrow" width="10" height="6" viewBox="0 0 10 6" fill="none" aria-hidden="true">
               <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
@@ -114,7 +114,7 @@ const pills = [
           )}
         </div>
       ) : (
-        <a class="pill" href={p.href} aria-current={isActive(p.href) ? "page" : undefined}>{p.label}</a>
+        <a class={`pill pill--${p.colorGroup}`} href={p.href} aria-current={isActive(p.href) ? "page" : undefined}>{p.label}</a>
       )
     ))}
   </div>
@@ -522,4 +522,66 @@ const pills = [
 
   .navToggle:checked ~ .backdrop { display: block; }
   .navToggle:checked ~ .drawer { transform: translateX(0); visibility: visible; }
+
+  /* ── Holiday Pill Re-Skin ─────────────────────────────────────────────────
+     ab = Home/Topics   (Coast Lavender)
+     cd = Guides/Events (Drive Mint)
+     ef = DIY/Advertise (Surf Pink)
+     Colors sourced from global.css --holiday-pill-* variables.
+     ──────────────────────────────────────────────────────────────────────── */
+  .pill--ab {
+    color: var(--holiday-pill-ab);
+    border-color: color-mix(in srgb, var(--holiday-pill-ab) 55%, transparent);
+    background: color-mix(in srgb, var(--holiday-pill-ab) 12%, transparent);
+  }
+  .pill--ab:hover,
+  .pill--ab[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--holiday-pill-ab) 75%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--holiday-pill-ab) 18%, transparent);
+  }
+
+  .pill--cd {
+    color: var(--holiday-pill-cd);
+    border-color: color-mix(in srgb, var(--holiday-pill-cd) 55%, transparent);
+    background: color-mix(in srgb, var(--holiday-pill-cd) 12%, transparent);
+  }
+  .pill--cd:hover,
+  .pill--cd[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--holiday-pill-cd) 75%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--holiday-pill-cd) 18%, transparent);
+  }
+
+  .pill--ef {
+    color: var(--holiday-pill-ef);
+    border-color: color-mix(in srgb, var(--holiday-pill-ef) 55%, transparent);
+    background: color-mix(in srgb, var(--holiday-pill-ef) 12%, transparent);
+  }
+  .pill--ef:hover,
+  .pill--ef[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--holiday-pill-ef) 75%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--holiday-pill-ef) 18%, transparent);
+  }
+
+  /* Dropdown sub-items inherit their parent pill group's holiday color */
+  .topicsDropdown .dropPill {
+    color: var(--holiday-pill-ab);
+    border-color: color-mix(in srgb, var(--holiday-pill-ab) 40%, transparent);
+    background: color-mix(in srgb, var(--holiday-pill-ab) 10%, transparent);
+  }
+  .topicsDropdown .dropPill:hover {
+    border-color: color-mix(in srgb, var(--holiday-pill-ab) 70%, transparent);
+    background: color-mix(in srgb, var(--holiday-pill-ab) 18%, transparent);
+  }
+  .topicsDropdown .dropFooter { color: var(--holiday-pill-ab); }
+
+  .diyDropdown .dropPill {
+    color: var(--holiday-pill-ef);
+    border-color: color-mix(in srgb, var(--holiday-pill-ef) 40%, transparent);
+    background: color-mix(in srgb, var(--holiday-pill-ef) 10%, transparent);
+  }
+  .diyDropdown .dropPill:hover {
+    border-color: color-mix(in srgb, var(--holiday-pill-ef) 70%, transparent);
+    background: color-mix(in srgb, var(--holiday-pill-ef) 18%, transparent);
+  }
+  .diyDropdown .dropFooter { color: var(--holiday-pill-ef); }
 </style>
