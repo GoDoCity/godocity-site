@@ -179,8 +179,8 @@ const guideCards = guideHero
 <Base title="GoDo Daytona" subtitle="Good news for Daytona" cityBase="daytona">
   <div class="pageWrap">
     {/* ── NEWSLETTER BAND — 160px compact utility strip ── */}
-    <div class="horizonLine" id="horizonLine"></div>
     <div class="nlBand" id="nlBand">
+      <div class="horizonLine" id="horizonLine"></div>
       <div class="nlInner">
         <div class="nlContent" id="nlContent">
           <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
@@ -217,7 +217,6 @@ const guideCards = guideHero
             el.style.width = 'calc(100% + ' + (leftOffset + rightGap) + 'px)';
           }
         }
-        makeBleed(document.getElementById('horizonLine'));
         makeBleed(document.getElementById('nlBand'));
         makeBleed(document.getElementById('adBand'));
         makeBleed(document.getElementById('alertBand'));
