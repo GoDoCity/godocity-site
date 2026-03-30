@@ -95,6 +95,7 @@ h1, h2, h3, h4, h5, h6,
 .topbar{
   border-bottom: none !important;
   box-shadow: none !important;
+  background-image: none !important;
   background:rgba(11,13,16,.75);
   backdrop-filter: blur(10px);
   position:sticky;
@@ -353,6 +354,8 @@ body > footer { order: 2; }
   background: var(--holiday-line-color);
   opacity: 0.4;
   box-shadow: 0 5px 15px rgba(0, 245, 255, 0.9);
+  /* Clip any upward glow bleed — allow overflow on bottom/sides only */
+  clip-path: inset(0px -100px -100px -100px);
   animation: navStrobe 2s ease-in-out infinite;
   z-index: 10;
 }
