@@ -158,7 +158,6 @@ const sections: SectionDef[] = [
     {/* ── PAGE HERO: "Daytona's Guide" banner with 4-block nav inside ── */}
     <div class="ghPageHero">
       <div class="horizonLine" id="horizonLine"></div>
-      <div class="ghPageHeroOverlay"></div>
       <div class="ghPageHeroContent">
         <h1 class="ghPageHeroTitle">Daytona's Guide</h1>
         <p class="ghPageHeroTagline">Your local guide to living, working, and playing in Daytona Beach.</p>
@@ -286,27 +285,11 @@ const sections: SectionDef[] = [
       min-height: 320px;
       display: flex;
       align-items: stretch;
+      background: #000000 !important;
       background-color: #000000 !important;
-      background-image: url('/images/guides/coast-banner.jpg');
-      background-size: cover;
-      background-position: center top;
       border-bottom: 3px solid #ffd24a;
       box-shadow: none !important;
       overflow: hidden;
-    }
-
-    .ghPageHeroOverlay {
-      position: absolute;
-      top: 2px; /* Don't bleed over the 2px turquoise horizon line */
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(
-        160deg,
-        rgba(0,0,0,0.88) 0%,
-        rgba(0,0,0,0.70) 45%,
-        rgba(0,0,0,0.52) 100%
-      );
     }
 
     .ghPageHeroContent {
@@ -375,6 +358,7 @@ const sections: SectionDef[] = [
     /* Spring Glow pastel neon rings — temporary Easter override */
     .ghBlock--coast    {
       --block-bg-img: url('/images/guides/coast-bg.jpg');
+      --pill-color: #bf94ff;
       background-color: #1e2530;
       border-radius: 16px;
       box-shadow:
@@ -389,6 +373,7 @@ const sections: SectionDef[] = [
     }
     .ghBlock--drive    {
       --block-bg-img: url('/images/guides/drive-bg.jpg');
+      --pill-color: #00ff9d;
       background-color: #1a2020;
       border-radius: 16px;
       box-shadow:
@@ -403,6 +388,7 @@ const sections: SectionDef[] = [
     }
     .ghBlock--surf     {
       --block-bg-img: url('/images/guides/surf-bg.jpg');
+      --pill-color: #ff6ad5;
       background-color: #1c2030;
       border-radius: 16px;
       box-shadow:
@@ -417,6 +403,7 @@ const sections: SectionDef[] = [
     }
     .ghBlock--local {
       --block-bg-img: url('/images/guides/essentials-bg.jpg');
+      --pill-color: #ffef78;
       background-color: #201c28;
       border-radius: 16px;
       box-shadow:
@@ -465,29 +452,13 @@ const sections: SectionDef[] = [
       font-family: 'Monoton', cursive;
       font-size: clamp(1.4rem, 2.4vw, 2.2rem);
       font-weight: 700;
-      letter-spacing: 0;
-      color: #ffffff;
+      letter-spacing: 1px;
+      color: #FFFFFF !important;
       line-height: 1.1;
       text-align: center;
       -webkit-font-smoothing: antialiased;
+      text-shadow: 0 0 8px var(--pill-color);
       transition: color 200ms ease, text-shadow 200ms ease;
-    }
-    /* Spring Glow pastels — temporary Easter override */
-    .ghBlock--coast .ghBlockAction {
-      color: #bf94ff;
-      text-shadow: 0 0 5px rgba(255,255,255,0.8), 0 0 10px #bf94ff;
-    }
-    .ghBlock--drive .ghBlockAction {
-      color: #00ff9d;
-      text-shadow: 0 0 5px rgba(255,255,255,0.8), 0 0 10px #00ff9d;
-    }
-    .ghBlock--surf .ghBlockAction {
-      color: #ff6ad5;
-      text-shadow: 0 0 5px rgba(255,255,255,0.8), 0 0 10px #ff6ad5;
-    }
-    .ghBlock--local .ghBlockAction {
-      color: #ffef78;
-      text-shadow: 0 0 5px rgba(255,255,255,0.8), 0 0 10px #ffef78;
     }
     .ghBlockCategory {
       display: block;
@@ -578,33 +549,22 @@ const sections: SectionDef[] = [
       text-align: center;
     }
 
+    .ghSectionHero--live { --pill-color: #bf94ff; }
+    .ghSectionHero--work { --pill-color: #00ff9d; }
+    .ghSectionHero--play { --pill-color: #ff6ad5; }
+    .ghSectionHero--best { --pill-color: #ffef78; }
+
     .ghSectionHeroTitle {
       font-family: 'Monoton', cursive;
       font-size: clamp(2.2rem, 5vw, 4rem);
       font-weight: 400;
-      letter-spacing: 0;
-      color: #ffffff;
+      letter-spacing: 1px;
+      color: #FFFFFF !important;
       margin: 0 auto;
       line-height: 1.1;
       text-align: center;
       -webkit-font-smoothing: antialiased;
-    }
-    /* Spring Glow pastels on section banners — temporary Easter override */
-    .ghSectionHero--live .ghSectionHeroTitle {
-      color: #bf94ff;
-      text-shadow: 0 0 5px #fff, 0 0 15px #bf94ff, 0 0 30px #bf94ff;
-    }
-    .ghSectionHero--work .ghSectionHeroTitle {
-      color: #00ff9d;
-      text-shadow: 0 0 5px #fff, 0 0 15px #00ff9d, 0 0 30px #00ff9d;
-    }
-    .ghSectionHero--play .ghSectionHeroTitle {
-      color: #ff6ad5;
-      text-shadow: 0 0 5px #fff, 0 0 15px #ff6ad5, 0 0 30px #ff6ad5;
-    }
-    .ghSectionHero--best .ghSectionHeroTitle {
-      color: #ffef78;
-      text-shadow: 0 0 5px #fff, 0 0 15px #ffef78, 0 0 30px #ffef78;
+      text-shadow: 0 0 8px var(--pill-color);
     }
 
     /* ── Subcategory ribbon (below hero banner) ── */
