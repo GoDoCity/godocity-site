@@ -45,12 +45,12 @@ const diyItems = [
 ];
 
 const pills = [
-  { label: "Home",      href: `${cityBase}/`,           dropdown: null,      colorGroup: "ab" },
-  { label: "Topics",    href: `${cityBase}/topics/`,    dropdown: "topics",  colorGroup: "ab" },
-  { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides",  colorGroup: "cd" },
-  { label: "Events",    href: `${cityBase}/events/`,    dropdown: null,      colorGroup: "cd" },
-  { label: "DIY",       href: `${cityBase}/diy/`,       dropdown: "diy",     colorGroup: "ef" },
-  { label: "Advertise", href: `${cityBase}/advertise/`, dropdown: null,      colorGroup: "ef" },
+  { label: "Home",      href: `${cityBase}/`,           dropdown: null,      colorGroup: "home"      },
+  { label: "Topics",    href: `${cityBase}/topics/`,    dropdown: "topics",  colorGroup: "topic"     },
+  { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides",  colorGroup: "guides"    },
+  { label: "Events",    href: `${cityBase}/events/`,    dropdown: null,      colorGroup: "events"    },
+  { label: "DIY",       href: `${cityBase}/diy/`,       dropdown: "diy",     colorGroup: "diy"       },
+  { label: "Advertise", href: `${cityBase}/advertise/`, dropdown: null,      colorGroup: "advertise" },
 ];
 ---
 
@@ -523,65 +523,99 @@ const pills = [
   .navToggle:checked ~ .backdrop { display: block; }
   .navToggle:checked ~ .drawer { transform: translateX(0); visibility: visible; }
 
-  /* ── Holiday Pill Re-Skin ─────────────────────────────────────────────────
-     ab = Home/Topics   (Coast Lavender)
-     cd = Guides/Events (Drive Mint)
-     ef = DIY/Advertise (Surf Pink)
-     Colors sourced from global.css --holiday-pill-* variables.
+  /* ── Individual Pill Colors ──────────────────────────────────────────────
+     Each nav item has its own unique pastel color sourced from
+     global.css --pill-* variables. To swap for July 4th RWB just update
+     the six --pill-* vars in global.css :root.
      ──────────────────────────────────────────────────────────────────────── */
-  .pill--ab {
-    color: var(--holiday-pill-ab);
-    border-color: color-mix(in srgb, var(--holiday-pill-ab) 55%, transparent);
-    background: color-mix(in srgb, var(--holiday-pill-ab) 12%, transparent);
+  .pill--home {
+    color: var(--pill-home);
+    border-color: color-mix(in srgb, var(--pill-home) 55%, transparent);
+    background: color-mix(in srgb, var(--pill-home) 12%, transparent);
   }
-  .pill--ab:hover,
-  .pill--ab[aria-current="page"] {
-    border-color: color-mix(in srgb, var(--holiday-pill-ab) 75%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--holiday-pill-ab) 18%, transparent);
-  }
-
-  .pill--cd {
-    color: var(--holiday-pill-cd);
-    border-color: color-mix(in srgb, var(--holiday-pill-cd) 55%, transparent);
-    background: color-mix(in srgb, var(--holiday-pill-cd) 12%, transparent);
-  }
-  .pill--cd:hover,
-  .pill--cd[aria-current="page"] {
-    border-color: color-mix(in srgb, var(--holiday-pill-cd) 75%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--holiday-pill-cd) 18%, transparent);
+  .pill--home:hover,
+  .pill--home[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--pill-home) 75%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pill-home) 18%, transparent);
   }
 
-  .pill--ef {
-    color: var(--holiday-pill-ef);
-    border-color: color-mix(in srgb, var(--holiday-pill-ef) 55%, transparent);
-    background: color-mix(in srgb, var(--holiday-pill-ef) 12%, transparent);
+  .pill--topic {
+    color: var(--pill-topic);
+    border-color: color-mix(in srgb, var(--pill-topic) 55%, transparent);
+    background: color-mix(in srgb, var(--pill-topic) 12%, transparent);
   }
-  .pill--ef:hover,
-  .pill--ef[aria-current="page"] {
-    border-color: color-mix(in srgb, var(--holiday-pill-ef) 75%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--holiday-pill-ef) 18%, transparent);
+  .pill--topic:hover,
+  .pill--topic[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--pill-topic) 75%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pill-topic) 18%, transparent);
   }
 
-  /* Dropdown sub-items inherit their parent pill group's holiday color */
+  .pill--guides {
+    color: var(--pill-guides);
+    border-color: color-mix(in srgb, var(--pill-guides) 55%, transparent);
+    background: color-mix(in srgb, var(--pill-guides) 12%, transparent);
+  }
+  .pill--guides:hover,
+  .pill--guides[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--pill-guides) 75%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pill-guides) 18%, transparent);
+  }
+
+  .pill--events {
+    color: var(--pill-events);
+    border-color: color-mix(in srgb, var(--pill-events) 55%, transparent);
+    background: color-mix(in srgb, var(--pill-events) 12%, transparent);
+  }
+  .pill--events:hover,
+  .pill--events[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--pill-events) 75%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pill-events) 18%, transparent);
+  }
+
+  .pill--diy {
+    color: var(--pill-diy);
+    border-color: color-mix(in srgb, var(--pill-diy) 55%, transparent);
+    background: color-mix(in srgb, var(--pill-diy) 12%, transparent);
+  }
+  .pill--diy:hover,
+  .pill--diy[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--pill-diy) 75%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pill-diy) 18%, transparent);
+  }
+
+  .pill--advertise {
+    color: var(--pill-advertise);
+    border-color: color-mix(in srgb, var(--pill-advertise) 55%, transparent);
+    background: color-mix(in srgb, var(--pill-advertise) 12%, transparent);
+  }
+  .pill--advertise:hover,
+  .pill--advertise[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--pill-advertise) 75%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pill-advertise) 18%, transparent);
+  }
+
+  /* Dropdown sub-items match their parent pill's color */
   .topicsDropdown .dropPill {
-    color: var(--holiday-pill-ab);
-    border-color: color-mix(in srgb, var(--holiday-pill-ab) 40%, transparent);
-    background: color-mix(in srgb, var(--holiday-pill-ab) 10%, transparent);
+    color: var(--pill-topic);
+    border-color: color-mix(in srgb, var(--pill-topic) 40%, transparent);
+    background: color-mix(in srgb, var(--pill-topic) 10%, transparent);
   }
   .topicsDropdown .dropPill:hover {
-    border-color: color-mix(in srgb, var(--holiday-pill-ab) 70%, transparent);
-    background: color-mix(in srgb, var(--holiday-pill-ab) 18%, transparent);
+    border-color: color-mix(in srgb, var(--pill-topic) 70%, transparent);
+    background: color-mix(in srgb, var(--pill-topic) 18%, transparent);
   }
-  .topicsDropdown .dropFooter { color: var(--holiday-pill-ab); }
+  .topicsDropdown .dropFooter { color: var(--pill-topic); }
+
+  .guidesDropdown .dropFooter { color: var(--pill-guides); }
 
   .diyDropdown .dropPill {
-    color: var(--holiday-pill-ef);
-    border-color: color-mix(in srgb, var(--holiday-pill-ef) 40%, transparent);
-    background: color-mix(in srgb, var(--holiday-pill-ef) 10%, transparent);
+    color: var(--pill-diy);
+    border-color: color-mix(in srgb, var(--pill-diy) 40%, transparent);
+    background: color-mix(in srgb, var(--pill-diy) 10%, transparent);
   }
   .diyDropdown .dropPill:hover {
-    border-color: color-mix(in srgb, var(--holiday-pill-ef) 70%, transparent);
-    background: color-mix(in srgb, var(--holiday-pill-ef) 18%, transparent);
+    border-color: color-mix(in srgb, var(--pill-diy) 70%, transparent);
+    background: color-mix(in srgb, var(--pill-diy) 18%, transparent);
   }
-  .diyDropdown .dropFooter { color: var(--holiday-pill-ef); }
+  .diyDropdown .dropFooter { color: var(--pill-diy); }
 </style>
