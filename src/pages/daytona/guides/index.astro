@@ -286,7 +286,7 @@ const sections: SectionDef[] = [
       min-height: 320px;
       display: flex;
       align-items: stretch;
-      background: linear-gradient(135deg, #080f1c 0%, #111e30 45%, #182030 100%);
+      background-color: #000000 !important;
       background-image: url('/images/guides/coast-banner.jpg');
       background-size: cover;
       background-position: center top;
@@ -297,7 +297,10 @@ const sections: SectionDef[] = [
 
     .ghPageHeroOverlay {
       position: absolute;
-      inset: 0;
+      top: 2px; /* Don't bleed over the 2px turquoise horizon line */
+      left: 0;
+      right: 0;
+      bottom: 0;
       background: linear-gradient(
         160deg,
         rgba(0,0,0,0.88) 0%,
@@ -461,7 +464,7 @@ const sections: SectionDef[] = [
       display: block;
       font-family: 'Monoton', cursive;
       font-size: clamp(1.4rem, 2.4vw, 2.2rem);
-      font-weight: 400;
+      font-weight: 700;
       letter-spacing: 0;
       color: #ffffff;
       line-height: 1.1;
@@ -472,19 +475,19 @@ const sections: SectionDef[] = [
     /* Spring Glow pastels — temporary Easter override */
     .ghBlock--coast .ghBlockAction {
       color: #bf94ff;
-      text-shadow: 0 0 5px #fff, 0 0 15px #bf94ff, 0 0 30px #bf94ff;
+      text-shadow: 0 0 5px rgba(255,255,255,0.8), 0 0 10px #bf94ff;
     }
     .ghBlock--drive .ghBlockAction {
       color: #00ff9d;
-      text-shadow: 0 0 5px #fff, 0 0 15px #00ff9d, 0 0 30px #00ff9d;
+      text-shadow: 0 0 5px rgba(255,255,255,0.8), 0 0 10px #00ff9d;
     }
     .ghBlock--surf .ghBlockAction {
       color: #ff6ad5;
-      text-shadow: 0 0 5px #fff, 0 0 15px #ff6ad5, 0 0 30px #ff6ad5;
+      text-shadow: 0 0 5px rgba(255,255,255,0.8), 0 0 10px #ff6ad5;
     }
     .ghBlock--local .ghBlockAction {
       color: #ffef78;
-      text-shadow: 0 0 5px #fff, 0 0 15px #ffef78, 0 0 30px #ffef78;
+      text-shadow: 0 0 5px rgba(255,255,255,0.8), 0 0 10px #ffef78;
     }
     .ghBlockCategory {
       display: block;
