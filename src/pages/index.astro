@@ -26,31 +26,7 @@ const cities = [
 
       <div class="card card-pad">
         <div class="kicker">Launching first</div>
-        <div class="easter-title-wrap">
-          <svg class="easter-egg-svg easter-egg--left" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-              <linearGradient id="eggGradL" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stop-color="#bf94ff"/>
-                <stop offset="50%"  stop-color="#ff8da1"/>
-                <stop offset="100%" stop-color="#ffef78"/>
-              </linearGradient>
-            </defs>
-            <path d="M50,6 C26,6 11,34 11,65 C11,97 28,124 50,124 C72,124 89,97 89,65 C89,34 74,6 50,6 Z"
-                  fill="none" stroke="url(#eggGradL)" stroke-width="2.2"/>
-          </svg>
-          <h2 style="margin:10px 0 6px">GoDoDaytona</h2>
-          <svg class="easter-egg-svg easter-egg--right" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <defs>
-              <linearGradient id="eggGradR" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%"   stop-color="#bf94ff"/>
-                <stop offset="50%"  stop-color="#ff8da1"/>
-                <stop offset="100%" stop-color="#ffef78"/>
-              </linearGradient>
-            </defs>
-            <path d="M50,6 C26,6 11,34 11,65 C11,97 28,124 50,124 C72,124 89,97 89,65 C89,34 74,6 50,6 Z"
-                  fill="none" stroke="url(#eggGradR)" stroke-width="2.2"/>
-          </svg>
-        </div>
+        <h2 style="margin:10px 0 6px">GoDoDaytona</h2>
         <p class="lede" style="margin:0">
           Primary brand: <strong>GoDoDaytona</strong> • Nickname: <strong>GoDo386</strong>
         </p>
@@ -63,41 +39,6 @@ const cities = [
       </div>
     </div>
   </section>
-
-  <style>
-    /* Spring Glow — two bookend eggs flanking "GoDoDaytona" h2 */
-    @keyframes eggJiggle {
-      0%, 80%, 100% { transform: rotate(0deg); }
-      83%            { transform: rotate(-10deg); }
-      86%            { transform: rotate(10deg); }
-      89%            { transform: rotate(-5deg); }
-      92%            { transform: rotate(0deg); }
-    }
-    .easter-title-wrap {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-    }
-    .easter-egg-svg {
-      display: block !important;
-      width: 80px;
-      height: 104px;
-      flex-shrink: 0;
-      pointer-events: none;
-      filter:
-        drop-shadow(0 -3px 8px #bf94ff)
-        drop-shadow(0  3px 8px #ff8da1)
-        drop-shadow(0  0  14px #ffef78);
-      opacity: 0.88;
-      animation: eggJiggle 5s ease-in-out infinite;
-    }
-    .easter-title-wrap h2 {
-      position: relative;
-      z-index: 1;
-    }
-  </style>
 
   <script is:inline>
     // Host-based routing for city subdomains (static + simple).
