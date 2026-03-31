@@ -4,12 +4,18 @@
  * Build-time event importer — two sources merged into one array:
  *
  *  1. Google Sheet  (SHEET_CSV_URL)
- *     Manual curation. Column C "Sponsored" = imported + featured at top.
- *     Column C "Live"      = imported as a regular event.
- *     Column E (col 4)     = explicit address override — geocoded via Mapbox,
+ *     Manual curation. Column B "Sponsored" = imported + featured at top.
+ *     Column B "Live"      = imported as a regular event.
+ *     Column D (col 3)     = explicit address override — geocoded via Mapbox,
  *                            overrides ALL other coordinate sources.
  *     Sheet always wins on dedup — any event ID in the sheet overrides the
  *     auto-discovered version entirely.
+ *
+ *     Non-Eventbrite events (major festivals, speedway races, etc.) are also
+ *     supported: leave Column A empty and put the event URL in Column G.
+ *     The script will import the row using Column G as the "Learn More" link,
+ *     Column L for the featured image (with og:image fetch fallback), and
+ *     Column N for a human-readable multi-day display string (e.g. "May 7-10").
  *
  *  2. Eventbrite Destination Search API  (EVENTBRITE_TOKEN)
  *     Auto-discovers all public events within 25mi of Daytona Beach center
@@ -18,20 +24,26 @@
  *     Deduped against sheet by Eventbrite ID. Never marked sponsored.
  *
  * Coordinate resolution (per event, highest priority first):
- *   1. Column E address override in Google Sheet  (geocoded via Mapbox)
+ *   1. Column D address override in Google Sheet  (geocoded via Mapbox)
  *   2. Eventbrite venue.address.latitude / longitude  (exact geocode from EB)
  *      — REJECTED if (0,0) or within a Water Zone (Halifax River / Atlantic Ocean)
  *   3. Mapbox Geocoding API fallback  (MAPBOX_ACCESS_TOKEN)
  *      — Query is "VenueName Daytona Beach, FL" for water-zone rescues
  *
  * Sheet column layout:
- *   A (col 0) — Eventbrite URL   (required)
- *   B (col 1) — Title override   (optional)
- *   C (col 2) — Status           ("Live" | "Sponsored")
- *   D (col 3) — (reserved / ignored)
- *   E (col 4) — Address override (optional — overrides all coordinate sources)
- *   F (col 5) — Raw Text / Title (optional title override)
- *   G (col 6) — Pro Tip          (optional — insider tip shown on hover in slider)
+ *   A (col  0) — Eventbrite URL        (optional — leave empty for non-EB events)
+ *   B (col  1) — Status                ("Live" | "Sponsored")
+ *   C (col  2) — Date Override         Plain text sort date; overrides Eventbrite date
+ *   D (col  3) — Location / Address    Address string; overrides venue geocode
+ *   E (col  4) — Image Override        Optional image URL for Eventbrite events
+ *   F (col  5) — Title Override        Optional title override
+ *   G (col  6) — Manual URL            Non-Eventbrite "Learn More" link
+ *                                       (used when Column A has no valid Eventbrite ID)
+ *   L (col 11) — Manual Image URL      Featured image for non-Eventbrite events
+ *                                       (falls back to og:image scrape of Col G URL)
+ *   N (col 13) — Display Date          Human-readable multi-day label shown on event
+ *                                       cards, e.g. "May 7-10". Column C is still used
+ *                                       for calendar sorting.
  */
 
 const CSV_TIMEOUT_MS = 12_000;
@@ -131,18 +143,22 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
 
   /*
    * Sheet column layout (fixed positions):
-   *   A (0) — Eventbrite URL          (required)
-   *   B (1) — Status                  "Live" | "Sponsored"
-   *   C (2) — Date Override           Plain text date; overrides Eventbrite date
-   *   D (3) — Location / Address      Address string; overrides venue geocode
-   *   E (4) — Image URL               Optional image override
-   *   F (5) — Raw Text / Title        Optional title override
-   *   G (6) — Pro Tip                 Optional insider tip (shown on hover in sidebar slider)
+   *   A  (col  0) — Eventbrite URL        (optional — leave empty for non-EB events)
+   *   B  (col  1) — Status                "Live" | "Sponsored"
+   *   C  (col  2) — Date Override         Plain text sort date; overrides Eventbrite date
+   *   D  (col  3) — Location / Address    Address string; overrides venue geocode
+   *   E  (col  4) — Image Override        Optional image URL for Eventbrite events
+   *   F  (col  5) — Title Override        Optional title override
+   *   G  (col  6) — Manual URL            Non-Eventbrite "Learn More" link
+   *   L  (col 11) — Manual Image URL      Featured image for non-Eventbrite events
+   *   N  (col 13) — Display Date          Human-readable label for event cards
+   *                                        e.g. "May 7-10" (Col C still used for sorting)
    */
 
-  /* Build sheetMeta: eventbriteId → { titleOverride, isSponsored, isLive, url,
-                                        addressOverride, dateOverride, imageOverride } */
-  const sheetMeta = new Map();
+  /* Build sheetMeta: eventbriteId → { ... } for Eventbrite-backed rows.
+     Build manualMeta: Array<{ ... }>           for non-Eventbrite rows (Col G URL). */
+  const sheetMeta  = new Map();
+  const manualMeta = [];
   let firstDataRow = true;
 
   for (const row of rows) {
@@ -151,43 +167,72 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     if (isHeadingRow(rawCells[0], rawCells.filter(Boolean))) continue;
 
     if (firstDataRow) {
-      console.log(`[sheet-import] First data row: ${JSON.stringify(rawCells.slice(0, 6))}`);
+      console.log(`[sheet-import] First data row: ${JSON.stringify(rawCells.slice(0, 7))}`);
       firstDataRow = false;
     }
 
-    /* Col A — URL (required) */
-    const url = rawCells[0] ?? "";
-    if (!/^https?:\/\//i.test(url)) continue;
+    /* Col A — Eventbrite URL (optional) */
+    const ebUrl    = rawCells[0] ?? "";
+    const idMatch  = ebUrl.match(EB_ID_RE);
+    const hasEbId  = !!idMatch;
 
-    const idMatch = url.match(EB_ID_RE);
-    if (!idMatch) { console.log(`[sheet-import] Skipping non-Eventbrite URL: ${url}`); continue; }
+    /* Col G — Manual URL for non-Eventbrite events */
+    const manualUrl   = rawCells[6] ?? "";
+    const hasManualUrl = /^https?:\/\//i.test(manualUrl);
+
+    /* Skip rows that have neither a valid Eventbrite ID nor a manual URL */
+    if (!hasEbId && !hasManualUrl) {
+      if (ebUrl) console.log(`[sheet-import] Skipping row — no valid Eventbrite ID or manual URL: "${ebUrl}"`);
+      continue;
+    }
 
     /* Col B — Status */
     const statusCell  = rawCells[1] ?? "";
     const isLive      = /^(live|sponsored)$/i.test(statusCell);
     const isSponsored = /^sponsored$/i.test(statusCell);
 
-    /* Col C — Date Override (plain-text date; empty = use Eventbrite date) */
+    /* Col C — Date Override (plain-text date; empty = use Eventbrite date for EB events) */
     const dateOverride = rawCells[2] || null;
 
     /* Col D — Location / Address Override */
     const addressOverride = rawCells[3] || null;
-    if (addressOverride) {
-      console.log(`[sheet-import] Col-D address override for event ${idMatch[1]}: "${addressOverride}"`);
-    }
 
-    /* Col E — Image Override (must look like a URL) */
+    /* Col E — Image Override (Eventbrite events; must look like a URL) */
     const imageOverride = (rawCells[4] && /^https?:\/\//i.test(rawCells[4]))
       ? rawCells[4] : null;
 
     /* Col F — Title Override */
     const titleOverride = rawCells[5] || null;
 
-    /* Col G — Pro Tip (insider tip text shown on hover in sidebar slider) */
-    const proTip = rawCells[6] || null;
+    /* Col L — Manual Image URL (non-Eventbrite events; image link ending in common extensions
+       or any https URL accepted — og:image is fetched as fallback if this is empty) */
+    const manualImageUrl = (rawCells[11] && /^https?:\/\//i.test(rawCells[11]))
+      ? rawCells[11] : null;
 
-    sheetMeta.set(idMatch[1], { titleOverride, isSponsored, isLive, url,
-                                 addressOverride, dateOverride, imageOverride, proTip });
+    /* Col N — Display Date (human-readable multi-day label, e.g. "May 7-10") */
+    const displayDate = rawCells[13] || null;
+
+    if (hasEbId) {
+      /* ── Eventbrite-backed row ── */
+      if (addressOverride) {
+        console.log(`[sheet-import] Col-D address override for event ${idMatch[1]}: "${addressOverride}"`);
+      }
+      sheetMeta.set(idMatch[1], {
+        titleOverride, isSponsored, isLive,
+        url: ebUrl,
+        addressOverride, dateOverride, imageOverride,
+        displayDate,
+      });
+    } else {
+      /* ── Non-Eventbrite row (manual event) ── */
+      manualMeta.push({
+        titleOverride, isSponsored, isLive,
+        manualUrl,
+        addressOverride, dateOverride,
+        manualImageUrl,
+        displayDate,
+      });
+    }
   }
 
   // ── 2. Fetch Eventbrite API data for each Live sheet event ─────────────────
@@ -260,6 +305,7 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     sheetEvents.push(makeEvent({
       title,
       eventDate,
+      displayDate: meta.displayDate ?? null,
       endDate:   api.endDate  ?? null,
       location:  api.location ?? "",
       city:      api.city     ?? "daytona beach",
@@ -269,8 +315,85 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
       lat:       coords?.lat  ?? null,
       lng:       coords?.lng  ?? null,
       sponsored: meta.isSponsored,
-      proTip:    meta.proTip  ?? null,
+      proTip:    null,
       source:    "eventbrite-sheet",
+    }));
+  }
+
+  // ── 2b. Process non-Eventbrite (manual) sheet rows ────────────────────────
+  for (const meta of manualMeta) {
+    if (!meta.isLive) {
+      console.log(`[sheet-import] SKIP manual event "${meta.manualUrl}": status not Live/Sponsored`);
+      continue;
+    }
+
+    const title = meta.titleOverride ?? "Untitled Event";
+
+    /* Date: Col C override required; warn + use today as fallback if missing */
+    let eventDate = null;
+    if (meta.dateOverride) {
+      eventDate = parseOverrideDate(meta.dateOverride);
+      if (!eventDate) {
+        console.log(
+          `[sheet-import] WARN manual "${title}": Col-C override "${meta.dateOverride}" ` +
+          `could not be parsed — falling back to today. Fix the date format.`
+        );
+      }
+    }
+
+    if (!eventDate) {
+      const fallback = new Date();
+      fallback.setUTCHours(12, 0, 0, 0);
+      eventDate = fallback.toISOString();
+      console.log(
+        `[sheet-import] WARN manual "${title}": no Col-C date set — using today as fallback. ` +
+        `Add a date override in Col C.`
+      );
+    }
+
+    /* Skip past events (same EST-aware logic as Eventbrite events) */
+    const todayEstNow = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+    const sortDateStr = eventDate.slice(0, 10);
+    if (sortDateStr < todayEstNow) {
+      console.log(
+        `[sheet-import] SKIP manual "${title}": date ${sortDateStr} is before ` +
+        `today (${todayEstNow} EST) — excluded from feed.`
+      );
+      continue;
+    }
+
+    /* Image: Col L → og:image scrape of Col G URL → placeholder */
+    let image = meta.manualImageUrl;
+    if (!image) {
+      console.log(`[sheet-import] Col L empty for manual "${title}" — fetching og:image from ${meta.manualUrl}`);
+      image = await fetchOgImage(meta.manualUrl);
+      if (image) {
+        console.log(`[sheet-import] og:image for "${title}": ${image}`);
+      } else {
+        console.log(`[sheet-import] No og:image found for "${title}" — using placeholder`);
+        image = "/images/daytona-placeholder.jpg";
+      }
+    }
+
+    /* Geocode: Col D address override → Mapbox lookup by title */
+    const coords = await resolveVenueCoords(null, mapboxToken, title, meta.addressOverride);
+    console.log(`[sheet-import] OK manual "${title}" → ${eventDate}`);
+
+    sheetEvents.push(makeEvent({
+      title,
+      eventDate,
+      displayDate: meta.displayDate ?? null,
+      endDate:   null,
+      location:  meta.addressOverride ?? "",
+      city:      "daytona beach",
+      url:       meta.manualUrl,
+      image,
+      category:  null,
+      lat:       coords?.lat ?? null,
+      lng:       coords?.lng ?? null,
+      sponsored: meta.isSponsored,
+      proTip:    null,
+      source:    "manual-sheet",
     }));
   }
 
@@ -440,10 +563,11 @@ function parseOverrideDate(text) {
   return null;
 }
 
-function makeEvent({ title, eventDate, endDate, location, city, url, image, category, lat, lng, sponsored, proTip, source }) {
+function makeEvent({ title, eventDate, displayDate, endDate, location, city, url, image, category, lat, lng, sponsored, proTip, source }) {
   return {
     title,
     eventDate,
+    displayDate: displayDate ?? null,   // Human-readable label for multi-day events (e.g. "May 7-10")
     endDate:   endDate   ?? null,
     location:  location  ?? "",
     city:      city      ?? "daytona beach",
@@ -712,6 +836,33 @@ async function geocode(query, mapboxToken) {
     return { lat, lng };
   } catch (err) {
     console.log(`[sheet-import] Geocode error for "${query}": ${err?.message ?? err}`);
+    return null;
+  }
+}
+
+/**
+ * Attempt to scrape the og:image meta tag from a public web page.
+ * Used as a fallback image source for non-Eventbrite events when no image
+ * URL is provided in Column L. Returns null on any failure.
+ *
+ * @param {string} pageUrl  The public URL to fetch.
+ * @returns {Promise<string|null>}
+ */
+async function fetchOgImage(pageUrl) {
+  if (!pageUrl) return null;
+  try {
+    const res = await fetch(pageUrl, {
+      headers: { "User-Agent": UA },
+      signal: AbortSignal.timeout(GEO_TIMEOUT_MS),
+    });
+    if (!res.ok) return null;
+    const html = await res.text();
+    // Match both attribute orderings: property before content, and content before property
+    const m =
+      html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ??
+      html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+    return m?.[1] ?? null;
+  } catch {
     return null;
   }
 }
