@@ -209,7 +209,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
         <input name="form-name" value="newsletter-signup" /><input name="nl-bot" /><input name="email" />
       </form>
       <div class="nlWrap">
-        <div class="horizonLine" id="horizonLine"></div>
         <div class="nlCard">
           <div class="nlContent" id="nlContent">
             <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
@@ -528,16 +527,20 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
      without creating a new block-formatting context (unlike overflow:hidden) */
   .eventsContainer { padding-bottom: 64px; overflow-x: clip; }
 
-  /* ── Newsletter — full-bleed slim band, strict 180px, no curves ── */
+  /* ── Newsletter — full-bleed band with turquoise top border ── */
   .nlWrap {
     position: relative;
     z-index: 20;
     width: 100vw;
     margin-left: calc(50% - 50vw);
-    margin-top: -1px;
     margin-bottom: 28px;
-    padding-top: 45px !important;
-    padding-bottom: 60px;
+    border-top: 4px solid #00FFFF;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
     min-height: 240px;
   }
   .nlCard {

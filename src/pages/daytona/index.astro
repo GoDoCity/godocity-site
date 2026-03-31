@@ -180,7 +180,6 @@ const guideCards = guideHero
   <div class="pageWrap">
     {/* ── NEWSLETTER BAND — 160px compact utility strip ── */}
     <div class="nlBand" id="nlBand">
-      <div class="horizonLine" id="horizonLine"></div>
       <div class="nlInner">
         <div class="nlContent" id="nlContent">
           <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
@@ -217,7 +216,6 @@ const guideCards = guideHero
             el.style.width = 'calc(100% + ' + (leftOffset + rightGap) + 'px)';
           }
         }
-        makeBleed(document.getElementById('nlBand'));
         makeBleed(document.getElementById('adBand'));
         makeBleed(document.getElementById('alertBand'));
         makeBleed(document.getElementById('alertBarLine'));
@@ -671,22 +669,22 @@ const guideCards = guideHero
       .nlSub strong { font-weight: 900 !important; }
     }
 
-    /* ── Newsletter — breathing room above, alert bar directly below ── */
+    /* ── Newsletter — centered card with turquoise top border ── */
     .nlBand {
       position: relative;
       background: var(--brand1);
-      margin: 24px 0 0;   /* 24px gap between nav pills and banner; alert bar sits flush below */
-      padding-top: 45px !important;
-      padding-bottom: 60px;
-      min-height: 240px;
+      border-top: 4px solid #00FFFF;
+      max-width: 800px;
+      margin: 20px auto;
       width: 100%;
       display: flex;
-      align-items: stretch;
-      overflow: hidden;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px 20px;
+      min-height: 240px;
       transition: height 350ms ease;
-    }
-    .nlBand .horizonLine {
-      z-index: 999 !important;
     }
     .nlInner {
       width: 100%;
