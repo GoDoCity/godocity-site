@@ -669,22 +669,34 @@ const guideCards = guideHero
       .nlSub strong { font-weight: 900 !important; }
     }
 
-    /* ── Newsletter — full-width band with turquoise top border ── */
+    /* ── Newsletter — full-bleed band with racing animation ── */
     .nlBand {
       position: relative;
-      background: var(--brand1);
-      border-top: 4px solid #00FFFF;
-      width: 100%;
-      margin: 0;
+      left: 50%;
+      right: 50%;
+      width: 100vw !important;
+      margin-left: -50vw !important;
+      margin-right: -50vw !important;
       margin-top: 15px !important;
+      height: 120px !important;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 20px 20px;
-      min-height: 140px;
-      transition: height 350ms ease;
+      overflow: hidden;
+      background-color: #FFE14D;
+      background-image:
+        linear-gradient(to bottom, #FFE14D, #FFE14D),
+        linear-gradient(90deg, #00FFFF 50%, transparent 50%);
+      background-size: 100% 100%, 40px 4px;
+      background-repeat: no-repeat, repeat-x;
+      background-position: center, top;
+      animation: racingLine 2s linear infinite;
+    }
+    @keyframes racingLine {
+      from { background-position: center, 0 0; }
+      to   { background-position: center, 40px 0; }
     }
     .nlInner {
       width: 100%;
@@ -782,7 +794,7 @@ const guideCards = guideHero
       width: 100%;
     }
     @media (max-width: 768px) {
-      .nlBand { margin: 0; }
+      .nlBand { margin-top: 15px !important; }
       /* 5. Container — Nooga breathing room */
       .nlInner { padding: 1.5rem 1rem !important; width: 100%; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
@@ -1102,6 +1114,12 @@ const guideCards = guideHero
     .homeAlertBar {
       display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
       padding: 12px 20px; margin: 0;
+      position: relative;
+      left: 50%;
+      right: 50%;
+      width: 100vw !important;
+      margin-left: -50vw !important;
+      margin-right: -50vw !important;
       background: #2E3E52; color: #E8EDF4;
       font-size: 16px; font-weight: 700; line-height: 1.3;
       text-decoration: none; text-align: center;
@@ -1111,6 +1129,12 @@ const guideCards = guideHero
     .homeAlertBar strong { font-weight: 900; color: #FFD24A; }
     .alertBarLine {
       display: block;
+      position: relative;
+      left: 50%;
+      right: 50%;
+      width: 100vw !important;
+      margin-left: -50vw !important;
+      margin-right: -50vw !important;
       height: 3px;
       background: rgba(255, 210, 74, 0.80);
       box-shadow: 0 0 8px rgba(255, 210, 74, 0.25);

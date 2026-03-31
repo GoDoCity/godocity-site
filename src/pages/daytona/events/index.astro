@@ -530,33 +530,46 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   /* Eliminate the gap between header and the yellow newsletter banner */
   section.section { padding-top: 0 !important; }
 
-  /* ── Newsletter — full-width band with turquoise top border ── */
+  /* ── Newsletter — full-bleed band with racing animation ── */
   .nlWrap {
     position: relative;
     z-index: 20;
-    width: 100%;
-    margin: 0 !important;
+    left: 50%;
+    right: 50%;
+    width: 100vw !important;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
     margin-top: 15px !important;
-    border-top: 4px solid #00FFFF;
+    height: 120px !important;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 20px 20px;
-    min-height: 140px;
+    overflow: hidden;
+    background-color: #FFE14D;
+    background-image:
+      linear-gradient(to bottom, #FFE14D, #FFE14D),
+      linear-gradient(90deg, #00FFFF 50%, transparent 50%);
+    background-size: 100% 100%, 40px 4px;
+    background-repeat: no-repeat, repeat-x;
+    background-position: center, top;
+    animation: racingLine 2s linear infinite;
+  }
+  @keyframes racingLine {
+    from { background-position: center, 0 0; }
+    to   { background-position: center, 40px 0; }
   }
   .nlCard {
-    background: linear-gradient(135deg, var(--brand1), var(--brand2));
-    /* No border-radius — hard edge to edge */
-    height: 140px;
-    max-height: 140px;
+    background: transparent;
+    height: 100%;
+    max-height: none;
     margin-bottom: 0;
-    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0 1.5rem;
+    width: 100%;
   }
   .nlContent {
     max-width: 520px;
