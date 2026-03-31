@@ -212,7 +212,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
         <div class="nlCard">
           <div class="nlContent" id="nlContent">
             <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
-            <div class="nlSub">Get the best local events sent to your inbox, <strong>for free.</strong></div>
+            <div class="nlSub">Get the best local events sent to your inbox, <strong><u>for free.</u></strong></div>
             <form class="nlForm" id="nlForm" novalidate>
               <input type="hidden" name="form-name" value="newsletter-signup" />
               <p style="display:none" aria-hidden="true"><label>Leave empty: <input name="nl-bot" id="nlBot" /></label></p>
@@ -547,7 +547,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     justify-content: center;
     text-align: center;
     overflow: hidden;
-    background-color: #FFE14D;
+    background-color: #FFF000;
   }
   .nlWrap::before {
     content: "";
@@ -586,24 +586,25 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     gap: 6px;
   }
   .nlHead {
-    font-size: clamp(26px, 3.2vw, 38px);
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 3rem;
     font-weight: 900;
     font-style: italic;
-    color: var(--accentText);
+    color: #000;
     line-height: 1.0;
     letter-spacing: -0.04em;
     margin: 0;
   }
   .nlCity { font-style: italic; font-weight: 900; }
   .nlSub {
+    font-family: 'Roboto', sans-serif;
     font-size: 16px;
     font-weight: 400;
-    color: var(--accentText);
-    opacity: .85;
+    color: rgba(0,0,0,.78);
     line-height: 1.3;
     margin: 0;
   }
-  .nlSub strong { font-weight: 900; opacity: 1; }
+  .nlSub strong { font-weight: 900; color: #000; }
   .nlForm { width: 100%; max-width: 420px; margin-top: 6px; }
   .nlRow { display: flex; height: 46px; width: 100%; }
   .nlInput {
