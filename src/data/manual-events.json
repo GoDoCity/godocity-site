@@ -1,4 +1,38 @@
 {
   "_instructions": "Quick-Entry: paste event objects into the 'quickEntry' array. They are merged at build time and take precedence over scraped data (dedup by title+date). Required fields: title, eventDate, city. All others optional. Dates must be YYYY-MM-DD. Known venue keys for automatic lat/lng: 'Hard Rock Hotel Daytona Beach', 'The Shores Resort & Spa', 'Daytona International Speedway', 'Ocean Center', 'Peabody Auditorium'.",
-  "quickEntry": []
+  "quickEntry": [
+    {
+      "_note_root_cause": "These 3 events use non-Eventbrite URLs (welcometorockville.com, jeepbeach.com, daytonainternationalspeedway.com). sheet-import.js requires an Eventbrite URL matching /eventbrite\\.com\\/e\\/[^/?#]+-\\d{5,}/ — any other URL is silently skipped at line 163. These events will never import via the sheet unless their Eventbrite listing URLs are added to column A.",
+      "_note": "placeholder — remove this object before adding real events"
+    },
+    {
+      "title": "Welcome to Rockville",
+      "eventDate": "2026-05-07",
+      "endDate": "2026-05-10",
+      "location": "Daytona International Speedway",
+      "city": "daytona beach",
+      "url": "https://welcometorockville.com/",
+      "category": "Music",
+      "sponsored": false
+    },
+    {
+      "title": "Jeep Beach",
+      "eventDate": "2026-04-17",
+      "endDate": "2026-04-26",
+      "location": "Daytona International Speedway",
+      "city": "daytona beach",
+      "url": "https://www.jeepbeach.com/",
+      "category": "Auto, Boat & Air",
+      "sponsored": false
+    },
+    {
+      "title": "Coke Zero Sugar 400",
+      "eventDate": "2026-08-29",
+      "location": "Daytona International Speedway",
+      "city": "daytona beach",
+      "url": "https://www.daytonainternationalspeedway.com/events/summer-cup-race/",
+      "category": "Sports & Fitness",
+      "sponsored": false
+    }
+  ]
 }
