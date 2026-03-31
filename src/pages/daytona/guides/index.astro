@@ -451,13 +451,13 @@ const sections: SectionDef[] = [
       display: block;
       font-family: 'Monoton', cursive;
       font-size: clamp(1.4rem, 2.4vw, 2.2rem);
-      font-weight: 700;
+      font-weight: 800;
       letter-spacing: 1px;
-      color: var(--pill-color);
+      color: #050505 !important;
       line-height: 1.1;
       text-align: center;
       -webkit-font-smoothing: antialiased;
-      text-shadow: 0 0 2px rgba(255,255,255,0.9), 0 0 8px var(--pill-color);
+      text-shadow: 0 0 2px #FFFFFF, 0 0 10px var(--pill-color), 0 0 20px var(--pill-color);
       transition: color 200ms ease, text-shadow 200ms ease;
     }
     .ghBlockCategory {
@@ -472,7 +472,7 @@ const sections: SectionDef[] = [
       width: 100%;
       margin: 2px auto 0;
     }
-    .ghBlock:hover .ghBlockAction   { color: #ffd24a; text-shadow: 0 0 4px #ffd24a; }
+    .ghBlock:hover .ghBlockAction   { color: #050505 !important; text-shadow: 0 0 2px #FFFFFF, 0 0 10px #ffd24a, 0 0 20px #ffd24a; }
     .ghBlock:hover .ghBlockCategory { color: rgba(255,210,74,0.85); }
 
     @media (max-width: 860px) {
@@ -557,14 +557,14 @@ const sections: SectionDef[] = [
     .ghSectionHeroTitle {
       font-family: 'Monoton', cursive;
       font-size: clamp(2.2rem, 5vw, 4rem);
-      font-weight: 400;
+      font-weight: 800;
       letter-spacing: 1px;
-      color: var(--pill-color);
+      color: #050505 !important;
       margin: 0 auto;
       line-height: 1.1;
       text-align: center;
       -webkit-font-smoothing: antialiased;
-      text-shadow: 0 0 2px rgba(255,255,255,0.9), 0 0 8px var(--pill-color);
+      text-shadow: 0 0 2px #FFFFFF, 0 0 10px var(--pill-color), 0 0 20px var(--pill-color);
     }
 
     /* ── Subcategory ribbon (below hero banner) ── */
