@@ -290,6 +290,7 @@ const sections: SectionDef[] = [
       border-bottom: 3px solid #ffd24a;
       box-shadow: none !important;
       overflow: hidden;
+      padding-top: 10px;
     }
 
     .ghPageHeroContent {
@@ -457,7 +458,7 @@ const sections: SectionDef[] = [
       line-height: 1.1;
       text-align: center;
       -webkit-font-smoothing: antialiased;
-      text-shadow: 0 0 2px #FFFFFF, 0 0 12px var(--pill-color), 0 0 20px var(--pill-color);
+      text-shadow: 0 0 2px #FFFFFF, 0 0 10px var(--pill-color), 0 0 20px var(--pill-color);
       transition: color 200ms ease, text-shadow 200ms ease;
     }
     .ghBlockCategory {
@@ -472,7 +473,7 @@ const sections: SectionDef[] = [
       width: 100%;
       margin: 2px auto 0;
     }
-    .ghBlock:hover .ghBlockAction   { color: #000000 !important; text-shadow: 0 0 2px #FFFFFF, 0 0 12px #ffd24a, 0 0 20px #ffd24a; }
+    .ghBlock:hover .ghBlockAction   { color: #000000 !important; text-shadow: 0 0 2px #FFFFFF, 0 0 10px #ffd24a, 0 0 20px #ffd24a; }
     .ghBlock:hover .ghBlockCategory { color: rgba(255,210,74,0.85); }
 
     @media (max-width: 860px) {
@@ -501,6 +502,12 @@ const sections: SectionDef[] = [
         flex-shrink: 0;
         white-space: nowrap;
       }
+    }
+
+    @media (max-width: 599px) {
+      /* Prevent neon words from wrapping on very small screens */
+      .ghBlockAction { font-size: clamp(1.1rem, 4vw, 1.5rem) !important; }
+      .ghSectionHeroTitle { font-size: clamp(1.6rem, 6.5vw, 2.4rem) !important; }
     }
 
     /* ══ END PAGE HERO ═══════════════════════════════════════════════════ */
@@ -564,7 +571,7 @@ const sections: SectionDef[] = [
       line-height: 1.1;
       text-align: center;
       -webkit-font-smoothing: antialiased;
-      text-shadow: 0 0 2px #FFFFFF, 0 0 12px var(--pill-color), 0 0 20px var(--pill-color);
+      text-shadow: 0 0 2px #FFFFFF, 0 0 10px var(--pill-color), 0 0 20px var(--pill-color);
     }
 
     /* ── Subcategory ribbon (below hero banner) ── */
