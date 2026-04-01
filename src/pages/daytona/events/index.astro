@@ -540,7 +540,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     margin-left: -50vw !important;
     margin-right: -50vw !important;
     margin-top: 15px !important;
-    height: 168px !important;
+    min-height: 168px;
+    height: auto !important;
+    padding: 1.5rem 0;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -587,13 +589,14 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   }
   .nlHead {
     font-family: 'Archivo Black', sans-serif;
-    font-size: 3rem;
+    font-size: clamp(1.5rem, 6vw, 3rem);
     font-weight: 900;
     font-style: italic;
     color: #000;
     line-height: 1.0;
     letter-spacing: -0.04em;
     margin: 0;
+    white-space: nowrap;
   }
   .nlCity { font-style: italic; font-weight: 900; }
   .nlSub {
@@ -648,7 +651,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   /* ── Newsletter mobile overhaul (< 768px) ── */
   @media (max-width: 767px) {
     /* 0. Allow banner to grow taller on mobile */
-    .nlWrap { height: auto !important; padding: 2rem 1rem; overflow: visible; justify-content: center; align-items: center; }
+    .nlWrap { min-height: 168px; height: auto !important; padding: 2rem 1rem; overflow: visible; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
     /* 1. Reset any restrictive parent containers */
     .nlCard, .nlContent, .nlForm, .nlInner {
@@ -694,6 +697,11 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     .nlSub strong {
       font-weight: 900 !important;
     }
+  }
+
+  /* ── Newsletter landscape (short viewport) ── */
+  @media (max-height: 500px) {
+    .nlWrap { padding: 0.75rem 0; }
   }
 
   /* ── Featured Section — 3-column static grid ── */

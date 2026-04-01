@@ -678,7 +678,9 @@ const guideCards = guideHero
       margin-left: -50vw !important;
       margin-right: -50vw !important;
       margin-top: 15px !important;
-      height: 168px !important;
+      min-height: 168px;
+      height: auto !important;
+      padding: 1.5rem 0;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -723,12 +725,13 @@ const guideCards = guideHero
     }
     .nlHead {
       font-family: 'Archivo Black', sans-serif;
-      font-size: 3rem;
+      font-size: clamp(1.5rem, 6vw, 3rem);
       font-weight: 900;
       font-style: italic;          /* "Speedway" lean — slanted heavy sans */
       color: #000;
       line-height: 1.0;
       letter-spacing: -0.04em;
+      white-space: nowrap;
     }
     /* City name span — swap "Daytona" → "Orlando" etc. without touching the template */
     .nlCity {
@@ -799,7 +802,7 @@ const guideCards = guideHero
       width: 100%;
     }
     @media (max-width: 768px) {
-      .nlBand { margin-top: 15px !important; height: auto !important; padding: 2rem 1rem; overflow: visible; justify-content: center; align-items: center; }
+      .nlBand { margin-top: 15px !important; min-height: 168px; height: auto !important; padding: 2rem 1rem; overflow: visible; display: flex; flex-direction: column; justify-content: center; align-items: center; }
       /* 5. Container — Nooga breathing room */
       .nlInner { padding: 1.5rem 1rem !important; width: 100%; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
@@ -854,6 +857,11 @@ const guideCards = guideHero
         white-space: nowrap !important;
         font-size: 2rem !important;
       }
+    }
+
+    /* ── Newsletter landscape (short viewport) ── */
+    @media (max-height: 500px) {
+      .nlBand { padding: 0.75rem 0; }
     }
 
     /* ── Home grid 75/25 inside 1280px container ── */
