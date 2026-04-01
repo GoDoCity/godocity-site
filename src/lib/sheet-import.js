@@ -365,7 +365,7 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     /* Image: Col L → og:image scrape of Col G URL → placeholder */
     let image = meta.manualImageUrl;
     if (!image) {
-      console.log(`[sheet-import] Col L empty for manual "${title}" — fetching og:image from ${meta.manualUrl}`);
+      console.log(`[sheet-import] Col H empty for manual "${title}" — fetching og:image from ${meta.manualUrl}`);
       image = await fetchOgImage(meta.manualUrl);
       if (image) {
         console.log(`[sheet-import] og:image for "${title}": ${image}`);
