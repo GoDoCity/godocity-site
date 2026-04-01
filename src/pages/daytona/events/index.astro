@@ -647,6 +647,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
   /* ── Newsletter mobile overhaul (< 768px) ── */
   @media (max-width: 767px) {
+    /* 0. Allow banner to grow taller on mobile */
+    .nlWrap { height: auto !important; padding: 2rem 1rem; overflow: visible; justify-content: center; align-items: center; }
+
     /* 1. Reset any restrictive parent containers */
     .nlCard, .nlContent, .nlForm, .nlInner {
       width: 100% !important;
@@ -657,7 +660,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
     /* 2. Breakout Header: Single line and centered */
     .nlHead {
-      font-size: 1.85rem !important;
+      font-size: 2rem !important;
       white-space: nowrap !important;
       display: block !important;
       width: 100vw !important;
