@@ -589,7 +589,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   }
   .nlHead {
     font-family: 'Archivo Black', sans-serif;
-    font-size: clamp(1.2rem, 5vw, 2.5rem);
+    font-size: 2.2rem;
     font-weight: 900;
     font-style: italic;
     color: #000;
@@ -663,7 +663,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
     /* 2. Breakout Header: Single line and centered */
     .nlHead {
-      font-size: clamp(1.2rem, 5vw, 2.5rem) !important;
+      font-size: 2.2rem !important;
       white-space: nowrap !important;
       display: block !important;
       width: 100vw !important;
@@ -707,6 +707,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   /* ── Newsletter landscape: very short (mobile landscape) ── */
   @media (max-height: 450px) {
     .nlWrap { padding: 0.5rem 0; min-height: 0; }
+    .nlHead { font-size: clamp(1.2rem, 5vw, 1.8rem) !important; }
     .nlContent { gap: 4px; }
     .nlSub { font-size: 15px; }
     .nlForm { margin-top: 4px; }
