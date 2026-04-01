@@ -14,8 +14,8 @@
  *     Non-Eventbrite events (major festivals, speedway races, etc.) are also
  *     supported: leave Column A empty and put the event URL in Column G.
  *     The script will import the row using Column G as the "Learn More" link,
- *     Column L for the featured image (with og:image fetch fallback), and
- *     Column N for a human-readable multi-day display string (e.g. "May 7-10").
+ *     Column H for the featured image (with og:image fetch fallback), and
+ *     Column I for a human-readable multi-day display string (e.g. "May 7-10").
  *
  *  2. Eventbrite Destination Search API  (EVENTBRITE_TOKEN)
  *     Auto-discovers all public events within 25mi of Daytona Beach center
@@ -39,9 +39,9 @@
  *   F (col  5) — Title Override        Optional title override
  *   G (col  6) — Manual URL            Non-Eventbrite "Learn More" link
  *                                       (used when Column A has no valid Eventbrite ID)
- *   L (col 11) — Manual Image URL      Featured image for non-Eventbrite events
+ *   H (col  7) — Manual Image URL      Featured image for non-Eventbrite events
  *                                       (falls back to og:image scrape of Col G URL)
- *   N (col 13) — Display Date          Human-readable multi-day label shown on event
+ *   I (col  8) — Display Date          Human-readable multi-day label shown on event
  *                                       cards, e.g. "May 7-10". Column C is still used
  *                                       for calendar sorting.
  */
@@ -150,8 +150,8 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
    *   E  (col  4) — Image Override        Optional image URL for Eventbrite events
    *   F  (col  5) — Title Override        Optional title override
    *   G  (col  6) — Manual URL            Non-Eventbrite "Learn More" link
-   *   L  (col 11) — Manual Image URL      Featured image for non-Eventbrite events
-   *   N  (col 13) — Display Date          Human-readable label for event cards
+   *   H  (col  7) — Manual Image URL      Featured image for non-Eventbrite events
+   *   I  (col  8) — Display Date          Human-readable label for event cards
    *                                        e.g. "May 7-10" (Col C still used for sorting)
    */
 
@@ -204,13 +204,13 @@ export async function importFromSheet(csvUrl, eventbriteToken = "", mapboxToken 
     /* Col F — Title Override */
     const titleOverride = rawCells[5] || null;
 
-    /* Col L — Manual Image URL (non-Eventbrite events; image link ending in common extensions
+    /* Col H — Manual Image URL (non-Eventbrite events; image link ending in common extensions
        or any https URL accepted — og:image is fetched as fallback if this is empty) */
-    const manualImageUrl = (rawCells[11] && /^https?:\/\//i.test(rawCells[11]))
-      ? rawCells[11] : null;
+    const manualImageUrl = (rawCells[7] && /^https?:\/\//i.test(rawCells[7]))
+      ? rawCells[7] : null;
 
-    /* Col N — Display Date (human-readable multi-day label, e.g. "May 7-10") */
-    const displayDate = rawCells[13] || null;
+    /* Col I — Display Date (human-readable multi-day label, e.g. "May 7-10") */
+    const displayDate = rawCells[8] || null;
 
     if (hasEbId) {
       /* ── Eventbrite-backed row ── */
