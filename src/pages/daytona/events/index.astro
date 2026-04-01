@@ -596,7 +596,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     line-height: 1.0;
     letter-spacing: -0.04em;
     margin: 0;
-    white-space: nowrap;
   }
   .nlCity { font-style: italic; font-weight: 900; }
   .nlSub {
@@ -651,7 +650,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   /* ── Newsletter mobile overhaul (< 768px) ── */
   @media (max-width: 767px) {
     /* 0. Allow banner to grow taller on mobile */
-    .nlWrap { min-height: 168px; height: auto !important; padding: 1.5rem 0; overflow: visible; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .nlWrap { min-height: 168px !important; height: auto !important; padding: 1.5rem 0; overflow: visible; display: flex; flex-direction: column; justify-content: center; align-items: center; }
 
     /* 1. Reset any restrictive parent containers */
     .nlCard, .nlContent, .nlForm, .nlInner {
@@ -661,14 +660,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
       overflow: visible !important;
     }
 
-    /* 2. Header: single line, centered */
+    /* 2. Header: big and centered, wraps naturally */
     .nlHead {
       font-size: 2.2rem !important;
-      white-space: nowrap !important;
-      display: block !important;
-      width: 100vw !important;
-      text-align: center !important;
-      margin-left: calc(-50vw + 50%) !important;
     }
 
     /* 3. Breakout Form: Stacks elements at fixed width */
@@ -693,17 +687,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
       border-radius: 8px !important;
     }
 
-    /* 5. Sub-headline: full-width block prevents "free." drop */
-    .nlSub {
-      display: block !important;
-      width: 100% !important;
-      text-align: center !important;
-      white-space: normal !important;
-      font-size: 1.2rem !important;
-    }
-    .nlSub strong {
-      font-weight: 900 !important;
-    }
+    /* 5. Sub-headline: matches home page — wraps naturally, no "free." widow */
+    .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; margin: 0 auto; }
+    .nlSub strong { font-weight: 900 !important; }
   }
 
   /* ── Newsletter landscape (short viewport) ── */
