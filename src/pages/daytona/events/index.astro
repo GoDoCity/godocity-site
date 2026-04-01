@@ -596,7 +596,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     line-height: 1.0;
     letter-spacing: -0.04em;
     margin: 0;
-    white-space: nowrap;
   }
   .nlCity { font-style: italic; font-weight: 900; }
   .nlSub {
@@ -664,10 +663,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     /* 2. Header: big and centered, wraps naturally */
     .nlHead {
       font-size: 2.2rem !important;
-      display: block !important;
-      width: 100vw !important;
-      text-align: center !important;
-      margin-left: calc(-50vw + 50%) !important;
     }
 
     /* 3. Breakout Form: Stacks elements at fixed width */
@@ -693,7 +688,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     }
 
     /* 5. Sub-headline: matches home page — wraps naturally, no "free." widow */
-    .nlSub { display: block; white-space: normal; font-size: 1.2rem; text-align: center; width: 100%; margin: 0 auto; }
+    .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; margin: 0 auto; }
     .nlSub strong { font-weight: 900 !important; }
   }
 
