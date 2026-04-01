@@ -801,7 +801,7 @@ const guideCards = guideHero
       width: 100%;
     }
     @media (max-width: 768px) {
-      .nlBand { margin-top: 15px !important; height: auto !important; min-height: 200px; padding: 1.5rem 0; overflow: visible; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+      .nlBand { margin-top: 15px !important; height: auto !important; min-height: 168px; padding: 1.5rem 0; overflow: visible; display: flex; flex-direction: column; justify-content: center; align-items: center; }
       /* 5. Container — Nooga breathing room */
       .nlInner { padding: 1.5rem 1rem !important; width: 100%; justify-content: center; text-align: center; }
       .nlContent { max-width: 100%; align-items: center; text-align: center; }
@@ -812,9 +812,10 @@ const guideCards = guideHero
         font-size: 2.2rem !important;
         letter-spacing: -0.02em !important;
         margin-bottom: 0.5rem;
+        white-space: nowrap !important;
       }
-      /* 4. Description — max-width: 90% keeps "for free." from widowing */
-      .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; width: 100%; max-width: 90%; margin: 0 auto; }
+      /* 4. Description — block + full-width prevents "free." widow */
+      .nlSub { display: block; white-space: normal; font-size: 1.2rem; text-align: center; width: 100%; margin: 0 auto; }
       /* "for free." stays extra-bold */
       .nlSub strong { font-weight: 900 !important; }
       /* Form column stack */
@@ -850,9 +851,10 @@ const guideCards = guideHero
         margin-left: 0 !important;
         margin-right: 0 !important;
       }
-      /* 4. Header: punchy size, portrait wraps naturally */
+      /* 4. Header: punchy size, locked to one line */
       .nlHead {
         font-size: 2.2rem !important;
+        white-space: nowrap !important;
       }
     }
 
