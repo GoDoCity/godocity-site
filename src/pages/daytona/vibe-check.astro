@@ -594,4 +594,43 @@ const hasEvents  = hasSlider || hasList;
     font-size: 14px; font-weight: 600; color: var(--text);
     line-height: 1.4;
   }
+
+  /* ══════════════════════════════════════════════════════════════════
+     CLEAN WHITE THEME — fix yellow-on-white text contrast
+     ══════════════════════════════════════════════════════════════════ */
+
+  /* Section header accent lines → light grey */
+  :global(html[data-theme="clean-white"]) .vibeSectionHead { border-bottom-color: #E5E7EB; }
+  :global(html[data-theme="clean-white"]) .vRailHead { border-bottom-color: #E5E7EB; }
+
+  /* Past poll winner text → Deep Slate instead of yellow */
+  :global(html[data-theme="clean-white"]) .vibePastWinner { color: #374151; }
+
+  /* Sidebar event calendar day-of-week + city name → Deep Slate */
+  :global(html[data-theme="clean-white"]) .veDow { color: #374151; }
+  :global(html[data-theme="clean-white"]) .veCityName { color: #374151; }
+
+  /* Sponsored badge → legible on white */
+  :global(html[data-theme="clean-white"]) .veSponBadge {
+    background: rgba(55,65,81,.08);
+    color: #374151;
+    border-color: rgba(55,65,81,.25);
+  }
+
+  /* "Submit an event" link → Deep Slate */
+  :global(html[data-theme="clean-white"]) .vSubmitEventLink { color: #374151; }
+
+  /* Pulse partner hover ring → neutral instead of yellow glow */
+  :global(html[data-theme="clean-white"]) .vppCard:hover {
+    border-color: #374151;
+    box-shadow: 0 0 0 1px rgba(55,65,81,.12), 0 6px 20px rgba(0,0,0,.12);
+  }
+
+  /* Sidebar newsletter box (yellow bg) → add dark border for definition on white page */
+  :global(html[data-theme="clean-white"]) .vnlBox {
+    border: 1px solid #111111;
+  }
+
+  /* "Good News Daytona!" headline inside sidebar box — enforce black */
+  :global(html[data-theme="clean-white"]) .vnlHead { color: #000000; }
 </style>

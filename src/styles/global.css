@@ -144,7 +144,7 @@ h1, h2, h3, h4, h5, h6,
    Nav
    ========================= */
 
-.nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0 14px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0 15px;margin-top:12px}
 .nav-left{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .nav-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 
@@ -384,3 +384,18 @@ body > footer { order: 2; }
 
 /* ── Kill switch: hide legacy ghHero banner on guide category pages ── */
 .ghHero { display: none !important; }
+
+/* =========================
+   Clean White: fix yellow-on-white text contrast
+   ========================= */
+
+/* Kicker tags — global .kicker class uses --accent (yellow); override to deep slate */
+html[data-theme="clean-white"] .kicker {
+  color: #374151;
+}
+
+/* Any neon/yellow accent lines touching the white background → light grey */
+html[data-theme="clean-white"] .sectionTitle::after {
+  background: #374151;
+  opacity: 1;
+}

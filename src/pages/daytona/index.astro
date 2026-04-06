@@ -1711,6 +1711,54 @@ const guideCards = guideHero
       .adActions { width: 100%; justify-content: center; gap: 1rem; margin-top: 4px; }
       .adBtnPrimary, .adBtnGhost { flex: 1; justify-content: center; }
     }
+
+    /* ══════════════════════════════════════════════════════════════════
+       CLEAN WHITE THEME — fix yellow-on-white text contrast
+       ══════════════════════════════════════════════════════════════════ */
+
+    /* Kicker labels (hero, cards, latest feed) → Deep Slate */
+    :global(html[data-theme="clean-white"]) .heroKicker { color: #374151; }
+    :global(html[data-theme="clean-white"]) .cardKicker { color: #374151; }
+    :global(html[data-theme="clean-white"]) .latestKicker { color: #374151; }
+
+    /* Sidebar event calendar day-of-week + city name → Deep Slate */
+    :global(html[data-theme="clean-white"]) .eDow { color: #374151; }
+    :global(html[data-theme="clean-white"]) .evCityName { color: #374151; }
+
+    /* Section header accent lines → light grey instead of neon yellow */
+    :global(html[data-theme="clean-white"]) .railHead { border-bottom-color: #E5E7EB; }
+    :global(html[data-theme="clean-white"]) .feedDivider { background: #E5E7EB; }
+    :global(html[data-theme="clean-white"]) .latestHead { border-bottom-color: #E5E7EB; }
+    :global(html[data-theme="clean-white"]) .topicsHead { border-bottom-color: #E5E7EB; }
+    :global(html[data-theme="clean-white"]) .guidesHead { border-bottom-color: #E5E7EB; }
+    :global(html[data-theme="clean-white"]) .masterMapHead { border-bottom-color: #E5E7EB; }
+
+    /* Featured event source badge → legible on white */
+    :global(html[data-theme="clean-white"]) .evSrcBadge--featured {
+      background: rgba(55,65,81,.08);
+      color: #374151;
+      border-color: rgba(55,65,81,.25);
+    }
+    :global(html[data-theme="clean-white"]) .evSrcBadge--community {
+      background: rgba(55,65,81,.06);
+      color: #374151;
+      border-color: rgba(55,65,81,.18);
+    }
+
+    /* Alert bar yellow line → near-black on white */
+    :global(html[data-theme="clean-white"]) .alertBarLine {
+      background: #1a1a1a;
+      box-shadow: none;
+    }
+
+    /* Newsletter banner (full-width yellow band) → add dark border */
+    :global(html[data-theme="clean-white"]) .nlBand {
+      border-top: 1px solid #111111;
+      border-bottom: 1px solid #111111;
+    }
+
+    /* "Good News Daytona!" headline inside the banner — already #000, but enforce */
+    :global(html[data-theme="clean-white"]) .nlHead { color: #000000; }
   </style>
 
   <script is:inline>
