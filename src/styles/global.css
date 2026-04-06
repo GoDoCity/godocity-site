@@ -1,3 +1,31 @@
+/* ── EMERGENCY WHITE THEME OVERRIDE ── */
+:root {
+  --bg: #ffffff !important;      /* Pure White Background */
+  --text: #1a1a1a !important;    /* Dark Slate Text for Readability */
+  --panel: #f9fafb !important;   /* Light Gray for Cards/Panels */
+  --line: #e5e7eb !important;    /* Light Gray for Borders */
+  --muted: #4b5563 !important;   /* Medium Gray for secondary text */
+  --surface: #ffffff !important;
+  --surface2: #f3f4f6 !important;
+  --topbar-bg: #111111 !important; /* KEEP THIS BLACK for the premium header look */
+}
+
+html, body {
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+/* Ensure cards and inputs are visible on white */
+.card, .pill, input[type="email"] {
+  border: 1px solid var(--line) !important;
+  background-color: var(--panel) !important;
+  color: var(--text) !important;
+}
+
+.lede, .article p, .note {
+  color: var(--muted) !important;
+}
+/* ──────────────────────────────────── */
 :root{
   /* Core palette */
   --bg:#0b0d10;
