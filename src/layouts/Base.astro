@@ -13,7 +13,7 @@ const monthThemeMap = {
   12: "christmas",
 };
 
-const seasonalTheme = monthThemeMap[m] ?? "dark-yellow";
+const seasonalTheme = monthThemeMap[m] ?? "clean-white";
 const activeTheme = urlTheme || seasonalTheme;
 
 const { title, subtitle, cityBase } = Astro.props;
@@ -23,7 +23,7 @@ const { title, subtitle, cityBase } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <meta name="color-scheme" content={activeTheme.startsWith("light-") ? "light" : "dark"} />
+    <meta name="color-scheme" content={(activeTheme.startsWith("light-") || activeTheme === "clean-white") ? "light" : "dark"} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;600;700;800&family=Montserrat:wght@400;700;900&family=Neonderthaw&family=Yellowtail&family=Monoton&family=Roboto:wght@400;900&family=Roboto+Condensed:wght@400;900&display=swap" rel="stylesheet" />
