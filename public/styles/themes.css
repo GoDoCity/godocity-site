@@ -219,3 +219,28 @@ html[data-theme="christmas"] {
   --pillBorder: color-mix(in srgb, #20c05c 50%, transparent);
   --underline: linear-gradient(90deg, #20c05c, #e0192d);
 }
+
+/* ── Clean White — pure white canvas, amber/gold + black accents ── */
+html[data-theme="clean-white"] {
+  --bg: #ffffff;
+  --panel: #F9FAFB;
+  --surface: rgba(0,0,0,.03);
+  --surface2: rgba(0,0,0,.055);
+  --text: #1a1a1a;
+  --muted: rgba(26,26,26,.65);
+  --faint: rgba(26,26,26,.42);
+  --border: #E5E7EB;
+  --line: #E5E7EB;
+  --accent: #ffd24a;
+  --accent2: #ffc400;
+  --accentText: #1a1a1a;
+  --focusRing: rgba(255,210,74,.35);
+  --brand1: #ffd24a;
+  --brand2: #ffc400;
+  --link: #b38600;
+  --pillBg: color-mix(in srgb, #ffd24a 13%, transparent);
+  --pillBorder: color-mix(in srgb, #ffd24a 55%, transparent);
+  --underline: linear-gradient(90deg, #ffd24a, #ffc400);
+  --topbar-bg: #111111;
+  --shadow: 0 2px 12px rgba(0,0,0,.08);
+}

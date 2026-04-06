@@ -505,7 +505,7 @@ const hasEvents  = hasSlider || hasList;
   .vcDot {
     width: 6px; height: 6px; border-radius: 50%;
     border: none; padding: 0;
-    background: rgba(255,255,255,.25);
+    background: var(--border, rgba(255,255,255,.25));
     cursor: pointer; transition: background 200ms, transform 200ms;
   }
   .vcDot--active { background: var(--brand1); transform: scale(1.3); }
