@@ -1,23 +1,25 @@
 /* public/styles/themes.css */
 
+/* ── Default / fallback: defer to the Design System variables ── */
 :root {
-  --bg: #0b0d10;
-  --text: #ffffff;
+  --bg: var(--bg-primary);
+  --text: var(--text-primary);
   --muted: #E0E0E0;
   --faint: rgba(224,224,224,.58);
   --border: rgba(255,255,255,.12);
   --surface: rgba(255,255,255,.03);
   --surface2: rgba(255,255,255,.05);
-  --accent: #ffd24a;
-  --accent2: #ffc400;
+  --accent: var(--theme-accent);
+  --accent2: var(--theme-accent);
   --accentText: #0b0d10;
-  --brand1: #ffd24a;
-  --brand2: #ffc400;
-  --link: #ffd24a;
-  --pillBg: color-mix(in srgb, #ffd24a 14%, transparent);
-  --pillBorder: color-mix(in srgb, #ffd24a 55%, transparent);
-  --underline: linear-gradient(90deg, #ffd24a, #ffc400);
-  --focusRing: rgba(255,210,74,.28);
+  --brand1: var(--theme-accent);
+  --brand2: var(--theme-accent);
+  --link: var(--theme-accent);
+  --pillBg: color-mix(in srgb, var(--theme-accent) 14%, transparent);
+  --pillBorder: color-mix(in srgb, var(--theme-accent) 55%, transparent);
+  --underline: var(--theme-gradient);
+  --focusRing: color-mix(in srgb, var(--theme-accent) 28%, transparent);
+  --topbar-bg: var(--bg-primary);
 }
 
 html[data-theme="dark-yellow"] {
@@ -220,27 +222,35 @@ html[data-theme="christmas"] {
   --underline: linear-gradient(90deg, #20c05c, #e0192d);
 }
 
-/* ── Clean White — pure white canvas, amber/gold + black accents ── */
+/* ── Clean White — pure white canvas, accent driven by Design System ── */
 html[data-theme="clean-white"] {
-  --bg: #ffffff;
+  --bg: var(--bg-primary);
   --panel: #F9FAFB;
   --surface: rgba(0,0,0,.03);
   --surface2: rgba(0,0,0,.055);
-  --text: #1a1a1a;
+  --text: var(--text-primary);
   --muted: rgba(26,26,26,.65);
   --faint: rgba(26,26,26,.42);
   --border: #E5E7EB;
   --line: #E5E7EB;
-  --accent: #ffd24a;
-  --accent2: #ffc400;
+  --accent: var(--theme-accent);
+  --accent2: var(--theme-accent);
   --accentText: #1a1a1a;
-  --focusRing: rgba(255,210,74,.35);
-  --brand1: #ffd24a;
-  --brand2: #ffc400;
-  --link: #b38600;
-  --pillBg: color-mix(in srgb, #ffd24a 13%, transparent);
-  --pillBorder: color-mix(in srgb, #ffd24a 55%, transparent);
-  --underline: linear-gradient(90deg, #ffd24a, #ffc400);
-  --topbar-bg: #111111;
+  --focusRing: color-mix(in srgb, var(--theme-accent) 35%, transparent);
+  --brand1: var(--theme-accent);
+  --brand2: var(--theme-accent);
+  --link: var(--theme-accent);
+  --pillBg: color-mix(in srgb, var(--theme-accent) 13%, transparent);
+  --pillBorder: color-mix(in srgb, var(--theme-accent) 55%, transparent);
+  --underline: var(--theme-gradient);
+  --topbar-bg: var(--bg-primary);
   --shadow: 0 2px 12px rgba(0,0,0,.08);
+}
+
+/* ── GODO Blue — city theme: white canvas, Daytona blue accent ── */
+html[data-theme="godo-blue"] {
+  --bg: #ffffff;
+  --text: #111111;
+  --accent: #0077be;
+  --brand1: #0077be;
 }
