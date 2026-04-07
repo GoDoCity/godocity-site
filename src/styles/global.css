@@ -2,7 +2,7 @@
   --bg: #ffffff;
   --text: #1a1a1a;
   --panel: #ffffff;
-  --muted: #4b5563;
+  --muted: #2d3748;
   --line: #e5e7eb;
   --accent: #ffd24a;
   --topbar-bg: #111111;
@@ -129,9 +129,9 @@ h1, h2, h3, h4, h5, h6,
    ========================= */
 
 .topbar {
-  background: var(--topbar-bg);
+  background: #ffffff;
   backdrop-filter: blur(10px);
-  position: sticky;
+  position: relative;
   top: 0;
   z-index: 50;
 }
@@ -145,7 +145,8 @@ h1, h2, h3, h4, h5, h6,
   background: var(--accent);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
 }
-.brand small { color: var(--muted); font-weight: 600; }
+.brand small { color: #1a1a1a; font-weight: 600; }
+.brand h1 { color: #1a1a1a; }
 
 /* =========================
    Nav
@@ -153,9 +154,9 @@ h1, h2, h3, h4, h5, h6,
 
 .nav {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 12px;
-  margin-top: var(--nav-gap);
+  margin-top: 0;
   margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 2px solid var(--brand1);
