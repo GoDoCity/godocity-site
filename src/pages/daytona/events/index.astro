@@ -614,29 +614,31 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   .nlInput {
     flex: 1; min-width: 0;
     border-radius: 8px 0 0 8px;
-    border: 2px solid rgba(0,0,0,.4);
+    border: 2px solid rgba(255,255,255,.3);
     border-right: none;
-    background: #fff;
-    color: #111;
+    background: #000;
+    color: #fff;
     padding: 0 14px;
     font-size: 15px; font-weight: 500; font-family: inherit;
     outline: none;
     transition: border-color 150ms;
   }
-  .nlInput::placeholder { color: #999; }
-  .nlInput:focus { border-color: rgba(0,0,0,.75); }
+  .nlInput::placeholder { color: #aaa; }
+  .nlInput:focus { border-color: rgba(255,255,255,.7); }
   .nlBtn {
     flex-shrink: 0; padding: 0 18px;
     border-radius: 0 8px 8px 0;
     border: none;
-    background: #fff;
-    color: #0077be;
+    background: #0077be;
+    color: #fff;
     font-size: 12px; font-weight: 900; font-family: inherit;
     letter-spacing: .04em;
     cursor: pointer; white-space: nowrap;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     transition: background 140ms;
+    margin-left: 5px;
   }
-  .nlBtn:hover { background: #e6f2fa; }
+  .nlBtn:hover { background: #005fa3; }
   .nlBtn:disabled { opacity: .5; cursor: default; }
   .nlFine {
     font-size: 11px; color: var(--accentText); opacity: .55; margin-top: 2px;
@@ -959,8 +961,8 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     .ctaOuter     { padding-top: 10px; }
     .nlCard       { padding: 24px 1.25rem; }
     .nlRow        { flex-direction: column; height: auto; gap: 8px; }
-    .nlInput      { border-radius: 8px; border-right: 2px solid rgba(0,0,0,.4); height: 46px; }
-    .nlBtn        { border-radius: 8px; height: 46px; }
+    .nlInput      { border-radius: 8px; border-right: 2px solid rgba(255,255,255,.3); height: 46px; }
+    .nlBtn        { border-radius: 8px; height: 46px; margin-left: 0 !important; }
     .filterBar    { gap: 6px; }
     .filterCount  { margin-left: 0; width: 100%; }
     .evCardTitle  { font-size: 16px; }
