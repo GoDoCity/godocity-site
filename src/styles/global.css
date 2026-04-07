@@ -64,6 +64,10 @@ html, body {
    ========================= */
 
 *{box-sizing:border-box}
+html {
+  background-color: #ffffff !important;
+  color: #1a1a1a !important;
+}
 html,body{
   margin:0;
   padding:0;
@@ -147,7 +151,7 @@ h1, h2, h3, h4, h5, h6,
    Nav
    ========================= */
 
-.nav{display:flex;align-items:center;justify-content:space-between;gap:var(--nav-gap);padding:10px 0 15px;margin-top:15px;margin-bottom:20px;border-bottom:1px solid var(--line)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:var(--nav-gap);padding:10px 0 15px;margin-top:25px !important;margin-bottom:25px !important;border-bottom:2px solid #e5e7eb !important}
 .nav-left{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .nav-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 
