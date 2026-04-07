@@ -27,12 +27,12 @@
   --hero-img: none;
 
   /* Pill colors */
-  --pill-home:      #bf94ff;
-  --pill-topic:     #98FF98;
-  --pill-guides:    #FFB7C5;
-  --pill-events:    #ffef78;
-  --pill-diy:       #87CEEB;
-  --pill-advertise: #FFDAB9;
+  --pill-home:      #e2e8f0;
+  --pill-topic:     #fbbf24;
+  --pill-guides:    #3b82f6;
+  --pill-events:    #f87171;
+  --pill-diy:       #10b981;
+  --pill-advertise: #8b5cf6;
   --holiday-line-color: #00f5ff;
 
   /* Daytona branding */
@@ -112,7 +112,7 @@ h1, h2, h3, h4, h5, h6,
 
 .lede {
   font-size: 1.1rem;
-  color: var(--muted);
+  color: #1a1a1a;
   max-width: 720px;
 }
 
@@ -131,9 +131,9 @@ h1, h2, h3, h4, h5, h6,
 .topbar {
   background: #ffffff;
   backdrop-filter: blur(10px);
-  position: relative;
+  position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 1000;
 }
 
 .brand { display: flex; align-items: center; gap: 12px; padding: 14px 0; }
@@ -159,7 +159,7 @@ h1, h2, h3, h4, h5, h6,
   margin-top: 0;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid var(--brand1);
+  border-bottom: 2px solid #1a1a1a;
 }
 .nav-left  { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .nav-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
@@ -268,10 +268,10 @@ h1, h2, h3, h4, h5, h6,
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 80px; }
 @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
-.article { padding: 14px; border-top: 1px solid var(--line); }
+.article { padding: 14px; border-top: 1px solid #1a1a1a; }
 .article:first-child { border-top: none; }
 .article h3 { margin: 0 0 6px; font-size: 18px; }
-.article p  { margin: 0; color: var(--muted); line-height: 1.5; }
+.article p  { margin: 0; color: #1a1a1a; line-height: 1.5; }
 
 .section { padding: 18px 0; }
 .section h2 { margin: 0 0 10px; font-size: 22px; }
@@ -297,7 +297,7 @@ h1, h2, h3, h4, h5, h6,
   width: 48px;
   height: 3px;
   border-radius: 999px;
-  background: var(--accent);
+  background: #1a1a1a;
   opacity: .95;
 }
 
