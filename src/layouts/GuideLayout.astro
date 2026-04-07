@@ -279,14 +279,14 @@ const emoji = topicEmoji[topic] ?? "📖";
     line-height: 1.35;
     transition: color 140ms;
   }
-  .gl-itoc-link:hover { color: #ffd24a; }
+  .gl-itoc-link:hover { color: var(--text); }
 
   .gl-itoc-item--sub .gl-itoc-link {
     font-size: 0.875rem;
     font-weight: 500;
     color: #aaaaaa;
   }
-  .gl-itoc-item--sub .gl-itoc-link:hover { color: #ffd24a; }
+  .gl-itoc-item--sub .gl-itoc-link:hover { color: var(--text); }
 
   @media (max-width: 900px) {
     #guide-toc.gl-itoc {
@@ -463,7 +463,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     border-radius: 999px;
     background: var(--pillBg, rgba(255, 210, 74, 0.14));
     border: 1px solid var(--pillBorder, rgba(255, 210, 74, 0.55));
-    color: var(--brand1, #ffd24a);
+    color: var(--text);
     font-size: 12px;
     font-weight: 900;
     letter-spacing: 0.1em;
@@ -471,7 +471,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     text-decoration: none;
     transition: opacity 140ms;
   }
-  .gl-pill:hover { opacity: 0.78; color: var(--brand1, #ffd24a); }
+  .gl-pill:hover { opacity: 0.78; color: var(--text); }
 
   .gl-topic {
     display: inline-flex;
@@ -671,7 +671,7 @@ const emoji = topicEmoji[topic] ?? "📖";
   .gl-ev-more {
     font-size: 12px;
     font-weight: 700;
-    color: var(--link, #ffd24a);
+    color: var(--text);
     text-decoration: none;
   }
   .gl-ev-more:hover { text-decoration: underline; }
@@ -741,7 +741,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     text-align: center;
     line-height: 1;
   }
-  .gl-eDow { font-size: 9px;  font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1, #ffd24a); }
+  .gl-eDow { font-size: 9px;  font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
   .gl-eDay { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 1px; }
   .gl-eMon { font-size: 7px;  font-weight: 700; letter-spacing: .08em; color: var(--faint, rgba(232,237,244,.58)); text-transform: uppercase; }
 
@@ -749,11 +749,11 @@ const emoji = topicEmoji[topic] ?? "📖";
   .gl-ev-name { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.25; }
   .gl-ev-meta { font-size: 11px; color: var(--faint, rgba(232,237,244,.58)); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
   .gl-ev-sep  { opacity: 0.4; }
-  .gl-ev-city { color: var(--brand1, #ffd24a); font-weight: 700; }
+  .gl-ev-city { color: var(--text); font-weight: 700; }
   .gl-sp-badge {
     display: inline-block; font-size: 7.5px; font-weight: 900; letter-spacing: .08em;
-    background: rgba(249,217,0,.18); color: var(--brand1, #ffd24a);
-    border: 1px solid rgba(249,217,0,.35); padding: 1px 4px; border-radius: 999px;
+    background: rgba(0,0,0,.07); color: var(--text);
+    border: 1px solid var(--line); padding: 1px 4px; border-radius: 999px;
     white-space: nowrap;
   }
 
@@ -764,7 +764,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     margin-top: 10px;
     font-size: 12px;
     font-weight: 700;
-    color: var(--brand1, #ffd24a);
+    color: var(--muted);
     text-decoration: none;
     opacity: 0.85;
     transition: opacity 120ms;
