@@ -9,8 +9,9 @@ import struct, zlib, math, numpy as np
 W, H = 1200, 480
 
 # ── Colours ──────────────────────────────────────────────────────────
-BG   = np.array([249, 217,   0], dtype=np.float32)   # #f9d900 yellow
-LINE = np.array([ 40,  38,   0], dtype=np.float32)   # very dark amber
+# ── New GODO Coastal Colours ──────────────────────────────────────────
+BG   = np.array([255, 255, 255], dtype=np.float32)   # Pure White background
+LINE = np.array([  0, 119, 190], dtype=np.float32)   # Daytona Blue (#0077be)
 
 # Pre-fill canvas with yellow
 canvas = np.full((H, W, 3), BG, dtype=np.float32)
