@@ -273,7 +273,7 @@ const sections: SectionDef[] = [
       background: var(--surface);
       border-bottom: 1px solid var(--border);
     }
-    .ghGridBreadcrumb a { color: var(--brand1, #ffd24a); text-decoration: none; }
+    .ghGridBreadcrumb a { color: var(--text); text-decoration: none; }
     .ghGridBreadcrumb a:hover { text-decoration: underline; }
     .ghCrumbSep { opacity: .5; }
 
@@ -630,8 +630,8 @@ const sections: SectionDef[] = [
       font-size: 14px;
     }
     .ghSubRibbonItem:hover {
-      color: #ffd24a;
-      border-bottom-color: #ffd24a;
+      color: var(--text);
+      border-bottom-color: var(--text);
     }
 
     /* ── 2×2 article grid (4 articles per category section) ── */
@@ -701,7 +701,7 @@ const sections: SectionDef[] = [
       margin: 0;
       transition: color 130ms ease;
     }
-    .ghArticleCard:hover .ghCardTitle { color: #ffd24a; }
+    .ghArticleCard:hover .ghCardTitle { color: var(--muted); }
     .ghCardDesc {
       font-size: 17px;
       color: var(--muted);
@@ -711,7 +711,7 @@ const sections: SectionDef[] = [
     .ghCardExternalBadge {
       font-size: 15px;
       font-weight: 700;
-      color: #ffd24a;
+      color: var(--text);
       letter-spacing: 0.06em;
       margin-top: auto;
       padding-top: 8px;
@@ -729,9 +729,9 @@ const sections: SectionDef[] = [
       height: 42px;
       padding: 0 28px;
       border-radius: 999px;
-      border: 2px solid #ffd24a;
+      border: 2px solid var(--line);
       background: transparent;
-      color: #ffd24a;
+      color: var(--text);
       font-size: 14px;
       font-weight: 800;
       text-decoration: none;
