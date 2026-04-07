@@ -20,7 +20,7 @@ const theme = cityBase === "Daytona" ? "godo-blue" : "clean-white";
   </head>
   <body class={cityBase ? `city city-${cityBase}` : "city"}>
     <Header title={title} subtitle={subtitle} cityBase={cityBase} />
-    <main>
+    <main style="padding-top: 80px;">
       <slot />
     </main>
     <Footer cityBase={cityBase} title={title} />
