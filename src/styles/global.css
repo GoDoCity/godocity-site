@@ -34,6 +34,14 @@
   --pill-diy:       #87CEEB;
   --pill-advertise: #FFDAB9;
   --holiday-line-color: #00f5ff;
+
+  /* Daytona branding */
+  --brand1: #ffd24a;
+  --brand2: #ffc400;
+  --border: #e5e7eb;
+  --faint: #6b7280;
+  --pillBg: #f9f9f9;
+  --pillBorder: #e5e7eb;
 }
 
 /* =========================
@@ -145,11 +153,12 @@ h1, h2, h3, h4, h5, h6,
 
 .nav {
   display: flex;
+  justify-content: space-between;
   gap: 12px;
   margin-top: var(--nav-gap);
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 2px solid var(--brand1);
 }
 .nav-left  { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
 .nav-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
@@ -164,10 +173,12 @@ h1, h2, h3, h4, h5, h6,
   padding: 9px 12px;
   border-radius: 999px;
   font-family: var(--font-head);
-  font-weight: 600;
+  font-weight: 800;
+  text-transform: uppercase;
 }
 
 .pill:hover {
+  background: var(--brand1);
   border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
 }
