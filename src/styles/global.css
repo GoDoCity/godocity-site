@@ -5,6 +5,7 @@
   --text-primary:    #111111;
   --theme-accent:    #0077be;
   --theme-gradient:  linear-gradient(135deg, #0077be, #00a9ce);
+  --theme-hover:     #f0f4f8;
 
   /* ── Derived aliases (legacy code uses these) ── */
   --bg:    var(--bg-primary);
@@ -138,11 +139,12 @@ h1, h2, h3, h4, h5, h6,
    ========================= */
 
 .topbar {
-  background: #ffffff !important;
+  background: var(--bg-primary) !important;
   backdrop-filter: blur(10px);
   position: sticky !important;
   top: 0;
-  z-index: 1000;
+  z-index: 9999;
+  border-bottom: 1px solid #e5e5e5;
 }
 
 .brand { display: flex; align-items: center; gap: 12px; padding: 14px 0; }
@@ -306,7 +308,7 @@ h1, h2, h3, h4, h5, h6,
   width: 48px;
   height: 3px;
   border-radius: 999px;
-  background: #000000 !important;
+  background: var(--theme-accent) !important;
   opacity: .95;
 }
 
@@ -398,18 +400,34 @@ button { border: none; cursor: pointer; }
 body .topbar {
   position: sticky !important;
   top: 0 !important;
-  background: #ffffff !important;
+  background: var(--bg-primary) !important;
   z-index: 9999 !important;
+  border-bottom: 1px solid #e5e5e5 !important;
 }
 
-body .sectionTitle::after,
+body .sectionTitle::after {
+  background: var(--theme-accent) !important;
+}
+
 body .article {
-  border-top: 1px solid #000000 !important;
-  background: #000000 !important;
+  border-top: 1px solid var(--line) !important;
 }
 
 body .kicker,
 body .view-all,
-body .see-all {
-  color: #000000 !important;
+body .see-all,
+body .view-all-stories,
+body .more-guides {
+  color: var(--theme-accent) !important;
+}
+
+/* Hover states: article cards + links use theme-hover, not yellow */
+.article:hover,
+a.article:hover {
+  background: var(--theme-hover) !important;
+}
+
+.card a:hover,
+a.card:hover {
+  background: var(--theme-hover) !important;
 }
