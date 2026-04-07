@@ -27,15 +27,16 @@ html, body {
 }
 /* ──────────────────────────────────── */
 :root{
-  /* Core palette */
+  /* Core palette — Clean White source of truth */
   --bg: #ffffff;
-  --text: #1a1a1a;
+  --text: #1a1a1a;        /* High-contrast Black */
   --panel: #ffffff;
-  --muted: #4b5563;
-  --line: #e5e7eb;
-  --accent: #ffd24a; /* Keeping your gold for buttons, not text */
+  --muted: #4b5563;       /* Professional Grey */
+  --line: #e5e7eb;        /* Subtle Border */
+  --accent: #ffd24a;      /* ONLY for buttons/highlights */
   --surface: #ffffff;
-  --topbar-bg: #111111; /* Keep the black header */
+  --topbar-bg: #111111;   /* The Black Header */
+  --nav-gap: 15px;
 
   /* Layout */
   --max:1360px;
@@ -146,7 +147,7 @@ h1, h2, h3, h4, h5, h6,
    Nav
    ========================= */
 
-.nav{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:10px 0 15px;margin-top:12px}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:var(--nav-gap);padding:10px 0 15px;margin-top:15px;margin-bottom:20px;border-bottom:1px solid var(--line)}
 .nav-left{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .nav-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 
