@@ -1,11 +1,21 @@
 /* Version 2.0 - Daytona Beach Edition */
 :root {
-  --bg: #ffffff;
-  --text: #1a1a1a;
+  /* ── Theme master controls (change these 4 to re-skin the whole city) ── */
+  --bg-primary:      #ffffff;
+  --text-primary:    #111111;
+  --theme-accent:    #0077be;
+  --theme-gradient:  linear-gradient(135deg, #0077be, #00a9ce);
+
+  /* ── Derived aliases (legacy code uses these) ── */
+  --bg:    var(--bg-primary);
+  --text:  var(--text-primary);
+  --accent: var(--theme-accent);
+  --brand1: var(--theme-accent);
+  --brand2: var(--theme-accent);
+
   --panel: #ffffff;
   --muted: #2d3748;
   --line: #e5e7eb;
-  --accent: #ffd24a;
   --topbar-bg: #111111;
   --nav-gap: 32px;
 
@@ -37,8 +47,6 @@
   --holiday-line-color: #00f5ff;
 
   /* Daytona branding */
-  --brand1: #ffd24a;
-  --brand2: #ffc400;
   --border: #e5e7eb;
   --faint: #6b7280;
   --pillBg: #f9f9f9;
@@ -52,8 +60,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html, body {
-  background-color: var(--bg);
-  color: var(--text);
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
   font-family: var(--font-body);
   line-height: 1.6;
   margin: 0;
@@ -213,7 +221,7 @@ h1, h2, h3, h4, h5, h6,
   min-height: var(--hero-min);
   isolation: isolate;
   background:
-    radial-gradient(1200px 600px at 20% 10%, rgba(255,210,74,.12), transparent 60%),
+    radial-gradient(1200px 600px at 20% 10%, color-mix(in srgb, var(--theme-accent) 12%, transparent), transparent 60%),
     radial-gradient(900px 500px at 85% 20%, rgba(120,180,255,.10), transparent 55%);
 }
 
@@ -354,7 +362,7 @@ button { border: none; cursor: pointer; }
    ========================= */
 
 .nlBox {
-  background: linear-gradient(135deg, #0077be, #00a9ce) !important;
+  background: var(--theme-gradient) !important;
   color: #ffffff;
 }
 .nlBox .nlBoxHead,
