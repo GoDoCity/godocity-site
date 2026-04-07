@@ -6,11 +6,11 @@
   --line: #e5e7eb;
   --accent: #ffd24a;
   --topbar-bg: #111111;
-  --nav-gap: 32px; /* Increased to fix the pill overlap */
+  --nav-gap: 32px;
 
   /* Layout */
-  --max:1360px;
-  --radius:14px;
+  --max: 1360px;
+  --radius: 14px;
   --shadow: 0 10px 30px rgba(0,0,0,.35);
   --surface: #ffffff;
 
@@ -25,29 +25,45 @@
   --hero-dim: .70;
   --hero-overlay: .50;
   --hero-img: none;
-}
 
-html, body {
-  background-color: var(--bg) !important;
-  color: var(--text) !important;
-  margin: 0;
-  padding: 0;
+  /* Pill colors */
+  --pill-home:      #bf94ff;
+  --pill-topic:     #98FF98;
+  --pill-guides:    #FFB7C5;
+  --pill-events:    #ffef78;
+  --pill-diy:       #87CEEB;
+  --pill-advertise: #FFDAB9;
+  --holiday-line-color: #00f5ff;
 }
 
 /* =========================
    Base / layout
    ========================= */
 
-*{box-sizing:border-box}
-html,body{
-  font-family:var(--font-body);
-  line-height:1.6;
-  overflow-x:hidden;
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* ── Custom Neon Font (tubular look) ── */
+/* HARD GUARANTEE: header -> main -> footer order */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+body > header { order: 0; }
+body > main   { order: 1; }
+body > footer { order: 2; }
+
 @font-face {
   font-family: 'CustomNeon';
   src: url('/fonts/CustomNeon.woff2') format('woff2'),
@@ -56,14 +72,12 @@ html,body{
   font-style: normal;
   font-display: swap;
 }
-a{color:inherit;text-decoration:none}
-a{color:var(--link);text-decoration:none}
-a:hover{
-  color: color-mix(in srgb, var(--brand2) 70%, var(--link));
-  opacity: 1;
-}
+
+a { color: inherit; text-decoration: none; }
+a:hover { opacity: .8; }
+
 /* =========================
-   TYPOGRAPHY
+   Typography
    ========================= */
 
 h1, h2, h3, h4, h5, h6,
@@ -85,34 +99,45 @@ h1, h2, h3, h4, h5, h6,
   margin: 0 0 10px;
 }
 
+.h1 { font-size: 44px; line-height: 1.06; margin: 10px 0; }
+@media (max-width: 900px) { .h1 { font-size: 36px; } }
+
 .lede {
   font-size: 1.1rem;
   color: var(--muted);
   max-width: 720px;
 }
+
+.kicker {
+  color: var(--text);
+  font-weight: 800;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
 /* =========================
    Topbar + brand
    ========================= */
 
-.topbar{
-  border-bottom: none !important;
-  box-shadow: none !important;
-  background-image: none !important;
-  background: var(--topbar-bg, rgba(11,13,16,.82));
+.topbar {
+  background: var(--topbar-bg);
   backdrop-filter: blur(10px);
-  position:sticky;
-  top:0;
-  z-index:50;
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
-.brand{display:flex;align-items:center;gap:12px;padding:14px 0}
-.badge{display:inline-flex;align-items:center;gap:8px;font-weight:700;letter-spacing:.2px}
-.badge-dot{
-  width:10px;height:10px;border-radius:99px;
-  background: var(--brand1);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand1) 18%, transparent);
+.brand { display: flex; align-items: center; gap: 12px; padding: 14px 0; }
+.badge { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: .2px; }
+.badge-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 99px;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
 }
-.brand small{color:var(--muted);font-weight:600}
+.brand small { color: var(--muted); font-weight: 600; }
 
 /* =========================
    Nav
@@ -121,106 +146,97 @@ h1, h2, h3, h4, h5, h6,
 .nav {
   display: flex;
   gap: 12px;
-  margin-top: var(--nav-gap) !important;
-  margin-bottom: 24px !important;
+  margin-top: var(--nav-gap);
+  margin-bottom: 24px;
   padding-bottom: 16px;
   border-bottom: 1px solid var(--line);
 }
-.nav-left{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.nav-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.nav-left  { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+.nav-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
 
-.pill{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-
-  border: 1px solid var(--pillBorder);
-  background: var(--pillBg);
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
   color: var(--text);
-
-  padding:9px 12px;
-  border-radius:999px;
-
+  padding: 9px 12px;
+  border-radius: 999px;
   font-family: var(--font-head);
   font-weight: 600;
 }
 
-.pill:hover{
-  border-color: color-mix(in srgb, var(--brand2) 70%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand2) 18%, transparent);
+.pill:hover {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent);
 }
-.pill[aria-current="page"]{
-  border-color: color-mix(in srgb, var(--brand2) 80%, transparent);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand2) 22%, transparent);
+
+.pill[aria-current="page"] {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
 }
-.cta{
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  background: linear-gradient(135deg, var(--brand1), var(--brand2));
-  color: var(--accentText);
-  font-weight:800;
-  padding:10px 14px;
-  border-radius:999px;
+
+.cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--accent);
+  color: var(--text);
+  font-weight: 800;
+  padding: 10px 14px;
+  border-radius: 999px;
 }
-.cta:hover{filter:brightness(.96)}
+.cta:hover { filter: brightness(.96); }
 
 /* =========================
-   Hero (hub-friendly default)
+   Hero
    ========================= */
 
-.hero{
-  position:relative;
-  overflow:hidden;
-  padding:25px 0 9px;
-  min-height:var(--hero-min);
-  isolation:isolate;
-
-  /* Clean default background for hub and non-city pages */
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding: 25px 0 9px;
+  min-height: var(--hero-min);
+  isolation: isolate;
   background:
     radial-gradient(1200px 600px at 20% 10%, rgba(255,210,74,.12), transparent 60%),
     radial-gradient(900px 500px at 85% 20%, rgba(120,180,255,.10), transparent 55%);
 }
 
-@media (max-width:900px){
-  .hero{min-height:var(--hero-min-mobile)}
-}
+@media (max-width: 900px) { .hero { min-height: var(--hero-min-mobile); } }
 
-/* If you ever use a hero image again, this class supports it */
-.hero.has-hero-img::before{
-  content:"";
-  position:absolute;
-  inset:-10%;
+.hero.has-hero-img::before {
+  content: "";
+  position: absolute;
+  inset: -10%;
   background: var(--hero-img) center / cover no-repeat;
   filter: blur(var(--hero-blur));
   transform: scale(1.08);
   opacity: var(--hero-dim);
-  z-index:0;
+  z-index: 0;
 }
 
-.hero.has-hero-img::after{
-  content:"";
-  position:absolute;
-  inset:0;
+.hero.has-hero-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
   background: linear-gradient(rgba(0,0,0,var(--hero-overlay)), rgba(0,0,0,var(--hero-overlay)));
-  z-index:1;
+  z-index: 1;
 }
 
-.hero.has-hero-img > .container{
-  position:relative;
-  z-index:3;
-}
+.hero.has-hero-img > .container { position: relative; z-index: 3; }
 
 /* =========================
-   City postcard banner (Option 2)
+   City postcard banner
    ========================= */
 
-.city-banner{
+.city-banner {
   width: min(980px, 92%);
-  margin: 8px auto 10px;      /* tighter spacing */
+  margin: 8px auto 10px;
   background: var(--hero-img) center / contain no-repeat;
   aspect-ratio: 3 / 2;
-  max-height: 320px;          /* Option 2 size */
+  max-height: 320px;
   border-radius: 14px;
   box-shadow: 0 18px 55px rgba(0,0,0,.45);
 }
@@ -229,45 +245,39 @@ h1, h2, h3, h4, h5, h6,
    Cards / content
    ========================= */
 
-.card{
-  border:1px solid var(--border, var(--line));
+.card {
+  border: 1px solid var(--line);
   background: var(--surface);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
 }
-.card-pad{padding:18px}
+.card-pad { padding: 18px; }
 
-.kicker{color:var(--text);font-weight:800;letter-spacing:.5px;text-transform:uppercase;font-size:12px}
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 80px; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
-.h1{font-size:44px;line-height:1.06;margin:10px 0 10px}
-@media (max-width:900px){.h1{font-size:36px}}
+.article { padding: 14px; border-top: 1px solid var(--line); }
+.article:first-child { border-top: none; }
+.article h3 { margin: 0 0 6px; font-size: 18px; }
+.article p  { margin: 0; color: var(--muted); line-height: 1.5; }
 
-.lede{color:var(--muted);font-size:16px;line-height:1.55;margin:0 0 12px}
+.section { padding: 18px 0; }
+.section h2 { margin: 0 0 10px; font-size: 22px; }
 
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:80px}
-@media (max-width:900px){.grid{grid-template-columns:1fr}}
-
-.article{padding:14px;border-top:1px solid var(--line)}
-.article:first-child{border-top:none}
-.article h3{margin:0 0 6px;font-size:18px}
-.article p{margin:0;color:var(--muted);line-height:1.5}
-
-.section{padding:18px 0}
-
-.container{
+.container {
   max-width: var(--max);
   margin-left: auto;
   margin-right: auto;
   padding-left: 18px;
   padding-right: 18px;
 }
-.section h2{margin:0 0 10px;font-size:22px}
-.sectionTitle{
+
+.sectionTitle {
   position: relative;
   padding-bottom: 8px;
   display: inline-block;
 }
-.sectionTitle::after{
+.sectionTitle::after {
   content: "";
   position: absolute;
   left: 0;
@@ -275,87 +285,67 @@ h1, h2, h3, h4, h5, h6,
   width: 48px;
   height: 3px;
   border-radius: 999px;
-  background: var(--underline);
+  background: var(--accent);
   opacity: .95;
 }
-.footer{border-top:1px solid var(--line);padding:22px 0 30px;color:var(--muted);font-size:14px}
 
-.tagrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.tag{border:1px solid var(--line);padding:6px 10px;border-radius:999px;color:var(--muted);font-weight:700;font-size:12px}
-
-form{display:flex;gap:10px;flex-wrap:wrap}
-input[type="email"]{
-  flex:1;
-  min-width:210px;
-  background: var(--surface2);
-  border:1px solid var(--border, var(--line));
-  border-radius:10px;
-  color:var(--text);
-  padding:10px 12px;
-  outline:none;
+.footer {
+  border-top: 1px solid var(--line);
+  padding: 22px 0 30px;
+  color: var(--muted);
+  font-size: 14px;
 }
-button{border:none;cursor:pointer}
-.note{color:var(--muted);font-size:13px;line-height:1.4;margin-top:10px}
-.nlButton{
+
+.siteFooter { position: static; }
+
+.tagrow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.tag {
+  border: 1px solid var(--line);
+  padding: 6px 10px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 12px;
+}
+
+form { display: flex; gap: 10px; flex-wrap: wrap; }
+input[type="email"] {
+  flex: 1;
+  min-width: 210px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--text);
+  padding: 10px 12px;
+  outline: none;
+}
+button { border: none; cursor: pointer; }
+.note { color: var(--muted); font-size: 13px; line-height: 1.4; margin-top: 10px; }
+
+.nlButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(180deg, var(--brand1), var(--brand2));
-  color: var(--accentText);
+  background: var(--accent);
+  color: var(--text);
   font-weight: 800;
   padding: 10px 20px;
   border-radius: 999px;
   border: none;
   cursor: pointer;
 }
-.nlButton:hover{ filter: brightness(.95); }
+.nlButton:hover { filter: brightness(.95); }
+
 /* =========================
-   City themes (works after you add body class in Base.astro)
+   City themes
    ========================= */
 
-/* Daytona theme: applies when body class is "city city-daytona" */
-.city-daytona{
-  --hero-img: url("/images/gododaytona-bg.png");
-}
+.city-daytona { --hero-img: url("/images/gododaytona-bg.png"); }
 
-/* HARD GUARANTEE: header -> main -> footer order */
-body {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-}
+/* =========================
+   Editorial utilities
+   ========================= */
 
-body > header { order: 0; }
-body > main   { order: 1; }
-body > footer { order: 2; }
-
-.siteFooter {
-  position: static !important;
-}
-/* ── Pill Color Palette ──────────────────────────────────────────────────────
-   One variable per nav item — easy to swap for July 4th Red/White/Blue ticker:
-     --pill-home:      #e0192d  (red)
-     --pill-topic:     #ffffff  (white)
-     --pill-guides:    #1e63ff  (blue)
-     --pill-events:    #e0192d  (red)
-     --pill-diy:       #ffffff  (white)
-     --pill-advertise: #1e63ff  (blue)
-   ──────────────────────────────────────────────────────────────────────────── */
-:root {
-  --pill-home:      #bf94ff;  /* Home      — Coast Lavender */
-  --pill-topic:     #98FF98;  /* Topics    — Drive Mint     */
-  --pill-guides:    #FFB7C5;  /* Guides    — Surf Pink      */
-  --pill-events:    #ffef78;  /* Events    — Canary Yellow  */
-  --pill-diy:       #87CEEB;  /* DIY       — Sky Blue       */
-  --pill-advertise: #FFDAB9;  /* Advertise — Peach          */
-  --holiday-line-color: #00f5ff; /* Horizon line — Vibrant Electric Turquoise */
-}
-
-
-/* ── Editorial Bold — use class="editorial-bold" in Markdown/MDX ──────────────
-   Designed for large emoji headlines (☀️, 🏎️, 📍) and bold editorial callouts.
-   font-size: 1.5rem / font-weight: 800 per spec.
-   Auto-applied to any paragraph that opens with ***…*** (bold+italic triple).  */
 .editorial-bold {
   font-size: 1.5rem;
   font-weight: 800;
@@ -363,6 +353,4 @@ body > footer { order: 2; }
   letter-spacing: -0.01em;
 }
 
-/* ── Kill switch: hide legacy ghHero banner on guide category pages ── */
 .ghHero { display: none !important; }
-
