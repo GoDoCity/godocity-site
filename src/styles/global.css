@@ -1,34 +1,37 @@
-:root{
-  /* Core palette — Clean White source of truth */
+:root {
   --bg: #ffffff;
-  --text: #1a1a1a;        /* High-contrast Black */
+  --text: #1a1a1a;
   --panel: #ffffff;
-  --muted: #4b5563;       /* Professional Grey */
-  --line: #e5e7eb;        /* Subtle Border */
-  --accent: #ffd24a;      /* ONLY for buttons/highlights */
-  --surface: #ffffff;
-  --topbar-bg: #111111;   /* The Black Header */
-  --nav-gap: 15px;
+  --muted: #4b5563;
+  --line: #e5e7eb;
+  --accent: #ffd24a;
+  --topbar-bg: #111111;
+  --nav-gap: 32px; /* Increased to fix the pill overlap */
 
   /* Layout */
   --max:1360px;
   --radius:14px;
   --shadow: 0 10px 30px rgba(0,0,0,.35);
+  --surface: #ffffff;
 
   /* Typography */
-   /* Fonts */
   --font-body: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
   --font-head: "Manrope", ui-sans-serif, system-ui;
 
-  /* Hero tuning knobs (hub uses gradients; city pages can still use these if needed) */
+  /* Hero tuning knobs */
   --hero-min: 420px;
   --hero-min-mobile: 560px;
   --hero-blur: 22px;
   --hero-dim: .70;
   --hero-overlay: .50;
-
-  /* Default: no hero image on the hub */
   --hero-img: none;
+}
+
+html, body {
+  background-color: var(--bg) !important;
+  color: var(--text) !important;
+  margin: 0;
+  padding: 0;
 }
 
 /* =========================
@@ -36,16 +39,8 @@
    ========================= */
 
 *{box-sizing:border-box}
-html {
-  background-color: #ffffff !important;
-  color: #1a1a1a !important;
-}
 html,body{
-  margin:0;
-  padding:0;
   font-family:var(--font-body);
-  background:var(--bg);
-  color:var(--text);
   line-height:1.6;
   overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
@@ -123,7 +118,14 @@ h1, h2, h3, h4, h5, h6,
    Nav
    ========================= */
 
-.nav{display:flex;align-items:center;justify-content:space-between;gap:var(--nav-gap);padding:10px 0 15px;margin-top:25px !important;margin-bottom:25px !important;border-bottom:2px solid #e5e7eb !important}
+.nav {
+  display: flex;
+  gap: 12px;
+  margin-top: var(--nav-gap) !important;
+  margin-bottom: 24px !important;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
 .nav-left{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
 .nav-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 
