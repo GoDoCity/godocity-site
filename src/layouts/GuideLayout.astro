@@ -586,6 +586,7 @@ const emoji = topicEmoji[topic] ?? "📖";
   /* ── Mini Newsletter ── */
   .gl-nl {
     position: relative;
+    /* Use our new theme gradient */
     background: var(--theme-gradient) !important;
     border-radius: 16px;
     padding: 28px 22px;
@@ -593,6 +594,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     flex-direction: column;
     gap: 10px;
     overflow: hidden;
+    border: none !important;
   }
 
   /* Topographic wave depth layer — lets city colour show through */
@@ -656,8 +658,8 @@ const emoji = topicEmoji[topic] ?? "📖";
     padding: 12px 0;
     border-radius: 999px;
     border: none;
-    background: white;
-    color: #0077be;
+    background: #ffffff !important;
+    color: #0077be !important; /* Hardcoded blue for contrast */
     font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
     font-size: 14px;
     font-weight: 900;
