@@ -208,7 +208,7 @@ const emoji = topicEmoji[topic] ?? "📖";
   /* ── Inline collapsible ToC ── */
   #guide-toc.gl-itoc {
     background-color: #000000 !important;
-    border: 2px solid #ffd24a !important;
+    border: 2px solid #ffffff !important;
     border-radius: 12px;
     padding: 16px 20px;
     margin-bottom: 32px;
@@ -342,7 +342,7 @@ const emoji = topicEmoji[topic] ?? "📖";
       var summary = document.createElement("summary");
       summary.className   = "gl-itoc-summary";
       summary.innerHTML   =
-        '<svg class="gl-itoc-hamburger" aria-hidden="true" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="18" height="2" rx="1" fill="#ffd24a"/><rect x="0" y="5.5" width="18" height="2" rx="1" fill="#ffd24a"/><rect x="0" y="11" width="18" height="2" rx="1" fill="#ffd24a"/></svg>In this guide <span class="gl-itoc-chevron" aria-hidden="true">&#8250;</span>';
+        '<svg class="gl-itoc-hamburger" aria-hidden="true" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="18" height="2" rx="1" fill="#ffffff"/><rect x="0" y="5.5" width="18" height="2" rx="1" fill="#ffffff"/><rect x="0" y="11" width="18" height="2" rx="1" fill="#ffffff"/></svg>In this guide <span class="gl-itoc-chevron" aria-hidden="true">&#8250;</span>';
       details.appendChild(summary);
 
       var list = document.createElement("ul");
@@ -511,7 +511,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     font-family: var(--font-head, "Manrope", sans-serif);
     font-size: 2.2rem;
     font-weight: 800;
-    color: #ffffff;
+    color: #1a1a1a;
     margin: 2rem 0 1rem;
     letter-spacing: -0.03em;
     scroll-margin-top: 80px;
@@ -520,6 +520,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     font-family: var(--font-head, "Manrope", sans-serif);
     font-size: clamp(1.1rem, 2vw, 1.35rem);
     font-weight: 700;
+    color: #1a1a1a;
     margin: 28px 0 8px;
     scroll-margin-top: 80px;
   }
@@ -584,7 +585,7 @@ const emoji = topicEmoji[topic] ?? "📖";
 
   /* ── Mini Newsletter ── */
   .gl-nl {
-    background: #f9d900;
+    background: linear-gradient(135deg, #0077be, #00a9ce) !important;
     border-radius: 16px;
     padding: 28px 22px;
     display: flex;
@@ -636,8 +637,8 @@ const emoji = topicEmoji[topic] ?? "📖";
     padding: 12px 0;
     border-radius: 999px;
     border: none;
-    background: #000;
-    color: #f9d900;
+    background: #ffffff;
+    color: #0077be;
     font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
     font-size: 14px;
     font-weight: 900;
@@ -656,7 +657,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     justify-content: space-between;
     align-items: baseline;
     padding-bottom: 10px;
-    border-bottom: 2px solid var(--brand1, #ffd24a);
+    border-bottom: 2px solid #000000;
     margin-bottom: 0;
   }
 
