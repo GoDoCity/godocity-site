@@ -382,3 +382,26 @@ button { border: none; cursor: pointer; }
 }
 
 .ghHero { display: none !important; }
+
+/* =========================
+   Double-selector overrides (Daytona Beach high-contrast)
+   ========================= */
+
+body .topbar {
+  position: sticky !important;
+  top: 0 !important;
+  background: #ffffff !important;
+  z-index: 9999 !important;
+}
+
+body .sectionTitle::after,
+body .article {
+  border-top: 1px solid #000000 !important;
+  background: #000000 !important;
+}
+
+body .kicker,
+body .view-all,
+body .see-all {
+  color: #000000 !important;
+}
