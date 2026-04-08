@@ -47,8 +47,8 @@ const siteName = Astro.props?.title ?? (rawBase ? `GoDo ${rawBase[0].toUpperCase
 <style>
   .siteFooter {
     margin-top: 22px;
-    background-color: #111111;
-    border-top: 1px solid rgba(255,255,255,.08);
+    background: transparent !important;
+    border-top: 1px solid #d0d0d0;
     padding: 18px 0 28px;
     overflow: visible;
   }
@@ -69,20 +69,20 @@ const siteName = Astro.props?.title ?? (rawBase ? `GoDo ${rawBase[0].toUpperCase
 
   .footerHead {
     font-weight: 950;
-    color: rgba(232,237,244,.92);
+    color: #111111 !important;
     margin-bottom: 10px;
   }
   .footerLink {
     display: block;
-    color: rgba(232,237,244,.78);
+    color: #111111 !important;
     text-decoration: none;
     margin-bottom: 8px;
     font-size: 13px;
   }
-  .footerLink:hover { color: rgba(255,210,74,.92); }
+  .footerLink:hover { color: #0057ff !important; }
 
   .footerFine {
-    color: rgba(232,237,244,.58);
+    color: #444444 !important;
     font-size: 13px;
     line-height: 1.35;
   }
