@@ -145,10 +145,12 @@ h1, h2, h3, h4, h5, h6,
   left: 0 !important;
   right: 0 !important;
   width: 100% !important;
+  height: 70px;
   z-index: 9999 !important;
   background-color: var(--bg-primary) !important;
   backdrop-filter: blur(10px);
   border-bottom: 1px solid #e5e5e5;
+  overflow: visible;
 }
 
 .brand { display: flex; align-items: center; gap: 12px; padding: 14px 0; }

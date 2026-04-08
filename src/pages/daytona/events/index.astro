@@ -734,9 +734,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   }
   .featuredActionBtn:hover { border-color: var(--brand1); color: var(--brand1); }
   .featuredActionBtn--add {
-    border-color: rgba(249,217,0,.35); color: var(--brand1);
+    border-color: rgba(0,119,190,.35); color: var(--brand1);
   }
-  .featuredActionBtn--add:hover { border-color: var(--brand1); background: rgba(249,217,0,.08); }
+  .featuredActionBtn--add:hover { border-color: var(--brand1); background: #f0f7ff; }
 
   /* 3-column grid — scrollable horizontally if >3 cards */
   .featuredGrid {
@@ -750,7 +750,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   }
   .featuredGrid::-webkit-scrollbar { height: 4px; }
   .featuredGrid::-webkit-scrollbar-track { background: rgba(255,255,255,.04); border-radius: 999px; }
-  .featuredGrid::-webkit-scrollbar-thumb { background: rgba(249,217,0,.35); border-radius: 999px; }
+  .featuredGrid::-webkit-scrollbar-thumb { background: rgba(0,119,190,.35); border-radius: 999px; }
 
   .featuredCard {
     flex-shrink: 0;
@@ -872,7 +872,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     display: flex;
     align-items: center;
     justify-content: center;
-    border-top: 1px solid rgba(255,215,0,.35);
+    border-top: 1px solid rgba(0,119,190,.35);
   }
 
   /* Col 3 — Text: title, venue, meta */
@@ -893,7 +893,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   .evCardCity { font-size: 15px; font-weight: 600; color: var(--muted); }
   .evCardDist {
     font-size: 15px; font-weight: 700; color: var(--brand1);
-    background: rgba(249,217,0,.10); padding: 1px 6px; border-radius: 999px;
+    background: #f0f7ff; padding: 1px 6px; border-radius: 999px;
   }
 
   /* ── Source badges — Community Event / Featured ── */
@@ -904,9 +904,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     white-space: nowrap; flex-shrink: 0;
   }
   .evSrcBadge--featured {
-    background: rgba(249,217,0,.12);
+    background: #f0f7ff;
     color: var(--brand1);
-    border: 1px solid rgba(249,217,0,.3);
+    border: 1px solid rgba(0,119,190,.3);
   }
   .evSrcBadge--community {
     background: var(--surface2, rgba(255,255,255,.06));
@@ -923,7 +923,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     font-size: 13px; font-weight: 700; font-family: inherit;
     cursor: pointer; transition: border-color 140ms, background 140ms;
   }
-  .loadMoreBtn:hover { border-color: var(--brand1); background: rgba(249,217,0,.06); }
+  .loadMoreBtn:hover { border-color: var(--brand1); background: #f0f7ff; }
   .loadMoreCount { color: var(--faint); font-weight: 400; margin-left: 4px; }
 
   /* ── Suggest an Event CTA ── */
