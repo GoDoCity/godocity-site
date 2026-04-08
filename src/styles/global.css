@@ -156,12 +156,17 @@ h1, h2, h3, h4, h5, h6,
 
 .brand { display: flex; align-items: center; gap: 12px; padding: 14px 0; }
 .badge { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; letter-spacing: .2px; }
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1);    opacity: 1; }
+  50%       { transform: scale(1.45); opacity: 0.55; }
+}
 .badge-dot {
   width: 10px;
   height: 10px;
   border-radius: 99px;
   background: var(--accent);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent);
+  animation: pulse-dot 2s ease-in-out infinite;
 }
 .brand small { color: #1a1a1a; font-weight: 600; }
 .brand h1 { color: #1a1a1a; }
