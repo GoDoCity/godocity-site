@@ -149,7 +149,8 @@ h1, h2, h3, h4, h5, h6,
   z-index: 9999 !important;
   background-color: var(--bg-primary) !important;
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid #e5e5e5;
+  border-bottom: none !important;
+  box-shadow: none !important;
   overflow: visible;
 }
 

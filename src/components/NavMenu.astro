@@ -337,12 +337,10 @@ const pills = [
 
   /* The visible panel lives inside dropInner */
   .dropInner {
-    background: rgba(11,13,16,.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--border, rgba(255,255,255,.12));
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
     border-radius: 16px;
-    box-shadow: 0 16px 48px rgba(0,0,0,.55), 0 2px 8px rgba(0,0,0,.35);
+    box-shadow: 0 8px 24px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
     overflow: hidden;
   }
 
@@ -385,12 +383,12 @@ const pills = [
   }
 
   .guidesDropdown { min-width: 210px; }
-  .guidesDropInner { border-color: rgba(255,255,255,.15); }
+  .guidesDropInner { border-color: #e5e7eb; }
   .guideList { padding: 10px 10px 6px; display: grid; gap: 3px; }
   .guideDropItem {
     display: flex; align-items: center; gap: 10px;
     padding: 10px 12px; border-radius: 10px;
-    text-decoration: none; color: var(--text);
+    text-decoration: none; color: #111111;
     transition: background 150ms, color 150ms, box-shadow 150ms;
   }
   .guideDropItem:hover {
@@ -413,12 +411,12 @@ const pills = [
   .dropFooter {
     display: block;
     padding: 10px 16px;
-    border-top: 1px solid var(--border, rgba(255,255,255,.08));
+    border-top: 1px solid #e5e7eb;
     font-size: 12.5px; font-weight: 700;
     color: var(--brand1); text-decoration: none;
     text-align: center; transition: background 140ms;
   }
-  .dropFooter:hover { background: var(--pillBg); }
+  .dropFooter:hover { background: #f9fafb; }
 
   /* ── Hamburger ── */
   .menuBtn {
@@ -610,13 +608,14 @@ const pills = [
   .guidesDropdown .dropFooter { color: var(--pill-guides); }
 
   .diyDropdown .dropPill {
-    color: var(--pill-diy);
-    border-color: color-mix(in srgb, var(--pill-diy) 40%, transparent);
-    background: color-mix(in srgb, var(--pill-diy) 10%, transparent);
+    color: #ffffff;
+    border-color: #047857;
+    background: #047857;
   }
   .diyDropdown .dropPill:hover {
-    border-color: color-mix(in srgb, var(--pill-diy) 70%, transparent);
-    background: color-mix(in srgb, var(--pill-diy) 18%, transparent);
+    border-color: #065f46;
+    background: #065f46;
+    color: #ffffff;
   }
-  .diyDropdown .dropFooter { color: var(--pill-diy); }
+  .diyDropdown .dropFooter { color: #047857; }
 </style>
