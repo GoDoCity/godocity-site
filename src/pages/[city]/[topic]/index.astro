@@ -175,7 +175,7 @@ try {
 } catch { upcomingEvents = []; }
 ---
 
-<Base title={`${topicLabelStr} | GoDo ${cityCap}`} subtitle={topicLabelStr} cityBase={city}>
+<Base title={topic === "diy" ? "DIY" : `${topicLabelStr} | GoDo ${cityCap}`} cityBase={city}>
   <section class="section">
     <div class="container" style="max-width: 1260px !important; margin: 0 auto !important; padding: 0 2rem;">
 
