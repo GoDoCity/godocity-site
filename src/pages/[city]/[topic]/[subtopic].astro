@@ -179,7 +179,7 @@ const DIY_PILL_LIST = [
   :root {
     --card-radius: 18px;
     --card-border: rgba(255,255,255,.10);
-    --card-border-hover: rgba(255,220,80,.22);
+    --card-border-hover: rgba(0,119,190,.30);
     --card-bg: rgba(255,255,255,.035);
     --card-bg-hover: rgba(255,255,255,.05);
     --shadow-soft: 0 10px 30px rgba(0,0,0,.24);
@@ -210,13 +210,13 @@ const DIY_PILL_LIST = [
   .diyPill {
     font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
     padding: 4px 14px; border-radius: 999px; text-decoration: none;
-    background: rgba(249,217,0,.08); color: var(--brand1);
-    border: 1px solid rgba(249,217,0,.18);
+    background: rgba(0,119,190,.08); color: var(--brand1);
+    border: 1px solid rgba(0,119,190,.25);
     transition: background 140ms, border-color 140ms;
   }
-  .diyPill:hover { background: rgba(249,217,0,.18); border-color: rgba(249,217,0,.4); }
+  .diyPill:hover { background: rgba(0,119,190,.18); border-color: rgba(0,119,190,.50); }
   .diyPill--active {
-    background: rgba(249,217,0,.22); border-color: rgba(249,217,0,.55);
+    background: rgba(0,119,190,.22); border-color: rgba(0,119,190,.55);
     color: var(--brand1); font-weight: 900;
   }
 
@@ -238,11 +238,11 @@ const DIY_PILL_LIST = [
     transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease);
     will-change: transform;
   }
-  .heroCard:hover, .row:hover, .moduleCard:hover {
+  .heroCard:hover, .row:hover {
     transform: var(--lift);
     background: var(--card-bg-hover);
     border-color: var(--card-border-hover);
-    box-shadow: 0 0 0 1px rgba(255,220,80,.08), var(--shadow-soft);
+    box-shadow: 0 0 0 1px rgba(0,119,190,.08), var(--shadow-soft);
   }
 
   .heroCard {
@@ -283,7 +283,7 @@ const DIY_PILL_LIST = [
     font-weight: 800; font-size: 14px; cursor: pointer;
     transition: background var(--ease), border-color var(--ease);
   }
-  .loadMoreBtn:hover { background: rgba(255,255,255,.07); border-color: rgba(255,220,80,.22); }
+  .loadMoreBtn:hover { background: rgba(255,255,255,.07); border-color: rgba(0,119,190,.30); }
 
   .emptyMsg { opacity: .6; font-size: 15px; padding: 24px 0; }
   .topicLinks { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }

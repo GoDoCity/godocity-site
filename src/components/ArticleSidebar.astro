@@ -248,6 +248,7 @@ const hasEvents = hasSlider || hasList;
     padding: 40px 26px;
     border-radius: 16px;
     background: var(--theme-gradient) !important;
+    border: 1px solid #000;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -255,9 +256,10 @@ const hasEvents = hasSlider || hasList;
   .nlBoxHead {
     font-size: 28px; font-weight: 900; font-style: italic;
     color: #fff; line-height: 1.05; letter-spacing: -0.04em;
+    text-shadow: 0 1px 3px rgba(0,0,0,.4);
   }
   .nlBoxHead strong { font-weight: 900; }
-  .nlBoxSub { font-size: 15px; color: rgba(255,255,255,.85); line-height: 1.45; }
+  .nlBoxSub { font-size: 15px; color: rgba(255,255,255,.88); line-height: 1.45; text-shadow: 0 1px 2px rgba(0,0,0,.3); }
   .nlForm { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
   .nlInput {
     width: 100%; box-sizing: border-box;
@@ -271,7 +273,7 @@ const hasEvents = hasSlider || hasList;
   .nlInput::placeholder { color: #aaa; }
   .nlSubmit {
     width: 100%; padding: 14px 0; border-radius: 999px;
-    border: none; background: #000; color: #f9d900;
+    border: none; background: #000; color: #fff;
     font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
     font-size: 15px; font-weight: 900; letter-spacing: .08em;
     cursor: pointer; transition: opacity 150ms;

@@ -362,7 +362,7 @@ try {
   :root {
     --card-radius: 18px;
     --card-border: rgba(255,255,255,.10);
-    --card-border-hover: rgba(255,220,80,.22);
+    --card-border-hover: rgba(0,119,190,.30);
     --card-bg: rgba(255,255,255,.035);
     --card-bg-hover: rgba(255,255,255,.05);
     --shadow-soft: 0 10px 30px rgba(0,0,0,.24);
@@ -380,9 +380,12 @@ try {
   .diyPill {
     font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
     padding: 4px 14px; border-radius: 999px;
-    background: rgba(249,217,0,.10); color: var(--brand1);
-    border: 1px solid rgba(249,217,0,.22);
+    background: rgba(0,119,190,.10); color: var(--brand1);
+    border: 1px solid rgba(0,119,190,.30);
+    text-decoration: none;
+    transition: background 140ms, border-color 140ms;
   }
+  .diyPill:hover { background: rgba(0,119,190,.18); border-color: rgba(0,119,190,.50); }
   .topicTitle {
     margin: 8px 0 6px;
     font-size: clamp(36px, 5vw, 56px);
@@ -418,11 +421,11 @@ try {
     transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease);
     will-change: transform;
   }
-  .heroCard:hover, .row:hover, .moduleCard:hover {
+  .heroCard:hover, .row:hover, .eventsCard:hover {
     transform: var(--lift);
     background: var(--card-bg-hover);
     border-color: var(--card-border-hover);
-    box-shadow: 0 0 0 1px rgba(255,220,80,.08), var(--shadow-soft);
+    box-shadow: 0 0 0 1px rgba(0,119,190,.08), var(--shadow-soft);
   }
 
   /* Hero */
@@ -524,18 +527,18 @@ try {
 
   /* Sponsored row/card tint */
   .sponsoredRow {
-    background: linear-gradient(90deg, rgba(255,210,50,.07) 0%, rgba(255,220,80,.03) 100%);
-    border-left: 2px solid rgba(255,210,50,.28);
+    background: linear-gradient(90deg, rgba(0,119,190,.07) 0%, rgba(0,169,206,.03) 100%);
+    border-left: 2px solid rgba(0,119,190,.28);
     padding-left: calc(var(--gap) - 2px);
   }
   .sponsoredCard {
-    border-color: rgba(255,210,50,.28) !important;
-    background: linear-gradient(135deg, rgba(255,210,50,.09) 0%, rgba(255,220,80,.04) 100%);
+    border-color: rgba(0,119,190,.28) !important;
+    background: linear-gradient(135deg, rgba(0,119,190,.09) 0%, rgba(0,169,206,.04) 100%);
   }
   .sponsorKicker {
-    background: rgba(255,200,30,.18);
-    color: rgba(255,210,50,1);
-    border: 1px solid rgba(255,200,30,.28);
+    background: rgba(0,119,190,.18);
+    color: var(--brand1);
+    border: 1px solid rgba(0,119,190,.35);
     border-radius: 999px;
     padding: 2px 10px;
     display: inline-block;
@@ -544,9 +547,9 @@ try {
     display: inline-flex; align-items: center;
     font-size: 9.5px; font-weight: 900; letter-spacing: .09em;
     text-transform: uppercase;
-    background: rgba(255,200,30,.16);
-    color: rgba(255,210,50,1);
-    border: 1px solid rgba(255,200,30,.28);
+    background: rgba(0,119,190,.16);
+    color: var(--brand1);
+    border: 1px solid rgba(0,119,190,.35);
     border-radius: 999px; padding: 2px 9px;
     position: relative; z-index: 1;
   }
@@ -571,7 +574,7 @@ try {
   }
   .loadMoreBtn:hover {
     background: rgba(255,255,255,.07);
-    border-color: rgba(255,220,80,.22);
+    border-color: rgba(0,119,190,.30);
   }
 
   /* Carousel */
@@ -602,8 +605,8 @@ try {
     transition: background var(--ease), border-color var(--ease);
   }
   .carouselNextBtn:hover {
-    background: rgba(255,220,80,.14);
-    border-color: rgba(255,220,80,.30);
+    background: rgba(0,119,190,.14);
+    border-color: rgba(0,119,190,.40);
   }
 
   .carouselTrack {
@@ -632,7 +635,7 @@ try {
   }
   .carouselCard:hover {
     transform: var(--lift);
-    border-color: rgba(255,220,80,.22);
+    border-color: rgba(0,119,190,.30);
     background: rgba(255,255,255,.05);
   }
   .carouselThumb {
@@ -645,7 +648,7 @@ try {
   .carouselBody { padding: 12px; flex: 1; }
   .carouselKicker {
     font-size: 9px; font-weight: 900; letter-spacing: .10em;
-    text-transform: uppercase; color: rgba(255,220,80,.85);
+    text-transform: uppercase; color: var(--brand1);
     margin-bottom: 5px;
   }
   .carouselCardTitle {
@@ -671,25 +674,40 @@ try {
   .moduleSubtext { opacity: .80; font-size: 13.5px; line-height: 1.35; margin-bottom: 12px; }
   .moduleFineprint { opacity: .62; font-size: 12px; margin-top: 10px; }
 
-  .newsletterCard { padding: 18px 16px 16px; }
+  .newsletterCard {
+    padding: 24px 20px 20px;
+    background: var(--theme-gradient) !important;
+    border: 1px solid #000 !important;
+  }
+  .newsletterCard .moduleTitle {
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,.4);
+  }
+  .newsletterCard .moduleSubtext {
+    color: rgba(255,255,255,.88);
+    text-shadow: 0 1px 2px rgba(0,0,0,.3);
+  }
+  .newsletterCard .moduleFineprint {
+    color: rgba(255,255,255,.72);
+    text-shadow: 0 1px 2px rgba(0,0,0,.3);
+  }
   .newsletterForm { display: grid; gap: 10px; margin-top: 10px; }
   .newsletterInput {
-    width: 100%; padding: 12px;
-    border-radius: 12px; border: 1px solid rgba(255,255,255,.12);
-    background: rgba(0,0,0,.25); color: inherit; outline: none;
+    width: 100%; padding: 12px; box-sizing: border-box;
+    border-radius: 12px; border: none;
+    background: #fff; color: #111; outline: 2px solid transparent;
+    transition: outline-color 150ms;
   }
-  .newsletterInput:focus {
-    border-color: rgba(255,220,80,.35);
-    box-shadow: 0 0 0 3px rgba(255,220,80,.10);
-  }
+  .newsletterInput:focus { outline-color: #000; }
+  .newsletterInput::placeholder { color: #aaa; }
   .newsletterButton {
     width: 100%; padding: 12px;
-    border-radius: 12px; border: 1px solid rgba(255,220,80,.35);
-    background: rgba(255,220,80,.14); color: rgba(255,220,80,.98);
-    font-weight: 900; letter-spacing: .02em; cursor: pointer;
-    transition: filter var(--ease), background var(--ease);
+    border-radius: 999px; border: none;
+    background: #000; color: #fff;
+    font-weight: 900; letter-spacing: .06em; cursor: pointer;
+    transition: opacity var(--ease);
   }
-  .newsletterButton:hover { filter: brightness(1.06); }
+  .newsletterButton:hover { opacity: .82; }
 
   /* ── Sidebar ── */
   /* Events sidebar */
