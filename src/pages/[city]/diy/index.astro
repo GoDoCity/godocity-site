@@ -95,7 +95,6 @@ function formatDate(d: Date | null): string {
 
 <Base
   title={`DIY Guides | GoDo${cityLabel}`}
-  subtitle={`Hands-on DIY guides for ${cityLabel} residents`}
   cityBase={city}
 >
   <section class="diyLanding">
@@ -108,9 +107,6 @@ function formatDate(d: Date | null): string {
       </div>
 
       <h1 class="landingTitle">DIY Guides</h1>
-      <p class="landingLede">
-        Hands-on how-tos built for {cityLabel} — paste a list, get a guide.
-      </p>
       <p class="landingCount">{allItems.length} guide{allItems.length !== 1 ? "s" : ""}</p>
 
       {allItems.length === 0 ? (
