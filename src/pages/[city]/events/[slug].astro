@@ -127,7 +127,7 @@ const relatedGuides = allGuides
 const pageUrl = Astro.url.href;
 ---
 
-<Base title={data.title} subtitle={data.description ?? `${data.title} — GoDo ${cityCap}`} cityBase={city}>
+<Base title={data.title} cityBase={city}>
 
   {/* ── HERO IMAGE ── */}
   {data.image && (
@@ -360,7 +360,7 @@ const pageUrl = Astro.url.href;
   .evHeroCat {
     position: absolute; bottom: 20px; left: 20px;
     font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
-    background: var(--brand1); color: #000;
+    background: var(--brand1); color: #fff;
     padding: 4px 12px; border-radius: 999px;
   }
 
@@ -399,15 +399,15 @@ const pageUrl = Astro.url.href;
     flex-wrap: wrap; margin-bottom: 28px;
   }
 
-  /* Large brand-yellow ticket button */
+  /* Ticket button */
   .actionTicket {
     display: inline-flex; align-items: center;
     height: 48px; padding: 0 26px; border-radius: 999px;
-    background: var(--brand1); color: #000;
+    background: var(--theme-gradient); color: #fff;
     font-size: 15px; font-weight: 900; letter-spacing: .02em;
     text-decoration: none; white-space: nowrap;
     transition: opacity 140ms, transform 140ms;
-    box-shadow: 0 2px 12px rgba(249,217,0,.25);
+    box-shadow: 0 2px 12px rgba(0,119,190,.30);
   }
   .actionTicket:hover { opacity: .88; transform: translateY(-1px); }
 
@@ -424,7 +424,7 @@ const pageUrl = Astro.url.href;
     transition: border-color 140ms, background 140ms;
     text-decoration: none;
   }
-  .actionBtn:hover { border-color: var(--brand1); background: rgba(249,217,0,.06); color: var(--text); }
+  .actionBtn:hover { border-color: var(--brand1); background: rgba(0,119,190,.06); color: var(--text); }
 
   /* Calendar dropdown */
   .calDrop { position: relative; }
@@ -491,12 +491,13 @@ const pageUrl = Astro.url.href;
   .sideMore:hover { text-decoration: underline; }
 
   .sideNl {
-    padding: 28px 22px; border-radius: 16px; background: var(--brand1);
+    padding: 28px 22px; border-radius: 16px;
+    background: var(--theme-gradient); border: 1px solid #000;
     display: flex; flex-direction: column; gap: 10px;
   }
-  .sideNlHead  { font-size: 22px; font-weight: 900; font-style: italic; color: #000; line-height: 1.1; }
+  .sideNlHead  { font-size: 22px; font-weight: 900; font-style: italic; color: #fff; line-height: 1.1; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
   .sideNlHead strong { font-weight: 900; }
-  .sideNlSub   { font-size: 14px; color: rgba(0,0,0,.75); line-height: 1.4; }
+  .sideNlSub   { font-size: 14px; color: rgba(255,255,255,.88); line-height: 1.4; text-shadow: 0 1px 2px rgba(0,0,0,.3); }
   .sideNlForm  { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
   .sideNlInput {
     width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 10px;
@@ -506,7 +507,7 @@ const pageUrl = Astro.url.href;
   .sideNlInput:focus { outline-color: #000; }
   .sideNlBtn {
     width: 100%; padding: 12px 0; border-radius: 999px;
-    border: none; background: #000; color: #f9d900;
+    border: none; background: #000; color: #fff;
     font-size: 14px; font-weight: 900; letter-spacing: .08em;
     cursor: pointer; transition: opacity 150ms; font-family: inherit;
   }
