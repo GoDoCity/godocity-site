@@ -753,19 +753,19 @@ const emoji = topicEmoji[topic] ?? "📖";
 
   /* Shared calendar block */
   .gl-ev-cal {
-    width: 44px;
-    height: 44px;
-    border-radius: 9px;
-    background: var(--pillBg, color-mix(in srgb, var(--theme-accent) 14%, transparent));
-    border: 1px solid var(--pillBorder, color-mix(in srgb, var(--theme-accent) 55%, transparent));
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: transparent;
+    border: 1px solid var(--brand1);
     display: grid;
     place-items: center;
     text-align: center;
     line-height: 1;
   }
-  .gl-eDow { font-size: 9px;  font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-  .gl-eDay { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 1px; }
-  .gl-eMon { font-size: 7px;  font-weight: 700; letter-spacing: .08em; color: var(--faint, rgba(232,237,244,.58)); text-transform: uppercase; }
+  .gl-eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
+  .gl-eDay { font-size: 19px; font-weight: 900; color: var(--brand1); margin-top: 1px; }
+  .gl-eMon { font-size: 8px;  font-weight: 700; letter-spacing: .08em; color: var(--brand1); text-transform: uppercase; }
 
   .gl-ev-info { display: flex; flex-direction: column; gap: 2px; }
   .gl-ev-name { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.25; }
