@@ -465,7 +465,7 @@ try {
     transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease);
     will-change: transform;
   }
-  .heroCard:hover, .row:hover, .eventsCard:hover {
+  .heroCard:hover, .row:hover {
     transform: var(--lift);
     background: var(--card-bg-hover);
     border-color: var(--card-border-hover);
@@ -761,10 +761,10 @@ try {
 
   /* ── Sidebar ── */
   /* Events sidebar */
-  .eventsCard { padding: 16px; }
+  .eventsCard { padding: 0; background: none !important; border: none !important; box-shadow: none !important; }
   .eventsList { margin-top: 10px; display: grid; gap: 8px; }
   .eventRow {
-    display: grid; grid-template-columns: 44px 1fr;
+    display: grid; grid-template-columns: 48px 1fr;
     gap: 12px; align-items: center;
     text-decoration: none;
   }
@@ -775,9 +775,9 @@ try {
     flex-shrink: 0;
     font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
   }
-  .eventDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; color: var(--brand1); text-transform: uppercase; line-height: 1; }
-  .eventNum { font-size: 22px; font-weight: 900; color: var(--brand1); margin-top: 1px; line-height: 1; }
-  .eventMon { font-size: 9px; font-weight: 700; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; line-height: 1; }
+  .eventDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; color: var(--brand1); text-transform: uppercase; line-height: 1; font-family: 'Century Gothic', AppleGothic, sans-serif !important; }
+  .eventNum { font-size: 22px; font-weight: 900; color: var(--brand1); margin-top: 1px; line-height: 1; font-family: 'Century Gothic', AppleGothic, sans-serif !important; }
+  .eventMon { font-size: 10px; font-weight: 700; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; line-height: 1; font-family: 'Century Gothic', AppleGothic, sans-serif !important; }
   .eventName { font-weight: 900; font-size: 13.5px; line-height: 1.2; color: var(--text); margin-bottom: 3px; }
   .eventPlace { opacity: .72; font-size: 12px; color: var(--faint); }
   .eventDivider { height: 1px; background: rgba(255,255,255,.08); border-radius: 999px; }
@@ -790,7 +790,7 @@ try {
   .eventsLink:hover { text-decoration: underline; }
 
   /* ── Sidebar Featured Events Carousel ── */
-  .sideEventsCarousel { padding: 16px; }
+  .sideEventsCarousel { padding: 0; background: none !important; border: none !important; box-shadow: none !important; }
   .sideEvSlider {
     display: grid;
     grid-template-columns: 1fr;
