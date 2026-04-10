@@ -8,6 +8,9 @@
   --theme-gradient:  linear-gradient(135deg, #0077be, #00a9ce);
   --theme-hover:     #f0f4f8;
 
+  /* ── Editorial text (body copy, descriptions, article text) ── */
+  --color-text-main: #1a1a1a;
+
   /* ── Derived aliases (legacy code uses these) ── */
   --bg:    var(--bg-primary);
   --text:  var(--text-primary);
@@ -123,7 +126,7 @@ h1, h2, h3, h4, h5, h6,
 
 .lede {
   font-size: 1.1rem;
-  color: #1a1a1a;
+  color: var(--color-text-main);
   max-width: 720px;
 }
 
@@ -295,7 +298,7 @@ h1, h2, h3, h4, h5, h6,
 .article { padding: 14px; border-top: 1px solid #000000 !important; }
 .article:first-child { border-top: none; }
 .article h3 { margin: 0 0 6px; font-size: 18px; }
-.article p  { margin: 0; color: #1a1a1a; line-height: 1.5; }
+.article p  { margin: 0; color: var(--color-text-main); line-height: 1.5; }
 
 .section { padding: 18px 0; }
 .section h2 { margin: 0 0 10px; font-size: 22px; }
