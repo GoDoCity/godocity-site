@@ -176,7 +176,7 @@ const guideCards = guideHero
   : daytonaGuides.slice(0, 3);
 ---
 
-<Base title="GoDoDay" subtitle="Good news for Daytona" cityBase="daytona">
+<Base title="GoDoDay" subtitle="Good News Daytona" cityBase="daytona">
   <div class="pageWrap">
     {/* ── NEWSLETTER BAND — 160px compact utility strip ── */}
     <div class="nlBand" id="nlBand">
@@ -592,14 +592,15 @@ const guideCards = guideHero
     }
 
     /* ── 1280px breath container — equal space both sides on any monitor ── */
-    :global(.container) {
+    /* Scoped to main so the fixed topbar container keeps its original 18px padding */
+    :global(main .container) {
       max-width: 1280px;
       margin: 0 auto;
       padding-left: 2.5rem;
       padding-right: 2.5rem;
     }
     @media (max-width: 768px) {
-      :global(.container) {
+      :global(main .container) {
         max-width: 100%;          /* never wider than the viewport */
         padding-left: 1.25rem;    /* 20px each side as specified   */
         padding-right: 1.25rem;
