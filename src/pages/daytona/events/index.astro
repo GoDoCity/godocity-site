@@ -595,7 +595,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     line-height: 1.0;
     letter-spacing: -0.04em;
     margin: 0;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    text-shadow: 0 1px 3px rgba(0,0,0,0.65);
   }
   .nlCity { font-style: italic; font-weight: 900; }
   .nlSub {
@@ -652,47 +652,60 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
   /* ── Newsletter mobile overhaul (< 768px) ── */
   @media (max-width: 767px) {
-    /* 0. Allow banner to grow taller on mobile */
-    .nlWrap { min-height: 168px !important; height: auto !important; padding: 1.5rem 0; overflow: visible; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    /* 0. Full-bleed wrapper: contain everything, no overflow bleed */
+    .nlWrap {
+      min-height: 168px !important;
+      height: auto !important;
+      padding: 1.5rem 1rem !important;
+      overflow: hidden !important;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: center !important;
+      align-items: center !important;
+      box-sizing: border-box !important;
+    }
 
-    /* 1. Reset any restrictive parent containers */
+    /* 1. Reset parent containers: full-width, centered, no stray padding */
     .nlCard, .nlContent, .nlForm, .nlInner {
       width: 100% !important;
       max-width: 100% !important;
-      padding: 15px 0 !important;
-      overflow: visible !important;
+      padding: 0 !important;
+      margin: 0 auto !important;
+      box-sizing: border-box !important;
     }
 
-    /* 2. Header: big and centered, wraps naturally */
+    /* 2. Headline: centered, full-width */
     .nlHead {
       font-size: 2.2rem !important;
+      width: 100% !important;
+      text-align: center !important;
+      margin: 0 auto !important;
     }
 
-    /* 3. Breakout Form: Stacks elements at fixed width */
+    /* 3. Form row: stacked column, no negative-margin viewport breakout */
     .nlRow {
       display: flex !important;
       flex-direction: column !important;
       align-items: center !important;
-      width: 100vw !important;
-      margin-left: calc(-50vw + 50%) !important;
+      width: 100% !important;
+      margin: 0 auto !important;
       gap: 12px !important;
+      box-sizing: border-box !important;
     }
 
-    /* 4. Uniform Sizing: Identical width and height */
+    /* 4. Input and Button: edge-to-edge within the gradient box */
     .nlInput, .nlBtn {
       width: 100% !important;
-      min-width: unset !important;
-      max-width: 320px !important;
+      max-width: 100% !important;
       height: 48px !important;
-      margin-left: 0 !important;
       margin: 0 auto !important;
       display: block !important;
       box-sizing: border-box !important;
       border-radius: 8px !important;
     }
 
-    /* 5. Sub-headline: matches home page — wraps naturally, no "free." widow */
-    .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; max-width: 80%; margin: 0 auto; }
+    /* 5. Sub-headline: centered, wraps naturally */
+    .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; max-width: 90%; margin: 0 auto; }
     .nlSub strong { font-weight: 900 !important; }
   }
 

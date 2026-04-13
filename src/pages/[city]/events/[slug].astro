@@ -494,15 +494,17 @@ const pageUrl = Astro.url.href;
     padding: 28px 22px; border-radius: 16px;
     background: var(--theme-gradient); border: 1px solid #000;
     display: flex; flex-direction: column; gap: 10px;
+    box-sizing: border-box; width: 100%;
   }
-  .sideNlHead  { font-size: 22px; font-weight: 900; font-style: italic; color: #fff; line-height: 1.1; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
+  .sideNlHead  { font-size: 22px; font-weight: 900; font-style: italic; color: #fff; line-height: 1.1; text-shadow: 0 1px 3px rgba(0,0,0,.4); width: 100%; margin: 0 auto; }
   .sideNlHead strong { font-weight: 900; }
   .sideNlSub   { font-size: 14px; color: rgba(255,255,255,.88); line-height: 1.4; text-shadow: 0 1px 2px rgba(0,0,0,.3); }
-  .sideNlForm  { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .sideNlForm  { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; width: 100%; box-sizing: border-box; }
   .sideNlInput {
     width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 10px;
     border: none; background: #fff; font-size: 14px; color: #111;
     outline: 2px solid transparent; transition: outline-color 150ms;
+    margin: 0 auto; display: block;
   }
   .sideNlInput:focus { outline-color: #000; }
   .sideNlBtn {
@@ -510,8 +512,31 @@ const pageUrl = Astro.url.href;
     border: none; background: #000; color: #fff;
     font-size: 14px; font-weight: 900; letter-spacing: .08em;
     cursor: pointer; transition: opacity 150ms; font-family: inherit;
+    box-sizing: border-box; margin: 0 auto; display: block;
   }
   .sideNlBtn:hover { opacity: .82; }
+
+  /* ── Newsletter sidebar: mobile-safe overrides (< 768px) ── */
+  @media (max-width: 767px) {
+    .sideNl {
+      width: 100% !important;
+      padding: 24px 16px !important;
+      box-sizing: border-box !important;
+      margin: 0 auto !important;
+    }
+    .sideNlHead, .sideNlSub, .sideNlForm {
+      width: 100% !important;
+      margin: 0 auto !important;
+      box-sizing: border-box !important;
+    }
+    .sideNlInput, .sideNlBtn {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 auto !important;
+      display: block !important;
+      box-sizing: border-box !important;
+    }
+  }
 
   /* ── More Like This ── */
   .relatedSection { padding: 40px 0 56px; border-top: 2px solid var(--brand1); }
