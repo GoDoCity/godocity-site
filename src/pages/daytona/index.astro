@@ -1396,14 +1396,14 @@ const guideCards = guideHero
       align-items: center;
       justify-content: center;
       font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: 35px;                          /* 35pt Bold Century Gothic */
-      font-weight: 700;
+      font-size: 42px;                          /* Newspaper-masthead scale */
+      font-weight: 800;                         /* Extra-Bold: thick without smushing */
       color: #fff;
       text-transform: none;
-      letter-spacing: .06em;
+      letter-spacing: -0.02em;                  /* Tight Century Gothic for large headings */
       text-align: center;
       padding: 10px;
-      text-shadow: 0 2px 16px rgba(0,0,0,.85);
+      text-shadow: 0 2px 24px rgba(0,0,0,.92), 0 4px 8px rgba(0,0,0,.60);
       line-height: 1.1;
       /* No transform on label — stays locked while image zooms behind it */
     }
@@ -1428,9 +1428,9 @@ const guideCards = guideHero
       }
       .topicTile:last-child { border-bottom: none; }
       .topicLabel {
-        font-size: 29px;             /* scaled down for mobile per spec (+3pt from desktop) */
-        letter-spacing: .08em;
-        text-shadow: 0 2px 18px rgba(0,0,0,.92);
+        font-size: 35px;             /* scaled down for mobile (-7px from 42px desktop) */
+        letter-spacing: -0.02em;
+        text-shadow: 0 2px 20px rgba(0,0,0,.95), 0 3px 6px rgba(0,0,0,.60);
       }
     }
 
