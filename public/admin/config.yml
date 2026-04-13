@@ -21,6 +21,7 @@ collections:
       - {label: "Headline", name: "title", widget: "string"}
       - {label: "Publish Date", name: "pubDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false}
       - {label: "Author", name: "author", widget: "string", required: false, default: "Charles King"}
+      - {label: "Author Headshot", name: "authorImage", widget: "image", required: false, default: "/images/charles-king-v2.jpg", hint: "Author photo shown in the byline. Defaults to Charles King."}
       - label: "Category"
         name: "category"
         widget: "select"
@@ -141,6 +142,7 @@ collections:
           - {label: "Jacksonville / 904", value: "904"}
       - {label: "Publish Date", name: "pubDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false}
       - {label: "Author", name: "author", widget: "string", required: false, default: "Charles King"}
+      - {label: "Author Headshot", name: "authorImage", widget: "image", required: false, default: "/images/charles-king-v2.jpg", hint: "Author photo shown in the byline. Defaults to Charles King."}
       - {label: "Hero Image", name: "heroImage", widget: "image", required: false, hint: "Optional banner image displayed above the title."}
       - {label: "Category", name: "category", widget: "hidden", default: "DIY"}
 
