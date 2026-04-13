@@ -116,13 +116,14 @@ const featuredAd = {
    Row 1: Biz · City · Culture  |  Row 2: Events · Food · History
    Row 3: Real Estate · Sports · Wellness
 ──────────────────────────────────────────────────────────────────────────── */
+// Each entry specifies its own extension so you can freely mix .jpg, .webp, .png, etc.
 const _hardcodedTopics = [
   { label: "Business",    slug: "business",     img: "/images/topics/business.jpg" },
   { label: "City",        slug: "city",         img: "/images/topics/city.jpg" },
   { label: "Culture",     slug: "culture",      img: "/images/topics/culture.jpg" },
   { label: "Events",      slug: "events",       img: "/images/topics/events.jpg" },
   { label: "Food",        slug: "food",         img: "/images/topics/food.jpg" },
-  { label: "History",     slug: "history",      img: "/images/topics/history.jpg" },
+  { label: "History",     slug: "history",      img: "/images/topics/history.webp" },
   { label: "Real Estate", slug: "real-estate",  img: "/images/topics/real-estate.jpg" },
   { label: "Sports",      slug: "sports",       img: "/images/topics/sports.jpg" },
   { label: "Wellness",    slug: "wellness",     img: "/images/topics/wellness.jpg" },
@@ -147,12 +148,16 @@ try {
 
 const topics = _cmsTopics.length > 0 ? _cmsTopics : _hardcodedTopics;
 /* ── TOPIC IMAGE GUIDE (save to /public/images/topics/) ──────────────
-   biz.jpg         → Local storefronts or Main Street Daytona aerial
+   Each img path in _hardcodedTopics includes its own extension, so you
+   can upload any format (.jpg, .webp, .png, .avif) per image.
+   To change an image's format, just update the extension in the array above.
+
+   business.jpg    → Local storefronts or Main Street Daytona aerial
    city.jpg        → Drone shot of Daytona Beach coastline at golden hour
    culture.jpg     → Neon lights of a local music venue or bold street mural
    events.jpg      → Packed grandstands at Daytona 500 or Bike Week crowd
    food.jpg        → Close-up burger / plated dish / condensation cocktail
-   history.jpg     → Historic Daytona boardwalk or vintage B&W race photo
+   history.webp    → Historic Daytona boardwalk or vintage B&W race photo
    real-estate.jpg → Modern beachfront balcony or charming historic home
    sports.jpg      → Motion-blur race car or surfer at New Smyrna Beach
    wellness.jpg    → Yoga on the beach, sunrise run, or spa interior
