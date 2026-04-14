@@ -20,10 +20,12 @@ const {
   formAction = "#",
 } = Astro.props;
 
-// Vote count is fetched live on the client — no server-baked number
+// Read at server/build time where env vars are always resolved
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL ?? "";
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 ---
 
-<div class="pollCard" data-poll-id={pollId} data-question={question}>
+<div class="pollCard" data-poll-id={pollId} data-question={question} data-sb-url={supabaseUrl} data-sb-key={supabaseKey}>
   <div class="pollTitle">{title}</div>
   <div class="pollQuestion">{question}</div>
 
@@ -73,9 +75,11 @@ const {
 <script>
   import { createClient } from "@supabase/supabase-js";
 
+  // Env vars are baked into data attributes at build/SSR time — safe for all runtimes
+  const firstCard = document.querySelector<HTMLElement>(".pollCard");
   const supabase = createClient(
-    import.meta.env.PUBLIC_SUPABASE_URL,
-    import.meta.env.PUBLIC_SUPABASE_ANON_KEY
+    firstCard?.dataset.sbUrl ?? "",
+    firstCard?.dataset.sbKey ?? ""
   );
 
   function updateResultsView(
