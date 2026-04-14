@@ -1,13 +1,28 @@
 // src/content/config.ts
 import { defineCollection, z } from "astro:content";
 
+// The "Official Roster" - Add new names here as they join the team!
+const authorEnum = z.enum([
+  "Charles King",
+  "Jax Sterling",
+  "Blair Archer",
+  "Miles Vance",
+  "Julian Wells",
+  "Sloane Miles",
+  "Dr. JK Miller",
+  "Kit Prescott",
+  "Reese Montgomery",
+  "Deb Davis",
+  "Logan King"
+]);
+
 const posts = defineCollection({
   type: "content",
   schema: z.object({
     title:       z.string(),
     description: z.string().optional(),
     pubDate:     z.coerce.date().optional(),
-    author:      z.string().optional(),
+    author:      authorEnum.optional().default("Charles King"),
     heroImage:   z.string().optional().transform(v => v === "" ? undefined : v),
     thumbnail:   z.string().optional().transform(v => v === "" ? undefined : v),
     tags:        z.array(z.string()).optional(),
@@ -35,11 +50,10 @@ const guides = defineCollection({
     image: z.string().optional(),
     description: z.string(),
     date: z.date().or(z.string()).transform((val) => new Date(val)),
+    author: authorEnum.optional().default("Jax Sterling"),
   }),
 });
 
-// Legacy city-specific ranked-list guides (e.g. "Best Restaurants in Daytona")
-// Stored under src/content/cityGuides/[city]/[slug].md
 const cityGuides = defineCollection({
   type: "content",
   schema: z.object({
@@ -47,7 +61,7 @@ const cityGuides = defineCollection({
     title:     z.string(),
     intro:     z.string().optional(),
     category:  z.string().optional().default("City Guide"),
-    author:    z.string().optional().default("Charles King"),
+    author:    authorEnum.optional().default("Charles King"),
     role:      z.string().optional().default("Newsletter Editor"),
     pubDate:   z.coerce.date().optional(),
     heroImage: z.string().optional(),
@@ -106,7 +120,6 @@ const globalSponsors = defineCollection({
   }),
 });
 
-// EVENTS — past events auto-hide via eventDate >= today filter in templates
 const events = defineCollection({
   type: "content",
   schema: z.object({
@@ -127,23 +140,11 @@ const events = defineCollection({
   }),
 });
 
-// DIY GUIDES — multi-city via `cities` array; rendered by DiyPill.astro
-// Intro: 2-paragraph minimum, 200-word maximum (enforced at schema level).
 const diy = defineCollection({
   type: "content",
   schema: z.object({
     title:    z.string(),
-    intro:    z.string()
-      .refine(
-        (v) => v.split(/\s+/).filter(Boolean).length <= 200,
-        { message: "Intro must be 200 words or fewer." }
-      )
-      .refine(
-        (v) => v.split(/\n\n+/).filter(Boolean).length >= 2,
-        { message: "Intro must have at least 2 paragraphs (separated by a blank line)." }
-      ),
-    // Accept either a multiline string (new CMS textarea) or a YAML array (legacy).
-    // Both are normalised to string[] before reaching the component.
+    intro:    z.string(), // Cleaned: No word count or paragraph enforcement
     materials: z.union([
       z.string().min(1),
       z.array(z.string()).min(1),
@@ -153,12 +154,10 @@ const diy = defineCollection({
       z.array(z.string()).min(1),
     ]).transform((v) => Array.isArray(v) ? v : v.split("\n").map((s) => s.trim()).filter(Boolean)),
     community_note: z.string().optional(),
-    // Topic determines which nav pill feed the article appears in
     topic:          z.enum(["Clean", "Paint", "Repair", "Decorate", "Build", "Craft"]).optional(),
-    // Cities this guide deploys to — e.g. ["daytona", "orlando", "904"]
     cities:         z.array(z.string()).min(1),
     pubDate:        z.coerce.date().optional(),
-    author:         z.string().optional().default("Charles King"),
+    author:         authorEnum.optional().default("Julian Wells"),
     heroImage:      z.string().optional().transform((v) => v === "" ? undefined : v),
     category:       z.string().optional().default("DIY"),
   }),
