@@ -134,15 +134,7 @@ const diy = defineCollection({
   type: "content",
   schema: z.object({
     title:    z.string(),
-    intro:    z.string()
-      .refine(
-        (v) => v.split(/\s+/).filter(Boolean).length <= 200,
-        { message: "Intro must be 200 words or fewer." }
-      )
-      .refine(
-        (v) => v.split(/\n\n+/).filter(Boolean).length >= 2,
-        { message: "Intro must have at least 2 paragraphs (separated by a blank line)." }
-      ),
+    intro:    z.string(),
     // Accept either a multiline string (new CMS textarea) or a YAML array (legacy).
     // Both are normalised to string[] before reaching the component.
     materials: z.union([
