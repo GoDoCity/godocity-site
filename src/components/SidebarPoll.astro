@@ -75,12 +75,18 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 <script>
   import { createClient } from "@supabase/supabase-js";
 
-  // Env vars are baked into data attributes at build/SSR time — safe for all runtimes
-  const firstCard = document.querySelector<HTMLElement>(".pollCard");
-  const supabase = createClient(
-    firstCard?.dataset.sbUrl ?? "",
-    firstCard?.dataset.sbKey ?? ""
-  );
+  // Returns a Supabase client seeded from the card's own data attributes.
+  // Initializing at module scope risks running before the DOM is ready, which
+  // makes querySelector return null and the URL empty — causing mangled fetches.
+  function getSupabase(card: Element) {
+    const el = card as HTMLElement;
+    const url = el.dataset.sbUrl ?? "";
+    const key = el.dataset.sbKey ?? "";
+    if (!url.startsWith("https://")) {
+      console.error("[SidebarPoll] Supabase URL looks wrong:", url);
+    }
+    return createClient(url, key);
+  }
 
   function updateResultsView(
     card: Element,
@@ -123,7 +129,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     if (form) form.style.display = "none";
     if (loading) loading.hidden = false;
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabase(card)
       .from("vibe_check_votes")
       .select("option_selected")
       .eq("question_text", pollId);
@@ -152,7 +158,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     const footer = card.querySelector<HTMLElement>("[data-poll-footer]");
     if (!footer) return;
     try {
-      const { count } = await supabase
+      const { count } = await getSupabase(card)
         .from("vibe_check_votes")
         .select("*", { count: "exact", head: true })
         .eq("question_text", pollId);
@@ -204,7 +210,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
       form.style.display = "none";
       loading.hidden = false;
 
-      const { error: insertError } = await supabase.from("vibe_check_votes").insert({
+      const { error: insertError } = await getSupabase(card).from("vibe_check_votes").insert({
         option_selected: selectedOption,
         question_text: pollId,
       });
