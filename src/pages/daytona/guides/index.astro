@@ -9,12 +9,6 @@ function guideSlug(g: (typeof allGuides)[number]) {
   return g.slug.split("/").pop()!;
 }
 
-const fallbackImgs: Record<string, string> = {
-  Live: "/images/topics/real-estate.jpg",
-  Work: "/images/topics/business.jpg",
-  Play: "/images/topics/sports.jpg",
-};
-
 type SubcategoryLink = { label: string; href: string };
 type ArticleItem = {
   img: string;
@@ -62,34 +56,6 @@ const subcategoryLinks: Record<string, SubcategoryLink[]> = {
   ],
 };
 
-/* ── Hardcoded placeholder articles (shown when collection is empty) ── */
-const hardcodedArticles: Record<string, ArticleItem[]> = {
-  live: [
-    { img: "/images/topics/city.jpg",        title: "Ormond Beach Neighborhoods Guide",      description: "Quiet streets, great schools, and lower price points — find your pocket.",     href: "/daytona/guides/live/" },
-    { img: "/images/topics/wellness.jpg",    title: "Hurricane Prep for Daytona Residents",  description: "The local checklist that actually gets you ready for storm season.",             href: "/daytona/guides/live/" },
-    { img: "/images/topics/culture.jpg",     title: "Local Gardening in Zone 9b",            description: "Discover what thrives in Daytona's soil and exactly when to plant it.",          href: "/daytona/guides/live/" },
-    { img: "/images/topics/real-estate.jpg", title: "Terrazzo Restoration at Home",          description: "Bring vintage floors back to life the right way — from grinding to sealing.",   href: "/daytona/guides/live/" },
-  ],
-  work: [
-    { img: "/images/topics/history.jpg",     title: "Small Business Insurance in Florida",     description: "Cut through the noise with a guide built for Daytona-area business owners.",   href: "/daytona/guides/work/" },
-    { img: "/images/topics/culture.jpg",     title: "Networking Events in Volusia County",     description: "The events, orgs, and meetups where Daytona's business community shows up.",    href: "/daytona/guides/work/" },
-    { img: "/images/topics/real-estate.jpg", title: "Best Coworking Spaces in Daytona",       description: "Real desks, fast internet, and people worth meeting.",                          href: "/daytona/guides/work/" },
-    { img: "/images/topics/business.jpg",    title: "Starting a Business in Volusia County",  description: "The permits, registrations, and resources you actually need to launch.",         href: "/daytona/guides/work/" },
-  ],
-  play: [
-    { img: "/images/topics/sports.jpg",      title: "Best Surfing Beaches in Daytona",        description: "Where to paddle out depending on swell and season.",                            href: "/daytona/guides/play/" },
-    { img: "/images/topics/wellness.jpg",    title: "Hidden Fishing Holes in Volusia",         description: "Backwater spots, creek mouths, and tidal flats worth a sunrise trip.",          href: "/daytona/guides/play/" },
-    { img: "/images/topics/city.jpg",        title: "Dog-Friendly Parks in Daytona Beach",    description: "Parks, trails, and off-leash zones worth the car ride.",                        href: "/daytona/guides/play/" },
-    { img: "/images/topics/culture.jpg",     title: "Arts & Culture Hidden Gems",              description: "Beyond the boardwalk — galleries, studios, and live music venues.",              href: "/daytona/guides/play/" },
-  ],
-  best: [
-    { img: "/images/topics/wellness.jpg",    title: "Basics & Pets: Essential Services Guide", description: "The vets, groomers, and pet stores locals actually recommend.",                  href: "/daytona/guides/best/" },
-    { img: "/images/topics/city.jpg",        title: "Health & Wellness in Daytona Beach",      description: "Top clinics, specialists, and wellness centers in Volusia County.",              href: "/daytona/guides/best/" },
-    { img: "/images/topics/real-estate.jpg", title: "Home Services You Can Trust",             description: "Plumbers, electricians, and contractors with real local reviews.",               href: "/daytona/guides/best/" },
-    { img: "/images/topics/culture.jpg",     title: "City & Safety: Volusia County Resources", description: "Emergency contacts, county resources, and local safety information.",            href: "https://www.volusia.org/services/public-protection/emergency-management/", external: true },
-  ],
-};
-
 /* ── Build dynamic sections (COAST / DRIVE / SURF) from guides collection ── */
 const topicConfig: { topic: "Live" | "Work" | "Play"; slug: string; brand: string; bg: "white" | "grey" }[] = [
   { topic: "Live", slug: "live", brand: "COAST", bg: "white" },
@@ -103,18 +69,12 @@ const sections: SectionDef[] = [
       .filter((g) => g.data.topic === topic)
       .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 
-    const collectionArticles: ArticleItem[] = topicGuides.slice(0, 4).map((g) => ({
-      img: g.data.image ?? fallbackImgs[topic],
+    const articles: ArticleItem[] = topicGuides.slice(0, 4).map((g) => ({
+      img: g.data.image ?? "",
       title: g.data.title,
       description: g.data.description,
       href: `/daytona/guides/${guideSlug(g)}/`,
     }));
-
-    /* Fill remaining slots with hardcoded placeholders so sections always look full */
-    const articles = [
-      ...collectionArticles,
-      ...hardcodedArticles[slug].slice(collectionArticles.length),
-    ].slice(0, 4);
 
     return {
       id: slug,
@@ -127,17 +87,6 @@ const sections: SectionDef[] = [
       viewAllLabel: `View More ${brand}`,
     };
   }),
-  /* ── LOCAL — hardcoded section (guides collection has no "Best" topic) ── */
-  {
-    id: "best",
-    brand: "LOCAL",
-    slug: "best",
-    bg: "grey",
-    subcategories: subcategoryLinks.best,
-    articles: hardcodedArticles.best,
-    viewAllHref: "/daytona/guides/best/",
-    viewAllLabel: "View More LOCAL",
-  },
 ];
 ---
 

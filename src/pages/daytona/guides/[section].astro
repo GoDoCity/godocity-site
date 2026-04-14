@@ -34,12 +34,6 @@ const emojiMap: Record<string, string> = {
   best: "⭐",
 };
 
-const fallbackImgs: Record<string, string> = {
-  Live: "/images/topics/real-estate.jpg",
-  Work: "/images/topics/business.jpg",
-  Play: "/images/topics/sports.jpg",
-  Best: "/images/topics/city.jpg",
-};
 
 const topic = topicMap[section] ?? "";
 const brand = brandMap[section] ?? topic.toUpperCase();
@@ -197,7 +191,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
                       <div class="ghCardImgWrap">
                         <img
                           class="ghCardImg"
-                          src={g.data.image ?? fallbackImgs[topic]}
+                          src={g.data.image ?? ""}
                           alt={g.data.title}
                           loading="lazy"
                           decoding="async"
@@ -235,7 +229,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
                   <div class="ghCardImgWrap">
                     <img
                       class="ghCardImg"
-                      src={g.data.image ?? fallbackImgs[topic]}
+                      src={g.data.image ?? ""}
                       alt={g.data.title}
                       loading="lazy"
                       decoding="async"
