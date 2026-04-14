@@ -122,7 +122,7 @@ const {
     const { data, error } = await supabase
       .from("vibe_check_votes")
       .select("option_selected")
-      .eq("question_text", "ormond-tacos");
+      .eq("question_text", pollId);
 
     // Kill spinner immediately when data arrives
     if (loading) { loading.hidden = true; loading.style.display = "none"; }
@@ -170,12 +170,10 @@ const {
     // Fetch live count immediately — footer stays empty until this resolves
     fetchLiveCount(card, pollId);
 
-    // STRESS-TEST MODE: localStorage check disabled — allows voting multiple times
-    // Re-enable this block when done testing:
-    // if (localStorage.getItem(storageKey)) {
-    //   await fetchAndShowResults(card, pollId);
-    //   return;
-    // }
+    if (localStorage.getItem(storageKey)) {
+      await fetchAndShowResults(card, pollId);
+      return;
+    }
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -202,14 +200,13 @@ const {
       form.style.display = "none";
       loading.hidden = false;
 
-      // INSERT vote with hardcoded poll ID, then immediately fetch live counts
       const { error: insertError } = await supabase.from("vibe_check_votes").insert({
         option_selected: selectedOption,
-        question_text: "ormond-tacos",
+        question_text: pollId,
       });
-      console.log("[SidebarPoll] insert — option:", selectedOption, "| pollId: ormond-tacos | error:", insertError);
+      console.log("[SidebarPoll] insert — option:", selectedOption, "| pollId:", pollId, "| error:", insertError);
 
-      await fetchAndShowResults(card, "ormond-tacos");
+      await fetchAndShowResults(card, pollId);
     });
   }
 
