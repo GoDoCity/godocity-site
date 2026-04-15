@@ -71,11 +71,9 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   <div class="pollFooter" data-poll-footer></div>
 
-  {import.meta.env.DEV && (
-    <div class="pollDevBar">
-      <button type="button" class="pollResetBtn" data-poll-reset-btn>↺ Reset vote (dev)</button>
-    </div>
-  )}
+  <div class="pollDevBar" data-poll-dev-bar>
+    <button type="button" class="pollResetBtn" data-poll-reset-btn>↺ Reset vote (dev)</button>
+  </div>
 </div>
 
 <script>
@@ -254,9 +252,11 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
       await fetchAndShowResults(card, pollId);
     });
 
-    // Dev-only reset button — clears localStorage vote and reloads
+    // Reset button — visible only when ?dev=true is in the URL
+    const devBar = card.querySelector<HTMLElement>("[data-poll-dev-bar]");
     const resetBtn = card.querySelector<HTMLButtonElement>("[data-poll-reset-btn]");
-    if (resetBtn) {
+    if (devBar && resetBtn && new URLSearchParams(location.search).get("dev") === "true") {
+      devBar.hidden = false;
       resetBtn.addEventListener("click", () => {
         localStorage.removeItem(storageKey);
         location.reload();
@@ -477,13 +477,16 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     color: var(--faint);
   }
 
-  /* ── Dev-only reset bar (never rendered in production) ── */
+  /* ── Dev reset bar — hidden by default, shown via JS when ?dev=true ── */
   .pollDevBar {
+    display: none;
     margin-top: 10px;
     padding-top: 8px;
     border-top: 1px dashed rgba(255, 80, 80, 0.25);
-    display: flex;
     justify-content: flex-end;
+  }
+  .pollDevBar:not([hidden]) {
+    display: flex;
   }
   .pollResetBtn {
     font-size: 10px;
