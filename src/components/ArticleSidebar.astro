@@ -333,12 +333,12 @@ const hasEvents = hasSlider || hasList;
   .sbDot {
     width: 6px; height: 6px; border-radius: 50%;
     border: none; padding: 0;
-    background: rgba(255,255,255,.25);
+    background: rgba(0, 119, 190, 0.28);
     cursor: pointer;
     transition: background 200ms, transform 200ms;
   }
   .sbDot--active {
-    background: var(--brand1);
+    background: #0077be;
     transform: scale(1.3);
   }
 
@@ -349,21 +349,21 @@ const hasEvents = hasSlider || hasList;
     transition: opacity 140ms;
   }
   .eventRow:last-child { border-bottom: none; }
-  .eventRow:hover { opacity: .76; }
+  .eventRow:hover { opacity: .76; color: #0077be; }
 
   .eventCal {
     width: 48px; height: 48px; border-radius: 10px;
-    background: transparent; border: 1px solid var(--brand1);
+    background: transparent; border: 1px solid #0077be;
     display: grid; place-items: center; text-align: center; line-height: 1;
   }
-  .eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
-  .eDay { font-size: 19px; font-weight: 900; color: var(--brand1); margin-top: 1px; }
-  .eMon { font-size: 8px; font-weight: 700; letter-spacing: .08em; color: var(--brand1); text-transform: uppercase; }
+  .eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #0077be; }
+  .eDay { font-size: 19px; font-weight: 900; color: #0077be; margin-top: 1px; }
+  .eMon { font-size: 8px; font-weight: 700; letter-spacing: .08em; color: #0077be; text-transform: uppercase; }
   .eventInfo { display: flex; flex-direction: column; gap: 2px; }
-  .eName { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
+  .eName { font-weight: 900; font-size: 15px; color: var(--text); line-height: 1.2; }
   .ePlace { font-size: 12px; color: var(--faint); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
   .evCitySep { opacity: .4; }
-  .evCityName { color: var(--brand1); font-weight: 700; }
+  .evCityName { color: #0077be; font-weight: 700; }
   .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
 
   .sponsoredBadge {
