@@ -70,6 +70,12 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
   </div>
 
   <div class="pollFooter" data-poll-footer></div>
+
+  {import.meta.env.DEV && (
+    <div class="pollDevBar">
+      <button type="button" class="pollResetBtn" data-poll-reset-btn>↺ Reset vote (dev)</button>
+    </div>
+  )}
 </div>
 
 <script>
@@ -247,6 +253,15 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 
       await fetchAndShowResults(card, pollId);
     });
+
+    // Dev-only reset button — clears localStorage vote and reloads
+    const resetBtn = card.querySelector<HTMLButtonElement>("[data-poll-reset-btn]");
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        localStorage.removeItem(storageKey);
+        location.reload();
+      });
+    }
   }
 
   document.querySelectorAll(".pollCard").forEach(initPoll);
@@ -460,5 +475,31 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     letter-spacing: 0.07em;
     text-transform: uppercase;
     color: var(--faint);
+  }
+
+  /* ── Dev-only reset bar (never rendered in production) ── */
+  .pollDevBar {
+    margin-top: 10px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 80, 80, 0.25);
+    display: flex;
+    justify-content: flex-end;
+  }
+  .pollResetBtn {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 100, 100, 0.7);
+    background: none;
+    border: 1px dashed rgba(255, 100, 100, 0.35);
+    border-radius: 6px;
+    padding: 3px 10px;
+    cursor: pointer;
+    transition: color 150ms, border-color 150ms;
+  }
+  .pollResetBtn:hover {
+    color: #ff4444;
+    border-color: #ff4444;
   }
 </style>
