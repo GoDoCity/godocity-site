@@ -94,6 +94,12 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     combinedTotal: number,
     realVotes: number
   ) {
+    // Identify the leading option so we can animate its bar
+    const leadLabel =
+      combinedTotal > 0
+        ? Object.entries(counts).sort((a, b) => b[1] - a[1])[0]?.[0] ?? ""
+        : "";
+
     card.querySelectorAll<HTMLElement>("[data-result-row]").forEach((row) => {
       const label = row.dataset.label ?? "";
       const pct =
@@ -102,12 +108,17 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
           : 0;
       const fill = row.querySelector<HTMLElement>("[data-result-fill]");
       const pctEl = row.querySelector<HTMLElement>("[data-result-pct]");
-      if (fill) fill.style.width = `${pct}%`;
+      if (fill) {
+        fill.style.width = `${pct}%`;
+        fill.classList.toggle("pollResultFill--lead", label === leadLabel && combinedTotal > 0);
+      }
       if (pctEl) pctEl.textContent = `${pct}%`;
     });
     const footer = card.querySelector<HTMLElement>("[data-poll-footer]");
-    if (footer)
-      footer.textContent = `${combinedTotal.toLocaleString()} votes cast`;
+    if (footer) {
+      const word = combinedTotal === 1 ? "vote" : "votes";
+      footer.textContent = `${combinedTotal.toLocaleString()} ${word} cast`;
+    }
   }
 
   function showResultsView(card: Element) {
@@ -382,9 +393,18 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   .pollResultFill {
     height: 100%;
-    background: #ffd24a;
+    background: #FFD700;
     border-radius: 999px;
     transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  /* Leading bar gets a soft gold pulse */
+  .pollResultFill--lead {
+    background: #FF8C00;
+    animation: pollLeadPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes pollLeadPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.55); }
+    50%       { box-shadow: 0 0 0 5px rgba(255, 140, 0, 0); }
   }
 
   /* ── Thank you confirmation ── */
@@ -416,9 +436,10 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     margin-top: 12px;
     padding-top: 10px;
     border-top: 1px solid rgba(255, 255, 255, 0.08);
-    font-size: 12.5px;
+    font-size: 11px;
     font-weight: 700;
-    opacity: 1;
-    color: var(--muted);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--faint);
   }
 </style>
