@@ -75,6 +75,22 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 <script>
   import { createClient } from "@supabase/supabase-js";
 
+  // Sets --poll-lead-color and --poll-field-color on the card based on the
+  // current month, so the bar palette shifts with the season automatically.
+  function applyMonthTheme(card: Element) {
+    const m = new Date().getMonth(); // 0 = Jan … 11 = Dec
+    const themes: Record<number, [string, string]> = {
+      6:  ["#0077be", "#E53935"],  // July    — Daytona Blue leader / Red field
+      9:  ["#FF8C00", "#7B1FA2"],  // October — Orange leader / Purple field
+      11: ["#C62828", "#2E7D32"],  // December — Red leader / Green field
+    };
+    // April + all other months default: Deep Orange leader / Gold field
+    const [lead, field] = themes[m] ?? ["#FF8C00", "#FFD700"];
+    const el = card as HTMLElement;
+    el.style.setProperty("--poll-lead-color", lead);
+    el.style.setProperty("--poll-field-color", field);
+  }
+
   // Returns a Supabase client seeded from the card's own data attributes.
   // Initializing at module scope risks running before the DOM is ready, which
   // makes querySelector return null and the URL empty — causing mangled fetches.
@@ -180,6 +196,8 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
   }
 
   async function initPoll(card: Element) {
+    applyMonthTheme(card);
+
     const form = card.querySelector<HTMLFormElement>("[data-poll-form]");
     const loading = card.querySelector<HTMLElement>("[data-poll-loading]");
     const btn = card.querySelector<HTMLButtonElement>(".pollBtn");
@@ -393,18 +411,19 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   .pollResultFill {
     height: 100%;
-    background: #FFD700;
+    background: var(--poll-field-color, #FFD700);
     border-radius: 999px;
     transition: width 600ms cubic-bezier(0.4, 0, 0.2, 1);
   }
-  /* Leading bar gets a soft gold pulse */
+  /* Leading bar: month-themed color + brightness pulse (not box-shadow —
+     that gets clipped by .pollResultBar's overflow:hidden) */
   .pollResultFill--lead {
-    background: #FF8C00;
+    background: var(--poll-lead-color, #FF8C00);
     animation: pollLeadPulse 1.8s ease-in-out infinite;
   }
   @keyframes pollLeadPulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.55); }
-    50%       { box-shadow: 0 0 0 5px rgba(255, 140, 0, 0); }
+    0%, 100% { filter: brightness(1); }
+    50%       { filter: brightness(1.45); }
   }
 
   /* ── Thank you confirmation ── */
