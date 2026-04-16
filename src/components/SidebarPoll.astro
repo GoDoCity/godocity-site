@@ -72,9 +72,24 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
   <div class="pollFooter" data-poll-footer></div>
 
   <div class="pollDevBar" data-poll-dev-bar>
-    <button type="button" class="pollResetBtn" data-poll-reset-btn>↺ Reset vote (dev)</button>
+    <button
+      type="button"
+      class="pollResetBtn"
+      data-poll-reset-btn
+      onclick="localStorage.clear(); alert('Dev Reset: All local poll data cleared!'); location.reload();">
+      ↺ Reset vote (dev)
+    </button>
   </div>
 </div>
+
+<script is:inline>
+  // Global escape hatch — callable from browser console: resetPoll()
+  window.resetPoll = function () {
+    localStorage.clear();
+    alert("Dev Reset: All local poll data cleared!");
+    location.reload();
+  };
+</script>
 
 <script>
   import { createClient } from "@supabase/supabase-js";
@@ -202,28 +217,11 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
   async function initPoll(card: Element) {
     applyMonthTheme(card);
 
-    // ── Dev reset — wired first, before any early returns ──────────────────
-    // Shows when ?dev=true is in the URL. Nukes every poll-voted-* key so
-    // the correct ID is always cleared regardless of what pollId resolves to.
+    // Show dev bar when ?dev=true — onclick is inline on the button itself
     const devBar = card.querySelector<HTMLElement>("[data-poll-dev-bar]");
-    const resetBtn = card.querySelector<HTMLButtonElement>("[data-poll-reset-btn]");
-    if (devBar && resetBtn && new URLSearchParams(location.search).get("dev") === "true") {
+    if (devBar && new URLSearchParams(location.search).get("dev") === "true") {
       devBar.hidden = false;
-      resetBtn.addEventListener("click", () => {
-        const removed: string[] = [];
-        for (let i = localStorage.length - 1; i >= 0; i--) {
-          const key = localStorage.key(i);
-          if (key && key.startsWith("poll-voted-")) {
-            localStorage.removeItem(key);
-            removed.push(key);
-          }
-        }
-        console.log("Dev Reset: cleared keys →", removed);
-        alert("Dev Reset: All local poll data cleared!\n\nKeys removed:\n" + (removed.length ? removed.join("\n") : "(none found)"));
-        location.reload(true as any);
-      });
     }
-    // ───────────────────────────────────────────────────────────────────────
 
     const form = card.querySelector<HTMLFormElement>("[data-poll-form]");
     const loading = card.querySelector<HTMLElement>("[data-poll-loading]");
