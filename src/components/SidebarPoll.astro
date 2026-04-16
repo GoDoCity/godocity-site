@@ -210,6 +210,19 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     const pollId = (card as HTMLElement).dataset.pollId ?? "poll";
     const storageKey = `poll-voted-${pollId}`;
 
+    // Wire reset button BEFORE any early returns so it works in both
+    // the "already voted" and "just voted" states
+    const devBar = card.querySelector<HTMLElement>("[data-poll-dev-bar]");
+    const resetBtn = card.querySelector<HTMLButtonElement>("[data-poll-reset-btn]");
+    if (devBar && resetBtn && new URLSearchParams(location.search).get("dev") === "true") {
+      devBar.hidden = false;
+      resetBtn.addEventListener("click", () => {
+        console.log("Clearing key:", storageKey);
+        localStorage.removeItem(storageKey);
+        location.reload();
+      });
+    }
+
     // Fetch live count immediately — footer stays empty until this resolves
     fetchLiveCount(card, pollId);
 
@@ -251,17 +264,6 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 
       await fetchAndShowResults(card, pollId);
     });
-
-    // Reset button — visible only when ?dev=true is in the URL
-    const devBar = card.querySelector<HTMLElement>("[data-poll-dev-bar]");
-    const resetBtn = card.querySelector<HTMLButtonElement>("[data-poll-reset-btn]");
-    if (devBar && resetBtn && new URLSearchParams(location.search).get("dev") === "true") {
-      devBar.hidden = false;
-      resetBtn.addEventListener("click", () => {
-        localStorage.removeItem(storageKey);
-        location.reload();
-      });
-    }
   }
 
   document.querySelectorAll(".pollCard").forEach(initPoll);
