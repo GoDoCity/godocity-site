@@ -2,6 +2,7 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import ArticleSidebar from "../../../components/ArticleSidebar.astro";
+import { getDisplayName } from "../../../lib/cityConfigs.js";
 
 /* ── Tag / string helpers (same as [topic]/index.astro) ── */
 function tagKey(raw) {
@@ -60,7 +61,7 @@ export async function getStaticPaths() {
 const { city, subtopic } = Astro.params;
 const subtopicKey   = tagKey(subtopic);
 const subtopicLabel = tagLabel(subtopicKey);
-const cityCap       = city.charAt(0).toUpperCase() + city.slice(1);
+const cityCap       = getDisplayName(city);
 
 const all = await getCollection("posts");
 const posts = all
@@ -93,7 +94,7 @@ const DIY_PILL_LIST = [
 ];
 ---
 
-<Base title={`${subtopicLabel} | DIY | GoDo ${cityCap}`} cityBase={city}>
+<Base title={`${subtopicLabel} | DIY | GoDo${cityCap}`} cityBase={city}>
   <section class="section">
     <div class="container" style="max-width: 1080px;">
 
