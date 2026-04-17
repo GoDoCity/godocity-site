@@ -255,21 +255,22 @@ const hasEvents = hasSlider || hasList;
     position: relative;
     overflow: hidden;
   }
-  .nlBox::before {
-    content: '';
+  .nlBox::before,
+  html body .nlBox::before {
+    content: '' !important;
     display: block !important;
     visibility: visible !important;
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
     background-color: transparent !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Cpath d='M0 0L40 40M40 0L0 0L0 40' fill='none' stroke='white' stroke-width='1' stroke-opacity='0.4'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 40px 40px;
-    opacity: 1;
-    z-index: 10 !important;
-    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 0L60 60M60 0L0 0L0 60' fill='none' stroke='white' stroke-width='2' stroke-opacity='1'/%3E%3C/svg%3E") !important;
+    background-repeat: repeat !important;
+    background-size: 60px 60px !important;
+    opacity: 0.4 !important;
+    z-index: 1 !important;
+    pointer-events: none !important;
   }
   .nlBox > * { position: relative; z-index: 20 !important; }
   .nlBoxHead {
