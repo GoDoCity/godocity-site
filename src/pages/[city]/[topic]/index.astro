@@ -721,27 +721,17 @@ try {
 
   .newsletterCard {
     padding: 24px 20px 20px;
-    background: var(--theme-gradient);
+    background:
+      url('/images/geometric-pattern-1.png') repeat center,
+      var(--theme-gradient);
+    background-size: 40px 34px, 100% 100%;
+    background-blend-mode: soft-light, normal;
     border: 1px solid rgba(0,0,0,.25) !important;
     position: relative;
     overflow: hidden;
   }
-  /* Triangle halftone overlay */
-  .newsletterCard::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background-image: url("/images/tri-grid.svg");
-    background-size: 20px 17.32px;
-    background-repeat: repeat;
-    opacity: 0.15;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-    z-index: 1;
-  }
-  /* All direct children sit above the pattern */
-  .newsletterCard > * { position: relative; z-index: 2; }
+  .newsletterCard::before { display: none; }
+  .newsletterCard > * { position: relative; z-index: 1; }
   .newsletterCard .moduleTitle {
     color: #fff;
     text-shadow: 0 1px 3px rgba(0,0,0,.4);

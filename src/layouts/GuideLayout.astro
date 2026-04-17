@@ -587,7 +587,11 @@ const emoji = topicEmoji[topic] ?? "📖";
   /* ── Mini Newsletter ── */
   .gl-nl {
     position: relative;
-    background: var(--theme-gradient);
+    background:
+      url('/images/geometric-pattern-1.png') repeat center,
+      var(--theme-gradient);
+    background-size: 40px 34px, 100% 100%;
+    background-blend-mode: soft-light, normal;
     border-radius: 16px;
     padding: 28px 22px;
     display: flex;
@@ -596,22 +600,8 @@ const emoji = topicEmoji[topic] ?? "📖";
     overflow: hidden;
     border: none !important;
   }
-  /* Triangle halftone overlay */
-  .gl-nl::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background-image: url("/images/tri-grid.svg");
-    background-size: 20px 17.32px;
-    background-repeat: repeat;
-    opacity: 0.15;
-    mix-blend-mode: overlay;
-    pointer-events: none;
-    z-index: 1;
-  }
-  /* All direct children sit above the pattern */
-  .gl-nl > * { position: relative; z-index: 2; }
+  .gl-nl::before { display: none; }
+  .gl-nl > * { position: relative; z-index: 1; }
 
   .gl-nl-head {
     font-size: 1.75rem;
