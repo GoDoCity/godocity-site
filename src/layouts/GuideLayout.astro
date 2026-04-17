@@ -587,8 +587,7 @@ const emoji = topicEmoji[topic] ?? "📖";
   /* ── Mini Newsletter ── */
   .gl-nl {
     position: relative;
-    /* Use our new theme gradient */
-    background: var(--theme-gradient) !important;
+    background: transparent;
     border-radius: 16px;
     padding: 28px 22px;
     display: flex;
@@ -597,23 +596,30 @@ const emoji = topicEmoji[topic] ?? "📖";
     overflow: hidden;
     border: none !important;
   }
-
-  /* Geometric triangle halftone — fades in from bottom at 10% opacity */
+  /* Layer 0: gradient background */
+  .gl-nl::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--theme-gradient);
+    z-index: 0;
+    pointer-events: none;
+  }
+  /* Layer 1: white filled triangle halftone — overlays the gradient */
   .gl-nl::before {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='17.32'%3E%3Cpolygon points='10,0 20,17.32 0,17.32' fill='none' stroke='white' stroke-width='0.8'/%3E%3Cpolygon points='0,0 20,0 10,17.32' fill='none' stroke='white' stroke-width='0.8'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='17.32'%3E%3Cpolygon points='10,0 20,17.32 0,17.32' fill='white'/%3E%3Cpolygon points='0,0 20,0 10,17.32' fill='white'/%3E%3C/svg%3E");
     background-size: 20px 17.32px;
-    opacity: 0.20;
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, black 60%);
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, black 60%);
+    opacity: 0.25;
+    mix-blend-mode: overlay;
     pointer-events: none;
     border-radius: inherit;
     z-index: 1;
   }
-
-  /* Ensure content sits above the pattern layer */
+  /* Layer 2: all direct children above both pseudo-elements */
   .gl-nl > * { position: relative; z-index: 2; }
 
   .gl-nl-head {
