@@ -721,17 +721,23 @@ try {
 
   .newsletterCard {
     padding: 24px 20px 20px;
-    background:
-      url('/images/geometric-pattern-1.png') repeat center,
-      var(--theme-gradient);
-    background-size: 100px auto, cover;
-    background-blend-mode: screen, normal;
+    background: var(--theme-gradient);
     border: 1px solid rgba(0,0,0,.25) !important;
     position: relative;
     overflow: hidden;
   }
-  .newsletterCard::before { display: none; }
-  .newsletterCard > * { position: relative; z-index: 1; }
+  .newsletterCard::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('/images/geometric-pattern-1.png');
+    background-repeat: repeat;
+    background-size: 80px auto;
+    opacity: 0.25;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .newsletterCard > * { position: relative; z-index: 2; }
   .newsletterCard .moduleTitle {
     color: #fff;
     text-shadow: 0 1px 3px rgba(0,0,0,.4);
