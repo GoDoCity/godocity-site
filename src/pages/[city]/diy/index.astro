@@ -40,14 +40,18 @@ const diyGuides = allDiy
   .filter((e) => e.data.cities.includes(city))
   .sort((a, b) => new Date(b.data.pubDate ?? 0).getTime() - new Date(a.data.pubDate ?? 0).getTime());
 
-/* DIY-category posts for this city */
+/* DIY-category posts for this city — check both category AND tags */
 const allPosts = await getCollection("posts");
 const diyPosts = allPosts.filter((p) => {
   const postCity = String(p?.data?.city ?? "").toLowerCase().trim();
   const isCityMatch =
     postCity === city.toLowerCase() ||
     (typeof p?.id === "string" && p.id.startsWith(`${city}/`));
-  const isDiy = String(p?.data?.category ?? "").toLowerCase().trim() === "diy";
+  const cat = String(p?.data?.category ?? "").toLowerCase().trim();
+  const tags = Array.isArray(p?.data?.tags)
+    ? p.data.tags.map((t) => String(t).toLowerCase().trim())
+    : [];
+  const isDiy = cat === "diy" || tags.includes("diy");
   return isCityMatch && isDiy;
 }).sort((a, b) => new Date(b.data.pubDate ?? 0).getTime() - new Date(a.data.pubDate ?? 0).getTime());
 

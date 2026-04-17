@@ -247,38 +247,29 @@ const hasEvents = hasSlider || hasList;
   .nlBox {
     padding: 40px 26px;
     border-radius: 16px;
-    background: transparent;
-    border: 1px solid #000;
+    background: var(--theme-gradient);
+    border: 1px solid rgba(0,0,0,.25);
     display: flex;
     flex-direction: column;
     gap: 12px;
     position: relative;
     overflow: hidden;
   }
-  /* Layer 0: gradient background */
-  .nlBox::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: var(--theme-gradient);
-    z-index: 0;
-    pointer-events: none;
-  }
-  /* Layer 1: white filled triangle halftone — overlays the gradient */
+  /* Triangle halftone overlay — white tessellating triangles on the gradient */
   .nlBox::before {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='17.32'%3E%3Cpolygon points='10,0 20,17.32 0,17.32' fill='white'/%3E%3Cpolygon points='0,0 20,0 10,17.32' fill='white'/%3E%3C/svg%3E");
+    background-image: url("/images/tri-grid.svg");
     background-size: 20px 17.32px;
-    opacity: 0.25;
+    background-repeat: repeat;
+    opacity: 0.15;
     mix-blend-mode: overlay;
     pointer-events: none;
     z-index: 1;
   }
-  /* Layer 2: all direct children above both pseudo-elements */
+  /* All direct children sit above the pattern */
   .nlBox > * { position: relative; z-index: 2; }
   .nlBoxHead {
     font-size: 1.75rem; font-weight: 900; font-style: italic;

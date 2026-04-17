@@ -370,18 +370,17 @@ const pills = [
     border: 1px solid var(--pillBorder);
     background: var(--pillBg);
     color: var(--brand1);
-    font-family: 'CustomNeon', 'Neonderthaw', cursive;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
     font-size: 13px;
     font-weight: 800;
     text-decoration: none;
     white-space: nowrap;
-    transition: background 140ms, border-color 140ms, transform 120ms, text-shadow 140ms;
+    transition: background 140ms, border-color 140ms, transform 120ms;
   }
   .dropPill:hover {
     border-color: var(--brand1);
     transform: translateY(-1px);
     background: color-mix(in srgb, var(--brand1) 14%, transparent);
-    text-shadow: 0 0 5px currentColor, 0 0 12px color-mix(in srgb, currentColor 55%, transparent);
   }
 
   .guidesDropdown { min-width: 210px; }
@@ -414,15 +413,12 @@ const pills = [
     display: block;
     padding: 10px 16px;
     border-top: 1px solid #e5e7eb;
-    font-family: 'CustomNeon', 'Neonderthaw', cursive;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
     font-size: 12.5px; font-weight: 700;
     color: var(--brand1); text-decoration: none;
-    text-align: center; transition: background 140ms, text-shadow 140ms;
+    text-align: center; transition: background 140ms;
   }
-  .dropFooter:hover {
-    background: #f9fafb;
-    text-shadow: 0 0 5px currentColor, 0 0 12px color-mix(in srgb, currentColor 55%, transparent);
-  }
+  .dropFooter:hover { background: #f9fafb; }
 
   /* ── Hamburger ── */
   .menuBtn {
