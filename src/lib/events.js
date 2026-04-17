@@ -14,6 +14,7 @@
  *   daytona/index.astro          → getGreaterDaytonaEvents()
  */
 import { importFromSheet } from "./sheet-import.js";
+import { getCityConfig } from "./cityConfigs.js";
 import { readFileSync, writeFileSync, mkdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -201,6 +202,24 @@ export async function getGreaterDaytonaEvents() {
     .filter(e => {
       const evCity = (e.city ?? "").toLowerCase().trim();
       return GREATER_DAYTONA.has(evCity) && isStrictlyFuture(e.eventDate, e.sponsored === true);
+    })
+    .map(normalizeSheetEvent)
+    .sort((a, b) => (dateSortKey(a) < dateSortKey(b) ? -1 : dateSortKey(a) > dateSortKey(b) ? 1 : 0));
+}
+
+/**
+ * Normalised events for any city slug, filtered via cityConfigs.regionCities.
+ * Falls back to a single-entry Set containing the raw slug for unconfigured cities.
+ * @param {string} slug — matches a key in CITY_CONFIGS (e.g. "daytona", "asheville")
+ */
+export async function getCityEvents(slug) {
+  const config = getCityConfig(slug);
+  const regionCities = config?.regionCities ?? new Set([String(slug ?? "").toLowerCase()]);
+  const raw = await getRawSheetEvents();
+  return raw
+    .filter(e => {
+      const evCity = (e.city ?? "").toLowerCase().trim();
+      return regionCities.has(evCity) && isStrictlyFuture(e.eventDate, e.sponsored === true);
     })
     .map(normalizeSheetEvent)
     .sort((a, b) => (dateSortKey(a) < dateSortKey(b) ? -1 : dateSortKey(a) > dateSortKey(b) ? 1 : 0));

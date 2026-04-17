@@ -54,7 +54,14 @@ const items    = collectionType === "cityGuide" ? [...((data as any).items ?? []
 const firstHalf  = items.slice(0, Math.ceil(items.length / 2));  // always-visible
 const secondHalf = items.slice(Math.ceil(items.length / 2));     // load-more
 
-const moreGuides = data.moreGuides ?? [{'emoji': '🏠', 'label': 'Live in Daytona', 'sub': 'Neighborhoods, housing & moving tips', 'href': '/daytona/guides/live/'}, {'emoji': '💼', 'label': 'Work in Daytona', 'sub': 'Jobs, co-working & local economy', 'href': '/daytona/guides/work/'}, {'emoji': '🎉', 'label': 'Play in Daytona', 'sub': 'Events, nightlife & weekend picks', 'href': '/daytona/guides/play/'}, {'emoji': '🏖️', 'label': 'Beach Guide', 'sub': 'Access, parking & the best stretches', 'href': '/daytona/guides/beach/'}, {'emoji': '🏁', 'label': 'Race Week Guide', 'sub': 'Daytona 500, Bike Week & beyond', 'href': '/daytona/guides/race-week/'}, {'emoji': '🌿', 'label': 'Wellness Guide', 'sub': 'Spas, yoga & healthy eats', 'href': '/daytona/guides/wellness/'}];
+const moreGuides = data.moreGuides ?? [
+  { emoji: '🏠', label: 'Live Here',      sub: 'Neighborhoods, housing & moving tips', href: `/${city}/guides/live/` },
+  { emoji: '💼', label: 'Work Here',      sub: 'Jobs, co-working & local economy',     href: `/${city}/guides/work/` },
+  { emoji: '🎉', label: 'Play Here',      sub: 'Events, nightlife & weekend picks',    href: `/${city}/guides/play/` },
+  { emoji: '🏖️', label: 'Beach Guide',    sub: 'Access, parking & the best stretches', href: `/${city}/guides/beach/` },
+  { emoji: '🏁', label: 'Signature Events', sub: 'Big events, races & local festivals', href: `/${city}/guides/events/` },
+  { emoji: '🌿', label: 'Wellness Guide', sub: 'Spas, yoga & healthy eats',            href: `/${city}/guides/wellness/` },
+];
 
 /* ── Sponsor resolution ─────────────────────────────────────────────────────
    Priority: localSponsor (guide frontmatter) > newest active globalSponsor
