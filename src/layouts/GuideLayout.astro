@@ -587,11 +587,7 @@ const emoji = topicEmoji[topic] ?? "📖";
   /* ── Mini Newsletter ── */
   .gl-nl {
     position: relative;
-    background:
-      url('/images/geometric-pattern-1.png') repeat center,
-      var(--theme-gradient);
-    background-size: 100px auto, cover;
-    background-blend-mode: screen, normal;
+    background: var(--theme-gradient);
     border-radius: 16px;
     padding: 28px 22px;
     display: flex;
@@ -600,8 +596,18 @@ const emoji = topicEmoji[topic] ?? "📖";
     overflow: hidden;
     border: none !important;
   }
-  .gl-nl::before { display: none; }
-  .gl-nl > * { position: relative; z-index: 1; }
+  .gl-nl::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('/images/geometric-pattern-1.png');
+    background-repeat: repeat;
+    background-size: 80px auto;
+    opacity: 0.25;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .gl-nl > * { position: relative; z-index: 2; }
 
   .gl-nl-head {
     font-size: 1.75rem;

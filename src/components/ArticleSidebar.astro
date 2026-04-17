@@ -247,11 +247,7 @@ const hasEvents = hasSlider || hasList;
   .nlBox {
     padding: 40px 26px;
     border-radius: 16px;
-    background:
-      url('/images/geometric-pattern-1.png') repeat center,
-      var(--theme-gradient);
-    background-size: 100px auto, cover;
-    background-blend-mode: screen, normal;
+    background: var(--theme-gradient);
     border: 1px solid rgba(0,0,0,.25);
     display: flex;
     flex-direction: column;
@@ -259,8 +255,18 @@ const hasEvents = hasSlider || hasList;
     position: relative;
     overflow: hidden;
   }
-  .nlBox::before { display: none; }
-  .nlBox > * { position: relative; z-index: 1; }
+  .nlBox::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('/images/geometric-pattern-1.png');
+    background-repeat: repeat;
+    background-size: 80px auto;
+    opacity: 0.25;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .nlBox > * { position: relative; z-index: 2; }
   .nlBoxHead {
     font-size: 1.75rem; font-weight: 900; font-style: italic;
     color: #fff; line-height: 1.05; letter-spacing: -0.04em;
