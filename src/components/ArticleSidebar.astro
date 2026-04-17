@@ -19,7 +19,7 @@ interface Props {
 }
 
 const { city } = Astro.props;
-const cityLabel = getDisplayName(city);
+const cityCap = getDisplayName(city);
 
 const allEvents    = await getCityEvents(city);
 const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
@@ -35,7 +35,7 @@ const hasEvents = hasSlider || hasList;
   <!-- 1 — Newsletter -->
   <div class="nlStickyWrap">
     <div class="nlBox">
-      <div class="nlBoxHead"><em>Good News <strong>{cityLabel}!</strong></em></div>
+      <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
       <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
       <form class="nlForm" action={`/${city}/subscribe/`} method="get">
         <input class="nlInput" type="email" name="email"
