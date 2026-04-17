@@ -587,7 +587,7 @@ const emoji = topicEmoji[topic] ?? "📖";
   /* ── Mini Newsletter ── */
   .gl-nl {
     position: relative;
-    background: transparent;
+    background: var(--theme-gradient);
     border-radius: 16px;
     padding: 28px 22px;
     display: flex;
@@ -596,30 +596,21 @@ const emoji = topicEmoji[topic] ?? "📖";
     overflow: hidden;
     border: none !important;
   }
-  /* Layer 0: gradient background */
-  .gl-nl::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: var(--theme-gradient);
-    z-index: 0;
-    pointer-events: none;
-  }
-  /* Layer 1: white filled triangle halftone — overlays the gradient */
+  /* Triangle halftone overlay */
   .gl-nl::before {
     content: "";
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='17.32'%3E%3Cpolygon points='10,0 20,17.32 0,17.32' fill='white'/%3E%3Cpolygon points='0,0 20,0 10,17.32' fill='white'/%3E%3C/svg%3E");
+    border-radius: inherit;
+    background-image: url("/images/tri-grid.svg");
     background-size: 20px 17.32px;
-    opacity: 0.25;
+    background-repeat: repeat;
+    opacity: 0.15;
     mix-blend-mode: overlay;
     pointer-events: none;
-    border-radius: inherit;
     z-index: 1;
   }
-  /* Layer 2: all direct children above both pseudo-elements */
+  /* All direct children sit above the pattern */
   .gl-nl > * { position: relative; z-index: 2; }
 
   .gl-nl-head {
