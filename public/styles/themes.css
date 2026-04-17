@@ -247,10 +247,62 @@ html[data-theme="clean-white"] {
   --shadow: 0 2px 12px rgba(0,0,0,.08);
 }
 
-/* ── GODO Blue — city theme: white canvas, Daytona blue accent ── */
+/* ── GODO Blue — Daytona Beach ── */
 html[data-theme="godo-blue"] {
   --bg: #ffffff;
   --text: #111111;
   --accent: #0077be;
   --brand1: #0077be;
+  --brand2: #005f99;
+  --link: #0077be;
+  --pillBg: color-mix(in srgb, #0077be 12%, transparent);
+  --pillBorder: color-mix(in srgb, #0077be 45%, transparent);
+}
+
+/* ── GODO Green — Asheville ── */
+html[data-theme="godo-green"] {
+  --bg: #ffffff;
+  --text: #111111;
+  --accent: #2E7D32;
+  --brand1: #2E7D32;
+  --brand2: #1B5E20;
+  --link: #2E7D32;
+  --pillBg: color-mix(in srgb, #2E7D32 12%, transparent);
+  --pillBorder: color-mix(in srgb, #2E7D32 45%, transparent);
+}
+
+/* ── GODO Cherry — Macon (Cherry Blossom City) ── */
+html[data-theme="godo-cherry"] {
+  --bg: #ffffff;
+  --text: #111111;
+  --accent: #A31545;
+  --brand1: #A31545;
+  --brand2: #7B0032;
+  --link: #A31545;
+  --pillBg: color-mix(in srgb, #A31545 12%, transparent);
+  --pillBorder: color-mix(in srgb, #A31545 45%, transparent);
+}
+
+/* ── GODO Teal — Jacksonville ── */
+html[data-theme="godo-teal"] {
+  --bg: #ffffff;
+  --text: #111111;
+  --accent: #007B7F;
+  --brand1: #007B7F;
+  --brand2: #005F63;
+  --link: #007B7F;
+  --pillBg: color-mix(in srgb, #007B7F 12%, transparent);
+  --pillBorder: color-mix(in srgb, #007B7F 45%, transparent);
+}
+
+/* ── GODO Pacific — San Diego ── */
+html[data-theme="godo-pacific"] {
+  --bg: #ffffff;
+  --text: #111111;
+  --accent: #006994;
+  --brand1: #006994;
+  --brand2: #004F70;
+  --link: #006994;
+  --pillBg: color-mix(in srgb, #006994 12%, transparent);
+  --pillBorder: color-mix(in srgb, #006994 45%, transparent);
 }

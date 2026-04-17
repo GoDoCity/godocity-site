@@ -1,6 +1,12 @@
 ---
 import NavMenu from "./NavMenu.astro";
+import { getDisplayName } from "../lib/cityConfigs.js";
+
 const { title, subtitle, cityBase } = Astro.props;
+
+// Always show "GoDo [City]" in the brand badge so every city gets its identity.
+// Falls back to the page title on non-city pages (no cityBase).
+const brandName = cityBase ? `GoDo ${getDisplayName(cityBase)}` : title;
 ---
 
 <header class="topbar">
@@ -8,7 +14,7 @@ const { title, subtitle, cityBase } = Astro.props;
     <div class="brand">
       <div class="badge">
         <span class="badge-dot" aria-hidden="true"></span>
-        <span>{title}</span>
+        <span>{brandName}</span>
       </div>
       {subtitle ? <small>{subtitle}</small> : null}
     </div>

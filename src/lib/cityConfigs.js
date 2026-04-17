@@ -9,8 +9,8 @@
  * 2. Add a matching  html[data-theme="your-theme-name"] { }  block to
  *    /public/styles/themes.css  with at minimum --brand1 and --accent set.
  *
- * That's it.  Base.astro, ArticleSidebar, SidebarPoll, and every component
- * that reads  var(--brand1)  will inherit the right colour automatically.
+ * That's it.  Base.astro, Header.astro, and every component that reads
+ * var(--brand1) will inherit the right colour automatically.
  * No other files need touching.
  */
 
@@ -29,7 +29,6 @@ export const CITY_CONFIGS = {
     /**
      * All city/neighbourhood name strings that count as part of this region.
      * Kept in sync with GREATER_DAYTONA in src/lib/events.js.
-     * Phase 2: events.js will import this set directly instead of defining its own.
      */
     regionCities: new Set([
       "daytona", "daytona beach",
@@ -45,24 +44,74 @@ export const CITY_CONFIGS = {
   },
 
   // ── Add new cities here ───────────────────────────────────────────────────
-  //
-  // asheville: {
-  //   slug:        "asheville",
-  //   displayName: "Asheville",
-  //   theme:       "godo-green",   // add html[data-theme="godo-green"] to themes.css
-  //   brand1:      "#2E7D32",
-  //   mapCenter:   { lat: 35.5951, lng: -82.5515 },
-  //   regionCities: new Set(["asheville", "weaverville", "biltmore"]),
-  // },
-  //
-  // sandiego: {
-  //   slug:        "sandiego",
-  //   displayName: "San Diego",
-  //   theme:       "godo-pacific",
-  //   brand1:      "#006994",
-  //   mapCenter:   { lat: 32.7157, lng: -117.1611 },
-  //   regionCities: new Set(["san diego", "chula vista", "la jolla"]),
-  // },
+
+  asheville: {
+    slug: "asheville",
+    displayName: "Asheville",
+    theme: "godo-green",
+    brand1: "#2E7D32",
+    mapCenter: { lat: 35.5951, lng: -82.5515 },
+    regionCities: new Set([
+      "asheville",
+      "weaverville",
+      "biltmore",
+      "black mountain",
+      "woodfin",
+      "swannanoa",
+      "arden",
+    ]),
+  },
+
+  macon: {
+    slug: "macon",
+    displayName: "Macon",
+    theme: "godo-cherry",
+    brand1: "#A31545",
+    mapCenter: { lat: 32.8407, lng: -83.6324 },
+    regionCities: new Set([
+      "macon",
+      "warner robins",
+      "byron",
+      "forsyth",
+      "gray",
+    ]),
+  },
+
+  jacksonville: {
+    slug: "jacksonville",
+    displayName: "Jacksonville",
+    theme: "godo-teal",
+    brand1: "#007B7F",
+    mapCenter: { lat: 30.3322, lng: -81.6557 },
+    regionCities: new Set([
+      "jacksonville",
+      "jacksonville beach",
+      "neptune beach",
+      "atlantic beach",
+      "ponte vedra",
+      "orange park",
+      "fleming island",
+      "st. augustine", "st augustine",
+    ]),
+  },
+
+  sandiego: {
+    slug: "sandiego",
+    displayName: "San Diego",
+    theme: "godo-pacific",
+    brand1: "#006994",
+    mapCenter: { lat: 32.7157, lng: -117.1611 },
+    regionCities: new Set([
+      "san diego",
+      "chula vista",
+      "la jolla",
+      "mission valley",
+      "el cajon",
+      "santee",
+      "oceanside",
+      "carlsbad",
+    ]),
+  },
 };
 
 // ── Helper functions ──────────────────────────────────────────────────────────
@@ -100,12 +149,13 @@ export function getBrand1ForCity(slug) {
 
 /**
  * Returns the human-readable display name for a city slug.
- * Falls back to the raw slug if unconfigured.
+ * Falls back to the capitalised raw slug if unconfigured.
  * @param {string} slug
  * @returns {string}
  */
 export function getDisplayName(slug) {
-  return getCityConfig(slug)?.displayName ?? String(slug ?? "");
+  const s = String(slug ?? "");
+  return getCityConfig(slug)?.displayName ?? (s ? s[0].toUpperCase() + s.slice(1) : s);
 }
 
 /** All configured city slugs — useful for getStaticPaths() in dynamic routes. */
