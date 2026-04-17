@@ -10,7 +10,7 @@ const year = new Date().getFullYear();
 const rawBase = Astro.props?.cityBase ? String(Astro.props.cityBase).trim() : "";
 const cityBase = rawBase ? `/${rawBase.replace(/^\/+/, "").replace(/\/+$/, "")}` : "/daytona";
 
-const siteName = Astro.props?.title ?? (rawBase ? `GoDo ${getDisplayName(rawBase)}` : "GoDoCity");
+const siteName = Astro.props?.title ?? (rawBase ? `GoDo${getDisplayName(rawBase)}` : "GoDoCity");
 ---
 
 <footer class="siteFooter">

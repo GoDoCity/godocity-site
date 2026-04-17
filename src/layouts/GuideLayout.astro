@@ -605,15 +605,16 @@ const emoji = topicEmoji[topic] ?? "📖";
     inset: 0;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='17.32'%3E%3Cpolygon points='10,0 20,17.32 0,17.32' fill='none' stroke='white' stroke-width='0.8'/%3E%3Cpolygon points='0,0 20,0 10,17.32' fill='none' stroke='white' stroke-width='0.8'/%3E%3C/svg%3E");
     background-size: 20px 17.32px;
-    opacity: 0.10;
-    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
-    mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
+    opacity: 0.20;
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, black 60%);
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, black 60%);
     pointer-events: none;
     border-radius: inherit;
+    z-index: 1;
   }
 
   /* Ensure content sits above the pattern layer */
-  .gl-nl > * { position: relative; z-index: 1; }
+  .gl-nl > * { position: relative; z-index: 2; }
 
   .gl-nl-head {
     font-size: 1.75rem;

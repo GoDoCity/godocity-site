@@ -6,7 +6,7 @@ const { title, subtitle, cityBase } = Astro.props;
 
 // Always show "GoDo [City]" in the brand badge so every city gets its identity.
 // Falls back to the page title on non-city pages (no cityBase).
-const brandName = cityBase ? `GoDo ${getDisplayName(cityBase)}` : title;
+const brandName = cityBase ? `GoDo${getDisplayName(cityBase)}` : title;
 ---
 
 <header class="topbar">
