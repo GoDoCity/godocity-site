@@ -11,17 +11,17 @@
  *  - Slot 1: Smart Slider — top 5 Sponsored events, auto-cycles every 5 s
  *  - Slots 2+: Static chronological list of regular (non-sponsored) events
  */
-import { getGreaterDaytonaEvents, cityDisplayName } from "../lib/events.js";
+import { getCityEvents, cityDisplayName } from "../lib/events.js";
+import { getDisplayName } from "../lib/cityConfigs.js";
 
 interface Props {
   city: string;
 }
 
 const { city } = Astro.props;
-const cityCap = city.charAt(0).toUpperCase() + city.slice(1);
+const cityLabel = getDisplayName(city);
 
-// Single call — returns cached data on every article page after the first
-const allEvents    = await getGreaterDaytonaEvents();
+const allEvents    = await getCityEvents(city);
 const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
 const regularList     = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
 
@@ -35,7 +35,7 @@ const hasEvents = hasSlider || hasList;
   <!-- 1 — Newsletter -->
   <div class="nlStickyWrap">
     <div class="nlBox">
-      <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
+      <div class="nlBoxHead"><em>Good News <strong>{cityLabel}!</strong></em></div>
       <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
       <form class="nlForm" action={`/${city}/subscribe/`} method="get">
         <input class="nlInput" type="email" name="email"
@@ -167,7 +167,7 @@ const hasEvents = hasSlider || hasList;
   </div>
 
   <!-- 3b — Community Alert bar (links to Vibe Check landing page) -->
-  <a class="communityAlert" href="/daytona/vibe-check/">
+  <a class="communityAlert" href={`/${city}/vibe-check/`}>
     🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="caVote">Vote Now</span>
   </a>
 
@@ -252,7 +252,24 @@ const hasEvents = hasSlider || hasList;
     display: flex;
     flex-direction: column;
     gap: 12px;
+    position: relative;
+    overflow: hidden;
   }
+  /* Geometric triangle halftone — fades in from bottom at 10 % opacity */
+  .nlBox::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='17.32'%3E%3Cpolygon points='10,0 20,17.32 0,17.32' fill='none' stroke='white' stroke-width='0.8'/%3E%3Cpolygon points='0,0 20,0 10,17.32' fill='none' stroke='white' stroke-width='0.8'/%3E%3C/svg%3E");
+    background-size: 20px 17.32px;
+    opacity: 0.10;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
+    mask-image: linear-gradient(to bottom, transparent 0%, black 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .nlBox > * { position: relative; z-index: 1; }
   .nlBoxHead {
     font-size: 1.75rem; font-weight: 900; font-style: italic;
     color: #fff; line-height: 1.05; letter-spacing: -0.04em;

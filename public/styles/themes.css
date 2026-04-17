@@ -255,6 +255,8 @@ html[data-theme="godo-blue"] {
   --brand1: #0077be;
   --brand2: #005f99;
   --link: #0077be;
+  --theme-accent: #0077be;
+  --theme-gradient: linear-gradient(135deg, #0077be, #00a9ce);
   --pillBg: color-mix(in srgb, #0077be 12%, transparent);
   --pillBorder: color-mix(in srgb, #0077be 45%, transparent);
 }
@@ -267,6 +269,8 @@ html[data-theme="godo-green"] {
   --brand1: #2E7D32;
   --brand2: #1B5E20;
   --link: #2E7D32;
+  --theme-accent: #2E7D32;
+  --theme-gradient: linear-gradient(135deg, #2E7D32, #66BB6A);
   --pillBg: color-mix(in srgb, #2E7D32 12%, transparent);
   --pillBorder: color-mix(in srgb, #2E7D32 45%, transparent);
 }
@@ -279,6 +283,8 @@ html[data-theme="godo-cherry"] {
   --brand1: #A31545;
   --brand2: #7B0032;
   --link: #A31545;
+  --theme-accent: #A31545;
+  --theme-gradient: linear-gradient(135deg, #A31545, #E91E63);
   --pillBg: color-mix(in srgb, #A31545 12%, transparent);
   --pillBorder: color-mix(in srgb, #A31545 45%, transparent);
 }
@@ -291,6 +297,8 @@ html[data-theme="godo-teal"] {
   --brand1: #007B7F;
   --brand2: #005F63;
   --link: #007B7F;
+  --theme-accent: #007B7F;
+  --theme-gradient: linear-gradient(135deg, #007B7F, #00ACC1);
   --pillBg: color-mix(in srgb, #007B7F 12%, transparent);
   --pillBorder: color-mix(in srgb, #007B7F 45%, transparent);
 }
@@ -303,6 +311,8 @@ html[data-theme="godo-pacific"] {
   --brand1: #006994;
   --brand2: #004F70;
   --link: #006994;
+  --theme-accent: #006994;
+  --theme-gradient: linear-gradient(135deg, #006994, #0097B2);
   --pillBg: color-mix(in srgb, #006994 12%, transparent);
   --pillBorder: color-mix(in srgb, #006994 45%, transparent);
 }
