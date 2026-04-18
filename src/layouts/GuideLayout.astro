@@ -587,7 +587,10 @@ const emoji = topicEmoji[topic] ?? "📖";
   /* ── Mini Newsletter ── */
   .gl-nl {
     position: relative;
-    background: var(--theme-gradient);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 0L60 60M60 0L0 0L0 60' fill='none' stroke='white' stroke-width='2' stroke-opacity='0.4'/%3E%3C/svg%3E"), var(--theme-gradient) !important;
+    background-repeat: repeat, no-repeat !important;
+    background-size: 60px 60px, cover !important;
+    background-position: center, center !important;
     border-radius: 16px;
     padding: 28px 22px;
     display: flex;
@@ -596,24 +599,6 @@ const emoji = topicEmoji[topic] ?? "📖";
     overflow: hidden;
     border: none !important;
   }
-  .gl-nl::before,
-  html body .gl-nl::before {
-    content: '' !important;
-    display: block !important;
-    visibility: visible !important;
-    position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background-color: transparent !important;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cpath d='M0 0L60 60M60 0L0 0L0 60' fill='none' stroke='white' stroke-width='2' stroke-opacity='1'/%3E%3C/svg%3E") !important;
-    background-repeat: repeat !important;
-    background-size: 60px 60px !important;
-    opacity: 0.4 !important;
-    z-index: 1 !important;
-    pointer-events: none !important;
-  }
-  .gl-nl > * { position: relative; z-index: 20 !important; }
 
   .gl-nl-head {
     font-size: 1.75rem;
