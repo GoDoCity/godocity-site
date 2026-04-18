@@ -721,14 +721,25 @@ try {
 
   .newsletterCard {
     padding: 24px 20px 20px;
-    background-image: url('/images/geometric-pattern-master.svg'), var(--theme-gradient) !important;
-    background-size: 100% auto, cover !important;
-    background-repeat: no-repeat, no-repeat !important;
-    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 90%);
-    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 30%, rgba(0,0,0,0) 90%);
+    background: var(--theme-gradient);
     border: 1px solid rgba(0,0,0,.25) !important;
     position: relative;
     overflow: hidden;
+  }
+  .newsletterCard::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('/images/geometric-pattern-master.svg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 80%);
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 10%, rgba(0,0,0,0) 80%);
+    opacity: 0.3;
+    pointer-events: none;
   }
   .newsletterCard .moduleTitle {
     color: #fff;
