@@ -185,6 +185,10 @@ const guideCards = guideHero
   {/* ── NEWSLETTER BAND — direct sibling of .pageWrap, outside overflow container ── */}
   <div class="nlBand" id="nlBand">
     <div class="nlInner">
+      {/* ── COMMUNITY ALERT BAR — above email form ── */}
+      <a class="homeAlertBar" id="alertBand" href="/daytona/vibe-check/">
+        🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="habVote">Vote Now →</span>
+      </a>
       <div class="nlContent" id="nlContent">
         <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
         <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong><u>for free.</u></strong></div>
@@ -239,10 +243,6 @@ const guideCards = guideHero
   </script>
 
   <div class="pageWrap">
-    {/* ── COMMUNITY ALERT BAR — thin strip under email band ── */}
-    <a class="homeAlertBar" id="alertBand" href="/daytona/vibe-check/">
-      🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="habVote">Vote Now →</span>
-    </a>
     <div class="alertBarLine" id="alertBarLine"></div>
 
     <div class="container">
@@ -672,12 +672,23 @@ const guideCards = guideHero
     /* ── Newsletter — full-bleed band ── */
     #nlBand {
       width: 100vw;
-      height: 180px;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
       overflow: hidden;
       background: var(--theme-gradient);
+      position: relative;
+    }
+    #nlBand::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url('/images/geometric-pattern-master.svg');
+      background-size: 40px 40px;
+      background-repeat: repeat;
+      opacity: 0.3;
+      pointer-events: none;
+      z-index: 0;
     }
     .nlBand::before {
       content: "";
@@ -697,22 +708,17 @@ const guideCards = guideHero
     }
     .nlInner {
       width: 100%;
-      height: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
       position: relative;
+      z-index: 1;
+      padding: 20px 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
-    .nlInner::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-image: url('/images/geometric-pattern-master.svg');
-      background-size: 40px 40px;
-      background-repeat: repeat;
-      opacity: 0.3;
-      pointer-events: none;
-    }
+    .pageWrap { margin-top: 16px; }
     .nlContent {
       max-width: 680px;
       width: 100%;
