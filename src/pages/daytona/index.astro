@@ -182,70 +182,63 @@ const guideCards = guideHero
 ---
 
 <Base title="GoDoDay" subtitle="Good News Daytona" cityBase="daytona">
-  <div class="pageWrap">
-    {/* ── NEWSLETTER BAND — 160px compact utility strip ── */}
-    <div class="nlBand" id="nlBand">
-      <div class="nlInner">
-        <div class="nlContent" id="nlContent">
-          <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
-          <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong><u>for free.</u></strong></div>
-          <form class="nlForm" id="nlForm" action="/daytona/subscribe/" method="get">
-            <div class="nlRow">
-              <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" />
-              <button class="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
-            </div>
-          </form>
-          <div class="nlFine">100% free, unsubscribe anytime.</div>
-        </div>
-        <div class="nlThanks" id="nlThanks" aria-live="polite">Thank you! You're on the list. ✓</div>
+  {/* ── NEWSLETTER BAND — direct sibling of .pageWrap, outside overflow container ── */}
+  <div class="nlBand" id="nlBand">
+    <div class="nlInner">
+      <div class="nlContent" id="nlContent">
+        <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
+        <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong><u>for free.</u></strong></div>
+        <form class="nlForm" id="nlForm" action="/daytona/subscribe/" method="get">
+          <div class="nlRow">
+            <input class="nlInput" type="email" name="email" placeholder="Enter your email address" aria-label="Email address" />
+            <button class="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
+          </div>
+        </form>
+        <div class="nlFine">100% free, unsubscribe anytime.</div>
       </div>
+      <div class="nlThanks" id="nlThanks" aria-live="polite">Thank you! You're on the list. ✓</div>
     </div>
-    <script is:inline>
-    (function(){
-      /* ── Full-bleed fix for nlBand ──────────────────────────────────────
-         Reads the actual left offset of the band from the viewport and
-         applies negative margin + extra width to reach true screen edges.
-         Works regardless of Base.astro's wrapper structure or overflow.   */
-      function bleedFix() {
-        /* Apply full-bleed to any element that should span screen edges.
-           Reads actual pixel offset from viewport and compensates exactly. */
-        function makeBleed(el) {
-          if (!el) return;
-          el.style.marginLeft = '';
-          el.style.width = '';
-          var rect = el.getBoundingClientRect();
-          var leftOffset = rect.left;
-          var rightGap = window.innerWidth - rect.right;
-          if (leftOffset > 0 || rightGap > 0) {
-            el.style.marginLeft = '-' + leftOffset + 'px';
-            el.style.width = 'calc(100% + ' + (leftOffset + rightGap) + 'px)';
-          }
+  </div>
+  <script is:inline>
+  (function(){
+    function bleedFix() {
+      function makeBleed(el) {
+        if (!el) return;
+        el.style.marginLeft = '';
+        el.style.width = '';
+        var rect = el.getBoundingClientRect();
+        var leftOffset = rect.left;
+        var rightGap = window.innerWidth - rect.right;
+        if (leftOffset > 0 || rightGap > 0) {
+          el.style.marginLeft = '-' + leftOffset + 'px';
+          el.style.width = 'calc(100% + ' + (leftOffset + rightGap) + 'px)';
         }
-        makeBleed(document.getElementById('nlBand'));
-        makeBleed(document.getElementById('adBand'));
-        makeBleed(document.getElementById('alertBand'));
-        makeBleed(document.getElementById('alertBarLine'));
       }
-      if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', bleedFix);
-      } else {
-        bleedFix();
-      }
-      window.addEventListener('resize', bleedFix);
+      makeBleed(document.getElementById('nlBand'));
+      makeBleed(document.getElementById('adBand'));
+      makeBleed(document.getElementById('alertBand'));
+      makeBleed(document.getElementById('alertBarLine'));
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', bleedFix);
+    } else {
+      bleedFix();
+    }
+    window.addEventListener('resize', bleedFix);
 
-      var form = document.getElementById('nlForm');
-      var content = document.getElementById('nlContent');
-      var thanks = document.getElementById('nlThanks');
-      if (!form) return;
-      form.addEventListener('submit', function(e){
-        e.preventDefault();
-        content.style.display = 'none';
-        thanks.style.display = 'flex';
-        /* height: auto — banner shrinks naturally to thank-you text */
-      });
-    })();
-    </script>
+    var form = document.getElementById('nlForm');
+    var content = document.getElementById('nlContent');
+    var thanks = document.getElementById('nlThanks');
+    if (!form) return;
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      content.style.display = 'none';
+      thanks.style.display = 'flex';
+    });
+  })();
+  </script>
 
+  <div class="pageWrap">
     {/* ── COMMUNITY ALERT BAR — thin strip under email band ── */}
     <a class="homeAlertBar" id="alertBand" href="/daytona/vibe-check/">
       🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="habVote">Vote Now →</span>
@@ -676,33 +669,15 @@ const guideCards = guideHero
       .nlSub strong { font-weight: 900 !important; }
     }
 
-    /* ── Newsletter — full-bleed band with racing animation ── */
+    /* ── Newsletter — full-bleed band ── */
     #nlBand {
-      width: 100vw !important;
-      position: relative !important;
-      left: 50% !important;
-      right: 50% !important;
-      margin-left: -50vw !important;
-      margin-right: -50vw !important;
-      max-width: none !important;
-      height: 180px !important;
-    }
-    .nlBand {
-      position: relative;
-      left: 50%;
-      right: 50%;
-      width: 100vw !important;
-      margin-left: -50vw !important;
-      margin-right: -50vw !important;
-      margin-top: 15px !important;
-      height: 180px !important;
-      padding: 0;
+      width: 100vw;
+      height: 180px;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      text-align: center;
+      align-items: center;
       overflow: hidden;
+      background: var(--theme-gradient);
     }
     .nlBand::before {
       content: "";
@@ -721,17 +696,9 @@ const guideCards = guideHero
       100% { opacity: 0.4; box-shadow: 0 0 2px #00FFFF; }
     }
     .nlInner {
-      position: relative;
-      height: 180px;
       width: 100%;
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 24px 2.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: var(--theme-gradient);
-      overflow: hidden;
+      height: 100%;
+      position: relative;
     }
     .nlInner::after {
       content: '';
@@ -741,8 +708,8 @@ const guideCards = guideHero
       width: 100%;
       height: 100%;
       background-image: url('/images/geometric-pattern-master.svg');
-      background-repeat: repeat;
       background-size: 40px 40px;
+      background-repeat: repeat;
       opacity: 0.3;
       pointer-events: none;
     }
