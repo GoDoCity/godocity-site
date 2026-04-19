@@ -185,10 +185,6 @@ const guideCards = guideHero
   {/* ── NEWSLETTER BAND — direct sibling of .pageWrap, outside overflow container ── */}
   <div class="nlBand" id="nlBand">
     <div class="nlInner">
-      {/* ── COMMUNITY ALERT BAR — above email form ── */}
-      <a class="homeAlertBar" id="alertBand" href="/daytona/vibe-check/">
-        🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="habVote">Vote Now →</span>
-      </a>
       <div class="nlContent" id="nlContent">
         <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
         <div class="nlSub">Get the best local news &amp; events sent to your inbox, <strong><u>for free.</u></strong></div>
@@ -201,6 +197,10 @@ const guideCards = guideHero
         <div class="nlFine">100% free, unsubscribe anytime.</div>
       </div>
       <div class="nlThanks" id="nlThanks" aria-live="polite">Thank you! You're on the list. ✓</div>
+      {/* ── COMMUNITY ALERT BAR — bottom of banner ── */}
+      <a class="homeAlertBar" id="alertBand" href="/daytona/vibe-check/">
+        🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="habVote">Vote Now →</span>
+      </a>
     </div>
   </div>
   <script is:inline>
@@ -712,6 +712,7 @@ const guideCards = guideHero
       display: flex;
       flex-direction: column;
       align-items: center;
+      background: transparent;
     }
     .pageWrap { margin-top: 0; }
     .nlContent {
