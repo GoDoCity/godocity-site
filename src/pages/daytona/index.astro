@@ -672,23 +672,25 @@ const guideCards = guideHero
     /* ── Newsletter — full-bleed band ── */
     #nlBand {
       width: 100vw;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      overflow: hidden;
-      background: var(--theme-gradient);
       position: relative;
+      background: var(--theme-gradient);
+      padding: 40px 0;
+      margin-top: 20px;
+      margin-bottom: 20px;
     }
     #nlBand::after {
       content: '';
       position: absolute;
-      inset: 0;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background-image: url('/images/geometric-pattern-master.svg');
       background-size: 40px 40px;
       background-repeat: repeat;
       opacity: 0.3;
+      z-index: 1;
       pointer-events: none;
-      z-index: 0;
     }
     .nlBand::before {
       content: "";
@@ -707,18 +709,17 @@ const guideCards = guideHero
       100% { opacity: 0.4; box-shadow: 0 0 2px #00FFFF; }
     }
     .nlInner {
-      width: 100%;
+      position: relative;
+      z-index: 2;
       max-width: 1200px;
       margin: 0 auto;
-      position: relative;
-      z-index: 1;
-      padding: 20px 2rem;
+      padding: 0 2rem;
       display: flex;
       flex-direction: column;
       align-items: center;
       gap: 12px;
     }
-    .pageWrap { margin-top: 16px; }
+    .pageWrap { margin-top: 0; }
     .nlContent {
       max-width: 680px;
       width: 100%;
