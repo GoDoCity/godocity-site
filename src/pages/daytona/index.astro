@@ -221,6 +221,7 @@ const guideCards = guideHero
             el.style.width = 'calc(100% + ' + (leftOffset + rightGap) + 'px)';
           }
         }
+        makeBleed(document.getElementById('nlBand'));
         makeBleed(document.getElementById('adBand'));
         makeBleed(document.getElementById('alertBand'));
         makeBleed(document.getElementById('alertBarLine'));
@@ -684,7 +685,7 @@ const guideCards = guideHero
       margin-left: -50vw !important;
       margin-right: -50vw !important;
       margin-top: 15px !important;
-      height: 320px !important;
+      height: 220px !important;
       padding: 0;
       display: flex;
       flex-direction: column;
@@ -711,7 +712,7 @@ const guideCards = guideHero
     }
     .nlInner {
       position: relative;
-      height: 320px;
+      height: 220px;
       width: 100%;
       max-width: 1280px;
       margin: 0 auto;
@@ -731,7 +732,7 @@ const guideCards = guideHero
       height: 100%;
       background-image: url('/images/geometric-pattern-master.svg');
       background-repeat: repeat;
-      background-size: 150px 150px;
+      background-size: 80px 80px;
       opacity: 0.3;
       pointer-events: none;
     }
