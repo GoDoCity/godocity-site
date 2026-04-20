@@ -199,6 +199,7 @@ const {
     width: 100%;
     padding: 10px 20px;
     margin: 0;
+    margin-top: auto;
     background: #1e2d3d;
     color: #E8EDF4;
     font-size: 15px; font-weight: 700; line-height: 1.3;
@@ -217,7 +218,7 @@ const {
 
   /* ── Mobile ── */
   @media (max-width: 768px) {
-    .nlBand { padding: 1.5rem 0; min-height: 168px; }
+    .nlBand { display: flex; flex-direction: column; padding: 1.5rem 0; min-height: 200px; }
     .nlInner { padding: 1.5rem 1rem !important; width: 100%; }
     .nlContent { max-width: 100%; }
     .nlHead {

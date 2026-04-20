@@ -1,6 +1,7 @@
 ---
 import Base from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
+import NewsletterBanner from "../../../components/NewsletterBanner.astro";
 import { getCollection } from "astro:content";
 import manualFeedData from "../../../data/manual-events.json";
 import {
@@ -200,33 +201,9 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   title="Events"
   cityBase="Daytona"
 >
+  <NewsletterBanner city="Daytona" vibeCheckText="What's on in Daytona this weekend?" />
   <section class="section">
     <div class="eventsContainer">
-
-      {/* ── NEWSLETTER — full-bleed slim band, edge-to-edge, no curves ── */}
-      <form name="newsletter-signup" data-netlify="true" netlify-honeypot="nl-bot" style="display:none" aria-hidden="true">
-        <input name="form-name" value="newsletter-signup" /><input name="nl-bot" /><input name="email" />
-      </form>
-      <div class="nlWrap">
-        <div class="nlCard">
-          <div class="nlContent" id="nlContent">
-            <div class="nlHead"><em>Good News <span class="nlCity">Daytona</span>!</em></div>
-            <div class="nlSub">Get the best local events sent to your inbox, <strong><u>for free.</u></strong></div>
-            <form class="nlForm" id="nlForm" novalidate>
-              <input type="hidden" name="form-name" value="newsletter-signup" />
-              <p style="display:none" aria-hidden="true"><label>Leave empty: <input name="nl-bot" id="nlBot" /></label></p>
-              <div class="nlRow">
-                <input class="nlInput" id="nlEmail" name="email" type="email"
-                  placeholder="Enter your email address" autocomplete="email" required />
-                <button class="nlBtn" id="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
-              </div>
-            </form>
-          </div>
-          <div class="nlThanks" id="nlThanks" aria-live="polite" style="display:none">
-            Thank you! You're on the list. ✓
-          </div>
-        </div>
-      </div>
 
       {/* ── FEATURED GRID — 3-column static row, horizontal scroll if >3 ── */}
       {sponsoredEvents.length > 0 && (
@@ -457,50 +434,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     applyState();
   }
 
-  /* ── Newsletter signup ── */
-  var nlForm    = document.getElementById("nlForm");
-  var nlBtn     = document.getElementById("nlBtn");
-  var nlEmail   = document.getElementById("nlEmail");
-  var nlContent = document.getElementById("nlContent");
-  var nlThanks  = document.getElementById("nlThanks");
-
-  if (nlForm) {
-    nlForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-
-      var email = (nlEmail ? nlEmail.value : "").trim();
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        if (nlEmail) nlEmail.focus();
-        return;
-      }
-
-      nlBtn.disabled    = true;
-      nlBtn.textContent = "SIGNING UP…";
-
-      var botVal = document.getElementById("nlBot") ? document.getElementById("nlBot").value : "";
-      var body   = "form-name=newsletter-signup&email=" + encodeURIComponent(email);
-      if (botVal) body += "&nl-bot=" + encodeURIComponent(botVal);
-
-      fetch("/", {
-        method:  "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body:    body,
-      })
-        .then(function (res) {
-          if (res.ok || res.status === 303) {
-            if (nlContent) nlContent.style.display = "none";
-            if (nlThanks)  nlThanks.style.display  = "";
-          } else {
-            throw new Error(res.status);
-          }
-        })
-        .catch(function () {
-          nlBtn.disabled    = false;
-          nlBtn.textContent = "SIGN UP, IT'S FREE!";
-        });
-    });
-  }
-
   /* ── Link validator: catch dead external URLs → Google Search fallback ── */
   document.querySelectorAll("[data-external='true']").forEach(function (el) {
     var fallback = el.getAttribute("data-fallback");
@@ -525,203 +458,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   /* overflow-x:clip prevents the 100vw negative-margin from creating a scrollbar
      without creating a new block-formatting context (unlike overflow:hidden) */
   .eventsContainer { padding-bottom: 64px; overflow-x: clip; }
-
-  /* Eliminate the gap between header and the newsletter banner */
-  section.section { padding-top: 0 !important; }
-
-  /* ── Newsletter — full-bleed band with racing animation ── */
-  .nlWrap {
-    position: relative;
-    z-index: 20;
-    left: 50%;
-    right: 50%;
-    width: 100vw !important;
-    margin-left: -50vw !important;
-    margin-right: -50vw !important;
-    margin-top: 15px !important;
-    min-height: 160px;
-    height: auto !important;
-    padding: 1rem 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    overflow: hidden;
-    background: var(--theme-gradient) !important;
-  }
-  .nlWrap::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 4px;
-    background: #00FFFF;
-    animation: pulseLine 2s ease-in-out infinite;
-    z-index: 100;
-  }
-  @keyframes pulseLine {
-    0%   { opacity: 0.4; box-shadow: 0 0 2px #00FFFF; }
-    50%  { opacity: 1;   box-shadow: 0 0 15px #00FFFF, 0 0 25px #00FFFF; }
-    100% { opacity: 0.4; box-shadow: 0 0 2px #00FFFF; }
-  }
-  .nlCard {
-    background: transparent;
-    height: 100%;
-    max-height: none;
-    margin-bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 1.5rem;
-    width: 100%;
-  }
-  .nlContent {
-    max-width: 520px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 6px;
-  }
-  .nlHead {
-    font-family: 'Archivo Black', sans-serif;
-    font-size: 2.2rem;
-    font-weight: 900;
-    font-style: italic;
-    color: #fff !important;
-    line-height: 1.0;
-    letter-spacing: -0.04em;
-    margin: 0;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.65);
-  }
-  .nlCity { font-style: italic; font-weight: 900; }
-  .nlSub {
-    font-family: 'Roboto', sans-serif;
-    font-size: 19px;
-    font-weight: 400;
-    color: rgba(255,255,255,.85);
-    line-height: 1.3;
-    margin: 0;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-  }
-  .nlSub strong { font-weight: 900; color: #ffffff; }
-  .nlForm { width: 100%; max-width: 420px; margin-top: 6px; }
-  .nlRow { display: flex; height: 46px; width: 100%; }
-  .nlInput {
-    flex: 1; min-width: 0;
-    border-radius: 8px 0 0 8px;
-    border: 2px solid rgba(255,255,255,.3);
-    border-right: none;
-    background: #fff;
-    color: #000;
-    padding: 0 14px;
-    font-size: 15px; font-weight: 500; font-family: inherit;
-    outline: none;
-    transition: border-color 150ms;
-  }
-  .nlInput::placeholder { color: #888; }
-  .nlInput:focus { border-color: rgba(255,255,255,.7); }
-  .nlBtn {
-    flex-shrink: 0; padding: 0 18px;
-    border-radius: 0 8px 8px 0;
-    border: 2px solid #fff;
-    background: #000;
-    color: #fff;
-    font-size: 12px; font-weight: 900; font-family: inherit;
-    letter-spacing: .04em;
-    cursor: pointer; white-space: nowrap;
-    text-shadow: none;
-    transition: background 140ms, color 140ms;
-    margin-left: 5px;
-  }
-  .nlBtn:hover { background: #fff; color: #000; }
-  .nlBtn:disabled { opacity: .5; cursor: default; }
-  .nlFine {
-    font-size: 11px; color: var(--accentText); opacity: .55; margin-top: 2px;
-  }
-  .nlThanks {
-    font-size: clamp(22px, 2.8vw, 32px);
-    font-weight: 900;
-    color: var(--accentText);
-    text-align: center;
-    padding: 8px 0;
-  }
-
-  /* ── Newsletter mobile overhaul (< 768px) ── */
-  @media (max-width: 767px) {
-    /* 0. Full-bleed wrapper: contain everything, no overflow bleed */
-    .nlWrap {
-      min-height: 168px !important;
-      height: auto !important;
-      padding: 1.5rem 1rem !important;
-      overflow: hidden !important;
-      display: flex !important;
-      flex-direction: column !important;
-      justify-content: center !important;
-      align-items: center !important;
-      box-sizing: border-box !important;
-    }
-
-    /* 1. Reset parent containers: full-width, centered, no stray padding */
-    .nlCard, .nlContent, .nlForm, .nlInner {
-      width: 100% !important;
-      max-width: 100% !important;
-      padding: 0 !important;
-      margin: 0 auto !important;
-      box-sizing: border-box !important;
-    }
-
-    /* 2. Headline: centered, full-width */
-    .nlHead {
-      font-size: 2.2rem !important;
-      width: 100% !important;
-      text-align: center !important;
-      margin: 0 auto !important;
-    }
-
-    /* 3. Form row: stacked column, no negative-margin viewport breakout */
-    .nlRow {
-      display: flex !important;
-      flex-direction: column !important;
-      align-items: center !important;
-      width: 100% !important;
-      margin: 0 auto !important;
-      gap: 12px !important;
-      box-sizing: border-box !important;
-    }
-
-    /* 4. Input and Button: edge-to-edge within the gradient box */
-    .nlInput, .nlBtn {
-      width: 100% !important;
-      max-width: 100% !important;
-      height: 48px !important;
-      margin: 0 auto !important;
-      display: block !important;
-      box-sizing: border-box !important;
-      border-radius: 8px !important;
-    }
-
-    /* 5. Sub-headline: centered, wraps naturally */
-    .nlSub { white-space: normal; font-size: 1.2rem; text-align: center; max-width: 90%; margin: 0 auto; }
-    .nlSub strong { font-weight: 900 !important; }
-  }
-
-  /* ── Newsletter landscape (short viewport) ── */
-  @media (max-height: 500px) {
-    .nlWrap { padding: 0.75rem 0; }
-  }
-
-  /* ── Newsletter landscape: very short (mobile landscape) ── */
-  @media (max-height: 450px) {
-    .nlWrap { padding: 1.5rem 0 !important; min-height: 0; overflow: visible; }
-    .nlHead { font-size: 2rem !important; white-space: nowrap !important; }
-    .nlContent { gap: 4px; }
-    .nlSub { font-size: 15px; }
-    .nlForm { margin-top: 4px; }
-  }
 
   /* ── Featured Section — 3-column static grid ── */
   .featuredSection { width: 100%; margin-bottom: 24px; }
@@ -972,10 +708,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
   @media (max-width: 520px) {
     .ctaOuter     { padding-top: 10px; }
-    .nlCard       { padding: 24px 1.25rem; }
-    .nlRow        { flex-direction: column; height: auto; gap: 8px; }
-    .nlInput      { border-radius: 8px; border-right: 2px solid rgba(255,255,255,.3); height: 46px; }
-    .nlBtn        { border-radius: 8px; height: 46px; margin-left: 0 !important; }
     .filterBar    { gap: 6px; }
     .filterCount  { margin-left: 0; width: 100%; }
     .evCardTitle  { font-size: 16px; }
