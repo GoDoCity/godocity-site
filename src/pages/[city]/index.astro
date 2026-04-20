@@ -9,6 +9,7 @@ import Base from "../../layouts/Base.astro";
 import { getCityEvents, cityDisplayName } from "../../lib/events.js";
 import { allCitySlugs, getDisplayName, getCityConfig } from "../../lib/cityConfigs.js";
 import { getCollection } from "astro:content";
+import NewsletterBanner from "../../components/NewsletterBanner.astro";
 
 export async function getStaticPaths() {
   return allCitySlugs.map(slug => ({ params: { city: slug } }));
@@ -60,6 +61,7 @@ function dateText(post: any) {
 ---
 
 <Base title={`GoDo${displayName}`} subtitle={`Local news, events & guides for ${displayName}`} cityBase={city}>
+  <NewsletterBanner city={displayName} />
   <section class="section">
     <div class="cityContainer">
 
@@ -110,17 +112,6 @@ function dateText(post: any) {
         </div>
 
         <aside class="citySidebar">
-
-          <div class="sideCard newsletterCard">
-            <div class="sideTitle nlTitle"><em>Good News {displayName}!</em></div>
-            <div class="sideSub">Get the best local posts and events sent to your inbox, for free.</div>
-            <form class="nlForm" action={`/${city}/subscribe/`} method="get">
-              <input class="nlInput" type="email" name="email"
-                     placeholder="Enter your email address" />
-              <button class="nlBtn" type="submit">SIGN UP — IT'S FREE!</button>
-            </form>
-            <div class="nlFine">100% free. Unsubscribe anytime.</div>
-          </div>
 
           {upcomingEvents.length > 0 && (
             <div class="sideCard evCard">
@@ -287,27 +278,6 @@ function dateText(post: any) {
     letter-spacing: -0.01em; margin: 0 0 8px;
   }
   .sideSub { font-size: 13.5px; opacity: .80; line-height: 1.4; margin-bottom: 12px; }
-
-  .newsletterCard {
-    background: var(--theme-gradient) !important;
-    border: 1px solid #000 !important;
-  }
-  .nlTitle { color: #fff; font-size: 1.5rem !important; font-style: italic; }
-  .newsletterCard .sideSub { color: rgba(255,255,255,.85); }
-  .nlForm { display: grid; gap: 8px; margin-top: 8px; }
-  .nlInput {
-    width: 100%; padding: 10px; box-sizing: border-box;
-    border-radius: 10px; border: none;
-    background: #fff; color: #111;
-  }
-  .nlBtn {
-    width: 100%; padding: 10px;
-    border-radius: 999px; border: none;
-    background: #000; color: #fff;
-    font-weight: 900; letter-spacing: .05em; cursor: pointer;
-  }
-  .nlBtn:hover { opacity: .85; }
-  .nlFine { font-size: 11px; color: rgba(255,255,255,.65); margin-top: 8px; }
 
   /* Events sidebar */
   .evCard { padding: 0; background: none !important; border: none !important; }
