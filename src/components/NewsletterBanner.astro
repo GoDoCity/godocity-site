@@ -1,0 +1,255 @@
+---
+interface Props {
+  city: string;          // e.g. "Daytona" — rendered in "Good News {city}!"
+  subscribeUrl?: string; // defaults to /{city}/subscribe/
+  vibeCheckUrl?: string; // defaults to /{city}/vibe-check/
+  vibeCheckText?: string; // the question shown in the alert bar
+}
+
+const {
+  city,
+  subscribeUrl = `/${city.toLowerCase()}/subscribe/`,
+  vibeCheckUrl  = `/${city.toLowerCase()}/vibe-check/`,
+  vibeCheckText = `What's happening in ${city}?`,
+} = Astro.props;
+---
+
+<div class="nlBand" id="nlBand">
+  <div class="nlInner">
+    <div class="nlContent" id="nlContent">
+      <div class="nlHead"><em>Good News <span class="nlCity">{city}</span>!</em></div>
+      <div class="nlSub">
+        Get the best local news &amp; events sent to your inbox,
+        <strong><u>for free.</u></strong>
+      </div>
+      <form class="nlForm" id="nlForm" action={subscribeUrl} method="get">
+        <div class="nlRow">
+          <input
+            class="nlInput"
+            type="email"
+            name="email"
+            placeholder="Enter your email address"
+            aria-label="Email address"
+          />
+          <button class="nlBtn" type="submit">SIGN UP, IT'S FREE!</button>
+        </div>
+      </form>
+      <div class="nlFine">100% free, unsubscribe anytime.</div>
+    </div>
+    <div class="nlThanks" id="nlThanks" aria-live="polite">Thank you! You're on the list. ✓</div>
+  </div>
+  <a class="homeAlertBar" id="alertBand" href={vibeCheckUrl}>
+    🗳️ <strong>Vibe Check:</strong> {vibeCheckText} <span class="habVote">Vote Now →</span>
+  </a>
+</div>
+
+<script is:inline>
+(function () {
+  var form    = document.getElementById('nlForm');
+  var content = document.getElementById('nlContent');
+  var thanks  = document.getElementById('nlThanks');
+  if (!form) return;
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    content.style.display = 'none';
+    thanks.style.display  = 'flex';
+  });
+})();
+</script>
+
+<style>
+  /* ── Band shell ── */
+  .nlBand {
+    position: relative;
+    background: var(--theme-gradient);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow: hidden;
+    padding-top: 20px;
+    margin-top: 20px;
+  }
+  /* Pattern layer — sits behind all content */
+  .nlBand::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url('/images/geometric-pattern-master.svg');
+    opacity: 0.35;
+    z-index: 0;
+    pointer-events: none;
+  }
+  /* Cyan pulse line at top edge */
+  .nlBand::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 4px;
+    background: #00FFFF;
+    animation: nlPulseLine 2s ease-in-out infinite;
+    z-index: 100;
+  }
+  @keyframes nlPulseLine {
+    0%   { opacity: 0.4; box-shadow: 0 0 2px #00FFFF; }
+    50%  { opacity: 1;   box-shadow: 0 0 15px #00FFFF, 0 0 25px #00FFFF; }
+    100% { opacity: 0.4; box-shadow: 0 0 2px #00FFFF; }
+  }
+
+  /* ── Content wrapper ── */
+  .nlInner {
+    position: relative;
+    z-index: 1;
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    background: transparent !important;
+  }
+  .nlContent {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+  }
+  .nlHead {
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 900;
+    font-style: italic;
+    color: #fff !important;
+    line-height: 1.0;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+  }
+  .nlCity { font-style: italic; font-weight: 900; }
+  .nlSub {
+    font-size: 19px;
+    font-weight: 400;
+    color: rgba(255,255,255,.85);
+    line-height: 1.2;
+    white-space: nowrap;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+  }
+  .nlSub strong { font-weight: 900; color: #ffffff; }
+  .nlForm { width: 100%; max-width: 480px; margin: 0; }
+  .nlRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+  .nlInput {
+    width: 350px !important;
+    height: 44px !important;
+    border-radius: 4px 0 0 4px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-right: none;
+    background: #fff; color: #000;
+    padding: 0 14px; font-size: 15px; font-weight: 500;
+    outline: none;
+    transition: border-color 150ms;
+  }
+  .nlInput::placeholder { color: #888; }
+  .nlInput:focus { border-color: rgba(255,255,255,.7); }
+  .nlBtn {
+    width: auto !important;
+    padding: 0 25px;
+    height: 44px !important;
+    border-radius: 0 4px 4px 0;
+    border: 2px solid #fff;
+    background: #000; color: #fff;
+    font-weight: 900; font-size: 14px; cursor: pointer;
+    white-space: nowrap; letter-spacing: .03em;
+    text-shadow: none;
+    transition: background 140ms, color 140ms;
+    margin-left: 5px;
+  }
+  .nlBtn:hover { background: #fff; color: #000; }
+  .nlFine {
+    font-size: 12px; font-weight: 500;
+    color: rgba(255,255,255,.65);
+    font-style: italic;
+    margin: 0;
+  }
+  .nlThanks {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(29px, 3.2vw, 38px);
+    font-weight: 900;
+    color: #000;
+    text-align: center;
+    padding: 28px 2.5rem;
+    width: 100%;
+  }
+
+  /* ── Vibe Check bar — full-width bottom strip ── */
+  .homeAlertBar {
+    position: relative;
+    z-index: 2;
+    display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap;
+    width: 100%;
+    padding: 10px 20px;
+    margin: 0;
+    background: rgba(0,0,0,0.4);
+    color: #E8EDF4;
+    font-size: 15px; font-weight: 700; line-height: 1.3;
+    text-decoration: none; text-align: center;
+    transition: opacity 140ms;
+  }
+  .homeAlertBar:hover { opacity: 0.85; }
+  .homeAlertBar strong { font-weight: 900; color: #ffffff; }
+  .habVote {
+    display: inline-flex; align-items: center;
+    padding: 4px 13px; border-radius: 999px;
+    background: var(--accent); color: var(--text);
+    font-size: 13px; font-weight: 900; letter-spacing: .04em;
+    white-space: nowrap;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 768px) {
+    .nlBand { padding: 1.5rem 0; min-height: 168px; }
+    .nlInner { padding: 1.5rem 1rem !important; width: 100%; }
+    .nlContent { max-width: 100%; }
+    .nlHead {
+      font-family: 'Montserrat', sans-serif !important;
+      font-weight: 900 !important;
+      font-size: 2.2rem !important;
+      letter-spacing: -0.02em !important;
+      white-space: nowrap !important;
+    }
+    .nlSub { display: block; white-space: normal; font-size: 1.2rem; width: 100%; max-width: 90%; margin: 0 auto; }
+    .nlSub strong { font-weight: 900 !important; }
+    .nlForm { display: flex; flex-direction: column; width: 100%; max-width: 100%; }
+    .nlRow { flex-direction: column; gap: 0.75rem; width: 100%; align-items: stretch; }
+    .nlInput { border-radius: 8px !important; height: 48px !important; width: 100% !important; max-width: none; font-size: 1.1rem; padding-left: 1rem; border-right: 2px solid rgba(255,255,255,.3); }
+    .nlBtn { border-radius: 8px !important; height: 42px !important; width: 100% !important; max-width: none; margin-left: 0 !important; }
+  }
+  @media (max-width: 767px) {
+    .nlRow { display: flex !important; flex-direction: column !important; width: 100% !important; align-items: center !important; }
+    .nlInput { width: 100% !important; max-width: 100% !important; min-width: 100% !important; box-sizing: border-box !important; margin: 0 !important; }
+    .nlBtn { width: 100% !important; max-width: 100% !important; margin: 0 !important; }
+    .nlHead { font-size: 2.2rem !important; white-space: nowrap !important; }
+  }
+  @media (max-height: 500px) { .nlBand { padding: 0.75rem 0; } }
+  @media (max-height: 450px) {
+    .nlBand { padding: 1.5rem 0 !important; min-height: 0; }
+    .nlHead { font-size: 2rem !important; }
+    .nlSub { font-size: 15px; }
+  }
+
+  /* ── Clean White theme overrides ── */
+  :global(html[data-theme="clean-white"]) .nlBand {
+    border-top: 1px solid #111111;
+    border-bottom: 1px solid #111111;
+  }
+  :global(html[data-theme="clean-white"]) .nlHead { color: #000000 !important; }
+</style>
