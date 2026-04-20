@@ -197,11 +197,11 @@ const guideCards = guideHero
         <div class="nlFine">100% free, unsubscribe anytime.</div>
       </div>
       <div class="nlThanks" id="nlThanks" aria-live="polite">Thank you! You're on the list. ✓</div>
-      {/* ── COMMUNITY ALERT BAR — bottom of banner ── */}
-      <a class="homeAlertBar" id="alertBand" href="/daytona/vibe-check/">
-        🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="habVote">Vote Now →</span>
-      </a>
     </div>
+    {/* ── COMMUNITY ALERT BAR — direct child of #nlBand, full-width bottom ── */}
+    <a class="homeAlertBar" id="alertBand" href="/daytona/vibe-check/">
+      🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="habVote">Vote Now →</span>
+    </a>
   </div>
   <script is:inline>
   (function(){
@@ -672,21 +672,20 @@ const guideCards = guideHero
     #nlBand {
       position: relative;
       background: var(--theme-gradient);
-      padding: 15px 0;
-      overflow: hidden;
       display: flex;
       flex-direction: column;
       align-items: center;
-      text-align: center;
+      overflow: hidden;
+      padding-top: 20px;
+      margin-top: 20px;
     }
     #nlBand::after {
       content: '';
       position: absolute;
       inset: 0;
       background-image: url('/images/geometric-pattern-master.svg');
-      background-size: 40px;
       opacity: 0.15;
-      z-index: 1;
+      z-index: 0;
       pointer-events: none;
     }
     .nlBand::before {
@@ -707,16 +706,24 @@ const guideCards = guideHero
     }
     .nlInner {
       position: relative;
-      z-index: 2;
-      width: 100%;
+      z-index: 1;
+      width: 90%;
       max-width: 600px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: transparent !important;
     }
-    #nlBand h2, #nlBand p, #nlBand form {
-      margin: 0 !important;
+    #alertBand {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      margin: 0;
+      padding: 10px 0;
+      text-align: center;
+      background: rgba(0,0,0,0.2);
     }
     .pageWrap { margin-top: 0; }
     .nlContent {
