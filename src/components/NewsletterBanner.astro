@@ -219,16 +219,14 @@ const {
   /* ── Mobile ── */
   @media (max-width: 768px) {
     #nlBand {
-      position: relative;
-      padding-bottom: 60px;
-      min-height: 250px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      min-height: 200px;
+      padding-bottom: 0;
     }
     .homeAlertBar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
+      position: static;
       width: 100%;
-      margin-top: 0;
     }
     .nlInner { padding: 1.5rem 1rem !important; width: 100%; }
     .nlContent { max-width: 100%; }
