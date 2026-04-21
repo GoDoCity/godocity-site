@@ -38,7 +38,7 @@ const CATEGORY_IMG: Record<string, string> = {
 ---
 
 <Base title={`Events in ${displayName}`} subtitle={`Upcoming events in ${displayName} and surrounding areas`} cityBase={city}>
-  <NewsletterBanner city={displayName} vibeCheckText={`What's on in ${displayName} this weekend?`} accentColor={config?.accentColor} />
+  <NewsletterBanner city={displayName} vibeCheckText={config?.vibeCheckText} accentColor={config?.accentColor} />
   <section class="section">
     <div class="evContainer">
 

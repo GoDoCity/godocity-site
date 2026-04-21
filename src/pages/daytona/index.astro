@@ -4,6 +4,8 @@ import InteractiveMap from "../../components/InteractiveMap.astro";
 import NewsletterBanner from "../../components/NewsletterBanner.astro";
 import { getCollection } from "astro:content";
 import { getGreaterDaytonaEvents, cityDisplayName } from "../../lib/events.js";
+import { getCityConfig } from "../../lib/cityConfigs.js";
+const daytonaConfig = getCityConfig("daytona");
 
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
@@ -185,7 +187,7 @@ const guideCards = guideHero
 <Base title="GoDoDay" subtitle="Good News Daytona" cityBase="daytona">
   <NewsletterBanner
     city="Daytona"
-    vibeCheckText="Who has the best tacos in Ormond?"
+    vibeCheckText={daytonaConfig?.vibeCheckText}
   />
   <script is:inline>
   (function(){

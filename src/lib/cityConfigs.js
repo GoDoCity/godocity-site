@@ -24,6 +24,8 @@ export const CITY_CONFIGS = {
     theme: "godo-blue",
     /** Primary brand colour — mirrors themes.css --brand1 for use in JS contexts */
     brand1: "#0077be",
+    /** Vibe Check question shown in the NewsletterBanner alert bar */
+    vibeCheckText: "Who has the best tacos in Ormond?",
     /** Lat/lng used as the default map centre on the events page */
     mapCenter: { lat: 29.2108, lng: -81.0228 },
     /**
@@ -51,6 +53,7 @@ export const CITY_CONFIGS = {
     theme: "godo-green",
     brand1: "#2E7D32",
     accentColor: "#76FF03",
+    vibeCheckText: "What's the best hike in the Blue Ridge this weekend?",
     mapCenter: { lat: 35.5951, lng: -82.5515 },
     regionCities: new Set([
       "asheville",
@@ -69,6 +72,7 @@ export const CITY_CONFIGS = {
     theme: "godo-cherry",
     brand1: "#A31545",
     accentColor: "#FF00FF",
+    vibeCheckText: "Where's the best soul food in Macon right now?",
     mapCenter: { lat: 32.8407, lng: -83.6324 },
     regionCities: new Set([
       "macon",
@@ -84,6 +88,7 @@ export const CITY_CONFIGS = {
     displayName: "Jacksonville",
     theme: "godo-teal",
     brand1: "#007B7F",
+    vibeCheckText: "What's the best spot on the Jax Beaches this weekend?",
     mapCenter: { lat: 30.3322, lng: -81.6557 },
     regionCities: new Set([
       "jacksonville",
@@ -102,6 +107,7 @@ export const CITY_CONFIGS = {
     displayName: "San Diego",
     theme: "godo-pacific",
     brand1: "#006994",
+    vibeCheckText: "Best beach or taco spot in San Diego this week?",
     mapCenter: { lat: 32.7157, lng: -117.1611 },
     regionCities: new Set([
       "san diego",
