@@ -12,6 +12,8 @@ import {
   isStrictlyFuture,
   HARD_CUTOFF,
 } from "../../../lib/events.js";
+import { getCityConfig } from "../../../lib/cityConfigs.js";
+const daytonaConfig = getCityConfig("daytona");
 
 /* ── City centres for distance label (events page only) ──────────────── */
 const CITY_CENTERS = {
@@ -201,7 +203,7 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   title="Events"
   cityBase="Daytona"
 >
-  <NewsletterBanner city="Daytona" vibeCheckText="What's on in Daytona this weekend?" />
+  <NewsletterBanner city="Daytona" vibeCheckText={daytonaConfig?.vibeCheckText} />
   <section class="section">
     <div class="eventsContainer">
 
