@@ -1,9 +1,10 @@
 ---
 interface Props {
-  city: string;          // e.g. "Daytona" — rendered in "Good News {city}!"
-  subscribeUrl?: string; // defaults to /{city}/subscribe/
-  vibeCheckUrl?: string; // defaults to /{city}/vibe-check/
+  city: string;           // e.g. "Daytona" — rendered in "Good News {city}!"
+  subscribeUrl?: string;  // defaults to /{city}/subscribe/
+  vibeCheckUrl?: string;  // defaults to /{city}/vibe-check/
   vibeCheckText?: string; // the question shown in the alert bar
+  accentColor?: string;   // pill/highlight color for the Vibe Check bar
 }
 
 const {
@@ -11,6 +12,7 @@ const {
   subscribeUrl = `/${city.toLowerCase()}/subscribe/`,
   vibeCheckUrl  = `/${city.toLowerCase()}/vibe-check/`,
   vibeCheckText = `What's on in Daytona this weekend?`,
+  accentColor,
 } = Astro.props;
 ---
 
@@ -38,7 +40,8 @@ const {
     </div>
     <div class="nlThanks" id="nlThanks" aria-live="polite">Thank you! You're on the list. ✓</div>
   </div>
-  <a class="homeAlertBar" id="alertBand" href={vibeCheckUrl}>
+  <a class="homeAlertBar" id="alertBand" href={vibeCheckUrl}
+     style={accentColor ? `--accent-color: ${accentColor};` : undefined}>
     🗳️ <strong>Vibe Check:</strong> {vibeCheckText} <span class="habVote">Vote Now →</span>
   </a>
 </div>
@@ -211,7 +214,7 @@ const {
   .habVote {
     display: inline-flex; align-items: center;
     padding: 4px 13px; border-radius: 999px;
-    background: var(--accent); color: #ffffff;
+    background: var(--accent-color, var(--accent)); color: #ffffff;
     font-size: 13px; font-weight: 900; letter-spacing: .04em;
     white-space: nowrap;
   }

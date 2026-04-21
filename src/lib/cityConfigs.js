@@ -50,6 +50,7 @@ export const CITY_CONFIGS = {
     displayName: "Asheville",
     theme: "godo-green",
     brand1: "#2E7D32",
+    accentColor: "#76FF03",
     mapCenter: { lat: 35.5951, lng: -82.5515 },
     regionCities: new Set([
       "asheville",
@@ -67,6 +68,7 @@ export const CITY_CONFIGS = {
     displayName: "Macon",
     theme: "godo-cherry",
     brand1: "#A31545",
+    accentColor: "#FF00FF",
     mapCenter: { lat: 32.8407, lng: -83.6324 },
     regionCities: new Set([
       "macon",
