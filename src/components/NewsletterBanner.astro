@@ -16,7 +16,8 @@ const {
 } = Astro.props;
 ---
 
-<div class="nlBand" id="nlBand">
+<div class="nlBand" id="nlBand"
+     style={accentColor ? `--accent-color: ${accentColor};` : undefined}>
   <div class="nlInner">
     <div class="nlContent" id="nlContent">
       <div class="nlHead"><em>Good News <span class="nlCity">{city}</span>!</em></div>
@@ -40,8 +41,7 @@ const {
     </div>
     <div class="nlThanks" id="nlThanks" aria-live="polite">Thank you! You're on the list. ✓</div>
   </div>
-  <a class="homeAlertBar" id="alertBand" href={vibeCheckUrl}
-     style={accentColor ? `--accent-color: ${accentColor};` : undefined}>
+  <a class="homeAlertBar" id="alertBand" href={vibeCheckUrl}>
     🗳️ <strong>Vibe Check:</strong> {vibeCheckText} <span class="habVote">Vote Now →</span>
   </a>
 </div>
@@ -83,20 +83,20 @@ const {
     z-index: 0;
     pointer-events: none;
   }
-  /* Cyan pulse line at top edge */
+  /* Pulse line at top edge — color follows --accent-color prop */
   .nlBand::before {
     content: "";
     position: absolute;
     top: 0; left: 0;
     width: 100%; height: 4px;
-    background: #00FFFF;
+    background: var(--accent-color, #00FFFF);
     animation: nlPulseLine 2s ease-in-out infinite;
     z-index: 100;
   }
   @keyframes nlPulseLine {
-    0%   { opacity: 0.4; box-shadow: 0 0 2px #00FFFF; }
-    50%  { opacity: 1;   box-shadow: 0 0 15px #00FFFF, 0 0 25px #00FFFF; }
-    100% { opacity: 0.4; box-shadow: 0 0 2px #00FFFF; }
+    0%   { opacity: 0.4; box-shadow: 0 0 2px var(--accent-color, #00FFFF); }
+    50%  { opacity: 1;   box-shadow: 0 0 15px var(--accent-color, #00FFFF), 0 0 25px var(--accent-color, #00FFFF); }
+    100% { opacity: 0.4; box-shadow: 0 0 2px var(--accent-color, #00FFFF); }
   }
 
   /* ── Content wrapper ── */
