@@ -221,7 +221,7 @@ const {
     #nlBand {
       display: flex;
       flex-direction: column;
-      min-height: 300px;
+      min-height: 350px;
       width: 100%;
     }
     .nlInner {
@@ -235,6 +235,15 @@ const {
     .homeAlertBar {
       flex-shrink: 0;
       width: 100%;
+    }
+    @media (orientation: landscape) {
+      #nlBand {
+        min-height: auto;
+        padding-bottom: 20px;
+      }
+      .homeAlertBar {
+        margin-top: 15px;
+      }
     }
     .nlContent { max-width: 100%; }
     .nlHead {
