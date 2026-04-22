@@ -6,23 +6,27 @@
     <title>GoDoCity CMS</title>
   </head>
   <body>
-    <script>window.CMS_MANUAL_INIT = true;</script>
+    <script>
+      window.CMS_CONFIG = {
+        backend: {
+          name: "github",
+          repo: "GoDoCity/godocity-site",
+          branch: "main",
+          auth_type: "pkce",
+          app_id: "0v23lizuiLRTw8PiF2P0"
+        },
+        media_folder: "public/images",
+        public_folder: "/images",
+        collections: [] // Add your collections here or keep this empty to test
+      };
+      window.CMS_MANUAL_INIT = true;
+    </script>
+    
     <script src="https://unpkg.com/decap-cms@3.3.3/dist/decap-cms.js"></script>
     
     <script>
-      console.log("CMS: Starting manual init...");
-      CMS.init({
-        config: {
-          backend: {
-            name: "github",
-            repo: "GoDoCity/godocity-site",
-            branch: "main",
-            auth_type: "pkce",
-            app_id: "0v23lizuiLRTw8PiF2P0"
-          }
-        }
-      });
-      console.log("CMS: Init executed.");
+      CMS.init();
+      console.log("CMS Initialized with forced global config.");
     </script>
   </body>
 </html>
