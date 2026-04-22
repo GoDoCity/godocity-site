@@ -5,9 +5,7 @@
     <title>GoDoCity CMS</title>
   </head>
   <body>
-    <script>
-      window.CMS_MANUAL_INIT = true;
-    </script>
+    <script>window.CMS_MANUAL_INIT = true;</script>
     <script src="https://unpkg.com/decap-cms@3.3.3/dist/decap-cms.js"></script>
     <script>
       CMS.init({
@@ -17,14 +15,12 @@
             repo: "GoDoCity/godocity-site",
             branch: "main",
             auth_type: "pkce",
-            app_id: "0v23lizuiLRTw8PiF2P0"
-          },
-          // This prevents Netlify from taking over
-          local_backend: false, 
-          publish_mode: "editorial_workflow"
+            // Use client_id for OAuth Apps
+            client_id: "0v23lizuiLRTw8PiF2P0" 
+          }
         }
       });
-      console.log("CMS force-initialized for GitHub.");
+      console.log("CMS Initialized with OAuth Client ID.");
     </script>
   </body>
 </html>
