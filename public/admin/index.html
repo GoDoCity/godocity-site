@@ -5,26 +5,23 @@
     <title>GoDoCity CMS</title>
   </head>
   <body>
-    <script>
-      window.CMS_CONFIG = {
-        backend: {
-          name: "github",
-          repo: "GoDoCity/godocity-site",
-          branch: "main",
-          auth_type: "pkce",
-          client_id: "0v23lizuiLRTw8PiF2P0" // Your OAuth Client ID
-        },
-        local_backend: false,
-        publish_mode: "editorial_workflow",
-        collections: [] 
-      };
-      window.CMS_MANUAL_INIT = true;
-    </script>
-
+    <script>window.CMS_MANUAL_INIT = true;</script>
     <script src="https://unpkg.com/decap-cms@3.3.3/dist/decap-cms.js"></script>
-    
     <script>
-      CMS.init();
+      CMS.init({
+        config: {
+          backend: {
+            name: "github",
+            repo: "GoDoCity/godocity-site",
+            branch: "main",
+            auth_type: "pkce",
+            client_id: "0v23lizuiLRTw8PiF2P0" // Use your OAuth Client ID
+          },
+          media_folder: "public/images",
+          public_folder: "/images",
+          collections: []
+        }
+      });
     </script>
   </body>
 </html>
