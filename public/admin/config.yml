@@ -1,7 +1,17 @@
+backend:
+  name: github
+  repo: GoDoCity/godocity-site
+  branch: main
+  auth_type: pkce
+  client_id: Ov23linwsFTCPx6mEIYP
+
+media_folder: public/images
+public_folder: /images
+
 collections:
   - name: "pages"
     label: "Pages"
-    folder: "content" # Ensure this folder exists in your repo
+    folder: "content"
     create: true
     fields:
       - {name: "title", label: "Title", widget: "string"}
