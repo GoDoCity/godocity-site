@@ -1,10 +1,38 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>GoDoCity CMS</title>
   </head>
   <body>
     <script src="https://unpkg.com/decap-cms@3.3.3/dist/decap-cms.js"></script>
+    <script>
+      CMS.init({
+        config: {
+          backend: {
+            name: "github",
+            repo: "GoDoCity/godocity-site",
+            branch: "main",
+            auth_type: "pkce",
+            client_id: "Ov23lizuiLRTW8pIf2PO"
+          },
+          media_folder: "public/images",
+          public_folder: "/images",
+          collections: [
+            {
+              name: "pages",
+              label: "Pages",
+              folder: "content",
+              create: true,
+              fields: [
+                { name: "title", label: "Title", widget: "string" },
+                { name: "body", label: "Body", widget: "markdown" }
+              ]
+            }
+          ]
+        }
+      });
+    </script>
   </body>
 </html>
