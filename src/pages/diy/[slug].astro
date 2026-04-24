@@ -1,0 +1,37 @@
+---
+import Base    from "../../layouts/Base.astro";
+import DiyPill from "../../components/DiyPill.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("diy");
+  return entries.map(entry => ({
+    params: { slug: entry.slug },
+    props:  { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { data }  = entry;
+---
+
+<Base title={`${data.title} | GoDoCity DIY`} subtitle={data.intro.split(/\n\n+/)[0].substring(0, 160)}>
+  <div class="diyPageWrap">
+    <DiyPill
+      title={data.title}
+      intro={data.intro}
+      materials={data.materials}
+      steps={data.steps}
+      community_note={data.community_note}
+      topic={data.topic}
+      author={data.author}
+      pubDate={data.pubDate}
+      heroImage={data.heroImage}
+    />
+  </div>
+</Base>
+
+<style>
+  .diyPageWrap { max-width: 1260px !important; margin: 0 auto !important; }
+  :global(.diyPageWrap .container) { max-width: 1260px !important; margin: 0 auto !important; }
+</style>
