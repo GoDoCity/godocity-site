@@ -2,7 +2,7 @@ backend:
   name: github
   repo: GoDoCity/godocity-site
   branch: main
-  base_url: https://REPLACE_WITH_YOUR_WORKER_URL
+  base_url: https://sveltia-cms-auth.yellowcabking.workers.dev
 
 media_folder: "public/images"
 public_folder: "/images"
