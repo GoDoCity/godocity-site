@@ -154,7 +154,7 @@ const diy = defineCollection({
       z.array(z.string()).min(1),
     ]).transform((v) => Array.isArray(v) ? v : v.split("\n").map((s) => s.trim()).filter(Boolean)),
     community_note: z.string().optional(),
-    topic:          z.enum(["Clean", "Paint", "Repair", "Decorate", "Build", "Craft"]).optional(),
+    topic:          z.enum(["Clean", "Paint", "Repair", "Decorate", "Build", "Craft", "Recipe"]).optional(),
     cities:         z.array(z.string()).min(1),
     pubDate:        z.coerce.date().optional(),
     author:         authorEnum.optional().default("Julian Wells"),
@@ -174,22 +174,6 @@ const topics = defineCollection({
   }),
 });
 
-const recipes = defineCollection({
-  type: "content",
-  schema: z.object({
-    title:       z.string(),
-    description: z.string().optional(),
-    ingredients: z.union([
-      z.string().min(1),
-      z.array(z.string()).min(1),
-    ]).optional().transform(v => {
-      if (!v) return [];
-      return Array.isArray(v) ? v : v.split("\n").map(s => s.trim()).filter(Boolean);
-    }),
-    image: z.string().optional().transform(v => v === "" ? undefined : v),
-  }),
-});
-
 const journalists = defineCollection({
   type: "content",
   schema: z.object({
@@ -198,4 +182,4 @@ const journalists = defineCollection({
   }),
 });
 
-export const collections = { posts, guides, cityGuides, globalSponsors, events, diy, topics, recipes, journalists };
+export const collections = { posts, guides, cityGuides, globalSponsors, events, diy, topics, journalists };
