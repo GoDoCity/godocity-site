@@ -68,7 +68,7 @@ interface FeedItem {
 const diyItems: FeedItem[] = diyGuides.map((e) => ({
   title: e.data.title,
   description: e.data.intro.split(/\n\n+/)[0].substring(0, 160),
-  href: `/${city}/diy/${e.slug}/`,
+  href: `/diy/${e.slug}/`,
   date: e.data.pubDate ?? null,
   heroImage: e.data.heroImage ?? "",
   type: "diy",

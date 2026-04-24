@@ -21,7 +21,7 @@ export interface Props {
   materials:      string[];
   steps:          string[];
   community_note?: string;
-  city:           string;
+  city?:          string;
   topic?:         string;
   author?:        string;
   pubDate?:       Date;
@@ -58,7 +58,6 @@ const paras   = trimmed.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
 // Guarantee at least 2 rendered paragraphs
 while (paras.length < 2) paras.push("");
 
-const cityLabel  = city.charAt(0).toUpperCase() + city.slice(1);
 const pubDateStr = pubDate
   ? new Date(pubDate).toLocaleDateString("en-US", { month: "long", year: "numeric" })
   : "";
@@ -72,7 +71,6 @@ const pubDateStr = pubDate
     {/* ══ PAGE HEADER ══ */}
     <header class="diyHeader">
       <div class="diyKicker">
-        <span class="kPill kCity">{cityLabel}</span>
         <span class="kPill kCat">DIY</span>
         {topic && <span class="kPill kTopic">{topic}</span>}
       </div>
@@ -143,7 +141,7 @@ const pubDateStr = pubDate
             ))}
           </ul>
           <div class="sidebarFoot">
-            <a class="sidebarCta" href={`/${city}/diy/`}>More DIY guides →</a>
+            <a class="sidebarCta" href="/diy/">More DIY guides →</a>
           </div>
         </div>
       </aside>

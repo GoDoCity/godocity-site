@@ -16,7 +16,7 @@ import Base from "../../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
-  const DIY_TOPICS = ["clean", "paint", "repair", "decorate", "build", "craft"] as const;
+  const DIY_TOPICS = ["clean", "paint", "repair", "decorate", "craft", "recipe"] as const;
   const diyEntries = await getCollection("diy");
   const paths: { params: { city: string; topic: string } }[] = [];
 
@@ -113,7 +113,7 @@ function formatDate(d: Date | null | undefined): string {
             const description = entry.data.intro.split(/\n\n+/)[0].substring(0, 160);
             return (
               <li class="diyCard">
-                <a class="cardLink" href={`/${city}/diy/${entry.slug}/`} aria-label={`Read: ${entry.data.title}`}>
+                <a class="cardLink" href={`/diy/${entry.slug}/`} aria-label={`Read: ${entry.data.title}`}>
                   <div class="cardThumbWrap">
                     {entry.data.heroImage
                       ? <img class="cardThumb" src={entry.data.heroImage} alt="" loading="lazy" decoding="async" />
