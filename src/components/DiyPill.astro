@@ -237,21 +237,25 @@ const pubDateStr = pubDate
     line-height: 1.72; margin: 0; max-width: 680px;
   }
 
-  /* Steps — dark slate container */
+  /* Steps — light yellow container, blue header bar */
   .diySteps {
-    background: #1e293b;
+    background: rgba(255, 210, 74, 0.07);
+    border: 1.5px solid var(--brand1);
     border-radius: 13px;
-    padding: 1.75rem 2rem;
+    padding: 0;
+    overflow: hidden;
   }
 
   .sectionHead {
-    font-size: 20px; font-weight: 900; letter-spacing: .06em;
-    text-transform: uppercase; color: var(--text);
-    margin: 0 0 24px; padding-bottom: 10px;
-    border-bottom: 2px solid var(--brand1);
+    background: #1e293b;
+    color: #fff;
+    font-size: 13px; font-weight: 900; letter-spacing: .1em;
+    text-transform: uppercase;
     font-family: 'Manrope', sans-serif;
+    padding: 16px 20px;
+    margin: 0;
   }
-  .stepList  { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+  .stepList  { list-style: none; margin: 0; padding: 8px 20px 4px; display: grid; gap: 0; }
 
   .stepItem  {
     display: flex; align-items: flex-start; gap: 18px;
@@ -269,28 +273,31 @@ const pubDateStr = pubDate
   }
 
   .stepText  {
-    font-size: 17px; color: #ffffff; line-height: 1.65; margin: 0;
+    font-size: 17px; color: var(--text); line-height: 1.65; margin: 0;
     padding-top: 10px; font-family: 'Manrope', sans-serif;
   }
 
-  /* Community Note blockquote */
+  /* Community Note — light yellow container, blue header bar */
   .communityNote {
-    margin: 0; padding: 20px 22px;
-    border-left: 4px solid var(--brand1);
-    border-radius: 0 14px 14px 0;
+    margin: 0; padding: 0;
+    border: 1.5px solid var(--brand1);
+    border-radius: 13px;
     background: rgba(255, 210, 74, 0.07);
-    display: grid; gap: 10px;
+    overflow: hidden;
+    display: block;
   }
 
   .cnLabel {
     display: flex; align-items: center; gap: 7px;
+    background: #1e293b; color: #fff;
     font-size: 10px; font-weight: 900; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--brand1);
-    line-height: 1;
+    text-transform: uppercase; line-height: 1;
+    padding: 16px 20px;
   }
   .cnIcon  { font-size: 15px; line-height: 1; }
   .cnText  {
-    margin: 0; font-size: 15px; color: var(--text);
+    margin: 0; padding: 16px 20px;
+    font-size: 15px; color: var(--text);
     line-height: 1.65; font-style: italic;
   }
 
@@ -306,8 +313,8 @@ const pubDateStr = pubDate
 
   .sidebarHead {
     padding: 16px 20px 14px;
-    background: var(--brand1);
-    color: var(--accentText, #000);
+    background: #1e293b;
+    color: #fff;
     font-size: 13px; font-weight: 900;
     letter-spacing: .1em; text-transform: uppercase;
   }
@@ -341,7 +348,8 @@ const pubDateStr = pubDate
     .diyHeader  { padding: 28px 0 24px; margin-bottom: 28px; }
     .diyTitle   { font-size: clamp(22px, 5vw, 36px); }
     .diyPara    { font-size: 16px; max-width: 100%; }
-    .diySteps   { padding: 1.25rem 1.25rem; border-radius: 10px; }
+    .diySteps   { border-radius: 10px; }
+    .stepList   { padding: 6px 14px 2px; }
     .stepText   { font-size: 15px; }
     .stepNum    { width: 38px; height: 38px; font-size: 17px; border-radius: 10px; }
     .diySidebar { position: static; }
