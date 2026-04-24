@@ -192,3 +192,29 @@ collections:
       - {label: "Image Alt Text", name: "imgAlt", widget: "string", required: false}
       - {label: "CTA Button Text", name: "ctaText", widget: "string", required: false, default: "Learn more"}
       - {label: "CTA Link URL", name: "ctaHref", widget: "string"}
+
+  - name: "recipes"
+    label: "Recipes"
+    label_singular: "Recipe"
+    folder: "src/content/recipes"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Description", name: "description", widget: "text", required: false}
+      - {label: "Ingredients", name: "ingredients", widget: "list", hint: "One ingredient per line — be specific (brand, size, quantity)."}
+      - {label: "Image", name: "image", widget: "image", required: false}
+      - {label: "Instructions", name: "body", widget: "markdown"}
+
+  - name: "journalists"
+    label: "Journalists"
+    label_singular: "Journalist"
+    folder: "src/content/journalists"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Name", name: "name", widget: "string"}
+      - {label: "Photo", name: "photo", widget: "image", required: false}
+      - {label: "Bio", name: "body", widget: "markdown"}

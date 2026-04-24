@@ -1,0 +1,189 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("recipes");
+  return entries.map(entry => ({
+    params: { slug: entry.slug },
+    props:  { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { data }  = entry;
+const { Content } = await entry.render();
+---
+
+<Base title={`${data.title} | GoDoCity Recipes`} subtitle={data.description}>
+  <div class="recipeWrap">
+    <div class="container">
+
+      {data.image && (
+        <div class="heroWrap">
+          <img class="heroImg" src={data.image} alt={data.title} loading="eager" decoding="async" />
+        </div>
+      )}
+
+      <header class="recipeHeader">
+        <div class="recipePill">Recipe</div>
+        <h1 class="recipeTitle">{data.title}</h1>
+        {data.description && <p class="recipeDesc">{data.description}</p>}
+      </header>
+
+      <div class="recipeCols">
+
+        {data.ingredients && data.ingredients.length > 0 && (
+          <aside class="ingredientsSidebar">
+            <h2 class="sidebarHeading">Ingredients</h2>
+            <ul class="ingredientsList">
+              {data.ingredients.map((item: string) => (
+                <li class="ingredientItem">
+                  <span class="ingredientCheck" aria-hidden="true">✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </aside>
+        )}
+
+        <article class="instructionsBody">
+          <h2 class="sidebarHeading">Instructions</h2>
+          <div class="prose">
+            <Content />
+          </div>
+        </article>
+
+      </div>
+
+    </div>
+  </div>
+</Base>
+
+<style>
+  .recipeWrap { min-height: 100vh; padding-bottom: 80px; }
+  :global(.container) { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+  @media (max-width: 768px) { :global(.container) { padding: 0 1.25rem; } }
+
+  /* ── Hero ── */
+  .heroWrap {
+    border-radius: 16px;
+    overflow: hidden;
+    margin: 32px 0 0;
+    max-height: 420px;
+  }
+  .heroImg {
+    display: block;
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+  }
+
+  /* ── Header ── */
+  .recipeHeader { padding: 32px 0 28px; border-bottom: 2px solid var(--brand1); margin-bottom: 40px; }
+  .recipePill {
+    display: inline-block;
+    background: var(--brand1);
+    color: #000;
+    font-size: 11px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    padding: 4px 12px;
+    border-radius: 999px;
+    margin-bottom: 14px;
+  }
+  .recipeTitle {
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    color: var(--text);
+    margin: 0 0 12px;
+    line-height: 1.05;
+    letter-spacing: -0.5px;
+  }
+  .recipeDesc {
+    font-size: 17px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+    max-width: 680px;
+  }
+
+  /* ── Two-column layout: sidebar + body ── */
+  .recipeCols {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 860px) { .recipeCols { grid-template-columns: 1fr; gap: 32px; } }
+
+  /* ── Ingredients sidebar ── */
+  .ingredientsSidebar {
+    background: var(--surface2, rgba(255,255,255,.04));
+    border: 1px solid var(--border, rgba(255,255,255,.1));
+    border-radius: 14px;
+    padding: 24px;
+    position: sticky;
+    top: 100px;
+  }
+  @media (max-width: 860px) { .ingredientsSidebar { position: static; } }
+
+  .sidebarHeading {
+    font-size: 13px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: var(--brand1);
+    margin: 0 0 16px;
+  }
+
+  .ingredientsList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .ingredientItem {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .ingredientCheck {
+    color: var(--brand1);
+    font-weight: 900;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── Instructions body ── */
+  .instructionsBody { min-width: 0; }
+  .instructionsBody .sidebarHeading { margin-bottom: 20px; }
+
+  .prose { color: var(--text); font-size: 16px; line-height: 1.75; }
+  .prose :global(h2),
+  .prose :global(h3) {
+    font-weight: 900;
+    color: var(--text);
+    margin: 1.5em 0 .5em;
+  }
+  .prose :global(p) { margin: 0 0 1.1em; }
+  .prose :global(ol) { padding-left: 1.4em; display: flex; flex-direction: column; gap: 10px; }
+  .prose :global(ul) { padding-left: 1.4em; display: flex; flex-direction: column; gap: 8px; }
+  .prose :global(li) { line-height: 1.55; }
+  .prose :global(li::marker) { color: var(--brand1); font-weight: 900; }
+  .prose :global(strong) { color: var(--text); font-weight: 800; }
+  .prose :global(code) {
+    background: rgba(255,255,255,.07);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+</style>
