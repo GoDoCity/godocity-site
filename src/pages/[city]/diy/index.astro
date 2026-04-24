@@ -130,7 +130,6 @@ function formatDate(d: Date | null): string {
                   </div>
                   <div class="cardBody">
                     <div class="cardKicker">
-                      <span class="kCityPill">{cityLabel}</span>
                       <span class="kDiyPill">{item.type === "diy" ? "DIY GUIDE" : "DIY"}</span>
                     </div>
                     <div class="cardTitle">{item.title}</div>
@@ -211,15 +210,9 @@ function formatDate(d: Date | null): string {
 
   /* Kicker pills */
   .cardKicker { display: flex; gap: 8px; align-items: center; margin-bottom: 7px; }
-  .kCityPill, .kDiyPill {
+  .kDiyPill {
     font-size: 10px; font-weight: 900; letter-spacing: .1em;
     text-transform: uppercase; padding: 2px 8px; border-radius: 999px;
-  }
-  .kCityPill {
-    background: var(--brand1);
-    color: var(--accentText, #000);
-  }
-  .kDiyPill {
     background: var(--pillBg);
     color: var(--brand1);
     border: 1px solid var(--pillBorder);

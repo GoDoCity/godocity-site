@@ -122,7 +122,6 @@ function formatDate(d: Date | null | undefined): string {
                   </div>
                   <div class="cardBody">
                     <div class="cardKicker">
-                      <span class="kCityPill">{cityLabel}</span>
                       <span class="kTopicPill">{topicLabel}</span>
                     </div>
                     <div class="cardTitle">{entry.data.title}</div>
@@ -200,15 +199,9 @@ function formatDate(d: Date | null | undefined): string {
   .cardBody { min-width: 0; }
 
   .cardKicker { display: flex; gap: 8px; align-items: center; margin-bottom: 7px; }
-  .kCityPill, .kTopicPill {
+  .kTopicPill {
     font-size: 10px; font-weight: 900; letter-spacing: .1em;
     text-transform: uppercase; padding: 2px 8px; border-radius: 999px;
-  }
-  .kCityPill {
-    background: var(--brand1);
-    color: var(--accentText, #000);
-  }
-  .kTopicPill {
     background: var(--pillBg);
     color: var(--brand1);
     border: 1px solid var(--pillBorder);
