@@ -38,7 +38,7 @@ function dateText(post) {
 function excerpt(post) { return post?.data?.description ?? ""; }
 
 /* ── DIY sub-categories ── */
-const DIY_SUBS = ["clean", "paint", "repair", "decorate", "build", "craft"];
+const DIY_SUBS = ["clean", "paint", "repair", "decorate", "recipe", "craft"];
 
 export async function getStaticPaths() {
   const all = await getCollection("posts");
@@ -50,7 +50,7 @@ export async function getStaticPaths() {
   /* Always generate all 6 DIY sub-pages for every city that has posts */
   const paths = [];
   for (const city of cities) {
-    for (const subtopic of ["clean", "paint", "repair", "decorate", "build", "craft"]) {
+    for (const subtopic of ["clean", "paint", "repair", "decorate", "recipe", "craft"]) {
       paths.push({ params: { city, topic: "diy", subtopic } });
     }
   }
@@ -89,7 +89,7 @@ const DIY_PILL_LIST = [
   { label: "Paint",    href: `/${city}/diy/paint/` },
   { label: "Repair",   href: `/${city}/diy/repair/` },
   { label: "Decorate", href: `/${city}/diy/decorate/` },
-  { label: "Build",    href: `/${city}/diy/build/` },
+  { label: "Recipe",   href: `/${city}/diy/recipe/` },
   { label: "Craft",    href: `/${city}/diy/craft/` },
 ];
 ---
