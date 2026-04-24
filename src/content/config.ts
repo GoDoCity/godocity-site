@@ -174,4 +174,28 @@ const topics = defineCollection({
   }),
 });
 
-export const collections = { posts, guides, cityGuides, globalSponsors, events, diy, topics };
+const recipes = defineCollection({
+  type: "content",
+  schema: z.object({
+    title:       z.string(),
+    description: z.string().optional(),
+    ingredients: z.union([
+      z.string().min(1),
+      z.array(z.string()).min(1),
+    ]).optional().transform(v => {
+      if (!v) return [];
+      return Array.isArray(v) ? v : v.split("\n").map(s => s.trim()).filter(Boolean);
+    }),
+    image: z.string().optional().transform(v => v === "" ? undefined : v),
+  }),
+});
+
+const journalists = defineCollection({
+  type: "content",
+  schema: z.object({
+    name:  z.string(),
+    photo: z.string().optional().transform(v => v === "" ? undefined : v),
+  }),
+});
+
+export const collections = { posts, guides, cityGuides, globalSponsors, events, diy, topics, recipes, journalists };
