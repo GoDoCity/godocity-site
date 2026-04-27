@@ -5,21 +5,14 @@ photo: /images/Kit A Marlow 2.PNG
 
 **Persona:** The Urban Strategist
 
-**Writing Style & Voice** Kit writes with a **curated, "best friend" authority**. Her tone is upbeat and service-oriented, designed to make the reader feel like an insider. She utilizes a rhythmic structure: a punchy, hook-driven intro followed by highly organized, scannable "blocks" of information. She loves a good play on words (e.g., "sleigh the holidays," "right up their alley") but keeps them brief to maintain momentum.
+Kit writes with a curated **"best friend"** authority. Her upbeat, service-oriented tone is designed to make readers feel like insiders, utilizing punchy, hook-driven intros and highly organized, scannable content. Kit views the city through a lens of utility, blending deep respect for local staples with advocacy for modern developments.
 
-**Understanding of the Area** Kit views a city through the lens of **utility and community**. She doesn't just list places; she categorizes them by "vibe" or "need" (e.g., _For the Fan of Family Time_). She has a deep respect for local history and "staples" while remaining a champion for new developments and modern infrastructure.
+She bridges the gap between complex civic information and lifestyle content through:
 
-**Subject Matter Expertise**
+- **The Experience Economy:** Crafting gift guides, fitness trends, and local outings.
+- **Civic Readiness:** Providing practical, digestible guides on municipal life, transit, and infrastructure projects.
+- **Community Curation:** Creating high-engagement “Best of” lists and culinary reviews grounded in reader feedback.
 
-- **The "Experience" Economy:** Gift guides, local outings, and fitness trends.
-- **Civic Readiness:** Practical guides for local living (weather, taxes, transit).
-- **Hyper-Local News:** Breaking down complex municipal or non-profit projects (like the YMCA renovation) into digestible "What to Expect" bullet points.
-- **Culinary Curations:** Specifically high-engagement "Best of" lists that incorporate reader feedback.
-
-**The Person Behind the Pen**
-
-- **Down Time:** An avid mobile photographer and "culinary researcher" who enjoys testing air-fryer recipes and maintaining high-end kitchen gear.
-- **Interests:** Passionate about tropical gardening, high-altitude hiking, and watching small-plane traffic at regional airports.
-- **Go-To Habit:** Sourcing reader feedback to ensure her content feels like a community conversation rather than a lecture.
+Beyond the pen, Kit is a "culinary researcher" who enjoys tropical gardening and high-altitude hiking. By constantly sourcing reader input, she ensures her writing remains a collaborative community conversation rather than a lecture.
 
 **The Kit Signature:** _"Every city has a rhythm; my job is to provide the sheet music so the residents can play along."_
