@@ -19,7 +19,24 @@ collections:
     fields:
       - {label: "Headline", name: "title", widget: "string"}
       - {label: "Publish Date", name: "pubDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false}
-      - {label: "Author", name: "author", widget: "string", required: false, default: "Charles King"}
+      - label: "Author"
+        name: author
+        widget: select
+        required: false
+        default: "Charles King"
+        options:
+          - {label: "Charles King",    value: "Charles King"}
+          - {label: "Jax Sterling",    value: "Jax Sterling"}
+          - {label: "Blair Archer",    value: "Blair Archer"}
+          - {label: "Miles Vance",     value: "Miles Vance"}
+          - {label: "Julian Wells",    value: "Julian Wells"}
+          - {label: "Sloane Miles",    value: "Sloane Miles"}
+          - {label: "Dr. JK Miller",   value: "Dr. JK Miller"}
+          - {label: "Kit Prescott",    value: "Kit Prescott"}
+          - {label: "Kit A. Marlow",   value: "Kit A. Marlow"}
+          - {label: "Reese Montgomery",value: "Reese Montgomery"}
+          - {label: "Deb Davis",       value: "Deb Davis"}
+          - {label: "Logan King",      value: "Logan King"}
       - label: "Category"
         name: "category"
         widget: "select"
@@ -116,7 +133,24 @@ collections:
           - {label: "Craft", value: "Craft"}
           - {label: "Recipe", value: "Recipe"}
       - {label: "Publish Date", name: "pubDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false}
-      - {label: "Author", name: "author", widget: "string", required: false, default: "Charles King"}
+      - label: "Author"
+        name: author
+        widget: select
+        required: false
+        default: "Charles King"
+        options:
+          - {label: "Charles King",    value: "Charles King"}
+          - {label: "Jax Sterling",    value: "Jax Sterling"}
+          - {label: "Blair Archer",    value: "Blair Archer"}
+          - {label: "Miles Vance",     value: "Miles Vance"}
+          - {label: "Julian Wells",    value: "Julian Wells"}
+          - {label: "Sloane Miles",    value: "Sloane Miles"}
+          - {label: "Dr. JK Miller",   value: "Dr. JK Miller"}
+          - {label: "Kit Prescott",    value: "Kit Prescott"}
+          - {label: "Kit A. Marlow",   value: "Kit A. Marlow"}
+          - {label: "Reese Montgomery",value: "Reese Montgomery"}
+          - {label: "Deb Davis",       value: "Deb Davis"}
+          - {label: "Logan King",      value: "Logan King"}
       - {label: "Hero Image", name: "heroImage", widget: "image", required: false, hint: "Optional banner image displayed above the title."}
       - {label: "Category", name: "category", widget: "hidden", default: "DIY"}
 
