@@ -21,6 +21,17 @@ function postHeroImage(post: any): string {
   return typeof v === "string" ? v.trim() : "";
 }
 
+/* Robust name normalisation: strips all Unicode whitespace variants, collapses to
+   NFC, then lowercases. Guards against zero-width spaces and nbsp from the CMS. */
+function normName(raw: any): string {
+  return String(raw ?? "")
+    .normalize("NFC")
+    .replace(/[ ​-‍⁠﻿]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
 export async function getStaticPaths() {
   const journalists = await getCollection("journalists");
   return journalists.map(entry => ({
@@ -33,16 +44,75 @@ const { entry }   = Astro.props;
 const { data }    = entry;
 const { Content } = await entry.render();
 
-/* Pull every post across all cities and filter by this journalist's name */
+const journalistNorm = normName(data.name);
+
+/* ── Query ALL content collections that carry bylines ─────────────────────── */
 const allPosts = await getCollection("posts");
-const articles = allPosts
-  .filter(p => {
-    const author = typeof p.data.author === "string" ? p.data.author.trim() : "";
-    return author.toLowerCase() === data.name.toLowerCase();
-  })
-  .sort((a, b) =>
-    new Date(b.data.pubDate ?? 0).getTime() - new Date(a.data.pubDate ?? 0).getTime()
-  );
+const allDiy   = await getCollection("diy");
+
+/* ── Build-time diagnostic log ─────────────────────────────────────────────── */
+console.log(`[journalists/${entry.slug}] Looking for: "${data.name}" (normalised: "${journalistNorm}")`);
+console.log(`  posts pool: ${allPosts.length}  |  diy pool: ${allDiy.length}`);
+const sampleAuthors = [
+  ...allPosts.slice(0, 5).map(p => p.data.author),
+  ...allDiy.slice(0, 3).map(e => e.data.author),
+].filter(Boolean);
+console.log(`  Sample author values:`, sampleAuthors);
+
+/* ── Filter posts ── */
+const matchedPosts = allPosts.filter(p => {
+  const articleAuthor = typeof p.data.author === "string" ? p.data.author : "";
+  const authorNorm    = normName(articleAuthor);
+  const match = authorNorm === journalistNorm || authorNorm.includes(journalistNorm) || journalistNorm.includes(authorNorm);
+  if (match) console.log(`  Comparing: articleAuthor="${articleAuthor}" vs journalistName="${data.name}" → MATCH`);
+  return match;
+});
+
+/* ── Filter DIY guides ── */
+const matchedDiy = allDiy.filter(e => {
+  const articleAuthor = typeof e.data.author === "string" ? e.data.author : "";
+  const authorNorm    = normName(articleAuthor);
+  const match = authorNorm === journalistNorm || authorNorm.includes(journalistNorm) || journalistNorm.includes(authorNorm);
+  if (match) console.log(`  Comparing (diy): articleAuthor="${articleAuthor}" vs journalistName="${data.name}" → MATCH`);
+  return match;
+});
+
+/* ── Unified article shape ─────────────────────────────────────────────────── */
+interface ArticleItem {
+  href:      string;
+  title:     string;
+  img:       string;
+  desc:      string;
+  date:      string;
+  kicker:    string;
+}
+
+const articles: ArticleItem[] = [
+  ...matchedPosts.map(p => {
+    const city     = p.data.city ?? p.slug.split("/")[0] ?? "daytona";
+    const postSlug = p.slug.split("/").pop() ?? p.slug;
+    const cat      = typeof p.data.category === "string" ? p.data.category.trim().toUpperCase() : "";
+    const sub      = typeof p.data.subtopic === "string" ? p.data.subtopic.trim() : "";
+    return {
+      href:   `/${city}/${postSlug}/`,
+      title:  p.data.title ?? p.slug,
+      img:    postHeroImage(p),
+      desc:   excerpt(p),
+      date:   formatDate(p.data.pubDate),
+      kicker: cat ? (sub ? `${cat} — ${sub}` : cat) : "",
+    };
+  }),
+  ...matchedDiy.map(e => ({
+    href:   `/diy/${e.slug}/`,
+    title:  e.data.title,
+    img:    typeof e.data.heroImage === "string" ? e.data.heroImage : "",
+    desc:   e.data.intro?.split(/\n\n+/)[0].substring(0, 160) ?? "",
+    date:   formatDate(e.data.pubDate),
+    kicker: e.data.topic ? `DIY — ${e.data.topic}` : "DIY",
+  })),
+].sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0));
+
+console.log(`  Total articles matched: ${articles.length}`);
 ---
 
 <Base title={`${data.name} | GoDoCity`} subtitle={`Journalism by ${data.name}`}>
@@ -88,31 +158,22 @@ const articles = allPosts
         )}
 
         <div class="articleGrid">
-          {articles.map(p => {
-            const city      = p.data.city ?? p.slug.split("/")[0] ?? "daytona";
-            const postSlug  = p.slug.split("/").pop();
-            const img       = postHeroImage(p);
-            const desc      = excerpt(p);
-            const date      = formatDate(p.data.pubDate);
-            const cat       = typeof p.data.category === "string" ? p.data.category.trim().toUpperCase() : "";
-            const sub       = typeof p.data.subtopic === "string" ? p.data.subtopic.trim() : "";
-            return (
-              <a class="articleCard" href={`/${city}/${postSlug}/`}>
-                <div class="cardImgWrap">
-                  {img
-                    ? <img class="cardImg" src={img} alt="" loading="lazy" decoding="async" />
-                    : <div class="cardImg cardImgFallback" aria-hidden="true" />
-                  }
-                </div>
-                <div class="cardBody">
-                  {cat && <div class="cardKicker">{cat}{sub ? ` — ${sub}` : ""}</div>}
-                  <div class="cardTitle">{p.data.title}</div>
-                  {desc && <div class="cardDesc">{desc}</div>}
-                  <div class="cardMeta">{date}</div>
-                </div>
-              </a>
-            );
-          })}
+          {articles.map(item => (
+            <a class="articleCard" href={item.href}>
+              <div class="cardImgWrap">
+                {item.img
+                  ? <img class="cardImg" src={item.img} alt="" loading="lazy" decoding="async" />
+                  : <div class="cardImg cardImgFallback" aria-hidden="true" />
+                }
+              </div>
+              <div class="cardBody">
+                {item.kicker && <div class="cardKicker">{item.kicker}</div>}
+                <div class="cardTitle">{item.title}</div>
+                {item.desc && <div class="cardDesc">{item.desc}</div>}
+                <div class="cardMeta">{item.date}</div>
+              </div>
+            </a>
+          ))}
         </div>
 
       </section>

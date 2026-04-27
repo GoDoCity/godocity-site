@@ -11,6 +11,7 @@ const authorEnum = z.enum([
   "Sloane Miles",
   "Dr. JK Miller",
   "Kit Prescott",
+  "Kit A. Marlow",
   "Reese Montgomery",
   "Deb Davis",
   "Logan King"
