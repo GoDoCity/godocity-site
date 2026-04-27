@@ -27,6 +27,7 @@ function normName(raw: any): string {
   return String(raw ?? "")
     .normalize("NFC")
     .replace(/[ ​-‍⁠﻿]/g, " ")
+    .replace(/\b[A-Za-z]\.\s*/g, "")  // strip middle initials: "D." → ""
     .replace(/\s+/g, " ")
     .trim()
     .toLowerCase();

@@ -4,6 +4,7 @@ import { defineCollection, z } from "astro:content";
 // The "Official Roster" - Add new names here as they join the team!
 const authorEnum = z.enum([
   "Charles King",
+  "Charles D. King",
   "Jax Sterling",
   "Blair Archer",
   "Miles Vance",
@@ -178,8 +179,10 @@ const topics = defineCollection({
 const journalists = defineCollection({
   type: "content",
   schema: z.object({
-    name:  z.string(),
-    photo: z.string().optional().transform(v => v === "" ? undefined : v),
+    name:     z.string(),
+    photo:    z.string().optional().transform(v => v === "" ? undefined : v),
+    featured: z.boolean().optional().default(false),
+    role:     z.string().optional().default("Journalist"),
   }),
 });
 

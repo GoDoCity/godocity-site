@@ -172,6 +172,10 @@ const topics = _cmsTopics.length > 0 ? _cmsTopics : _hardcodedTopics;
    Fetch all guides, filter to Daytona, sort newest-first.
    guideHero  = featured: true guide, or most recent
    guideCards = up to 3 non-hero guides for the 3-card row                   */
+const featuredJournalists = (await getCollection("journalists"))
+  .filter(j => j.data.featured === true)
+  .sort((a, b) => a.data.name.localeCompare(b.data.name));
+
 const allGuides = await getCollection("guides");
 const daytonaGuides = allGuides
   .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
@@ -402,28 +406,42 @@ const guideCards = guideHero
         {/* ── SIDEBAR — aligns top with hero, borderless ── */}
         <aside class="homeRail">
 
-          {/* ── EDITORIAL TEAM — above Upcoming Events ── */}
-          <div class="editTeamSection">
-            <div class="railHead">
-              <span class="railTitle editTeamTitle">GoDoCity Editorial Team</span>
-            </div>
-            <div class="editTeamRow">
-              <img
-                class="editHeadshot"
-                src="/images/charles-king-v2.jpg"
-                alt="Charles King"
-                width="80"
-                height="80"
-                loading="eager"
-                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
-              />
-              <div class="editHeadshotFallback" aria-hidden="true">CK</div>
-              <div class="editTeamInfo">
-                <div class="editName">Charles King</div>
-                <div class="editTitle">Newsletter Editor</div>
+          {/* ── EDITORIAL TEAM — dynamically pulled from journalists CMS ── */}
+          {featuredJournalists.length > 0 && (
+            <div class="editTeamSection">
+              <div class="railHead">
+                <span class="railTitle editTeamTitle">GoDoCity Editorial Team</span>
               </div>
+              {featuredJournalists.map(j => {
+                const initials = j.data.name.split(" ")
+                  .filter((w: string) => w.length > 1)
+                  .map((w: string) => w[0])
+                  .join("").slice(0, 2).toUpperCase();
+                return (
+                  <div class="editTeamRow">
+                    <a class="editPhotoLink" href={`/journalists/${j.slug}/`} aria-label={`Profile: ${j.data.name}`}>
+                      {j.data.photo
+                        ? <img
+                            class="editHeadshot"
+                            src={j.data.photo}
+                            alt={j.data.name}
+                            width="80" height="80"
+                            loading="eager"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                          />
+                        : null
+                      }
+                      <div class="editHeadshotFallback" aria-hidden="true">{initials}</div>
+                    </a>
+                    <div class="editTeamInfo">
+                      <a class="editName editNameLink" href={`/journalists/${j.slug}/`}>{j.data.name}</a>
+                      <div class="editTitle">{j.data.role}</div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-          </div>
+          )}
 
           <div class="railSection">
             <div class="railHead">
@@ -1169,10 +1187,16 @@ const guideCards = guideHero
     }
     .editName {
       font-size: 15px;
-      font-weight: 700;       /* Bold Century Gothic */
+      font-weight: 700;
       color: var(--text);
       line-height: 1.2;
     }
+    .editNameLink {
+      text-decoration: none;
+      transition: color 130ms;
+    }
+    .editNameLink:hover { color: var(--brand1); }
+    .editPhotoLink { display: contents; }
     .editTitle {
       font-size: 14px;
       font-weight: 400;       /* Normal weight Century Gothic — muted hierarchy */

@@ -1,6 +1,8 @@
 ---
 name: Charles D. King
 photo: /images/charles-king-v2.jpg
+featured: true
+role: "Newsletter Editor"
 ---
 
 Charles grew up on the Florida coast, left to figure out how the rest of the world works, and came back with receipts. He's an Embry-Riddle alum, a 30-year family business operator, and the kind of person who believes every city deserves someone willing to truly pay attention to it.

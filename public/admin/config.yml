@@ -227,4 +227,6 @@ collections:
     fields:
       - {label: "Name", name: "name", widget: "string"}
       - {label: "Photo", name: "photo", widget: "image", required: false}
+      - {label: "Role / Title", name: "role", widget: "string", required: false, default: "Journalist", hint: "Displayed on the editorial team section (e.g. Newsletter Editor, Staff Writer)."}
+      - {label: "Featured on Homepage", name: "featured", widget: "boolean", required: false, default: false, hint: "Show this journalist in the Editorial Team sidebar."}
       - {label: "Bio", name: "body", widget: "markdown"}
