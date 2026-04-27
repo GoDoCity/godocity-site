@@ -9,7 +9,7 @@ tags:
   - '#WelcomeToRockville #DaytonaBeach #LiveMusic #CentralFlorida #FestivalSeason'
 description: Get ready to turn the volume up to 11. Daytona International Speedway is transforming into the World Center of Rock for the 15th anniversary of Florida’s biggest music festival. From May 7-10, 2026, experience four days of non-stop energy with over 160 bands across five stages.
 thumbnail: /images/Rockville 2026 2.png
-heroImage: /images/Rockville 2026.png
+heroImage: ''
 city: daytona
 featured: true
 ---
