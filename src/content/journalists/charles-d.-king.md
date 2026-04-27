@@ -1,5 +1,5 @@
 ---
-name: Charles D. King
+name: Charles King
 photo: /images/charles-king-v2.jpg
 ---
 
