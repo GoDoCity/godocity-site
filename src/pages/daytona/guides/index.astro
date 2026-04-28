@@ -12,9 +12,18 @@ function guideSlug(g: (typeof allGuides)[number]) {
 }
 
 const featuredGuides = sorted.filter(g => g.data.featured === true).slice(0, 4);
-const browseGuides   = sorted;
 
-const TABS = ["All", "Education", "Housing", "Healthcare", "Need To Know"] as const;
+const SECTIONS = [
+  { brand: "COAST", category: "Education",    mod: "coast", bg: "white" },
+  { brand: "DRIVE", category: "Housing",      mod: "drive", bg: "grey"  },
+  { brand: "SURF",  category: "Healthcare",   mod: "surf",  bg: "white" },
+  { brand: "LOCAL", category: "Need To Know", mod: "local", bg: "grey"  },
+] as const;
+
+const sectionGuides = SECTIONS.map(s => ({
+  ...s,
+  guides: sorted.filter(g => g.data.category === s.category),
+}));
 ---
 
 <Base
@@ -123,82 +132,38 @@ const TABS = ["All", "Education", "Housing", "Healthcare", "Need To Know"] as co
       </section>
     )}
 
-    {/* ══ BROWSE / TABBED SECTION ════════════════════════════════════════ */}
-    <section class="hub hubBrowse">
-      <div class="hubInner">
-        <div class="hubHead">
-          <span class="hubHeadLabel">Browse Guides</span>
-          <div class="hubHeadLine" aria-hidden="true" />
+    {/* ══ CATEGORY SECTIONS ══════════════════════════════════════════════ */}
+    {sectionGuides.map(s => s.guides.length > 0 && (
+      <section class={`hub hubCat hubCat--${s.bg}`}>
+        <div class="hubInner">
+
+          <div class="hubCatHead hubCatHead--${s.mod}">
+            <span class="hubCatBrand">{s.brand}</span>
+            <span class="hubCatLabel">{s.category}</span>
+          </div>
+
+          <div class="hubCatGrid">
+            {s.guides.map(g => (
+              <a class="hubCatCard" href={`/daytona/guides/${guideSlug(g)}/`}>
+                <div class="hubCatImgWrap">
+                  {g.data.image
+                    ? <img class="hubCatImg" src={g.data.image} alt={g.data.title} loading="lazy" decoding="async" />
+                    : <div class="hubCatImg hubImgFallback" aria-hidden="true" />
+                  }
+                </div>
+                <div class="hubCatBody">
+                  <h3 class="hubCatTitle">{g.data.title}</h3>
+                  {g.data.description && <p class="hubCatDesc">{g.data.description}</p>}
+                </div>
+              </a>
+            ))}
+          </div>
+
         </div>
-
-        {/* Tab bar */}
-        <div class="hubTabBar" role="tablist" aria-label="Filter guides by category">
-          {TABS.map((tab, i) => (
-            <button
-              class={`hubTab${i === 0 ? " hubTab--active" : ""}`}
-              role="tab"
-              aria-selected={i === 0 ? "true" : "false"}
-              data-cat={tab === "All" ? "" : tab}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        {/* Card grid — all rendered, filtered client-side */}
-        <div class="hubBrowseGrid" id="hubBrowseGrid">
-          {browseGuides.map(g => (
-            <a
-              class="hubBrowseCard"
-              href={`/daytona/guides/${guideSlug(g)}/`}
-              data-category={g.data.category ?? ""}
-            >
-              <div class="hubBrowseImgWrap">
-                {g.data.image
-                  ? <img class="hubBrowseImg" src={g.data.image} alt={g.data.title} loading="lazy" decoding="async" />
-                  : <div class="hubBrowseImg hubImgFallback" aria-hidden="true" />
-                }
-              </div>
-              <div class="hubBrowseBody">
-                {g.data.category && <span class="hubCategoryPill hubCategoryPill--sm">{g.data.category}</span>}
-                <h3 class="hubBrowseTitle">{g.data.title}</h3>
-                {g.data.description && <p class="hubBrowseDesc">{g.data.description}</p>}
-              </div>
-            </a>
-          ))}
-        </div>
-
-        {browseGuides.length === 0 && (
-          <p class="hubEmpty">No guides published yet.</p>
-        )}
-
-      </div>
-    </section>
+      </section>
+    ))}
 
   </div>{/* end .ghWrap */}
-
-  <script>
-    (() => {
-      const tabs  = document.querySelectorAll<HTMLButtonElement>(".hubTab");
-      const cards = document.querySelectorAll<HTMLElement>(".hubBrowseCard");
-
-      tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-          const cat = tab.dataset.cat ?? "";
-
-          tabs.forEach(t => {
-            t.classList.toggle("hubTab--active", t === tab);
-            t.setAttribute("aria-selected", String(t === tab));
-          });
-
-          cards.forEach(card => {
-            const match = cat === "" || (card.dataset.category ?? "") === cat;
-            (card as HTMLElement).style.display = match ? "" : "none";
-          });
-        });
-      });
-    })();
-  </script>
 
   <style>
     /* ── Wrap ── */
@@ -705,8 +670,9 @@ const TABS = ["All", "Education", "Housing", "Healthcare", "Need To Know"] as co
     ══════════════════════════════════════════════════════════════════ */
     .hub { padding: 56px 0; }
     .hub + .hub { border-top: 1px solid var(--border); }
-    .hubFeatured { background: var(--surface); }
-    .hubBrowse   { background: var(--surface2); }
+    .hubFeatured  { background: var(--surface); }
+    .hubCat--white { background: var(--surface); }
+    .hubCat--grey  { background: var(--surface2); }
 
     .hubInner {
       max-width: 1250px;
@@ -791,19 +757,16 @@ const TABS = ["All", "Education", "Housing", "Healthcare", "Need To Know"] as co
     .hubHeroDesc { font-size: 15px; color: var(--muted); line-height: 1.55; margin: 0; }
     .hubReadMore { font-size: 13px; font-weight: 700; color: var(--brand1); margin-top: 4px; }
 
-    /* Secondary stack */
+    /* Secondary stack — all images 16:9 */
     .hubSecondaryStack { display: flex; flex-direction: column; gap: 12px; }
     @media (max-width: 900px) {
       .hubSecondaryStack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     }
-    @media (max-width: 580px) {
-      .hubSecondaryStack { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 580px) { .hubSecondaryStack { grid-template-columns: 1fr; } }
 
     .hubSecCard {
       display: flex;
-      gap: 12px;
-      align-items: flex-start;
+      flex-direction: column;
       text-decoration: none;
       border-radius: 12px;
       overflow: hidden;
@@ -813,21 +776,11 @@ const TABS = ["All", "Education", "Housing", "Healthcare", "Need To Know"] as co
     }
     .hubSecCard:hover { box-shadow: 0 6px 20px rgba(0,0,0,.18); transform: translateY(-2px); }
 
-    @media (max-width: 900px) {
-      .hubSecCard { flex-direction: column; gap: 0; }
-    }
-
-    .hubSecImgWrap { flex-shrink: 0; width: 100px; aspect-ratio: 4/3; overflow: hidden; background: var(--surface2); }
+    .hubSecImgWrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--surface2); flex-shrink: 0; }
     .hubSecImg { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
     .hubSecCard:hover .hubSecImg { transform: scale(1.04); }
 
-    @media (max-width: 900px) {
-      .hubSecImgWrap { width: 100%; aspect-ratio: 16/9; }
-    }
-
-    .hubSecBody { flex: 1; padding: 10px 14px 10px 0; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-    @media (max-width: 900px) { .hubSecBody { padding: 12px 14px; } }
-
+    .hubSecBody { padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 5px; }
     .hubSecTitle {
       font-size: 14px; font-weight: 800; line-height: 1.25;
       color: var(--text); margin: 0;
@@ -840,45 +793,43 @@ const TABS = ["All", "Education", "Housing", "Healthcare", "Need To Know"] as co
     /* Fallback placeholder */
     .hubImgFallback { background: var(--surface2); }
 
-    /* ── Tab bar ── */
-    .hubTabBar {
+    /* ── Category magazine sections ── */
+    .hubCat { padding: 48px 0; }
+
+    .hubCatHead {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+      align-items: baseline;
+      gap: 14px;
+      padding-bottom: 14px;
+      border-bottom: 3px solid var(--brand1);
       margin-bottom: 28px;
     }
-    .hubTab {
-      display: inline-flex;
-      align-items: center;
-      height: 36px;
-      padding: 0 18px;
-      border-radius: 999px;
-      border: 2px solid var(--border);
-      background: transparent;
-      color: var(--muted);
-      font-size: 13px;
-      font-weight: 700;
+    .hubCatBrand {
+      font-family: 'Monoton', cursive;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      font-weight: 900;
+      color: var(--text);
       letter-spacing: .04em;
-      cursor: pointer;
-      transition: background 130ms, color 130ms, border-color 130ms;
+      line-height: 1;
     }
-    .hubTab:hover { border-color: var(--brand1); color: var(--text); }
-    .hubTab--active {
-      background: var(--brand1);
-      border-color: var(--brand1);
-      color: #000;
+    .hubCatLabel {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
 
-    /* ── Browse card grid ── */
-    .hubBrowseGrid {
+    /* 3-col card grid for categories */
+    .hubCatGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 20px;
     }
-    @media (max-width: 860px) { .hubBrowseGrid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 540px) { .hubBrowseGrid { grid-template-columns: 1fr; gap: 14px; } }
+    @media (max-width: 860px) { .hubCatGrid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 540px) { .hubCatGrid { grid-template-columns: 1fr; gap: 14px; } }
 
-    .hubBrowseCard {
+    .hubCatCard {
       display: flex;
       flex-direction: column;
       text-decoration: none;
@@ -888,28 +839,28 @@ const TABS = ["All", "Education", "Housing", "Healthcare", "Need To Know"] as co
       background: var(--panel, var(--surface));
       transition: box-shadow 200ms, transform 200ms;
     }
-    .hubBrowseCard:hover { box-shadow: 0 8px 28px rgba(0,0,0,.2); transform: translateY(-3px); }
+    .hubCatCard:hover { box-shadow: 0 8px 28px rgba(0,0,0,.2); transform: translateY(-3px); }
 
-    .hubBrowseImgWrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--surface2); flex-shrink: 0; }
-    .hubBrowseImg { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
-    .hubBrowseCard:hover .hubBrowseImg { transform: scale(1.03); }
+    .hubCatImgWrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--surface2); flex-shrink: 0; }
+    .hubCatImg { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
+    .hubCatCard:hover .hubCatImg { transform: scale(1.03); }
 
-    .hubBrowseBody { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
-    .hubBrowseTitle {
-      font-size: 16px; font-weight: 800; line-height: 1.2;
+    .hubCatBody { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+    .hubCatTitle {
+      font-size: 15px; font-weight: 800; line-height: 1.25;
       color: var(--text); margin: 0;
       display: -webkit-box; -webkit-line-clamp: 3;
       -webkit-box-orient: vertical; overflow: hidden;
       transition: color 130ms;
     }
-    .hubBrowseCard:hover .hubBrowseTitle { color: var(--brand1); }
-    .hubBrowseDesc {
+    .hubCatCard:hover .hubCatTitle { color: var(--brand1); }
+    .hubCatDesc {
       font-size: 13px; color: var(--muted); line-height: 1.45;
       display: -webkit-box; -webkit-line-clamp: 2;
       -webkit-box-orient: vertical; overflow: hidden;
       margin: 0;
     }
 
-    .hubEmpty { color: var(--faint); font-size: 15px; padding: 24px 0; }
+    @media (max-width: 640px) { .hubCat { padding: 32px 0; } }
   </style>
 </Base>
