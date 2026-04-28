@@ -46,14 +46,13 @@ const guides = defineCollection({
   type: 'content',
   schema: z.object({
     title: z.string(),
-    topic: z.enum(['Live', 'Work', 'Play']),
+    topic: z.enum(['COAST', 'DRIVE', 'SURF', 'LOCAL']),
     featured: z.boolean().default(false),
     showToC: z.boolean().default(true),
     image: z.string().optional(),
     description: z.string(),
     date: z.date().or(z.string()).transform((val) => new Date(val)),
     author: authorEnum.optional().default("Jax Sterling"),
-    category: z.enum(['Education', 'Housing', 'Healthcare', 'Need To Know']).optional(),
   }),
 });
 

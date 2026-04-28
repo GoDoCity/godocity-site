@@ -1,6 +1,6 @@
 ---
 title: "Your Ultimate Guide to Daytona — Play: Date Night Spots"
-topic: Play
+topic: SURF
 featured: true
 showToC: true
 image: /images/dinning-guide-1.webp

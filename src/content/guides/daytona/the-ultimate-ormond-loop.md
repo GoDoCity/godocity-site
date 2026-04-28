@@ -1,6 +1,6 @@
 ---
 title: The Ultimate Ormond Loop Guide
-topic: Play
+topic: SURF
 featured: false
 showToC: true
 image: /images/tomoka.png

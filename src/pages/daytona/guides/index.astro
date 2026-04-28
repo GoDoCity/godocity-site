@@ -14,15 +14,15 @@ function guideSlug(g: (typeof allGuides)[number]) {
 const featuredGuides = sorted.filter(g => g.data.featured === true).slice(0, 4);
 
 const SECTIONS = [
-  { brand: "COAST", category: "Education",    mod: "coast", bg: "white" },
-  { brand: "DRIVE", category: "Housing",      mod: "drive", bg: "grey"  },
-  { brand: "SURF",  category: "Healthcare",   mod: "surf",  bg: "white" },
-  { brand: "LOCAL", category: "Need To Know", mod: "local", bg: "grey"  },
+  { brand: "COAST", topic: "COAST", mod: "coast", bg: "white" },
+  { brand: "DRIVE", topic: "DRIVE", mod: "drive", bg: "grey"  },
+  { brand: "SURF",  topic: "SURF",  mod: "surf",  bg: "white" },
+  { brand: "LOCAL", topic: "LOCAL", mod: "local", bg: "grey"  },
 ] as const;
 
 const sectionGuides = SECTIONS.map(s => ({
   ...s,
-  guides: sorted.filter(g => g.data.category === s.category),
+  guides: sorted.filter(g => g.data.topic === s.topic),
 }));
 ---
 
@@ -44,32 +44,28 @@ const sectionGuides = SECTIONS.map(s => ({
       <div class="ghPageHeroContent">
         <h1 class="ghPageHeroTitle">Daytona's Guide</h1>
         <div class="ghBlocks">
-          <a class="ghBlock ghBlock--coast" href="/daytona/guides/live/" aria-label="COAST — Live guides">
+          <a class="ghBlock ghBlock--coast" href="/daytona/guides/coast/" aria-label="COAST guides">
             <div class="ghBlockOverlay"></div>
             <div class="ghBlockContent">
               <span class="ghBlockAction">COAST</span>
-              <span class="ghBlockCategory">[Live]</span>
             </div>
           </a>
-          <a class="ghBlock ghBlock--drive" href="/daytona/guides/work/" aria-label="DRIVE — Work guides">
+          <a class="ghBlock ghBlock--drive" href="/daytona/guides/drive/" aria-label="DRIVE guides">
             <div class="ghBlockOverlay"></div>
             <div class="ghBlockContent">
               <span class="ghBlockAction">DRIVE</span>
-              <span class="ghBlockCategory">[Work]</span>
             </div>
           </a>
-          <a class="ghBlock ghBlock--surf" href="/daytona/guides/play/" aria-label="SURF — Play guides">
+          <a class="ghBlock ghBlock--surf" href="/daytona/guides/surf/" aria-label="SURF guides">
             <div class="ghBlockOverlay"></div>
             <div class="ghBlockContent">
               <span class="ghBlockAction">SURF</span>
-              <span class="ghBlockCategory">[Play]</span>
             </div>
           </a>
-          <a class="ghBlock ghBlock--local" href="/daytona/guides/best/" aria-label="LOCAL — Best guides">
+          <a class="ghBlock ghBlock--local" href="/daytona/guides/local/" aria-label="LOCAL guides">
             <div class="ghBlockOverlay"></div>
             <div class="ghBlockContent">
               <span class="ghBlockAction">LOCAL</span>
-              <span class="ghBlockCategory">[Best]</span>
             </div>
           </a>
         </div>
@@ -96,8 +92,8 @@ const sectionGuides = SECTIONS.map(s => ({
                 }
               </div>
               <div class="hubHeroBody">
-                {featuredGuides[0].data.category && (
-                  <span class="hubCategoryPill">{featuredGuides[0].data.category}</span>
+                {featuredGuides[0].data.topic && (
+                  <span class="hubCategoryPill">{featuredGuides[0].data.topic}</span>
                 )}
                 <h2 class="hubHeroTitle">{featuredGuides[0].data.title}</h2>
                 {featuredGuides[0].data.description && (
@@ -119,7 +115,7 @@ const sectionGuides = SECTIONS.map(s => ({
                       }
                     </div>
                     <div class="hubSecBody">
-                      {g.data.category && <span class="hubCategoryPill hubCategoryPill--sm">{g.data.category}</span>}
+                      {g.data.topic && <span class="hubCategoryPill hubCategoryPill--sm">{g.data.topic}</span>}
                       <h3 class="hubSecTitle">{g.data.title}</h3>
                     </div>
                   </a>
@@ -139,7 +135,6 @@ const sectionGuides = SECTIONS.map(s => ({
 
           <div class="hubCatHead hubCatHead--${s.mod}">
             <span class="hubCatBrand">{s.brand}</span>
-            <span class="hubCatLabel">{s.category}</span>
           </div>
 
           <div class="hubCatGrid">
@@ -155,6 +150,7 @@ const sectionGuides = SECTIONS.map(s => ({
                   <h3 class="hubCatTitle">{g.data.title}</h3>
                   {g.data.description && <p class="hubCatDesc">{g.data.description}</p>}
                 </div>
+
               </a>
             ))}
           </div>
