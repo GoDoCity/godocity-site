@@ -504,8 +504,19 @@ const emoji = topicEmoji[topic] ?? "📖";
   /* ── Article body ── */
   .gl-article {
     min-width: 0;
-    line-height: 1.8;
+    font-size: 1.125rem;
+    line-height: 1.75;
     color: var(--text);
+  }
+
+  .gl-article h1 {
+    font-family: var(--font-head, "Manrope", sans-serif);
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800;
+    color: var(--text-primary);
+    margin: 0 0 1rem;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
   }
 
   .gl-article h2 {
@@ -540,6 +551,15 @@ const emoji = topicEmoji[topic] ?? "📖";
     font-style: normal;
   }
 
+  /* Images */
+  .gl-article img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    display: block;
+    margin: 1.5rem 0;
+  }
+
   /* Auto-generated image captions from alt text */
   .gl-article figure {
     margin: 0 0 24px;
@@ -547,7 +567,9 @@ const emoji = topicEmoji[topic] ?? "📖";
   }
   .gl-article figure img {
     max-width: 100%;
-    border-radius: var(--radius, 14px);
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 0;
   }
   .gl-article figcaption {
     margin-top: 8px;
