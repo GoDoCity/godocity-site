@@ -1,6 +1,6 @@
 ---
 title: 'Living in the 32174 — Live: The Ultimate Ormond Beach Neighborhood Guide'
-topic: Live
+topic: COAST
 featured: true
 showToC: true
 image: /images/the-loop.webp
