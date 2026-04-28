@@ -509,7 +509,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     color: var(--text);
   }
 
-  .gl-article h1 {
+  .gl-article :global(h1) {
     font-family: var(--font-head, "Manrope", sans-serif);
     font-size: clamp(2rem, 4vw, 3rem);
     font-weight: 800;
@@ -519,7 +519,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     line-height: 1.08;
   }
 
-  .gl-article h2 {
+  .gl-article :global(h2) {
     font-family: var(--font-head, "Manrope", sans-serif);
     font-size: 1.75rem;
     font-weight: 800;
@@ -528,7 +528,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     letter-spacing: -0.03em;
     scroll-margin-top: 80px;
   }
-  .gl-article h3 {
+  .gl-article :global(h3) {
     font-family: var(--font-head, "Manrope", sans-serif);
     font-size: clamp(1.1rem, 2vw, 1.35rem);
     font-weight: 700;
@@ -536,14 +536,11 @@ const emoji = topicEmoji[topic] ?? "📖";
     margin: 28px 0 8px;
     scroll-margin-top: 80px;
   }
-  .gl-article p  { margin: 0 0 18px; }
+  .gl-article :global(p) { margin: 0 0 18px; }
 
-  /* ── Auto editorial-bold for ***…*** blocks ───────────────────────────────
-     Markdown `***text***` renders as <em><strong>text</strong></em>.
-     When a paragraph opens with this pattern it gets .editorial-bold styling:
-     1.5rem / weight 800 — optimised for large emojis (☀️ 🏎️ 📍).             */
-  .gl-article p > em:first-child > strong,
-  .gl-article p > strong:first-child > em {
+  /* ── Auto editorial-bold for ***…*** blocks ── */
+  .gl-article :global(p > em:first-child > strong),
+  .gl-article :global(p > strong:first-child > em) {
     font-size: 1.5rem;
     font-weight: 800;
     line-height: 1.3;
@@ -551,27 +548,29 @@ const emoji = topicEmoji[topic] ?? "📖";
     font-style: normal;
   }
 
-  /* Images */
-  .gl-article img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 0.5rem;
+  /* Images — :global() required so slot/markdown content images match */
+  .gl-article :global(img) {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
     display: block;
-    margin: 1.5rem 0;
+    margin: 1.5rem auto;
+    border-radius: 0.5rem;
   }
 
   /* Auto-generated image captions from alt text */
-  .gl-article figure {
+  .gl-article :global(figure) {
     margin: 0 0 24px;
     text-align: center;
   }
-  .gl-article figure img {
-    max-width: 100%;
-    height: auto;
+  .gl-article :global(figure img) {
+    max-width: 100% !important;
+    width: auto !important;
+    height: auto !important;
     border-radius: 0.5rem;
-    margin: 0;
+    margin: 0 auto;
   }
-  .gl-article figcaption {
+  .gl-article :global(figcaption) {
     margin-top: 8px;
     font-size: 13px;
     font-style: italic;
