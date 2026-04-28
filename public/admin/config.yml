@@ -168,7 +168,17 @@ collections:
           - {label: "Live", value: "Live"}
           - {label: "Work", value: "Work"}
           - {label: "Play", value: "Play"}
-      - {label: "Featured", name: "featured", widget: "boolean", default: false}
+      - {label: "Featured", name: "featured", widget: "boolean", default: false, hint: "ON = appears in the Featured Hub at the top of /guides/."}
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        required: false
+        hint: "Used for tab filtering on the Media Hub page."
+        options:
+          - {label: "Education",    value: "Education"}
+          - {label: "Housing",      value: "Housing"}
+          - {label: "Healthcare",   value: "Healthcare"}
+          - {label: "Need To Know", value: "Need To Know"}
       - {label: "Show Table of Contents", name: "showToC", widget: "boolean", default: true}
       - {label: "Featured Image", name: "image", widget: "image"}
       - {label: "Description/Hook", name: "description", widget: "text"}
