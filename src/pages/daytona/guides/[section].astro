@@ -4,34 +4,34 @@ import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
   return [
-    { params: { section: "live" } },
-    { params: { section: "work" } },
-    { params: { section: "play" } },
-    { params: { section: "best" } },
+    { params: { section: "coast" } },
+    { params: { section: "drive" } },
+    { params: { section: "surf"  } },
+    { params: { section: "local" } },
   ];
 }
 
 const { section } = Astro.params;
 
 const topicMap: Record<string, string> = {
-  live: "Live",
-  work: "Work",
-  play: "Play",
-  best: "Best",
+  coast: "COAST",
+  drive: "DRIVE",
+  surf:  "SURF",
+  local: "LOCAL",
 };
 
 const brandMap: Record<string, string> = {
-  live: "COAST",
-  work: "DRIVE",
-  play: "SURF",
-  best: "LOCAL",
+  coast: "COAST",
+  drive: "DRIVE",
+  surf:  "SURF",
+  local: "LOCAL",
 };
 
 const emojiMap: Record<string, string> = {
-  live: "🌊",
-  work: "🚗",
-  play: "🏄",
-  best: "⭐",
+  coast: "🌊",
+  drive: "🚗",
+  surf:  "🏄",
+  local: "⭐",
 };
 
 
@@ -42,25 +42,25 @@ const emoji = emojiMap[section] ?? "";
 /* ── Jump ribbon configuration per section ── */
 type RibbonItem = { label: string; href: string; id: string };
 const ribbonConfig: Record<string, RibbonItem[]> = {
-  live: [
+  coast: [
     { label: "Neighborhoods", href: "#neighborhoods", id: "neighborhoods" },
     { label: "Schools",       href: "#schools",       id: "schools"       },
     { label: "Healthcare",    href: "#healthcare",    id: "healthcare"    },
     { label: "Need to Know",  href: "#need-to-know",  id: "need-to-know"  },
   ],
-  work: [
+  drive: [
     { label: "Entrepreneurship", href: "#entrepreneurship", id: "entrepreneurship" },
     { label: "Industry",         href: "#industry",         id: "industry"         },
     { label: "Networking",       href: "#networking",       id: "networking"       },
     { label: "Coworking",        href: "#coworking",        id: "coworking"        },
   ],
-  play: [
+  surf: [
     { label: "Outdoors",       href: "#outdoors",      id: "outdoors"      },
     { label: "Arts & Culture", href: "#arts-culture",  id: "arts-culture"  },
     { label: "Dining",         href: "#dining",        id: "dining"        },
     { label: "Attractions",    href: "#attractions",   id: "attractions"   },
   ],
-  best: [
+  local: [
     { label: "Basics & Pets",  href: "#basics-pets",   id: "basics-pets"   },
     { label: "Health",         href: "#health",         id: "health"        },
     { label: "Home Services",  href: "#home-services",  id: "home-services" },
@@ -92,7 +92,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
 
 <Base
   title={`${brand} Guides | GoDoDaytona`}
-  subtitle={`GoDo guides for ${topic.toLowerCase()} in Daytona Beach.`}
+  subtitle={`GoDo ${topic} guides for Daytona Beach.`}
   cityBase="daytona"
 >
   <div class="ghWrap">

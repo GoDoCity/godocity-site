@@ -18,13 +18,14 @@ export async function getStaticPaths() {
 const { guide } = Astro.props;
 const { Content } = await guide.render();
 
-/* Map topic → visual category label used in the ribbon breadcrumb */
+/* Map topic → section slug for the breadcrumb back-link */
 const topicToSection: Record<string, string> = {
-  Live: "live",
-  Work: "work",
-  Play: "play",
+  COAST: "coast",
+  DRIVE: "drive",
+  SURF:  "surf",
+  LOCAL: "local",
 };
-const sectionSlug = topicToSection[guide.data.topic] ?? "play";
+const sectionSlug = topicToSection[guide.data.topic] ?? "coast";
 ---
 
 <GuideLayout
