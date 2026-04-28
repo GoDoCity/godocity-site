@@ -53,6 +53,7 @@ const guides = defineCollection({
     description: z.string(),
     date: z.date().or(z.string()).transform((val) => new Date(val)),
     author: authorEnum.optional().default("Jax Sterling"),
+    category: z.enum(['Education', 'Housing', 'Healthcare', 'Need To Know']).optional(),
   }),
 });
 

@@ -2,92 +2,19 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-/* ── Fetch all guides from the Decap collection ── */
 const allGuides = await getCollection("guides");
+const sorted = [...allGuides].sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
 
 function guideSlug(g: (typeof allGuides)[number]) {
   return g.slug.split("/").pop()!;
 }
 
-type SubcategoryLink = { label: string; href: string };
-type ArticleItem = {
-  img: string;
-  title: string;
-  description?: string;
-  href: string;
-  external?: boolean;
-};
-type SectionDef = {
-  id: string;
-  brand: string;
-  slug: string;
-  bg: "white" | "grey";
-  subcategories: SubcategoryLink[];
-  articles: ArticleItem[];
-  viewAllHref: string;
-  viewAllLabel: string;
-};
+const featuredGuides = sorted.filter(g => g.data.featured === true).slice(0, 4);
+const browseGuides   = sorted;
 
-/* ── Subcategory ribbon links per section (link to category page anchors) ── */
-const subcategoryLinks: Record<string, SubcategoryLink[]> = {
-  live: [
-    { label: "Neighborhoods", href: "/daytona/guides/live/#neighborhoods" },
-    { label: "Schools",       href: "/daytona/guides/live/#schools"       },
-    { label: "Healthcare",    href: "/daytona/guides/live/#healthcare"    },
-    { label: "Need to Know",  href: "/daytona/guides/live/#need-to-know"  },
-  ],
-  work: [
-    { label: "Entrepreneurship", href: "/daytona/guides/work/#entrepreneurship" },
-    { label: "Industry",         href: "/daytona/guides/work/#industry"         },
-    { label: "Networking",       href: "/daytona/guides/work/#networking"       },
-    { label: "Coworking",        href: "/daytona/guides/work/#coworking"        },
-  ],
-  play: [
-    { label: "Outdoors",       href: "/daytona/guides/play/#outdoors"      },
-    { label: "Arts & Culture", href: "/daytona/guides/play/#arts-culture"  },
-    { label: "Dining",         href: "/daytona/guides/play/#dining"        },
-    { label: "Attractions",    href: "/daytona/guides/play/#attractions"   },
-  ],
-  best: [
-    { label: "Basics & Pets",  href: "/daytona/guides/best/#basics-pets"   },
-    { label: "Health",         href: "/daytona/guides/best/#health"         },
-    { label: "Home Services",  href: "/daytona/guides/best/#home-services"  },
-    { label: "City & Safety",  href: "/daytona/guides/best/#city-safety"    },
-  ],
-};
-
-/* ── Build dynamic sections (COAST / DRIVE / SURF) from guides collection ── */
-const topicConfig: { topic: "Live" | "Work" | "Play"; slug: string; brand: string; bg: "white" | "grey" }[] = [
-  { topic: "Live", slug: "live", brand: "COAST", bg: "white" },
-  { topic: "Work", slug: "work", brand: "DRIVE", bg: "grey"  },
-  { topic: "Play", slug: "play", brand: "SURF",  bg: "white" },
-];
-
-const sections: SectionDef[] = [
-  ...topicConfig.map(({ topic, slug, brand, bg }) => {
-    const topicGuides = allGuides
-      .filter((g) => g.data.topic === topic)
-      .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
-
-    const articles: ArticleItem[] = topicGuides.slice(0, 4).map((g) => ({
-      img: g.data.image ?? "",
-      title: g.data.title,
-      description: g.data.description,
-      href: `/daytona/guides/${guideSlug(g)}/`,
-    }));
-
-    return {
-      id: slug,
-      brand,
-      slug,
-      bg,
-      subcategories: subcategoryLinks[slug],
-      articles,
-      viewAllHref: `/daytona/guides/${slug}/`,
-      viewAllLabel: `View More ${brand}`,
-    };
-  }),
-];
+const TABS = ["All", "Education", "Housing", "Healthcare", "Need To Know"] as const;
 ---
 
 <Base
@@ -140,69 +67,138 @@ const sections: SectionDef[] = [
       </div>
     </div>
 
-    {/* ── FOUR STACKED SECTIONS ── */}
-    {sections.map((s) => (
-      <section class={`ghSection ghSection--${s.bg}`} id={s.id}>
+    {/* ══ FEATURED HUB ══════════════════════════════════════════════════ */}
+    {featuredGuides.length > 0 && (
+      <section class="hub hubFeatured">
+        <div class="hubInner">
+          <div class="hubHead">
+            <span class="hubHeadLabel">Featured</span>
+            <div class="hubHeadLine" aria-hidden="true" />
+          </div>
 
-        {/* Wide category hero photo banner */}
-        <div class={`ghSectionHero ghSectionHero--${s.id}`}>
-          <div class="ghSectionHeroOverlay"></div>
-          <div class="container ghSectionHeroContent">
-            <h2 class="ghSectionHeroTitle">{s.brand}</h2>
+          <div class="hubHeroGrid">
+
+            {/* Primary hero card */}
+            <a class="hubHeroCard" href={`/daytona/guides/${guideSlug(featuredGuides[0])}/`}>
+              <div class="hubHeroImgWrap">
+                {featuredGuides[0].data.image
+                  ? <img class="hubHeroImg" src={featuredGuides[0].data.image} alt={featuredGuides[0].data.title} loading="eager" decoding="async" />
+                  : <div class="hubHeroImg hubImgFallback" aria-hidden="true" />
+                }
+              </div>
+              <div class="hubHeroBody">
+                {featuredGuides[0].data.category && (
+                  <span class="hubCategoryPill">{featuredGuides[0].data.category}</span>
+                )}
+                <h2 class="hubHeroTitle">{featuredGuides[0].data.title}</h2>
+                {featuredGuides[0].data.description && (
+                  <p class="hubHeroDesc">{featuredGuides[0].data.description}</p>
+                )}
+                <span class="hubReadMore">Read guide →</span>
+              </div>
+            </a>
+
+            {/* Secondary stack (up to 3) */}
+            {featuredGuides.length > 1 && (
+              <div class="hubSecondaryStack">
+                {featuredGuides.slice(1).map(g => (
+                  <a class="hubSecCard" href={`/daytona/guides/${guideSlug(g)}/`}>
+                    <div class="hubSecImgWrap">
+                      {g.data.image
+                        ? <img class="hubSecImg" src={g.data.image} alt={g.data.title} loading="lazy" decoding="async" />
+                        : <div class="hubSecImg hubImgFallback" aria-hidden="true" />
+                      }
+                    </div>
+                    <div class="hubSecBody">
+                      {g.data.category && <span class="hubCategoryPill hubCategoryPill--sm">{g.data.category}</span>}
+                      <h3 class="hubSecTitle">{g.data.title}</h3>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+
           </div>
         </div>
-
-        {/* Subcategory ribbon — links to section anchors on category page */}
-        <div class="ghSubRibbonOuter">
-          <div class="container">
-            <nav class="ghSubRibbon" aria-label={`${s.brand} subcategories`}>
-              {s.subcategories.map((sub) => (
-                <a class="ghSubRibbonItem" href={sub.href}>{sub.label}</a>
-              ))}
-            </nav>
-          </div>
-        </div>
-
-        {/* Uniform 4-article grid */}
-        <div class="container">
-          <div class="ghArticleGrid">
-            {s.articles.map((art) => (
-              <a
-                class="ghArticleCard"
-                href={art.href}
-                target={art.external ? "_blank" : undefined}
-                rel={art.external ? "noopener noreferrer" : undefined}
-              >
-                <div class="ghCardImgWrap">
-                  <img
-                    class="ghCardImg"
-                    src={art.img}
-                    alt={art.title}
-                    loading="lazy"
-                    decoding="async"
-                    onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
-                  />
-                  <div class="ghCardImgFallback" aria-hidden="true"></div>
-                </div>
-                <div class="ghCardBody">
-                  <h3 class="ghCardTitle">{art.title}</h3>
-                  {art.description && <p class="ghCardDesc">{art.description}</p>}
-                  {art.external && <span class="ghCardExternalBadge">↗ External</span>}
-                </div>
-              </a>
-            ))}
-          </div>
-
-          {/* View More button */}
-          <div class="ghViewMoreRow">
-            <a class="ghViewMoreBtn" href={s.viewAllHref}>{s.viewAllLabel} →</a>
-          </div>
-        </div>
-
       </section>
-    ))}
+    )}
+
+    {/* ══ BROWSE / TABBED SECTION ════════════════════════════════════════ */}
+    <section class="hub hubBrowse">
+      <div class="hubInner">
+        <div class="hubHead">
+          <span class="hubHeadLabel">Browse Guides</span>
+          <div class="hubHeadLine" aria-hidden="true" />
+        </div>
+
+        {/* Tab bar */}
+        <div class="hubTabBar" role="tablist" aria-label="Filter guides by category">
+          {TABS.map((tab, i) => (
+            <button
+              class={`hubTab${i === 0 ? " hubTab--active" : ""}`}
+              role="tab"
+              aria-selected={i === 0 ? "true" : "false"}
+              data-cat={tab === "All" ? "" : tab}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {/* Card grid — all rendered, filtered client-side */}
+        <div class="hubBrowseGrid" id="hubBrowseGrid">
+          {browseGuides.map(g => (
+            <a
+              class="hubBrowseCard"
+              href={`/daytona/guides/${guideSlug(g)}/`}
+              data-category={g.data.category ?? ""}
+            >
+              <div class="hubBrowseImgWrap">
+                {g.data.image
+                  ? <img class="hubBrowseImg" src={g.data.image} alt={g.data.title} loading="lazy" decoding="async" />
+                  : <div class="hubBrowseImg hubImgFallback" aria-hidden="true" />
+                }
+              </div>
+              <div class="hubBrowseBody">
+                {g.data.category && <span class="hubCategoryPill hubCategoryPill--sm">{g.data.category}</span>}
+                <h3 class="hubBrowseTitle">{g.data.title}</h3>
+                {g.data.description && <p class="hubBrowseDesc">{g.data.description}</p>}
+              </div>
+            </a>
+          ))}
+        </div>
+
+        {browseGuides.length === 0 && (
+          <p class="hubEmpty">No guides published yet.</p>
+        )}
+
+      </div>
+    </section>
 
   </div>{/* end .ghWrap */}
+
+  <script>
+    (() => {
+      const tabs  = document.querySelectorAll<HTMLButtonElement>(".hubTab");
+      const cards = document.querySelectorAll<HTMLElement>(".hubBrowseCard");
+
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          const cat = tab.dataset.cat ?? "";
+
+          tabs.forEach(t => {
+            t.classList.toggle("hubTab--active", t === tab);
+            t.setAttribute("aria-selected", String(t === tab));
+          });
+
+          cards.forEach(card => {
+            const match = cat === "" || (card.dataset.category ?? "") === cat;
+            (card as HTMLElement).style.display = match ? "" : "none";
+          });
+        });
+      });
+    })();
+  </script>
 
   <style>
     /* ── Wrap ── */
@@ -691,12 +687,11 @@ const sections: SectionDef[] = [
       box-shadow: 0 0 0 4px rgba(255,210,74,0.22);
     }
 
-    /* ── Mobile ── */
+    /* ── Mobile (legacy section styles) ── */
     @media (max-width: 640px) {
       .ghSection { padding: 0 0 32px; }
       .ghSectionHero { min-height: 140px; }
       .ghSectionHeroContent { padding: 24px 0; }
-      /* +40% section banner neon title on mobile */
       .ghSectionHeroTitle { font-size: clamp(3.08rem, 9.8vw, 5.6rem); }
       .ghArticleGrid { gap: 14px; }
       .ghViewMoreRow { margin-top: 20px; }
@@ -704,5 +699,217 @@ const sections: SectionDef[] = [
       .ghCardDesc { font-size: 16px; }
       .ghCardBody { padding: 4px 14px 6px; gap: 3px; }
     }
+
+    /* ══════════════════════════════════════════════════════════════════
+       MEDIA HUB — shared container
+    ══════════════════════════════════════════════════════════════════ */
+    .hub { padding: 56px 0; }
+    .hub + .hub { border-top: 1px solid var(--border); }
+    .hubFeatured { background: var(--surface); }
+    .hubBrowse   { background: var(--surface2); }
+
+    .hubInner {
+      max-width: 1250px;
+      margin: 0 auto;
+      padding: 0 2.5rem;
+    }
+    @media (max-width: 768px) { .hubInner { padding: 0 1.25rem; } }
+
+    /* Section heading row */
+    .hubHead {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .hubHeadLabel {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--brand1);
+      white-space: nowrap;
+    }
+    .hubHeadLine {
+      flex: 1;
+      height: 2px;
+      background: var(--brand1);
+      border-radius: 2px;
+    }
+
+    /* Category pill */
+    .hubCategoryPill {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: #000;
+      background: var(--brand1);
+      padding: 3px 10px;
+      border-radius: 999px;
+    }
+    .hubCategoryPill--sm { font-size: 9px; padding: 2px 8px; }
+
+    /* ── Featured Hub grid ── */
+    .hubHeroGrid {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      align-items: start;
+    }
+    @media (max-width: 900px)  { .hubHeroGrid { grid-template-columns: 1fr; } }
+
+    /* Primary hero card */
+    .hubHeroCard {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--panel, var(--surface));
+      transition: box-shadow 200ms, transform 200ms;
+    }
+    .hubHeroCard:hover { box-shadow: 0 10px 36px rgba(0,0,0,.22); transform: translateY(-3px); }
+
+    .hubHeroImgWrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--surface2); }
+    .hubHeroImg { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 320ms ease; }
+    .hubHeroCard:hover .hubHeroImg { transform: scale(1.03); }
+
+    .hubHeroBody { padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 10px; }
+    .hubHeroTitle {
+      font-size: clamp(1.25rem, 2.2vw, 1.65rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin: 0;
+      transition: color 130ms;
+    }
+    .hubHeroCard:hover .hubHeroTitle { color: var(--brand1); }
+    .hubHeroDesc { font-size: 15px; color: var(--muted); line-height: 1.55; margin: 0; }
+    .hubReadMore { font-size: 13px; font-weight: 700; color: var(--brand1); margin-top: 4px; }
+
+    /* Secondary stack */
+    .hubSecondaryStack { display: flex; flex-direction: column; gap: 12px; }
+    @media (max-width: 900px) {
+      .hubSecondaryStack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    }
+    @media (max-width: 580px) {
+      .hubSecondaryStack { grid-template-columns: 1fr; }
+    }
+
+    .hubSecCard {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      text-decoration: none;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--panel, var(--surface));
+      transition: box-shadow 180ms, transform 180ms;
+    }
+    .hubSecCard:hover { box-shadow: 0 6px 20px rgba(0,0,0,.18); transform: translateY(-2px); }
+
+    @media (max-width: 900px) {
+      .hubSecCard { flex-direction: column; gap: 0; }
+    }
+
+    .hubSecImgWrap { flex-shrink: 0; width: 100px; aspect-ratio: 4/3; overflow: hidden; background: var(--surface2); }
+    .hubSecImg { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
+    .hubSecCard:hover .hubSecImg { transform: scale(1.04); }
+
+    @media (max-width: 900px) {
+      .hubSecImgWrap { width: 100%; aspect-ratio: 16/9; }
+    }
+
+    .hubSecBody { flex: 1; padding: 10px 14px 10px 0; display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    @media (max-width: 900px) { .hubSecBody { padding: 12px 14px; } }
+
+    .hubSecTitle {
+      font-size: 14px; font-weight: 800; line-height: 1.25;
+      color: var(--text); margin: 0;
+      display: -webkit-box; -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical; overflow: hidden;
+      transition: color 130ms;
+    }
+    .hubSecCard:hover .hubSecTitle { color: var(--brand1); }
+
+    /* Fallback placeholder */
+    .hubImgFallback { background: var(--surface2); }
+
+    /* ── Tab bar ── */
+    .hubTabBar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+    .hubTab {
+      display: inline-flex;
+      align-items: center;
+      height: 36px;
+      padding: 0 18px;
+      border-radius: 999px;
+      border: 2px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .04em;
+      cursor: pointer;
+      transition: background 130ms, color 130ms, border-color 130ms;
+    }
+    .hubTab:hover { border-color: var(--brand1); color: var(--text); }
+    .hubTab--active {
+      background: var(--brand1);
+      border-color: var(--brand1);
+      color: #000;
+    }
+
+    /* ── Browse card grid ── */
+    .hubBrowseGrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    @media (max-width: 860px) { .hubBrowseGrid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 540px) { .hubBrowseGrid { grid-template-columns: 1fr; gap: 14px; } }
+
+    .hubBrowseCard {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--panel, var(--surface));
+      transition: box-shadow 200ms, transform 200ms;
+    }
+    .hubBrowseCard:hover { box-shadow: 0 8px 28px rgba(0,0,0,.2); transform: translateY(-3px); }
+
+    .hubBrowseImgWrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--surface2); flex-shrink: 0; }
+    .hubBrowseImg { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
+    .hubBrowseCard:hover .hubBrowseImg { transform: scale(1.03); }
+
+    .hubBrowseBody { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 6px; flex: 1; }
+    .hubBrowseTitle {
+      font-size: 16px; font-weight: 800; line-height: 1.2;
+      color: var(--text); margin: 0;
+      display: -webkit-box; -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical; overflow: hidden;
+      transition: color 130ms;
+    }
+    .hubBrowseCard:hover .hubBrowseTitle { color: var(--brand1); }
+    .hubBrowseDesc {
+      font-size: 13px; color: var(--muted); line-height: 1.45;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+      margin: 0;
+    }
+
+    .hubEmpty { color: var(--faint); font-size: 15px; padding: 24px 0; }
   </style>
 </Base>
