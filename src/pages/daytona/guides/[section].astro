@@ -1,6 +1,7 @@
 ---
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
+import NewsletterBanner from "../../../components/NewsletterBanner.astro";
 
 export async function getStaticPaths() {
   return [
@@ -268,6 +269,8 @@ function authorSlug(name: string): string {
 
   </div>
 
+  <NewsletterBanner city="Daytona" />
+
   <style>
     /* ── Smooth scroll globally for this page ── */
     html { scroll-behavior: smooth; }
@@ -378,6 +381,7 @@ function authorSlug(name: string): string {
       display: flex;
       flex-wrap: nowrap;
       align-items: stretch;
+      justify-content: center;   /* centered on desktop */
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
@@ -389,12 +393,13 @@ function authorSlug(name: string): string {
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
-      padding: 0 18px;
-      height: 50px;
+      justify-content: center;
+      padding: 0 22px;
+      height: 64px;
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: 12px;
+      font-size: 21px;
       font-weight: 700;
-      letter-spacing: 0.08em;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
       color: var(--muted);
       text-decoration: none;
@@ -404,10 +409,10 @@ function authorSlug(name: string): string {
     }
     .ghRibbonItem + .ghRibbonItem::before {
       content: "•";
-      margin-right: 18px;
+      margin-right: 22px;
       color: var(--muted);
       opacity: 0.35;
-      font-size: 11px;
+      font-size: 16px;
     }
     .ghRibbonItem:hover {
       color: var(--text);
@@ -418,13 +423,16 @@ function authorSlug(name: string): string {
       border-bottom-color: var(--brand-color, #ffd24a);
     }
     @media (max-width: 640px) {
-      .ghRibbonItem { padding: 0 12px; font-size: 11px; height: 44px; }
+      /* Mobile: left-aligned for swipe */
+      .ghRibbon { justify-content: flex-start; }
+      .ghRibbonItem { padding: 0 14px; font-size: 14px; height: 48px; }
+      .ghRibbonItem + .ghRibbonItem::before { margin-right: 14px; font-size: 11px; }
     }
 
     /* ── Content sections ── */
     .ghSection {
       padding: 36px 0 52px;
-      scroll-margin-top: 56px; /* ribbon height */
+      scroll-margin-top: 70px; /* ribbon height (64px) + 6px buffer */
     }
     .ghSection--white { background: var(--surface); }
     .ghSection--alt   { background: var(--surface2); border-bottom: 1px solid var(--border); }
@@ -677,12 +685,18 @@ function authorSlug(name: string): string {
       return document.getElementById(item.getAttribute('data-ribbon-id') || '');
     }).filter(Boolean);
 
+    function isNearPageBottom() {
+      return window.scrollY + window.innerHeight >= document.body.scrollHeight - 50;
+    }
+
     if ('IntersectionObserver' in window && sections.length) {
       var io = new IntersectionObserver(function (entries) {
+        /* Stop forcing a section active when near the page bottom — prevents bounce */
+        if (isNearPageBottom()) return;
         entries.forEach(function (entry) {
           if (entry.isIntersecting) setActive(entry.target.id);
         });
-      }, { rootMargin: '-5% 0px -75% 0px', threshold: 0 });
+      }, { rootMargin: '-10% 0px -40% 0px', threshold: 0 });
       sections.forEach(function (s) { if (s) io.observe(s); });
     }
   })();
