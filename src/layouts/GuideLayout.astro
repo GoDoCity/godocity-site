@@ -23,9 +23,10 @@ interface Props {
   cityBase?: string;
   topic?: string;
   showToC?: boolean;
+  hideHeader?: boolean;
 }
 
-const { title, subtitle, cityBase = "daytona", topic = "", showToC = false } = Astro.props;
+const { title, subtitle, cityBase = "daytona", topic = "", showToC = false, hideHeader = false } = Astro.props;
 
 /* ── Events for sidebar ── */
 const allEvents       = await getCityEvents(cityBase);
@@ -49,16 +50,18 @@ const emoji = topicEmoji[topic] ?? "📖";
 
   <section class="gl-wrap">
 
-    <!-- ── Branding header ─────────────────────────────────────────────── -->
-    <header class="gl-header">
-      <a class="gl-pill" href={`/${cityBase}/guides/`}>Guides</a>
-      {topic && (
-        <span class="gl-topic">
-          <span class="gl-topic-emoji">{emoji}</span>
-          {topic}
-        </span>
-      )}
-    </header>
+    <!-- ── Branding header (suppressed on full article pages) ───────────── -->
+    {!hideHeader && (
+      <header class="gl-header">
+        <a class="gl-pill" href={`/${cityBase}/guides/`}>Guides</a>
+        {topic && (
+          <span class="gl-topic">
+            <span class="gl-topic-emoji">{emoji}</span>
+            {topic}
+          </span>
+        )}
+      </header>
+    )}
 
     <!-- ── Main grid ──────────────────────────────────────────────────── -->
     <div class="gl-grid">
