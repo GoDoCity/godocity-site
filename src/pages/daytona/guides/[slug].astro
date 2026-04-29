@@ -1,9 +1,4 @@
 ---
-/**
- * src/pages/daytona/guides/[slug].astro
- * Renders individual guide pages from the "guides" content collection.
- * Uses GuideLayout which provides the TOC (showToC), sidebar, and 70/30 grid.
- */
 import GuideLayout from "../../../layouts/GuideLayout.astro";
 import { getCollection } from "astro:content";
 
@@ -18,7 +13,6 @@ export async function getStaticPaths() {
 const { guide } = Astro.props;
 const { Content } = await guide.render();
 
-/* Map topic → section slug for the breadcrumb back-link */
 const topicToSection: Record<string, string> = {
   COAST: "coast",
   DRIVE: "drive",
@@ -26,6 +20,13 @@ const topicToSection: Record<string, string> = {
   LOCAL: "local",
 };
 const sectionSlug = topicToSection[guide.data.topic] ?? "coast";
+
+const pubDate = guide.data.date
+  ? guide.data.date.toLocaleDateString("en-US", {
+      year: "numeric", month: "long", day: "numeric",
+    })
+  : null;
+const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
 ---
 
 <GuideLayout
@@ -35,23 +36,46 @@ const sectionSlug = topicToSection[guide.data.topic] ?? "coast";
   topic={guide.data.topic}
   showToC={guide.data.showToC}
 >
-  <!-- Guide hero meta row -->
-  <div class="sg-meta">
-    <a class="sg-back" href={`/daytona/guides/${sectionSlug}/`}>
-      ← {guide.data.topic} Guides
-    </a>
-    {guide.data.date && (
-      <time class="sg-date" datetime={guide.data.date.toISOString()}>
-        {guide.data.date.toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })}
-      </time>
-    )}
+  <!-- Back link -->
+  <a class="sg-back" href={`/daytona/guides/${sectionSlug}/`}>
+    ← {guide.data.topic} Guides
+  </a>
+
+  <!-- Category eyebrow pill -->
+  <span class="sg-eyebrow">{guide.data.topic}</span>
+
+  <!-- H1 headline -->
+  <h1 class="sg-title">{guide.data.title}</h1>
+
+  <!-- Description / subtitle -->
+  {guide.data.description && (
+    <p class="sg-subtitle">{guide.data.description}</p>
+  )}
+
+  <!-- Byline: author + date + social icons -->
+  <div class="sg-byline">
+    <div class="sg-byline-left">
+      {guide.data.author && (
+        <span class="sg-author">{guide.data.author}</span>
+      )}
+      {pubDate && (
+        <time class="sg-date" datetime={pubDateISO ?? undefined}>{pubDate}</time>
+      )}
+    </div>
+    <div class="sg-social" aria-label="Share this article">
+      <a class="sg-social-btn" href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.url.href)}&text=${encodeURIComponent(guide.data.title)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on X / Twitter">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.747l7.73-8.835L1.254 2.25H8.08l4.261 5.636 5.903-5.636Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a class="sg-social-btn" href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(Astro.url.href)}`} target="_blank" rel="noopener noreferrer" aria-label="Share on Facebook">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </a>
+      <button class="sg-social-btn sg-copy-btn" data-url={Astro.url.href} aria-label="Copy link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      </button>
+    </div>
   </div>
 
-  <!-- Featured image (if present) -->
+  <!-- Featured hero image -->
   {guide.data.image && (
     <div class="sg-hero-img-wrap">
       <img
@@ -64,46 +88,122 @@ const sectionSlug = topicToSection[guide.data.topic] ?? "coast";
     </div>
   )}
 
-  <!-- Article title -->
-  <h1 class="sg-title">{guide.data.title}</h1>
-
-  <!-- Article body — TOC is injected by GuideLayout script before first h2 -->
+  <!-- Article body -->
   <Content />
 </GuideLayout>
 
 <style>
-  /* ── Guide meta row (back link + date) ── */
-  .sg-meta {
+  /* ── Back link ── */
+  .sg-back {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    transition: color 130ms;
+  }
+  .sg-back:hover { color: var(--text); }
+
+  /* ── Category eyebrow pill ── */
+  .sg-eyebrow {
+    display: inline-block;
+    background: #111;
+    color: #fff;
+    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+  }
+
+  /* ── H1 headline ── */
+  .sg-title {
+    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: clamp(1.9rem, 4vw, 3.2rem);
+    font-weight: 900;
+    color: var(--text);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin: 0 0 16px;
+  }
+
+  /* ── Description / subtitle ── */
+  .sg-subtitle {
+    font-size: 16px;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: #000;
+    margin: 0 0 20px;
+  }
+
+  /* ── Byline row ── */
+  .sg-byline {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
   }
-  .sg-back {
-    font-size: 13px;
+  .sg-byline-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .sg-author {
+    font-size: 14px;
     font-weight: 700;
     color: var(--text);
-    text-decoration: none;
-    letter-spacing: 0.02em;
-    transition: opacity 130ms;
+    letter-spacing: 0.01em;
   }
-  .sg-back:hover { opacity: 0.75; }
-
   .sg-date {
-    font-size: 12px;
+    font-size: 13px;
     color: var(--faint, rgba(232,237,244,.58));
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
+  }
+
+  /* ── Social icons ── */
+  .sg-social {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .sg-social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--surface2, #1c2028);
+    border: 1px solid var(--border);
+    color: var(--text);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 150ms, color 150ms;
+  }
+  .sg-social-btn:hover {
+    background: var(--brand1);
+    color: #000;
+    border-color: var(--brand1);
   }
 
   /* ── Hero image ── */
   .sg-hero-img-wrap {
     width: 100%;
     aspect-ratio: 16 / 9;
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
     background: #1c2028;
   }
   .sg-hero-img {
@@ -114,19 +214,22 @@ const sectionSlug = topicToSection[guide.data.topic] ?? "coast";
     object-position: center;
   }
 
-  /* ── Guide title ── */
-  .sg-title {
-    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-    font-size: clamp(1.9rem, 4vw, 3.2rem);
-    font-weight: 900;
-    color: var(--text);
-    line-height: 1.12;
-    letter-spacing: -0.03em;
-    margin: 0 0 28px;
-  }
-
   @media (max-width: 640px) {
-    .sg-hero-img-wrap { aspect-ratio: 4/3; }
-    .sg-title { margin-bottom: 20px; }
+    .sg-hero-img-wrap { aspect-ratio: 4/3; border-radius: 8px; }
+    .sg-title { margin-bottom: 12px; }
+    .sg-byline { flex-direction: column; align-items: flex-start; }
   }
 </style>
+
+<script>
+  /* Copy-link button */
+  document.querySelectorAll<HTMLButtonElement>(".sg-copy-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const url = btn.dataset.url ?? location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        btn.setAttribute("aria-label", "Copied!");
+        setTimeout(() => btn.setAttribute("aria-label", "Copy link"), 2000);
+      });
+    });
+  });
+</script>
