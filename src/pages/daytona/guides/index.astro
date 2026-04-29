@@ -43,10 +43,7 @@ const sections = SECTIONS
         <p class="gd-header-sub">Your definitive local source for coast, culture, and community.</p>
         <nav class="gd-header-nav" aria-label="Guide topic sections">
           {sections.map(s => (
-            <a class="gd-nav-link" href={`/daytona/guides/${s.slug}/`}
-               style={`--nav-neon: ${s.neon};`}>
-              {s.topic}
-            </a>
+            <a class="gd-nav-link" href={`/daytona/guides/${s.slug}/`}>{s.topic}</a>
           ))}
         </nav>
       </div>
@@ -82,7 +79,7 @@ const sections = SECTIONS
                     }
                   </div>
                   <div class="gd-feature-text">
-                    <span class="gd-feature-eyebrow" style={`--neon: ${s.neon};`}>{s.topic}</span>
+                    <span class="gd-feature-eyebrow">{s.topic}</span>
                     <h2 class="gd-feature-title">{feature.data.title}</h2>
                     {feature.data.description && (
                       <p class="gd-feature-desc">{feature.data.description}</p>
@@ -91,7 +88,7 @@ const sections = SECTIONS
                       {feature.data.author && <span class="gd-meta-author">{feature.data.author}</span>}
                       {feature.data.date   && <span class="gd-meta-date">{fmtDate(feature.data.date)}</span>}
                     </div>
-                    <span class="gd-feature-cta" style={`color: ${s.neon};`}>Read guide →</span>
+                    <span class="gd-feature-cta">Read guide →</span>
                   </div>
                 </a>
 
@@ -119,8 +116,7 @@ const sections = SECTIONS
 
                 <!-- View all -->
                 <div class="gd-view-more">
-                  <a href={`/daytona/guides/${s.slug}/`} class="gd-view-more-link"
-                     style={`--va-neon: ${s.neon};`}>
+                  <a href={`/daytona/guides/${s.slug}/`} class="gd-view-more-link">
                     View all {s.topic} guides →
                   </a>
                 </div>
@@ -202,26 +198,19 @@ const sections = SECTIONS
     flex-wrap: wrap;
   }
   .gd-nav-link {
-    font-family: 'Monoton', cursive;
-    font-size: 0.72rem;
-    letter-spacing: 0.06em;
-    color: #000 !important;
+    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #111;
     text-decoration: none;
-    padding: 10px 26px;
-    border: 1px solid rgba(255,255,255,0.12);
+    padding: 9px 22px;
     border-radius: 999px;
-    background: #060810;
-    -webkit-font-smoothing: antialiased;
-    text-shadow:
-      0 0 1px #fff,
-      0 0 8px var(--nav-neon, #fff),
-      0 0 18px var(--nav-neon, #fff);
-    transition: border-color 160ms, box-shadow 160ms;
+    background: #fff;
+    transition: background 160ms;
   }
-  .gd-nav-link:hover {
-    border-color: var(--nav-neon, rgba(255,255,255,0.5));
-    box-shadow: 0 0 18px color-mix(in srgb, var(--nav-neon, #fff) 30%, transparent);
-  }
+  .gd-nav-link:hover { background: #e8e8e8; }
 
   /* ─────────────────────────────────────────────
      Topic section
@@ -271,9 +260,10 @@ const sections = SECTIONS
   ───────────────────────────────────────────── */
   .gd-feature {
     display: grid;
-    grid-template-columns: 3fr 2fr;
+    grid-template-columns: 0.65fr 0.35fr;
+    height: 420px;
     text-decoration: none;
-    border-radius: 14px;
+    border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--border);
     background: var(--panel, var(--surface));
@@ -286,9 +276,9 @@ const sections = SECTIONS
   }
 
   .gd-feature-img {
-    aspect-ratio: 16 / 9;
     overflow: hidden;
     background: var(--surface2);
+    height: 100%;
   }
   .gd-feature-img img {
     display: block;
@@ -309,35 +299,31 @@ const sections = SECTIONS
   }
   .gd-feature-eyebrow {
     display: inline-block;
-    background: #060810;
-    color: #000 !important;
-    font-family: 'Monoton', cursive;
-    font-size: 0.6rem;
-    letter-spacing: 0.08em;
-    padding: 5px 14px;
+    background: #111;
+    color: #fff;
+    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 4px 12px;
     border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.1);
-    -webkit-font-smoothing: antialiased;
-    text-shadow:
-      0 0 1px #fff,
-      0 0 8px var(--neon),
-      0 0 18px var(--neon);
     align-self: flex-start;
   }
   .gd-feature-title {
     font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-    font-size: clamp(1.6rem, 2.6vw, 2.3rem);
-    font-weight: 900;
-    line-height: 1.12;
-    letter-spacing: -0.025em;
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
     color: var(--text);
     margin: 0;
     transition: color 130ms;
   }
   .gd-feature:hover .gd-feature-title { color: var(--brand1); }
   .gd-feature-desc {
-    font-size: 1.1rem;
-    line-height: 1.7;
+    font-size: 16px;
+    line-height: 1.6;
     color: var(--muted);
     margin: 0;
     display: -webkit-box;
@@ -363,9 +349,12 @@ const sections = SECTIONS
     letter-spacing: 0.02em;
   }
   .gd-feature-cta {
-    font-size: 13px;
+    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 12px;
     font-weight: 800;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brand1);
     margin-top: 4px;
     transition: opacity 130ms;
   }
@@ -375,8 +364,9 @@ const sections = SECTIONS
   @media (max-width: 960px) {
     .gd-feature {
       grid-template-columns: 1fr;
+      height: auto;
     }
-    .gd-feature-img { aspect-ratio: 16/9; }
+    .gd-feature-img { aspect-ratio: 16/9; height: auto; }
     .gd-feature-text { padding: 22px 24px 28px; gap: 10px; }
   }
 
@@ -426,9 +416,9 @@ const sections = SECTIONS
 
   .gd-card-body { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 8px; }
   .gd-card-title {
-    font-size: 17px;
+    font-size: 24px;
     font-weight: 800;
-    line-height: 1.28;
+    line-height: 1.2;
     color: var(--text);
     margin: 0;
     display: -webkit-box;
@@ -439,8 +429,8 @@ const sections = SECTIONS
   }
   .gd-card:hover .gd-card-title { color: var(--brand1); }
   .gd-card-desc {
-    font-size: 0.875rem;
-    line-height: 1.55;
+    font-size: 16px;
+    line-height: 1.6;
     color: var(--muted);
     margin: 0;
     display: -webkit-box;
@@ -465,7 +455,7 @@ const sections = SECTIONS
     text-transform: uppercase;
     color: var(--text);
     text-decoration: none;
-    border-bottom: 2px solid var(--va-neon, var(--brand1));
+    border-bottom: 2px solid var(--brand1);
     padding-bottom: 2px;
     transition: opacity 130ms;
   }
