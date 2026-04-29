@@ -269,8 +269,6 @@ function authorSlug(name: string): string {
 
   </div>
 
-  <NewsletterBanner city="Daytona" />
-
   <style>
     /* ── Smooth scroll globally for this page ── */
     html { scroll-behavior: smooth; }
@@ -375,7 +373,7 @@ function authorSlug(name: string): string {
     .ghRibbonInner {
       max-width: 1200px;
       margin: 0 auto;
-      padding: 0 18px;
+      padding: 0 18px 4px;
     }
     .ghRibbon {
       display: flex;
@@ -636,6 +634,8 @@ function authorSlug(name: string): string {
       .ghCatHeading { margin: 0 0 20px; }
     }
   </style>
+
+  <NewsletterBanner city="Daytona" />
 </Base>
 
 <script is:inline>
@@ -660,25 +660,25 @@ function authorSlug(name: string): string {
     var items = Array.prototype.slice.call(ribbon.querySelectorAll('.ghRibbonItem'));
     if (!items.length) return;
 
+    function lastItemId() {
+      return items[items.length - 1] ? items[items.length - 1].getAttribute('data-ribbon-id') || '' : '';
+    }
+
     function setActive(id) {
-      var matched = false;
+      if (!id) return;
       items.forEach(function (item) {
         var rid = item.getAttribute('data-ribbon-id') || '';
-        var active = !!id && id === rid;
+        var active = id === rid;
         item.classList.toggle('is-active', active);
-        if (active) {
-          item.scrollIntoView({ inline: 'nearest', block: 'nearest' });
-          matched = true;
-        }
+        if (active) item.scrollIntoView({ inline: 'nearest', block: 'nearest' });
       });
-      if (!matched && items[0]) items[0].classList.add('is-active');
     }
 
     function idFromHash() {
       return window.location.hash ? window.location.hash.slice(1) : null;
     }
-    setActive(idFromHash());
-    window.addEventListener('hashchange', function () { setActive(idFromHash()); });
+    setActive(idFromHash() || (items[0] && items[0].getAttribute('data-ribbon-id')) || '');
+    window.addEventListener('hashchange', function () { setActive(idFromHash() || ''); });
 
     /* ── IntersectionObserver: update active as user scrolls ── */
     var sections = items.map(function (item) {
@@ -691,12 +691,11 @@ function authorSlug(name: string): string {
 
     if ('IntersectionObserver' in window && sections.length) {
       var io = new IntersectionObserver(function (entries) {
-        /* Stop forcing a section active when near the page bottom — prevents bounce */
-        if (isNearPageBottom()) return;
+        if (isNearPageBottom()) { setActive(lastItemId()); return; }
         entries.forEach(function (entry) {
           if (entry.isIntersecting) setActive(entry.target.id);
         });
-      }, { rootMargin: '-10% 0px -40% 0px', threshold: 0 });
+      }, { rootMargin: '-10% 0px -20% 0px', threshold: 0 });
       sections.forEach(function (s) { if (s) io.observe(s); });
     }
   })();
