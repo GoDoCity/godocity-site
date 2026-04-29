@@ -16,10 +16,10 @@ function fmtDate(d: Date) {
 }
 
 const SECTIONS = [
-  { topic: "COAST" as const, slug: "coast", accent: "#0E3F6E" },
-  { topic: "DRIVE" as const, slug: "drive", accent: "#7A2F00" },
-  { topic: "SURF"  as const, slug: "surf",  accent: "#004E64" },
-  { topic: "LOCAL" as const, slug: "local", accent: "#1C3E1F" },
+  { topic: "COAST" as const, slug: "coast", accent: "#0E3F6E", neon: "#bf94ff" },
+  { topic: "DRIVE" as const, slug: "drive", accent: "#7A2F00", neon: "#00ff9d" },
+  { topic: "SURF"  as const, slug: "surf",  accent: "#004E64", neon: "#ff6ad5" },
+  { topic: "LOCAL" as const, slug: "local", accent: "#1C3E1F", neon: "#ffef78" },
 ];
 
 const sections = SECTIONS
@@ -45,7 +45,7 @@ const sections = SECTIONS
         <nav class="gd-header-nav" aria-label="Guide topic sections">
           {sections.map(s => (
             <a class="gd-nav-link" href={`/daytona/guides/${s.slug}/`}
-               style={`--nav-accent: ${s.accent};`}>
+               style={`--nav-neon: ${s.neon};`}>
               {s.topic}
             </a>
           ))}
@@ -61,7 +61,7 @@ const sections = SECTIONS
         <section class={`gd-section${i % 2 === 1 ? " gd-section--alt" : ""}`}>
 
           <!-- Full-width topic bar -->
-          <div class="gd-topic-bar" style={`background: ${s.accent};`}>
+          <div class="gd-topic-bar" style={`--neon: ${s.neon};`}>
             <span class="gd-topic-label">{s.topic}</span>
           </div>
 
@@ -102,6 +102,9 @@ const sections = SECTIONS
                     </div>
                     <div class="gd-card-body">
                       <h3 class="gd-card-title">{g.data.title}</h3>
+                      {g.data.description && (
+                        <p class="gd-card-desc">{g.data.description}</p>
+                      )}
                     </div>
                   </a>
                 ))}
@@ -191,21 +194,25 @@ const sections = SECTIONS
     flex-wrap: wrap;
   }
   .gd-nav-link {
-    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-    font-size: 0.8rem;
-    font-weight: 900;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: #fff;
+    font-family: 'Monoton', cursive;
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    color: #000 !important;
     text-decoration: none;
-    padding: 9px 24px;
-    border: 2px solid rgba(255,255,255,0.25);
+    padding: 10px 26px;
+    border: 2px solid rgba(255,255,255,0.15);
     border-radius: 999px;
-    transition: border-color 160ms, background 160ms;
+    background: rgba(255,255,255,0.04);
+    -webkit-font-smoothing: antialiased;
+    text-shadow:
+      0 0 1px #fff,
+      0 0 8px var(--nav-neon, #fff),
+      0 0 18px var(--nav-neon, #fff);
+    transition: border-color 160ms, box-shadow 160ms;
   }
   .gd-nav-link:hover {
-    border-color: var(--nav-accent, #fff);
-    background: rgba(255,255,255,0.07);
+    border-color: var(--nav-neon, #fff);
+    box-shadow: 0 0 14px rgba(255,255,255,0.12);
   }
 
   /* ─────────────────────────────────────────────
@@ -219,23 +226,29 @@ const sections = SECTIONS
     background: var(--surface2, #161b24);
   }
 
-  /* Full-width header bar */
+  /* Full-width header bar — neon identity */
   .gd-topic-bar {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 22px 2rem;
+    padding: 30px 2rem;
     width: 100%;
+    background: #060810;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
   }
   .gd-topic-label {
-    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-    font-size: clamp(2.2rem, 5vw, 4rem);
-    font-weight: 900;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: #fff;
+    font-family: 'Monoton', cursive;
+    font-size: clamp(2.6rem, 5.5vw, 5rem);
+    color: #000 !important;
     line-height: 1;
     text-align: center;
+    -webkit-font-smoothing: antialiased;
+    text-shadow:
+      0 0 2px #fff,
+      0 0 10px var(--neon),
+      0 0 28px var(--neon),
+      0 0 55px var(--neon);
   }
 
   /* Inner container */
@@ -256,7 +269,7 @@ const sections = SECTIONS
     overflow: hidden;
     border: 1px solid var(--border);
     background: var(--panel, var(--surface));
-    margin-bottom: 28px;
+    margin-bottom: 20px;
     transition: box-shadow 200ms ease, transform 200ms ease;
   }
   .gd-feature:hover {
@@ -294,22 +307,22 @@ const sections = SECTIONS
   }
   .gd-feature-title {
     font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-    font-size: clamp(1.35rem, 2.2vw, 1.9rem);
+    font-size: clamp(1.6rem, 2.6vw, 2.3rem);
     font-weight: 900;
-    line-height: 1.15;
-    letter-spacing: -0.02em;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
     color: var(--text);
     margin: 0;
     transition: color 130ms;
   }
   .gd-feature:hover .gd-feature-title { color: var(--brand1); }
   .gd-feature-desc {
-    font-size: 15px;
-    line-height: 1.65;
+    font-size: 1.1rem;
+    line-height: 1.7;
     color: var(--muted);
     margin: 0;
     display: -webkit-box;
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -392,11 +405,11 @@ const sections = SECTIONS
   }
   .gd-card:hover .gd-card-img img { transform: scale(1.04); }
 
-  .gd-card-body { padding: 12px 14px 16px; }
+  .gd-card-body { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 8px; }
   .gd-card-title {
-    font-size: 15px;
+    font-size: 17px;
     font-weight: 800;
-    line-height: 1.3;
+    line-height: 1.28;
     color: var(--text);
     margin: 0;
     display: -webkit-box;
@@ -406,6 +419,16 @@ const sections = SECTIONS
     transition: color 130ms;
   }
   .gd-card:hover .gd-card-title { color: var(--brand1); }
+  .gd-card-desc {
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--muted);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
   /* ─────────────────────────────────────────────
      Fallback & view-more
