@@ -16,6 +16,24 @@ const { Content } = await guide.render();
 function authorSlug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
+function toAnchor(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
+const topicToSection: Record<string, string> = {
+  COAST: "coast", DRIVE: "drive", SURF: "surf", LOCAL: "local",
+};
+const sectionSlug = topicToSection[guide.data.topic] ?? "coast";
+
+const topicColorMap: Record<string, string> = {
+  COAST: "#7B61FF", DRIVE: "#00E676", SURF: "#FF4081", LOCAL: "#FFD600",
+};
+const topicTextMap: Record<string, string> = {
+  COAST: "#fff", DRIVE: "#000", SURF: "#fff", LOCAL: "#000",
+};
+const topicColor     = topicColorMap[guide.data.topic] ?? "#111";
+const topicTextColor = topicTextMap[guide.data.topic]  ?? "#fff";
+const subAnchor      = guide.data.subtopic ? toAnchor(guide.data.subtopic) : null;
 
 const pubDate = guide.data.date
   ? guide.data.date.toLocaleDateString("en-US", {
@@ -34,8 +52,13 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
   hideHeader={true}
 >
   <!-- Category eyebrow pills -->
-  <div class="sg-pills">
-    <span class="sg-eyebrow">{guide.data.topic}</span>
+  <div class="sg-pills" style={`--topic-color: ${topicColor}; --topic-text: ${topicTextColor};`}>
+    <a class="sg-eyebrow sg-eyebrow--topic" href={`/daytona/guides/${sectionSlug}/`}>{guide.data.topic}</a>
+    {guide.data.subtopic && subAnchor && (
+      <a class="sg-eyebrow sg-eyebrow--sub" href={`/daytona/guides/${sectionSlug}/#${subAnchor}`}>
+        {guide.data.subtopic}
+      </a>
+    )}
   </div>
 
   <!-- H1 headline -->
@@ -96,8 +119,6 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
   }
   .sg-eyebrow {
     display: inline-block;
-    background: #111;
-    color: #fff;
     font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
     font-size: 10px;
     font-weight: 800;
@@ -105,6 +126,19 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
     text-transform: uppercase;
     padding: 4px 14px;
     border-radius: 999px;
+    text-decoration: none;
+    line-height: 1.6;
+    transition: opacity 130ms;
+  }
+  .sg-eyebrow:hover { opacity: 0.78; }
+  .sg-eyebrow--topic {
+    background: var(--topic-color, #111);
+    color: var(--topic-text, #fff);
+  }
+  .sg-eyebrow--sub {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
   }
 
   /* ── H1 headline ── */
