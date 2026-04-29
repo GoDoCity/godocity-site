@@ -4,11 +4,12 @@ topic: SURF
 featured: false
 showToC: true
 image: /images/tomoka.png
-description: A 30-mile scenic drive through ancient Florida hammock, alongside
-  the Halifax River and Tomoka State Park — the most beautiful road in Volusia
-  County.
+description: A 30-mile scenic drive through ancient Florida hammock, alongside the Halifax River and Tomoka State Park — the most beautiful road in Volusia County.
 date: 2026-03-23T10:00:00.000Z
+author: Charles King
+subtopic: Outdoors
 ---
+
 ## What Is the Ormond Loop?
 
 The Ormond Loop is a 30-mile circular scenic drive that begins and ends on Granada Boulevard in Ormond Beach. It winds through a canopy of ancient live oaks draped in Spanish moss, hugs the western shore of the Halifax River, and cuts through the heart of Tomoka State Park. Locals treat it as their secret — the kind of road that makes visitors question why they ever thought Florida was flat and featureless.
