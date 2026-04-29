@@ -23,8 +23,7 @@ const SECTIONS = [
 ];
 
 const sections = SECTIONS
-  .map(s => ({ ...s, guides: sorted.filter(g => g.data.topic === s.topic) }))
-  .filter(s => s.guides.length > 0);
+  .map(s => ({ ...s, guides: sorted.filter(g => g.data.topic === s.topic) }));
 ---
 
 <Base title="Guides — GoDo Daytona" cityBase="daytona">
@@ -55,7 +54,7 @@ const sections = SECTIONS
 
     <!-- Topic sections -->
     {sections.map((s, i) => {
-      const feature = s.guides[0];
+      const feature = s.guides[0] ?? null;
       const grid    = s.guides.slice(1, 4);
       return (
         <section class={`gd-section${i % 2 === 1 ? " gd-section--alt" : ""}`}>
@@ -67,57 +66,66 @@ const sections = SECTIONS
 
           <div class="gd-section-body">
 
-            <!-- Feature card -->
-            <a class="gd-feature" href={`/daytona/guides/${guideSlug(feature)}/`}>
-              <div class="gd-feature-img">
-                {feature.data.image
-                  ? <img src={feature.data.image} alt={feature.data.title} loading="lazy" decoding="async" />
-                  : <div class="gd-img-fallback" aria-hidden="true" />
-                }
+            {s.guides.length === 0 ? (
+              <!-- Empty state -->
+              <div class="gd-empty">
+                <p class="gd-empty-msg">{s.topic} guides coming soon — check back shortly.</p>
               </div>
-              <div class="gd-feature-text">
-                <span class="gd-feature-eyebrow" style={`color: ${s.accent};`}>{s.topic}</span>
-                <h2 class="gd-feature-title">{feature.data.title}</h2>
-                {feature.data.description && (
-                  <p class="gd-feature-desc">{feature.data.description}</p>
+            ) : (
+              <>
+                <!-- Feature card -->
+                <a class="gd-feature" href={`/daytona/guides/${guideSlug(feature)}/`}>
+                  <div class="gd-feature-img">
+                    {feature.data.image
+                      ? <img src={feature.data.image} alt={feature.data.title} loading="lazy" decoding="async" />
+                      : <div class="gd-img-fallback" aria-hidden="true" />
+                    }
+                  </div>
+                  <div class="gd-feature-text">
+                    <span class="gd-feature-eyebrow" style={`--neon: ${s.neon};`}>{s.topic}</span>
+                    <h2 class="gd-feature-title">{feature.data.title}</h2>
+                    {feature.data.description && (
+                      <p class="gd-feature-desc">{feature.data.description}</p>
+                    )}
+                    <div class="gd-feature-meta">
+                      {feature.data.author && <span class="gd-meta-author">{feature.data.author}</span>}
+                      {feature.data.date   && <span class="gd-meta-date">{fmtDate(feature.data.date)}</span>}
+                    </div>
+                    <span class="gd-feature-cta" style={`color: ${s.neon};`}>Read guide →</span>
+                  </div>
+                </a>
+
+                <!-- Small cards row -->
+                {grid.length > 0 && (
+                  <div class="gd-grid">
+                    {grid.map(g => (
+                      <a class="gd-card" href={`/daytona/guides/${guideSlug(g)}/`}>
+                        <div class="gd-card-img">
+                          {g.data.image
+                            ? <img src={g.data.image} alt={g.data.title} loading="lazy" decoding="async" />
+                            : <div class="gd-img-fallback" aria-hidden="true" />
+                          }
+                        </div>
+                        <div class="gd-card-body">
+                          <h3 class="gd-card-title">{g.data.title}</h3>
+                          {g.data.description && (
+                            <p class="gd-card-desc">{g.data.description}</p>
+                          )}
+                        </div>
+                      </a>
+                    ))}
+                  </div>
                 )}
-                <div class="gd-feature-meta">
-                  {feature.data.author && <span class="gd-meta-author">{feature.data.author}</span>}
-                  {feature.data.date   && <span class="gd-meta-date">{fmtDate(feature.data.date)}</span>}
-                </div>
-                <span class="gd-feature-cta" style={`color: ${s.accent};`}>Read guide →</span>
-              </div>
-            </a>
 
-            <!-- Small cards row -->
-            {grid.length > 0 && (
-              <div class="gd-grid">
-                {grid.map(g => (
-                  <a class="gd-card" href={`/daytona/guides/${guideSlug(g)}/`}>
-                    <div class="gd-card-img">
-                      {g.data.image
-                        ? <img src={g.data.image} alt={g.data.title} loading="lazy" decoding="async" />
-                        : <div class="gd-img-fallback" aria-hidden="true" />
-                      }
-                    </div>
-                    <div class="gd-card-body">
-                      <h3 class="gd-card-title">{g.data.title}</h3>
-                      {g.data.description && (
-                        <p class="gd-card-desc">{g.data.description}</p>
-                      )}
-                    </div>
+                <!-- View all -->
+                <div class="gd-view-more">
+                  <a href={`/daytona/guides/${s.slug}/`} class="gd-view-more-link"
+                     style={`--va-neon: ${s.neon};`}>
+                    View all {s.topic} guides →
                   </a>
-                ))}
-              </div>
+                </div>
+              </>
             )}
-
-            <!-- View all -->
-            <div class="gd-view-more">
-              <a href={`/daytona/guides/${s.slug}/`} class="gd-view-more-link"
-                 style={`--va-accent: ${s.accent};`}>
-                View all {s.topic} guides →
-              </a>
-            </div>
 
           </div>
         </section>
@@ -140,7 +148,7 @@ const sections = SECTIONS
      Breadcrumb
   ───────────────────────────────────────────── */
   .gd-breadcrumb {
-    max-width: 1250px;
+    max-width: 1300px;
     margin: 0 auto;
     padding: 14px 2rem 12px;
     display: flex;
@@ -166,7 +174,7 @@ const sections = SECTIONS
     border-bottom: 3px solid #000;
   }
   .gd-header-inner {
-    max-width: 1250px;
+    max-width: 1300px;
     margin: 0 auto;
     text-align: center;
   }
@@ -200,9 +208,9 @@ const sections = SECTIONS
     color: #000 !important;
     text-decoration: none;
     padding: 10px 26px;
-    border: 2px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.12);
     border-radius: 999px;
-    background: rgba(255,255,255,0.04);
+    background: #060810;
     -webkit-font-smoothing: antialiased;
     text-shadow:
       0 0 1px #fff,
@@ -211,8 +219,8 @@ const sections = SECTIONS
     transition: border-color 160ms, box-shadow 160ms;
   }
   .gd-nav-link:hover {
-    border-color: var(--nav-neon, #fff);
-    box-shadow: 0 0 14px rgba(255,255,255,0.12);
+    border-color: var(--nav-neon, rgba(255,255,255,0.5));
+    box-shadow: 0 0 18px color-mix(in srgb, var(--nav-neon, #fff) 30%, transparent);
   }
 
   /* ─────────────────────────────────────────────
@@ -253,7 +261,7 @@ const sections = SECTIONS
 
   /* Inner container */
   .gd-section-body {
-    max-width: 1250px;
+    max-width: 1300px;
     margin: 0 auto;
     padding: 40px 2rem 56px;
   }
@@ -263,7 +271,7 @@ const sections = SECTIONS
   ───────────────────────────────────────────── */
   .gd-feature {
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: 3fr 2fr;
     text-decoration: none;
     border-radius: 14px;
     overflow: hidden;
@@ -300,10 +308,21 @@ const sections = SECTIONS
     justify-content: center;
   }
   .gd-feature-eyebrow {
-    font-size: 11px;
-    font-weight: 900;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+    display: inline-block;
+    background: #060810;
+    color: #000 !important;
+    font-family: 'Monoton', cursive;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    -webkit-font-smoothing: antialiased;
+    text-shadow:
+      0 0 1px #fff,
+      0 0 8px var(--neon),
+      0 0 18px var(--neon);
+    align-self: flex-start;
   }
   .gd-feature-title {
     font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
@@ -440,15 +459,30 @@ const sections = SECTIONS
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 800;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--va-accent, var(--brand1));
+    color: var(--text);
     text-decoration: none;
+    border-bottom: 2px solid var(--va-neon, var(--brand1));
+    padding-bottom: 2px;
     transition: opacity 130ms;
   }
   .gd-view-more-link:hover { opacity: 0.7; }
+
+  /* Empty state */
+  .gd-empty {
+    padding: 40px 0 16px;
+    text-align: center;
+  }
+  .gd-empty-msg {
+    font-size: 1rem;
+    color: var(--muted);
+    font-style: italic;
+    letter-spacing: 0.02em;
+    margin: 0;
+  }
 
   /* ─────────────────────────────────────────────
      Mobile
