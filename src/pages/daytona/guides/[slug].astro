@@ -13,6 +13,10 @@ export async function getStaticPaths() {
 const { guide } = Astro.props;
 const { Content } = await guide.render();
 
+function authorSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+
 const topicToSection: Record<string, string> = {
   COAST: "coast",
   DRIVE: "drive",
@@ -36,13 +40,10 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
   topic={guide.data.topic}
   showToC={guide.data.showToC}
 >
-  <!-- Back link -->
-  <a class="sg-back" href={`/daytona/guides/${sectionSlug}/`}>
-    ← {guide.data.topic} Guides
-  </a>
-
-  <!-- Category eyebrow pill -->
-  <span class="sg-eyebrow">{guide.data.topic}</span>
+  <!-- Category eyebrow pills -->
+  <div class="sg-pills">
+    <span class="sg-eyebrow">{guide.data.topic}</span>
+  </div>
 
   <!-- H1 headline -->
   <h1 class="sg-title">{guide.data.title}</h1>
@@ -56,7 +57,7 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
   <div class="sg-byline">
     <div class="sg-byline-left">
       {guide.data.author && (
-        <span class="sg-author">{guide.data.author}</span>
+        <a class="sg-author" href={`/authors/${authorSlug(guide.data.author)}`}>{guide.data.author}</a>
       )}
       {pubDate && (
         <time class="sg-date" datetime={pubDateISO ?? undefined}>{pubDate}</time>
@@ -93,21 +94,13 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
 </GuideLayout>
 
 <style>
-  /* ── Back link ── */
-  .sg-back {
-    display: inline-block;
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--muted);
-    text-decoration: none;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-    margin-bottom: 18px;
-    transition: color 130ms;
+  /* ── Eyebrow pills row ── */
+  .sg-pills {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
   }
-  .sg-back:hover { color: var(--text); }
-
-  /* ── Category eyebrow pill ── */
   .sg-eyebrow {
     display: inline-block;
     background: #111;
@@ -119,7 +112,6 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
     text-transform: uppercase;
     padding: 4px 14px;
     border-radius: 999px;
-    margin-bottom: 16px;
   }
 
   /* ── H1 headline ── */
@@ -164,7 +156,10 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
     font-weight: 700;
     color: var(--text);
     letter-spacing: 0.01em;
+    text-decoration: none;
+    transition: color 130ms;
   }
+  .sg-author:hover { color: var(--brand1); }
   .sg-date {
     font-size: 13px;
     color: var(--faint, rgba(232,237,244,.58));
