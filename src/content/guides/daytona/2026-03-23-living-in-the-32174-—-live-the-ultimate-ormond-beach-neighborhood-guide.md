@@ -6,6 +6,8 @@ showToC: true
 image: /images/the-loop.webp
 description: From the "The Loop" to the downtown historic district, discover why Ormond is the "Birthplace of Speed" and a premier place to call home.
 date: 2026-03-23T13:23:00.000Z
+author: Charles King
+subtopic: Neighborhoods
 ---
 
 #Neighborhood Vibes
