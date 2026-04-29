@@ -11,852 +11,430 @@ function guideSlug(g: (typeof allGuides)[number]) {
   return g.slug.split("/").pop()!;
 }
 
-const featuredGuides = sorted.filter(g => g.data.featured === true).slice(0, 4);
+function fmtDate(d: Date) {
+  return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+}
 
 const SECTIONS = [
-  { brand: "COAST", topic: "COAST", mod: "coast", bg: "white" },
-  { brand: "DRIVE", topic: "DRIVE", mod: "drive", bg: "grey"  },
-  { brand: "SURF",  topic: "SURF",  mod: "surf",  bg: "white" },
-  { brand: "LOCAL", topic: "LOCAL", mod: "local", bg: "grey"  },
-] as const;
+  { topic: "COAST" as const, slug: "coast", accent: "#0E3F6E" },
+  { topic: "DRIVE" as const, slug: "drive", accent: "#7A2F00" },
+  { topic: "SURF"  as const, slug: "surf",  accent: "#004E64" },
+  { topic: "LOCAL" as const, slug: "local", accent: "#1C3E1F" },
+];
 
-const sectionGuides = SECTIONS.map(s => ({
-  ...s,
-  guides: sorted.filter(g => g.data.topic === s.topic),
-}));
+const sections = SECTIONS
+  .map(s => ({ ...s, guides: sorted.filter(g => g.data.topic === s.topic) }))
+  .filter(s => s.guides.length > 0);
 ---
 
-<Base
-  title="Guides"
-  cityBase="daytona"
->
-  <div class="ghWrap">
+<Base title="Guides — GoDo Daytona" cityBase="daytona">
+  <div class="gd-page">
 
-    {/* ── BREADCRUMB ── */}
-    <div class="ghGridBreadcrumb">
+    <!-- Breadcrumb -->
+    <div class="gd-breadcrumb">
       <a href="/daytona/">GoDo Daytona</a>
-      <span class="ghCrumbSep">›</span>
+      <span aria-hidden="true">›</span>
       <span>Guides</span>
     </div>
 
-    {/* ── PAGE HERO: "Daytona's Guide" banner with 4-block nav inside ── */}
-    <div class="ghPageHero">
-      <div class="ghPageHeroContent">
-        <h1 class="ghPageHeroTitle">Daytona's Guide</h1>
-        <div class="ghBlocks">
-          <a class="ghBlock ghBlock--coast" href="/daytona/guides/coast/" aria-label="COAST guides">
-            <div class="ghBlockOverlay"></div>
-            <div class="ghBlockContent">
-              <span class="ghBlockAction">COAST</span>
-            </div>
-          </a>
-          <a class="ghBlock ghBlock--drive" href="/daytona/guides/drive/" aria-label="DRIVE guides">
-            <div class="ghBlockOverlay"></div>
-            <div class="ghBlockContent">
-              <span class="ghBlockAction">DRIVE</span>
-            </div>
-          </a>
-          <a class="ghBlock ghBlock--surf" href="/daytona/guides/surf/" aria-label="SURF guides">
-            <div class="ghBlockOverlay"></div>
-            <div class="ghBlockContent">
-              <span class="ghBlockAction">SURF</span>
-            </div>
-          </a>
-          <a class="ghBlock ghBlock--local" href="/daytona/guides/local/" aria-label="LOCAL guides">
-            <div class="ghBlockOverlay"></div>
-            <div class="ghBlockContent">
-              <span class="ghBlockAction">LOCAL</span>
-            </div>
-          </a>
-        </div>
+    <!-- Page header -->
+    <header class="gd-header">
+      <div class="gd-header-inner">
+        <h1 class="gd-header-title">Daytona's Guide</h1>
+        <p class="gd-header-sub">Your definitive local source for coast, culture, and community.</p>
+        <nav class="gd-header-nav" aria-label="Guide topic sections">
+          {sections.map(s => (
+            <a class="gd-nav-link" href={`/daytona/guides/${s.slug}/`}
+               style={`--nav-accent: ${s.accent};`}>
+              {s.topic}
+            </a>
+          ))}
+        </nav>
       </div>
-    </div>
+    </header>
 
-    {/* ══ FEATURED HUB ══════════════════════════════════════════════════ */}
-    {featuredGuides.length > 0 && (
-      <section class="hub hubFeatured">
-        <div class="hubInner">
-          <div class="hubHead">
-            <span class="hubHeadLabel">Featured</span>
-            <div class="hubHeadLine" aria-hidden="true" />
+    <!-- Topic sections -->
+    {sections.map((s, i) => {
+      const feature = s.guides[0];
+      const grid    = s.guides.slice(1, 4);
+      return (
+        <section class={`gd-section${i % 2 === 1 ? " gd-section--alt" : ""}`}>
+
+          <!-- Full-width topic bar -->
+          <div class="gd-topic-bar" style={`background: ${s.accent};`}>
+            <span class="gd-topic-label">{s.topic}</span>
           </div>
 
-          <div class="hubHeroGrid">
+          <div class="gd-section-body">
 
-            {/* Primary hero card */}
-            <a class="hubHeroCard" href={`/daytona/guides/${guideSlug(featuredGuides[0])}/`}>
-              <div class="hubHeroImgWrap">
-                {featuredGuides[0].data.image
-                  ? <img class="hubHeroImg" src={featuredGuides[0].data.image} alt={featuredGuides[0].data.title} loading="eager" decoding="async" />
-                  : <div class="hubHeroImg hubImgFallback" aria-hidden="true" />
+            <!-- Feature card -->
+            <a class="gd-feature" href={`/daytona/guides/${guideSlug(feature)}/`}>
+              <div class="gd-feature-img">
+                {feature.data.image
+                  ? <img src={feature.data.image} alt={feature.data.title} loading="lazy" decoding="async" />
+                  : <div class="gd-img-fallback" aria-hidden="true" />
                 }
               </div>
-              <div class="hubHeroBody">
-                {featuredGuides[0].data.topic && (
-                  <span class="hubCategoryPill">{featuredGuides[0].data.topic}</span>
+              <div class="gd-feature-text">
+                <span class="gd-feature-eyebrow" style={`color: ${s.accent};`}>{s.topic}</span>
+                <h2 class="gd-feature-title">{feature.data.title}</h2>
+                {feature.data.description && (
+                  <p class="gd-feature-desc">{feature.data.description}</p>
                 )}
-                <h2 class="hubHeroTitle">{featuredGuides[0].data.title}</h2>
-                {featuredGuides[0].data.description && (
-                  <p class="hubHeroDesc">{featuredGuides[0].data.description}</p>
-                )}
-                <span class="hubReadMore">Read guide →</span>
+                <div class="gd-feature-meta">
+                  {feature.data.author && <span class="gd-meta-author">{feature.data.author}</span>}
+                  {feature.data.date   && <span class="gd-meta-date">{fmtDate(feature.data.date)}</span>}
+                </div>
+                <span class="gd-feature-cta" style={`color: ${s.accent};`}>Read guide →</span>
               </div>
             </a>
 
-            {/* Secondary stack (up to 3) */}
-            {featuredGuides.length > 1 && (
-              <div class="hubSecondaryStack">
-                {featuredGuides.slice(1).map(g => (
-                  <a class="hubSecCard" href={`/daytona/guides/${guideSlug(g)}/`}>
-                    <div class="hubSecImgWrap">
+            <!-- Small cards row -->
+            {grid.length > 0 && (
+              <div class="gd-grid">
+                {grid.map(g => (
+                  <a class="gd-card" href={`/daytona/guides/${guideSlug(g)}/`}>
+                    <div class="gd-card-img">
                       {g.data.image
-                        ? <img class="hubSecImg" src={g.data.image} alt={g.data.title} loading="lazy" decoding="async" />
-                        : <div class="hubSecImg hubImgFallback" aria-hidden="true" />
+                        ? <img src={g.data.image} alt={g.data.title} loading="lazy" decoding="async" />
+                        : <div class="gd-img-fallback" aria-hidden="true" />
                       }
                     </div>
-                    <div class="hubSecBody">
-                      {g.data.topic && <span class="hubCategoryPill hubCategoryPill--sm">{g.data.topic}</span>}
-                      <h3 class="hubSecTitle">{g.data.title}</h3>
+                    <div class="gd-card-body">
+                      <h3 class="gd-card-title">{g.data.title}</h3>
                     </div>
                   </a>
                 ))}
               </div>
             )}
 
-          </div>
-        </div>
-      </section>
-    )}
-
-    {/* ══ CATEGORY SECTIONS ══════════════════════════════════════════════ */}
-    {sectionGuides.map(s => s.guides.length > 0 && (
-      <section class={`hub hubCat hubCat--${s.bg}`}>
-        <div class="hubInner">
-
-          <div class="hubCatHead hubCatHead--${s.mod}">
-            <span class="hubCatBrand">{s.brand}</span>
-          </div>
-
-          <div class="hubCatGrid">
-            {s.guides.map(g => (
-              <a class="hubCatCard" href={`/daytona/guides/${guideSlug(g)}/`}>
-                <div class="hubCatImgWrap">
-                  {g.data.image
-                    ? <img class="hubCatImg" src={g.data.image} alt={g.data.title} loading="lazy" decoding="async" />
-                    : <div class="hubCatImg hubImgFallback" aria-hidden="true" />
-                  }
-                </div>
-                <div class="hubCatBody">
-                  <h3 class="hubCatTitle">{g.data.title}</h3>
-                  {g.data.description && <p class="hubCatDesc">{g.data.description}</p>}
-                </div>
-
+            <!-- View all -->
+            <div class="gd-view-more">
+              <a href={`/daytona/guides/${s.slug}/`} class="gd-view-more-link"
+                 style={`--va-accent: ${s.accent};`}>
+                View all {s.topic} guides →
               </a>
-            ))}
+            </div>
+
           </div>
-
-        </div>
-      </section>
-    ))}
-
-  </div>{/* end .ghWrap */}
-
-  <style>
-    /* ── Wrap ── */
-    .ghWrap { min-height: 100vh; }
-
-    /* ── Breadcrumb (above hero) ── */
-    .ghGridBreadcrumb {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--faint);
-      padding: 14px 24px 10px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-    }
-    .ghGridBreadcrumb a { color: var(--text); text-decoration: none; }
-    .ghGridBreadcrumb a:hover { text-decoration: underline; }
-    .ghCrumbSep { opacity: .5; }
-
-    /* ══ PAGE HERO — "Daytona's Guide" banner with nav blocks ══════════ */
-    .ghPageHero {
-      position: relative;
-      width: 100%;
-      min-height: 320px;
-      display: flex;
-      align-items: stretch;
-      background: #000000 !important;
-      background-color: #000000 !important;
-      border-bottom: 3px solid #000;
-      box-shadow: none !important;
-      overflow: hidden;
-    }
-
-    .ghPageHeroContent {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: var(--max, 1360px);
-      margin: 0 auto;
-      padding: 40px 24px 28px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 6px;
-      text-align: center;
-    }
-
-    .ghPageHeroTitle {
-      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(3.25rem, 6.875vw, 5.25rem);
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: #ffffff;
-      margin: 0 auto;
-      line-height: 1;
-      text-shadow: 0 2px 20px rgba(0,0,0,0.7), 0 0 40px rgba(255,210,74,0.18);
-      text-align: center;
-      width: 100%;
-    }
-
-    .ghPageHeroTagline {
-      font-size: clamp(0.88rem, 1.5vw, 1.05rem);
-      color: rgba(255,255,255,0.72);
-      margin: 0 0 18px;
-      font-weight: 400;
-      text-shadow: 0 1px 6px rgba(0,0,0,0.4);
-      text-align: center;
-    }
-
-    /* 4-block nav row inside hero */
-    .ghBlocks {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      width: 100%;
-    }
-
-    .ghBlock {
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      text-decoration: none;
-      background-color: #1c2028;
-      border-radius: 16px;
-      border: none;
-      min-height: 72px;
-      transition: box-shadow 220ms ease, transform 160ms ease;
-    }
-    .ghBlock:hover {
-      box-shadow: 0 6px 24px rgba(0,0,0,0.35);
-      transform: translateY(-2px);
-    }
-
-    /* Spring Glow pastel neon rings — temporary Easter override */
-    .ghBlock--coast    {
-      --block-bg-img: url('/images/guides/coast-bg.jpg');
-      --pill-color: #bf94ff;
-      background-color: #1e2530;
-      border-radius: 16px;
-      box-shadow:
-        0 0 10px rgba(191,148,255,0.5),
-        0 0 24px rgba(191,148,255,0.25);
-    }
-    .ghBlock--coast:hover {
-      box-shadow:
-        0 0 22px rgba(191,148,255,0.75),
-        0 0 45px rgba(191,148,255,0.4),
-        0 6px 24px rgba(0,0,0,0.35);
-    }
-    .ghBlock--drive    {
-      --block-bg-img: url('/images/guides/drive-bg.jpg');
-      --pill-color: #00ff9d;
-      background-color: #1a2020;
-      border-radius: 16px;
-      box-shadow:
-        0 0 10px rgba(0,255,157,0.5),
-        0 0 24px rgba(0,255,157,0.25);
-    }
-    .ghBlock--drive:hover {
-      box-shadow:
-        0 0 22px rgba(0,255,157,0.75),
-        0 0 45px rgba(0,255,157,0.4),
-        0 6px 24px rgba(0,0,0,0.35);
-    }
-    .ghBlock--surf     {
-      --block-bg-img: url('/images/guides/surf-bg.jpg');
-      --pill-color: #ff6ad5;
-      background-color: #1c2030;
-      border-radius: 16px;
-      box-shadow:
-        0 0 10px rgba(255,106,213,0.5),
-        0 0 24px rgba(255,106,213,0.25);
-    }
-    .ghBlock--surf:hover {
-      box-shadow:
-        0 0 22px rgba(255,106,213,0.75),
-        0 0 45px rgba(255,106,213,0.4),
-        0 6px 24px rgba(0,0,0,0.35);
-    }
-    .ghBlock--local {
-      --block-bg-img: url('/images/guides/essentials-bg.jpg');
-      --pill-color: #ffef78;
-      background-color: #201c28;
-      border-radius: 16px;
-      box-shadow:
-        0 0 10px rgba(255,239,120,0.5),
-        0 0 24px rgba(255,239,120,0.25);
-    }
-    .ghBlock--local:hover {
-      box-shadow:
-        0 0 22px rgba(255,239,120,0.75),
-        0 0 45px rgba(255,239,120,0.4),
-        0 6px 24px rgba(0,0,0,0.35);
-    }
-
-    .ghBlockOverlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(160deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.80) 100%);
-      transition: background 280ms ease;
-    }
-    .ghBlock:hover .ghBlockOverlay {
-      background: linear-gradient(160deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.38) 60%, rgba(0,0,0,0.65) 100%);
-    }
-    .ghBlock::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background-image: var(--block-bg-img, none);
-      background-size: cover;
-      background-position: center;
-      transition: transform 380ms ease;
-    }
-    .ghBlock:hover::before { transform: scale(1.04); }
-
-    .ghBlockContent {
-      position: relative;
-      z-index: 1;
-      padding: 10px 14px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      text-align: center;
-    }
-    .ghBlockAction {
-      display: block;
-      font-family: 'Monoton', cursive;
-      font-size: clamp(1.4rem, 2.4vw, 2.2rem);
-      font-weight: 900;
-      letter-spacing: 1px;
-      color: #000000 !important;
-      line-height: 1.1;
-      text-align: center;
-      -webkit-font-smoothing: antialiased;
-      text-shadow: 0 0 1px #FFFFFF, 0 0 8px var(--pill-color), 0 0 15px var(--pill-color);
-      transition: color 200ms ease, text-shadow 200ms ease;
-    }
-    .ghBlockCategory {
-      display: block;
-      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.12em;
-      color: var(--text);
-      line-height: 1;
-      text-align: center;
-      width: 100%;
-      margin: 2px auto 0;
-    }
-    .ghBlock:hover .ghBlockAction   { color: #ffffff !important; text-shadow: 0 0 1px rgba(0,0,0,.5), 0 0 8px rgba(0,119,190,.8), 0 0 15px rgba(0,169,206,.6); }
-    .ghBlock:hover .ghBlockCategory { color: rgba(255,255,255,0.85); }
-
-    @media (max-width: 860px) {
-      .ghBlocks { grid-template-columns: 1fr 1fr; gap: 8px; }
-    }
-    @media (max-width: 640px) {
-      .ghBlocks { grid-template-columns: 1fr 1fr; gap: 6px; }
-      .ghBlock { min-height: 58px; }
-      .ghBlockContent { padding: 8px 10px; }
-      /* +40% neon title scaling on mobile — plenty of horizontal room */
-      .ghBlockAction { font-size: clamp(1.96rem, 5vw, 3.08rem); }
-      .ghBlockCategory { font-size: 1rem; }
-      .ghPageHeroContent { padding: 28px 16px 20px; }
-      .ghPageHeroTagline { margin-bottom: 12px; }
-      /* Mobile ribbon: no wrap, horizontal swipe */
-      .ghSubRibbon {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        justify-content: flex-start;
-        -webkit-overflow-scrolling: touch;
-      }
-      .ghSubRibbonItem {
-        padding: 0 14px;
-        font-size: 14px;
-        height: 48px;
-        flex-shrink: 0;
-        white-space: nowrap;
-      }
-    }
-
-    @media (max-width: 599px) {
-      /* Prevent neon words from wrapping on very small screens */
-      .ghBlockAction { font-size: clamp(1.1rem, 4vw, 1.5rem) !important; }
-      .ghSectionHeroTitle { font-size: clamp(1.6rem, 6.5vw, 2.4rem) !important; }
-    }
-
-    /* ══ END PAGE HERO ═══════════════════════════════════════════════════ */
-
-    /* ── Section shells ── */
-    .ghSection { padding: 0 0 48px; }
-    .ghSection--white { background: var(--surface); }
-    .ghSection--grey  { background: var(--surface2); border-bottom: 1px solid var(--border); }
-
-    /* ── Wide category hero photo banner ── */
-    .ghSectionHero {
-      position: relative;
-      width: 100%;
-      min-height: 200px;
-      display: flex;
-      align-items: center;
-      background-color: #2E3E52;
-      background-size: cover;
-      background-position: center;
-      border-top: 3px solid #000;
-      border-bottom: 3px solid #000;
-      margin-bottom: 0;
-    }
-
-    /* Background images — drop matching files into /public/images/guides/ */
-    .ghSectionHero--live { background-image: url('/images/guides/coast-banner.jpg'); }
-    .ghSectionHero--work { background-image: url('/images/guides/drive-banner.jpg'); }
-    .ghSectionHero--play { background-image: url('/images/guides/surf-banner.jpg');  }
-    .ghSectionHero--best { background-image: url('/images/guides/essentials-banner.jpg'); }
-
-    .ghSectionHeroOverlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        100deg,
-        rgba(0,0,0,0.72) 0%,
-        rgba(0,0,0,0.42) 55%,
-        rgba(0,0,0,0.22) 100%
+        </section>
       );
-    }
+    })}
 
-    .ghSectionHeroContent {
-      position: relative;
-      z-index: 1;
-      padding: 36px 0;
-      text-align: center;
-    }
-
-    .ghSectionHero--live { --pill-color: #bf94ff; }
-    .ghSectionHero--work { --pill-color: #00ff9d; }
-    .ghSectionHero--play { --pill-color: #ff6ad5; }
-    .ghSectionHero--best { --pill-color: #ffef78; }
-
-    .ghSectionHeroTitle {
-      font-family: 'Monoton', cursive;
-      font-size: clamp(2.2rem, 5vw, 4rem);
-      font-weight: 900;
-      letter-spacing: 1px;
-      color: #000000 !important;
-      margin: 0 auto;
-      line-height: 1.1;
-      text-align: center;
-      -webkit-font-smoothing: antialiased;
-      text-shadow: 0 0 1px #FFFFFF, 0 0 8px var(--pill-color), 0 0 15px var(--pill-color);
-    }
-
-    /* ── Subcategory ribbon (below hero banner) ── */
-    .ghSubRibbonOuter {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      background: var(--surface);
-      border-bottom: 2px solid var(--border);
-      margin-bottom: 28px;
-    }
-    .ghSection--grey .ghSubRibbonOuter {
-      background: var(--surface2);
-    }
-    /* Force ribbon inner container to be centered and full-width */
-    .ghSubRibbonOuter .container {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-    }
-
-    .ghSubRibbon {
-      display: flex;
-      flex-wrap: nowrap;
-      align-items: stretch;
-      justify-content: center;
-      width: 100%;
-      margin: 0 auto;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-    .ghSubRibbon::-webkit-scrollbar { display: none; }
-
-    .ghSubRibbonItem {
-      flex-shrink: 0;
-      display: inline-flex;
-      align-items: center;
-      padding: 0 20px;
-      height: 56px;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      border-bottom: 3px solid transparent;
-      transition: color 140ms ease, border-color 140ms ease;
-      white-space: nowrap;
-    }
-    /* Dot separator — replaces border-left */
-    .ghSubRibbonItem + .ghSubRibbonItem::before {
-      content: "•";
-      margin-right: 20px;
-      color: var(--muted);
-      opacity: 0.5;
-      font-weight: 400;
-      font-size: 14px;
-    }
-    .ghSubRibbonItem:hover {
-      color: var(--text);
-      border-bottom-color: var(--text);
-    }
-
-    /* ── 2×2 article grid (4 articles per category section) ── */
-    .ghArticleGrid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-
-    @media (max-width: 480px) {
-      .ghArticleGrid { grid-template-columns: 1fr; }
-    }
-
-    /* ── Article card ── */
-    .ghArticleCard {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      text-decoration: none;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: var(--panel);
-      transition: box-shadow 200ms ease, transform 200ms ease;
-    }
-    .ghArticleCard:hover {
-      box-shadow: 0 8px 28px rgba(0,0,0,0.28);
-      transform: translateY(-3px);
-    }
-
-    .ghCardImgWrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 16 / 7.26;
-      overflow: hidden;
-      background: var(--surface2);
-      flex-shrink: 0;
-    }
-    .ghCardImg {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      transition: transform 320ms ease;
-    }
-    .ghArticleCard:hover .ghCardImg { transform: scale(1.04); }
-    .ghCardImgFallback {
-      display: none;
-      position: absolute;
-      inset: 0;
-      background: var(--surface2);
-    }
-
-    .ghCardBody {
-      padding: 3px 22px 5px;
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-      flex: 1;
-    }
-    .ghCardTitle {
-      font-size: 24px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.25;
-      margin: 0;
-      transition: color 130ms ease;
-    }
-    .ghArticleCard:hover .ghCardTitle { color: var(--muted); }
-    .ghCardDesc {
-      font-size: 17px;
-      color: var(--color-text-main);
-      line-height: 1.5;
-      margin: 0;
-    }
-    .ghCardExternalBadge {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 0.06em;
-      margin-top: auto;
-      padding-top: 8px;
-    }
-
-    /* ── View More button ── */
-    .ghViewMoreRow {
-      margin-top: 28px;
-      text-align: center;
-      padding-bottom: 4px;
-    }
-    .ghViewMoreBtn {
-      display: inline-flex;
-      align-items: center;
-      height: 42px;
-      padding: 0 28px;
-      border-radius: 999px;
-      border: 2px solid var(--line);
-      background: transparent;
-      color: var(--text);
-      font-size: 14px;
-      font-weight: 800;
-      text-decoration: none;
-      letter-spacing: 0.03em;
-      transition: background 140ms ease, color 140ms ease, box-shadow 140ms ease;
-    }
-    .ghViewMoreBtn:hover {
-      background: var(--accent);
-      color: var(--text);
-      box-shadow: 0 0 0 4px rgba(255,210,74,0.22);
-    }
-
-    /* ── Mobile (legacy section styles) ── */
-    @media (max-width: 640px) {
-      .ghSection { padding: 0 0 32px; }
-      .ghSectionHero { min-height: 140px; }
-      .ghSectionHeroContent { padding: 24px 0; }
-      .ghSectionHeroTitle { font-size: clamp(3.08rem, 9.8vw, 5.6rem); }
-      .ghArticleGrid { gap: 14px; }
-      .ghViewMoreRow { margin-top: 20px; }
-      .ghCardTitle { font-size: 18px; }
-      .ghCardDesc { font-size: 16px; }
-      .ghCardBody { padding: 4px 14px 6px; gap: 3px; }
-    }
-
-    /* ══════════════════════════════════════════════════════════════════
-       MEDIA HUB — shared container
-    ══════════════════════════════════════════════════════════════════ */
-    .hub { padding: 56px 0; }
-    .hub + .hub { border-top: 1px solid var(--border); }
-    .hubFeatured  { background: var(--surface); }
-    .hubCat--white { background: var(--surface); }
-    .hubCat--grey  { background: var(--surface2); }
-
-    .hubInner {
-      max-width: 1250px;
-      margin: 0 auto;
-      padding: 0 2.5rem;
-    }
-    @media (max-width: 768px) { .hubInner { padding: 0 1.25rem; } }
-
-    /* Section heading row */
-    .hubHead {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-    .hubHeadLabel {
-      font-size: 11px;
-      font-weight: 900;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      color: var(--brand1);
-      white-space: nowrap;
-    }
-    .hubHeadLine {
-      flex: 1;
-      height: 2px;
-      background: var(--brand1);
-      border-radius: 2px;
-    }
-
-    /* Category pill */
-    .hubCategoryPill {
-      display: inline-block;
-      font-size: 10px;
-      font-weight: 900;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: #000;
-      background: var(--brand1);
-      padding: 3px 10px;
-      border-radius: 999px;
-    }
-    .hubCategoryPill--sm { font-size: 9px; padding: 2px 8px; }
-
-    /* ── Featured Hub grid ── */
-    .hubHeroGrid {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 20px;
-      align-items: start;
-    }
-    @media (max-width: 900px)  { .hubHeroGrid { grid-template-columns: 1fr; } }
-
-    /* Primary hero card */
-    .hubHeroCard {
-      display: flex;
-      flex-direction: column;
-      text-decoration: none;
-      border-radius: 16px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: var(--panel, var(--surface));
-      transition: box-shadow 200ms, transform 200ms;
-    }
-    .hubHeroCard:hover { box-shadow: 0 10px 36px rgba(0,0,0,.22); transform: translateY(-3px); }
-
-    .hubHeroImgWrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--surface2); }
-    .hubHeroImg { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 320ms ease; }
-    .hubHeroCard:hover .hubHeroImg { transform: scale(1.03); }
-
-    .hubHeroBody { padding: 24px 28px 28px; display: flex; flex-direction: column; gap: 10px; }
-    .hubHeroTitle {
-      font-size: clamp(1.25rem, 2.2vw, 1.65rem);
-      font-weight: 800;
-      line-height: 1.15;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      margin: 0;
-      transition: color 130ms;
-    }
-    .hubHeroCard:hover .hubHeroTitle { color: var(--brand1); }
-    .hubHeroDesc { font-size: 15px; color: var(--muted); line-height: 1.55; margin: 0; }
-    .hubReadMore { font-size: 13px; font-weight: 700; color: var(--brand1); margin-top: 4px; }
-
-    /* Secondary stack — all images 16:9 */
-    .hubSecondaryStack { display: flex; flex-direction: column; gap: 12px; }
-    @media (max-width: 900px) {
-      .hubSecondaryStack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-    }
-    @media (max-width: 580px) { .hubSecondaryStack { grid-template-columns: 1fr; } }
-
-    .hubSecCard {
-      display: flex;
-      flex-direction: column;
-      text-decoration: none;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: var(--panel, var(--surface));
-      transition: box-shadow 180ms, transform 180ms;
-    }
-    .hubSecCard:hover { box-shadow: 0 6px 20px rgba(0,0,0,.18); transform: translateY(-2px); }
-
-    .hubSecImgWrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--surface2); flex-shrink: 0; }
-    .hubSecImg { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
-    .hubSecCard:hover .hubSecImg { transform: scale(1.04); }
-
-    .hubSecBody { padding: 10px 14px 12px; display: flex; flex-direction: column; gap: 5px; }
-    .hubSecTitle {
-      font-size: 14px; font-weight: 800; line-height: 1.25;
-      color: var(--text); margin: 0;
-      display: -webkit-box; -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical; overflow: hidden;
-      transition: color 130ms;
-    }
-    .hubSecCard:hover .hubSecTitle { color: var(--brand1); }
-
-    /* Fallback placeholder */
-    .hubImgFallback { background: var(--surface2); }
-
-    /* ── Category magazine sections ── */
-    .hubCat { padding: 48px 0; }
-
-    .hubCatHead {
-      display: flex;
-      align-items: baseline;
-      gap: 14px;
-      padding-bottom: 14px;
-      border-bottom: 3px solid var(--brand1);
-      margin-bottom: 28px;
-    }
-    .hubCatBrand {
-      font-family: 'Monoton', cursive;
-      font-size: clamp(1.4rem, 3vw, 2rem);
-      font-weight: 900;
-      color: var(--text);
-      letter-spacing: .04em;
-      line-height: 1;
-    }
-    .hubCatLabel {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    /* 3-col card grid for categories */
-    .hubCatGrid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 20px;
-    }
-    @media (max-width: 860px) { .hubCatGrid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 540px) { .hubCatGrid { grid-template-columns: 1fr; gap: 14px; } }
-
-    .hubCatCard {
-      display: flex;
-      flex-direction: column;
-      text-decoration: none;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: var(--panel, var(--surface));
-      transition: box-shadow 200ms, transform 200ms;
-    }
-    .hubCatCard:hover { box-shadow: 0 8px 28px rgba(0,0,0,.2); transform: translateY(-3px); }
-
-    .hubCatImgWrap { width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--surface2); flex-shrink: 0; }
-    .hubCatImg { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
-    .hubCatCard:hover .hubCatImg { transform: scale(1.03); }
-
-    .hubCatBody { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
-    .hubCatTitle {
-      font-size: 15px; font-weight: 800; line-height: 1.25;
-      color: var(--text); margin: 0;
-      display: -webkit-box; -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical; overflow: hidden;
-      transition: color 130ms;
-    }
-    .hubCatCard:hover .hubCatTitle { color: var(--brand1); }
-    .hubCatDesc {
-      font-size: 13px; color: var(--muted); line-height: 1.45;
-      display: -webkit-box; -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical; overflow: hidden;
-      margin: 0;
-    }
-
-    @media (max-width: 640px) { .hubCat { padding: 32px 0; } }
-  </style>
+  </div>
 </Base>
+
+<style>
+  /* ─────────────────────────────────────────────
+     Page shell
+  ───────────────────────────────────────────── */
+  .gd-page {
+    min-height: 100vh;
+    background: var(--surface);
+  }
+
+  /* ─────────────────────────────────────────────
+     Breadcrumb
+  ───────────────────────────────────────────── */
+  .gd-breadcrumb {
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 14px 2rem 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--faint, rgba(232,237,244,.55));
+    border-bottom: 1px solid var(--border);
+  }
+  .gd-breadcrumb a {
+    color: var(--text);
+    text-decoration: none;
+  }
+  .gd-breadcrumb a:hover { text-decoration: underline; }
+
+  /* ─────────────────────────────────────────────
+     Page header
+  ───────────────────────────────────────────── */
+  .gd-header {
+    background: #000;
+    padding: 52px 2rem 40px;
+    border-bottom: 3px solid #000;
+  }
+  .gd-header-inner {
+    max-width: 1250px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  .gd-header-title {
+    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #fff;
+    margin: 0 0 10px;
+    line-height: 1;
+  }
+  .gd-header-sub {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.55);
+    margin: 0 0 28px;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+  }
+  .gd-header-nav {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .gd-nav-link {
+    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #fff;
+    text-decoration: none;
+    padding: 9px 24px;
+    border: 2px solid rgba(255,255,255,0.25);
+    border-radius: 999px;
+    transition: border-color 160ms, background 160ms;
+  }
+  .gd-nav-link:hover {
+    border-color: var(--nav-accent, #fff);
+    background: rgba(255,255,255,0.07);
+  }
+
+  /* ─────────────────────────────────────────────
+     Topic section
+  ───────────────────────────────────────────── */
+  .gd-section {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+  .gd-section--alt {
+    background: var(--surface2, #161b24);
+  }
+
+  /* Full-width header bar */
+  .gd-topic-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 22px 2rem;
+    width: 100%;
+  }
+  .gd-topic-label {
+    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: clamp(2.2rem, 5vw, 4rem);
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #fff;
+    line-height: 1;
+    text-align: center;
+  }
+
+  /* Inner container */
+  .gd-section-body {
+    max-width: 1250px;
+    margin: 0 auto;
+    padding: 40px 2rem 56px;
+  }
+
+  /* ─────────────────────────────────────────────
+     Feature card  (horizontal: image left, text right)
+  ───────────────────────────────────────────── */
+  .gd-feature {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    text-decoration: none;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--panel, var(--surface));
+    margin-bottom: 28px;
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+  .gd-feature:hover {
+    box-shadow: 0 12px 42px rgba(0,0,0,0.28);
+    transform: translateY(-3px);
+  }
+
+  .gd-feature-img {
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--surface2);
+  }
+  .gd-feature-img img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 360ms ease;
+  }
+  .gd-feature:hover .gd-feature-img img { transform: scale(1.04); }
+
+  .gd-feature-text {
+    padding: 36px 36px 36px 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    justify-content: center;
+  }
+  .gd-feature-eyebrow {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .gd-feature-title {
+    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+    font-size: clamp(1.35rem, 2.2vw, 1.9rem);
+    font-weight: 900;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin: 0;
+    transition: color 130ms;
+  }
+  .gd-feature:hover .gd-feature-title { color: var(--brand1); }
+  .gd-feature-desc {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--muted);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .gd-feature-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+  }
+  .gd-meta-author {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .gd-meta-date {
+    font-size: 12px;
+    color: var(--faint, rgba(232,237,244,.55));
+    letter-spacing: 0.02em;
+  }
+  .gd-feature-cta {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    margin-top: 4px;
+    transition: opacity 130ms;
+  }
+  .gd-feature:hover .gd-feature-cta { opacity: 0.75; }
+
+  /* Responsive: stack on smaller screens */
+  @media (max-width: 960px) {
+    .gd-feature {
+      grid-template-columns: 1fr;
+    }
+    .gd-feature-img { aspect-ratio: 16/9; }
+    .gd-feature-text { padding: 22px 24px 28px; gap: 10px; }
+  }
+
+  /* ─────────────────────────────────────────────
+     Small cards grid (3 columns)
+  ───────────────────────────────────────────── */
+  .gd-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 860px) { .gd-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .gd-grid { grid-template-columns: 1fr; gap: 14px; } }
+
+  .gd-card {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--panel, var(--surface));
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+  .gd-card:hover {
+    box-shadow: 0 8px 28px rgba(0,0,0,.22);
+    transform: translateY(-2px);
+  }
+
+  .gd-card-img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+  .gd-card-img img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 300ms ease;
+  }
+  .gd-card:hover .gd-card-img img { transform: scale(1.04); }
+
+  .gd-card-body { padding: 12px 14px 16px; }
+  .gd-card-title {
+    font-size: 15px;
+    font-weight: 800;
+    line-height: 1.3;
+    color: var(--text);
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 130ms;
+  }
+  .gd-card:hover .gd-card-title { color: var(--brand1); }
+
+  /* ─────────────────────────────────────────────
+     Fallback & view-more
+  ───────────────────────────────────────────── */
+  .gd-img-fallback { width: 100%; height: 100%; background: var(--surface2); }
+
+  .gd-view-more { text-align: right; }
+  .gd-view-more-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--va-accent, var(--brand1));
+    text-decoration: none;
+    transition: opacity 130ms;
+  }
+  .gd-view-more-link:hover { opacity: 0.7; }
+
+  /* ─────────────────────────────────────────────
+     Mobile
+  ───────────────────────────────────────────── */
+  @media (max-width: 640px) {
+    .gd-header { padding: 36px 1rem 28px; }
+    .gd-header-sub { display: none; }
+    .gd-topic-bar { padding: 16px 1rem; }
+    .gd-section-body { padding: 28px 1rem 40px; }
+    .gd-breadcrumb { padding: 12px 1rem; }
+  }
+</style>
