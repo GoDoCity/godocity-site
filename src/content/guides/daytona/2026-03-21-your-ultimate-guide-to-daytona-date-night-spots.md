@@ -1,11 +1,13 @@
 ---
-title: "Your Ultimate Guide to Daytona — Play: Date Night Spots"
+title: 'Your Ultimate Guide to Daytona — Play: Date Night Spots'
 topic: SURF
 featured: true
 showToC: true
 image: /images/dinning-guide-1.webp
 description: From sunset cocktails on the Intracoastal to hidden gem bistros in Ormond, we've scouted the perfect spots for your next night out.
 date: 2026-03-21T12:38:00.000Z
+author: Charles King
+subtopic: Dining
 ---
 
 ## The Sunset Seekers
