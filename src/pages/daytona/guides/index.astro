@@ -71,44 +71,50 @@ const sections = SECTIONS
               </div>
             ) : (
               <>
-                <!-- Feature card -->
+                <!-- Feature card — full width, text above photo -->
                 <a class="gd-feature" href={`/daytona/guides/${guideSlug(feature)}/`}>
+                  <div class="gd-feature-text">
+                    <span class="gd-eyebrow">{s.topic}</span>
+                    <h2 class="gd-feature-title">{feature.data.title}</h2>
+                    {feature.data.description && (
+                      <p class="gd-feature-desc">{feature.data.description}</p>
+                    )}
+                    <div class="gd-meta">
+                      {feature.data.author && <span class="gd-meta-author">{feature.data.author}</span>}
+                      {feature.data.author && feature.data.date && <span class="gd-meta-sep">·</span>}
+                      {feature.data.date && <span class="gd-meta-date">{fmtDate(feature.data.date)}</span>}
+                    </div>
+                  </div>
                   <div class="gd-feature-img">
                     {feature.data.image
                       ? <img src={feature.data.image} alt={feature.data.title} loading="lazy" decoding="async" />
                       : <div class="gd-img-fallback" aria-hidden="true" />
                     }
                   </div>
-                  <div class="gd-feature-text">
-                    <span class="gd-feature-eyebrow">{s.topic}</span>
-                    <h2 class="gd-feature-title">{feature.data.title}</h2>
-                    {feature.data.description && (
-                      <p class="gd-feature-desc">{feature.data.description}</p>
-                    )}
-                    <div class="gd-feature-meta">
-                      {feature.data.author && <span class="gd-meta-author">{feature.data.author}</span>}
-                      {feature.data.date   && <span class="gd-meta-date">{fmtDate(feature.data.date)}</span>}
-                    </div>
-                    <span class="gd-feature-cta">Read guide →</span>
-                  </div>
                 </a>
 
-                <!-- Small cards row -->
+                <!-- 3-column grid — same text-above-photo layout -->
                 {grid.length > 0 && (
                   <div class="gd-grid">
                     {grid.map(g => (
                       <a class="gd-card" href={`/daytona/guides/${guideSlug(g)}/`}>
+                        <div class="gd-card-body">
+                          <span class="gd-eyebrow">{s.topic}</span>
+                          <h3 class="gd-card-title">{g.data.title}</h3>
+                          {g.data.description && (
+                            <p class="gd-card-desc">{g.data.description}</p>
+                          )}
+                          <div class="gd-meta">
+                            {g.data.author && <span class="gd-meta-author">{g.data.author}</span>}
+                            {g.data.author && g.data.date && <span class="gd-meta-sep">·</span>}
+                            {g.data.date && <span class="gd-meta-date">{fmtDate(g.data.date)}</span>}
+                          </div>
+                        </div>
                         <div class="gd-card-img">
                           {g.data.image
                             ? <img src={g.data.image} alt={g.data.title} loading="lazy" decoding="async" />
                             : <div class="gd-img-fallback" aria-hidden="true" />
                           }
-                        </div>
-                        <div class="gd-card-body">
-                          <h3 class="gd-card-title">{g.data.title}</h3>
-                          {g.data.description && (
-                            <p class="gd-card-desc">{g.data.description}</p>
-                          )}
                         </div>
                       </a>
                     ))}
@@ -258,48 +264,9 @@ const sections = SECTIONS
   }
 
   /* ─────────────────────────────────────────────
-     Feature card  (horizontal: image left, text right)
+     Shared pill eyebrow
   ───────────────────────────────────────────── */
-  .gd-feature {
-    display: grid;
-    grid-template-columns: 0.55fr 0.45fr;
-    height: 420px;
-    text-decoration: none;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    background: var(--panel, var(--surface));
-    margin-bottom: 20px;
-    transition: box-shadow 200ms ease, transform 200ms ease;
-  }
-  .gd-feature:hover {
-    box-shadow: 0 12px 42px rgba(0,0,0,0.28);
-    transform: translateY(-3px);
-  }
-
-  .gd-feature-img {
-    overflow: hidden;
-    background: var(--surface2);
-    height: 100%;
-  }
-  .gd-feature-img img {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    transition: transform 360ms ease;
-  }
-  .gd-feature:hover .gd-feature-img img { transform: scale(1.04); }
-
-  .gd-feature-text {
-    padding: 36px 36px 36px 32px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    justify-content: center;
-  }
-  .gd-feature-eyebrow {
+  .gd-eyebrow {
     display: inline-block;
     background: #111;
     color: #fff;
@@ -311,6 +278,58 @@ const sections = SECTIONS
     padding: 4px 12px;
     border-radius: 999px;
     align-self: flex-start;
+    flex-shrink: 0;
+  }
+
+  /* ─────────────────────────────────────────────
+     Shared metadata row (author · date)
+  ───────────────────────────────────────────── */
+  .gd-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .gd-meta-author {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .gd-meta-sep {
+    font-size: 11px;
+    color: var(--faint, rgba(232,237,244,.55));
+  }
+  .gd-meta-date {
+    font-size: 12px;
+    color: var(--faint, rgba(232,237,244,.55));
+    letter-spacing: 0.02em;
+  }
+
+  /* ─────────────────────────────────────────────
+     Feature card — full width, text above photo
+  ───────────────────────────────────────────── */
+  .gd-feature {
+    display: flex;
+    flex-direction: column;
+    text-decoration: none;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--panel, var(--surface));
+    margin-bottom: 32px;
+    transition: box-shadow 200ms ease, transform 200ms ease;
+  }
+  .gd-feature:hover {
+    box-shadow: 0 12px 42px rgba(0,0,0,0.28);
+    transform: translateY(-3px);
+  }
+
+  .gd-feature-text {
+    padding: 24px 28px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
   }
   .gd-feature-title {
     font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
@@ -334,44 +353,23 @@ const sections = SECTIONS
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .gd-feature-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    margin-top: 4px;
-  }
-  .gd-meta-author {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--text);
-    letter-spacing: 0.02em;
-  }
-  .gd-meta-date {
-    font-size: 12px;
-    color: var(--faint, rgba(232,237,244,.55));
-    letter-spacing: 0.02em;
-  }
-  .gd-feature-cta {
-    font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-    font-size: 12px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--brand1);
-    margin-top: 4px;
-    transition: opacity 130ms;
-  }
-  .gd-feature:hover .gd-feature-cta { opacity: 0.75; }
 
-  /* Responsive: stack on smaller screens */
-  @media (max-width: 960px) {
-    .gd-feature {
-      grid-template-columns: 1fr;
-      height: auto;
-    }
-    .gd-feature-img { aspect-ratio: 16/9; height: auto; }
-    .gd-feature-text { padding: 22px 24px 28px; gap: 10px; }
+  .gd-feature-img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: var(--surface2);
+    flex-shrink: 0;
   }
+  .gd-feature-img img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 360ms ease;
+  }
+  .gd-feature:hover .gd-feature-img img { transform: scale(1.04); }
 
   /* ─────────────────────────────────────────────
      Small cards grid (3 columns)
@@ -417,11 +415,19 @@ const sections = SECTIONS
   }
   .gd-card:hover .gd-card-img img { transform: scale(1.04); }
 
-  .gd-card-body { padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+  /* Card body sits ABOVE the image */
+  .gd-card-body {
+    padding: 16px 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+  }
   .gd-card-title {
     font-size: 24px;
     font-weight: 800;
     line-height: 1.2;
+    letter-spacing: -0.02em;
     color: var(--text);
     margin: 0;
     display: -webkit-box;
