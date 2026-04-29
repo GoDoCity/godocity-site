@@ -1,6 +1,7 @@
 ---
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
+import NewsletterBanner from "../../../components/NewsletterBanner.astro";
 
 const allGuides = await getCollection("guides");
 const sorted = [...allGuides].sort(
@@ -129,6 +130,7 @@ const sections = SECTIONS
     })}
 
   </div>
+  <NewsletterBanner city="Daytona" />
 </Base>
 
 <style>
@@ -144,7 +146,7 @@ const sections = SECTIONS
      Breadcrumb
   ───────────────────────────────────────────── */
   .gd-breadcrumb {
-    max-width: 1300px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 14px 2rem 12px;
     display: flex;
@@ -170,7 +172,7 @@ const sections = SECTIONS
     border-bottom: 3px solid #000;
   }
   .gd-header-inner {
-    max-width: 1300px;
+    max-width: 1200px;
     margin: 0 auto;
     text-align: center;
   }
@@ -250,7 +252,7 @@ const sections = SECTIONS
 
   /* Inner container */
   .gd-section-body {
-    max-width: 1300px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 40px 2rem 56px;
   }
@@ -260,7 +262,7 @@ const sections = SECTIONS
   ───────────────────────────────────────────── */
   .gd-feature {
     display: grid;
-    grid-template-columns: 0.65fr 0.35fr;
+    grid-template-columns: 0.55fr 0.45fr;
     height: 420px;
     text-decoration: none;
     border-radius: 12px;
@@ -323,11 +325,12 @@ const sections = SECTIONS
   .gd-feature:hover .gd-feature-title { color: var(--brand1); }
   .gd-feature-desc {
     font-size: 16px;
-    line-height: 1.6;
-    color: var(--muted);
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: #000;
     margin: 0;
     display: -webkit-box;
-    -webkit-line-clamp: 5;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -376,7 +379,7 @@ const sections = SECTIONS
   .gd-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
+    gap: 24px;
     margin-bottom: 24px;
   }
   @media (max-width: 860px) { .gd-grid { grid-template-columns: repeat(2, 1fr); } }
@@ -430,11 +433,12 @@ const sections = SECTIONS
   .gd-card:hover .gd-card-title { color: var(--brand1); }
   .gd-card-desc {
     font-size: 16px;
-    line-height: 1.6;
-    color: var(--muted);
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+    color: #000;
     margin: 0;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
