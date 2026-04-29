@@ -20,26 +20,24 @@ const topicMap: Record<string, string> = {
   local: "LOCAL",
 };
 
-const brandMap: Record<string, string> = {
-  coast: "COAST",
-  drive: "DRIVE",
-  surf:  "SURF",
-  local: "LOCAL",
+const colorMap: Record<string, string> = {
+  coast: "#7B61FF",
+  drive: "#00E676",
+  surf:  "#FF4081",
+  local: "#FFD600",
 };
 
-const emojiMap: Record<string, string> = {
-  coast: "🌊",
-  drive: "🚗",
-  surf:  "🏄",
-  local: "⭐",
+const textMap: Record<string, string> = {
+  coast: "#fff",
+  drive: "#000",
+  surf:  "#fff",
+  local: "#000",
 };
 
+const topic      = topicMap[section] ?? "";
+const brandColor = colorMap[section] ?? "#ffd24a";
+const brandText  = textMap[section]  ?? "#fff";
 
-const topic = topicMap[section] ?? "";
-const brand = brandMap[section] ?? topic.toUpperCase();
-const emoji = emojiMap[section] ?? "";
-
-/* ── Jump ribbon configuration per section ── */
 type RibbonItem = { label: string; href: string; id: string };
 const ribbonConfig: Record<string, RibbonItem[]> = {
   coast: [
@@ -55,21 +53,20 @@ const ribbonConfig: Record<string, RibbonItem[]> = {
     { label: "Coworking",        href: "#coworking",        id: "coworking"        },
   ],
   surf: [
-    { label: "Outdoors",       href: "#outdoors",      id: "outdoors"      },
-    { label: "Arts & Culture", href: "#arts-culture",  id: "arts-culture"  },
-    { label: "Dining",         href: "#dining",        id: "dining"        },
-    { label: "Attractions",    href: "#attractions",   id: "attractions"   },
+    { label: "Outdoors",       href: "#outdoors",     id: "outdoors"     },
+    { label: "Arts & Culture", href: "#arts-culture", id: "arts-culture" },
+    { label: "Dining",         href: "#dining",       id: "dining"       },
+    { label: "Attractions",    href: "#attractions",  id: "attractions"  },
   ],
   local: [
-    { label: "Basics & Pets",  href: "#basics-pets",   id: "basics-pets"   },
-    { label: "Health",         href: "#health",         id: "health"        },
-    { label: "Home Services",  href: "#home-services",  id: "home-services" },
-    { label: "City & Safety",  href: "#city-safety",    id: "city-safety"   },
+    { label: "Basics & Pets",  href: "#basics-pets",  id: "basics-pets"  },
+    { label: "Health",         href: "#health",       id: "health"       },
+    { label: "Home Services",  href: "#home-services",id: "home-services"},
+    { label: "City & Safety",  href: "#city-safety",  id: "city-safety"  },
   ],
 };
 const ribbonItems: RibbonItem[] = ribbonConfig[section] ?? [];
 
-/* ── External links allowed in City & Safety for Volusia County resources ── */
 type ExternalLink = { label: string; href: string; description?: string };
 const citySafetyLinks: ExternalLink[] = [
   {
@@ -79,7 +76,6 @@ const citySafetyLinks: ExternalLink[] = [
   },
 ];
 
-/* ── Query guides collection and filter by topic ── */
 const allGuides = await getCollection("guides");
 const topicGuides = allGuides
   .filter((g) => g.data.topic === topic)
@@ -88,16 +84,22 @@ const topicGuides = allGuides
 function guideSlug(g: (typeof allGuides)[number]) {
   return g.slug.split("/").pop()!;
 }
+function toAnchor(label: string): string {
+  return label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
+function authorSlug(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+}
 ---
 
 <Base
-  title={`${brand} Guides | GoDoDaytona`}
+  title={`${topic} Guides | GoDo Daytona`}
   subtitle={`GoDo ${topic} guides for Daytona Beach.`}
   cityBase="daytona"
 >
-  <div class="ghWrap">
+  <div class="ghWrap" style={`--brand-color: ${brandColor}; --brand-text: ${brandText};`}>
 
-    {/* ── CATEGORY HEADER + RIBBON ── */}
+    <!-- ── Header stack ── -->
     <div class="ghHeaderStack">
 
       <div class="ghHeaderBreadcrumb container">
@@ -105,31 +107,25 @@ function guideSlug(g: (typeof allGuides)[number]) {
         <span class="ghCrumbSep">›</span>
         <a href="/daytona/guides/">Guides</a>
         <span class="ghCrumbSep">›</span>
-        <span>{brand}</span>
+        <span>{topic}</span>
       </div>
 
-      {/* Category banner with background photo support */}
       <div class={`ghCategoryBanner ghCategoryBanner--${section}`}>
         <div class="ghCategoryBannerOverlay"></div>
         <div class="container ghCategoryBannerContent">
           <h1 class="ghCategoryBannerText">
-            <span class="ghBannerAction">{brand}</span>
+            <span class="ghBannerAction">{topic}</span>
             <span class="ghBannerCategory">[{topic}]</span>
           </h1>
         </div>
       </div>
 
-      {/* ── STICKY JUMP RIBBON ── */}
       {ribbonItems.length > 0 && (
         <div class="ghRibbonOuter" id="ghRibbon">
-          <div class="container">
-            <nav class="ghRibbon" aria-label={`${brand} sub-categories`}>
+          <div class="ghRibbonInner">
+            <nav class="ghRibbon" aria-label={`${topic} sub-categories`}>
               {ribbonItems.map((item) => (
-                <a
-                  class="ghRibbonItem"
-                  href={item.href}
-                  data-ribbon-id={item.id}
-                >
+                <a class="ghRibbonItem" href={item.href} data-ribbon-id={item.id}>
                   {item.label}
                 </a>
               ))}
@@ -138,34 +134,32 @@ function guideSlug(g: (typeof allGuides)[number]) {
         </div>
       )}
 
-    </div>{/* end .ghHeaderStack */}
+    </div>
 
-    {/* ── GUIDES CONTENT — per-subcategory anchor sections ── */}
+    <!-- ── Content sections ── -->
     {ribbonItems.length > 0 ? (
       ribbonItems.map((cat, catIdx) => {
-        /* All real guides are displayed in the first ribbon section;
-           subsequent sections will fill as content is categorized */
-        const catGuides = catIdx === 0 ? topicGuides : [];
+        /* All real guides land in the first ribbon section until subtopic assignment rolls out */
+        const catGuides = catIdx === 0 ? topicGuides : topicGuides.filter(
+          g => g.data.subtopic && toAnchor(g.data.subtopic) === cat.id
+        );
         const hasContent = catGuides.length > 0;
         const isCitySafety = cat.id === "city-safety";
 
         return (
-          <section class={`ghSection ghSection--${catIdx % 2 === 0 ? "white" : "alt"}`} id={cat.id}>
+          <section
+            class={`ghSection ghSection--${catIdx % 2 === 0 ? "white" : "alt"}`}
+            id={cat.id}
+          >
             <div class="container">
               <h2 class="ghCatHeading">{cat.label}</h2>
 
-              {/* External resources block for City & Safety */}
               {isCitySafety && citySafetyLinks.length > 0 && (
                 <div class="ghExtLinksBlock">
                   <p class="ghExtLinksLabel">Official Resources</p>
                   <div class="ghExtLinks">
                     {citySafetyLinks.map((link) => (
-                      <a
-                        class="ghExtLinkCard"
-                        href={link.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a class="ghExtLinkCard" href={link.href} target="_blank" rel="noopener noreferrer">
                         <span class="ghExtLinkArrow">↗</span>
                         <span class="ghExtLinkInner">
                           <span class="ghExtLinkTitle">{link.label}</span>
@@ -180,14 +174,13 @@ function guideSlug(g: (typeof allGuides)[number]) {
               {!hasContent ? (
                 <p class="ghCatEmpty">
                   {catIdx === 0
-                    ? `No ${brand.toLowerCase()} guides yet — check back soon!`
+                    ? `No ${topic.toLowerCase()} guides yet — check back soon!`
                     : `More ${cat.label} guides coming soon.`}
                 </p>
               ) : (
-                /* Uniform 3-column grid — all articles the same size */
                 <div class="ghUniformGrid">
                   {catGuides.map((g) => (
-                    <a class="ghArticleCard" href={`/daytona/guides/${guideSlug(g)}/`}>
+                    <article class="ghArticleCard">
                       <div class="ghCardImgWrap">
                         <img
                           class="ghCardImg"
@@ -200,15 +193,22 @@ function guideSlug(g: (typeof allGuides)[number]) {
                         <div class="ghCardImgFallback" aria-hidden="true"></div>
                       </div>
                       <div class="ghCardBody">
-                        <div class="ghCardKicker">
-                          <span class="ghCardKickerEmoji">{emoji}</span>
-                          {brand} — {cat.label}
+                        <div class="ghCardPills">
+                          <a class="ghPill ghPill--topic" href={`/daytona/guides/${section}/`}>{topic}</a>
+                          <a class="ghPill ghPill--sub" href={`/daytona/guides/${section}/#${cat.id}`}>{cat.label}</a>
                         </div>
-                        <h3 class="ghCardTitle">{g.data.title}</h3>
+                        <h3 class="ghCardTitle">
+                          <a class="ghCardTitleLink" href={`/daytona/guides/${guideSlug(g)}/`}>{g.data.title}</a>
+                        </h3>
                         {g.data.description && <p class="ghCardDesc">{g.data.description}</p>}
+                        {g.data.author && (
+                          <div class="ghCardMeta">
+                            <a class="ghCardAuthor" href={`/authors/${authorSlug(g.data.author)}`}>{g.data.author}</a>
+                          </div>
+                        )}
                         <span class="ghCardCta">Read the guide →</span>
                       </div>
-                    </a>
+                    </article>
                   ))}
                 </div>
               )}
@@ -217,7 +217,6 @@ function guideSlug(g: (typeof allGuides)[number]) {
         );
       })
     ) : (
-      /* No ribbon — flat single-section fallback */
       <section class="ghSection ghSection--white">
         <div class="container">
           {topicGuides.length === 0 ? (
@@ -225,7 +224,7 @@ function guideSlug(g: (typeof allGuides)[number]) {
           ) : (
             <div class="ghUniformGrid">
               {topicGuides.map((g) => (
-                <a class="ghArticleCard" href={`/daytona/guides/${guideSlug(g)}/`}>
+                <article class="ghArticleCard">
                   <div class="ghCardImgWrap">
                     <img
                       class="ghCardImg"
@@ -238,15 +237,24 @@ function guideSlug(g: (typeof allGuides)[number]) {
                     <div class="ghCardImgFallback" aria-hidden="true"></div>
                   </div>
                   <div class="ghCardBody">
-                    <div class="ghCardKicker">
-                      <span class="ghCardKickerEmoji">{emoji}</span>
-                      {brand} Guide
+                    <div class="ghCardPills">
+                      <a class="ghPill ghPill--topic" href={`/daytona/guides/${section}/`}>{topic}</a>
+                      {g.data.subtopic && (
+                        <a class="ghPill ghPill--sub" href={`/daytona/guides/${section}/#${toAnchor(g.data.subtopic)}`}>{g.data.subtopic}</a>
+                      )}
                     </div>
-                    <h3 class="ghCardTitle">{g.data.title}</h3>
+                    <h3 class="ghCardTitle">
+                      <a class="ghCardTitleLink" href={`/daytona/guides/${guideSlug(g)}/`}>{g.data.title}</a>
+                    </h3>
                     {g.data.description && <p class="ghCardDesc">{g.data.description}</p>}
+                    {g.data.author && (
+                      <div class="ghCardMeta">
+                        <a class="ghCardAuthor" href={`/authors/${authorSlug(g.data.author)}`}>{g.data.author}</a>
+                      </div>
+                    )}
                     <span class="ghCardCta">Read the guide →</span>
                   </div>
-                </a>
+                </article>
               ))}
             </div>
           )}
@@ -254,24 +262,24 @@ function guideSlug(g: (typeof allGuides)[number]) {
       </section>
     )}
 
-    {/* ── Back to all guides ── */}
     <div class="ghBackRow">
       <a class="ghBackBtn" href="/daytona/guides/">← All Guides</a>
     </div>
 
-  </div>{/* end .ghWrap */}
+  </div>
 
   <style>
+    /* ── Smooth scroll globally for this page ── */
+    html { scroll-behavior: smooth; }
+
+    /* ── 1200px container override ── */
+    .ghWrap .container { max-width: 1200px; }
+
     .ghWrap { min-height: 100vh; }
 
-    /* ── Header stack ── */
-    .ghHeaderStack {
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
+    .ghHeaderStack { width: 100%; display: flex; flex-direction: column; gap: 0; }
 
+    /* ── Breadcrumb ── */
     .ghHeaderBreadcrumb {
       font-size: 13px;
       font-weight: 600;
@@ -283,124 +291,93 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
     .ghHeaderBreadcrumb a { color: var(--brand1); text-decoration: none; }
     .ghHeaderBreadcrumb a:hover { text-decoration: underline; }
-    .ghCrumbSep { opacity: .5; }
+    .ghCrumbSep { opacity: .45; }
 
-    /* ── Category banner with photo support ── */
+    /* ── Banner ── */
     .ghCategoryBanner {
       position: relative;
       width: 100%;
       min-height: 220px;
       display: flex;
       align-items: center;
-      background-color: #2E3E52;
+      background-color: #060810;
       background-size: cover;
       background-position: center;
-      border-top: 4px solid #ffd24a;
-      border-bottom: 4px solid #ffd24a;
-      margin-bottom: 0;
+      border-top: 4px solid var(--brand-color, #ffd24a);
+      border-bottom: 4px solid var(--brand-color, #ffd24a);
     }
-
-    /* Background images — add matching files to /public/images/guides/ */
-    .ghCategoryBanner--live { background-image: url('/images/guides/coast-banner.jpg'); }
-    .ghCategoryBanner--work { background-image: url('/images/guides/drive-banner.jpg'); }
-    .ghCategoryBanner--play { background-image: url('/images/guides/surf-banner.jpg');  }
-    .ghCategoryBanner--best { background-image: url('/images/guides/essentials-banner.jpg'); }
+    .ghCategoryBanner--coast { background-image: url('/images/guides/coast-banner.jpg'); }
+    .ghCategoryBanner--drive { background-image: url('/images/guides/drive-banner.jpg'); }
+    .ghCategoryBanner--surf  { background-image: url('/images/guides/surf-banner.jpg');  }
+    .ghCategoryBanner--local { background-image: url('/images/guides/essentials-banner.jpg'); }
 
     .ghCategoryBannerOverlay {
       position: absolute;
       inset: 0;
-      background: rgba(0,0,0,0.58);
+      background: rgba(0, 0, 0, 0.60);
     }
-
     .ghCategoryBannerContent {
       position: relative;
       z-index: 1;
-      padding: 40px 0 36px;
+      padding: 44px 0 38px;
       width: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
       text-align: center;
     }
-
     .ghCategoryBannerText {
-      font-family: 'Monoton', cursive;
-      font-weight: 400;
       margin: 0 auto;
       line-height: 1.1;
       text-align: center;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       width: 100%;
     }
     .ghBannerAction {
       font-family: 'Monoton', cursive;
       font-size: clamp(2.8rem, 6.5vw, 5rem);
       font-weight: 400;
-      letter-spacing: 0;
-      color: #ffffff;
+      color: var(--brand-color, #fff);
       display: block;
-      text-align: center;
       -webkit-font-smoothing: antialiased;
-    }
-    /* Neon sign colors per category banner — vibrant neon with subtle white inner glow */
-    .ghCategoryBanner--live .ghBannerAction {
-      color: #bf94ff;
-      text-shadow: 0 0 5px #fff, 0 0 15px #bf94ff, 0 0 30px #bf94ff;
-    }
-    .ghCategoryBanner--work .ghBannerAction {
-      color: #00ff9d;
-      text-shadow: 0 0 5px #fff, 0 0 15px #00ff9d, 0 0 30px #00ff9d;
-    }
-    .ghCategoryBanner--play .ghBannerAction {
-      color: #ff6ad5;
-      text-shadow: 0 0 5px #fff, 0 0 15px #ff6ad5, 0 0 30px #ff6ad5;
-    }
-    .ghCategoryBanner--best .ghBannerAction {
-      color: #ffef78;
-      text-shadow: 0 0 5px #fff, 0 0 15px #ffef78, 0 0 30px #ffef78;
+      text-shadow:
+        0 0 4px #fff,
+        0 0 14px var(--brand-color, #ffd24a),
+        0 0 32px var(--brand-color, #ffd24a),
+        0 0 60px var(--brand-color, #ffd24a);
     }
     .ghBannerCategory {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(1.2rem, 2.4vw, 1.8rem);
+      font-size: clamp(1rem, 2vw, 1.55rem);
       font-weight: 300;
-      letter-spacing: 0.18em;
-      color: rgba(255,255,255,0.82);
+      letter-spacing: 0.22em;
+      color: var(--brand-color, rgba(255,255,255,0.8));
+      opacity: 0.7;
       display: block;
-      text-align: center;
-      width: 100%;
-      margin: 0 auto;
-      align-self: center;
     }
 
-    /* ── Sticky Jump Ribbon ── */
+    /* ── Sticky sub-nav ribbon ── */
     .ghRibbonOuter {
       position: sticky;
       top: 0;
       z-index: 100;
       width: 100%;
-      display: flex;
-      justify-content: center;
       background: var(--surface);
       border-bottom: 2px solid var(--border);
-      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+      box-shadow: 0 2px 12px rgba(0,0,0,0.14);
     }
-    /* Override any global .container max-width / padding so ribbon stays centered */
-    .ghRibbonOuter .container {
-      width: 100%;
-      max-width: none;
-      padding: 0;
-      display: flex;
-      justify-content: center;
+    .ghRibbonInner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 18px;
     }
     .ghRibbon {
       display: flex;
       flex-wrap: nowrap;
       align-items: stretch;
-      justify-content: center;
-      width: 100%;
       overflow-x: auto;
       -webkit-overflow-scrolling: touch;
       scrollbar-width: none;
@@ -412,74 +389,58 @@ function guideSlug(g: (typeof allGuides)[number]) {
       flex-shrink: 0;
       display: inline-flex;
       align-items: center;
-      padding: 0 20px;
-      height: 56px;
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 0.09em;
+      padding: 0 18px;
+      height: 50px;
+      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--muted);
       text-decoration: none;
       border-bottom: 3px solid transparent;
-      transition: color 140ms ease, border-color 140ms ease;
+      transition: color 140ms, border-color 140ms;
       white-space: nowrap;
     }
-    /* Dot separator — replaces border-left */
     .ghRibbonItem + .ghRibbonItem::before {
       content: "•";
-      margin-right: 20px;
+      margin-right: 18px;
       color: var(--muted);
-      opacity: 0.5;
-      font-weight: 400;
-      font-size: 14px;
+      opacity: 0.35;
+      font-size: 11px;
     }
     .ghRibbonItem:hover {
       color: var(--text);
-      border-bottom-color: var(--text);
+      border-bottom-color: color-mix(in srgb, var(--brand-color) 55%, transparent);
     }
-    .ghRibbonItem.is-active,
-    .ghRibbonItem[aria-current="true"] {
+    .ghRibbonItem.is-active {
       color: var(--text);
-      border-bottom-color: #ffd24a;
+      border-bottom-color: var(--brand-color, #ffd24a);
     }
-
     @media (max-width: 640px) {
-      /* Mobile: single-line horizontal swipe, never stacks */
-      .ghRibbon {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        justify-content: flex-start;
-        -webkit-overflow-scrolling: touch;
-      }
-      .ghRibbonItem {
-        padding: 0 14px;
-        font-size: 14px;
-        height: 48px;
-        flex-shrink: 0;
-        white-space: nowrap;
-      }
+      .ghRibbonItem { padding: 0 12px; font-size: 11px; height: 44px; }
     }
 
-    /* ── Section shells ── */
-    .ghSection { padding: 32px 0 48px; }
+    /* ── Content sections ── */
+    .ghSection {
+      padding: 36px 0 52px;
+      scroll-margin-top: 56px; /* ribbon height */
+    }
     .ghSection--white { background: var(--surface); }
     .ghSection--alt   { background: var(--surface2); border-bottom: 1px solid var(--border); }
 
-    /* Section heading with gold underline — centered, +25% larger */
     .ghCatHeading {
       font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
-      font-size: clamp(1.625rem, 3.125vw, 2.375rem);
+      font-size: clamp(1.4rem, 2.8vw, 2rem);
       font-weight: 900;
       letter-spacing: 0.06em;
       text-transform: uppercase;
       text-align: center;
       color: var(--text);
-      margin: 16px 0 32px;
+      margin: 0 0 32px;
       padding-bottom: 14px;
-      border-bottom: 2px solid #ffd24a;
+      border-bottom: 2px solid var(--brand-color, #ffd24a);
     }
-
-    /* Placeholder text when no articles */
     .ghCatEmpty {
       font-size: 1rem;
       color: var(--muted);
@@ -488,85 +449,44 @@ function guideSlug(g: (typeof allGuides)[number]) {
     }
 
     /* ── External resource links (City & Safety) ── */
-    .ghExtLinksBlock {
-      margin-bottom: 28px;
-    }
+    .ghExtLinksBlock { margin-bottom: 28px; }
     .ghExtLinksLabel {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text);
-      margin: 0 0 10px;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--text); margin: 0 0 10px;
     }
-    .ghExtLinks {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+    .ghExtLinks { display: flex; flex-direction: column; gap: 10px; }
     .ghExtLinkCard {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 14px 18px;
-      border: 1px solid var(--border);
-      border-left: 4px solid #ffd24a;
-      border-radius: 10px;
-      background: var(--panel);
-      text-decoration: none;
-      transition: box-shadow 160ms ease, background 160ms ease;
+      display: flex; align-items: flex-start; gap: 12px; padding: 14px 18px;
+      border: 1px solid var(--border); border-left: 4px solid var(--brand-color, #ffd24a);
+      border-radius: 10px; background: var(--panel); text-decoration: none;
+      transition: box-shadow 160ms;
     }
-    .ghExtLinkCard:hover {
-      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-      background: color-mix(in srgb, #ffd24a 6%, var(--panel));
-    }
-    .ghExtLinkArrow {
-      font-size: 18px;
-      color: var(--muted);
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-    .ghExtLinkInner {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-    .ghExtLinkTitle {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--text);
-      line-height: 1.2;
-    }
-    .ghExtLinkDesc {
-      font-size: 13px;
-      color: var(--muted);
-      line-height: 1.45;
-    }
+    .ghExtLinkCard:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
+    .ghExtLinkArrow { font-size: 18px; color: var(--muted); flex-shrink: 0; margin-top: 1px; }
+    .ghExtLinkInner { display: flex; flex-direction: column; gap: 3px; }
+    .ghExtLinkTitle { font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.2; }
+    .ghExtLinkDesc  { font-size: 13px; color: var(--muted); line-height: 1.45; }
 
-    /* ── Uniform 3-column article grid ── */
+    /* ── 3-column article grid ── */
     .ghUniformGrid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 24px;
     }
-    @media (max-width: 900px) {
-      .ghUniformGrid { grid-template-columns: repeat(2, 1fr); gap: 18px; }
-    }
-    @media (max-width: 480px) {
-      .ghUniformGrid { grid-template-columns: 1fr; gap: 14px; }
-    }
+    @media (max-width: 900px) { .ghUniformGrid { grid-template-columns: repeat(2, 1fr); gap: 18px; } }
+    @media (max-width: 480px) { .ghUniformGrid { grid-template-columns: 1fr; gap: 14px; } }
 
-    /* ── Article card (uniform) ── */
+    /* ── Article card (cover-link pattern) ── */
     .ghArticleCard {
+      position: relative;
       display: flex;
       flex-direction: column;
       height: 100%;
-      text-decoration: none;
       border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--border);
       background: var(--panel);
-      transition: box-shadow 200ms ease, transform 200ms ease;
+      transition: box-shadow 200ms, transform 200ms;
     }
     .ghArticleCard:hover {
       box-shadow: 0 8px 28px rgba(0,0,0,0.28);
@@ -576,47 +496,64 @@ function guideSlug(g: (typeof allGuides)[number]) {
     .ghCardImgWrap {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 7.59;
+      aspect-ratio: 16 / 8;
       overflow: hidden;
       background: var(--surface2);
       flex-shrink: 0;
     }
     .ghCardImg {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: center;
-      transition: transform 320ms ease;
+      display: block; width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+      transition: transform 320ms;
     }
     .ghArticleCard:hover .ghCardImg { transform: scale(1.04); }
-    .ghCardImgFallback {
-      display: none;
-      position: absolute;
-      inset: 0;
-      background: var(--surface2);
-    }
+    .ghCardImgFallback { display: none; position: absolute; inset: 0; background: var(--surface2); }
 
     .ghCardBody {
-      padding: 8px 18px 8px;
+      padding: 14px 18px 16px;
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 6px;
       flex: 1;
     }
-    .ghCardKicker {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      color: var(--text);
+
+    /* Dual pills — sit above the cover link via z-index */
+    .ghCardPills {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 1;
     }
-    .ghCardKickerEmoji { font-size: 13px; letter-spacing: 0; }
+    .ghPill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: opacity 130ms;
+      line-height: 1.6;
+    }
+    .ghPill:hover { opacity: 0.75; }
+    .ghPill--topic {
+      background: var(--brand-color, #111);
+      color: var(--brand-text, #fff);
+    }
+    .ghPill--sub {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .ghPill--sub:hover { border-color: var(--brand-color, var(--border)); }
+
+    /* Cover link: ::after stretches over the whole card; pills + meta sit above it */
     .ghCardTitle {
-      font-size: 23px;
+      font-size: 20px;
       font-weight: 700;
       color: var(--text);
       line-height: 1.25;
@@ -625,12 +562,20 @@ function guideSlug(g: (typeof allGuides)[number]) {
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      transition: color 130ms ease;
+      transition: color 130ms;
     }
     .ghArticleCard:hover .ghCardTitle { color: var(--muted); }
+    .ghCardTitleLink { color: inherit; text-decoration: none; }
+    .ghCardTitleLink::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
     .ghCardDesc {
-      font-size: 17px;
-      color: var(--color-text-main);
+      font-size: 14px;
+      color: var(--muted);
       line-height: 1.5;
       margin: 0;
       display: -webkit-box;
@@ -638,82 +583,107 @@ function guideSlug(g: (typeof allGuides)[number]) {
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    .ghCardMeta {
+      position: relative;
+      z-index: 1;
+    }
+    .ghCardAuthor {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 130ms;
+    }
+    .ghCardAuthor:hover { color: var(--brand-color, var(--brand1)); }
+
     .ghCardCta {
       display: inline-flex;
       align-items: center;
       margin-top: auto;
-      padding-top: 8px;
-      font-size: 13px;
+      padding-top: 6px;
+      font-size: 12px;
       font-weight: 800;
       color: var(--text);
-      letter-spacing: 0.02em;
+      letter-spacing: 0.04em;
     }
 
     /* ── Back row ── */
-    .ghBackRow {
-      text-align: center;
-      padding: 32px 0 48px;
-    }
+    .ghBackRow { text-align: center; padding: 32px 0 48px; }
     .ghBackBtn {
-      display: inline-flex;
-      align-items: center;
-      height: 40px;
-      padding: 0 24px;
-      border-radius: 999px;
-      border: 1.5px solid var(--border);
-      background: var(--panel);
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: border-color 140ms, color 140ms, background 140ms;
+      display: inline-flex; align-items: center; height: 40px; padding: 0 24px;
+      border-radius: 999px; border: 1.5px solid var(--border); background: var(--panel);
+      color: var(--muted); font-size: 14px; font-weight: 700; text-decoration: none;
+      transition: border-color 140ms, color 140ms;
     }
-    .ghBackBtn:hover {
-      border-color: var(--line);
-      color: var(--text);
-      background: var(--surface);
-    }
+    .ghBackBtn:hover { border-color: var(--brand-color, var(--brand1)); color: var(--text); }
 
     /* ── Mobile ── */
     @media (max-width: 640px) {
       .ghHeaderBreadcrumb { padding: 10px 0 8px; font-size: 12px; }
       .ghSection { padding: 20px 0 32px; }
       .ghCategoryBanner { min-height: 160px; }
-      .ghCategoryBannerContent { padding: 28px 0 24px; justify-content: center; }
-      /* +40% neon title and sub-label scaling on mobile */
-      .ghBannerAction { font-size: clamp(3.92rem, 13.5vw, 7rem); text-align: center; }
-      .ghBannerCategory { font-size: clamp(1.4rem, 4.2vw, 2rem); text-align: center; }
-      .ghCatHeading { margin: 12px 0 24px; }
+      .ghCategoryBannerContent { padding: 28px 0 24px; }
+      .ghBannerAction { font-size: clamp(2.4rem, 11vw, 4rem); }
+      .ghBannerCategory { font-size: clamp(0.9rem, 3vw, 1.2rem); }
+      .ghCatHeading { margin: 0 0 20px; }
     }
   </style>
 </Base>
 
-{/* ── Ribbon active-state script ── */}
-<script>
+<script is:inline>
   (function () {
-    var ribbon = document.getElementById("ghRibbon");
+    /* ── Smooth scroll for ribbon anchor clicks ── */
+    document.querySelectorAll('.ghRibbonItem').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        var href = link.getAttribute('href');
+        if (!href || href.charAt(0) !== '#') return;
+        var target = document.getElementById(href.slice(1));
+        if (!target) return;
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.pushState(null, '', href);
+        setActive(href.slice(1));
+      });
+    });
+
+    /* ── Ribbon active state ── */
+    var ribbon = document.getElementById('ghRibbon');
     if (!ribbon) return;
-    var items = Array.prototype.slice.call(ribbon.querySelectorAll(".ghRibbonItem"));
+    var items = Array.prototype.slice.call(ribbon.querySelectorAll('.ghRibbonItem'));
     if (!items.length) return;
 
-    function syncActive() {
-      var hash = window.location.hash || "";
+    function setActive(id) {
       var matched = false;
       items.forEach(function (item) {
-        var id = item.getAttribute("data-ribbon-id") || "";
-        var active = hash === "#" + id;
-        item.classList.toggle("is-active", active);
+        var rid = item.getAttribute('data-ribbon-id') || '';
+        var active = !!id && id === rid;
+        item.classList.toggle('is-active', active);
         if (active) {
+          item.scrollIntoView({ inline: 'nearest', block: 'nearest' });
           matched = true;
-          item.scrollIntoView({ inline: "nearest", block: "nearest" });
         }
       });
-      if (!matched && items[0]) {
-        items[0].classList.add("is-active");
-      }
+      if (!matched && items[0]) items[0].classList.add('is-active');
     }
 
-    syncActive();
-    window.addEventListener("hashchange", syncActive);
+    function idFromHash() {
+      return window.location.hash ? window.location.hash.slice(1) : null;
+    }
+    setActive(idFromHash());
+    window.addEventListener('hashchange', function () { setActive(idFromHash()); });
+
+    /* ── IntersectionObserver: update active as user scrolls ── */
+    var sections = items.map(function (item) {
+      return document.getElementById(item.getAttribute('data-ribbon-id') || '');
+    }).filter(Boolean);
+
+    if ('IntersectionObserver' in window && sections.length) {
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) setActive(entry.target.id);
+        });
+      }, { rootMargin: '-5% 0px -75% 0px', threshold: 0 });
+      sections.forEach(function (s) { if (s) io.observe(s); });
+    }
   })();
 </script>

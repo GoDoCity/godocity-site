@@ -175,6 +175,46 @@ collections:
       - {label: "Featured Image", name: "image", widget: "image"}
       - {label: "Description/Hook", name: "description", widget: "text"}
       - {label: "Publish Date", name: "date", widget: "datetime"}
+      - label: "Author"
+        name: author
+        widget: select
+        required: false
+        default: "Jax Sterling"
+        options:
+          - {label: "Jax Sterling",      value: "Jax Sterling"}
+          - {label: "Charles King",      value: "Charles King"}
+          - {label: "Blair Archer",      value: "Blair Archer"}
+          - {label: "Miles Vance",       value: "Miles Vance"}
+          - {label: "Julian Wells",      value: "Julian Wells"}
+          - {label: "Sloane Miles",      value: "Sloane Miles"}
+          - {label: "Dr. JK Miller",     value: "Dr. JK Miller"}
+          - {label: "Kit Prescott",      value: "Kit Prescott"}
+          - {label: "Kit A. Marlow",     value: "Kit A. Marlow"}
+          - {label: "Reese Montgomery",  value: "Reese Montgomery"}
+          - {label: "Deb Davis",         value: "Deb Davis"}
+          - {label: "Logan King",        value: "Logan King"}
+      - label: "Subtopic"
+        name: "subtopic"
+        widget: "select"
+        required: false
+        hint: "Sub-section this guide belongs to. Determines the deep-link pill on the article page."
+        options:
+          - {label: "Neighborhoods",    value: "Neighborhoods"}
+          - {label: "Schools",          value: "Schools"}
+          - {label: "Healthcare",       value: "Healthcare"}
+          - {label: "Need to Know",     value: "Need to Know"}
+          - {label: "Entrepreneurship", value: "Entrepreneurship"}
+          - {label: "Industry",         value: "Industry"}
+          - {label: "Networking",       value: "Networking"}
+          - {label: "Coworking",        value: "Coworking"}
+          - {label: "Outdoors",         value: "Outdoors"}
+          - {label: "Arts & Culture",   value: "Arts & Culture"}
+          - {label: "Dining",           value: "Dining"}
+          - {label: "Attractions",      value: "Attractions"}
+          - {label: "Basics & Pets",    value: "Basics & Pets"}
+          - {label: "Health",           value: "Health"}
+          - {label: "Home Services",    value: "Home Services"}
+          - {label: "City & Safety",    value: "City & Safety"}
       - {label: "Body", name: "body", widget: "markdown"}
 
   - name: "topics"
