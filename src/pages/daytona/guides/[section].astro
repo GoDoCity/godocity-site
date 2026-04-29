@@ -82,6 +82,12 @@ const topicGuides = allGuides
   .filter((g) => g.data.topic === topic)
   .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
 
+const topicSlugSet = new Set(topicGuides.map((g) => g.slug));
+const moreGuides = allGuides
+  .filter((g) => !topicSlugSet.has(g.slug))
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+  .slice(0, 15);
+
 function guideSlug(g: (typeof allGuides)[number]) {
   return g.slug.split("/").pop()!;
 }
@@ -269,6 +275,47 @@ function authorSlug(name: string): string {
 
   </div>
 
+  {moreGuides.length > 0 && (
+    <section class="ghMoreSection">
+      <div class="container">
+        <h2 class="ghMoreHeading">More to Explore</h2>
+        <div class="ghMoreGrid">
+          {moreGuides.map((g) => {
+            const gTopic   = g.data.topic;
+            const gColor   = colorMap[gTopic.toLowerCase()] ?? "#111";
+            const gText    = textMap[gTopic.toLowerCase()]  ?? "#fff";
+            const gSection = gTopic.toLowerCase();
+            return (
+              <article class="ghMiniCard">
+                <div class="ghMiniImgWrap">
+                  <img
+                    class="ghMiniImg"
+                    src={g.data.image ?? ""}
+                    alt={g.data.title}
+                    loading="lazy"
+                    decoding="async"
+                    onerror="this.style.display='none';this.nextElementSibling.style.display='block'"
+                  />
+                  <div class="ghMiniImgFallback" aria-hidden="true"></div>
+                </div>
+                <div class="ghMiniBody">
+                  <a
+                    class="ghMiniPill"
+                    href={`/daytona/guides/${gSection}/`}
+                    style={`background:${gColor};color:${gText};`}
+                  >{gTopic}</a>
+                  <h3 class="ghMiniTitle">
+                    <a class="ghMiniTitleLink" href={`/daytona/guides/${guideSlug(g)}/`}>{g.data.title}</a>
+                  </h3>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  )}
+
   <style>
     /* ── Smooth scroll globally for this page ── */
     html { scroll-behavior: smooth; }
@@ -415,10 +462,6 @@ function authorSlug(name: string): string {
     .ghRibbonItem:hover {
       color: var(--text);
       border-bottom-color: color-mix(in srgb, var(--brand-color) 55%, transparent);
-    }
-    .ghRibbonItem.is-active {
-      color: var(--text);
-      border-bottom-color: var(--brand-color, #ffd24a);
     }
     @media (max-width: 640px) {
       /* Mobile: left-aligned for swipe */
@@ -623,6 +666,105 @@ function authorSlug(name: string): string {
     }
     .ghBackBtn:hover { border-color: var(--brand-color, var(--brand1)); color: var(--text); }
 
+    /* ── More to Explore section ── */
+    .ghMoreSection {
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
+      padding: 48px 0 56px;
+    }
+    .ghMoreHeading {
+      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+      font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--muted);
+      margin: 0 0 28px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .ghMoreGrid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 900px) { .ghMoreGrid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
+    @media (max-width: 480px) { .ghMoreGrid { grid-template-columns: 1fr; gap: 10px; } }
+
+    .ghMiniCard {
+      position: relative;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      transition: box-shadow 200ms, transform 200ms;
+    }
+    .ghMiniCard:hover {
+      box-shadow: 0 6px 20px rgba(0,0,0,0.26);
+      transform: translateY(-2px);
+    }
+    .ghMiniImgWrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: var(--surface2);
+    }
+    .ghMiniImg {
+      display: block; width: 100%; height: 100%;
+      object-fit: cover; object-position: center;
+      transition: transform 320ms;
+    }
+    .ghMiniCard:hover .ghMiniImg { transform: scale(1.04); }
+    .ghMiniImgFallback { display: none; position: absolute; inset: 0; background: var(--surface2); }
+
+    .ghMiniBody {
+      padding: 10px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ghMiniPill {
+      display: inline-block;
+      align-self: flex-start;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-decoration: none;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+      transition: opacity 130ms;
+    }
+    .ghMiniPill:hover { opacity: 0.75; }
+    .ghMiniTitle {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.3;
+      margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .ghMiniCard:hover .ghMiniTitle { color: var(--muted); }
+    .ghMiniTitleLink {
+      color: inherit;
+      text-decoration: none;
+    }
+    .ghMiniTitleLink::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+    }
+
     /* ── Mobile ── */
     @media (max-width: 640px) {
       .ghHeaderBreadcrumb { padding: 10px 0 8px; font-size: 12px; }
@@ -632,6 +774,7 @@ function authorSlug(name: string): string {
       .ghBannerAction { font-size: clamp(2.4rem, 11vw, 4rem); }
       .ghBannerCategory { font-size: clamp(0.9rem, 3vw, 1.2rem); }
       .ghCatHeading { margin: 0 0 20px; }
+      .ghMoreSection { padding: 32px 0 40px; }
     }
   </style>
 
@@ -639,64 +782,15 @@ function authorSlug(name: string): string {
 </Base>
 
 <script is:inline>
-  (function () {
-    /* ── Smooth scroll for ribbon anchor clicks ── */
-    document.querySelectorAll('.ghRibbonItem').forEach(function (link) {
-      link.addEventListener('click', function (e) {
-        var href = link.getAttribute('href');
-        if (!href || href.charAt(0) !== '#') return;
-        var target = document.getElementById(href.slice(1));
-        if (!target) return;
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        history.pushState(null, '', href);
-        setActive(href.slice(1));
-      });
+  document.querySelectorAll('.ghRibbonItem').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      var href = link.getAttribute('href');
+      if (!href || href.charAt(0) !== '#') return;
+      var target = document.getElementById(href.slice(1));
+      if (!target) return;
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.pushState(null, '', href);
     });
-
-    /* ── Ribbon active state ── */
-    var ribbon = document.getElementById('ghRibbon');
-    if (!ribbon) return;
-    var items = Array.prototype.slice.call(ribbon.querySelectorAll('.ghRibbonItem'));
-    if (!items.length) return;
-
-    function lastItemId() {
-      return items[items.length - 1] ? items[items.length - 1].getAttribute('data-ribbon-id') || '' : '';
-    }
-
-    function setActive(id) {
-      if (!id) return;
-      items.forEach(function (item) {
-        var rid = item.getAttribute('data-ribbon-id') || '';
-        var active = id === rid;
-        item.classList.toggle('is-active', active);
-        if (active) item.scrollIntoView({ inline: 'nearest', block: 'nearest' });
-      });
-    }
-
-    function idFromHash() {
-      return window.location.hash ? window.location.hash.slice(1) : null;
-    }
-    setActive(idFromHash() || (items[0] && items[0].getAttribute('data-ribbon-id')) || '');
-    window.addEventListener('hashchange', function () { setActive(idFromHash() || ''); });
-
-    /* ── IntersectionObserver: update active as user scrolls ── */
-    var sections = items.map(function (item) {
-      return document.getElementById(item.getAttribute('data-ribbon-id') || '');
-    }).filter(Boolean);
-
-    function isNearPageBottom() {
-      return window.scrollY + window.innerHeight >= document.body.scrollHeight - 50;
-    }
-
-    if ('IntersectionObserver' in window && sections.length) {
-      var io = new IntersectionObserver(function (entries) {
-        if (isNearPageBottom()) { setActive(lastItemId()); return; }
-        entries.forEach(function (entry) {
-          if (entry.isIntersecting) setActive(entry.target.id);
-        });
-      }, { rootMargin: '-10% 0px -20% 0px', threshold: 0 });
-      sections.forEach(function (s) { if (s) io.observe(s); });
-    }
-  })();
+  });
 </script>
