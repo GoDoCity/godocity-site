@@ -17,14 +17,6 @@ function authorSlug(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
-const topicToSection: Record<string, string> = {
-  COAST: "coast",
-  DRIVE: "drive",
-  SURF:  "surf",
-  LOCAL: "local",
-};
-const sectionSlug = topicToSection[guide.data.topic] ?? "coast";
-
 const pubDate = guide.data.date
   ? guide.data.date.toLocaleDateString("en-US", {
       year: "numeric", month: "long", day: "numeric",
@@ -39,6 +31,7 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
   cityBase="daytona"
   topic={guide.data.topic}
   showToC={guide.data.showToC}
+  hideHeader={true}
 >
   <!-- Category eyebrow pills -->
   <div class="sg-pills">

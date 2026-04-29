@@ -17,10 +17,10 @@ function fmtDate(d: Date) {
 }
 
 const SECTIONS = [
-  { topic: "COAST" as const, slug: "coast", accent: "#0E3F6E", neon: "#bf94ff" },
-  { topic: "DRIVE" as const, slug: "drive", accent: "#7A2F00", neon: "#00ff9d" },
-  { topic: "SURF"  as const, slug: "surf",  accent: "#004E64", neon: "#ff6ad5" },
-  { topic: "LOCAL" as const, slug: "local", accent: "#1C3E1F", neon: "#ffef78" },
+  { topic: "COAST" as const, slug: "coast", accent: "#0E3F6E", neon: "#bf94ff", pillColor: "#7B61FF" },
+  { topic: "DRIVE" as const, slug: "drive", accent: "#7A2F00", neon: "#00ff9d", pillColor: "#00E676" },
+  { topic: "SURF"  as const, slug: "surf",  accent: "#004E64", neon: "#ff6ad5", pillColor: "#FF4081" },
+  { topic: "LOCAL" as const, slug: "local", accent: "#1C3E1F", neon: "#ffef78", pillColor: "#FFD600" },
 ];
 
 const sections = SECTIONS
@@ -44,7 +44,7 @@ const sections = SECTIONS
         <p class="gd-header-sub">Your definitive local source for coast, culture, and community.</p>
         <nav class="gd-header-nav" aria-label="Guide topic sections">
           {sections.map(s => (
-            <a class="gd-nav-link" href={`/daytona/guides/${s.slug}/`}>{s.topic}</a>
+            <a class="gd-nav-link" href={`/daytona/guides/${s.slug}/`} style={`--pill-color: ${s.pillColor};`}>{s.topic}</a>
           ))}
         </nav>
       </div>
@@ -205,14 +205,18 @@ const sections = SECTIONS
     font-weight: 700;
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: #111;
+    color: #000;
     text-decoration: none;
     padding: 9px 22px;
     border-radius: 999px;
-    background: #fff;
-    transition: background 160ms;
+    background: var(--pill-color, #fff);
+    border: 1px solid var(--pill-color, transparent);
+    transition: box-shadow 180ms, filter 180ms;
   }
-  .gd-nav-link:hover { background: #e8e8e8; }
+  .gd-nav-link:hover {
+    box-shadow: 0 0 8px var(--pill-color, transparent), 0 0 20px var(--pill-color, transparent);
+    filter: brightness(1.12);
+  }
 
   /* ─────────────────────────────────────────────
      Topic section
