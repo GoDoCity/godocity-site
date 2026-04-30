@@ -371,14 +371,14 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 
         </div>{/* /.container (map + feed) */}
 
-      {/* ── OWN THE CITY CTA ── */}
-      <div class="container ctaOuter">
-        <div class="ctaBox">
-          <h2 class="ctaHeadline">&ldquo;Own the City&rdquo;</h2>
-          <p class="ctaBody">
-            Built by locals, for locals. <strong><u>Add your event to GoDoDaytona—free,</u></strong> where thousands of locals will see it! Upgrade to Featured to stay on top all week.
-          </p>
-          <a class="ctaBtn" href="/submit-event/">SUBMIT YOUR EVENT</a>
+      {/* ── SUBMIT EVENT FOOTER ── */}
+      <div class="submitFooter">
+        <div class="submitInner">
+          <div class="submitText">
+            <p class="submitHeadline">Know about an event we're missing?</p>
+            <p class="submitSub">GoDo Daytona is built by locals, for locals. Add your event free — thousands of Daytonans will see it.</p>
+          </div>
+          <a class="submitBtn" href="/submit-event/">Submit an Event →</a>
         </div>
       </div>
 
@@ -709,7 +709,6 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
   }
 
   @media (max-width: 520px) {
-    .ctaOuter     { padding-top: 10px; }
     .filterBar    { gap: 6px; }
     .filterCount  { margin-left: 0; width: 100%; }
     .evCardTitle  { font-size: 16px; }
@@ -718,54 +717,54 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
     .evCardDist   { font-size: 13px; }
   }
 
-  /* ── Own the City CTA ─────────────────────────────────────────────────── */
-  .ctaOuter {
-    padding-top: 40px;
-    padding-bottom: 16px;
+  /* ── Submit Event Footer ──────────────────────────────────────────────── */
+  .submitFooter {
+    background: linear-gradient(135deg, #003f88 0%, #0077be 100%);
+    border-top: 3px solid #0055a4;
+    padding: clamp(32px, 5vw, 52px) 2rem;
+    margin-top: 8px;
   }
-  .ctaBox {
-    width: 100%;
-    background: #FFF000;
-    border-radius: 16px;
-    padding: clamp(32px, 5vw, 56px) clamp(24px, 6vw, 64px);
-    text-align: center;
-    font-family: 'Roboto', sans-serif;
+  .submitInner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
   }
-  .ctaHeadline {
-    margin: 0 0 16px;
-    font-family: 'Archivo Black', sans-serif;
-    font-size: 3rem;
+  .submitText { flex: 1; }
+  .submitHeadline {
+    margin: 0 0 8px;
+    font-size: clamp(20px, 3vw, 28px);
     font-weight: 900;
-    font-style: italic;
-    letter-spacing: -.02em;
-    color: #000000 !important;
-    line-height: 1.1;
-    text-shadow: none;
+    color: #fff;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
   }
-  .ctaBody {
-    margin: 0 auto 32px;
-    max-width: 640px;
-    font-family: 'Roboto', sans-serif;
-    font-size: 1.3rem;
-    font-weight: 400;
-    color: #000000 !important;
-    line-height: 1.65;
-    text-shadow: none;
+  .submitSub {
+    margin: 0;
+    font-size: 15px;
+    color: rgba(255,255,255,0.78);
+    line-height: 1.55;
+    max-width: 540px;
   }
-  .ctaBtn {
+  .submitBtn {
     display: inline-flex; align-items: center; justify-content: center;
-    height: 52px; padding: 0 36px;
+    flex-shrink: 0;
+    height: 48px; padding: 0 32px;
     border-radius: 999px;
-    background: #000000;
-    color: #FFF000;
-    font-size: 15px; font-weight: 900;
-    letter-spacing: .04em; text-transform: uppercase;
+    background: #fff;
+    color: #003f88;
+    font-size: 14px; font-weight: 900;
+    letter-spacing: .04em;
     text-decoration: none;
     transition: filter 140ms, transform 120ms;
+    white-space: nowrap;
   }
-  .ctaBtn:hover { filter: brightness(1.25); transform: translateY(-1px); }
+  .submitBtn:hover { filter: brightness(0.95); transform: translateY(-1px); }
 
-  @media (max-width: 600px) {
-    .ctaBox { padding: 50px 20px 30px 20px; }
+  @media (max-width: 620px) {
+    .submitInner { flex-direction: column; align-items: flex-start; gap: 20px; }
+    .submitBtn { width: 100%; justify-content: center; }
   }
 </style>

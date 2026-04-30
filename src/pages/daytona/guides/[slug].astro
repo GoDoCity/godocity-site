@@ -73,7 +73,7 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
   <div class="sg-byline">
     <div class="sg-byline-left">
       {guide.data.author && (
-        <a class="sg-author" href={`/daytona/authors/${authorSlug(guide.data.author)}`}>{guide.data.author}</a>
+        <a class="sg-author" href={`/daytona/journalists/${authorSlug(guide.data.author)}`}>{guide.data.author}</a>
       )}
       {pubDate && (
         <time class="sg-date" datetime={pubDateISO ?? undefined}>{pubDate}</time>

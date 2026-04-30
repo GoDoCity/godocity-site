@@ -1,0 +1,300 @@
+---
+import Base from "../../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+
+function formatDate(raw: any) {
+  if (!raw) return "";
+  const d = new Date(raw);
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  return `${months[d.getUTCMonth()]} ${d.getUTCDate()}, ${d.getUTCFullYear()}`;
+}
+
+function excerpt(post: any): string {
+  const v = post?.data?.description ?? post?.data?.excerpt ?? post?.body ?? "";
+  if (typeof v !== "string" || !v.trim()) return "";
+  const clean = v.replace(/[#*_`>\[\]]/g, " ").replace(/\s+/g, " ").trim();
+  return clean.length > 160 ? clean.slice(0, 157).trimEnd() + "…" : clean;
+}
+
+function postHeroImage(post: any): string {
+  const v = post?.data?.heroImage ?? post?.data?.thumbnail ?? post?.data?.image ?? "";
+  return typeof v === "string" ? v.trim() : "";
+}
+
+function normName(raw: any): string {
+  return String(raw ?? "")
+    .normalize("NFC")
+    .replace(/[ ​-‍⁠﻿]/g, " ")
+    .replace(/\b[A-Za-z]\.\s*/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+export async function getStaticPaths() {
+  const journalists = await getCollection("journalists");
+  return journalists.map(entry => ({
+    params: { slug: entry.slug },
+    props:  { entry },
+  }));
+}
+
+const { entry }   = Astro.props;
+const { data }    = entry;
+const { Content } = await entry.render();
+
+const journalistNorm = normName(data.name);
+
+const allPosts = await getCollection("posts");
+const allDiy   = await getCollection("diy");
+
+const daytonaPosts = allPosts.filter(p => {
+  const city = String(p?.data?.city ?? "daytona").toLowerCase().trim();
+  return city === "daytona" || (typeof p?.id === "string" && p.id.startsWith("daytona/"));
+});
+
+const matchedPosts = daytonaPosts.filter(p => {
+  const articleAuthor = typeof p.data.author === "string" ? p.data.author : "";
+  const authorNorm    = normName(articleAuthor);
+  return authorNorm === journalistNorm || authorNorm.includes(journalistNorm) || journalistNorm.includes(authorNorm);
+});
+
+const matchedDiy = allDiy.filter(e => {
+  const articleAuthor = typeof e.data.author === "string" ? e.data.author : "";
+  const authorNorm    = normName(articleAuthor);
+  return authorNorm === journalistNorm || authorNorm.includes(journalistNorm) || journalistNorm.includes(authorNorm);
+});
+
+interface ArticleItem {
+  href:   string;
+  title:  string;
+  img:    string;
+  desc:   string;
+  date:   string;
+  kicker: string;
+}
+
+const articles: ArticleItem[] = [
+  ...matchedPosts.map(p => {
+    const city     = p.data.city ?? p.slug.split("/")[0] ?? "daytona";
+    const postSlug = p.slug.split("/").pop() ?? p.slug;
+    const cat      = typeof p.data.category === "string" ? p.data.category.trim().toUpperCase() : "";
+    const sub      = typeof p.data.subtopic === "string" ? p.data.subtopic.trim() : "";
+    return {
+      href:   `/${city}/posts/${postSlug}/`,
+      title:  p.data.title ?? p.slug,
+      img:    postHeroImage(p),
+      desc:   excerpt(p),
+      date:   formatDate(p.data.pubDate),
+      kicker: cat ? (sub ? `${cat} — ${sub}` : cat) : "",
+    };
+  }),
+  ...matchedDiy.map(e => ({
+    href:   `/diy/${e.slug}/`,
+    title:  e.data.title,
+    img:    typeof e.data.heroImage === "string" ? e.data.heroImage : "",
+    desc:   e.data.intro?.split(/\n\n+/)[0].substring(0, 160) ?? "",
+    date:   formatDate(e.data.pubDate),
+    kicker: e.data.topic ? `DIY — ${e.data.topic}` : "DIY",
+  })),
+].sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0));
+---
+
+<Base title={`${data.name} | GoDo Daytona`} subtitle={`Journalism by ${data.name} on GoDo Daytona`} cityBase="daytona">
+  <div class="journalistWrap">
+    <div class="container">
+
+      <header class="journalistHeader">
+
+        <div class="photoCol">
+          {data.photo
+            ? <img class="journalistPhoto" src={data.photo} alt={data.name} loading="eager" decoding="async" />
+            : (
+              <div class="journalistInitials" aria-hidden="true">
+                {data.name.split(" ").map((w: string) => w[0]).join("").slice(0, 2).toUpperCase()}
+              </div>
+            )
+          }
+        </div>
+
+        <div class="bioCol">
+          <div class="journalistPill">Journalist · GoDo Daytona</div>
+          <h1 class="journalistName">{data.name}</h1>
+          <div class="journalistBio prose">
+            <Content />
+          </div>
+          <p class="journalistMeta">
+            {articles.length} {articles.length === 1 ? "article" : "articles"} on GoDo Daytona
+          </p>
+        </div>
+
+      </header>
+
+      <section class="articleSection" aria-label={`Articles by ${data.name}`}>
+
+        <div class="sectionHead">
+          <span class="sectionLabel">Articles by {data.name}</span>
+        </div>
+
+        {articles.length === 0 && (
+          <p class="noArticles">No articles found yet.</p>
+        )}
+
+        <div class="articleGrid">
+          {articles.map(item => (
+            <a class="articleCard" href={item.href}>
+              <div class="cardImgWrap">
+                {item.img
+                  ? <img class="cardImg" src={item.img} alt="" loading="lazy" decoding="async" />
+                  : <div class="cardImg cardImgFallback" aria-hidden="true" />
+                }
+              </div>
+              <div class="cardBody">
+                {item.kicker && <div class="cardKicker">{item.kicker}</div>}
+                <div class="cardTitle">{item.title}</div>
+                {item.desc && <div class="cardDesc">{item.desc}</div>}
+                <div class="cardMeta">{item.date}</div>
+              </div>
+            </a>
+          ))}
+        </div>
+
+      </section>
+
+    </div>
+  </div>
+</Base>
+
+<style>
+  .journalistWrap { min-height: 100vh; padding-bottom: 80px; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 2rem; }
+  @media (max-width: 768px) { .container { padding: 0 1.25rem; } }
+
+  .journalistHeader {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 48px;
+    align-items: start;
+    padding: 48px 0 40px;
+    border-bottom: 2px solid var(--brand1);
+    margin-bottom: 48px;
+  }
+  @media (max-width: 720px) {
+    .journalistHeader { grid-template-columns: 1fr; gap: 28px; }
+  }
+
+  .photoCol { display: flex; justify-content: center; }
+  .journalistPhoto {
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--brand1);
+    display: block;
+  }
+  @media (max-width: 720px) {
+    .journalistPhoto { width: 120px; height: 120px; }
+  }
+  .journalistInitials {
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: var(--brand1); color: #000;
+    font-size: 52px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    letter-spacing: -0.04em;
+  }
+
+  .bioCol { display: flex; flex-direction: column; gap: 10px; }
+  .journalistPill {
+    display: inline-block;
+    background: var(--brand1); color: #000;
+    font-size: 10px; font-weight: 900;
+    text-transform: uppercase; letter-spacing: .12em;
+    padding: 3px 10px; border-radius: 999px;
+    width: fit-content;
+  }
+  .journalistName {
+    font-size: clamp(28px, 3.5vw, 44px);
+    font-weight: 900;
+    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
+    color: var(--text); margin: 0;
+    line-height: 1.05; letter-spacing: -0.5px;
+  }
+  .journalistBio.prose {
+    font-size: 15px; color: var(--muted);
+    line-height: 1.65; max-width: 620px;
+  }
+  .journalistBio.prose :global(p) { margin: 0 0 .75em; }
+  .journalistBio.prose :global(p:last-child) { margin-bottom: 0; }
+  .journalistBio.prose :global(strong) { color: var(--text); font-weight: 800; }
+  .journalistBio.prose :global(a) { color: var(--brand1); text-decoration: underline; }
+  .journalistMeta { font-size: 13px; color: var(--faint); font-weight: 500; margin: 0; }
+
+  .articleSection { margin-bottom: 48px; }
+  .sectionHead {
+    display: flex; align-items: baseline;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--brand1);
+    margin-bottom: 28px;
+  }
+  .sectionLabel {
+    font-size: 20px; font-weight: 900;
+    letter-spacing: .07em; text-transform: uppercase; color: var(--text);
+  }
+  .noArticles { color: var(--faint); font-size: 15px; padding: 24px 0; }
+
+  .articleGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 860px) { .articleGrid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .articleGrid { grid-template-columns: 1fr; gap: 0; } }
+
+  .articleCard {
+    display: flex; flex-direction: column;
+    text-decoration: none; transition: opacity 140ms;
+  }
+  .articleCard:hover { opacity: .88; }
+  @media (max-width: 540px) {
+    .articleCard {
+      display: grid; grid-template-columns: 1fr 90px;
+      gap: 12px; padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+    }
+  }
+
+  .cardImgWrap { border-radius: 10px; overflow: hidden; margin-bottom: 10px; }
+  @media (max-width: 540px) { .cardImgWrap { margin-bottom: 0; order: 2; border-radius: 7px; } }
+
+  .cardImg {
+    display: block; width: 100%;
+    aspect-ratio: 16/10; object-fit: cover;
+    background: var(--surface2); transition: transform 280ms ease;
+  }
+  .articleCard:hover .cardImg { transform: scale(1.03); }
+  .cardImgFallback { aspect-ratio: 16/10; background: var(--surface2); }
+  @media (max-width: 540px) {
+    .cardImg { width: 90px; height: 64px; aspect-ratio: unset; }
+    .cardImgFallback { width: 90px; height: 64px; }
+  }
+
+  .cardBody { display: flex; flex-direction: column; gap: 5px; }
+  .cardKicker {
+    font-size: 10px; font-weight: 800;
+    letter-spacing: .09em; text-transform: uppercase; color: var(--brand1);
+  }
+  .cardTitle {
+    font-size: 17px; font-weight: 800; line-height: 1.2;
+    letter-spacing: -0.15px; color: var(--text);
+    display: -webkit-box; -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical; overflow: hidden;
+    transition: color 130ms;
+  }
+  .articleCard:hover .cardTitle { color: var(--brand1); }
+  .cardDesc {
+    font-size: 13.5px; color: var(--muted); line-height: 1.45;
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .cardMeta { font-size: 11.5px; color: var(--faint); }
+</style>
