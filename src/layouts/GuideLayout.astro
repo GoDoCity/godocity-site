@@ -816,16 +816,15 @@ const emoji = topicEmoji[topic] ?? "📖";
   /* ── Responsive ─────────────────────────────────────────────────────── */
   @media (max-width: 900px) {
     .gl-grid {
-      grid-template-columns: 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 40px;
     }
 
-    /* On mobile, sidebar sits below content */
+    .gl-main    { order: 1; }
+    .gl-sidebar { order: 2; }
+
     .gl-sticky-top { position: static; }
-
-    /* Show sidebar events section before the main article on mobile */
-    .gl-sidebar { order: -1; }
-
   }
 
   @media (max-width: 600px) {

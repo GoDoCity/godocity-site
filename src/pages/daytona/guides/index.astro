@@ -102,7 +102,7 @@ const sections = SECTIONS
                     )}
                     <div class="gd-feature-meta">
                       {feature.data.author && (
-                        <a class="gd-meta-author" href={`/authors/${authorSlug(feature.data.author)}`}>{feature.data.author}</a>
+                        <a class="gd-meta-author" href={`/daytona/authors/${authorSlug(feature.data.author)}`}>{feature.data.author}</a>
                       )}
                       {feature.data.date && <span class="gd-meta-date">{fmtDate(feature.data.date)}</span>}
                     </div>
@@ -195,9 +195,9 @@ const sections = SECTIONS
      Page header
   ───────────────────────────────────────────── */
   .gd-header {
-    background: #000;
+    background: linear-gradient(160deg, #0A2B5E 0%, #0077be 100%);
     padding: 52px 2rem 40px;
-    border-bottom: 3px solid #000;
+    border-bottom: 3px solid #0055a4;
   }
   .gd-header-inner {
     max-width: 1200px;
@@ -271,15 +271,15 @@ const sections = SECTIONS
   .gd-topic-label {
     font-family: 'Monoton', cursive;
     font-size: clamp(2.6rem, 5.5vw, 5rem);
-    color: #000 !important;
+    color: var(--neon);
     line-height: 1;
     text-align: center;
     -webkit-font-smoothing: antialiased;
     text-shadow:
-      0 0 2px #fff,
-      0 0 10px var(--neon),
-      0 0 28px var(--neon),
-      0 0 55px var(--neon);
+      0 0 1px var(--neon),
+      0 0 8px var(--neon),
+      0 0 18px color-mix(in srgb, var(--neon) 65%, transparent),
+      0 1px 4px rgba(0,0,0,0.8);
   }
 
   /* Inner container */
@@ -555,5 +555,9 @@ const sections = SECTIONS
     .gd-topic-bar { padding: 16px 1rem; }
     .gd-section-body { padding: 28px 1rem 40px; }
     .gd-breadcrumb { padding: 12px 1rem; }
+
+    /* Compact topic pills so all four fit on one line */
+    .gd-header-nav { gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; justify-content: flex-start; }
+    .gd-nav-link { font-size: 0.6rem; padding: 6px 12px; height: auto; flex-shrink: 0; }
   }
 </style>
