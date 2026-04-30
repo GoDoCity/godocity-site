@@ -29,10 +29,10 @@ const topicItems = [
 ];
 
 const guideItems = [
-  { label: "COAST",      emoji: "🌊", href: `${cityBase}/guides/live/`, key: "coast",      color: "#bf94ff" },
-  { label: "DRIVE",      emoji: "🚗", href: `${cityBase}/guides/work/`, key: "drive",      color: "#00ff9d" },
-  { label: "SURF",       emoji: "🏄", href: `${cityBase}/guides/play/`, key: "surf",       color: "#ff6ad5" },
-  { label: "LOCAL",      emoji: "⭐", href: `${cityBase}/guides/best/`, key: "local",      color: "#ffef78" },
+  { label: "COAST",      emoji: "🌊", href: `${cityBase}/guides/coast/`, key: "coast",      color: "#bf94ff" },
+  { label: "DRIVE",      emoji: "🚗", href: `${cityBase}/guides/drive/`, key: "drive",      color: "#00ff9d" },
+  { label: "SURF",       emoji: "🏄", href: `${cityBase}/guides/surf/`,  key: "surf",       color: "#ff6ad5" },
+  { label: "LOCAL",      emoji: "⭐", href: `${cityBase}/guides/local/`, key: "local",      color: "#ffef78" },
 ];
 
 const diyItems = [
@@ -46,7 +46,7 @@ const diyItems = [
 
 const pills = [
   { label: "Home",      href: `${cityBase}/`,           dropdown: null,      colorGroup: "home"      },
-  { label: "Topics",    href: `${cityBase}/topics/`,    dropdown: "topics",  colorGroup: "topic"     },
+  { label: "Topics",    href: `${cityBase}/posts/`,     dropdown: "topics",  colorGroup: "topic"     },
   { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides",  colorGroup: "guides"    },
   { label: "Events",    href: `${cityBase}/events/`,    dropdown: null,      colorGroup: "events"    },
   { label: "DIY",       href: `${cityBase}/diy/`,       dropdown: "diy",     colorGroup: "diy"       },
@@ -77,7 +77,7 @@ const pills = [
                     <a class="dropPill" href={t.href} role="menuitem">{t.label}</a>
                   ))}
                 </div>
-                <a class="dropFooter" href={`${cityBase}/topics/`}>Browse all topics →</a>
+                <a class="dropFooter" href={`${cityBase}/posts/`}>Browse all posts →</a>
               </div>
             </div>
           )}

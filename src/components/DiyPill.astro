@@ -1,23 +1,9 @@
 ---
-/**
- * src/components/DiyPill.astro
- * ─────────────────────────────────────────────────────────────────────────────
- * Universal DIY "Pill" layout component.
- *
- * Layout: 75/25 grid split — 1260px max-width, 80px column gap (matches site standard).
- *   75% Main column : Title kicker, Intro (≥2 paragraphs, ≤200 words), numbered Steps,
- *                     Community Note (styled blockquote).
- *   25% Sidebar     : Materials list with distinct brand-accent background + border.
- *
- * Usage (from a page route):
- *   import DiyPill from "../../components/DiyPill.astro";
- *   <DiyPill {...entry.data} city={city} />
- * ─────────────────────────────────────────────────────────────────────────────
- */
+import { getCollection } from "astro:content";
 
 export interface Props {
   title:          string;
-  intro:          string;       // Plain text; \n\n = paragraph break; max 200 words
+  intro:          string;
   materials:      string[];
   steps:          string[];
   community_note?: string;
@@ -41,9 +27,7 @@ const {
   heroImage,
 } = Astro.props;
 
-/* ── Smart-list normalisation — belt-and-suspenders for CMS textarea input ──
- *  Schema transform in config.ts handles the canonical case; this guards
- *  against any raw string that slips through (e.g. direct component usage). */
+/* ── Normalise list fields ── */
 const normMaterials: string[] = Array.isArray(materials)
   ? materials
   : String(materials).split("\n").map((s) => s.trim()).filter(Boolean);
@@ -51,11 +35,10 @@ const normSteps: string[] = Array.isArray(steps)
   ? steps
   : String(steps).split("\n").map((s) => s.trim()).filter(Boolean);
 
-/* ── Intro: enforce ≤200 words, then split into paragraphs (min 2) ── */
+/* ── Intro: enforce ≤200 words, split into paragraphs ── */
 const words   = intro.split(/\s+/).filter(Boolean);
-const trimmed = words.length > 200 ? words.slice(0, 200).join(" ") + "\u2026" : intro;
+const trimmed = words.length > 200 ? words.slice(0, 200).join(" ") + "…" : intro;
 const paras   = trimmed.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
-// Guarantee at least 2 rendered paragraphs
 while (paras.length < 2) paras.push("");
 
 const pubDateStr = pubDate
@@ -65,103 +48,197 @@ const pubDateStr = pubDate
 const authorSlug = author
   ? author.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
   : "";
+
+/* ── Upcoming events for sidebar ── */
+const citySlug = (city ?? "daytona").toLowerCase().trim();
+const today = new Date(); today.setHours(0, 0, 0, 0);
+let sidebarEvents: any[] = [];
+try {
+  const allEvents = await getCollection("events");
+  sidebarEvents = allEvents
+    .filter((e: any) => {
+      const evCity = String(e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+      const evDate = new Date(e.data.eventDate); evDate.setHours(0, 0, 0, 0);
+      return evCity === citySlug && evDate >= today;
+    })
+    .sort((a: any, b: any) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
+    .slice(0, 3);
+} catch { sidebarEvents = []; }
+
+const eventsHref = `/${citySlug}/events/`;
 ---
 
 <div class="diyWrap">
-  <div class="container">
+  <div class="diyContainer">
 
-    {/* 1 ── Headline + meta */}
-    <header class="diyHeader">
-      <div class="diyKicker">
-        <span class="kPill kCat">DIY</span>
-        {topic && <span class="kPill kTopic">{topic}</span>}
-      </div>
-      <h1 class="diyTitle">{title}</h1>
-      {(author || pubDateStr) && (
-        <div class="diyMeta">
-          {author && (
-            authorSlug
-              ? <a class="diyAuthor diyAuthorLink" href={`/daytona/journalists/${authorSlug}/`}>By {author}</a>
-              : <span class="diyAuthor">By {author}</span>
-          )}
-          {author && pubDateStr && <span class="diyDot" aria-hidden="true">·</span>}
-          {pubDateStr && <span class="diyDate">{pubDateStr}</span>}
+    {/* ── LEFT: main content column ── */}
+    <div class="diyMain">
+
+      {/* 1 — Headline + meta */}
+      <header class="diyHeader">
+        <div class="diyKicker">
+          <span class="kPill kCat">DIY</span>
+          {topic && <span class="kPill kTopic">{topic}</span>}
+        </div>
+        <h1 class="diyTitle">{title}</h1>
+        {(author || pubDateStr) && (
+          <div class="diyMeta">
+            {author && (
+              authorSlug
+                ? <a class="diyAuthor diyAuthorLink" href={`/daytona/journalists/${authorSlug}/`}>By {author}</a>
+                : <span class="diyAuthor">By {author}</span>
+            )}
+            {author && pubDateStr && <span class="diyDot" aria-hidden="true">·</span>}
+            {pubDateStr && <span class="diyDate">{pubDateStr}</span>}
+          </div>
+        )}
+      </header>
+
+      {/* 2 — Featured photo (16:9) */}
+      {heroImage && (
+        <div class="diyHeroBanner">
+          <img class="diyHeroImg" src={heroImage} alt={title} loading="eager" decoding="async" />
         </div>
       )}
-    </header>
 
-    {/* 2 ── Featured photo (16:9) */}
-    {heroImage && (
-      <div class="diyHeroBanner">
-        <img class="diyHeroImg" src={heroImage} alt={title} loading="eager" decoding="async" />
+      {/* 3 — What You'll Need (materials) */}
+      <section class="diyMaterials" aria-labelledby="materials-heading">
+        <div class="diyBlockHead" id="materials-heading">
+          <span class="diyBlockIcon" aria-hidden="true">🛒</span>
+          What You'll Need
+        </div>
+        <ul class="materialGrid">
+          {normMaterials.map((m) => (
+            <li class="materialItem">
+              <span class="materialCheck" aria-hidden="true">✓</span>
+              <span>{m}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* 4 — Intro / description */}
+      <div class="diyIntro">
+        {paras.map((p) => p && <p class="diyPara">{p}</p>)}
       </div>
-    )}
 
-    {/* 3 ── What You'll Need (materials) */}
-    <section class="diyMaterials" aria-labelledby="materials-heading">
-      <div class="diyBlockHead" id="materials-heading">
-        <span class="diyBlockIcon" aria-hidden="true">🛒</span>
-        What You'll Need
+      {/* 5 — Step-by-Step */}
+      <section class="diySteps" aria-labelledby="steps-heading">
+        <h2 class="sectionHead" id="steps-heading">Step-by-Step</h2>
+        <ol class="stepList">
+          {normSteps.map((step, i) => (
+            <li class="stepItem">
+              <div class="stepNum" aria-label={`Step ${i + 1}`}>{i + 1}</div>
+              <p class="stepText">{step}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* 6 — Community Notes */}
+      {community_note && (
+        <blockquote class="communityNote">
+          <span class="cnLabel" aria-label="Community Note">
+            <span class="cnIcon" aria-hidden="true">💬</span>
+            Community Note
+          </span>
+          <p class="cnText">{community_note}</p>
+        </blockquote>
+      )}
+
+      <div class="diyFootNav">
+        <a class="diyFootLink" href="/diy/">← More DIY guides</a>
       </div>
-      <ul class="materialGrid">
-        {normMaterials.map((m) => (
-          <li class="materialItem">
-            <span class="materialCheck" aria-hidden="true">✓</span>
-            <span>{m}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
 
-    {/* 4 ── Intro / description */}
-    <div class="diyIntro">
-      {paras.map((p) => p && <p class="diyPara">{p}</p>)}
-    </div>
+    </div>{/* /.diyMain */}
 
-    {/* 5 ── Step-by-Step */}
-    <section class="diySteps" aria-labelledby="steps-heading">
-      <h2 class="sectionHead" id="steps-heading">Step-by-Step</h2>
-      <ol class="stepList">
-        {normSteps.map((step, i) => (
-          <li class="stepItem">
-            <div class="stepNum" aria-label={`Step ${i + 1}`}>{i + 1}</div>
-            <p class="stepText">{step}</p>
-          </li>
-        ))}
-      </ol>
-    </section>
+    {/* ── RIGHT: sidebar ── */}
+    <aside class="diySidebar">
 
-    {/* 6 ── Community Notes */}
-    {community_note && (
-      <blockquote class="communityNote">
-        <span class="cnLabel" aria-label="Community Note">
-          <span class="cnIcon" aria-hidden="true">💬</span>
-          Community Note
-        </span>
-        <p class="cnText">{community_note}</p>
-      </blockquote>
-    )}
+      {/* Upcoming Events */}
+      <div class="sideCard eventsCard">
+        <div class="sideCardHead">Upcoming Events</div>
+        {sidebarEvents.length > 0 ? (
+          <div class="evList" role="list">
+            {sidebarEvents.map((e: any, i: number) => {
+              const d   = new Date(e.data.eventDate);
+              const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+              const day = d.getDate();
+              const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+              const evSlug = e.slug.split("/").pop();
+              return (
+                <>
+                  {i > 0 && <div class="evDivider" aria-hidden="true"></div>}
+                  <a class="evRow" role="listitem"
+                     href={e.data.url ?? `/${citySlug}/events/${evSlug}/`}
+                     target={e.data.url ? "_blank" : "_self"}
+                     rel={e.data.url ? "noopener" : ""}>
+                    <div class="evDate">
+                      <div class="evDow">{dow}</div>
+                      <div class="evDay">{day}</div>
+                      <div class="evMon">{mon}</div>
+                    </div>
+                    <div class="evInfo">
+                      <div class="evName">{e.data.title}</div>
+                      <div class="evPlace">{e.data.location}</div>
+                    </div>
+                  </a>
+                </>
+              );
+            })}
+          </div>
+        ) : (
+          <p class="noEvents">No upcoming events — check back soon.</p>
+        )}
+        <a class="seeAll" href={eventsHref}>See all events →</a>
+      </div>
 
-    <div class="diyFootNav">
-      <a class="diyFootLink" href="/diy/">← More DIY guides</a>
-    </div>
+      {/* Ad slot */}
+      <div class="sideCard adCard">
+        <div class="adLabel">Advertisement</div>
+        <div class="adSlot" aria-label="Advertisement placeholder">
+          <span class="adSlotText">Your Ad Here</span>
+          <a class="adCta" href={`/${citySlug}/advertise/`}>Learn more →</a>
+        </div>
+      </div>
 
-  </div>
+      {/* Vibe Check */}
+      <div class="sideCard vibeCard">
+        <div class="sideCardHead">Vibe Check</div>
+        <p class="vibeText">Got a suggestion, tip, or local story? We want to hear it.</p>
+        <a class="vibeBtn" href={`/${citySlug}/contact/`}>Contact Us →</a>
+      </div>
+
+    </aside>
+
+  </div>{/* /.diyContainer */}
 </div>
 
 <style>
-  :global(.diyWrap .container) {
-    max-width: 860px !important;
-    margin: 0 auto !important;
-    padding: 0 2rem !important;
-  }
-  @media (max-width: 768px) {
-    :global(.diyWrap .container) { padding: 0 1.25rem !important; }
-  }
-
+  /* ── Outer wrapper ── */
   .diyWrap { min-height: 60vh; padding-bottom: 64px; }
 
-  /* 1 ── Header */
+  /* ── Two-column grid ── */
+  .diyContainer {
+    max-width: 1260px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: grid;
+    grid-template-columns: 3fr 1fr;
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 960px) {
+    .diyContainer {
+      grid-template-columns: 1fr;
+      gap: 40px;
+    }
+  }
+  @media (max-width: 768px) {
+    .diyContainer { padding: 0 1.25rem; }
+  }
+
+  /* ── 1 — Header ── */
   .diyHeader {
     padding: 48px 0 32px;
     border-bottom: 2px solid var(--brand1);
@@ -192,7 +269,7 @@ const authorSlug = author
   .diyAuthorLink:hover { color: var(--brand1); text-decoration-color: var(--brand1); }
   .diyDot { opacity: .45; }
 
-  /* 2 ── Hero image (16:9) */
+  /* ── 2 — Hero image ── */
   .diyHeroBanner {
     width: 100%; border-radius: 14px; overflow: hidden;
     aspect-ratio: 16/9; margin-bottom: 36px;
@@ -202,11 +279,10 @@ const authorSlug = author
     object-fit: cover; object-position: center;
   }
 
-  /* 3 ── Materials section */
+  /* ── 3 — Materials ── */
   .diyMaterials {
     border: 1.5px solid var(--brand1);
-    border-radius: 13px;
-    overflow: hidden;
+    border-radius: 13px; overflow: hidden;
     margin-bottom: 36px;
   }
   .diyBlockHead {
@@ -233,7 +309,7 @@ const authorSlug = author
   .materialItem:last-child { border-bottom: none; }
   .materialCheck { color: var(--brand1); font-size: 13px; flex-shrink: 0; margin-top: 2px; }
 
-  /* 4 ── Intro */
+  /* ── 4 — Intro ── */
   .diyIntro { display: grid; gap: 16px; margin-bottom: 36px; }
   .diyPara {
     font-size: clamp(16px, 1.2vw, 18px); color: var(--muted);
@@ -241,7 +317,7 @@ const authorSlug = author
     line-height: 1.72; margin: 0;
   }
 
-  /* 5 ── Steps */
+  /* ── 5 — Steps ── */
   .diySteps {
     background: rgba(255,210,74,.07);
     border: 1.5px solid var(--brand1);
@@ -272,7 +348,7 @@ const authorSlug = author
     padding-top: 10px; font-family: 'Manrope', sans-serif;
   }
 
-  /* 6 ── Community Note */
+  /* ── 6 — Community Note ── */
   .communityNote {
     margin: 0 0 36px; padding: 0;
     border: 1.5px solid var(--brand1); border-radius: 13px;
@@ -298,7 +374,95 @@ const authorSlug = author
   }
   .diyFootLink:hover { opacity: .75; text-decoration: underline; }
 
-  /* Mobile */
+  /* ── SIDEBAR ── */
+  .diySidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding-top: 152px; /* aligns roughly with content below header */
+  }
+  @media (max-width: 960px) {
+    .diySidebar { padding-top: 0; }
+  }
+
+  .sideCard {
+    border-radius: 16px;
+    border: 1px solid var(--card-border, rgba(255,255,255,.10));
+    background: var(--card-bg, rgba(255,255,255,.035));
+    padding: 16px;
+  }
+
+  /* Events */
+  .sideCardHead {
+    font-size: 13px; font-weight: 900; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--text);
+    margin: 0 0 10px;
+  }
+  .evList { display: grid; gap: 8px; }
+  .evRow {
+    display: grid; grid-template-columns: 44px 1fr;
+    gap: 10px; align-items: center;
+    text-decoration: none;
+  }
+  .evDate {
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+    padding: 7px 6px;
+    text-align: center; line-height: 1.05;
+  }
+  .evDow { font-size: 10px; font-weight: 900; letter-spacing: .1em; opacity: .78; color: var(--text); }
+  .evDay { margin-top: 3px; font-size: 15px; font-weight: 950; color: var(--text); }
+  .evMon { font-size: 7.5px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
+  .evName { font-weight: 800; font-size: 13px; line-height: 1.2; margin-bottom: 3px; color: var(--text); }
+  .evPlace { opacity: .72; font-size: 12px; line-height: 1.2; color: var(--muted); }
+  .evDivider { height: 1px; background: rgba(255,255,255,.08); border-radius: 999px; margin: 2px 0; }
+  .noEvents { font-size: 13px; color: var(--faint); padding: 4px 0; margin: 0; }
+  .seeAll {
+    display: block; margin-top: 10px;
+    font-size: 13px; font-weight: 700; color: var(--brand1);
+    text-decoration: underline; text-decoration-color: transparent;
+    text-underline-offset: 2px; transition: text-decoration-color 120ms;
+  }
+  .seeAll:hover { text-decoration-color: var(--brand1); }
+
+  /* Ad slot */
+  .adCard { }
+  .adLabel {
+    font-size: 9px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--faint); margin-bottom: 8px;
+  }
+  .adSlot {
+    border: 1.5px dashed rgba(255,255,255,.15);
+    border-radius: 10px;
+    min-height: 140px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 8px;
+    background: rgba(255,255,255,.015);
+  }
+  .adSlotText { font-size: 12px; color: var(--faint); font-weight: 700; }
+  .adCta {
+    font-size: 11.5px; font-weight: 800; color: var(--brand1);
+    text-decoration: none; letter-spacing: .02em;
+    border: 1px solid color-mix(in srgb, var(--brand1) 40%, transparent);
+    padding: 5px 12px; border-radius: 999px;
+    transition: background 140ms;
+  }
+  .adCta:hover { background: color-mix(in srgb, var(--brand1) 14%, transparent); }
+
+  /* Vibe Check */
+  .vibeText { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 0 0 12px; }
+  .vibeBtn {
+    display: inline-flex; align-items: center;
+    font-size: 13px; font-weight: 800; color: var(--brand1);
+    border: 1px solid color-mix(in srgb, var(--brand1) 45%, transparent);
+    border-radius: 999px; padding: 7px 14px;
+    text-decoration: none;
+    transition: background 140ms;
+  }
+  .vibeBtn:hover { background: color-mix(in srgb, var(--brand1) 12%, transparent); }
+
+  /* ── Mobile ── */
   @media (max-width: 768px) {
     .diyHeader  { padding: 28px 0 24px; margin-bottom: 24px; }
     .diyTitle   { font-size: clamp(22px, 5vw, 36px); }
