@@ -173,7 +173,7 @@ const hero = posts.find(isFeatured) ?? posts[0] ?? null;
 const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 ---
 
-<Base title={`${topicLabel} | GoDo Daytona`} subtitle={`${topicLabel}`} cityBase="daytona" />
+<Base title={`${topicLabel} | GoDo Daytona`} subtitle={`${topicLabel}`} cityBase="daytona">
 
 <section class="section">
   <div class="container" style="max-width: 1320px;">
@@ -318,6 +318,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
   </div>
 </section>
+
+</Base>
 
 <style>
   /* ── Layout variables ── */
