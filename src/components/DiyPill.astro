@@ -243,18 +243,15 @@ const eventsHref = `/${citySlug}/events/`;
   /* ── Wrapper: extra top clearance below fixed nav ── */
   .diyWrap { min-height: 60vh; padding: 40px 0 64px; }
 
-  /* ── Two-column grid: 4:1 up to 1440px ── */
+  /* ── Two-column grid: 3:1 (75% / 25%) matching site proportions ── */
   .diyContainer {
     max-width: 1440px;
     margin: 0 auto;
     padding: 0 1.5rem;
     display: grid;
-    grid-template-columns: 4fr 1fr;
+    grid-template-columns: 3fr 1fr;
     gap: 52px;
     align-items: start;
-  }
-  @media (max-width: 1060px) {
-    .diyContainer { grid-template-columns: 3fr 1fr; gap: 40px; }
   }
   @media (max-width: 900px) {
     .diyContainer { grid-template-columns: 1fr; gap: 40px; }
@@ -269,7 +266,8 @@ const eventsHref = `/${citySlug}/events/`;
     border-bottom: 2px solid var(--brand1);
     margin-bottom: 36px;
   }
-  .diyKicker { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  /* negative top-margin creates the same 'hanging pill' overlap seen on guide pages */
+  .diyKicker { display: flex; align-items: center; gap: 10px; margin-top: -6px; margin-bottom: 14px; }
   .kPill {
     font-size: 10.5px; font-weight: 800; letter-spacing: .11em;
     text-transform: uppercase; padding: 3px 10px; border-radius: 999px;
@@ -309,7 +307,7 @@ const eventsHref = `/${citySlug}/events/`;
   /* ── 3 — Materials: full left-column width with accent bg ── */
   .diyMaterials {
     width: 100%;
-    border: 1.5px solid var(--brand1);
+    border: 2px solid var(--brand1);
     border-radius: 13px; overflow: hidden;
     margin-bottom: 36px;
   }
@@ -326,7 +324,7 @@ const eventsHref = `/${citySlug}/events/`;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0 24px;
-    background: rgba(255,210,74,.08);
+    background: rgba(255,210,74,.12);
   }
   @media (max-width: 540px) { .materialGrid { grid-template-columns: 1fr; } }
   .materialItem {
@@ -340,7 +338,7 @@ const eventsHref = `/${citySlug}/events/`;
   /* ── 4 — Intro ── */
   .diyIntro { display: grid; gap: 16px; margin-bottom: 36px; }
   .diyPara {
-    font-size: clamp(16px, 1.2vw, 18px); color: var(--muted);
+    font-size: clamp(16px, 1.2vw, 18px); color: #1a1a1a;
     font-family: 'Manrope', sans-serif; font-weight: 400;
     line-height: 1.72; margin: 0;
   }
@@ -372,7 +370,7 @@ const eventsHref = `/${citySlug}/events/`;
     font-family: 'Manrope', sans-serif; margin-top: 2px;
   }
   .stepText {
-    font-size: 17px; color: var(--text); line-height: 1.65; margin: 0;
+    font-size: 17px; color: #1a1a1a; line-height: 1.65; margin: 0;
     padding-top: 10px; font-family: 'Manrope', sans-serif;
   }
 
@@ -548,11 +546,12 @@ const eventsHref = `/${citySlug}/events/`;
   /* Vibe Check */
   .vibeText { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 10px 0 12px; }
   .vibeBtn {
-    display: inline-flex; align-items: center;
+    display: flex; align-items: center; justify-content: center; width: 100%;
     font-size: 13px; font-weight: 800; color: var(--brand1);
     border: 1px solid color-mix(in srgb, var(--brand1) 45%, transparent);
-    border-radius: 999px; padding: 7px 14px;
+    border-radius: 999px; padding: 10px 14px;
     text-decoration: none; transition: background 140ms;
+    box-sizing: border-box;
   }
   .vibeBtn:hover { background: color-mix(in srgb, var(--brand1) 12%, transparent); }
 
