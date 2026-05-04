@@ -1,6 +1,6 @@
 ---
 import Base from "../../../layouts/Base.astro";
-import SidebarPoll from "../../../components/SidebarPoll.astro";
+import ArticleSidebar from "../../../components/ArticleSidebar.astro";
 import { getCollection } from "astro:content";
 
 /** Daytona filter */
@@ -140,21 +140,6 @@ export async function getStaticPaths() {
 
 /** Page data */
 const { topicKey } = Astro.props;
-
-/* Live upcoming events for sidebar */
-const sidebarToday = new Date();
-sidebarToday.setHours(0, 0, 0, 0);
-let allEvents = [];
-try { allEvents = await getCollection("events"); } catch { allEvents = []; }
-const sidebarEvents = allEvents
-  .filter(e => {
-    const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-    const evDate = new Date(e.data.eventDate);
-    evDate.setHours(0, 0, 0, 0);
-    return evCity === "daytona" && evDate >= sidebarToday;
-  })
-  .sort((a, b) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
-  .slice(0, 3);
 const topicLabel = tagLabelFromKey(topicKey);
 
 const all = await getCollection("posts");
@@ -176,7 +161,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 <Base title={`${topicLabel} | GoDo Daytona`} subtitle={`${topicLabel}`} cityBase="daytona">
 
 <section class="section">
-  <div class="container" style="max-width: 1320px;">
+  <div class="pageWrap">
 
     <div class="topicHeader">
       <h1 class="topicTitle">{topicLabel}</h1>
@@ -241,78 +226,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 
       </div>
 
-      {/* ── Sidebar ── */}
-      <aside class="topicSidebar">
-
-        {/* Upcoming Events */}
-        <div class="moduleCard eventsCard">
-          <div class="moduleTitle">Upcoming Events</div>
-          {sidebarEvents.length > 0 ? (
-            <div class="eventsList" role="list">
-              {sidebarEvents.map((e, i) => {
-                const d   = new Date(e.data.eventDate);
-                const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                const day = d.getDate();
-                const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                const evSlug = e.slug.split("/").pop();
-                return (
-                  <>
-                    {i > 0 && <div class="eventDivider" aria-hidden="true"></div>}
-                    <a class="eventRow" role="listitem"
-                       href={e.data.url ?? `/daytona/events/${evSlug}/`}
-                       target={e.data.url ? "_blank" : "_self"}
-                       rel={e.data.url ? "noopener" : ""}>
-                      <div class="eventDate">
-                        <div class="eventDay">{dow}</div>
-                        <div class="eventNum">{day}</div>
-                        <div class="eventMon">{mon}</div>
-                      </div>
-                      <div class="eventInfo">
-                        <div class="eventName">{e.data.title}</div>
-                        <div class="eventPlace">{e.data.location}</div>
-                      </div>
-                    </a>
-                  </>
-                );
-              })}
-            </div>
-          ) : (
-            <p class="noEvents">No upcoming events — check back soon.</p>
-          )}
-          <a class="eventsLink" href="/daytona/events/">See all events →</a>
-        </div>
-
-        {/* City Guides */}
-        <div class="moduleCard guidesCard">
-          <div class="guidesHead">
-            <span class="moduleTitle" style="margin:0">City Guides</span>
-            <a class="guidesMore" href="/daytona/guides/">See all</a>
-          </div>
-          <div class="guideList">
-            <a class="guideRow" href="/daytona/guides/live/">🏠 Live in Daytona</a>
-            <a class="guideRow" href="/daytona/guides/work/">💼 Work in Daytona</a>
-            <a class="guideRow" href="/daytona/guides/play/">🎉 Play in Daytona</a>
-            <a class="guideRow" href="/daytona/guides/best-restaurants/">🍽️ Best Restaurants</a>
-          </div>
-        </div>
-
-        {/* Vibe Check Poll */}
-        <SidebarPoll />
-
-        {/* Newsletter — sticky once scrolled past above modules */}
-        <div class="nlStickyWrap">
-          <div class="moduleCard newsletterCard">
-            <div class="moduleTitle">Good news for Daytona</div>
-            <div class="moduleSubtext">Get the best local posts and events sent to your inbox, for free.</div>
-            <div class="newsletterForm">
-              <input class="newsletterInput" type="email" placeholder="Enter your email address" aria-label="Email address" />
-              <button class="newsletterButton" type="button">SIGN UP — IT’S FREE!</button>
-            </div>
-            <div class="moduleFineprint">100% free. Unsubscribe anytime.</div>
-          </div>
-        </div>
-
-      </aside>
+      {/* ── RIGHT: production sidebar — identical to DIY and News post pages ── */}
+      <ArticleSidebar city="daytona" />
 
     </div>
 
@@ -322,8 +237,8 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 </Base>
 
 <style>
-  /* ── Layout variables ── */
-  :root {
+  /* ── Layout tokens (scoped — not :root) ── */
+  .topicLayout, .topicHeader, .topicMain, .pageWrap {
     --card-radius: 18px;
     --card-border: rgba(255,255,255,.10);
     --card-border-hover: rgba(255,220,80,.22);
@@ -345,29 +260,20 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   }
   .topicMeta { opacity: .72; font-size: 14px; }
 
-  /* ── Two-column layout ── */
+  /* ── Wrapper: matches DiyPill and posts pages exactly ── */
+  .pageWrap { max-width: 1440px; margin: 0 auto; padding: 0 1.5rem; }
+  @media (max-width: 600px) { .pageWrap { padding: 0 1rem; } }
+
+  /* ── Two-column layout: 7fr/3fr — identical to DiyPill and GuideLayout ── */
   .topicLayout {
     display: grid;
-    grid-template-columns: 1fr 300px;
-    gap: 80px;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    gap: 56px;
     align-items: start;
   }
   .topicMain { min-width: 0; }
-  .topicSidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
   @media (max-width: 980px) {
-    .topicLayout { grid-template-columns: 1fr; }
-  }
-
-  /* Newsletter becomes sticky only after scrolling past Events + Guides + Poll */
-  .nlStickyWrap {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 20px;
-    z-index: 10;
+    .topicLayout { grid-template-columns: 1fr; gap: 40px; }
   }
 
   /* ── Hero card ── */
@@ -525,125 +431,5 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
     flex-wrap: wrap;
   }
 
-  /* ── Sidebar cards ── */
-  .moduleCard {
-    border-radius: var(--card-radius);
-    border: 1px solid var(--card-border);
-    background: var(--card-bg);
-    padding: 16px;
-  }
-  .moduleTitle {
-    font-weight: 950;
-    font-size: 16px;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
-    margin: 0 0 8px;
-    color: var(--text);
-  }
-  .moduleSubtext { opacity: .80; font-size: 13.5px; line-height: 1.35; margin-bottom: 12px; }
-  .moduleFineprint { opacity: .62; font-size: 12px; line-height: 1.25; margin-top: 10px; }
-
-  /* Events */
-  .eventsCard { padding: 16px; }
-  .eventsList { margin-top: 10px; display: grid; gap: 10px; }
-  .eventRow {
-    display: grid;
-    grid-template-columns: 44px 1fr;
-    gap: 12px;
-    align-items: center;
-    text-decoration: none;
-  }
-  .eventDate {
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.10);
-    background: rgba(255,255,255,.03);
-    padding: 8px;
-    text-align: center;
-    line-height: 1.05;
-  }
-  .eventDay { font-size: 11px; font-weight: 900; letter-spacing: .10em; opacity: .78; }
-  .eventNum { margin-top: 4px; font-size: 16px; font-weight: 950; }
-  .eventMon { font-size: 8px; font-weight: 700; color: var(--faint); text-transform: uppercase; letter-spacing: .06em; margin-top: 2px; }
-  .eventName { font-weight: 900; font-size: 13.8px; line-height: 1.2; margin-bottom: 4px; color: var(--text); }
-  .eventPlace { opacity: .72; font-size: 12.5px; line-height: 1.2; color: var(--muted); }
-  .eventDivider { height: 1px; background: rgba(255,255,255,.08); border-radius: 999px; margin: 2px 0; }
-  .noEvents { font-size: 13px; color: var(--faint); padding: 10px 0 4px; margin: 0; }
-  .eventsLink {
-    display: block;
-    margin-top: 10px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--brand1);
-    text-decoration: underline;
-    text-decoration-color: transparent;
-    text-underline-offset: 2px;
-    transition: text-decoration-color 120ms;
-  }
-  .eventsLink:hover { text-decoration-color: var(--brand1); }
-
-  /* City Guides */
-  .guidesCard { padding: 16px; }
-  .guidesHead {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-  .guidesMore {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--brand1);
-    text-decoration: underline;
-    text-decoration-color: transparent;
-    text-underline-offset: 2px;
-    transition: text-decoration-color 120ms;
-  }
-  .guidesMore:hover { text-decoration-color: var(--brand1); }
-  .guideList { display: grid; }
-  .guideRow {
-    display: block;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text);
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    line-height: 1.3;
-    transition: color 120ms;
-  }
-  .guideRow:last-child { border-bottom: none; }
-  .guideRow:hover { color: var(--brand1); }
-
-  /* Newsletter */
-  .newsletterCard { padding: 18px 16px 16px; }
-  .newsletterForm { display: grid; gap: 10px; margin-top: 10px; }
-  .newsletterInput {
-    width: 100%;
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,.12);
-    background: rgba(0,0,0,.25);
-    color: inherit;
-    outline: none;
-  }
-  .newsletterInput:focus {
-    border-color: rgba(255,220,80,.35);
-    box-shadow: 0 0 0 3px rgba(255,220,80,.10);
-  }
-  .newsletterButton {
-    width: 100%;
-    padding: 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(255,220,80,.35);
-    background: rgba(255,220,80,.14);
-    color: rgba(255,220,80,.98);
-    font-weight: 900;
-    letter-spacing: .02em;
-    cursor: pointer;
-    transition: filter var(--ease), background var(--ease), border-color var(--ease);
-  }
-  .newsletterButton:hover {
-    filter: brightness(1.06);
-    border-color: rgba(255,220,80,.45);
-  }
+  /* sidebar styles live in ArticleSidebar.astro */
 </style>

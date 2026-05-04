@@ -15,7 +15,7 @@
  */
 import Base from "./Base.astro";
 import { getCityEvents, cityDisplayName } from "../lib/events.js";
-import { getDisplayName } from "../lib/cityConfigs.js";
+import { getShortName } from "../lib/cityConfigs.js";
 
 interface Props {
   title: string;
@@ -82,7 +82,7 @@ const emoji = topicEmoji[topic] ?? "📖";
         <div class="gl-sticky-top">
           <div class="gl-nl">
             <div class="gl-nl-head">
-              <em>Good News <strong>{getDisplayName(cityBase)}!</strong></em>
+              <em>Good News <strong>{getShortName(cityBase)}!</strong></em>
             </div>
             <div class="gl-nl-sub">Free local stories, every morning.</div>
             <form class="gl-nl-form" action={`/${cityBase}/subscribe/`} method="get">
