@@ -203,18 +203,18 @@ const hero = heroImage(post);
 
 <style>
   .section { padding: 24px 0; }
-  /* matches DiyPill and GuideLayout: 1440px wide, 7fr/3fr columns, 56px gap */
-  .pageWrap { max-width: 1440px; margin: 0 auto; padding: 0 1.5rem; }
+  /* matches DiyPill and GuideLayout exactly: 1440px wide, 7fr/3fr, 56px gap */
+  .pageWrap { max-width: 1440px; margin: 0 auto; padding: 0 2rem; }
   @media (max-width: 600px) { .pageWrap { padding: 0 1rem; } }
 
   .postLayout {
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    grid-template-columns: minmax(0, 7fr) minmax(360px, 3fr);
     gap: 56px;
     align-items: start;
     padding-top: 16px;
   }
-  @media (max-width: 860px) {
+  @media (max-width: 1150px) {
     .postLayout { grid-template-columns: 1fr; gap: 40px; }
   }
 

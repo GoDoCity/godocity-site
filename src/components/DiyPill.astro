@@ -152,13 +152,13 @@ const citySlug = (city ?? "daytona").toLowerCase().trim();
   .diyContainer {
     max-width: 1440px;
     margin: 0 auto;
-    padding: 0 1.5rem;
+    padding: 0 2rem;
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    grid-template-columns: minmax(0, 7fr) minmax(360px, 3fr);
     gap: 56px;
     align-items: start;
   }
-  @media (max-width: 900px) {
+  @media (max-width: 1150px) {
     .diyContainer { grid-template-columns: 1fr; gap: 40px; }
   }
   @media (max-width: 600px) {

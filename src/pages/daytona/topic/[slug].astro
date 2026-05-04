@@ -261,18 +261,18 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
   .topicMeta { opacity: .72; font-size: 14px; }
 
   /* ── Wrapper: matches DiyPill and posts pages exactly ── */
-  .pageWrap { max-width: 1440px; margin: 0 auto; padding: 0 1.5rem; }
+  .pageWrap { max-width: 1440px; margin: 0 auto; padding: 0 2rem; }
   @media (max-width: 600px) { .pageWrap { padding: 0 1rem; } }
 
   /* ── Two-column layout: 7fr/3fr — identical to DiyPill and GuideLayout ── */
   .topicLayout {
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    grid-template-columns: minmax(0, 7fr) minmax(360px, 3fr);
     gap: 56px;
     align-items: start;
   }
   .topicMain { min-width: 0; }
-  @media (max-width: 980px) {
+  @media (max-width: 1150px) {
     .topicLayout { grid-template-columns: 1fr; gap: 40px; }
   }
 
