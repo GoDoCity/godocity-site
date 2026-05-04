@@ -12,14 +12,14 @@
  *  - Slots 2+: Static chronological list of regular (non-sponsored) events
  */
 import { getCityEvents, cityDisplayName } from "../lib/events.js";
-import { getDisplayName, getCityConfig } from "../lib/cityConfigs.js";
+import { getShortName, getCityConfig } from "../lib/cityConfigs.js";
 
 interface Props {
   city: string;
 }
 
 const { city } = Astro.props;
-const cityCap      = getDisplayName(city);
+const cityCap      = getShortName(city); // "Daytona" not "Daytona Beach"
 const cityConfig   = getCityConfig(city);
 const vibeCheckText = cityConfig?.vibeCheckText ?? "What's happening in your city this week?";
 

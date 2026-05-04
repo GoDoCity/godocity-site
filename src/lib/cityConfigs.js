@@ -20,6 +20,8 @@ export const CITY_CONFIGS = {
     slug: "daytona",
     /** Human-readable city name used in headings and <title> tags */
     displayName: "Daytona Beach",
+    /** Short brand name for punchy UI copy (newsletter headings, etc.) */
+    shortName: "Daytona",
     /** Must match an  html[data-theme="…"]  block in /public/styles/themes.css */
     theme: "godo-blue",
     /** Primary brand colour — mirrors themes.css --brand1 for use in JS contexts */
@@ -164,6 +166,18 @@ export function getBrand1ForCity(slug) {
 export function getDisplayName(slug) {
   const s = String(slug ?? "");
   return getCityConfig(slug)?.displayName ?? (s ? s[0].toUpperCase() + s.slice(1) : s);
+}
+
+/**
+ * Returns the short brand name for punchy UI copy (newsletter headings, etc.).
+ * Falls back to displayName, then to the capitalised raw slug.
+ * @param {string} slug
+ * @returns {string}
+ */
+export function getShortName(slug) {
+  const cfg = getCityConfig(slug);
+  if (cfg?.shortName) return cfg.shortName;
+  return getDisplayName(slug);
 }
 
 /** All configured city slugs — useful for getStaticPaths() in dynamic routes. */

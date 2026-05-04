@@ -130,7 +130,7 @@ const hero = heroImage(post);
 
 <Base title={title} subtitle={subtitle} cityBase="daytona">
   <section class="section">
-    <div class="container">
+    <div class="pageWrap">
       <div class="postLayout">
 
         <div class="postMain">
@@ -198,23 +198,24 @@ const hero = heroImage(post);
       </div>
     </div>
   </section>
+
 </Base>
 
 <style>
-  /* ── Width lock: 1260px + 32px gutters ── */
   .section { padding: 24px 0; }
-  :global(.container) { max-width: 1260px !important; margin: 0 auto; padding: 0 2rem !important; }
-  @media (max-width: 768px) { :global(.container) { padding: 0 1.25rem !important; } }
+  /* matches DiyPill and GuideLayout: 1440px wide, 7fr/3fr columns, 56px gap */
+  .pageWrap { max-width: 1440px; margin: 0 auto; padding: 0 1.5rem; }
+  @media (max-width: 600px) { .pageWrap { padding: 0 1rem; } }
 
   .postLayout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 280px;
-    gap: 32px;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    gap: 56px;
     align-items: start;
     padding-top: 16px;
   }
   @media (max-width: 860px) {
-    .postLayout { grid-template-columns: 1fr; }
+    .postLayout { grid-template-columns: 1fr; gap: 40px; }
   }
 
   .postMain { min-width: 0; }
