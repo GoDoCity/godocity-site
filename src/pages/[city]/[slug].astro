@@ -124,7 +124,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   cityBase={city}
 >
 <div class="pageWrap">
-  <div class="container">
+  <div class="innerWrap">
 
     <header class="articleHeader">
       {/* ── Single left-aligned breadcrumb: Category > Subtopic > City ── */}
@@ -257,26 +257,28 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 <style>
   :global(html), :global(body) { overflow-x: hidden; width: 100%; position: relative; }
   .pageWrap { min-height: 100vh; overflow-x: hidden; width: 100%; }
-  :global(.container) { max-width: 1250px !important; margin: 0 auto !important; padding: 0 2.5rem; }
-  @media (max-width: 768px) { :global(.container) { max-width: 100% !important; padding: 0 1.25rem; } }
+  /* scoped inner wrapper — replaces :global(.container) which was polluting the whole page */
+  .innerWrap {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  @media (max-width: 600px) { .innerWrap { padding: 0 1rem; } }
 
   .articleHeader {
-    max-width: 1250px !important;
-    width: 100% !important;
-    margin: 0 auto !important;
     padding-top: 40px;
   }
 
   .homeGrid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 290px;
+    grid-template-columns: minmax(0, 7fr) minmax(380px, 3fr);
     gap: clamp(40px, 4vw, 56px);
     align-items: start;
     padding: 0 0 56px;
   }
   .homeGrid > * { min-width: 0; }
   .homeGrid > *:not(.homeRail) { overflow: hidden; }
-  @media (max-width: 980px) { .homeGrid { grid-template-columns: 1fr; } .homeRail { order: 2; } }
+  @media (max-width: 1150px) { .homeGrid { grid-template-columns: 1fr; gap: 40px; } .homeRail { order: 2; } }
 
   /* ── Single left-aligned breadcrumb ── */
   .breadcrumb {
