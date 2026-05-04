@@ -446,9 +446,9 @@ const emoji = topicEmoji[topic] ?? "📖";
 <style>
   /* ── Wrapper ── */
   .gl-wrap {
-    max-width: 1250px;
+    max-width: 1440px;
     margin: 0 auto;
-    padding: 40px 24px 80px;
+    padding: 40px 2rem 80px;
   }
 
   /* ── Branding header ── */
@@ -492,7 +492,7 @@ const emoji = topicEmoji[topic] ?? "📖";
   /* ── Two-column grid ── */
   .gl-grid {
     display: grid;
-    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    grid-template-columns: minmax(0, 7fr) minmax(360px, 3fr);
     gap: 56px;
     align-items: start;
   }
@@ -814,7 +814,7 @@ const emoji = topicEmoji[topic] ?? "📖";
   .gl-submit-ev:hover { opacity: 1; }
 
   /* ── Responsive ─────────────────────────────────────────────────────── */
-  @media (max-width: 900px) {
+  @media (max-width: 1150px) {
     .gl-grid {
       display: flex;
       flex-direction: column;
@@ -831,7 +831,7 @@ const emoji = topicEmoji[topic] ?? "📖";
   }
 
   @media (max-width: 600px) {
-    .gl-wrap { padding: 24px 16px 60px; }
+    .gl-wrap { padding: 24px 1rem 60px; }
     .gl-header { margin-bottom: 20px; }
   }
 </style>
