@@ -150,7 +150,7 @@ const citySlug = (city ?? "daytona").toLowerCase().trim();
 
   /* Two-column grid: 7fr / 3fr — identical to GuideLayout so sidebars are pixel-matched */
   .diyContainer {
-    max-width: 1440px;
+    max-width: 1280px;
     margin: 0 auto;
     padding: 0 2rem;
     display: grid;
@@ -201,7 +201,7 @@ const citySlug = (city ?? "daytona").toLowerCase().trim();
   /* ── 2 — Hero image 16:9 ── */
   .diyHeroBanner {
     width: 100%; border-radius: 14px; overflow: hidden;
-    aspect-ratio: 16 / 9; margin-bottom: 36px;
+    aspect-ratio: 16 / 9; max-height: 520px; margin-bottom: 36px;
     background: var(--surface2, #1a1f2e);
   }
   .diyHeroImg {
