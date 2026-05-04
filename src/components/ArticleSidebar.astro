@@ -12,14 +12,16 @@
  *  - Slots 2+: Static chronological list of regular (non-sponsored) events
  */
 import { getCityEvents, cityDisplayName } from "../lib/events.js";
-import { getDisplayName } from "../lib/cityConfigs.js";
+import { getDisplayName, getCityConfig } from "../lib/cityConfigs.js";
 
 interface Props {
   city: string;
 }
 
 const { city } = Astro.props;
-const cityCap = getDisplayName(city);
+const cityCap      = getDisplayName(city);
+const cityConfig   = getCityConfig(city);
+const vibeCheckText = cityConfig?.vibeCheckText ?? "What's happening in your city this week?";
 
 const allEvents    = await getCityEvents(city);
 const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
@@ -166,9 +168,9 @@ const hasEvents = hasSlider || hasList;
     </a>
   </div>
 
-  <!-- 3b — Community Alert bar (links to Vibe Check landing page) -->
+  <!-- 3b — Community Alert bar — text from cityConfigs.vibeCheckText so it auto-updates per city -->
   <a class="communityAlert" href={`/${city}/vibe-check/`}>
-    🗳️ <strong>Vibe Check:</strong> Who has the best tacos in Ormond? <span class="caVote">Vote Now</span>
+    🗳️ <strong>Vibe Check:</strong> {vibeCheckText} <span class="caVote">Vote Now</span>
   </a>
 
   <!-- 4 — City Guides -->
@@ -178,10 +180,10 @@ const hasEvents = hasSlider || hasList;
       <a class="railMore" href={`/${city}/guides/`}>See all</a>
     </div>
     <div class="guideList">
-      <a class="guideRow" href={`/${city}/guides/live/`}>🏠 Live in {cityCap}</a>
-      <a class="guideRow" href={`/${city}/guides/work/`}>💼 Work in {cityCap}</a>
-      <a class="guideRow" href={`/${city}/guides/play/`}>🎉 Play in {cityCap}</a>
-      <a class="guideRow" href={`/${city}/guides/best-restaurants/`}>🍽️ Best Restaurants</a>
+      <a class="guideRow" href={`/${city}/guides/coast/`}>🌊 Coast</a>
+      <a class="guideRow" href={`/${city}/guides/drive/`}>🚗 Drive</a>
+      <a class="guideRow" href={`/${city}/guides/surf/`}>🏄 Surf</a>
+      <a class="guideRow" href={`/${city}/guides/local/`}>⭐ Local</a>
     </div>
   </div>
 
