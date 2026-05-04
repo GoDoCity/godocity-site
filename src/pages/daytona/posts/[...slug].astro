@@ -204,7 +204,7 @@ const hero = heroImage(post);
 <style>
   .section { padding: 24px 0; }
   /* matches DiyPill and GuideLayout exactly: 1440px wide, 7fr/3fr, 56px gap */
-  .pageWrap { max-width: 1440px; margin: 0 auto; padding: 0 2rem; }
+  .pageWrap { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
   @media (max-width: 600px) { .pageWrap { padding: 0 1rem; } }
 
   .postLayout {
@@ -228,7 +228,7 @@ const hero = heroImage(post);
   .postLede { margin: 0 0 14px; font-size: clamp(15px, 1.4vw, 18px); line-height: 1.45; color: var(--color-text-main); }
   .heroFigure { margin: 0 0 18px; }
   .heroFull {
-    display: block; width: 100%; aspect-ratio: 16/9; object-fit: cover;
+    display: block; width: 100%; aspect-ratio: 16/9; max-height: 520px; object-fit: cover;
     border-radius: 16px; border: 1px solid rgba(255,255,255,.10);
     box-shadow: 0 10px 26px rgba(0,0,0,.30);
   }
