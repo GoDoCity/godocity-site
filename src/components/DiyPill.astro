@@ -1,18 +1,18 @@
 ---
-import { getCollection } from "astro:content";
 import { getDisplayName } from "../lib/cityConfigs.js";
+import ArticleSidebar from "./ArticleSidebar.astro";
 
 export interface Props {
-  title:          string;
-  intro:          string;
-  materials:      string[];
-  steps:          string[];
+  title:           string;
+  intro:           string;
+  materials:       string[];
+  steps:           string[];
   community_note?: string;
-  city?:          string;
-  topic?:         string;
-  author?:        string;
-  pubDate?:       Date;
-  heroImage?:     string;
+  city?:           string;
+  topic?:          string;
+  author?:         string;
+  pubDate?:        Date;
+  heroImage?:      string;
 }
 
 const {
@@ -50,26 +50,8 @@ const authorSlug = author
   ? author.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")
   : "";
 
-/* ── City helpers ── */
-const citySlug    = (city ?? "daytona").toLowerCase().trim();
-const cityDisplay = getDisplayName(citySlug);
-
-/* ── Upcoming events for sidebar ── */
-const today = new Date(); today.setHours(0, 0, 0, 0);
-let sidebarEvents: any[] = [];
-try {
-  const allEvents = await getCollection("events");
-  sidebarEvents = allEvents
-    .filter((e: any) => {
-      const evCity = String(e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-      const evDate = new Date(e.data.eventDate); evDate.setHours(0, 0, 0, 0);
-      return evCity === citySlug && evDate >= today;
-    })
-    .sort((a: any, b: any) => new Date(a.data.eventDate).getTime() - new Date(b.data.eventDate).getTime())
-    .slice(0, 3);
-} catch { sidebarEvents = []; }
-
-const eventsHref = `/${citySlug}/events/`;
+/* ── City helpers — all values come from cityConfigs.js, never hardcoded ── */
+const citySlug = (city ?? "daytona").toLowerCase().trim();
 ---
 
 <div class="diyWrap">
@@ -156,101 +138,24 @@ const eventsHref = `/${citySlug}/events/`;
 
     </div>{/* /.diyMain */}
 
-    {/* ── RIGHT: sidebar ── */}
-    <aside class="diySidebar">
-
-      {/* 1 — Newsletter banner (matches Guide sidebar exactly) */}
-      <div class="diyNl">
-        <div class="diyNlHead">
-          <em>Good News <strong>{cityDisplay}!</strong></em>
-        </div>
-        <div class="diyNlSub">Free local stories, every morning.</div>
-        <form class="diyNlForm" action={`/${citySlug}/subscribe/`} method="get">
-          <input
-            class="diyNlInput"
-            type="email"
-            name="email"
-            placeholder="your@email.com"
-            required
-            autocomplete="email"
-          />
-          <button class="diyNlBtn" type="submit">SIGN UP</button>
-        </form>
-      </div>
-
-      {/* 2 — Upcoming Events */}
-      <div class="sideSection">
-        <div class="sideSectionHead">
-          <span class="sideSectionTitle">Upcoming Events</span>
-          <a class="sideSectionMore" href={eventsHref}>See all</a>
-        </div>
-        {sidebarEvents.length > 0 ? (
-          <div class="evList">
-            {sidebarEvents.map((e: any) => {
-              const d   = new Date(e.data.eventDate);
-              const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-              const day = d.getDate();
-              const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-              const evSlug = e.slug.split("/").pop();
-              return (
-                <a class="evRow"
-                   href={e.data.url ?? `/${citySlug}/events/${evSlug}/`}
-                   target={e.data.url ? "_blank" : "_self"}
-                   rel={e.data.url ? "noopener" : ""}>
-                  <div class="evCal">
-                    <div class="evDow">{dow}</div>
-                    <div class="evDay">{day}</div>
-                    <div class="evMon">{mon}</div>
-                  </div>
-                  <div class="evInfo">
-                    <div class="evName">{e.data.title}</div>
-                    <div class="evPlace">{e.data.location}</div>
-                  </div>
-                </a>
-              );
-            })}
-          </div>
-        ) : (
-          <p class="noEvents">No upcoming events — check back soon.</p>
-        )}
-        <a class="submitEv" href="/submit-event/">+ Submit an event →</a>
-      </div>
-
-      {/* 3 — Ad slot */}
-      <div class="sideSection adSection">
-        <div class="adLabel">Advertisement</div>
-        <div class="adSlot" aria-label="Advertisement placeholder">
-          <span class="adSlotText">Your Ad Here</span>
-          <a class="adCta" href={`/${citySlug}/advertise/`}>Learn more →</a>
-        </div>
-      </div>
-
-      {/* 4 — Vibe Check */}
-      <div class="sideSection vibeSection">
-        <div class="sideSectionHead">
-          <span class="sideSectionTitle">Vibe Check</span>
-        </div>
-        <p class="vibeText">Got a suggestion, tip, or local story? We want to hear it.</p>
-        <a class="vibeBtn" href={`/${citySlug}/contact/`}>Contact Us →</a>
-      </div>
-
-    </aside>
+    {/* ── RIGHT: production sidebar — same component as every article page ── */}
+    <ArticleSidebar city={citySlug} />
 
   </div>{/* /.diyContainer */}
 </div>
 
 <style>
-  /* ── Wrapper: extra top clearance below fixed nav ── */
-  .diyWrap { min-height: 60vh; padding: 40px 0 64px; }
+  /* Extra clearance below fixed nav — uses the global --nav-h token (defined in themes.css) */
+  .diyWrap { min-height: 60vh; padding: calc(var(--nav-h, 80px) * 0.5) 0 64px; }
 
-  /* ── Two-column grid: 3:1 (75% / 25%) matching site proportions ── */
+  /* Two-column grid: 7fr / 3fr — identical to GuideLayout so sidebars are pixel-matched */
   .diyContainer {
     max-width: 1440px;
     margin: 0 auto;
     padding: 0 1.5rem;
     display: grid;
-    grid-template-columns: 3fr 1fr;
-    gap: 52px;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    gap: 56px;
     align-items: start;
   }
   @media (max-width: 900px) {
@@ -293,7 +198,7 @@ const eventsHref = `/${citySlug}/events/`;
   .diyAuthorLink:hover { color: var(--brand1); text-decoration-color: var(--brand1); }
   .diyDot { opacity: .45; }
 
-  /* ── 2 — Hero image 16:9, no stretch ── */
+  /* ── 2 — Hero image 16:9 ── */
   .diyHeroBanner {
     width: 100%; border-radius: 14px; overflow: hidden;
     aspect-ratio: 16 / 9; margin-bottom: 36px;
@@ -304,7 +209,7 @@ const eventsHref = `/${citySlug}/events/`;
     object-fit: cover; object-position: center;
   }
 
-  /* ── 3 — Materials: full left-column width with accent bg ── */
+  /* ── 3 — Materials: full left-column width, sharp contrast ── */
   .diyMaterials {
     width: 100%;
     border: 2px solid var(--brand1);
@@ -329,8 +234,8 @@ const eventsHref = `/${citySlug}/events/`;
   @media (max-width: 540px) { .materialGrid { grid-template-columns: 1fr; } }
   .materialItem {
     display: flex; align-items: flex-start; gap: 10px;
-    padding: 9px 0; border-bottom: 1px solid rgba(255,210,74,.18);
-    font-size: 14px; color: var(--text); font-weight: 600; line-height: 1.4;
+    padding: 9px 0; border-bottom: 1px solid rgba(255,210,74,.22);
+    font-size: 14px; color: #1a1a1a; font-weight: 600; line-height: 1.4;
   }
   .materialItem:last-child { border-bottom: none; }
   .materialCheck { color: var(--brand1); font-size: 13px; flex-shrink: 0; margin-top: 2px; }
@@ -389,7 +294,7 @@ const eventsHref = `/${citySlug}/events/`;
   .cnIcon { font-size: 15px; line-height: 1; }
   .cnText {
     margin: 0; padding: 16px 20px;
-    font-size: 15px; color: var(--text); line-height: 1.65; font-style: italic;
+    font-size: 15px; color: #1a1a1a; line-height: 1.65; font-style: italic;
   }
 
   /* Footer nav */
@@ -399,161 +304,6 @@ const eventsHref = `/${citySlug}/events/`;
     text-decoration: none; transition: opacity 130ms;
   }
   .diyFootLink:hover { opacity: .75; text-decoration: underline; }
-
-  /* ══════════════════════════════════════════
-     SIDEBAR
-  ══════════════════════════════════════════ */
-  .diySidebar {
-    display: flex;
-    flex-direction: column;
-    gap: 28px;
-    position: sticky;
-    top: 90px;
-    align-self: start;
-  }
-  @media (max-width: 900px) {
-    .diySidebar { position: static; gap: 24px; }
-  }
-
-  /* ── Newsletter banner (identical to GuideLayout .gl-nl) ── */
-  .diyNl {
-    position: relative;
-    background: var(--theme-gradient);
-    border-radius: 16px;
-    padding: 28px 22px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    overflow: hidden;
-  }
-  .diyNl::after {
-    content: '';
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-image: url('/images/geometric-pattern-master.svg');
-    background-repeat: repeat;
-    background-size: 150px 150px;
-    opacity: 0.3;
-    pointer-events: none;
-  }
-  .diyNlHead {
-    font-size: 1.75rem; font-weight: 900; font-style: italic;
-    color: white; line-height: 1.1; letter-spacing: -0.04em;
-  }
-  .diyNlHead strong { font-weight: 900; }
-  .diyNlSub { font-size: 13.5px; color: rgba(255,255,255,.85); line-height: 1.4; }
-  .diyNlForm { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
-  .diyNlInput {
-    width: 100%; box-sizing: border-box;
-    padding: 12px 14px; border-radius: 10px;
-    border: none; background: white;
-    font-size: 14px; color: var(--text-primary);
-    box-shadow: 0 2px 8px rgba(0,0,0,.12);
-    outline: 2px solid transparent; transition: outline-color 150ms;
-  }
-  .diyNlInput:focus { outline-color: var(--text-primary); }
-  .diyNlInput::placeholder { color: var(--muted); }
-  .diyNlBtn {
-    width: 100%; padding: 12px 0;
-    border-radius: 999px; border: none;
-    background: #ffffff !important;
-    color: #0077be !important;
-    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
-    font-size: 14px; font-weight: 900; letter-spacing: .1em;
-    cursor: pointer; box-sizing: border-box;
-    transition: opacity 150ms;
-  }
-  .diyNlBtn:hover { opacity: .82; }
-
-  /* ── Generic sidebar section ── */
-  .sideSection {
-    display: grid;
-    gap: 0;
-  }
-  .sideSectionHead {
-    display: flex; justify-content: space-between; align-items: baseline;
-    padding-bottom: 10px;
-    border-bottom: 2px solid var(--theme-accent, var(--brand1));
-    margin-bottom: 0;
-  }
-  .sideSectionTitle {
-    font-size: 14px; font-weight: 900;
-    letter-spacing: .08em; text-transform: uppercase; color: var(--text);
-  }
-  .sideSectionMore {
-    font-size: 12px; font-weight: 700; color: var(--text);
-    text-decoration: none;
-  }
-  .sideSectionMore:hover { text-decoration: underline; }
-
-  /* Events list */
-  .evList { display: grid; }
-  .evRow {
-    display: grid; grid-template-columns: 48px 1fr;
-    gap: 10px; align-items: center;
-    text-decoration: none;
-    padding: 11px 0;
-    border-bottom: 1px solid var(--border, rgba(255,255,255,.10));
-    transition: opacity 140ms;
-  }
-  .evRow:last-child { border-bottom: none; }
-  .evRow:hover { opacity: .76; }
-  .evCal {
-    width: 48px; height: 48px; border-radius: 10px;
-    background: transparent;
-    border: 1px solid var(--brand1);
-    display: grid; place-items: center;
-    text-align: center; line-height: 1;
-  }
-  .evDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; color: var(--brand1); }
-  .evDay { font-size: 19px; font-weight: 900; color: var(--brand1); margin-top: 1px; }
-  .evMon { font-size: 8px; font-weight: 700; letter-spacing: .08em; color: var(--brand1); text-transform: uppercase; }
-  .evInfo { display: flex; flex-direction: column; gap: 2px; }
-  .evName { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.25; }
-  .evPlace { font-size: 11px; color: var(--faint); }
-  .noEvents { font-size: 12px; color: var(--faint); padding: 10px 0; margin: 0; }
-  .submitEv {
-    display: block; margin-top: 10px;
-    font-size: 12px; font-weight: 700;
-    color: var(--muted); text-decoration: none;
-    opacity: .85; transition: opacity 120ms;
-  }
-  .submitEv:hover { opacity: 1; }
-
-  /* Ad slot */
-  .adSection { }
-  .adLabel {
-    font-size: 9px; font-weight: 700; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--faint); margin-bottom: 8px;
-  }
-  .adSlot {
-    border: 1.5px dashed rgba(255,255,255,.15);
-    border-radius: 10px; min-height: 140px;
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center; gap: 8px;
-    background: rgba(255,255,255,.015);
-  }
-  .adSlotText { font-size: 12px; color: var(--faint); font-weight: 700; }
-  .adCta {
-    font-size: 11.5px; font-weight: 800; color: var(--brand1);
-    text-decoration: none; letter-spacing: .02em;
-    border: 1px solid color-mix(in srgb, var(--brand1) 40%, transparent);
-    padding: 5px 12px; border-radius: 999px;
-    transition: background 140ms;
-  }
-  .adCta:hover { background: color-mix(in srgb, var(--brand1) 14%, transparent); }
-
-  /* Vibe Check */
-  .vibeText { font-size: 13.5px; color: var(--muted); line-height: 1.5; margin: 10px 0 12px; }
-  .vibeBtn {
-    display: flex; align-items: center; justify-content: center; width: 100%;
-    font-size: 13px; font-weight: 800; color: var(--brand1);
-    border: 1px solid color-mix(in srgb, var(--brand1) 45%, transparent);
-    border-radius: 999px; padding: 10px 14px;
-    text-decoration: none; transition: background 140ms;
-    box-sizing: border-box;
-  }
-  .vibeBtn:hover { background: color-mix(in srgb, var(--brand1) 12%, transparent); }
 
   /* ── Mobile ── */
   @media (max-width: 768px) {

@@ -2,6 +2,7 @@
 
 /* ── Default / fallback: defer to the Design System variables ── */
 :root {
+  --nav-h: 80px; /* fixed header height — referenced by Base.astro main padding and any component that needs clearance */
   --bg: var(--bg-primary);
   --text: var(--text-primary);
   --muted: #E0E0E0;
