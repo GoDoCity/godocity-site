@@ -606,6 +606,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     position: sticky;
     top: 80px;          /* clear fixed header */
     z-index: 10;
+    margin-bottom: 2.5rem;
   }
 
   /* ── Mini Newsletter ── */
@@ -613,12 +614,14 @@ const emoji = topicEmoji[topic] ?? "📖";
     position: relative;
     background: var(--theme-gradient);
     border-radius: 16px;
-    padding: 28px 22px;
+    padding: 2rem;
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 10px;
     overflow: hidden;
     border: none !important;
+    text-align: center;
   }
   .gl-nl::after {
     content: '';
@@ -641,6 +644,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     color: white;
     line-height: 1.1;
     letter-spacing: -0.04em;
+    text-align: center;
   }
   .gl-nl-head strong { font-weight: 900; }
 
@@ -648,6 +652,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     font-size: 13.5px;
     color: rgba(255, 255, 255, 0.85);
     line-height: 1.4;
+    text-align: center;
   }
 
   .gl-nl-form {
@@ -655,6 +660,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     flex-direction: column;
     gap: 8px;
     margin-top: 4px;
+    width: 100%;
   }
 
   .gl-nl-input {
@@ -678,8 +684,8 @@ const emoji = topicEmoji[topic] ?? "📖";
     padding: 12px 0;
     border-radius: 999px;
     border: none;
-    background: #ffffff !important;
-    color: #0077be !important; /* Hardcoded blue for contrast */
+    background: #000;
+    color: #fff;
     font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
     font-size: 14px;
     font-weight: 900;
