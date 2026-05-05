@@ -38,7 +38,7 @@ const hasEvents = hasSlider || hasList;
   <div class="nlStickyWrap">
     <div class="nlBox">
       <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
-      <div class="nlBoxSub">Get the best local stories delivered free every morning.</div>
+      <div class="nlBoxSub">Join GoDo{cityCap} for the daily brief on local news, fresh openings, and must-see events.</div>
       <form class="nlForm" action={`/${city}/subscribe/`} method="get">
         <input class="nlInput" type="email" name="email"
           placeholder="your@email.com" required autocomplete="email" />
@@ -280,7 +280,7 @@ const hasEvents = hasSlider || hasList;
   }
   .nlBoxHead strong { font-weight: 900; }
   .nlBoxSub { font-size: 15px; color: rgba(255,255,255,.88); line-height: 1.45; text-shadow: 0 1px 2px rgba(0,0,0,.3); text-align: center; }
-  .nlForm { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; width: 100%; }
+  .nlForm { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; width: 100%; }
   .nlInput {
     width: 100%; box-sizing: border-box;
     padding: 14px 16px; border-radius: 10px;
