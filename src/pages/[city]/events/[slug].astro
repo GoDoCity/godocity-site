@@ -127,7 +127,7 @@ const relatedGuides = allGuides
 const pageUrl = Astro.url.href;
 ---
 
-<Base title={data.title} cityBase={city}>
+<Base title={`${data.title} | GoDo${cityCap}`} subtitle={`Good news for ${cityCap}`} cityBase={city}>
 
   {/* ── HERO IMAGE ── */}
   {data.image && (
@@ -139,7 +139,7 @@ const pageUrl = Astro.url.href;
   )}
 
   <section class="section">
-    <div class="container">
+    <div class="evOuter">
       <div class="evLayout">
 
         {/* ── MAIN COLUMN ── */}
@@ -151,7 +151,6 @@ const pageUrl = Astro.url.href;
             <div class="eventHeader">
               {!data.image && data.category && <span class="catPill">{data.category}</span>}
               <h1 class="eventTitle">{data.title}</h1>
-              {data.description && <p class="eventDesc">{data.description}</p>}
             </div>
 
             {/* Meta block */}
@@ -228,6 +227,16 @@ const pageUrl = Astro.url.href;
 
         {/* ── SIDEBAR ── */}
         <aside class="evSidebar">
+          <div class="sideNl">
+            <div class="sideNlHead"><em>Good News <strong>{cityCap}!</strong></em></div>
+            <div class="sideNlSub">Join GoDo{cityCap} for the daily brief on local news, fresh openings, and must-see events.</div>
+            <form class="sideNlForm" action={`/${city}/subscribe/`} method="get">
+              <input class="sideNlInput" type="email" name="email"
+                placeholder="your@email.com" required autocomplete="email" />
+              <button class="sideNlBtn" type="submit">SIGN UP</button>
+            </form>
+          </div>
+
           {relatedGuides.length > 0 && (
             <div class="sideBlock">
               <div class="sideHead">{cityCap} Guides</div>
@@ -243,16 +252,6 @@ const pageUrl = Astro.url.href;
               <a class="sideMore" href={`/${city}/guides/`}>All guides →</a>
             </div>
           )}
-
-          <div class="sideNl">
-            <div class="sideNlHead"><em>Good News <strong>{cityCap}!</strong></em></div>
-            <div class="sideNlSub">Join GoDo{cityCap} for the daily brief on local news, fresh openings, and must-see events.</div>
-            <form class="sideNlForm" action={`/${city}/subscribe/`} method="get">
-              <input class="sideNlInput" type="email" name="email"
-                placeholder="your@email.com" required autocomplete="email" />
-              <button class="sideNlBtn" type="submit">SIGN UP</button>
-            </form>
-          </div>
         </aside>
 
       </div>
@@ -364,12 +363,17 @@ const pageUrl = Astro.url.href;
     padding: 4px 12px; border-radius: 999px;
   }
 
-  /* ── 70/30 Layout ── */
+  /* ── Container ── */
+  .evOuter { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+  @media (max-width: 600px) { .evOuter { padding: 0 1rem; } }
+
+  /* ── 7fr/3fr Layout ── */
   .evLayout {
-    display: grid; grid-template-columns: minmax(0, 1fr) 280px;
-    gap: 48px; align-items: start; padding: 32px 0 48px;
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(380px, 3fr);
+    gap: 56px; align-items: start; padding: 32px 0 48px;
   }
-  @media (max-width: 860px) { .evLayout { grid-template-columns: 1fr; gap: 32px; } }
+  @media (max-width: 1150px) { .evLayout { grid-template-columns: 1fr; gap: 40px; } }
 
   /* ── Detail ── */
   .eventDetail { max-width: 680px; }
@@ -380,8 +384,6 @@ const pageUrl = Astro.url.href;
     margin-bottom: 10px; text-transform: uppercase; letter-spacing: .06em;
   }
   .eventTitle { font-size: clamp(24px, 3vw, 40px); font-weight: 900; line-height: 1.1; margin: 0 0 10px; }
-  .eventDesc  { font-size: 17px; color: var(--muted); margin: 0 0 24px; line-height: 1.5; }
-
   .eventMeta {
     display: flex; flex-direction: column; gap: 10px;
     margin-bottom: 20px; padding: 16px 18px;
