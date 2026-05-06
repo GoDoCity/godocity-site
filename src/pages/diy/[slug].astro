@@ -13,6 +13,22 @@ export async function getStaticPaths() {
 
 const { entry } = Astro.props;
 const { data }  = entry;
+
+/* ── More DIY Guides scroller ── */
+const allDiy = await getCollection("diy");
+const moreGuides = allDiy
+  .filter((e) => e.slug !== entry.slug)
+  .sort((a, b) => {
+    const da = new Date(a.data.pubDate ?? 0).getTime();
+    const db = new Date(b.data.pubDate ?? 0).getTime();
+    return db - da;
+  })
+  .slice(0, 12);
+
+const FALLBACK_DIY = "/images/gododaytona-bg.png";
+function diyThumb(e) {
+  return String(e.data.heroImage ?? "").trim() || FALLBACK_DIY;
+}
 ---
 
 <Base title={`${data.title} | GoDoCity DIY`}>
@@ -28,10 +44,115 @@ const { data }  = entry;
       pubDate={data.pubDate}
       heroImage={data.heroImage}
     />
+
+    {moreGuides.length > 0 && (
+      <div class="guidesOuter">
+        <div class="guidesWrap">
+          <div class="guidesHeader">
+            <h3 class="guidesHead">More DIY Guides</h3>
+            <div class="guidesArrows">
+              <button class="guidesBtn" aria-label="Scroll left"
+                onclick="this.closest('.guidesWrap').querySelector('.guidesScroll').scrollBy({left:-300,behavior:'smooth'})">&#8592;</button>
+              <button class="guidesBtn" aria-label="Scroll right"
+                onclick="this.closest('.guidesWrap').querySelector('.guidesScroll').scrollBy({left:300,behavior:'smooth'})">&#8594;</button>
+            </div>
+          </div>
+          <div class="guidesScroll">
+            {moreGuides.map((g) => (
+              <a class="guideCard" href={`/diy/${g.slug}/`}>
+                <div class="guideCardThumb">
+                  <img src={diyThumb(g)} alt={g.data.title ?? ""}
+                    loading="lazy" decoding="async"
+                    onerror={`this.src='${FALLBACK_DIY}';this.onerror=null;`} />
+                </div>
+                <div class="guideCardTitle">{g.data.title}</div>
+              </a>
+            ))}
+          </div>
+        </div>
+      </div>
+    )}
+
+    <div class="diyPageLinks">
+      <a class="diyPagePill" href="/diy/">← All DIY Guides</a>
+    </div>
   </div>
 </Base>
 
 <style>
   .diyPageWrap { max-width: 1280px !important; margin: 0 auto !important; }
   :global(.diyPageWrap .container) { max-width: 1280px !important; margin: 0 auto !important; }
+
+  /* More DIY Guides scroller — matches "More Stories" on post pages */
+  .guidesOuter { padding: 0 2rem; }
+  @media (max-width: 600px) { .guidesOuter { padding: 0 1rem; } }
+
+  .guidesWrap {
+    max-width: 1280px;
+    margin: 0 auto 0;
+    border-top: 2px solid var(--brand1);
+    padding-top: 24px;
+    padding-bottom: 40px;
+  }
+  .guidesHeader {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+  }
+  .guidesHead {
+    margin: 0; font-size: 13px; font-weight: 900; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--brand1);
+  }
+  .guidesArrows { display: flex; gap: 6px; }
+  .guidesBtn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid var(--pillBorder); background: var(--surface2);
+    color: var(--text); font-size: 16px; cursor: pointer; line-height: 1;
+    transition: background 120ms, opacity 120ms;
+  }
+  .guidesBtn:hover { background: var(--pillBg); opacity: .85; }
+
+  .guidesScroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 1.5rem;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .guidesScroll::-webkit-scrollbar { display: none; }
+
+  .guideCard {
+    flex: 0 0 310px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border-radius: 14px;
+    transition: opacity 140ms, transform 140ms, box-shadow 140ms;
+  }
+  .guideCard:hover { opacity: .92; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.28); }
+
+  .guideCardThumb {
+    width: 310px; aspect-ratio: 16/10;
+    border-radius: 12px; overflow: hidden; background: var(--surface2);
+  }
+  .guideCardThumb img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 280ms ease;
+  }
+  .guideCard:hover .guideCardThumb img { transform: scale(1.04); }
+
+  .guideCardTitle {
+    font-size: 14px; font-weight: 800; line-height: 1.25; color: var(--text);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  /* Footer link */
+  .diyPageLinks { padding: 0 2rem 40px; }
+  @media (max-width: 600px) { .diyPageLinks { padding: 0 1rem 32px; } }
+  .diyPagePill {
+    font-size: 13px; font-weight: 700; color: var(--brand1);
+    text-decoration: none; transition: opacity 130ms;
+  }
+  .diyPagePill:hover { opacity: .75; text-decoration: underline; }
 </style>
