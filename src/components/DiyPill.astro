@@ -70,7 +70,7 @@ const topicLabel = topic ? topic.trim().split(" ").map((w) => w ? w[0].toUpperCa
           <a class="catCrumb" href={`/${citySlug}/diy/`}>DIY</a>
           {topicLabel && topicKey && (
             <>
-              <span class="catSep" aria-hidden="true">›</span>
+              <span class="catDash" aria-hidden="true"> — </span>
               <a class="catCrumb" href={`/${citySlug}/diy/${topicKey}/`}>{topicLabel}</a>
             </>
           )}
@@ -179,14 +179,18 @@ const topicLabel = topic ? topic.trim().split(" ").map((w) => w ? w[0].toUpperCa
     padding: 12px 0 0;
     margin-bottom: 0;
   }
-  .diyKicker { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .diyKicker { display: flex; align-items: center; margin-bottom: 10px; }
   .catCrumb {
     font-size: 0.8rem; font-weight: 900; letter-spacing: .12em;
     text-transform: uppercase; color: var(--brand1);
     text-decoration: none; transition: opacity 130ms;
   }
   .catCrumb:hover { opacity: .72; }
-  .catSep { font-size: 0.8rem; opacity: .45; font-weight: 700; }
+  .catDash {
+    font-size: 0.8rem; font-weight: 700;
+    color: var(--faint); opacity: .55;
+    margin: 0 5px; letter-spacing: 0;
+  }
   .diyTitle {
     font-size: clamp(26px, 3.8vw, 48px);
     font-weight: 900;

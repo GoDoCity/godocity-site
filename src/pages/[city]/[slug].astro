@@ -53,8 +53,9 @@ const tierRaw    = typeof data.sponsorTier === "string" ? data.sponsorTier.trim(
 const isSponsored = tierRaw !== "" && tierRaw !== "None";
 
 /* Kicker: sponsored tier label OR category — no tag fallback */
-const categorySlug   = category ? tagSlugFromRaw(category) : "";
-const kickerDisplay  = isSponsored
+const categorySlug  = category ? tagSlugFromRaw(category) : "";
+const subtopicSlug  = subtopic ? tagSlugFromRaw(subtopic) : "";
+const kickerDisplay = isSponsored
   ? tierRaw.toUpperCase()
   : category ? category.toUpperCase() : "";
 
@@ -132,25 +133,21 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
     <div class="homeGrid">
       <main class="articleMain">
         <header class="articleHeader">
-          {/* ── Single left-aligned breadcrumb: Category > Subtopic > City ── */}
-          <nav class="breadcrumb" aria-label="Breadcrumb">
-            {category && categorySlug && (
-              <>
-                {isSponsored
-                  ? <span class="bcItem bcSponsored">{tierRaw}</span>
-                  : <a class="bcItem bcLink" href={`/${city}/${categorySlug}/`}>{category}</a>
-                }
-                <span class="bcSep" aria-hidden="true">›</span>
-              </>
-            )}
-            {subtopic && (
-              <>
-                <span class="bcItem">{subtopic}</span>
-                <span class="bcSep" aria-hidden="true">›</span>
-              </>
-            )}
-            <a class="bcItem bcLink" href={`/${city}/`}>{cityCap}</a>
-          </nav>
+          {/* ── Category kicker: TOPIC — SUBTOPIC above H1 ── */}
+          {kickerDisplay && (
+            <div class="catKicker">
+              {isSponsored
+                ? <span class="catCrumb catSponsored">{kickerDisplay}</span>
+                : <a class="catCrumb" href={`/${city}/${categorySlug}/`}>{kickerDisplay}</a>
+              }
+              {subtopic && subtopicSlug && !isSponsored && (
+                <>
+                  <span class="catDash" aria-hidden="true"> — </span>
+                  <a class="catCrumb" href={`/${city}/${categorySlug}/${subtopicSlug}/`}>{subtopic.toUpperCase()}</a>
+                </>
+              )}
+            </div>
+          )}
           {data.map_locations && data.map_locations.length > 0 && (
             <InteractiveMap locations={data.map_locations} height="350px" />
           )}
@@ -283,23 +280,31 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .homeGrid > *:not(.homeRail) { overflow: hidden; }
   @media (max-width: 1150px) { .homeGrid { grid-template-columns: 1fr; gap: 40px; } .homeRail { order: 2; } }
 
-  /* ── Single left-aligned breadcrumb ── */
-  .breadcrumb {
+  /* ── Category kicker above H1 ── */
+  .catKicker {
     display: flex;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 2px;
     margin-bottom: 10px;
+  }
+  .catCrumb {
     font-size: 0.8rem;
     font-weight: 900;
     letter-spacing: .12em;
     text-transform: uppercase;
+    color: var(--brand1);
+    text-decoration: none;
+    transition: opacity 130ms;
   }
-  .bcItem { color: var(--brand1); white-space: nowrap; }
-  .bcLink { color: var(--brand1); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; transition: text-decoration-color 120ms; }
-  .bcLink:hover { text-decoration-color: var(--brand1); }
-  .bcSep { color: var(--border); margin: 0 3px; font-size: 13px; line-height: 1; }
-  .bcSponsored { color: var(--brand1); font-style: italic; }
+  .catCrumb:hover { opacity: .72; }
+  .catSponsored { font-style: italic; }
+  .catDash {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--faint);
+    opacity: .55;
+    margin: 0 5px;
+    letter-spacing: 0;
+  }
 
   .articleTitle { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; font-family: "Manrope", sans-serif; line-height: 1.08; letter-spacing: -0.02em; color: var(--text); margin: 0 0 18px; max-width: 860px; }
 
