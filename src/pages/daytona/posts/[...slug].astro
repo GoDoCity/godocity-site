@@ -41,8 +41,8 @@ function heroImage(post) {
 }
 
 /* Related posts */
-const RELATED_LIMIT = 3;
-const MAX_FEATURED_IN_RELATED = 1;
+const RELATED_LIMIT = 12;
+const MAX_FEATURED_IN_RELATED = 2;
 
 function normalizeTags(post) {
   const raw = Array.isArray(post?.data?.tags) ? post.data.tags : [];
@@ -125,7 +125,7 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
 const relatedAll = buildRelatedPosts(post, daytonaPosts);
 const seen = new Set();
 const deduped = relatedAll.filter((p) => { if (seen.has(p.slug)) return false; seen.add(p.slug); return true; });
-const relatedPosts = [...deduped.filter(isFeatured), ...deduped.filter((p) => !isFeatured(p))].slice(0, 8);
+const relatedPosts = [...deduped.filter(isFeatured), ...deduped.filter((p) => !isFeatured(p))].slice(0, 12);
 
 const pub = getPostDate(post);
 const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
@@ -273,19 +273,21 @@ const hero = heroImage(post);
   }
   .relatedScroll::-webkit-scrollbar { display: none; }
   .relatedCard {
-    flex: 0 0 280px;
+    flex: 0 0 310px;
     text-decoration: none;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    transition: opacity 140ms;
+    transition: opacity 140ms, transform 140ms, box-shadow 140ms;
+    border-radius: 14px;
   }
-  .relatedCard:hover { opacity: .82; }
+  .relatedCard:hover { opacity: .92; transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.28); }
   .relatedCardThumb {
-    width: 280px; aspect-ratio: 16/10;
+    width: 310px; aspect-ratio: 16/10;
     border-radius: 12px; overflow: hidden; background: var(--surface2);
   }
-  .relatedCardThumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .relatedCardThumb img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 280ms ease; }
+  .relatedCard:hover .relatedCardThumb img { transform: scale(1.04); }
   .relatedCardTitle {
     font-size: 14px; font-weight: 800; line-height: 1.25; color: var(--text);
     display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
