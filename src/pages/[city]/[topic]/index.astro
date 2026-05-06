@@ -160,7 +160,7 @@ const carouselPosts = all
   })
   .filter(post => !posts.some(p => p.slug === post.slug))
   .sort((a, b) => new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime())
-  .slice(0, 8);
+  .slice(0, 12);
 
 /* ── Live upcoming events for sidebar ─────────────────────────────────────────
    getGreaterDaytonaEvents() uses the module-level singleton + filesystem cache
@@ -279,7 +279,10 @@ try {
             <div class="carouselSection">
               <div class="carouselHeader">
                 <div class="carouselTitle">More from GoDo{cityCap}</div>
-                <button class="carouselNextBtn" id="carouselNext" type="button" aria-label="Scroll right">&#8250;</button>
+                <div class="carouselArrows">
+                  <button class="carouselNextBtn" id="carouselPrev" type="button" aria-label="Scroll left">&#8249;</button>
+                  <button class="carouselNextBtn" id="carouselNext" type="button" aria-label="Scroll right">&#8250;</button>
+                </div>
               </div>
               <div class="carouselTrack" id="carouselTrack">
                 {carouselPosts.map(p => {
@@ -442,7 +445,7 @@ try {
   .topicLayout {
     display: grid;
     grid-template-columns: minmax(0, 7fr) minmax(380px, 3fr);
-    gap: clamp(40px, 4vw, 56px);
+    gap: 56px;
     align-items: start;
   }
   .topicMain { min-width: 0; }
@@ -635,6 +638,7 @@ try {
     font-size: 16px;
     letter-spacing: -0.01em;
   }
+  .carouselArrows { display: flex; gap: 6px; flex-shrink: 0; }
   .carouselNextBtn {
     display: flex;
     align-items: center;
@@ -682,6 +686,7 @@ try {
     transform: var(--lift);
     border-color: rgba(0,119,190,.30);
     background: rgba(255,255,255,.05);
+    box-shadow: 0 8px 24px rgba(0,0,0,.28);
   }
   .carouselThumb {
     aspect-ratio: 4/3;
@@ -869,13 +874,11 @@ try {
   }
 
   /* Carousel scroll */
+  var track = document.getElementById("carouselTrack");
   var next = document.getElementById("carouselNext");
-  if (next) {
-    next.addEventListener("click", function () {
-      var track = document.getElementById("carouselTrack");
-      if (track) track.scrollBy({ left: track.offsetWidth * 0.85, behavior: "smooth" });
-    });
-  }
+  var prev = document.getElementById("carouselPrev");
+  if (next && track) next.addEventListener("click", function () { track.scrollBy({ left: track.offsetWidth * 0.85, behavior: "smooth" }); });
+  if (prev && track) prev.addEventListener("click", function () { track.scrollBy({ left: -track.offsetWidth * 0.85, behavior: "smooth" }); });
 
   /* Sidebar Featured Events Slider */
   (function () {

@@ -96,7 +96,7 @@ const DIY_PILL_LIST = [
 
 <Base title={`${subtopicLabel} | DIY | GoDo${cityCap}`} cityBase={city}>
   <section class="section">
-    <div class="container" style="max-width: 1080px;">
+    <div class="container" style="max-width: 1280px;">
 
       <div class="topicHeader">
         <div class="diyBreadcrumb">
@@ -223,12 +223,12 @@ const DIY_PILL_LIST = [
 
   .topicLayout {
     display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 18px;
+    grid-template-columns: minmax(0, 7fr) minmax(380px, 3fr);
+    gap: 56px;
     align-items: start;
   }
   .topicMain { min-width: 0; }
-  @media (max-width: 980px) {
+  @media (max-width: 1150px) {
     .topicLayout { grid-template-columns: 1fr; }
   }
 
