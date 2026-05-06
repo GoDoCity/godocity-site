@@ -77,7 +77,7 @@ const diyItems: FeedItem[] = diyGuides.map((e) => ({
 const postItems: FeedItem[] = diyPosts.map((p) => ({
   title: p.data.title ?? p.slug,
   description: p.data.description ?? "",
-  href: `/${city}/posts/${p.slug}/`,
+  href: `/${city}/posts/${p.slug.split("/").pop()}/`,
   date: p.data.pubDate ?? null,
   heroImage: (p.data.heroImage ?? p.data.thumbnail ?? "") as string,
   type: "post",

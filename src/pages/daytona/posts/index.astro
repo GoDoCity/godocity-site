@@ -119,7 +119,7 @@ function tagSlugFromRaw(raw) {
           const d = getPostDate(post);
           const dateStr = formatDate(d);
           const tags = getTagItems(post);
-          const url = `/daytona/posts/${post.slug}/`;
+          const url = `/daytona/posts/${post.slug.split("/").pop()}/`;
           const img = thumbImage(post);
           const catRaw = (post.data?.category && String(post.data.category).trim()) || (tags.length > 0 ? tags[0].label : "");
           const catLabel = catRaw.toUpperCase();

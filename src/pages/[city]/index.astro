@@ -85,7 +85,7 @@ function dateText(post: any) {
               <div class="postGrid">
                 {posts.map((p, i) => (
                   <a class={`postCard${i === 0 ? " postCard--hero" : ""}`}
-                     href={`/${city}/posts/${p.slug}/`}>
+                     href={`/${city}/posts/${p.slug.split("/").pop()}/`}>
                     <div class="postThumb">
                       <img src={i === 0 ? heroImage(p) : thumbImage(p)}
                            alt={p.data.title ?? ""}
