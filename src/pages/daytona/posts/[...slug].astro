@@ -104,7 +104,7 @@ export async function getStaticPaths() {
 /* Page data */
 const { post } = Astro.props;
 const title = post.data.title;
-const subtitle = post.data.description ?? "GoDo Daytona post";
+const subtitle = "Good news for Daytona";
 const { Content } = await post.render();
 
 const all = await getCollection("posts");
@@ -125,7 +125,7 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
 const relatedAll = buildRelatedPosts(post, daytonaPosts);
 const seen = new Set();
 const deduped = relatedAll.filter((p) => { if (seen.has(p.slug)) return false; seen.add(p.slug); return true; });
-const relatedPosts = [...deduped.filter(isFeatured), ...deduped.filter((p) => !isFeatured(p))].slice(0, 3);
+const relatedPosts = [...deduped.filter(isFeatured), ...deduped.filter((p) => !isFeatured(p))].slice(0, 8);
 
 const pub = getPostDate(post);
 const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
@@ -165,7 +165,13 @@ const hero = heroImage(post);
 
           {relatedPosts.length > 0 && (
             <div class="relatedWrap">
-              <h3 class="relatedHead">More Stories</h3>
+              <div class="relatedHeader">
+                <h3 class="relatedHead">More Stories</h3>
+                <div class="relatedArrows">
+                  <button class="relatedBtn" aria-label="Scroll left" onclick="this.closest('.relatedWrap').querySelector('.relatedScroll').scrollBy({left:-300,behavior:'smooth'})">&#8592;</button>
+                  <button class="relatedBtn" aria-label="Scroll right" onclick="this.closest('.relatedWrap').querySelector('.relatedScroll').scrollBy({left:300,behavior:'smooth'})">&#8594;</button>
+                </div>
+              </div>
               <div class="relatedScroll">
                 {relatedPosts.map((p) => {
                   const t = p.data.title ?? p.slug;
@@ -246,7 +252,17 @@ const hero = heroImage(post);
   .featuredPillSmall { font-size: 11px; padding: 4px 9px; align-self: start; }
 
   .relatedWrap { margin-top: 32px; border-top: 2px solid var(--brand1); padding-top: 24px; }
-  .relatedHead { margin: 0 0 16px; font-size: 13px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
+  .relatedHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .relatedHead { margin: 0; font-size: 13px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
+  .relatedArrows { display: flex; gap: 6px; }
+  .relatedBtn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid var(--pillBorder); background: var(--surface2);
+    color: var(--text); font-size: 16px; cursor: pointer; line-height: 1;
+    transition: background 120ms, opacity 120ms;
+  }
+  .relatedBtn:hover { background: var(--pillBg); opacity: .85; }
   .relatedScroll {
     display: flex;
     overflow-x: auto;

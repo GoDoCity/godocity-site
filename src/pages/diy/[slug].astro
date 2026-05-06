@@ -15,7 +15,7 @@ const { entry } = Astro.props;
 const { data }  = entry;
 ---
 
-<Base title={`${data.title} | GoDoCity DIY`} subtitle={data.intro.split(/\n\n+/)[0].substring(0, 160)}>
+<Base title={`${data.title} | GoDoCity DIY`}>
   <div class="diyPageWrap">
     <DiyPill
       title={data.title}
