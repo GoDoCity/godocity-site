@@ -15,6 +15,7 @@
 import Base           from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection, render } from "astro:content";
+import { getShortName } from "../../../lib/cityConfigs.js";
 
 /* ── Build all static paths from both guide collections ────────────────────── */
 export async function getStaticPaths() {
@@ -232,9 +233,9 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           {/* Newsletter */}
           <div class="nlBox">
             <div class="nlBoxHead">
-              <em>Good News <strong>{city.charAt(0).toUpperCase() + city.slice(1)}!</strong></em>
+              <em>Good News <strong>{getShortName(city)}!</strong></em>
             </div>
-            <div class="nlBoxSub">Get the best local stories delivered free to your inbox every morning.</div>
+            <div class="nlBoxSub">Join GoDo{getShortName(city)} for the daily brief on local news, fresh openings, and must-see events.</div>
             <form class="nlForm" action={`/${city}/subscribe/`} method="get">
               <input class="nlInput" type="email" name="email"
                 placeholder="your@email.com" required autocomplete="email" />
@@ -1038,11 +1039,11 @@ window.addEventListener('load', function () {
   .guideLink:hover { color: var(--link); }
 
   /* Sidebar newsletter */
-  .nlBox    { padding: 40px 26px; border-radius: 16px; background: var(--brand1); display: flex; flex-direction: column; gap: 12px; }
-  .nlBoxHead { font-size: 28px; font-weight: 900; font-style: italic; color: #000; letter-spacing: -0.04em; line-height: 1.05; }
+  .nlBox    { padding: 2rem; border-radius: 16px; background: var(--theme-gradient); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; position: relative; overflow: hidden; border: 1px solid rgba(0,0,0,.25); }
+  .nlBoxHead { font-size: 1.75rem; font-weight: 900; font-style: italic; color: #fff; letter-spacing: -0.04em; line-height: 1.05; text-align: center; text-shadow: 0 1px 3px rgba(0,0,0,.4); }
   .nlBoxHead strong { font-weight: 900; }
-  .nlBoxSub  { font-size: 15px; color: rgba(0,0,0,.8); line-height: 1.45; }
-  .nlForm    { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+  .nlBoxSub  { font-size: 1.1rem; font-weight: 400; color: rgba(255,255,255,.88); line-height: 1.4; text-align: center; max-width: 280px; margin: 0 auto; text-shadow: 0 1px 2px rgba(0,0,0,.3); }
+  .nlForm    { display: flex; flex-direction: column; gap: 10px; margin-top: 12px; width: 100%; }
   .nlInput   {
     width: 100%; box-sizing: border-box;
     padding: 14px 16px; border-radius: 10px;
@@ -1055,7 +1056,7 @@ window.addEventListener('load', function () {
   .nlInput::placeholder { color: #aaa; }
   .nlSubmit  {
     width: 100%; padding: 14px 0; border-radius: 999px;
-    border: none; background: #000; color: #f9d900;
+    border: none; background: #000; color: #fff;
     font-family: "Manrope", sans-serif;
     font-size: 15px; font-weight: 900; letter-spacing: .08em;
     cursor: pointer; transition: opacity 150ms;
