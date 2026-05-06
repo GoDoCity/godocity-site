@@ -52,6 +52,10 @@ const authorSlug = author
 
 /* ── City helpers — all values come from cityConfigs.js, never hardcoded ── */
 const citySlug = (city ?? "daytona").toLowerCase().trim();
+
+/* ── Category / topic breadcrumb ── */
+const topicKey  = topic ? topic.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : "";
+const topicLabel = topic ? topic.trim().split(" ").map((w) => w ? w[0].toUpperCase() + w.slice(1) : "").join(" ").toUpperCase() : "";
 ---
 
 <div class="diyWrap">
@@ -63,8 +67,13 @@ const citySlug = (city ?? "daytona").toLowerCase().trim();
       {/* 1 — Headline + meta */}
       <header class="diyHeader">
         <div class="diyKicker">
-          <span class="kPill kCat">DIY</span>
-          {topic && <span class="kPill kTopic">{topic}</span>}
+          <a class="catCrumb" href={`/${citySlug}/diy/`}>DIY</a>
+          {topicLabel && topicKey && (
+            <>
+              <span class="catSep" aria-hidden="true">›</span>
+              <a class="catCrumb" href={`/${citySlug}/diy/${topicKey}/`}>{topicLabel}</a>
+            </>
+          )}
         </div>
         <h1 class="diyTitle">{title}</h1>
         {(author || pubDateStr) && (
@@ -170,17 +179,14 @@ const citySlug = (city ?? "daytona").toLowerCase().trim();
     padding: 12px 0 0;
     margin-bottom: 0;
   }
-  /* negative top-margin creates the same 'hanging pill' overlap seen on guide pages */
-  .diyKicker { display: flex; align-items: center; gap: 10px; margin-top: -6px; margin-bottom: 14px; }
-  .kPill {
-    font-size: 10.5px; font-weight: 800; letter-spacing: .11em;
-    text-transform: uppercase; padding: 3px 10px; border-radius: 999px;
+  .diyKicker { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .catCrumb {
+    font-size: 0.8rem; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--brand1);
+    text-decoration: none; transition: opacity 130ms;
   }
-  .kCat { background: var(--pillBg); color: var(--brand1); border: 1px solid var(--pillBorder); }
-  .kTopic {
-    background: rgba(255,210,74,.12); color: var(--brand1);
-    border: 1px solid rgba(255,210,74,.35);
-  }
+  .catCrumb:hover { opacity: .72; }
+  .catSep { font-size: 0.8rem; opacity: .45; font-weight: 700; }
   .diyTitle {
     font-size: clamp(26px, 3.8vw, 48px);
     font-weight: 900;

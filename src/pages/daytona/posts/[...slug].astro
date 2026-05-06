@@ -42,7 +42,6 @@ function heroImage(post) {
 
 /* Related posts */
 const RELATED_LIMIT = 12;
-const MAX_FEATURED_IN_RELATED = 2;
 
 function normalizeTags(post) {
   const raw = Array.isArray(post?.data?.tags) ? post.data.tags : [];
@@ -58,24 +57,16 @@ function sharedTagScore(aKeys, bKeys) {
 function buildRelatedPosts(currentPost, allCityPosts) {
   const currentSlug = currentPost?.slug;
   const currentKeys = normalizeTags(currentPost);
-  const candidates = allCityPosts
+  return allCityPosts
     .filter((p) => p?.slug && p.slug !== currentSlug)
-    .map((p) => {
-      const keys = normalizeTags(p);
-      return { p, score: sharedTagScore(currentKeys, keys), date: new Date(getPostDate(p) ?? 0).getTime() };
-    });
-  candidates.sort((x, y) => y.score !== x.score ? y.score - x.score : y.date - x.date);
-  const withOverlap = candidates.filter((c) => c.score > 0).map((c) => c.p);
-  const withoutOverlap = candidates.filter((c) => c.score === 0).map((c) => c.p);
-  const ranked = [...withOverlap, ...withoutOverlap];
-  const featured = ranked.filter(isFeatured);
-  const nonFeatured = ranked.filter((p) => !isFeatured(p));
-  const result = [];
-  result.push(...featured.slice(0, MAX_FEATURED_IN_RELATED));
-  result.push(...nonFeatured.slice(0, RELATED_LIMIT - result.length));
-  const remaining = ranked.filter((p) => !result.some((r) => r.slug === p.slug));
-  result.push(...remaining.slice(0, RELATED_LIMIT - result.length));
-  return result.slice(0, RELATED_LIMIT);
+    .map((p) => ({
+      p,
+      score: sharedTagScore(currentKeys, normalizeTags(p)),
+      date: new Date(getPostDate(p) ?? 0).getTime(),
+    }))
+    .sort((a, b) => b.score !== a.score ? b.score - a.score : b.date - a.date)
+    .slice(0, RELATED_LIMIT)
+    .map((c) => c.p);
 }
 
 /* Build-safe getStaticPaths */
@@ -122,10 +113,7 @@ const tagItems = Array.from(uniqueKeySet).map((key) => ({
   key, label: tagLabelFromKey(key), slug: tagSlugFromKey(key),
 }));
 
-const relatedAll = buildRelatedPosts(post, daytonaPosts);
-const seen = new Set();
-const deduped = relatedAll.filter((p) => { if (seen.has(p.slug)) return false; seen.add(p.slug); return true; });
-const relatedPosts = [...deduped.filter(isFeatured), ...deduped.filter((p) => !isFeatured(p))].slice(0, 12);
+const relatedPosts = buildRelatedPosts(post, daytonaPosts);
 
 const pub = getPostDate(post);
 const pubText = pub
@@ -137,6 +125,13 @@ const author = typeof post.data.author === "string" && post.data.author.trim()
   ? post.data.author.trim() : "Charles King";
 const authorSlug = author.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
+const categoryRaw = typeof post.data.category === "string" && post.data.category.trim()
+  ? post.data.category.trim()
+  : rawTags[0] ?? "";
+const categoryKey   = tagKey(categoryRaw);
+const categorySlug  = tagSlugFromKey(categoryKey);
+const categoryLabel = tagLabelFromKey(categoryKey).toUpperCase();
+
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona">
@@ -145,6 +140,9 @@ const authorSlug = author.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-
       <div class="postLayout">
 
         <div class="postMain">
+          {categoryLabel && (
+            <a class="catCrumb" href={`/daytona/${categorySlug}/`}>{categoryLabel}</a>
+          )}
           <h1 class={`postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
 
           <p class="byline">
@@ -221,6 +219,19 @@ const authorSlug = author.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-
   }
 
   .postMain { min-width: 0; }
+
+  .catCrumb {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--brand1);
+    text-decoration: none;
+    margin-bottom: 10px;
+    transition: opacity 130ms;
+  }
+  .catCrumb:hover { opacity: .72; }
 
   .postTitle {
     margin: 0 0 8px;
