@@ -128,9 +128,14 @@ const deduped = relatedAll.filter((p) => { if (seen.has(p.slug)) return false; s
 const relatedPosts = [...deduped.filter(isFeatured), ...deduped.filter((p) => !isFeatured(p))].slice(0, 12);
 
 const pub = getPostDate(post);
-const pubText = pub ? new Date(pub).toLocaleDateString("en-US") : "";
+const pubText = pub
+  ? new Date(pub).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+  : "";
 const featured = isFeatured(post);
 const hero = heroImage(post);
+const author = typeof post.data.author === "string" && post.data.author.trim()
+  ? post.data.author.trim() : "Charles King";
+const authorSlug = author.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
 ---
 
@@ -142,17 +147,11 @@ const hero = heroImage(post);
         <div class="postMain">
           <h1 class={`postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
 
-          <div class="metaRow">
-            {pubText && <span class="metaDate">{pubText}</span>}
-            {tagItems.length > 0 && (
-              <span class="metaTags" aria-label="Topics">
-                {tagItems.map((t) => (
-                  <a class="topicPill" href={`/daytona/topic/${t.slug}/`}>{t.label}</a>
-                ))}
-              </span>
-            )}
-            {featured && <span class="featuredPill">FEATURED</span>}
-          </div>
+          <p class="byline">
+            {pubText && <span class="bylineDate">{pubText}</span>}
+            {pubText && <span class="bylineSep" aria-hidden="true"> | </span>}
+            <a class="bylineAuthor" href={`/daytona/journalists/${authorSlug}/`}>{author}</a>
+          </p>
 
           <figure class="heroFigure">
             <img class="heroFull" src={hero} alt={post.data.title ?? "Post image"} loading="eager" decoding="async"
@@ -228,6 +227,28 @@ const hero = heroImage(post);
     font-size: clamp(22px, 2.6vw, 34px);
     font-weight: 800; letter-spacing: -0.3px; line-height: 1.1;
   }
+  .byline {
+    margin: 0 0 28px;
+    font-size: 0.9rem;
+    color: var(--faint);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0;
+  }
+  .bylineDate { opacity: .85; }
+  .bylineSep  { opacity: .45; margin: 0 6px; }
+  .bylineAuthor {
+    color: var(--brand1);
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 2px;
+    font-weight: 700;
+    transition: text-decoration-color 130ms;
+  }
+  .bylineAuthor:hover { text-decoration-color: var(--brand1); }
+
   .heroFigure { margin: 0 0 2rem; }
   .heroFull {
     display: block; width: 100%; aspect-ratio: 16/9; max-height: 450px; object-fit: cover;
@@ -235,21 +256,6 @@ const hero = heroImage(post);
     box-shadow: 0 10px 26px rgba(0,0,0,.30);
   }
   .postBody { margin-top: 18px; line-height: 1.65; font-size: 16px; }
-  .metaRow { margin: 0 0 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; opacity: .85; }
-  .metaDate { opacity: .75; font-size: 13px; }
-  .metaTags { display: inline-flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .topicPill {
-    display: inline-flex; align-items: center; padding: 4px 10px;
-    border-radius: 999px; font-size: 11px; font-weight: 800;
-    text-decoration: none; color: #111;
-    background: rgba(255,220,80,.65); border: 1px solid rgba(255,220,80,.55);
-  }
-  .featuredPill {
-    font-size: 12px; font-weight: 800; padding: 5px 10px; border-radius: 999px;
-    border: 1px solid var(--pillBorder); color: var(--brand1);
-    background: var(--pillBg); white-space: nowrap;
-  }
-  .featuredPillSmall { font-size: 11px; padding: 4px 9px; align-self: start; }
 
   .relatedWrap { margin-top: 32px; border-top: 2px solid var(--brand1); padding-top: 24px; }
   .relatedHeader { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }

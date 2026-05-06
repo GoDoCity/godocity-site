@@ -157,7 +157,8 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           <h1 class="articleTitle">{data.title}</h1>
           {/* ── Byline below title ── */}
           <p class="articleByline">
-            {dateStr && <span>{dateStr} — </span>}
+            {dateStr && <span class="blDate">{dateStr}</span>}
+            {dateStr && <span class="blSep" aria-hidden="true"> | </span>}
             <a class="bylineAuthor" href={`/journalists/${authorSlug}/`}>{authorName}</a>
           </p>
         </header>
@@ -302,7 +303,9 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
   .articleTitle { font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; font-family: "Manrope", sans-serif; line-height: 1.08; letter-spacing: -0.02em; color: var(--text); margin: 0 0 18px; max-width: 860px; }
 
-  .articleByline { font-size: 13px; color: var(--faint); margin: 0 0 16px; font-weight: 500; }
+  .articleByline { font-size: 0.9rem; color: var(--faint); margin: 0 0 28px; font-weight: 500; display: flex; align-items: center; flex-wrap: wrap; gap: 0; }
+  .blDate { opacity: .85; }
+  .blSep  { opacity: .45; margin: 0 6px; }
   .bylineAuthor { color: var(--brand1); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; font-weight: 700; transition: text-decoration-color 130ms; }
   .bylineAuthor:hover { text-decoration-color: var(--brand1); }
 
