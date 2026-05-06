@@ -141,7 +141,6 @@ const hero = heroImage(post);
 
         <div class="postMain">
           <h1 class={`postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
-          {post.data.description && <p class="postLede">{post.data.description}</p>}
 
           <div class="metaRow">
             {pubText && <span class="metaDate">{pubText}</span>}
@@ -166,26 +165,18 @@ const hero = heroImage(post);
 
           {relatedPosts.length > 0 && (
             <div class="relatedWrap">
-              <h3 class="relatedHead">Related posts</h3>
-              <div class="relatedList">
+              <h3 class="relatedHead">More Stories</h3>
+              <div class="relatedScroll">
                 {relatedPosts.map((p) => {
                   const t = p.data.title ?? p.slug;
-                  const desc = p.data.description ?? "";
-                  const d = getPostDate(p);
-                  const dateText = d ? new Date(d).toLocaleDateString("en-US") : "";
                   const img = heroImage(p);
                   return (
-                    <a class="relatedRow" href={`/daytona/posts/${p.slug.split("/").pop()}/`}>
-                      <div class="relatedThumb">
-                        <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async"
+                    <a class="relatedCard" href={`/daytona/posts/${p.slug.split("/").pop()}/`}>
+                      <div class="relatedCardThumb">
+                        <img src={img} alt={t} loading="lazy" decoding="async"
                           onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
                       </div>
-                      <div class="relatedText">
-                        <div class="relatedTitle">{t}</div>
-                        {desc && <div class="relatedDesc">{desc}</div>}
-                        {dateText && <div class="relatedMeta">{dateText}</div>}
-                      </div>
-                      {isFeatured(p) && <span class="featuredPill featuredPillSmall">FEATURED</span>}
+                      <div class="relatedCardTitle">{t}</div>
                     </a>
                   );
                 })}
@@ -231,7 +222,6 @@ const hero = heroImage(post);
     font-size: clamp(22px, 2.6vw, 34px);
     font-weight: 800; letter-spacing: -0.3px; line-height: 1.1;
   }
-  .postLede { margin: 0 0 14px; font-size: clamp(15px, 1.4vw, 18px); line-height: 1.45; color: var(--color-text-main); }
   .heroFigure { margin: 0 0 2rem; }
   .heroFull {
     display: block; width: 100%; aspect-ratio: 16/9; max-height: 450px; object-fit: cover;
@@ -255,31 +245,35 @@ const hero = heroImage(post);
   }
   .featuredPillSmall { font-size: 11px; padding: 4px 9px; align-self: start; }
 
-  .relatedWrap { margin-top: 32px; }
-  .relatedHead { margin: 0 0 12px; font-size: 15px; font-weight: 800; opacity: .9; }
-  .relatedList { display: grid; gap: 12px; }
-  .relatedRow {
-    text-decoration: none; display: grid;
-    grid-template-columns: 96px 1fr auto; gap: 12px; align-items: start;
-    border: 1px solid rgba(255,255,255,.10); border-radius: 14px;
-    padding: 12px; background: rgba(255,255,255,.03);
-    transition: border-color 160ms ease, box-shadow 160ms ease;
+  .relatedWrap { margin-top: 32px; border-top: 2px solid var(--brand1); padding-top: 24px; }
+  .relatedHead { margin: 0 0 16px; font-size: 13px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
+  .relatedScroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 1.5rem;
+    scrollbar-width: none;
+    padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .relatedScroll::-webkit-scrollbar { display: none; }
+  .relatedCard {
+    flex: 0 0 280px;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: opacity 140ms;
+  }
+  .relatedCard:hover { opacity: .82; }
+  .relatedCardThumb {
+    width: 280px; aspect-ratio: 16/10;
+    border-radius: 12px; overflow: hidden; background: var(--surface2);
+  }
+  .relatedCardThumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .relatedCardTitle {
+    font-size: 14px; font-weight: 800; line-height: 1.25; color: var(--text);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
   .relatedRow:hover { border-color: var(--pillBorder); box-shadow: 0 0 0 1px var(--pillBg), 0 10px 26px rgba(0,0,0,.30); }
-  .relatedThumb { width: 96px; }
-  .relatedImg { width: 96px; height: 66px; border-radius: 10px; object-fit: cover; border: 1px solid rgba(255,255,255,.10); display: block; }
-  .relatedFallback { background: rgba(255,255,255,.04); }
-  .relatedText { min-width: 0; }
-  .relatedTitle { font-weight: 800; font-size: 15px; line-height: 1.2; color: var(--text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .relatedDesc { margin-top: 5px; font-size: 13px; color: var(--muted); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .relatedMeta { margin-top: 6px; font-size: 12px; color: var(--faint); }
-
-  @media (max-width: 520px) {
-    .relatedRow { grid-template-columns: 1fr; }
-    .relatedThumb { width: 100%; }
-    .relatedImg { width: 100%; height: auto; aspect-ratio: 16/9; }
-    .featuredPillSmall { justify-self: start; }
-  }
-
   .postLinks { margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
 </style>

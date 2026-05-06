@@ -155,8 +155,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
             <InteractiveMap locations={data.map_locations} height="350px" />
           )}
           <h1 class="articleTitle">{data.title}</h1>
-          {data.description && <p class="articleDesc">{data.description}</p>}
-          {/* ── Byline below description ── */}
+          {/* ── Byline below title ── */}
           <p class="articleByline">
             {dateStr && <span>{dateStr} — </span>}
             <a class="bylineAuthor" href={`/journalists/${authorSlug}/`}>{authorName}</a>
@@ -275,7 +274,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .homeGrid {
     display: grid;
     grid-template-columns: minmax(0, 7fr) minmax(380px, 3fr);
-    gap: clamp(40px, 4vw, 56px);
+    gap: 56px;
     align-items: start;
     padding: 0 0 56px;
   }
@@ -306,8 +305,6 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .articleByline { font-size: 13px; color: var(--faint); margin: 0 0 16px; font-weight: 500; }
   .bylineAuthor { color: var(--brand1); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; font-weight: 700; transition: text-decoration-color 130ms; }
   .bylineAuthor:hover { text-decoration-color: var(--brand1); }
-
-  .articleDesc { font-size: clamp(15px, 1.15vw, 17px); color: var(--color-text-main); line-height: 1.65; border-left: 3px solid var(--brand1); padding-left: 16px; margin: 0 0 28px; max-width: 660px; }
 
   .heroWrap { width: 100%; aspect-ratio: 16/9; max-height: 450px; border-radius: 14px; overflow: hidden; background: var(--surface2); margin: 0 0 2rem; display: block; }
   .heroImg { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
