@@ -132,6 +132,11 @@ const categoryKey   = tagKey(categoryRaw);
 const categorySlug  = tagSlugFromKey(categoryKey);
 const categoryLabel = tagLabelFromKey(categoryKey).toUpperCase();
 
+const subtopicRaw   = typeof post.data.subtopic === "string" ? post.data.subtopic.trim() : "";
+const subtopicKey   = tagKey(subtopicRaw);
+const subtopicSlug  = tagSlugFromKey(subtopicKey);
+const subtopicLabel = tagLabelFromKey(subtopicKey).toUpperCase();
+
 ---
 
 <Base title={title} subtitle={subtitle} cityBase="daytona">
@@ -141,7 +146,15 @@ const categoryLabel = tagLabelFromKey(categoryKey).toUpperCase();
 
         <div class="postMain">
           {categoryLabel && (
-            <a class="catCrumb" href={`/daytona/${categorySlug}/`}>{categoryLabel}</a>
+            <div class="catKicker">
+              <a class="catCrumb" href={`/daytona/${categorySlug}/`}>{categoryLabel}</a>
+              {subtopicLabel && (
+                <>
+                  <span class="catDash" aria-hidden="true"> — </span>
+                  <a class="catCrumb" href={`/daytona/${categorySlug}/${subtopicSlug}/`}>{subtopicLabel}</a>
+                </>
+              )}
+            </div>
           )}
           <h1 class={`postTitle ${featured ? "isFeatured" : ""}`}>{title}</h1>
 
@@ -220,18 +233,29 @@ const categoryLabel = tagLabelFromKey(categoryKey).toUpperCase();
 
   .postMain { min-width: 0; }
 
+  .catKicker {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
   .catCrumb {
-    display: inline-block;
     font-size: 0.8rem;
     font-weight: 900;
     letter-spacing: .12em;
     text-transform: uppercase;
     color: var(--brand1);
     text-decoration: none;
-    margin-bottom: 10px;
     transition: opacity 130ms;
   }
   .catCrumb:hover { opacity: .72; }
+  .catDash {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--faint);
+    opacity: .55;
+    margin: 0 5px;
+    letter-spacing: 0;
+  }
 
   .postTitle {
     margin: 0 0 8px;

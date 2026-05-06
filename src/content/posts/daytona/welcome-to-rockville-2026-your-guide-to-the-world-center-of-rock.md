@@ -2,7 +2,7 @@
 title: 'Welcome to Rockville 2026: Your Guide to the World Center of Rock'
 pubDate: 2026-04-27
 author: Kit A. Marlow
-category: Events
+category: Culture
 subtopic: Festivals
 sponsorTier: None
 tags:
