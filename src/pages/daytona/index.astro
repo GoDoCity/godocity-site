@@ -231,7 +231,7 @@ const guideCards = guideHero
 
           {/* ── HERO — cinematic wide crop, anchored to sidebar height ── */}
           {hero && (
-            <a class="heroCard" href={`/daytona/${hero.slug.split('/').pop()}/`}>
+            <a class="heroCard" href={`/daytona/posts/${hero.slug.split('/').pop()}/`}>
               <div class="heroImgWrap">
                 {heroImage(hero)
                   ? <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""} loading="eager" decoding="async" />
@@ -254,7 +254,7 @@ const guideCards = guideHero
           {/* ── 3 CARDS SIDE BY SIDE ── */}
           <div class="cardGrid">
             {latest.map((p) => (
-              <a class="articleCard" href={`/daytona/${p.slug.split('/').pop()}/`}>
+              <a class="articleCard" href={`/daytona/posts/${p.slug.split('/').pop()}/`}>
                 <div class="cardImgWrap">
                   {heroImage(p)
                     ? <img class="cardImg" src={heroImage(p)} alt="" loading="lazy" decoding="async" />
@@ -313,7 +313,7 @@ const guideCards = guideHero
                 const { catLabel, sub } = kickerParts(p);
                 const kickerLabel = catLabel || primaryTag(p).toUpperCase();
                 return (
-                  <a class="latestRow" href={`/daytona/${p.slug.split('/').pop()}/`}>
+                  <a class="latestRow" href={`/daytona/posts/${p.slug.split('/').pop()}/`}>
                     <div class="latestThumbWrap">
                       {thumbImage(p)
                         ? <img class="latestThumb" src={thumbImage(p)} alt="" loading="lazy" decoding="async" />

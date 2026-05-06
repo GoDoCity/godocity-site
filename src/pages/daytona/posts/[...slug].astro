@@ -92,7 +92,13 @@ export async function getStaticPaths() {
       const db = new Date(b?.data?.pubDate ?? b?.data?.date ?? b?.data?.published ?? b?.data?.updated ?? 0).getTime();
       return db - da;
     });
-  return daytonaPosts.map((post) => ({ params: { slug: post.slug }, props: { post } }));
+  return daytonaPosts.map((post) => {
+    const parts = post.slug.split("/");
+    const cleanSlug = parts.length > 1 && parts[0] === "daytona"
+      ? parts.slice(1).join("/")
+      : post.slug;
+    return { params: { slug: cleanSlug }, props: { post } };
+  });
 }
 
 /* Page data */
@@ -169,7 +175,7 @@ const hero = heroImage(post);
                   const dateText = d ? new Date(d).toLocaleDateString("en-US") : "";
                   const img = heroImage(p);
                   return (
-                    <a class="relatedRow" href={`/daytona/posts/${p.slug}/`}>
+                    <a class="relatedRow" href={`/daytona/posts/${p.slug.split("/").pop()}/`}>
                       <div class="relatedThumb">
                         <img class="relatedImg" src={img} alt={t} loading="lazy" decoding="async"
                           onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />

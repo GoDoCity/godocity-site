@@ -117,7 +117,7 @@ const DIY_PILL_LIST = [
         <div class="topicMain">
 
           {hero && (
-            <a class="heroCard" href={`/${city}/posts/${hero.slug}/`}>
+            <a class="heroCard" href={`/${city}/posts/${hero.slug.split("/").pop()}/`}>
               <div class="heroMedia">
                 <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""}
                   loading="lazy" decoding="async"
@@ -136,7 +136,7 @@ const DIY_PILL_LIST = [
             <div class="list" id="articleList">
               {rest.map((p, idx) => (
                 <div class={`row${idx >= 9 ? " rowHidden" : ""}`}>
-                  <a class="rowCardLink" href={`/${city}/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
+                  <a class="rowCardLink" href={`/${city}/posts/${p.slug.split("/").pop()}/`} aria-label={p.data.title ?? p.slug}></a>
                   <div class="rowThumbWrap">
                     <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""}
                       loading="lazy" decoding="async"

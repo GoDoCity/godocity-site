@@ -37,7 +37,7 @@ const subtitle = "Editor picks for GoDoDaytona.";
     {posts.length ? (
       <div style="margin-top:18px;display:grid;gap:12px;">
         {posts.map((p) => (
-          <a class="card" href={`/daytona/posts/${p.slug}/`} style="display:block;padding:16px;">
+          <a class="card" href={`/daytona/posts/${p.slug.split("/").pop()}/`} style="display:block;padding:16px;">
             <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
               <div style="font-weight:900;font-size:18px;line-height:1.2;">
                 {p.data.title}

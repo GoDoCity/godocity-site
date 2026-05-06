@@ -180,7 +180,7 @@ try {
 
 <Base title={topic === "diy" ? "DIY" : `${topicLabelStr} | GoDo${cityCap}`} cityBase={city}>
   <section class="section">
-    <div class="container" style="max-width: 1260px !important; margin: 0 auto !important; padding: 0 2rem;">
+    <div class="container" style="max-width: 1280px; margin: 0 auto; padding: 0 2rem;">
 
       <div class="topicHeader">
         <h1 class="topicTitle">{topic === "diy" ? "Master Your Home" : topicLabelStr}</h1>
@@ -207,7 +207,7 @@ try {
         <div class="topicMain">
 
           {hero && (
-            <a class={`heroCard${kickerParts(hero).sponsorLabel ? " sponsoredCard" : ""}`} href={hero._href ?? `/${city}/posts/${hero.slug}/`}>
+            <a class={`heroCard${kickerParts(hero).sponsorLabel ? " sponsoredCard" : ""}`} href={hero._href ?? `/${city}/posts/${hero.slug.split("/").pop()}/`}>
               <div class="heroMedia">
                 <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""}
                   loading="lazy" decoding="async"
@@ -234,7 +234,7 @@ try {
                 const kickerLabel = sponsorLabel || catLabel;
                 return (
                   <div class={`row${idx >= 9 ? " rowHidden" : ""}${isSponsored ? " sponsoredRow" : ""}`}>
-                    <a class="rowCardLink" href={p._href ?? `/${city}/posts/${p.slug}/`} aria-label={p.data.title ?? p.slug}></a>
+                    <a class="rowCardLink" href={p._href ?? `/${city}/posts/${p.slug.split("/").pop()}/`} aria-label={p.data.title ?? p.slug}></a>
                     <div class="rowThumbWrap">
                       <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""}
                         loading="lazy" decoding="async"
@@ -286,7 +286,7 @@ try {
                   const img = thumbImage(p);
                   const { catLabel } = kickerParts(p);
                   return (
-                    <a class="carouselCard" href={`/${city}/posts/${p.slug}/`}>
+                    <a class="carouselCard" href={`/${city}/posts/${p.slug.split("/").pop()}/`}>
                       <div class="carouselThumb">
                         <img class="carouselImg" src={img} alt={p.data.title ?? ""}
                           loading="lazy" decoding="async"
@@ -441,8 +441,8 @@ try {
 
   .topicLayout {
     display: grid;
-    grid-template-columns: 1fr 320px;
-    gap: 80px;
+    grid-template-columns: minmax(0, 7fr) minmax(380px, 3fr);
+    gap: clamp(40px, 4vw, 56px);
     align-items: start;
   }
   .topicMain { min-width: 0; }
@@ -453,7 +453,7 @@ try {
     position: sticky;
     top: 16px;
   }
-  @media (max-width: 980px) {
+  @media (max-width: 1150px) {
     .topicLayout { grid-template-columns: 1fr; }
     .topicSidebar { position: static; }
   }
