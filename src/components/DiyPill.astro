@@ -43,7 +43,7 @@ const paras   = trimmed.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
 while (paras.length < 2) paras.push("");
 
 const pubDateStr = pubDate
-  ? new Date(pubDate).toLocaleDateString("en-US", { month: "long", year: "numeric" })
+  ? new Date(pubDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
   : "";
 
 const authorSlug = author
@@ -68,15 +68,15 @@ const citySlug = (city ?? "daytona").toLowerCase().trim();
         </div>
         <h1 class="diyTitle">{title}</h1>
         {(author || pubDateStr) && (
-          <div class="diyMeta">
+          <p class="diyMeta">
+            {pubDateStr && <span class="diyDate">{pubDateStr}</span>}
+            {pubDateStr && author && <span class="diyDot" aria-hidden="true"> | </span>}
             {author && (
               authorSlug
-                ? <a class="diyAuthor diyAuthorLink" href={`/${citySlug}/journalists/${authorSlug}/`}>By {author}</a>
-                : <span class="diyAuthor">By {author}</span>
+                ? <a class="diyAuthor diyAuthorLink" href={`/${citySlug}/journalists/${authorSlug}/`}>{author}</a>
+                : <span class="diyAuthor">{author}</span>
             )}
-            {author && pubDateStr && <span class="diyDot" aria-hidden="true">·</span>}
-            {pubDateStr && <span class="diyDate">{pubDateStr}</span>}
-          </div>
+          </p>
         )}
       </header>
 
@@ -167,9 +167,8 @@ const citySlug = (city ?? "daytona").toLowerCase().trim();
 
   /* ── 1 — Header ── */
   .diyHeader {
-    padding: 12px 0 32px;
-    border-bottom: 2px solid var(--brand1);
-    margin-bottom: 36px;
+    padding: 12px 0 0;
+    margin-bottom: 0;
   }
   /* negative top-margin creates the same 'hanging pill' overlap seen on guide pages */
   .diyKicker { display: flex; align-items: center; gap: 10px; margin-top: -6px; margin-bottom: 14px; }
@@ -189,14 +188,20 @@ const citySlug = (city ?? "daytona").toLowerCase().trim();
     line-height: 1.06; letter-spacing: -0.02em; color: var(--text);
     margin: 0 0 18px;
   }
-  .diyMeta { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--faint); }
-  .diyAuthor { font-weight: 700; color: var(--text); }
-  .diyAuthorLink {
-    text-decoration: underline; text-decoration-color: transparent;
-    text-underline-offset: 2px; transition: color 130ms, text-decoration-color 130ms;
+  .diyMeta {
+    display: flex; align-items: center; flex-wrap: wrap; gap: 0;
+    font-size: 0.9rem; color: var(--faint); font-weight: 500;
+    margin: 0 0 28px;
   }
-  .diyAuthorLink:hover { color: var(--brand1); text-decoration-color: var(--brand1); }
-  .diyDot { opacity: .45; }
+  .diyDate  { opacity: .85; }
+  .diyDot   { opacity: .45; margin: 0 6px; }
+  .diyAuthor { font-weight: 700; color: var(--brand1); }
+  .diyAuthorLink {
+    color: var(--brand1);
+    text-decoration: underline; text-decoration-color: transparent;
+    text-underline-offset: 2px; transition: text-decoration-color 130ms;
+  }
+  .diyAuthorLink:hover { text-decoration-color: var(--brand1); }
 
   /* ── 2 — Hero image 16:9 ── */
   .diyHeroBanner {
