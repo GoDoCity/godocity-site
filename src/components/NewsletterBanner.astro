@@ -22,8 +22,7 @@ const {
     <div class="nlContent" id="nlContent">
       <div class="nlHead"><em>Good News <span class="nlCity">{city}</span>!</em></div>
       <div class="nlSub">
-        Get the best local news &amp; events sent to your inbox,
-        <strong><u>for free.</u></strong>
+        Join GoDo{city} for the daily brief on local news, fresh openings, and must-see events.
       </div>
       <form class="nlForm" id="nlForm" action={subscribeUrl} method="get">
         <div class="nlRow">
@@ -133,12 +132,14 @@ const {
   }
   .nlCity { font-style: italic; font-weight: 900; }
   .nlSub {
-    font-size: 19px;
+    font-size: 1.1rem;
     font-weight: 400;
     color: rgba(255,255,255,.85);
-    line-height: 1.2;
-    white-space: nowrap;
+    line-height: 1.4;
     text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    text-align: center;
+    max-width: 480px;
+    margin: 0 auto;
   }
   .nlSub strong { font-weight: 900; color: #ffffff; }
   .nlForm { width: 100%; max-width: 480px; margin: 0; }
