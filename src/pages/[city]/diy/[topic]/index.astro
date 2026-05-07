@@ -6,6 +6,7 @@
  * URL pattern: /daytona/diy/paint/  /daytona/diy/repair/
  */
 import Base from "../../../../layouts/Base.astro";
+import ArticleSidebar from "../../../../components/ArticleSidebar.astro";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
@@ -89,7 +90,7 @@ const postItems = allPosts
   .map(post => {
     const slug = post.slug.split("/").pop();
     const href = city === "daytona" ? `/daytona/posts/${slug}/` : `/${city}/${slug}/`;
-    const img  = String(post.data.heroImage ?? post.data.thumbnail ?? post.data.image ?? "").trim() || FALLBACK_IMG;
+    const img  = String(post.data.heroImage || post.data.thumbnail || post.data.image || "").trim() || FALLBACK_IMG;
     return {
       title:  post.data.title ?? post.slug,
       date:   formatDate(getPostDate(post)),
@@ -115,80 +116,92 @@ const guides = [...diyItems, ...postItems]
   <section class="diyTopicLanding">
     <div class="dtWrap">
 
-      <div class="landingKicker">
-        <a class="kLink" href={`/${city}/diy/`}>DIY</a>
-        <span class="kSep" aria-hidden="true"> — </span>
-        <span class="kTopic">{topicLabel.toUpperCase()}</span>
-      </div>
-
-      <h1 class="landingTitle">{topicLabel}</h1>
-      <p class="landingCount">
-        {guides.length > 0
-          ? `${guides.length} guide${guides.length !== 1 ? "s" : ""}`
-          : ""}
-      </p>
-
-      {guides.length === 0 ? (
-        <div class="comingSoon">
-          <div class="csIcon" aria-hidden="true">🚧</div>
-          <h2 class="csTitle">Coming Soon</h2>
-          <p class="csText">
-            We're building out our <strong>{topicLabel}</strong> DIY guides for {cityLabel}.
-            Check back soon — or explore all DIY content now.
-          </p>
-          <a class="csBtn" href={`/${city}/diy/`}>← All DIY guides</a>
+      {/* ── Page header (full width, above the grid) ── */}
+      <div class="stHeader">
+        <div class="stBreadcrumb">
+          <a class="stBreadLink" href={`/${city}/diy/`}>DIY</a>
+          <span class="stBreadSep" aria-hidden="true">›</span>
+          <span class="stBreadCurrent">{topicLabel.toUpperCase()}</span>
         </div>
-      ) : (
-        <>
-          {/* ── Hero card: first guide ── */}
-          {guides[0] && (
-            <a class="heroCard" href={guides[0].href}>
-              <div class="heroMedia">
-                <img class="heroImg" src={guides[0].img} alt={guides[0].title}
-                  loading="lazy" decoding="async"
-                  onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
-              </div>
-              <div class="heroBody">
-                <div class="heroKicker">DIY — {topicLabel}</div>
-                <div class="heroTitle">{guides[0].title}</div>
-                {guides[0].desc && <div class="heroDesc">{guides[0].desc}</div>}
-                {guides[0].date && <div class="heroMeta">{guides[0].date}</div>}
-              </div>
-            </a>
-          )}
-
-          {/* ── List rows: remaining guides ── */}
-          {guides.length > 1 && (
-            <ul class="diyList">
-              {guides.slice(1).map((item) => (
-                <li class="diyCard">
-                  <a class="cardLink" href={item.href} aria-label={`Read: ${item.title}`}>
-                    <div class="cardThumbWrap">
-                      <img class="cardThumb" src={item.img} alt=""
-                        loading="lazy" decoding="async"
-                        onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
-                    </div>
-                    <div class="cardBody">
-                      <div class="cardKicker">
-                        <span class="kTopicPill">DIY — {topicLabel}</span>
-                      </div>
-                      <div class="cardTitle">{item.title}</div>
-                      {item.date && <div class="cardDate">{item.date}</div>}
-                      {item.desc && <div class="cardDesc">{item.desc}</div>}
-                    </div>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-        </>
-      )}
-
-      <div class="backLink">
-        <a href={`/${city}/diy/`}>← All DIY guides</a>
+        <h1 class="stTitle">{topicLabel}</h1>
+        <p class="stMeta">
+          {guides.length > 0
+            ? `${guides.length} guide${guides.length !== 1 ? "s" : ""}`
+            : ""}
+        </p>
       </div>
 
-    </div>
+      {/* ── Two-column layout: main content + sidebar ── */}
+      <div class="dtLayout">
+        <div class="dtMain">
+
+          {guides.length === 0 ? (
+            <div class="comingSoon">
+              <div class="csIcon" aria-hidden="true">🚧</div>
+              <h2 class="csTitle">Coming Soon</h2>
+              <p class="csText">
+                We're building out our <strong>{topicLabel}</strong> DIY guides for {cityLabel}.
+                Check back soon — or explore all DIY content now.
+              </p>
+              <a class="csBtn" href={`/${city}/diy/`}>← All DIY guides</a>
+            </div>
+          ) : (
+            <>
+              {/* ── Hero card: first guide ── */}
+              {guides[0] && (
+                <a class="heroCard" href={guides[0].href}>
+                  <div class="heroMedia">
+                    <img class="heroImg" src={guides[0].img} alt={guides[0].title}
+                      loading="lazy" decoding="async"
+                      onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+                  </div>
+                  <div class="heroBody">
+                    <div class="heroKicker">DIY — {topicLabel}</div>
+                    <div class="heroTitle">{guides[0].title}</div>
+                    {guides[0].desc && <div class="heroDesc">{guides[0].desc}</div>}
+                    {guides[0].date && <div class="heroMeta">{guides[0].date}</div>}
+                  </div>
+                </a>
+              )}
+
+              {/* ── List rows: remaining guides ── */}
+              {guides.length > 1 && (
+                <ul class="diyList">
+                  {guides.slice(1).map((item) => (
+                    <li class="diyCard">
+                      <a class="cardLink" href={item.href} aria-label={`Read: ${item.title}`}>
+                        <div class="cardThumbWrap">
+                          <img class="cardThumb" src={item.img} alt=""
+                            loading="lazy" decoding="async"
+                            onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+                        </div>
+                        <div class="cardBody">
+                          <div class="cardKicker">
+                            <span class="kTopicPill">DIY — {topicLabel}</span>
+                          </div>
+                          <div class="cardTitle">{item.title}</div>
+                          {item.date && <div class="cardDate">{item.date}</div>}
+                          {item.desc && <div class="cardDesc">{item.desc}</div>}
+                        </div>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
+          )}
+
+          <div class="backLink">
+            <a href={`/${city}/diy/`}>← All DIY guides</a>
+          </div>
+
+        </div>{/* /.dtMain */}
+
+        <ArticleSidebar city={city} />
+
+      </div>{/* /.dtLayout */}
+
+    </div>{/* /.dtWrap */}
   </section>
 </Base>
 
@@ -197,22 +210,36 @@ const guides = [...diyItems, ...postItems]
   .dtWrap { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
   @media (max-width: 600px) { .dtWrap { padding: 0 1rem; } }
 
-  .landingKicker {
-    display: flex; align-items: center;
+  /* ── Page header (above grid) ── */
+  .stHeader { margin-bottom: 28px; }
+
+  .stBreadcrumb {
+    display: flex; align-items: center; gap: 6px;
     font-size: 0.8rem; font-weight: 900; letter-spacing: .12em;
     text-transform: uppercase; margin-bottom: 10px;
   }
-  .kLink  { color: var(--brand1); text-decoration: none; transition: opacity 130ms; }
-  .kLink:hover { opacity: .72; }
-  .kSep   { color: var(--faint); opacity: .55; margin: 0 5px; font-weight: 700; letter-spacing: 0; }
-  .kTopic { color: var(--text); }
+  .stBreadLink {
+    color: var(--brand1); text-decoration: none; transition: opacity 130ms;
+  }
+  .stBreadLink:hover { opacity: .72; }
+  .stBreadSep { color: var(--faint); opacity: .55; font-weight: 700; letter-spacing: 0; }
+  .stBreadCurrent { color: var(--text); }
 
-  .landingTitle {
+  .stTitle {
     font-size: clamp(32px, 5vw, 52px); font-weight: 900;
     line-height: 1.02; letter-spacing: -0.02em;
     margin: 0 0 4px;
   }
-  .landingCount { font-size: 13px; opacity: .55; margin: 0 0 24px; }
+  .stMeta { font-size: 13px; opacity: .55; margin: 0; }
+
+  /* ── Two-column layout ── */
+  .dtLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(380px, 3fr);
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 1150px) { .dtLayout { grid-template-columns: 1fr; gap: 40px; } }
 
   /* ── Coming Soon ── */
   .comingSoon {
@@ -232,7 +259,7 @@ const guides = [...diyItems, ...postItems]
   }
   .csBtn:hover { opacity: .85; }
 
-  /* ── Hero card (first guide) — matches [city]/[topic]/[subtopic].astro exactly ── */
+  /* ── Hero card (first guide) ── */
   :root {
     --card-radius: 18px;
     --card-border: rgba(255,255,255,.10);
@@ -267,7 +294,7 @@ const guides = [...diyItems, ...postItems]
   .heroDesc { margin-top: 10px; opacity: .86; line-height: 1.5; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .heroMeta { margin-top: 12px; opacity: .62; font-size: 12.5px; }
 
-  /* ── List rows (guides after first) — matches subtopic page .stRow ── */
+  /* ── List rows (guides after first) ── */
   .diyList { list-style: none; padding: 0; margin: 0; display: grid; gap: 12px; }
   .diyCard {
     border-radius: var(--card-radius); border: 1px solid var(--card-border);
