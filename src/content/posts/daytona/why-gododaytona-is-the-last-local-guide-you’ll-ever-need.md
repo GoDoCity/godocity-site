@@ -9,7 +9,7 @@ tags:
   - '#GoDoDaytona #LocalNews #DaytonaBeach #CommunityConnections #Hyperlocal'
 description: Tired of missing out on the best local events or hearing about a new restaurant three months too late? GoDoDaytona is changing the way we stay connected to the World’s Most Famous Beach.
 thumbnail: ''
-heroImage: /images/GoDo blueprint.png
+heroImage: /images/GoDo Blueprint H.png
 city: daytona
 featured: false
 ---
