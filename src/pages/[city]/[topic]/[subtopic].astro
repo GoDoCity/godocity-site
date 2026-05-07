@@ -27,10 +27,12 @@ function isFeatured(post) {
 }
 const FALLBACK_IMG = "/images/gododaytona-bg.png";
 function heroImage(post) {
-  return String(post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "").trim() || FALLBACK_IMG;
+  const v = post?.data?.heroImage || post?.data?.heroimage || post?.data?.thumbnail || post?.data?.image || "";
+  return String(v).trim() || FALLBACK_IMG;
 }
 function thumbImage(post) {
-  return String(post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "").trim() || FALLBACK_IMG;
+  const v = post?.data?.thumbnail || post?.data?.heroImage || post?.data?.heroimage || post?.data?.image || "";
+  return String(v).trim() || FALLBACK_IMG;
 }
 function dateText(post) {
   const d = getPostDate(post);
