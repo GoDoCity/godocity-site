@@ -8,9 +8,8 @@
 import Base from "../../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 
-const DIY_TOPICS = ["clean", "paint", "repair", "decorate", "craft", "recipe", "build"] as const;
-
 export async function getStaticPaths() {
+  const DIY_TOPICS = ["clean", "paint", "repair", "decorate", "craft", "recipe", "build"];
   const diyEntries  = await getCollection("diy");
   const allPosts    = await getCollection("posts");
 
