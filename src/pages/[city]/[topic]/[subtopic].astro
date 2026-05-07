@@ -4,12 +4,15 @@ import { getCollection } from "astro:content";
 import ArticleSidebar from "../../../components/ArticleSidebar.astro";
 import { getDisplayName } from "../../../lib/cityConfigs.js";
 
-/* ── Tag / string helpers (same as [topic]/index.astro) ── */
+/* ── String helpers ── */
 function tagKey(raw) {
   return String(raw ?? "").toLowerCase().trim()
     .replace(/\s*&\s*/g, " ")
     .replace(/[-_]+/g, " ")
     .replace(/\s+/g, " ").trim();
+}
+function tagSlug(key) {
+  return String(key ?? "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 function tagLabel(key) {
   return key.split(" ").filter(Boolean).map(w => w[0].toUpperCase() + w.slice(1)).join(" ");
@@ -22,9 +25,7 @@ function isFeatured(post) {
   if (v === true || v === 1) return true;
   return ["true", "yes", "1"].includes(String(v ?? "").toLowerCase().trim());
 }
-/* Fallback shown when an article has no image or a broken image URL */
 const FALLBACK_IMG = "/images/gododaytona-bg.png";
-
 function heroImage(post) {
   return String(post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "").trim() || FALLBACK_IMG;
 }
@@ -37,94 +38,111 @@ function dateText(post) {
 }
 function excerpt(post) { return post?.data?.description ?? ""; }
 
-/* ── DIY sub-categories ── */
-const DIY_SUBS = ["clean", "paint", "repair", "decorate", "recipe", "craft"];
-
+/* ─────────────────────────────────────────────────────────────────────────
+   getStaticPaths
+   Generates one page per unique (city, topicSlug, subtopicSlug) found in
+   the posts collection.  DIY subtopics (/city/diy/paint/) are excluded —
+   those are handled by [city]/diy/[topic]/index.astro.
+   Case-normalised via tagKey so "Festivals" and "festivals" merge to one path.
+───────────────────────────────────────────────────────────────────────── */
 export async function getStaticPaths() {
-  const all = await getCollection("posts");
-  const cities = new Set();
-  for (const post of all) {
+  const _tagKey  = (raw) => String(raw ?? "").toLowerCase().trim().replace(/\s*&\s*/g, " ").replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
+  const _tagSlug = (key) => String(key ?? "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  const allPosts = await getCollection("posts");
+
+  const paths = new Map<string, { city: string; topic: string; subtopic: string }>();
+
+  for (const post of allPosts) {
     const city = (post.data.city ?? post.id?.split("/")[0] ?? "").toLowerCase().trim();
-    if (city) cities.add(city);
+    if (!city) continue;
+
+    const cat = typeof post.data.category === "string" ? post.data.category.trim() : "";
+    const sub = typeof post.data.subtopic === "string" ? post.data.subtopic.trim() : "";
+    if (!cat || !sub) continue;
+
+    const topicSlug    = _tagSlug(_tagKey(cat));
+    const subtopicSlug = _tagSlug(_tagKey(sub));
+    if (!topicSlug || !subtopicSlug) continue;
+
+    /* DIY subtopics have their own route: [city]/diy/[topic]/index.astro */
+    if (topicSlug === "diy") continue;
+
+    const key = `${city}|||${topicSlug}|||${subtopicSlug}`;
+    if (!paths.has(key)) paths.set(key, { city, topic: topicSlug, subtopic: subtopicSlug });
   }
-  /* Always generate all 6 DIY sub-pages for every city that has posts */
-  const paths = [];
-  for (const city of cities) {
-    for (const subtopic of ["clean", "paint", "repair", "decorate", "recipe", "craft"]) {
-      paths.push({ params: { city, topic: "diy", subtopic } });
-    }
-  }
-  return paths;
+
+  return Array.from(paths.values()).map(({ city, topic, subtopic }) => ({
+    params: { city, topic, subtopic },
+  }));
 }
 
 /* ── Page data ── */
-const { city, subtopic } = Astro.params;
-const subtopicKey   = tagKey(subtopic);
-const subtopicLabel = tagLabel(subtopicKey);
-const cityCap       = getDisplayName(city);
+const { city, topic, subtopic } = Astro.params;
 
-const all = await getCollection("posts");
-const posts = all
+const topicKey     = tagKey(topic);
+const subtopicKey  = tagKey(subtopic);
+const topicLabel   = tagLabel(topicKey);
+const subtopicLabel = tagLabel(subtopicKey);
+const cityCap      = getDisplayName(city);
+
+/* Filter posts: city + category === topic + subtopic === subtopic (case-insensitive) */
+const allPosts = await getCollection("posts");
+const posts = allPosts
   .filter(post => {
     const postCity = (post.data.city ?? post.id?.split("/")[0] ?? "").toLowerCase().trim();
     return postCity === city;
   })
   .filter(post => {
-    /* Post must belong to the "diy" topic AND match the subtopic */
-    const tags = Array.isArray(post.data.tags) ? post.data.tags.map(tagKey) : [];
-    const cat  = tagKey(post.data.category ?? "");
-    const sub  = tagKey(post.data.subtopic ?? "");
-    const inDiy = tags.includes("diy") || cat === "diy";
-    if (!inDiy) return false;
-    return tags.includes(subtopicKey) || sub === subtopicKey;
+    const cat = tagKey(post.data.category ?? "");
+    const sub = tagKey(post.data.subtopic ?? "");
+    return cat === topicKey && sub === subtopicKey;
   })
   .sort((a, b) => new Date(getPostDate(b) ?? 0).getTime() - new Date(getPostDate(a) ?? 0).getTime());
 
 const hero = posts.find(isFeatured) ?? posts[0] ?? null;
 const rest = hero ? posts.filter(p => p.slug !== hero.slug) : posts;
 
-
-const DIY_PILL_LIST = [
-  { label: "Clean",    href: `/${city}/diy/clean/` },
-  { label: "Paint",    href: `/${city}/diy/paint/` },
-  { label: "Repair",   href: `/${city}/diy/repair/` },
-  { label: "Decorate", href: `/${city}/diy/decorate/` },
-  { label: "Recipe",   href: `/${city}/diy/recipe/` },
-  { label: "Craft",    href: `/${city}/diy/craft/` },
-];
+/* Helper: pick the right article URL for the city */
+function articleHref(post) {
+  const pCity = (post.data.city ?? post.id?.split("/")[0] ?? "").toLowerCase().trim();
+  const slug  = post.slug.split("/").pop();
+  if (pCity === "daytona") return `/daytona/posts/${slug}/`;
+  return `/${pCity}/${slug}/`;
+}
 ---
 
-<Base title={`${subtopicLabel} | DIY | GoDo${cityCap}`} cityBase={city}>
-  <section class="section">
-    <div class="container" style="max-width: 1280px;">
+<Base title={`${subtopicLabel} | ${topicLabel} | GoDo${cityCap}`} cityBase={city}>
+  <section class="stSection">
+    <div class="stWrap">
 
-      <div class="topicHeader">
-        <div class="diyBreadcrumb">
-          <a class="breadLink" href={`/${city}/diy/`}>Master Your Home</a>
-          <span class="breadSep">›</span>
-          <span class="breadCurrent">{subtopicLabel}</span>
+      <div class="stHeader">
+        <div class="stBreadcrumb">
+          <a class="stBreadLink" href={`/${city}/${topic}/`}>{topicLabel}</a>
+          <span class="stBreadSep" aria-hidden="true">›</span>
+          <span class="stBreadCurrent">{subtopicLabel}</span>
         </div>
-        <h1 class="topicTitle">{subtopicLabel}</h1>
-        <div class="diyPills">
-          {DIY_PILL_LIST.map(({ label, href }) => (
-            <a class={`diyPill${tagKey(label) === subtopicKey ? " diyPill--active" : ""}`} href={href}>{label}</a>
-          ))}
-        </div>
-        <div class="topicMeta">{posts.length} post{posts.length === 1 ? "" : "s"}</div>
+        <h1 class="stTitle">{subtopicLabel}</h1>
+        <p class="stMeta">
+          {posts.length > 0
+            ? `${posts.length} article${posts.length === 1 ? "" : "s"}`
+            : ""}
+        </p>
       </div>
 
-      <div class="topicLayout">
-        <div class="topicMain">
+      <div class="stLayout">
+        <div class="stMain">
 
+          {/* ── Hero card ── */}
           {hero && (
-            <a class="heroCard" href={`/${city}/posts/${hero.slug.split("/").pop()}/`}>
+            <a class="heroCard" href={articleHref(hero)}>
               <div class="heroMedia">
                 <img class="heroImg" src={heroImage(hero)} alt={hero.data.title ?? ""}
                   loading="lazy" decoding="async"
                   onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
               </div>
               <div class="heroBody">
-                <div class="heroKicker">DIY — {subtopicLabel}</div>
+                <div class="heroKicker">{topicLabel} — {subtopicLabel}</div>
                 <div class="heroTitle">{hero.data.title}</div>
                 {excerpt(hero) && <div class="heroDesc">{excerpt(hero)}</div>}
                 <div class="heroMeta">{dateText(hero)}</div>
@@ -132,20 +150,21 @@ const DIY_PILL_LIST = [
             </a>
           )}
 
+          {/* ── Article list ── */}
           {rest.length > 0 && (
-            <div class="list" id="articleList">
+            <div class="stList" id="stList">
               {rest.map((p, idx) => (
-                <div class={`row${idx >= 9 ? " rowHidden" : ""}`}>
-                  <a class="rowCardLink" href={`/${city}/posts/${p.slug.split("/").pop()}/`} aria-label={p.data.title ?? p.slug}></a>
-                  <div class="rowThumbWrap">
-                    <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""}
+                <div class={`stRow${idx >= 9 ? " stRowHidden" : ""}`}>
+                  <a class="stRowLink" href={articleHref(p)} aria-label={p.data.title ?? p.slug}></a>
+                  <div class="stThumbWrap">
+                    <img class="stThumb" src={thumbImage(p)} alt={p.data.title ?? ""}
                       loading="lazy" decoding="async"
                       onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
                   </div>
-                  <div class="rowText">
-                    <div class="rowTitle">{p.data.title ?? p.slug}</div>
-                    {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
-                    <div class="rowMeta">{dateText(p)}</div>
+                  <div class="stText">
+                    <div class="stRowTitle">{p.data.title ?? p.slug}</div>
+                    {excerpt(p) && <div class="stRowDesc">{excerpt(p)}</div>}
+                    <div class="stRowMeta">{dateText(p)}</div>
                   </div>
                 </div>
               ))}
@@ -153,18 +172,27 @@ const DIY_PILL_LIST = [
           )}
 
           {rest.length > 9 && (
-            <button class="loadMoreBtn" id="loadMoreBtn" type="button">
-              Load {rest.length - 9} more {rest.length - 9 === 1 ? "post" : "posts"}
+            <button class="stLoadMore" id="stLoadMore" type="button">
+              Load {rest.length - 9} more {rest.length - 9 === 1 ? "article" : "articles"}
             </button>
           )}
 
+          {/* ── Coming Soon empty state ── */}
           {posts.length === 0 && (
-            <p class="emptyMsg">No {subtopicLabel.toLowerCase()} posts yet — check back soon.</p>
+            <div class="comingSoon">
+              <div class="csIcon" aria-hidden="true">🚧</div>
+              <h2 class="csTitle">Coming Soon</h2>
+              <p class="csText">
+                We're building out our <strong>{subtopicLabel}</strong> coverage.
+                Check back soon — or explore all <strong>{topicLabel}</strong> stories now.
+              </p>
+              <a class="csBtn" href={`/${city}/${topic}/`}>← All {topicLabel} stories</a>
+            </div>
           )}
 
-          <p class="topicLinks">
-            <a class="pill" href={`/${city}/diy/`}>← All DIY</a>
-            <a class="pill" href={`/${city}/topics/`}>All topics</a>
+          <p class="stFootLinks">
+            <a class="stPill" href={`/${city}/${topic}/`}>← All {topicLabel}</a>
+            <a class="stPill" href={`/${city}/topics/`}>All topics</a>
           </p>
 
         </div>
@@ -188,69 +216,51 @@ const DIY_PILL_LIST = [
     --ease: 160ms ease;
   }
 
-  .topicHeader { margin-bottom: 18px; }
+  .stSection { padding: 24px 0 64px; }
+  .stWrap { max-width: 1280px; margin: 0 auto; padding: 0 2rem; }
+  @media (max-width: 600px) { .stWrap { padding: 0 1rem; } }
 
-  .diyBreadcrumb {
+  .stHeader { margin-bottom: 20px; }
+  .stBreadcrumb {
     display: flex; align-items: center; gap: 6px;
-    font-size: 13px; color: var(--muted); margin-bottom: 6px;
+    font-size: 0.8rem; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; margin-bottom: 8px;
   }
-  .breadLink { color: var(--brand1); text-decoration: none; font-weight: 700; }
-  .breadLink:hover { text-decoration: underline; }
-  .breadSep { opacity: .5; }
-  .breadCurrent { font-weight: 600; }
+  .stBreadLink { color: var(--brand1); text-decoration: none; transition: opacity 130ms; }
+  .stBreadLink:hover { opacity: .72; }
+  .stBreadSep { opacity: .4; font-weight: 400; }
+  .stBreadCurrent { color: var(--text); font-weight: 700; }
 
-  .topicTitle {
-    margin: 4px 0 10px;
-    font-size: clamp(36px, 5vw, 56px);
-    line-height: 1.02;
-    letter-spacing: -0.02em;
+  .stTitle {
+    margin: 0 0 6px;
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 900; line-height: 1.02; letter-spacing: -0.02em;
   }
-  .topicMeta { opacity: .72; font-size: 14px; margin-top: 6px; }
+  .stMeta { opacity: .62; font-size: 14px; margin: 0; }
 
-  .diyPills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; }
-  .diyPill {
-    font-size: 12px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
-    padding: 4px 14px; border-radius: 999px; text-decoration: none;
-    background: rgba(0,119,190,.08); color: var(--brand1);
-    border: 1px solid rgba(0,119,190,.25);
-    transition: background 140ms, border-color 140ms;
-  }
-  .diyPill:hover { background: rgba(0,119,190,.18); border-color: rgba(0,119,190,.50); }
-  .diyPill--active {
-    background: rgba(0,119,190,.22); border-color: rgba(0,119,190,.55);
-    color: var(--brand1); font-weight: 900;
-  }
-
-  .topicLayout {
+  .stLayout {
     display: grid;
     grid-template-columns: minmax(0, 7fr) minmax(380px, 3fr);
     gap: 56px;
     align-items: start;
   }
-  .topicMain { min-width: 0; }
-  @media (max-width: 1150px) {
-    .topicLayout { grid-template-columns: 1fr; }
-  }
+  .stMain { min-width: 0; }
+  @media (max-width: 1150px) { .stLayout { grid-template-columns: 1fr; gap: 40px; } }
 
-  .heroCard, .row, .moduleCard {
-    border-radius: var(--card-radius);
-    border: 1px solid var(--card-border);
+  /* ── Hero card ── */
+  .heroCard {
+    display: grid; grid-template-columns: 1.2fr 1fr;
+    gap: 0; overflow: hidden; text-decoration: none; margin: 0 0 18px;
+    border-radius: var(--card-radius); border: 1px solid var(--card-border);
     background: var(--card-bg);
     transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease);
-    will-change: transform;
   }
-  .heroCard:hover, .row:hover {
-    transform: var(--lift);
-    background: var(--card-bg-hover);
+  @media (max-width: 880px) { .heroCard { grid-template-columns: 1fr; } }
+  .heroCard:hover {
+    transform: var(--lift); background: var(--card-bg-hover);
     border-color: var(--card-border-hover);
     box-shadow: 0 0 0 1px rgba(0,119,190,.08), var(--shadow-soft);
   }
-
-  .heroCard {
-    display: grid; grid-template-columns: 1.2fr 1fr;
-    gap: 0; overflow: hidden; text-decoration: none; margin: 6px 0 18px;
-  }
-  @media (max-width: 880px) { .heroCard { grid-template-columns: 1fr; } }
   .heroMedia { position: relative; overflow: hidden; background: rgba(255,255,255,.02); }
   .heroImg { width: 100%; height: 100%; display: block; aspect-ratio: 4/3; object-fit: cover; }
   .heroBody { padding: 18px; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
@@ -258,46 +268,77 @@ const DIY_PILL_LIST = [
     font-size: 12px; font-weight: 900; letter-spacing: .10em;
     opacity: .78; text-transform: uppercase; margin-bottom: 10px; color: var(--brand1);
   }
-  .heroTitle { font-weight: 950; font-size: clamp(22px, 2.2vw, 30px); line-height: 1.10; letter-spacing: -0.015em; }
-  .heroDesc { margin-top: 10px; opacity: .86; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .heroTitle { font-weight: 950; font-size: clamp(20px, 2vw, 28px); line-height: 1.10; letter-spacing: -0.015em; }
+  .heroDesc { margin-top: 10px; opacity: .86; line-height: 1.5; font-size: 14px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .heroMeta { margin-top: 12px; opacity: .62; font-size: 12.5px; }
 
-  .list { display: grid; gap: 12px; margin-top: 6px; }
-  .row {
+  /* ── Article list ── */
+  .stList { display: grid; gap: 12px; margin-top: 6px; }
+  .stRow {
     position: relative; display: grid; grid-template-columns: 1fr 2fr;
     gap: 14px; align-items: center; padding: 14px; cursor: pointer;
+    border-radius: var(--card-radius); border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    transition: transform var(--ease), background var(--ease), border-color var(--ease), box-shadow var(--ease);
   }
-  .rowCardLink { position: absolute; inset: 0; z-index: 0; border-radius: var(--card-radius); text-decoration: none; }
-  .rowText { min-width: 0; }
-  .rowTitle { font-weight: 900; font-size: 17px; line-height: 1.18; letter-spacing: -0.01em; }
-  .rowDesc { margin-top: 7px; opacity: .84; font-size: 14px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-  .rowMeta { margin-top: 9px; opacity: .58; font-size: 12.5px; }
-  .rowThumbWrap { aspect-ratio: 4/3; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.02); }
-  .rowThumbWrap.isEmpty { opacity: .25; }
-  .rowThumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .stRow:hover {
+    transform: var(--lift); background: var(--card-bg-hover);
+    border-color: var(--card-border-hover);
+    box-shadow: 0 0 0 1px rgba(0,119,190,.08), var(--shadow-soft);
+  }
+  .stRowLink { position: absolute; inset: 0; z-index: 0; border-radius: var(--card-radius); text-decoration: none; }
+  .stText { min-width: 0; }
+  .stRowTitle { font-weight: 900; font-size: 17px; line-height: 1.18; letter-spacing: -0.01em; }
+  .stRowDesc { margin-top: 7px; opacity: .84; font-size: 14px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .stRowMeta { margin-top: 9px; opacity: .58; font-size: 12.5px; }
+  .stThumbWrap { aspect-ratio: 4/3; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.02); }
+  .stThumb { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-  .rowHidden { display: none; }
-  .loadMoreBtn {
+  .stRowHidden { display: none; }
+  .stLoadMore {
     display: block; width: 100%; margin-top: 14px; padding: 14px;
     border-radius: var(--card-radius); border: 1px solid rgba(255,255,255,.12);
     background: rgba(255,255,255,.04); color: inherit;
     font-weight: 800; font-size: 14px; cursor: pointer;
     transition: background var(--ease), border-color var(--ease);
   }
-  .loadMoreBtn:hover { background: rgba(255,255,255,.07); border-color: rgba(0,119,190,.30); }
+  .stLoadMore:hover { background: rgba(255,255,255,.07); border-color: rgba(0,119,190,.30); }
 
-  .emptyMsg { opacity: .6; font-size: 15px; padding: 24px 0; }
-  .topicLinks { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+  /* ── Coming Soon empty state ── */
+  .comingSoon {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 64px 32px; gap: 16px;
+    border-radius: var(--card-radius); border: 1px solid var(--card-border);
+    background: var(--card-bg);
+  }
+  .csIcon { font-size: 48px; line-height: 1; }
+  .csTitle { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -0.02em; }
+  .csText { margin: 0; opacity: .78; font-size: 16px; line-height: 1.6; max-width: 440px; }
+  .csBtn {
+    display: inline-block; padding: 12px 24px; border-radius: 999px;
+    background: var(--brand1); color: #000;
+    font-size: 13px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+    text-decoration: none; transition: opacity 130ms;
+    margin-top: 8px;
+  }
+  .csBtn:hover { opacity: .85; }
 
+  /* ── Footer links ── */
+  .stFootLinks { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .stPill {
+    font-size: 13px; font-weight: 700; color: var(--brand1);
+    text-decoration: none; transition: opacity 130ms;
+  }
+  .stPill:hover { opacity: .75; text-decoration: underline; }
 </style>
 
 <script is:inline>
 (function () {
-  var btn = document.getElementById("loadMoreBtn");
+  var btn = document.getElementById("stLoadMore");
   if (btn) {
     btn.addEventListener("click", function () {
-      document.querySelectorAll(".rowHidden").forEach(function (el) {
-        el.classList.remove("rowHidden");
+      document.querySelectorAll(".stRowHidden").forEach(function (el) {
+        el.classList.remove("stRowHidden");
       });
       btn.style.display = "none";
     });

@@ -53,7 +53,70 @@ collections:
           - {label: "Sports", value: "Sports"}
           - {label: "Travel & Outdoors", value: "Travel & Outdoors"}
           - {label: "Wellness", value: "Wellness"}
-      - {label: "Subtopic", name: "subtopic", widget: "string", required: false, hint: "Short kicker label shown above the headline (e.g. 'Bars', 'Small Business', 'Development')."}
+      - label: "Subtopic"
+        name: "subtopic"
+        widget: "select"
+        required: false
+        hint: "Sub-category — links to the topic's subtopic archive page."
+        options:
+          - {label: "Landmarks",     value: "Landmarks"}
+          - {label: "Pioneers",      value: "Pioneers"}
+          - {label: "Racing History", value: "Racing History"}
+          - {label: "Archives",      value: "Archives"}
+          - {label: "Architecture",  value: "Architecture"}
+          - {label: "Dining",        value: "Dining"}
+          - {label: "Bars",          value: "Bars"}
+          - {label: "Coffee",        value: "Coffee"}
+          - {label: "Fine Dining",   value: "Fine Dining"}
+          - {label: "Casual",        value: "Casual"}
+          - {label: "Breakfast",     value: "Breakfast"}
+          - {label: "Fitness",       value: "Fitness"}
+          - {label: "Health",        value: "Health"}
+          - {label: "Spa",           value: "Spa"}
+          - {label: "Mindfulness",   value: "Mindfulness"}
+          - {label: "Yoga",          value: "Yoga"}
+          - {label: "Nutrition",     value: "Nutrition"}
+          - {label: "Clean",         value: "Clean"}
+          - {label: "Paint",         value: "Paint"}
+          - {label: "Repair",        value: "Repair"}
+          - {label: "Decorate",      value: "Decorate"}
+          - {label: "Build",         value: "Build"}
+          - {label: "Craft",         value: "Craft"}
+          - {label: "Recipe",        value: "Recipe"}
+          - {label: "Shopping",      value: "Shopping"}
+          - {label: "Family",        value: "Family"}
+          - {label: "Holiday",       value: "Holiday"}
+          - {label: "Weekend",       value: "Weekend"}
+          - {label: "Hidden Gems",   value: "Hidden Gems"}
+          - {label: "Outdoors",      value: "Outdoors"}
+          - {label: "Festivals",     value: "Festivals"}
+          - {label: "Arts",          value: "Arts"}
+          - {label: "Nightlife",     value: "Nightlife"}
+          - {label: "Music",         value: "Music"}
+          - {label: "Theatre",       value: "Theatre"}
+          - {label: "Development",   value: "Development"}
+          - {label: "Openings",      value: "Openings"}
+          - {label: "Tech",          value: "Tech"}
+          - {label: "Small Business", value: "Small Business"}
+          - {label: "Economy",       value: "Economy"}
+          - {label: "Government",    value: "Government"}
+          - {label: "Transport",     value: "Transport"}
+          - {label: "Schools",       value: "Schools"}
+          - {label: "Safety",        value: "Safety"}
+          - {label: "Environment",   value: "Environment"}
+          - {label: "Racing",        value: "Racing"}
+          - {label: "High School",   value: "High School"}
+          - {label: "Watersports",   value: "Watersports"}
+          - {label: "Golf",          value: "Golf"}
+          - {label: "Market News",   value: "Market News"}
+          - {label: "Luxury",        value: "Luxury"}
+          - {label: "Neighborhoods", value: "Neighborhoods"}
+          - {label: "Rentals",       value: "Rentals"}
+          - {label: "Staycations",   value: "Staycations"}
+          - {label: "Day Trips",     value: "Day Trips"}
+          - {label: "Beach Life",    value: "Beach Life"}
+          - {label: "Boating",       value: "Boating"}
+          - {label: "Wildlife",      value: "Wildlife"}
       - label: "Sponsorship Tier"
         name: "sponsorTier"
         widget: "select"
