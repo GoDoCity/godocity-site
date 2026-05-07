@@ -46,6 +46,9 @@ function excerpt(post) { return post?.data?.description ?? ""; }
    Case-normalised via tagKey so "Festivals" and "festivals" merge to one path.
 ───────────────────────────────────────────────────────────────────────── */
 export async function getStaticPaths() {
+  const _tagKey  = (raw) => String(raw ?? "").toLowerCase().trim().replace(/\s*&\s*/g, " ").replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
+  const _tagSlug = (key) => String(key ?? "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
   const allPosts = await getCollection("posts");
 
   const paths = new Map<string, { city: string; topic: string; subtopic: string }>();
@@ -58,8 +61,8 @@ export async function getStaticPaths() {
     const sub = typeof post.data.subtopic === "string" ? post.data.subtopic.trim() : "";
     if (!cat || !sub) continue;
 
-    const topicSlug    = tagSlug(tagKey(cat));
-    const subtopicSlug = tagSlug(tagKey(sub));
+    const topicSlug    = _tagSlug(_tagKey(cat));
+    const subtopicSlug = _tagSlug(_tagKey(sub));
     if (!topicSlug || !subtopicSlug) continue;
 
     /* DIY subtopics have their own route: [city]/diy/[topic]/index.astro */
