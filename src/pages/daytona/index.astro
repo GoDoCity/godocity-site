@@ -2,6 +2,7 @@
 import Base from "../../layouts/Base.astro";
 import InteractiveMap from "../../components/InteractiveMap.astro";
 import NewsletterBanner from "../../components/NewsletterBanner.astro";
+import AdSlot from "../../components/AdSlot.astro";
 import { getCollection } from "astro:content";
 import { getGreaterDaytonaEvents, cityDisplayName } from "../../lib/events.js";
 import { getCityConfig } from "../../lib/cityConfigs.js";
@@ -309,27 +310,30 @@ const guideCards = guideHero
                 <a class="latestMore" href="/daytona/posts/">View all →</a>
               </div>
 
-              {listFeed.map((p) => {
+              {listFeed.map((p, idx) => {
                 const { catLabel, sub } = kickerParts(p);
                 const kickerLabel = catLabel || primaryTag(p).toUpperCase();
                 return (
-                  <a class="latestRow" href={`/daytona/posts/${p.slug.split('/').pop()}/`}>
-                    <div class="latestThumbWrap">
-                      {thumbImage(p)
-                        ? <img class="latestThumb" src={thumbImage(p)} alt="" loading="lazy" decoding="async" />
-                        : <div class="latestThumb latestThumbFallback" aria-hidden="true" />
-                      }
-                    </div>
-                    <div class="latestText">
-                      {kickerLabel && (
-                        <div class="latestKicker">
-                          {kickerLabel}{sub ? ` — ${sub}` : ""}
-                        </div>
-                      )}
-                      <div class="latestTitle">{p.data.title ?? p.slug}</div>
-                      <div class="latestByline">{byline(p)}</div>
-                    </div>
-                  </a>
+                  <>
+                    <a class="latestRow" href={`/daytona/posts/${p.slug.split('/').pop()}/`}>
+                      <div class="latestThumbWrap">
+                        {thumbImage(p)
+                          ? <img class="latestThumb" src={thumbImage(p)} alt="" loading="lazy" decoding="async" />
+                          : <div class="latestThumb latestThumbFallback" aria-hidden="true" />
+                        }
+                      </div>
+                      <div class="latestText">
+                        {kickerLabel && (
+                          <div class="latestKicker">
+                            {kickerLabel}{sub ? ` — ${sub}` : ""}
+                          </div>
+                        )}
+                        <div class="latestTitle">{p.data.title ?? p.slug}</div>
+                        <div class="latestByline">{byline(p)}</div>
+                      </div>
+                    </a>
+                    {(idx + 1) % 4 === 0 && <AdSlot type="in-feed" city="daytona" />}
+                  </>
                 );
               })}
             </section>

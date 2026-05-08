@@ -1,0 +1,268 @@
+---
+/**
+ * src/components/AdSlot.astro
+ * Dynamic ad slot — fetches active ads from the `ads` content collection.
+ * Falls back silently when no matching active ad exists (zero render).
+ *
+ * Usage:
+ *   <AdSlot type="sidebar" city="daytona" />
+ *   <AdSlot type="in-feed" city={city} />
+ *   <AdSlot type="banner" />
+ *
+ * UTM params are appended automatically to every destination URL.
+ */
+import { getCollection } from "astro:content";
+
+interface Props {
+  type: "sidebar" | "in-feed" | "banner";
+  city?: string;
+}
+
+const { type, city = "all" } = Astro.props;
+
+let ad: any = null;
+try {
+  const allAds = await getCollection("ads");
+  const eligible = allAds.filter((a: any) => {
+    if (!a.data.active) return false;
+    if (a.data.type !== type) return false;
+    const adCity = (a.data.city ?? "all").toLowerCase();
+    const reqCity = city.toLowerCase();
+    // "all" ads run everywhere; city-targeted ads only in their market
+    if (adCity !== "all" && reqCity !== "all" && adCity !== reqCity) return false;
+    return true;
+  });
+  if (eligible.length > 0) ad = eligible[0];
+} catch {
+  // ads collection not yet populated — render nothing
+}
+
+// Build UTM-tagged destination URL
+let dest = "#";
+if (ad) {
+  const slug = ad.data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const sep  = ad.data.link.includes("?") ? "&" : "?";
+  dest = `${ad.data.link}${sep}utm_source=godocity&utm_medium=native_ad&utm_campaign=${slug}`;
+}
+
+const imgSrc  = ad?.data?.image  || "/images/gododaytona-bg.png";
+const altText = ad?.data?.altText || ad?.data?.title || "Sponsored advertisement";
+---
+
+{/* ── SIDEBAR ── */}
+{ad && type === "sidebar" && (
+  <div class="adSidebar">
+    <div class="adLabel">SPONSORED</div>
+    <a class="adSidebarCard" href={dest} target="_blank" rel="noopener noreferrer sponsored">
+      <div class="adSidebarImgWrap">
+        <img class="adSidebarImg" src={imgSrc} alt={altText}
+          loading="lazy" decoding="async"
+          onerror={`this.src='/images/gododaytona-bg.png';this.onerror=null;`} />
+      </div>
+      {ad.data.tagline && <div class="adSidebarTagline">{ad.data.tagline}</div>}
+      <div class="adSidebarCta">Learn More →</div>
+    </a>
+    <div class="adDisclosure">
+      <a href="/daytona/advertise/#ad-policy" rel="nofollow">Advertiser Disclosure</a>
+    </div>
+  </div>
+)}
+
+{/* ── IN-FEED ── */}
+{ad && type === "in-feed" && (
+  <a class="adInFeed" href={dest} target="_blank" rel="noopener noreferrer sponsored"
+     aria-label={`Sponsored: ${ad.data.title}`}>
+    <div class="adInFeedThumb">
+      <img src={imgSrc} alt={altText} loading="lazy" decoding="async"
+        onerror={`this.src='/images/gododaytona-bg.png';this.onerror=null;`} />
+    </div>
+    <div class="adInFeedBody">
+      <div class="adInFeedKicker">
+        <span class="adInFeedPill">SPONSORED</span>
+      </div>
+      <div class="adInFeedTitle">{ad.data.title}</div>
+      {ad.data.tagline && <div class="adInFeedDesc">{ad.data.tagline}</div>}
+      <div class="adInFeedMeta">
+        <a class="adInFeedPolicy" href="/daytona/advertise/#ad-policy" rel="nofollow"
+           onclick="event.stopPropagation()">Ad Policy</a>
+      </div>
+    </div>
+  </a>
+)}
+
+{/* ── BANNER ── */}
+{ad && type === "banner" && (
+  <div class="adBanner">
+    <div class="adLabel">SPONSORED</div>
+    <a class="adBannerCard" href={dest} target="_blank" rel="noopener noreferrer sponsored">
+      <img class="adBannerImg" src={imgSrc} alt={altText} loading="lazy" decoding="async"
+        onerror={`this.src='/images/gododaytona-bg.png';this.onerror=null;`} />
+      {ad.data.tagline && (
+        <div class="adBannerOverlay">
+          <span class="adBannerTagline">{ad.data.tagline}</span>
+        </div>
+      )}
+    </a>
+    <div class="adDisclosure">
+      <a href="/daytona/advertise/#ad-policy" rel="nofollow">Advertiser Disclosure</a>
+    </div>
+  </div>
+)}
+
+<style>
+  /* ── Shared ── */
+  .adLabel {
+    font-size: 9px; font-weight: 800; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--faint, #999);
+    text-align: center; margin-bottom: 5px; opacity: .75;
+  }
+
+  .adDisclosure { text-align: center; margin-top: 5px; }
+  .adDisclosure a {
+    font-size: 10px; color: var(--faint, #999); opacity: .68;
+    text-decoration: underline; text-underline-offset: 2px;
+    transition: opacity 120ms;
+  }
+  .adDisclosure a:hover { opacity: 1; }
+
+  /* ════════════════════════════════════════
+     SIDEBAR
+  ════════════════════════════════════════ */
+  .adSidebar { display: grid; gap: 5px; }
+
+  .adSidebarCard {
+    display: block; text-decoration: none;
+    border-radius: 13px; overflow: hidden;
+    border: 1px solid var(--border, #e5e7eb);
+    background: var(--surface, rgba(255,255,255,.04));
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+  .adSidebarCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,.14);
+  }
+
+  .adSidebarImgWrap {
+    width: 100%; aspect-ratio: 3/2; overflow: hidden;
+    background: var(--surface, #f0f7f0);
+  }
+  .adSidebarImg {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 280ms ease;
+  }
+  .adSidebarCard:hover .adSidebarImg { transform: scale(1.03); }
+
+  .adSidebarTagline {
+    padding: 12px 14px 0;
+    font-size: 14px; font-weight: 700;
+    color: var(--text, #111); line-height: 1.35;
+  }
+
+  .adSidebarCta {
+    margin: 8px 14px 14px;
+    display: inline-flex; align-items: center;
+    height: 30px; padding: 0 13px; border-radius: 999px;
+    background: var(--brand1, #0077be); color: #fff;
+    font-size: 11.5px; font-weight: 800; letter-spacing: .04em;
+  }
+
+  /* ════════════════════════════════════════
+     IN-FEED — matches .row card on topic page + .latestRow on homepage
+     Uses the host page's CSS custom props with safe fallbacks.
+  ════════════════════════════════════════ */
+  .adInFeed {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 14px;
+    align-items: center;
+    padding: 14px;
+    text-decoration: none;
+    color: var(--text, #111);
+    border-radius: var(--card-radius, 14px);
+    border: 1px solid var(--card-border, var(--border, #e5e7eb));
+    background: var(--card-bg, var(--surface, rgba(255,255,255,.04)));
+    transition:
+      transform 160ms ease,
+      background 160ms ease,
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+  .adInFeed:hover {
+    transform: var(--lift, translateY(-2px));
+    background: var(--card-bg-hover, var(--surface2, rgba(255,255,255,.07)));
+    border-color: var(--card-border-hover, var(--brand1, #0077be));
+    box-shadow: 0 0 0 1px rgba(0,119,190,.08), var(--shadow-soft, 0 10px 30px rgba(0,0,0,.14));
+  }
+
+  .adInFeedThumb {
+    aspect-ratio: 4/3;
+    border-radius: 10px; overflow: hidden;
+    background: var(--surface, #f0f0f0);
+    border: 1px solid rgba(0,0,0,.06);
+    flex-shrink: 0;
+  }
+  .adInFeedThumb img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 280ms ease;
+  }
+  .adInFeed:hover .adInFeedThumb img { transform: scale(1.04); }
+
+  .adInFeedBody { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+
+  .adInFeedKicker { margin-bottom: 3px; }
+  .adInFeedPill {
+    display: inline-block;
+    font-size: 9px; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; padding: 2px 7px; border-radius: 999px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 14%, transparent);
+    color: var(--brand1, #0077be);
+    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 40%, transparent);
+  }
+
+  .adInFeedTitle {
+    font-weight: 900; font-size: 16px; line-height: 1.18;
+    letter-spacing: -0.01em; color: var(--text, #111);
+  }
+  .adInFeedDesc {
+    font-size: 13px; line-height: 1.45; opacity: .78;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .adInFeedMeta { margin-top: 5px; }
+  .adInFeedPolicy {
+    font-size: 10px; color: var(--faint, #999); opacity: .65;
+    text-decoration: underline; text-underline-offset: 2px;
+    transition: opacity 120ms;
+  }
+  .adInFeedPolicy:hover { opacity: 1; }
+
+  /* ════════════════════════════════════════
+     BANNER
+  ════════════════════════════════════════ */
+  .adBanner { display: grid; gap: 5px; }
+
+  .adBannerCard {
+    position: relative; display: block; overflow: hidden;
+    text-decoration: none; border-radius: 12px;
+    border: 1px solid var(--border, #e5e7eb);
+    transition: opacity 140ms;
+  }
+  .adBannerCard:hover { opacity: .92; }
+
+  .adBannerImg {
+    width: 100%; height: 120px; object-fit: cover; display: block;
+  }
+
+  .adBannerOverlay {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 8px 14px;
+    background: linear-gradient(transparent, rgba(0,0,0,.62));
+  }
+  .adBannerTagline {
+    font-size: 14px; font-weight: 800; color: #fff;
+  }
+
+  @media (max-width: 560px) {
+    .adInFeed { grid-template-columns: 1fr; }
+  }
+</style>

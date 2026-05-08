@@ -335,3 +335,39 @@ collections:
       - {label: "Role / Title", name: "role", widget: "string", required: false, default: "Journalist", hint: "Displayed on the editorial team section (e.g. Newsletter Editor, Staff Writer)."}
       - {label: "Featured on Homepage", name: "featured", widget: "boolean", required: false, default: false, hint: "Show this journalist in the Editorial Team sidebar."}
       - {label: "Bio", name: "body", widget: "markdown"}
+
+  - name: "ads"
+    label: "Advertisements"
+    label_singular: "Ad"
+    folder: "src/content/ads"
+    create: true
+    delete: true
+    slug: "{{title}}"
+    summary: "{{title}} ({{fields.type}}) — {{fields.city}}"
+    fields:
+      - {label: "Campaign Name (Internal)", name: "title", widget: "string", hint: "Used as the UTM campaign slug. E.g. 'Spring Sale 2026'."}
+      - label: "Ad Type / Placement"
+        name: "type"
+        widget: "select"
+        hint: "Where this ad appears on the site."
+        options:
+          - {label: "Sidebar Ad", value: "sidebar"}
+          - {label: "In-Feed Ad", value: "in-feed"}
+          - {label: "Banner", value: "banner"}
+      - {label: "Active", name: "active", widget: "boolean", default: true, hint: "Toggle ON to run this ad network-wide. Toggle OFF to pause instantly."}
+      - {label: "Ad Image / Creative", name: "image", widget: "image", required: false, media_folder: "/public/images/ads", public_folder: "/images/ads", hint: "Sidebar: 600×400px recommended. In-feed: 800×600px. Banner: 1200×300px."}
+      - {label: "Destination URL", name: "link", widget: "string", hint: "Where the ad clicks through to. UTM params are appended automatically."}
+      - label: "Target City"
+        name: "city"
+        widget: "select"
+        required: false
+        default: "all"
+        hint: "Restrict to a single market, or choose 'All Markets' to run network-wide."
+        options:
+          - {label: "All Markets", value: "all"}
+          - {label: "Daytona Beach", value: "daytona"}
+          - {label: "Orlando", value: "orlando"}
+          - {label: "Tampa", value: "tampa"}
+      - {label: "Tagline (optional)", name: "tagline", widget: "string", required: false, hint: "Short descriptor shown below the image (max ~80 chars)."}
+      - {label: "Alt Text", name: "altText", widget: "string", required: false, hint: "Screen reader description of the ad image."}
+      - {label: "Notes", name: "body", widget: "text", required: false, hint: "Internal notes — flight dates, contact, etc. Not displayed on site."}
