@@ -401,7 +401,7 @@ button { border: none; cursor: pointer; }
    City themes
    ========================= */
 
-.city-daytona { --hero-img: url("/images/gododaytona-bg.png"); }
+.city-daytona { --hero-img: url("/images/godo-blueprint-h.png"); }
 
 /* =========================
    Editorial utilities

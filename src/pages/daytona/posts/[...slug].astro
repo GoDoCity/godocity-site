@@ -34,7 +34,7 @@ function sortNewestFirst(a, b) {
 }
 
 /* Hero image field — checks all common frontmatter aliases */
-const FALLBACK_IMG = "/images/gododaytona-bg.png";
+const FALLBACK_IMG = "/images/old-mural-backup.png";
 function heroImage(post) {
   const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.thumbnail ?? "";
   return String(v).trim() || FALLBACK_IMG;

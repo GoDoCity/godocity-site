@@ -27,7 +27,7 @@ function isFeatured(post) {
   return ["true", "yes", "1"].includes(String(v ?? "").toLowerCase().trim());
 }
 /* Fallback shown when an article has no image or a broken image URL */
-const FALLBACK_IMG = "/images/gododaytona-bg.png";
+const FALLBACK_IMG = "/images/old-mural-backup.png";
 
 function heroImage(post) {
   const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "";

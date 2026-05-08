@@ -67,7 +67,7 @@ function formatDate(d: any): string {
   if (!d) return "";
   try { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); } catch { return ""; }
 }
-const FALLBACK_IMG = "/images/gododaytona-bg.png";
+const FALLBACK_IMG = "/images/old-mural-backup.png";
 
 const diyItems = allDiy
   .filter(e =>
