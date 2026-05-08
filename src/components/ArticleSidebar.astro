@@ -13,6 +13,7 @@
  */
 import { getCityEvents, cityDisplayName } from "../lib/events.js";
 import { getShortName, getCityConfig } from "../lib/cityConfigs.js";
+import AdSlot from "./AdSlot.astro";
 
 interface Props {
   city: string;
@@ -155,18 +156,8 @@ const hasEvents = hasSlider || hasList;
     <a class="submitEventLink" href="/submit-event/">+ Submit an event →</a>
   </div>
 
-  <!-- 3 — Advertisement -->
-  <div class="displayAdSlot">
-    <div class="adSlotLabel">Advertisement</div>
-    <a class="displayAdCard" href={`/${city}/advertise/`}>
-      <div class="displayAdInner">
-        <div class="displayAdIcon">📢</div>
-        <div class="displayAdTitle">Your Ad Here</div>
-        <div class="displayAdDesc">Reach thousands of {cityCap} locals</div>
-        <div class="displayAdCta">Advertise with us →</div>
-      </div>
-    </a>
-  </div>
+  <!-- 3 — Advertisement (live from CMS; falls back to nothing if no active ad) -->
+  <AdSlot type="sidebar" city={city} />
 
   <!-- 3b — Community Alert bar — text from cityConfigs.vibeCheckText so it auto-updates per city -->
   <a class="communityAlert" href={`/${city}/vibe-check/`}>
@@ -402,26 +393,7 @@ const hasEvents = hasSlider || hasList;
   }
   .submitEventLink:hover { opacity: 1; }
 
-  /* ── Ad slot ── */
-  .displayAdSlot { display: grid; gap: 5px; }
-  .adSlotLabel {
-    font-size: 8.5px; font-weight: 700; letter-spacing: .12em;
-    text-transform: uppercase; color: var(--faint); text-align: center;
-  }
-  .displayAdCard {
-    display: block; text-decoration: none; border-radius: 13px; overflow: hidden;
-    background: #f0f7ff; transition: opacity 140ms;
-  }
-  .displayAdCard:hover { opacity: .9; }
-  .displayAdInner { padding: 22px 14px; text-align: center; display: grid; gap: 5px; place-items: center; }
-  .displayAdIcon { font-size: 24px; margin-bottom: 2px; }
-  .displayAdTitle { font-size: 16px; font-weight: 900; color: #0b1a2e; }
-  .displayAdDesc { font-size: 14px; color: rgba(11,26,46,.78); line-height: 1.3; }
-  .displayAdCta {
-    margin-top: 6px; display: inline-flex; align-items: center;
-    height: 30px; padding: 0 13px; border-radius: 999px;
-    background: #0077be; color: #fff; font-size: 11.5px; font-weight: 800;
-  }
+  /* Ad slot is handled by AdSlot.astro */
 
   /* ── Community Alert bar ── */
   .communityAlert {

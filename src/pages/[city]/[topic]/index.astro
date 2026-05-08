@@ -1,5 +1,6 @@
 ---
 import Base from "../../../layouts/Base.astro";
+import AdSlot from "../../../components/AdSlot.astro";
 import { getCollection } from "astro:content";
 
 /* ── Tag helpers ── */
@@ -233,28 +234,31 @@ try {
                 const isSponsored = !!sponsorLabel;
                 const kickerLabel = sponsorLabel || catLabel;
                 return (
-                  <div class={`row${idx >= 9 ? " rowHidden" : ""}${isSponsored ? " sponsoredRow" : ""}`}>
-                    <a class="rowCardLink" href={p._href ?? `/${city}/posts/${p.slug.split("/").pop()}/`} aria-label={p.data.title ?? p.slug}></a>
-                    <div class="rowThumbWrap">
-                      <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""}
-                        loading="lazy" decoding="async"
-                        onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+                  <>
+                    <div class={`row${idx >= 9 ? " rowHidden" : ""}${isSponsored ? " sponsoredRow" : ""}`}>
+                      <a class="rowCardLink" href={p._href ?? `/${city}/posts/${p.slug.split("/").pop()}/`} aria-label={p.data.title ?? p.slug}></a>
+                      <div class="rowThumbWrap">
+                        <img class="rowThumb" src={thumbImage(p)} alt={p.data.title ?? ""}
+                          loading="lazy" decoding="async"
+                          onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+                      </div>
+                      <div class="rowText">
+                        {kickerLabel && (
+                          <div class="rowKicker">
+                            {isSponsored
+                              ? <span class="kickerSponsorBadge">{kickerLabel}</span>
+                              : <a class="kickerCatLink" href={`/${city}/${catSlug}/`}>{kickerLabel}</a>
+                            }
+                            {sub && <span class="kickerSub"> — {sub}</span>}
+                          </div>
+                        )}
+                        <div class="rowTitle">{p.data.title ?? p.slug}</div>
+                        {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
+                        <div class="rowMeta">{dateText(p)}</div>
+                      </div>
                     </div>
-                    <div class="rowText">
-                      {kickerLabel && (
-                        <div class="rowKicker">
-                          {isSponsored
-                            ? <span class="kickerSponsorBadge">{kickerLabel}</span>
-                            : <a class="kickerCatLink" href={`/${city}/${catSlug}/`}>{kickerLabel}</a>
-                          }
-                          {sub && <span class="kickerSub"> — {sub}</span>}
-                        </div>
-                      )}
-                      <div class="rowTitle">{p.data.title ?? p.slug}</div>
-                      {excerpt(p) && <div class="rowDesc">{excerpt(p)}</div>}
-                      <div class="rowMeta">{dateText(p)}</div>
-                    </div>
-                  </div>
+                    {(idx + 1) % 4 === 0 && <AdSlot type="in-feed" city={city} />}
+                  </>
                 );
               })}
             </div>

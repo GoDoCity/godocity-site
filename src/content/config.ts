@@ -187,4 +187,18 @@ const journalists = defineCollection({
   }),
 });
 
-export const collections = { posts, guides, cityGuides, globalSponsors, events, diy, topics, journalists };
+const ads = defineCollection({
+  type: "content",
+  schema: z.object({
+    title:   z.string(),
+    type:    z.enum(["sidebar", "in-feed", "banner"]),
+    image:   z.string().optional().transform(v => v === "" ? undefined : v),
+    link:    z.string(),
+    active:  z.boolean().default(true),
+    city:    z.enum(["all", "daytona", "orlando", "tampa"]).optional().default("all"),
+    altText: z.string().optional(),
+    tagline: z.string().optional(),
+  }),
+});
+
+export const collections = { posts, guides, cityGuides, globalSponsors, events, diy, topics, journalists, ads };
