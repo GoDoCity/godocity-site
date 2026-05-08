@@ -198,7 +198,7 @@ const ads = defineCollection({
     city:      z.enum(["all", "daytona", "orlando", "tampa"]).optional().default("all"),
     altText:   z.string().optional(),
     tagline:   z.string().optional(),
-    eventDate: z.coerce.date().optional(),
+    eventDate: z.union([z.coerce.date(), z.string()]).optional().nullable(),
   }),
 });
 

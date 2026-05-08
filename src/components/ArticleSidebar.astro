@@ -73,7 +73,12 @@ const hasEvents      = hasSlider || hasList || hasFeaturedAds;
 
         {/* ── Featured Event Ads (pinned at absolute top) ── */}
         {hasFeaturedAds && featuredEventAds.map((a: any) => {
-          const d   = a.data.eventDate ? new Date(a.data.eventDate) : null;
+          const rawDate = a.data.eventDate;
+          const d: Date | null = (() => {
+            if (!rawDate) return null;
+            const candidate = rawDate instanceof Date ? rawDate : new Date(String(rawDate));
+            return isNaN(candidate.getTime()) ? null : candidate;
+          })();
           const dow = d ? d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase() : null;
           const day = d ? d.getDate() : null;
           const mon = d ? d.toLocaleDateString("en-US", { month: "short" }).toUpperCase() : null;
