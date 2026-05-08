@@ -76,11 +76,14 @@ export async function getStaticPaths() {
 
   return Array.from(paths.values()).map(({ city, topic, subtopic }) => ({
     params: { city, topic, subtopic },
+    props:  { allPosts },
   }));
 }
 
 /* ── Page data ── */
 const { city, topic, subtopic } = Astro.params;
+/* allPosts passed from getStaticPaths — no second fetch needed */
+const { allPosts } = Astro.props;
 
 const topicKey     = tagKey(topic);
 const subtopicKey  = tagKey(subtopic);
@@ -89,8 +92,7 @@ const subtopicLabel = tagLabel(subtopicKey);
 const cityCap      = getDisplayName(city);
 
 /* Filter posts: city + category === topic + subtopic === subtopic (case-insensitive) */
-const allPosts = await getCollection("posts");
-const posts = allPosts
+const posts = (allPosts as any[])
   .filter(post => {
     const postCity = (post.data.city ?? post.id?.split("/")[0] ?? "").toLowerCase().trim();
     return postCity === city;

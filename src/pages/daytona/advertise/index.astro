@@ -579,15 +579,24 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
     max-width: 600px; margin: 0;
   }
 
-  /* ── Black CTA buttons (signature style) ── */
+  /* ── Primary "Money" CTA — white pill with glow halo, pops on dark hero ── */
   .adBtnBlack {
     display: inline-flex; align-items: center; justify-content: center;
-    background: #111111; color: #fff;
+    background: #ffffff; color: #111111;
     font-size: 14px; font-weight: 900; letter-spacing: .05em; text-transform: uppercase;
-    padding: 16px 32px; border-radius: 999px; text-decoration: none;
-    transition: background 160ms, transform 160ms;
+    padding: 16px 36px; border-radius: 999px; text-decoration: none;
+    border: 2px solid #ffffff;
+    box-shadow:
+      0 0 0 4px rgba(255,255,255,.20),
+      0 6px 24px rgba(0,0,0,.35);
+    transition: transform 180ms ease, box-shadow 180ms ease;
   }
-  .adBtnBlack:hover { background: #333; transform: translateY(-1px); }
+  .adBtnBlack:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 0 0 6px rgba(255,255,255,.30),
+      0 8px 36px rgba(0,119,190,.55);
+  }
 
   .adBtnGhost {
     display: inline-flex; align-items: center; justify-content: center;

@@ -45,10 +45,16 @@ export async function getStaticPaths() {
     }
   }
 
-  return Array.from(paths.values()).map(({ city, topic }) => ({ params: { city, topic } }));
+  return Array.from(paths.values()).map(({ city, topic }) => ({
+    params: { city, topic },
+    props:  { allPosts, allDiy: diyEntries },
+  }));
 }
 
 const { city, topic } = Astro.params;
+/* allPosts + allDiy passed from getStaticPaths — no second fetch needed */
+const { allPosts, allDiy } = Astro.props as { allPosts: any[]; allDiy: any[] };
+
 const cityLabel  = city.charAt(0).toUpperCase() + city.slice(1);
 const topicLabel = topic.charAt(0).toUpperCase() + topic.slice(1);
 
@@ -63,7 +69,6 @@ function formatDate(d: any): string {
 }
 const FALLBACK_IMG = "/images/gododaytona-bg.png";
 
-const allDiy = await getCollection("diy");
 const diyItems = allDiy
   .filter(e =>
     Array.isArray(e.data.cities) && e.data.cities.includes(city) &&
@@ -79,7 +84,6 @@ const diyItems = allDiy
     source: "diy" as const,
   }));
 
-const allPosts = await getCollection("posts");
 const postItems = allPosts
   .filter(post => {
     const postCity = (post.data.city ?? post.id?.split("/")[0] ?? "").toLowerCase().trim();
