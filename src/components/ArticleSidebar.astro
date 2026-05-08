@@ -11,6 +11,7 @@
  *  - Slot 1: Smart Slider — top 5 Sponsored events, auto-cycles every 5 s
  *  - Slots 2+: Static chronological list of regular (non-sponsored) events
  */
+import { getCollection } from "astro:content";
 import { getCityEvents, cityDisplayName } from "../lib/events.js";
 import { getShortName, getCityConfig } from "../lib/cityConfigs.js";
 import AdSlot from "./AdSlot.astro";
@@ -28,9 +29,19 @@ const allEvents    = await getCityEvents(city);
 const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
 const regularList     = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
 
-const hasSlider = sponsoredSlides.length > 0;
-const hasList   = regularList.length > 0;
-const hasEvents = hasSlider || hasList;
+const allAds = await getCollection("ads").catch(() => [] as any[]);
+const featuredEventAds = allAds.filter((a: any) => {
+  if (!a.data.active) return false;
+  if (a.data.type !== "featured-event") return false;
+  const adCity = (a.data.city ?? "all").toLowerCase();
+  const reqCity = city.toLowerCase();
+  return adCity === "all" || reqCity === "all" || adCity === reqCity;
+});
+
+const hasSlider      = sponsoredSlides.length > 0;
+const hasList        = regularList.length > 0;
+const hasFeaturedAds = featuredEventAds.length > 0;
+const hasEvents      = hasSlider || hasList || hasFeaturedAds;
 ---
 
 <aside class="articleSidebar">
@@ -59,6 +70,37 @@ const hasEvents = hasSlider || hasList;
       <p class="noEvents">No upcoming events yet.</p>
     ) : (
       <div class="eventList">
+
+        {/* ── Featured Event Ads (pinned at absolute top) ── */}
+        {hasFeaturedAds && featuredEventAds.map((a: any) => {
+          const d   = a.data.eventDate ? new Date(a.data.eventDate) : null;
+          const dow = d ? d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase() : null;
+          const day = d ? d.getDate() : null;
+          const mon = d ? d.toLocaleDateString("en-US", { month: "short" }).toUpperCase() : null;
+          const slug = a.data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+          const sep  = a.data.link.includes("?") ? "&" : "?";
+          const dest = `${a.data.link}${sep}utm_source=godocity&utm_medium=featured_event&utm_campaign=${slug}`;
+          return (
+            <a class="featuredEventAd" href={dest} target="_blank" rel="noopener">
+              <div class="feaHeader">
+                <span class="feaBadge">FEATURED</span>
+              </div>
+              <div class="feaBody">
+                {d && (
+                  <div class="eventCal feaCal">
+                    <div class="eDow">{dow}</div>
+                    <div class="eDay">{day}</div>
+                    <div class="eMon">{mon}</div>
+                  </div>
+                )}
+                <div class="feaInfo">
+                  <div class="eName">{a.data.title}</div>
+                  {a.data.tagline && <div class="feaTagline">{a.data.tagline}</div>}
+                </div>
+              </div>
+            </a>
+          );
+        })}
 
         {/* ── Smart Slider: top 5 sponsored events, fades every 5 s ── */}
         {hasSlider && (
@@ -447,4 +489,29 @@ const hasEvents = hasSlider || hasList;
   }
   .guideRow:last-child { border-bottom: none; }
   .guideRow:hover { color: var(--link); }
+
+  /* ── Featured Event Ad cards ── */
+  .featuredEventAd {
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 12px; border-radius: 10px;
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 45%, transparent);
+    background: color-mix(in srgb, var(--brand1, #0077be) 7%, transparent);
+    text-decoration: none; margin-bottom: 8px;
+    transition: background 140ms, border-color 140ms;
+  }
+  .featuredEventAd:hover {
+    background: color-mix(in srgb, var(--brand1, #0077be) 13%, transparent);
+    border-color: var(--brand1, #0077be);
+  }
+  .feaHeader { display: flex; align-items: center; }
+  .feaBadge {
+    display: inline-block;
+    font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase;
+    background: var(--brand1, #0077be); color: #fff;
+    padding: 2px 7px; border-radius: 999px;
+  }
+  .feaBody { display: flex; align-items: center; gap: 12px; }
+  .feaCal { flex-shrink: 0; }
+  .feaInfo { display: flex; flex-direction: column; gap: 3px; }
+  .feaTagline { font-size: 12px; color: var(--faint, #666); line-height: 1.4; }
 </style>
