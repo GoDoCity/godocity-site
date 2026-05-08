@@ -13,10 +13,7 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
   <!-- ═══════════════════════════════════════════
        1. HERO — The Mission
   ═══════════════════════════════════════════ -->
-  <section
-    class="adHero"
-    style="background: url('/images/godo-blueprint-h.png') center/cover no-repeat !important; background-size: cover !important; background-position: center !important;"
-  >
+  <section class="adHero">
     <div class="adHeroOverlay" aria-hidden="true"></div>
     <div class="adHeroInner">
       <p class="adHeroEyebrow">Media &amp; Partnership Opportunities</p>
@@ -617,14 +614,22 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
   .adHero {
     position: relative; overflow: hidden;
     min-height: 560px;
-    background: url("/images/godo-blueprint-h.png") center / cover no-repeat;
+    background: #000e23;
     display: flex; align-items: center;
   }
   @media (max-width: 768px) { .adHero { min-height: 480px; } }
 
+  /* Blueprint image layer — brightened so the schematic lines glow */
+  .adHero::before {
+    content: "";
+    position: absolute; inset: 0; z-index: 0;
+    background: url("/images/godo-blueprint-h.png") center / cover no-repeat;
+    filter: brightness(1.25) saturate(1.2) contrast(1.05);
+  }
+
   .adHeroOverlay {
     position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(0,0,0,.82) 0%, rgba(0,40,88,.80) 100%);
+    background: linear-gradient(135deg, rgba(0,20,50,.85) 0%, rgba(0,60,110,.75) 100%);
     z-index: 1;
   }
 
@@ -645,6 +650,7 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
     font-size: clamp(36px, 6vw, 64px); font-weight: 900;
     letter-spacing: -0.03em; line-height: 1.05;
     color: #fff; margin: 0 0 20px; max-width: 720px;
+    text-shadow: 0 2px 10px rgba(0,0,0,.5);
   }
 
   .adHeroSub {
