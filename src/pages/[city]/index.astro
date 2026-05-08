@@ -45,7 +45,7 @@ try {
     .slice(0, 8);
 } catch {}
 
-const FALLBACK_IMG = "/images/gododaytona-bg.png";
+const FALLBACK_IMG = "/images/old-mural-backup.png";
 function heroImage(post: any) {
   const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "";
   return String(v).trim() || FALLBACK_IMG;

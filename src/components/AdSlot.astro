@@ -45,7 +45,7 @@ if (ad) {
   dest = `${ad.data.link}${sep}utm_source=godocity&utm_medium=native_ad&utm_campaign=${slug}`;
 }
 
-const imgSrc  = ad?.data?.image  || "/images/gododaytona-bg.png";
+const imgSrc  = ad?.data?.image  || "/images/old-mural-backup.png";
 const altText = ad?.data?.altText || ad?.data?.title || "Sponsored advertisement";
 ---
 
@@ -57,7 +57,7 @@ const altText = ad?.data?.altText || ad?.data?.title || "Sponsored advertisement
       <div class="adSidebarImgWrap">
         <img class="adSidebarImg" src={imgSrc} alt={altText}
           loading="lazy" decoding="async"
-          onerror={`this.src='/images/gododaytona-bg.png';this.onerror=null;`} />
+          onerror={`this.src='/images/old-mural-backup.png';this.onerror=null;`} />
       </div>
       {ad.data.tagline && <div class="adSidebarTagline">{ad.data.tagline}</div>}
       <div class="adSidebarCta">Learn More →</div>
@@ -74,7 +74,7 @@ const altText = ad?.data?.altText || ad?.data?.title || "Sponsored advertisement
      aria-label={`Sponsored: ${ad.data.title}`}>
     <div class="adInFeedThumb">
       <img src={imgSrc} alt={altText} loading="lazy" decoding="async"
-        onerror={`this.src='/images/gododaytona-bg.png';this.onerror=null;`} />
+        onerror={`this.src='/images/old-mural-backup.png';this.onerror=null;`} />
     </div>
     <div class="adInFeedBody">
       <div class="adInFeedKicker">
@@ -96,7 +96,7 @@ const altText = ad?.data?.altText || ad?.data?.title || "Sponsored advertisement
     <div class="adLabel">SPONSORED</div>
     <a class="adBannerCard" href={dest} target="_blank" rel="noopener noreferrer sponsored">
       <img class="adBannerImg" src={imgSrc} alt={altText} loading="lazy" decoding="async"
-        onerror={`this.src='/images/gododaytona-bg.png';this.onerror=null;`} />
+        onerror={`this.src='/images/old-mural-backup.png';this.onerror=null;`} />
       {ad.data.tagline && (
         <div class="adBannerOverlay">
           <span class="adBannerTagline">{ad.data.tagline}</span>
