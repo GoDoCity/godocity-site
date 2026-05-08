@@ -1,7 +1,7 @@
 ---
 title: GoDoDaytona — Advertise With Us
 type: sidebar
-active: false
+active: true
 eventDate: ''
 image: /images/ads/GoDo Blueprint H.png
 link: /daytona/advertise/
