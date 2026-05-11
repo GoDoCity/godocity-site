@@ -316,243 +316,458 @@ const { product } = Astro.props as { product: Product };
       <div class="ppWrap">
         <div class="ppMockupHeader">
           <span class="ppMockupEyebrow">Live View</span>
-          <h2 class="ppMockupTitle">Where Your Ad Lives</h2>
-          <p class="ppMockupSub">This is the exact position your creative occupies in the {product.subtitle} placement.</p>
+          <h2 class="ppMockupTitle">See exactly where your brand appears.</h2>
+          <p class="ppMockupSub">Your creative, in context — this is how the <strong>{product.subtitle}</strong> placement looks to our Daytona audience.</p>
         </div>
 
-        <div class="ppMockupStage">
-          <div class={`ppDevice ppDevice--${product.mockupType}`}>
+        {/* Device toggle — shown for email-header, email-premium, and display */}
+        {(product.mockupType === "email-header" || product.mockupType === "email-premium" || product.mockupType === "display") && (
+          <div class="ppDeviceToggle" id="ppDevToggle">
+            <button class="ppDevBtn ppDevBtn--on" data-target="mobile" aria-pressed="true">
+              <svg width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true">
+                <rect x="1" y="0.5" width="10" height="13" rx="2.5" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="4" y="11" width="4" height="1" rx=".5" fill="currentColor"/>
+              </svg>
+              Mobile
+            </button>
+            <button class="ppDevBtn" data-target="desktop" aria-pressed="false">
+              <svg width="15" height="12" viewBox="0 0 15 12" fill="none" aria-hidden="true">
+                <rect x="1" y="1" width="13" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M5.5 9v2m4-2v2M3 11h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              Desktop
+            </button>
+          </div>
+        )}
 
+        <div class="ppLiveViewLayout">
+          {/* ─── MOCKUP STAGE ─── */}
+          <div class="ppMockupStage">
+
+            {/* ══ THE DAILY MENTION — email-text ══ */}
             {product.mockupType === "email-text" && (
-              <div class="ppEmailShell">
-                <div class="ppEmailTop">
-                  <div class="ppEmailBrand">
-                    <div class="ppEmailLogo"></div>
-                    <div>
-                      <div class="ppSkel ppSkel--60 ppSkel--sm"></div>
-                      <div class="ppSkel ppSkel--40 ppSkel--xs" style="margin-top:3px"></div>
+              <div class="ppPhoneShell">
+                <div class="ppPhoneNotch"></div>
+                <div class="ppPhoneScreen ppNLScreen">
+                  <div class="ppNLHead">
+                    <div class="ppNLLogo" aria-hidden="true">G</div>
+                    <div class="ppNLTitleGroup">
+                      <span class="ppNLName">GoDoDaytona</span>
+                      <span class="ppNLSub">Your Morning Briefing</span>
+                    </div>
+                    <span class="ppNLDate">Mon, May 12</span>
+                  </div>
+                  <div class="ppNLBar"></div>
+                  <div class="ppNLStory">
+                    <span class="ppNLCat">DAYTONA TODAY</span>
+                    <div class="ppNLHL">Beachside Market Expansion Draws Record Summer Crowds to Main Street</div>
+                    <div class="ppSkel ppSkel--90 ppSkel--xs" style="margin-top:4px"></div>
+                    <div class="ppSkel ppSkel--80 ppSkel--xs"></div>
+                    <div class="ppSkel ppSkel--65 ppSkel--xs"></div>
+                  </div>
+                  <div class="ppAdZone ppAdZone--nlText">
+                    <span class="ppSponsorTag">SPONSORED</span>
+                    <p class="ppNLTextMention">
+                      <strong class="ppNLTextBiz">Your Business Name</strong>
+                      <span class="ppNLTextMsg"> — Your offer in one compelling sentence that feels like a natural recommendation.</span>
+                      <a class="ppNLTextLink">Learn more →</a>
+                    </p>
+                    <div class="ppAdBadge">YOUR BRAND HERE</div>
+                  </div>
+                  <div class="ppNLStory ppNLStory--sm">
+                    <span class="ppNLCat">COMMUNITY</span>
+                    <div class="ppNLHL ppNLHL--sm">Volusia Arts Week Returns with 40+ Local Events Citywide</div>
+                    <div class="ppSkel ppSkel--80 ppSkel--xs" style="margin-top:3px"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ══ THE TOP LINE — email-header ══ */}
+            {product.mockupType === "email-header" && (
+              <div class="ppDualView">
+                {/* MOBILE */}
+                <div class="ppPhoneShell" data-view="mobile">
+                  <div class="ppPhoneNotch"></div>
+                  <div class="ppPhoneScreen ppNLScreen">
+                    <div class="ppNLHead">
+                      <div class="ppNLLogo" aria-hidden="true">G</div>
+                      <div class="ppNLTitleGroup">
+                        <span class="ppNLName">GoDoDaytona</span>
+                        <span class="ppNLSub">Morning Briefing</span>
+                      </div>
+                    </div>
+                    <div class="ppNLBar"></div>
+                    <div class="ppAdZone ppAdZone--nlHeader">
+                      <span class="ppSponsorTag ppSponsorTag--top">PRESENTING PARTNER</span>
+                      <div class="ppNLHeaderImg">
+                        <div class="ppAdBadge">YOUR BRAND HERE</div>
+                      </div>
+                    </div>
+                    <div class="ppNLStory ppNLStory--sm" style="margin-top:8px">
+                      <span class="ppNLCat">DAYTONA TODAY</span>
+                      <div class="ppNLHL ppNLHL--sm">Beachside Market Expansion Draws Record Summer Crowds</div>
+                      <div class="ppSkel ppSkel--85 ppSkel--xs" style="margin-top:3px"></div>
+                      <div class="ppSkel ppSkel--65 ppSkel--xs"></div>
                     </div>
                   </div>
-                  <div class="ppEmailDivider"></div>
                 </div>
-                <div class="ppEmailSection">
-                  <div class="ppSkel ppSkel--80 ppSkel--md ppSkel--dark"></div>
-                  <div class="ppSkel ppSkel--90"></div>
-                  <div class="ppSkel ppSkel--90"></div>
-                  <div class="ppSkel ppSkel--60"></div>
-                </div>
-                <div class="ppAdZone ppAdZone--textAd">
-                  <div class="ppAdZoneLabel">YOUR AD HERE</div>
-                  <div class="ppAdZoneTextContent">
-                    <div class="ppSkel ppSkel--90 ppSkel--dark"></div>
-                    <div class="ppSkel ppSkel--50 ppSkel--link"></div>
+                {/* DESKTOP */}
+                <div class="ppDesktopShell" data-view="desktop" hidden>
+                  <div class="ppDesktopBar">
+                    <div class="ppBrowserDots"><span></span><span></span><span></span></div>
+                    <div class="ppDesktopUrl">mail.google.com · GoDoDaytona Morning Briefing</div>
                   </div>
-                </div>
-                <div class="ppEmailSection">
-                  <div class="ppSkel ppSkel--70 ppSkel--md ppSkel--dark"></div>
-                  <div class="ppSkel ppSkel--90"></div>
-                  <div class="ppSkel ppSkel--80"></div>
+                  <div class="ppDesktopMeta">
+                    <span class="ppDMFrom"><strong>From:</strong> GoDoDaytona &lt;hello@gododaytona.com&gt;</span>
+                    <span class="ppDMSubj"><strong>Subject:</strong> Your Daytona Briefing — Monday, May 12</span>
+                  </div>
+                  <div class="ppDesktopNL">
+                    <div class="ppNLHead ppNLHead--wide">
+                      <div class="ppNLLogo" aria-hidden="true">G</div>
+                      <div class="ppNLTitleGroup">
+                        <span class="ppNLName">GoDoDaytona</span>
+                        <span class="ppNLSub">Your Morning Briefing</span>
+                      </div>
+                      <span class="ppNLDate">Mon, May 12</span>
+                    </div>
+                    <div class="ppNLBar"></div>
+                    <div class="ppAdZone ppAdZone--nlHeaderDesk">
+                      <span class="ppSponsorTag ppSponsorTag--top">PRESENTING PARTNER</span>
+                      <div class="ppNLHeaderImgDesk">
+                        <div class="ppAdBadge">YOUR BRAND HERE</div>
+                      </div>
+                    </div>
+                    <div class="ppDesktopStory">
+                      <span class="ppNLCat">DAYTONA TODAY</span>
+                      <div class="ppNLHL ppNLHL--desk">Beachside Market Expansion Draws Record Summer Crowds to Main Street District</div>
+                      <div class="ppSkel ppSkel--90 ppSkel--xs" style="margin-top:4px"></div>
+                      <div class="ppSkel ppSkel--75 ppSkel--xs"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
-            {product.mockupType === "email-header" && (
-              <div class="ppEmailShell">
-                <div class="ppEmailTop">
-                  <div class="ppEmailBrand">
-                    <div class="ppEmailLogo"></div>
-                    <div class="ppSkel ppSkel--50 ppSkel--sm"></div>
-                  </div>
-                  <div class="ppEmailDivider"></div>
-                </div>
-                <div class="ppAdZone ppAdZone--emailHeader">
-                  <div class="ppAdZoneLabel">YOUR AD HERE</div>
-                  <div class="ppAdZoneImgLarge"></div>
-                  <div class="ppSkel ppSkel--60" style="margin-top:6px"></div>
-                </div>
-                <div class="ppEmailSection">
-                  <div class="ppSkel ppSkel--80 ppSkel--md ppSkel--dark"></div>
-                  <div class="ppSkel ppSkel--90"></div>
-                  <div class="ppSkel ppSkel--70"></div>
-                </div>
-              </div>
-            )}
-
+            {/* ══ THE ANCHOR — email-banner ══ */}
             {product.mockupType === "email-banner" && (
-              <div class="ppEmailShell">
-                <div class="ppEmailTop">
-                  <div class="ppEmailBrand">
-                    <div class="ppEmailLogo"></div>
-                    <div class="ppSkel ppSkel--50 ppSkel--sm"></div>
+              <div class="ppPhoneShell">
+                <div class="ppPhoneNotch"></div>
+                <div class="ppPhoneScreen ppNLScreen">
+                  <div class="ppNLHead">
+                    <div class="ppNLLogo" aria-hidden="true">G</div>
+                    <div class="ppNLTitleGroup">
+                      <span class="ppNLName">GoDoDaytona</span>
+                      <span class="ppNLSub">Morning Briefing</span>
+                    </div>
+                    <span class="ppNLDate">Mon, May 12</span>
                   </div>
-                  <div class="ppEmailDivider"></div>
-                </div>
-                <div class="ppEmailSection">
-                  <div class="ppSkel ppSkel--80 ppSkel--md ppSkel--dark"></div>
-                  <div class="ppSkel ppSkel--90"></div>
-                  <div class="ppSkel ppSkel--75"></div>
-                </div>
-                <div class="ppAdZone ppAdZone--emailBanner">
-                  <div class="ppAdZoneLabel">YOUR AD HERE</div>
-                  <div class="ppAdZoneImgMid"></div>
-                </div>
-                <div class="ppEmailSection">
-                  <div class="ppSkel ppSkel--70 ppSkel--md ppSkel--dark"></div>
-                  <div class="ppSkel ppSkel--90"></div>
-                  <div class="ppSkel ppSkel--55"></div>
+                  <div class="ppNLBar"></div>
+                  <div class="ppNLStory">
+                    <span class="ppNLCat">DAYTONA TODAY</span>
+                    <div class="ppNLHL">Beachside Market Draws Record Crowds to Main Street</div>
+                    <div class="ppSkel ppSkel--90 ppSkel--xs" style="margin-top:4px"></div>
+                    <div class="ppSkel ppSkel--80 ppSkel--xs"></div>
+                    <div class="ppSkel ppSkel--70 ppSkel--xs"></div>
+                    <span class="ppNLReadMore">Read more →</span>
+                  </div>
+                  <div class="ppAdZone ppAdZone--nlBanner">
+                    <span class="ppSponsorTag">SPONSORED</span>
+                    <div class="ppNLBannerImg">
+                      <div class="ppAdBadge">YOUR BRAND HERE</div>
+                    </div>
+                  </div>
+                  <div class="ppNLStory ppNLStory--sm">
+                    <span class="ppNLCat">COMMUNITY</span>
+                    <div class="ppNLHL ppNLHL--sm">Volusia Arts Week Returns with 40+ Local Events</div>
+                    <div class="ppSkel ppSkel--75 ppSkel--xs" style="margin-top:3px"></div>
+                  </div>
                 </div>
               </div>
             )}
 
+            {/* ══ THE HIGH-IMPACT SHOWCASE — email-premium ══ */}
             {product.mockupType === "email-premium" && (
-              <div class="ppEmailShell">
-                <div class="ppEmailTop">
-                  <div class="ppEmailBrand">
-                    <div class="ppEmailLogo"></div>
-                    <div class="ppSkel ppSkel--50 ppSkel--sm"></div>
+              <div class="ppDualView">
+                {/* MOBILE */}
+                <div class="ppPhoneShell" data-view="mobile">
+                  <div class="ppPhoneNotch"></div>
+                  <div class="ppPhoneScreen ppNLScreen">
+                    <div class="ppNLHead">
+                      <div class="ppNLLogo" aria-hidden="true">G</div>
+                      <div class="ppNLTitleGroup">
+                        <span class="ppNLName">GoDoDaytona</span>
+                        <span class="ppNLSub">Morning Briefing</span>
+                      </div>
+                    </div>
+                    <div class="ppNLBar"></div>
+                    <div class="ppNLStory ppNLStory--sm">
+                      <span class="ppNLCat">DAYTONA TODAY</span>
+                      <div class="ppNLHL ppNLHL--sm">Beachside Market Draws Summer Crowds</div>
+                      <div class="ppSkel ppSkel--80 ppSkel--xs" style="margin-top:3px"></div>
+                    </div>
+                    <div class="ppAdZone ppAdZone--nlPremium">
+                      <span class="ppPremiumTag">PREMIUM PARTNER</span>
+                      <div class="ppNLPremiumImg">
+                        <div class="ppAdBadge">YOUR BRAND HERE</div>
+                        <div class="ppPremiumSize">600 × 300 px</div>
+                      </div>
+                      <div class="ppSkel ppSkel--70 ppSkel--xs" style="margin-top:5px"></div>
+                      <div class="ppSkel ppSkel--50 ppSkel--xs"></div>
+                    </div>
                   </div>
-                  <div class="ppEmailDivider"></div>
                 </div>
-                <div class="ppEmailSection">
-                  <div class="ppSkel ppSkel--65 ppSkel--md ppSkel--dark"></div>
-                  <div class="ppSkel ppSkel--85"></div>
-                </div>
-                <div class="ppAdZone ppAdZone--emailPremium">
-                  <div class="ppAdZonePremiumBadge">PREMIUM SPONSOR</div>
-                  <div class="ppAdZoneLabel ppAdZoneLabel--inside">YOUR AD HERE</div>
-                  <div class="ppAdZoneImgPremium"></div>
-                  <div class="ppSkel ppSkel--60" style="margin-top:6px"></div>
-                  <div class="ppSkel ppSkel--40" style="margin-top:4px"></div>
-                </div>
-                <div class="ppEmailSection">
-                  <div class="ppSkel ppSkel--80"></div>
+                {/* DESKTOP */}
+                <div class="ppDesktopShell" data-view="desktop" hidden>
+                  <div class="ppDesktopBar">
+                    <div class="ppBrowserDots"><span></span><span></span><span></span></div>
+                    <div class="ppDesktopUrl">mail.google.com · GoDoDaytona Morning Briefing</div>
+                  </div>
+                  <div class="ppDesktopMeta">
+                    <span class="ppDMFrom"><strong>From:</strong> GoDoDaytona &lt;hello@gododaytona.com&gt;</span>
+                    <span class="ppDMSubj"><strong>Subject:</strong> Your Daytona Briefing — Monday, May 12</span>
+                  </div>
+                  <div class="ppDesktopNL">
+                    <div class="ppNLHead ppNLHead--wide">
+                      <div class="ppNLLogo" aria-hidden="true">G</div>
+                      <div class="ppNLTitleGroup">
+                        <span class="ppNLName">GoDoDaytona</span>
+                        <span class="ppNLSub">Your Morning Briefing</span>
+                      </div>
+                      <span class="ppNLDate">Mon, May 12</span>
+                    </div>
+                    <div class="ppNLBar"></div>
+                    <div class="ppDesktopStory">
+                      <span class="ppNLCat">DAYTONA TODAY</span>
+                      <div class="ppNLHL ppNLHL--desk">Beachside Market Expansion Draws Record Summer Crowds to Main Street</div>
+                      <div class="ppSkel ppSkel--85 ppSkel--xs" style="margin-top:4px"></div>
+                    </div>
+                    <div class="ppAdZone ppAdZone--nlPremiumDesk">
+                      <span class="ppPremiumTag">PREMIUM PARTNER</span>
+                      <div class="ppNLPremiumImgDesk">
+                        <div class="ppAdBadge">YOUR BRAND HERE</div>
+                        <div class="ppPremiumSize">600 × 300 px exclusive canvas</div>
+                      </div>
+                      <div class="ppSkel ppSkel--60 ppSkel--xs" style="margin-top:5px"></div>
+                      <div class="ppSkel ppSkel--40 ppSkel--xs"></div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
 
+            {/* ══ THE LOCAL SPOTLIGHT — article-mini ══ */}
             {product.mockupType === "article-mini" && (
               <div class="ppBrowserShell">
                 <div class="ppBrowserChrome">
-                  <div class="ppBrowserDots">
-                    <span></span><span></span><span></span>
-                  </div>
-                  <div class="ppBrowserUrl">
-                    <div class="ppSkel ppSkel--60 ppSkel--xs"></div>
+                  <div class="ppBrowserDots"><span></span><span></span><span></span></div>
+                  <div class="ppBrowserUrl">gododaytona.com/daytona/news</div>
+                </div>
+                <div class="ppSiteHeader">
+                  <div class="ppNLLogo ppNLLogo--sm" aria-hidden="true">G</div>
+                  <span class="ppSiteTitle">GoDoDaytona</span>
+                  <div class="ppSiteNav">
+                    <span>News</span><span>Dining</span><span>Events</span>
                   </div>
                 </div>
-                <div class="ppBrowserBody">
-                  <div class="ppSkel ppSkel--55 ppSkel--lg ppSkel--dark" style="margin-bottom:8px"></div>
-                  <div class="ppSkel ppSkel--90"></div>
-                  <div class="ppSkel ppSkel--80"></div>
-                  <div class="ppSkel ppSkel--70" style="margin-bottom:12px"></div>
-                  <div class="ppAdZone ppAdZone--miniArticle">
-                    <div class="ppAdZoneLabel">YOUR AD HERE</div>
-                    <div class="ppSkel ppSkel--70 ppSkel--md ppSkel--dark"></div>
-                    <div class="ppSkel ppSkel--90" style="margin-top:5px"></div>
-                    <div class="ppSkel ppSkel--85"></div>
-                    <div class="ppSkel ppSkel--40 ppSkel--link" style="margin-top:6px"></div>
+                <div class="ppArticlePage">
+                  <div class="ppArticleList">
+                    <div class="ppArticleItem">
+                      <div class="ppArticleThumb"></div>
+                      <div class="ppArticleText">
+                        <div class="ppSkel ppSkel--80 ppSkel--sm ppSkel--dark"></div>
+                        <div class="ppSkel ppSkel--70 ppSkel--xs" style="margin-top:3px"></div>
+                      </div>
+                    </div>
+                    <div class="ppAdZone ppAdZone--spotlightCard">
+                      <span class="ppSponsorTag ppSponsorTag--article">SPONSORED STORY</span>
+                      <div class="ppSpotlightContent">
+                        <div class="ppSpotlightThumb"></div>
+                        <div>
+                          <div class="ppNLHL ppNLHL--sm" style="color:#111">Your Business Spotlight Headline Goes Here</div>
+                          <div class="ppSkel ppSkel--90 ppSkel--xs" style="margin-top:4px"></div>
+                          <div class="ppSkel ppSkel--70 ppSkel--xs"></div>
+                          <span class="ppNLTextLink" style="margin-top:5px;display:block">Read the story →</span>
+                        </div>
+                      </div>
+                      <div class="ppAdBadge ppAdBadge--sm">YOUR BRAND HERE</div>
+                    </div>
+                    <div class="ppArticleItem ppArticleItem--faded">
+                      <div class="ppArticleThumb ppArticleThumb--sm"></div>
+                      <div class="ppArticleText">
+                        <div class="ppSkel ppSkel--75 ppSkel--xs ppSkel--dark"></div>
+                        <div class="ppSkel ppSkel--55 ppSkel--xs" style="margin-top:3px"></div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="ppSkel ppSkel--90" style="margin-top:12px"></div>
-                  <div class="ppSkel ppSkel--80"></div>
                 </div>
               </div>
             )}
 
+            {/* ══ THE DEEP DIVE — article-feature ══ */}
             {product.mockupType === "article-feature" && (
               <div class="ppBrowserShell">
                 <div class="ppBrowserChrome">
-                  <div class="ppBrowserDots">
-                    <span></span><span></span><span></span>
-                  </div>
-                  <div class="ppBrowserUrl">
-                    <div class="ppSkel ppSkel--60 ppSkel--xs"></div>
+                  <div class="ppBrowserDots"><span></span><span></span><span></span></div>
+                  <div class="ppBrowserUrl">gododaytona.com/daytona/your-business-feature</div>
+                </div>
+                <div class="ppSiteHeader">
+                  <div class="ppNLLogo ppNLLogo--sm" aria-hidden="true">G</div>
+                  <span class="ppSiteTitle">GoDoDaytona</span>
+                  <div class="ppSiteNav">
+                    <span>News</span><span>Dining</span><span>Events</span>
                   </div>
                 </div>
-                <div class="ppBrowserBody">
-                  <div class="ppAdZone ppAdZone--featureArticle">
-                    <div class="ppAdZoneLabel">YOUR AD HERE</div>
-                    <div class="ppAdZoneFeatureHero"></div>
-                    <div class="ppSkel ppSkel--70 ppSkel--lg ppSkel--dark" style="margin-top:8px"></div>
-                    <div class="ppSkel ppSkel--50 ppSkel--sm" style="margin-top:4px"></div>
-                    <div class="ppSkel ppSkel--90" style="margin-top:8px"></div>
-                    <div class="ppSkel ppSkel--85"></div>
-                    <div class="ppSkel ppSkel--90"></div>
-                    <div class="ppSkel ppSkel--70"></div>
-                    <div class="ppSkel ppSkel--40 ppSkel--link" style="margin-top:8px"></div>
+                <div class="ppAdZone ppAdZone--deepDive">
+                  <span class="ppSponsorTag ppSponsorTag--article">SPONSORED FEATURE</span>
+                  <div class="ppDeepDiveHero">
+                    <div class="ppAdBadge ppAdBadge--hero">YOUR BRAND HERE</div>
+                    <span class="ppDeepDiveImgLabel">Hero Image — 1200 × 600 px</span>
+                  </div>
+                  <div class="ppDeepDiveBody">
+                    <span class="ppNLCat" style="margin-bottom:4px;display:block">SPONSORED · DAYTONA BUSINESS SPOTLIGHT</span>
+                    <div class="ppNLHL" style="font-size:10px;line-height:1.35;color:#111;margin-bottom:4px">Why [Your Business Name] Has Become a Cornerstone of the Daytona Community</div>
+                    <span class="ppByline">By GoDoDaytona Editorial · Presented by Your Business</span>
+                    <div class="ppSkel ppSkel--90 ppSkel--xs" style="margin-top:5px"></div>
+                    <div class="ppSkel ppSkel--90 ppSkel--xs"></div>
+                    <div class="ppSkel ppSkel--80 ppSkel--xs"></div>
+                    <div class="ppSkel ppSkel--85 ppSkel--xs"></div>
+                    <div class="ppSkel ppSkel--60 ppSkel--xs"></div>
+                    <span class="ppNLTextLink" style="margin-top:6px;display:block">Continue reading →</span>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* ══ THE LOCAL FEED — social ══ */}
             {product.mockupType === "social" && (
-              <div class="ppPhoneShell">
+              <div class="ppPhoneShell ppPhoneShell--ig">
                 <div class="ppPhoneNotch"></div>
-                <div class="ppPhoneScreen">
-                  <div class="ppSocialNav">
-                    <div class="ppSkel ppSkel--30 ppSkel--xs"></div>
-                    <div class="ppSkel ppSkel--20 ppSkel--xs"></div>
+                <div class="ppPhoneScreen ppIGScreen">
+                  {/* Instagram nav bar */}
+                  <div class="ppIGNav">
+                    <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+                      <path d="M1 3.5C1 2.12 2.12 1 3.5 1h11C15.88 1 17 2.12 17 3.5v7C17 11.88 15.88 13 14.5 13h-11C2.12 13 1 11.88 1 10.5v-7z" stroke="currentColor" stroke-width="1.3"/>
+                      <path d="M1 5l8 5 8-5" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+                    </svg>
+                    <span class="ppIGNavTitle">GoDoDaytona</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                      <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/>
+                      <path d="M8 4v4l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                    </svg>
                   </div>
-                  <div class="ppAdZone ppAdZone--social">
-                    <div class="ppAdZoneLabel">YOUR AD HERE</div>
-                    <div class="ppSocialPostHeader">
-                      <div class="ppSocialAvatar"></div>
-                      <div>
-                        <div class="ppSkel ppSkel--45 ppSkel--sm ppSkel--dark"></div>
-                        <div class="ppSkel ppSkel--30 ppSkel--xs" style="margin-top:3px"></div>
+                  {/* Post card */}
+                  <div class="ppAdZone ppAdZone--igPost">
+                    <div class="ppAdBadge ppAdBadge--ig">YOUR BRAND HERE</div>
+                    {/* Post header */}
+                    <div class="ppIGPostHead">
+                      <div class="ppIGAvatar" aria-hidden="true">G</div>
+                      <div class="ppIGMeta">
+                        <span class="ppIGHandle">gododaytona</span>
+                        <span class="ppIGLocation">Daytona Beach, FL</span>
+                      </div>
+                      <span class="ppIGDots">···</span>
+                    </div>
+                    {/* Square image */}
+                    <div class="ppIGImage">
+                      <span class="ppIGImgLabel">Your Creative Here<br/>1:1 Square Format</span>
+                    </div>
+                    {/* Action bar */}
+                    <div class="ppIGActions">
+                      <div class="ppIGActLeft">
+                        <svg width="18" height="17" viewBox="0 0 18 17" fill="none" aria-label="Like">
+                          <path d="M9 15S1.5 10.5 1.5 5.5a4 4 0 0 1 7.5-2 4 4 0 0 1 7.5 2C16.5 10.5 9 15 9 15z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                        </svg>
+                        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-label="Comment">
+                          <path d="M15 10.5a2 2 0 0 1-2 2H5l-3 3V3a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v7.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                        </svg>
+                        <svg width="17" height="17" viewBox="0 0 17 17" fill="none" aria-label="Share">
+                          <path d="M15 8.5L1 2l4.5 6.5L1 15l14-6.5z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                      <svg width="14" height="17" viewBox="0 0 14 17" fill="none" aria-label="Save">
+                        <path d="M1 1h12v14l-6-4-6 4V1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div class="ppIGLikes">847 likes</div>
+                    <div class="ppIGCaption">
+                      <span class="ppIGHandle ppIGHandle--cap">gododaytona</span>
+                      <span class="ppIGCaptionText"> Daytona's most engaged locals just discovered something worth knowing. Your brand, in their feed, at the right moment. 🌊 #daytonabeach #local</span>
+                    </div>
+                    <span class="ppIGSponsored">Sponsored</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ══ THE MARKET TAKEOVER — display ══ */}
+            {product.mockupType === "display" && (
+              <div class="ppDualView ppDualView--display">
+                {/* MOBILE */}
+                <div class="ppPhoneShell ppPhoneShell--sm" data-view="mobile">
+                  <div class="ppPhoneNotch"></div>
+                  <div class="ppPhoneScreen">
+                    <div class="ppSiteHeader ppSiteHeader--mini">
+                      <div class="ppNLLogo ppNLLogo--sm" aria-hidden="true">G</div>
+                      <span class="ppSiteTitle ppSiteTitle--sm">GoDoDaytona</span>
+                    </div>
+                    <div class="ppAdZone ppAdZone--mobileLeader">
+                      <span class="ppSponsorTag">LEADERBOARD</span>
+                      <div class="ppMobileLeaderImg">
+                        <div class="ppAdBadge ppAdBadge--sm">YOUR BRAND HERE</div>
                       </div>
                     </div>
-                    <div class="ppSocialImg"></div>
-                    <div class="ppSocialCaption">
-                      <div class="ppSkel ppSkel--90"></div>
-                      <div class="ppSkel ppSkel--75" style="margin-top:4px"></div>
-                      <div class="ppSkel ppSkel--40 ppSkel--link" style="margin-top:4px"></div>
+                    <div style="padding:6px 8px">
+                      <div class="ppSkel ppSkel--60 ppSkel--sm ppSkel--dark" style="margin-bottom:4px"></div>
+                      <div class="ppSkel ppSkel--90 ppSkel--xs"></div>
+                      <div class="ppSkel ppSkel--80 ppSkel--xs"></div>
                     </div>
-                    <div class="ppSocialActions">
-                      <div class="ppSkel ppSkel--20 ppSkel--xs"></div>
-                      <div class="ppSkel ppSkel--20 ppSkel--xs"></div>
+                    <div class="ppAdZone ppAdZone--mobileInFeed" style="margin:4px 8px">
+                      <span class="ppSponsorTag">IN-FEED</span>
+                      <div class="ppMobileInFeedImg">
+                        <div class="ppAdBadge ppAdBadge--sm">YOUR BRAND HERE</div>
+                      </div>
                     </div>
-                    <div class="ppAdSponsoredTag">Sponsored</div>
-                  </div>
-                  <div class="ppSocialSecondPost">
-                    <div class="ppSkel ppSkel--60"></div>
-                    <div class="ppSkel ppSkel--40" style="margin-top:4px"></div>
                   </div>
                 </div>
-              </div>
-            )}
-
-            {product.mockupType === "display" && (
-              <div class="ppBrowserShell ppBrowserShell--wide">
-                <div class="ppBrowserChrome">
-                  <div class="ppBrowserDots">
-                    <span></span><span></span><span></span>
+                {/* DESKTOP */}
+                <div class="ppDesktopShell ppDesktopShell--display" data-view="desktop" hidden>
+                  <div class="ppDesktopBar">
+                    <div class="ppBrowserDots"><span></span><span></span><span></span></div>
+                    <div class="ppDesktopUrl">gododaytona.com/daytona/news</div>
                   </div>
-                  <div class="ppBrowserUrl">
-                    <div class="ppSkel ppSkel--50 ppSkel--xs"></div>
+                  <div class="ppSiteHeader">
+                    <div class="ppNLLogo ppNLLogo--sm" aria-hidden="true">G</div>
+                    <span class="ppSiteTitle">GoDoDaytona</span>
+                    <div class="ppSiteNav"><span>News</span><span>Dining</span><span>Events</span></div>
                   </div>
-                </div>
-                <div class="ppDisplayLayout">
-                  <div class="ppAdZone ppAdZone--leaderboard">
-                    <div class="ppAdZoneLabel">LEADERBOARD — YOUR AD HERE</div>
-                    <div class="ppAdZoneLeaderImg"></div>
+                  <div class="ppAdZone ppAdZone--desktopLeader">
+                    <span class="ppSponsorTag">LEADERBOARD — YOUR AD HERE</span>
+                    <div class="ppDeskLeaderImg">
+                      <div class="ppAdBadge">YOUR BRAND HERE</div>
+                    </div>
                   </div>
                   <div class="ppDisplayColumns">
                     <div class="ppDisplayMain">
-                      <div class="ppSkel ppSkel--70 ppSkel--lg ppSkel--dark"></div>
-                      <div class="ppSkel ppSkel--90" style="margin-top:6px"></div>
-                      <div class="ppSkel ppSkel--85"></div>
-                      <div class="ppSkel ppSkel--75"></div>
-                      <div class="ppAdZone ppAdZone--inFeed" style="margin-top:10px">
-                        <div class="ppAdZoneLabel">IN-FEED — YOUR AD HERE</div>
-                        <div class="ppAdZoneInFeedImg"></div>
+                      <div class="ppSkel ppSkel--70 ppSkel--sm ppSkel--dark" style="margin-bottom:5px"></div>
+                      <div class="ppSkel ppSkel--90 ppSkel--xs"></div>
+                      <div class="ppSkel ppSkel--85 ppSkel--xs"></div>
+                      <div class="ppSkel ppSkel--75 ppSkel--xs"></div>
+                      <div class="ppAdZone ppAdZone--deskInFeed" style="margin:8px 0">
+                        <span class="ppSponsorTag">IN-FEED AD</span>
+                        <div class="ppDeskInFeedImg">
+                          <div class="ppAdBadge ppAdBadge--sm">YOUR BRAND HERE</div>
+                        </div>
                       </div>
-                      <div class="ppSkel ppSkel--90" style="margin-top:10px"></div>
-                      <div class="ppSkel ppSkel--80"></div>
+                      <div class="ppSkel ppSkel--90 ppSkel--xs"></div>
+                      <div class="ppSkel ppSkel--80 ppSkel--xs"></div>
                     </div>
                     <div class="ppDisplaySidebar">
-                      <div class="ppAdZone ppAdZone--sidebar">
-                        <div class="ppAdZoneLabel">SIDEBAR</div>
-                        <div class="ppAdZoneSidebarImg"></div>
+                      <div class="ppAdZone ppAdZone--deskSidebar">
+                        <span class="ppSponsorTag">SIDEBAR</span>
+                        <div class="ppDeskSidebarImg">
+                          <div class="ppAdBadge ppAdBadge--sm">YOUR BRAND HERE</div>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -560,8 +775,61 @@ const { product } = Astro.props as { product: Product };
               </div>
             )}
 
-          </div>
-        </div>
+          </div>{/* /.ppMockupStage */}
+
+          {/* ─── ANNOTATION CALLOUTS ─── */}
+          <div class="ppAnnotGroup">
+
+            {product.mockupType === "email-text" && (<>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Native editorial integration</strong><p class="ppAnnotBody">Lives inside the body copy — reads as a trusted local recommendation, not a banner.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Mobile optimized</strong><p class="ppAnnotBody">73% of our readers open on mobile. Text formats render perfectly on every device.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">5,000+ daily readers</strong><p class="ppAnnotBody">Each insertion reaches the full subscriber base, Monday through Friday.</p></div></div>
+            </>)}
+
+            {product.mockupType === "email-header" && (<>
+              <div class="ppAnnot ppAnnot--primary"><div class="ppAnnotDot ppAnnotDot--lg"></div><div><strong class="ppAnnotTitle">Primary focal point</strong><p class="ppAnnotBody">The first element rendered on email open. Your brand captures 100% of initial attention before any editorial content.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">100% above the fold</strong><p class="ppAnnotBody">Visible without scrolling on every device — desktop, mobile, and tablet.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Exclusive placement</strong><p class="ppAnnotBody">One brand per send date. When you run, you're the only sponsor in this slot.</p></div></div>
+            </>)}
+
+            {product.mockupType === "email-banner" && (<>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Peak engagement position</strong><p class="ppAnnotBody">Placed after our lead story — readers who reach this point have confirmed their interest and are at maximum intent.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Universal email compatibility</strong><p class="ppAnnotBody">Renders correctly across Gmail, Apple Mail, Outlook, and all major mobile clients.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Flexible scheduling</strong><p class="ppAnnotBody">Available as a single insertion or on a recurring weekly schedule. Lock in your dates in advance.</p></div></div>
+            </>)}
+
+            {product.mockupType === "email-premium" && (<>
+              <div class="ppAnnot ppAnnot--primary"><div class="ppAnnotDot ppAnnotDot--lg"></div><div><strong class="ppAnnotTitle">600 × 300 px canvas</strong><p class="ppAnnotBody">The largest email creative available — room for hero photography, brand storytelling, and a clear call to action.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Exclusive — one brand per date</strong><p class="ppAnnotBody">No competing creative. No shared space. Your image dominates the most-read section of the briefing.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Highest dwell time</strong><p class="ppAnnotBody">Positioned below our lead story — the section where readers spend the most time before scrolling further.</p></div></div>
+            </>)}
+
+            {product.mockupType === "article-mini" && (<>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Indexed for local search</strong><p class="ppAnnotBody">Published to the site and immediately crawlable. Targets the search terms your customers actually use.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Lives on site permanently</strong><p class="ppAnnotBody">Unlike a banner, this placement accumulates traffic and clicks long after launch — no expiry date.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">GoDo editorial voice</strong><p class="ppAnnotBody">Written by our team to match our editorial standards. Reads like trusted local content, not advertising copy.</p></div></div>
+            </>)}
+
+            {product.mockupType === "article-feature" && (<>
+              <div class="ppAnnot ppAnnot--primary"><div class="ppAnnotDot ppAnnotDot--lg"></div><div><strong class="ppAnnotTitle">400–600 word editorial feature</strong><p class="ppAnnotBody">A full-length story written by the GoDo team, built entirely around your brand and your community story.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Search-optimized from day one</strong><p class="ppAnnotBody">Targets the longtail keywords your customers actually search. Built to rank for months after publication.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Promoted on social + newsletter</strong><p class="ppAnnotBody">Featured in the morning briefing and across social on launch day, giving you a coordinated visibility moment.</p></div></div>
+            </>)}
+
+            {product.mockupType === "social" && (<>
+              <div class="ppAnnot ppAnnot--primary"><div class="ppAnnotDot ppAnnotDot--lg"></div><div><strong class="ppAnnotTitle">Instagram + Facebook simultaneously</strong><p class="ppAnnotBody">One post, two platforms, one audience that's already opted in to local Daytona recommendations.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Published at peak hours</strong><p class="ppAnnotBody">Posted at the highest-engagement windows for the Volusia County market — not just generic best-times.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Tags your account directly</strong><p class="ppAnnotBody">Links to your profile, website, or booking page. Paid boosting available for extended reach.</p></div></div>
+            </>)}
+
+            {product.mockupType === "display" && (<>
+              <div class="ppAnnot ppAnnot--primary"><div class="ppAnnotDot ppAnnotDot--lg"></div><div><strong class="ppAnnotTitle">3 positions simultaneously</strong><p class="ppAnnotBody">Leaderboard above every article, sidebar alongside content, and in-feed between editorial blocks — all at once.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Run-of-site or category targeting</strong><p class="ppAnnotBody">Reach the full audience across all sections, or focus on Food & Drink, Real Estate, or Events.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Real-time impression reporting</strong><p class="ppAnnotBody">Live dashboard access so you can see exactly how your campaign performs — and adjust mid-flight.</p></div></div>
+            </>)}
+
+          </div>{/* /.ppAnnotGroup */}
+        </div>{/* /.ppLiveViewLayout */}
       </div>
     </section>
 
@@ -1157,4 +1425,347 @@ const { product } = Astro.props as { product: Product };
     font-size: 11px; color: #aaa; font-weight: 600;
     text-transform: uppercase; letter-spacing: .07em;
   }
+
+  /* ── Live View two-column layout ── */
+  .ppLiveViewLayout {
+    display: flex; gap: 40px; align-items: flex-start;
+  }
+  @media (max-width: 960px) {
+    .ppLiveViewLayout { flex-direction: column; align-items: center; }
+  }
+
+  /* Override .ppMockupStage to become the left flex column */
+  .ppLiveViewLayout .ppMockupStage {
+    flex: 1; min-width: 0; display: flex; justify-content: center;
+  }
+
+  /* ── Annotation callout column ── */
+  .ppAnnotGroup {
+    width: 272px; flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 14px;
+    padding-top: 4px;
+  }
+  @media (max-width: 960px) {
+    .ppAnnotGroup {
+      width: 100%; max-width: 560px;
+      flex-direction: row; flex-wrap: wrap;
+    }
+  }
+
+  .ppAnnot {
+    display: flex; gap: 12px;
+    background: #fff; border: 1.5px solid #e5e7eb;
+    border-radius: 14px; padding: 16px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05);
+  }
+  @media (max-width: 960px) {
+    .ppAnnot { flex: 1 1 240px; }
+  }
+  .ppAnnot--primary {
+    border-color: color-mix(in srgb, var(--brand1, #0077be) 40%, transparent);
+    background: color-mix(in srgb, var(--brand1, #0077be) 4%, white);
+  }
+
+  .ppAnnotDot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--brand1, #0077be);
+    flex-shrink: 0; margin-top: 3px;
+  }
+  .ppAnnotDot--lg { width: 13px; height: 13px; }
+
+  .ppAnnotTitle {
+    display: block; font-size: 12px; font-weight: 800; color: #111;
+    margin-bottom: 4px;
+  }
+  .ppAnnotBody {
+    font-size: 11.5px; line-height: 1.62; color: #666; margin: 0;
+  }
+
+  /* ── Device toggle ── */
+  .ppDeviceToggle {
+    display: flex; gap: 6px; justify-content: center;
+    margin-bottom: 28px;
+  }
+  .ppDevBtn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 999px;
+    border: 1.5px solid #e5e7eb; background: #fff; color: #aaa;
+    font-size: 12px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 140ms;
+  }
+  .ppDevBtn:hover { border-color: #ccc; color: #555; }
+  .ppDevBtn--on {
+    border-color: var(--brand1, #0077be);
+    color: var(--brand1, #0077be);
+    background: color-mix(in srgb, var(--brand1, #0077be) 6%, white);
+  }
+
+  /* ── Newsletter shell (shared across email products) ── */
+  .ppNLHead {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .ppNLHead--wide .ppNLLogo { width: 26px; height: 26px; border-radius: 7px; font-size: 13px; }
+  .ppNLHead--wide .ppNLName { font-size: 10px; }
+  .ppNLHead--wide .ppNLSub  { font-size: 8px; }
+  .ppNLHead--wide .ppNLDate { font-size: 8px; }
+
+  .ppNLLogo {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: var(--brand1, #0077be); color: #fff;
+    font-size: 11px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .ppNLLogo--sm { width: 16px; height: 16px; border-radius: 4px; font-size: 8px; }
+
+  .ppNLTitleGroup {
+    display: flex; flex-direction: column; gap: 0; flex: 1; min-width: 0;
+  }
+  .ppNLName { font-size: 8px; font-weight: 800; color: #111; line-height: 1; }
+  .ppNLSub  { font-size: 6.5px; color: #aaa; line-height: 1.1; }
+  .ppNLDate { font-size: 6.5px; color: #aaa; white-space: nowrap; margin-left: auto; }
+
+  .ppNLBar {
+    height: 2px; background: var(--brand1, #0077be); border-radius: 1px;
+    margin: 2px 0; flex-shrink: 0;
+  }
+
+  .ppNLStory { display: flex; flex-direction: column; gap: 3px; }
+  .ppNLStory--sm { opacity: .72; }
+
+  .ppNLCat {
+    font-size: 6px; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--brand1, #0077be);
+  }
+  .ppNLHL { font-size: 9px; font-weight: 800; color: #111; line-height: 1.3; }
+  .ppNLHL--sm   { font-size: 8px; }
+  .ppNLHL--desk { font-size: 11px; }
+
+  .ppNLReadMore {
+    font-size: 7px; color: var(--brand1, #0077be); font-weight: 700;
+    display: inline-block; margin-top: 2px;
+  }
+
+  /* Text ad copy */
+  .ppNLTextMention { font-size: 7.5px; line-height: 1.5; color: #333; margin: 4px 0 6px; }
+  .ppNLTextBiz  { font-weight: 800; color: #111; }
+  .ppNLTextLink { color: var(--brand1, #0077be); font-weight: 700; white-space: nowrap; }
+
+  /* Image placeholders */
+  .ppNLHeaderImg, .ppNLHeaderImgDesk,
+  .ppNLBannerImg, .ppNLPremiumImg, .ppNLPremiumImgDesk {
+    width: 100%; border-radius: 5px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 18%, #e5e7eb);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .ppNLHeaderImg      { height: 36px; }
+  .ppNLHeaderImgDesk  { height: 52px; }
+  .ppNLBannerImg      { height: 30px; }
+  .ppNLPremiumImg     { height: 52px; }
+  .ppNLPremiumImgDesk { height: 65px; }
+
+  /* ── Ad badges ── */
+  .ppAdBadge {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 7px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--brand1, #0077be);
+    background: rgba(255,255,255,.92);
+    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 30%, transparent);
+    border-radius: 999px; padding: 3px 9px; white-space: nowrap;
+    box-shadow: 0 1px 6px rgba(0,0,0,.08);
+  }
+  .ppAdBadge--sm   { font-size: 6px; padding: 2px 6px; }
+  .ppAdBadge--ig   { font-size: 6.5px; }
+  .ppAdBadge--hero { font-size: 8px; padding: 4px 11px; }
+
+  /* ── Sponsor / partner tags ── */
+  .ppSponsorTag {
+    display: inline-block;
+    font-size: 6px; font-weight: 900; letter-spacing: .13em; text-transform: uppercase;
+    color: var(--brand1, #0077be);
+    background: color-mix(in srgb, var(--brand1, #0077be) 8%, white);
+    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 20%, transparent);
+    border-radius: 4px; padding: 2px 5px; margin-bottom: 4px;
+  }
+  .ppSponsorTag--top     { display: block; }
+  .ppSponsorTag--article { font-size: 6.5px; }
+
+  .ppPremiumTag {
+    display: inline-block;
+    font-size: 6px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase;
+    color: #fff; background: var(--brand1, #0077be);
+    border-radius: 4px; padding: 2px 6px; margin-bottom: 4px;
+  }
+  .ppPremiumSize {
+    font-size: 6px; color: rgba(255,255,255,.75); font-weight: 600;
+    text-align: center; margin-top: 3px;
+  }
+
+  /* ── Ad zone sub-variants ── */
+  .ppAdZone--nlText        { padding: 8px; }
+  .ppAdZone--nlHeader      { padding: 7px; }
+  .ppAdZone--nlHeaderDesk  { padding: 7px; }
+  .ppAdZone--nlBanner      { padding: 7px; }
+  .ppAdZone--nlPremium     { padding: 8px; }
+  .ppAdZone--nlPremiumDesk { padding: 8px; }
+  .ppAdZone--igPost        { border-radius: 0; padding: 0; border-left: none; border-right: none; }
+  .ppAdZone--spotlightCard { position: relative; }
+  .ppAdZone--deepDive      { border-radius: 0; border-left: none; border-right: none; padding: 0; }
+  .ppAdZone--mobileLeader  { padding: 6px; }
+  .ppAdZone--mobileInFeed  { padding: 5px; }
+  .ppAdZone--desktopLeader { padding: 6px; margin-bottom: 0; }
+  .ppAdZone--deskInFeed    { padding: 5px; }
+  .ppAdZone--deskSidebar   { padding: 5px; height: 100%; }
+
+  /* ── Phone shell variants ── */
+  .ppPhoneShell--ig { width: 224px; }
+  .ppPhoneShell--sm { width: 168px; }
+
+  /* ── Instagram screen ── */
+  .ppIGScreen { padding: 0; gap: 0; }
+
+  .ppIGNav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px; border-bottom: 1px solid #f0f0f0; color: #111;
+  }
+  .ppIGNavTitle { font-size: 10px; font-weight: 800; color: #111; }
+
+  .ppIGPostHead {
+    display: flex; align-items: center; gap: 7px; padding: 7px 10px;
+  }
+  .ppIGAvatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--brand1, #0077be), #0abb78);
+    color: #fff; font-size: 10px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .ppIGMeta { display: flex; flex-direction: column; gap: 1px; flex: 1; }
+  .ppIGHandle { font-size: 8px; font-weight: 800; color: #111; }
+  .ppIGHandle--cap { font-weight: 800; }
+  .ppIGLocation { font-size: 7px; color: #aaa; }
+  .ppIGDots { font-size: 14px; color: #777; letter-spacing: -2px; line-height: 1; }
+
+  .ppIGImage {
+    width: 100%; aspect-ratio: 1;
+    background: color-mix(in srgb, var(--brand1, #0077be) 18%, #e5e7eb);
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    position: relative;
+  }
+  .ppIGImgLabel {
+    font-size: 7px; color: color-mix(in srgb, var(--brand1, #0077be) 65%, #333);
+    font-weight: 700; line-height: 1.5; text-align: center;
+  }
+  .ppIGActions {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 10px; color: #111;
+  }
+  .ppIGActLeft { display: flex; gap: 10px; align-items: center; }
+  .ppIGLikes   { font-size: 8px; font-weight: 800; color: #111; padding: 0 10px; margin-bottom: 2px; }
+  .ppIGCaption { padding: 0 10px 3px; display: flex; gap: 4px; flex-wrap: wrap; align-items: baseline; }
+  .ppIGCaptionText { font-size: 7.5px; color: #333; line-height: 1.4; }
+  .ppIGSponsored { display: block; font-size: 7px; color: #aaa; padding: 0 10px 8px; }
+
+  /* ── Article mockups ── */
+  .ppSiteHeader {
+    display: flex; align-items: center; gap: 7px;
+    padding: 8px 10px; border-bottom: 1px solid #f0f0f0; background: #fff;
+  }
+  .ppSiteHeader--mini { padding: 5px 8px; }
+  .ppSiteTitle    { font-size: 10px; font-weight: 800; color: #111; }
+  .ppSiteTitle--sm { font-size: 8px; }
+  .ppSiteNav { display: flex; gap: 8px; margin-left: auto; }
+  .ppSiteNav span { font-size: 7.5px; color: #666; font-weight: 600; }
+
+  .ppArticlePage { padding: 8px 10px; }
+  .ppArticleList { display: flex; flex-direction: column; gap: 8px; }
+  .ppArticleItem { display: flex; gap: 8px; align-items: flex-start; }
+  .ppArticleItem--faded { opacity: .38; }
+  .ppArticleThumb {
+    width: 40px; height: 40px; border-radius: 5px; flex-shrink: 0;
+    background: color-mix(in srgb, var(--brand1, #0077be) 14%, #e5e7eb);
+  }
+  .ppArticleThumb--sm { width: 30px; height: 30px; }
+  .ppArticleText { flex: 1; display: flex; flex-direction: column; gap: 3px; }
+
+  .ppSpotlightContent { display: flex; gap: 8px; align-items: flex-start; }
+  .ppSpotlightThumb {
+    width: 46px; height: 46px; border-radius: 5px; flex-shrink: 0;
+    background: color-mix(in srgb, var(--brand1, #0077be) 20%, #e5e7eb);
+  }
+
+  .ppByline { font-size: 6.5px; color: #aaa; font-weight: 500; display: block; margin-bottom: 4px; }
+
+  .ppDeepDiveHero {
+    width: 100%; height: 55px; border-radius: 0;
+    background: color-mix(in srgb, var(--brand1, #0077be) 20%, #e5e7eb);
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ppDeepDiveImgLabel {
+    position: absolute; bottom: 5px; right: 7px;
+    font-size: 6.5px; color: rgba(255,255,255,.8); font-weight: 600;
+  }
+  .ppDeepDiveBody { padding: 8px; }
+
+  /* ── Desktop email/browser shell ── */
+  .ppDualView { display: flex; justify-content: center; width: 100%; }
+
+  .ppDesktopShell {
+    width: 380px; max-width: 100%;
+    background: #fff; border: 1.5px solid #ddd;
+    border-radius: 12px; overflow: hidden;
+    box-shadow: 0 16px 56px rgba(0,0,0,.12);
+  }
+  .ppDesktopShell--display { width: 440px; }
+
+  .ppDesktopBar {
+    display: flex; align-items: center; gap: 8px;
+    background: #f0f0f2; padding: 6px 10px; border-bottom: 1px solid #e5e7eb;
+  }
+  .ppDesktopUrl {
+    flex: 1; font-size: 9px; color: #999;
+    overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  }
+  .ppDesktopMeta {
+    display: flex; flex-direction: column; gap: 2px;
+    padding: 7px 12px; border-bottom: 1px solid #f0f0f0; background: #fafafa;
+  }
+  .ppDMFrom, .ppDMSubj { font-size: 8.5px; color: #555; line-height: 1.4; }
+  .ppDMFrom strong, .ppDMSubj strong { color: #111; }
+  .ppDesktopNL { padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .ppDesktopStory { display: flex; flex-direction: column; gap: 3px; }
+
+  /* ── Display ad image slots ── */
+  .ppMobileLeaderImg, .ppMobileInFeedImg,
+  .ppDeskLeaderImg, .ppDeskInFeedImg, .ppDeskSidebarImg {
+    width: 100%; border-radius: 4px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 18%, #e5e7eb);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ppMobileLeaderImg  { height: 20px; }
+  .ppMobileInFeedImg  { height: 16px; }
+  .ppDeskLeaderImg    { height: 26px; }
+  .ppDeskInFeedImg    { height: 20px; }
+  .ppDeskSidebarImg   { height: 80px; }
 </style>
+
+<script>
+  const toggle = document.getElementById('ppDevToggle');
+  if (toggle) {
+    toggle.addEventListener('click', (e: Event) => {
+      const btn = (e.target as Element).closest('.ppDevBtn') as HTMLElement | null;
+      if (!btn) return;
+      const target = btn.dataset.target;
+      toggle.querySelectorAll<HTMLElement>('.ppDevBtn').forEach(b => {
+        b.classList.toggle('ppDevBtn--on', b === btn);
+        b.setAttribute('aria-pressed', String(b === btn));
+      });
+      const section = toggle.closest('.ppSection--mockup');
+      if (!section) return;
+      section.querySelectorAll<HTMLElement>('[data-view]').forEach(el => {
+        el.hidden = el.dataset.view !== target;
+      });
+    });
+  }
+</script>
