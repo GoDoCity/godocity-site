@@ -1,0 +1,801 @@
+---
+import Base from "../../../../layouts/Base.astro";
+
+export function getStaticPaths() {
+  return PRODUCTS.map((p) => ({ params: { product: p.slug }, props: { product: p } }));
+}
+
+interface Product {
+  slug: string;
+  name: string;
+  badge?: string;
+  valueHook: string;
+  specs: { label: string; value: string; icon: string }[];
+  description: string[];
+  mockupType: string;
+  startingAt: string;
+  startingUnit: string;
+}
+
+const PRODUCTS: Product[] = [
+  {
+    slug: "newsletter-text-ad",
+    name: "Newsletter Text Ad",
+    badge: "The Daily Mention",
+    valueHook: "Put your brand in the first 5 seconds of their day.",
+    specs: [
+      { label: "Reach", value: "5,000+ subscribers", icon: "reach" },
+      { label: "Format", value: "Text + Link", icon: "text" },
+      { label: "Lead Time", value: "3 Business Days", icon: "clock" },
+    ],
+    description: [
+      "The simplest placement with the highest frequency. A native text mention woven directly into the body of GoDoDaytona's weekday morning briefing — appearing as a natural part of the editorial flow rather than a banner to skip past.",
+      "Our readers are conditioned to trust what they see in this newsletter. A Daily Mention inherits that trust. Your business name, a one-line pitch, and a link — clean, local, and delivered right to inbox at the moment Daytona residents are at their most receptive.",
+      "Ideal for promotions, events, and businesses that want consistent, low-friction presence in the local conversation without a large creative budget.",
+    ],
+    mockupType: "email-text",
+    startingAt: "$75",
+    startingUnit: "per insertion",
+  },
+  {
+    slug: "email-header-ad",
+    name: "Email Header Ad",
+    badge: "Top-of-Mind Visibility",
+    valueHook: "The very first thing 5,000+ Daytona locals see every weekday morning.",
+    specs: [
+      { label: "Reach", value: "5,000+ subscribers", icon: "reach" },
+      { label: "Format", value: "Image + Text", icon: "image" },
+      { label: "Lead Time", value: "5 Business Days", icon: "clock" },
+    ],
+    description: [
+      "Before the news, before the weather, before any editorial content — your brand. The Header Ad occupies the highest-value real estate in our daily email: the full-width image and headline slot that loads the moment the reader opens the briefing.",
+      "There is no higher-attention moment in local digital advertising than the first 3 seconds of email open. This placement captures that window and holds it. It reads as editorial rather than interruptive, fitting naturally into the GoDo visual language your audience already knows and trusts.",
+      "Supply a 600×200 px image with a headline and CTA, and we handle the rest. Perfect for grand openings, limited-time offers, and high-visibility brand campaigns.",
+    ],
+    mockupType: "email-header",
+    startingAt: "$150",
+    startingUnit: "per insertion",
+  },
+  {
+    slug: "email-banner-ad",
+    name: "Email Banner Ad",
+    badge: "Standard Mid-Scroll",
+    valueHook: "Catch your audience mid-read, when curiosity is at its peak.",
+    specs: [
+      { label: "Reach", value: "5,000+ subscribers", icon: "reach" },
+      { label: "Format", value: "Image Banner", icon: "image" },
+      { label: "Lead Time", value: "3 Business Days", icon: "clock" },
+    ],
+    description: [
+      "Positioned between editorial sections, the Email Banner drops into the reader's scroll path at the moment they're already engaged and moving through the content. This mid-letter placement benefits from the surrounding credibility without competing with the hero slot above.",
+      "At 600×150 px, it's a clean horizontal format that displays consistently across desktop and mobile email clients. Your creative gets a full-width stage at the point in the briefing where readers have confirmed their interest — they didn't bounce, they're in.",
+      "An excellent workhorse for weekly campaigns, recurring promotions, and seasonal awareness. Available as a one-time insertion or on a recurring weekly schedule.",
+    ],
+    mockupType: "email-banner",
+    startingAt: "$100",
+    startingUnit: "per insertion",
+  },
+  {
+    slug: "premium-email-banner-ad",
+    name: "Premium Email Banner Ad",
+    badge: "High-Impact Placement",
+    valueHook: "Maximum visibility. Maximum impact. Zero compromise.",
+    specs: [
+      { label: "Reach", value: "5,000+ subscribers", icon: "reach" },
+      { label: "Format", value: "Large Image Banner", icon: "image" },
+      { label: "Lead Time", value: "5 Business Days", icon: "clock" },
+    ],
+    description: [
+      "The Premium Banner combines the size of the Header Ad with the dwell time of the mid-scroll position — a full-width, high-resolution creative slot placed just below our lead story section, where readers linger longest.",
+      "At 600×300 px, you have room to tell a visual story. A compelling restaurant photo, a real estate hero shot, a wellness lifestyle image — the Premium Banner gives your creative the space it deserves in the one inbox Daytona actually reads.",
+      "This placement is capped at one advertiser per send date, ensuring your brand owns the moment without sharing attention. Plan ahead — premium dates fill weeks in advance.",
+    ],
+    mockupType: "email-premium",
+    startingAt: "$200",
+    startingUnit: "per insertion",
+  },
+  {
+    slug: "mini-article",
+    name: "Mini Article",
+    badge: "Quick Local Highlight",
+    valueHook: "Your story in 150 words — built for the reader who wants to know, not just scroll.",
+    specs: [
+      { label: "Reach", value: "10,000+ monthly readers", icon: "reach" },
+      { label: "Format", value: "Short-Form Article", icon: "text" },
+      { label: "Lead Time", value: "5 Business Days", icon: "clock" },
+    ],
+    description: [
+      "A 100–150 word branded story published on GoDoDaytona.com with your brand name, a clear value statement, and a call to action. It looks and reads like local editorial because it's written that way — our voice, your message.",
+      "The Mini Article lives in our site's content stream, discoverable by anyone browsing local news, dining, or events. It's indexed for search, shareable across social, and it stays on the site indefinitely — working for you long after the initial publish date.",
+      "No fluff, no filler. Just a tight, local-feeling story that tells readers why your business matters to this community right now. Ideal for new openings, seasonal offers, or community partnerships that deserve more than a banner can say.",
+    ],
+    mockupType: "article-mini",
+    startingAt: "$250",
+    startingUnit: "per article",
+  },
+  {
+    slug: "feature-article",
+    name: "Feature Article",
+    badge: "Deep-Dive Branded Content",
+    valueHook: "Long-form storytelling that earns search rankings and builds lasting local authority.",
+    specs: [
+      { label: "Reach", value: "10,000+ monthly readers", icon: "reach" },
+      { label: "Format", value: "Long-Form Article + Images", icon: "text" },
+      { label: "Lead Time", value: "7 Business Days", icon: "clock" },
+    ],
+    description: [
+      "A full-length editorial story (400–600 words) researched, written, and published by the GoDo editorial team — but built entirely around your brand. Think neighborhood guides, business spotlights, event previews, or 'best of' features that position you as a cornerstone of the local scene.",
+      "Feature Articles are optimized for search from the ground up. They target the longtail keywords your customers actually use — 'best waterfront dining Daytona Beach,' 'top home renovators Port Orange' — and are built to rank for months after publication.",
+      "You review the draft before we hit publish. The final piece carries a clear 'Sponsored' designation per our editorial standards, but its editorial quality is indistinguishable from our organic content. Readers engage; search engines notice.",
+    ],
+    mockupType: "article-feature",
+    startingAt: "$500",
+    startingUnit: "per article",
+  },
+  {
+    slug: "social-feed-post",
+    name: "Social Feed Post",
+    badge: "Instagram & Facebook Reach",
+    valueHook: "Native content that looks local because it is.",
+    specs: [
+      { label: "Reach", value: "10,000+ social followers", icon: "reach" },
+      { label: "Format", value: "Image + Caption", icon: "image" },
+      { label: "Lead Time", value: "3 Business Days", icon: "clock" },
+    ],
+    description: [
+      "A dedicated, purpose-built post published to GoDoDaytona's Instagram and Facebook feeds — designed to feel like organic GoDo content rather than an ad. Our audience follows us for local discoveries, and your brand gets introduced as exactly that.",
+      "We write the caption, style the creative to match our feed aesthetic, and publish it at peak engagement hours. The post tags your account, links to your booking page or website, and optionally receives paid boosting for additional targeted reach within Volusia County.",
+      "One post. Two platforms. One audience that's already opted in to local recommendations. This is word-of-mouth at scale — and it works particularly well for food, events, retail openings, and anything that benefits from a strong visual moment.",
+    ],
+    mockupType: "social",
+    startingAt: "$150",
+    startingUnit: "per post",
+  },
+  {
+    slug: "digital-display-bundle",
+    name: "Digital Display Bundle",
+    badge: "Website-Wide Presence",
+    valueHook: "Be everywhere your customers are reading, all week long.",
+    specs: [
+      { label: "Reach", value: "25,000+ monthly pageviews", icon: "reach" },
+      { label: "Format", value: "Leaderboard + Sidebar + In-Feed", icon: "image" },
+      { label: "Lead Time", value: "5 Business Days", icon: "clock" },
+    ],
+    description: [
+      "A coordinated display package that puts your brand in three high-visibility positions across GoDoDaytona.com simultaneously: the leaderboard above article content, the sidebar alongside it, and an in-feed unit between editorial blocks.",
+      "Run-of-site targeting means your ad appears across all content categories — news, dining, events, business — so you're reaching the full breadth of our local audience regardless of what they came to read. Or select a specific category (e.g., Food & Drink only) for tighter relevance.",
+      "Weekly bundles include real-time impression reporting so you can see exactly how your campaign is performing. Creative updates between weeks are included at no extra charge. The bundle is our most cost-efficient display option per impression — and the most visible.",
+    ],
+    mockupType: "display",
+    startingAt: "$300",
+    startingUnit: "per week",
+  },
+];
+
+const { product } = Astro.props;
+---
+
+<Base
+  title={`${product.name} | GoDoDaytona Advertise`}
+  subtitle={product.valueHook}
+  cityBase="daytona"
+>
+
+  <!-- ── BREADCRUMB ── -->
+  <nav class="ppBreadcrumb" aria-label="Breadcrumb">
+    <div class="ppWrap">
+      <a href="/daytona/advertise/">Advertise</a>
+      <span aria-hidden="true">›</span>
+      <a href="/daytona/advertise/#self-service">Products</a>
+      <span aria-hidden="true">›</span>
+      <span>{product.name}</span>
+    </div>
+  </nav>
+
+  <!-- ── HERO ── -->
+  <section class="ppHero">
+    <div class="ppHeroOverlay" aria-hidden="true"></div>
+    <div class="ppWrap ppHeroInner">
+      {product.badge && <p class="ppHeroBadge">{product.badge}</p>}
+      <h1 class="ppHeroTitle">{product.name}</h1>
+      <p class="ppHeroHook">{product.valueHook}</p>
+      <a href="/daytona/advertise/#contact" class="ppHeroCta">Reserve This Placement</a>
+    </div>
+  </section>
+
+  <div class="ppBody">
+
+    <!-- ── SPECS ROW ── -->
+    <section class="ppSection">
+      <div class="ppWrap">
+        <div class="ppSpecsRow">
+          {product.specs.map((spec) => (
+            <div class="ppSpecCard">
+              <div class="ppSpecIcon" aria-hidden="true">
+                {spec.icon === "reach" && (
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="11" cy="11" r="4" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="11" cy="11" r="1.5" fill="currentColor"/>
+                  </svg>
+                )}
+                {spec.icon === "text" && (
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <rect x="2" y="3" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                    <line x1="6" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="6" y1="12" x2="14" y2="12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                    <line x1="6" y1="16" x2="11" y2="16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  </svg>
+                )}
+                {spec.icon === "image" && (
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <rect x="2" y="3" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                    <circle cx="7.5" cy="8.5" r="2" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M2 15l5-5 4 4 3-3 6 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                )}
+                {spec.icon === "clock" && (
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                    <circle cx="11" cy="11" r="9" stroke="currentColor" stroke-width="1.8"/>
+                    <path d="M11 6v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                )}
+              </div>
+              <div class="ppSpecValue">{spec.value}</div>
+              <div class="ppSpecLabel">{spec.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+
+    <!-- ── MAIN CONTENT: MOCKUP + DESCRIPTION ── -->
+    <section class="ppSection ppSection--grey">
+      <div class="ppWrap ppContentGrid">
+
+        <!-- MOCKUP -->
+        <div class="ppMockupCol">
+          <p class="ppMockupLabel">Ad Placement Preview</p>
+          <div class={`ppDevice ppDevice--${product.mockupType}`}>
+
+            {product.mockupType === "email-text" && (
+              <div class="ppEmailFrame">
+                <div class="ppEmailHeader">
+                  <div class="ppEmailLogo"></div>
+                  <div class="ppEmailHeaderLines">
+                    <div class="ppLine ppLine--wide"></div>
+                    <div class="ppLine ppLine--med"></div>
+                  </div>
+                </div>
+                <div class="ppEmailSection">
+                  <div class="ppLine ppLine--wide"></div>
+                  <div class="ppLine ppLine--wide"></div>
+                  <div class="ppLine ppLine--med"></div>
+                </div>
+                <div class="ppAdPlacement ppAdPlacement--textAd">
+                  <span class="ppAdTag">SPONSORED</span>
+                  <div class="ppTextAdContent">
+                    <div class="ppLine ppLine--wide ppLine--dark"></div>
+                    <div class="ppLine ppLine--med ppLine--link"></div>
+                  </div>
+                </div>
+                <div class="ppEmailSection">
+                  <div class="ppLine ppLine--wide"></div>
+                  <div class="ppLine ppLine--narrow"></div>
+                </div>
+              </div>
+            )}
+
+            {product.mockupType === "email-header" && (
+              <div class="ppEmailFrame">
+                <div class="ppEmailHeader">
+                  <div class="ppEmailLogo"></div>
+                </div>
+                <div class="ppAdPlacement ppAdPlacement--emailHeader">
+                  <span class="ppAdTag">SPONSORED</span>
+                  <div class="ppBannerImg ppBannerImg--header"></div>
+                  <div class="ppLine ppLine--med" style="margin-top:6px"></div>
+                </div>
+                <div class="ppEmailSection">
+                  <div class="ppLine ppLine--wide"></div>
+                  <div class="ppLine ppLine--wide"></div>
+                  <div class="ppLine ppLine--med"></div>
+                </div>
+              </div>
+            )}
+
+            {product.mockupType === "email-banner" && (
+              <div class="ppEmailFrame">
+                <div class="ppEmailHeader">
+                  <div class="ppEmailLogo"></div>
+                  <div class="ppEmailHeaderLines">
+                    <div class="ppLine ppLine--wide"></div>
+                    <div class="ppLine ppLine--med"></div>
+                  </div>
+                </div>
+                <div class="ppEmailSection">
+                  <div class="ppLine ppLine--wide"></div>
+                  <div class="ppLine ppLine--wide"></div>
+                </div>
+                <div class="ppAdPlacement ppAdPlacement--emailBanner">
+                  <span class="ppAdTag">SPONSORED</span>
+                  <div class="ppBannerImg ppBannerImg--mid"></div>
+                </div>
+                <div class="ppEmailSection">
+                  <div class="ppLine ppLine--wide"></div>
+                  <div class="ppLine ppLine--narrow"></div>
+                </div>
+              </div>
+            )}
+
+            {product.mockupType === "email-premium" && (
+              <div class="ppEmailFrame">
+                <div class="ppEmailHeader">
+                  <div class="ppEmailLogo"></div>
+                </div>
+                <div class="ppEmailSection">
+                  <div class="ppLine ppLine--wide"></div>
+                  <div class="ppLine ppLine--med"></div>
+                </div>
+                <div class="ppAdPlacement ppAdPlacement--emailPremium">
+                  <span class="ppAdTag ppAdTag--premium">PREMIUM SPONSOR</span>
+                  <div class="ppBannerImg ppBannerImg--premium"></div>
+                  <div class="ppLine ppLine--med" style="margin-top:6px"></div>
+                  <div class="ppLine ppLine--narrow" style="margin-top:4px"></div>
+                </div>
+                <div class="ppEmailSection">
+                  <div class="ppLine ppLine--wide"></div>
+                </div>
+              </div>
+            )}
+
+            {product.mockupType === "article-mini" && (
+              <div class="ppBrowserFrame">
+                <div class="ppBrowserBar">
+                  <div class="ppBrowserDots"><span></span><span></span><span></span></div>
+                  <div class="ppBrowserUrl"></div>
+                </div>
+                <div class="ppArticleBody">
+                  <div class="ppLine ppLine--wide ppLine--title"></div>
+                  <div class="ppLine ppLine--med" style="margin-bottom:10px"></div>
+                  <div class="ppAdPlacement ppAdPlacement--miniArticle">
+                    <span class="ppAdTag">SPONSORED STORY</span>
+                    <div class="ppLine ppLine--wide ppLine--dark"></div>
+                    <div class="ppLine ppLine--wide"></div>
+                    <div class="ppLine ppLine--wide"></div>
+                    <div class="ppLine ppLine--med ppLine--link" style="margin-top:6px"></div>
+                  </div>
+                  <div class="ppLine ppLine--wide" style="margin-top:10px"></div>
+                  <div class="ppLine ppLine--wide"></div>
+                  <div class="ppLine ppLine--narrow"></div>
+                </div>
+              </div>
+            )}
+
+            {product.mockupType === "article-feature" && (
+              <div class="ppBrowserFrame">
+                <div class="ppBrowserBar">
+                  <div class="ppBrowserDots"><span></span><span></span><span></span></div>
+                  <div class="ppBrowserUrl"></div>
+                </div>
+                <div class="ppArticleBody">
+                  <div class="ppAdPlacement ppAdPlacement--featureArticle">
+                    <span class="ppAdTag">SPONSORED</span>
+                    <div class="ppFeatureHero"></div>
+                    <div class="ppLine ppLine--wide ppLine--title" style="margin-top:8px"></div>
+                    <div class="ppLine ppLine--wide"></div>
+                    <div class="ppLine ppLine--wide"></div>
+                    <div class="ppLine ppLine--med"></div>
+                    <div class="ppLine ppLine--wide"></div>
+                    <div class="ppLine ppLine--narrow ppLine--link" style="margin-top:6px"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {product.mockupType === "social" && (
+              <div class="ppPhoneFrame">
+                <div class="ppPhoneNotch"></div>
+                <div class="ppPhoneScreen">
+                  <div class="ppSocialHeader">
+                    <div class="ppSocialAvatar"></div>
+                    <div class="ppSocialMeta">
+                      <div class="ppLine ppLine--med ppLine--dark" style="height:5px"></div>
+                      <div class="ppLine ppLine--narrow" style="height:4px;margin-top:3px"></div>
+                    </div>
+                  </div>
+                  <div class="ppSocialImg"></div>
+                  <div class="ppSocialCaption">
+                    <div class="ppLine ppLine--wide" style="height:5px"></div>
+                    <div class="ppLine ppLine--wide" style="height:5px;margin-top:4px"></div>
+                    <div class="ppLine ppLine--med ppLine--link" style="height:5px;margin-top:4px"></div>
+                  </div>
+                  <div class="ppAdTag ppAdTag--social">Sponsored</div>
+                </div>
+              </div>
+            )}
+
+            {product.mockupType === "display" && (
+              <div class="ppBrowserFrame">
+                <div class="ppBrowserBar">
+                  <div class="ppBrowserDots"><span></span><span></span><span></span></div>
+                  <div class="ppBrowserUrl"></div>
+                </div>
+                <div class="ppDisplayLayout">
+                  <div class="ppAdPlacement ppAdPlacement--leaderboard">
+                    <span class="ppAdTag">LEADERBOARD AD</span>
+                    <div class="ppBannerImg ppBannerImg--leader"></div>
+                  </div>
+                  <div class="ppDisplayBody">
+                    <div class="ppDisplayMain">
+                      <div class="ppLine ppLine--wide ppLine--title"></div>
+                      <div class="ppLine ppLine--wide"></div>
+                      <div class="ppLine ppLine--wide"></div>
+                      <div class="ppLine ppLine--med"></div>
+                      <div class="ppAdPlacement ppAdPlacement--inFeed" style="margin-top:8px">
+                        <span class="ppAdTag">IN-FEED AD</span>
+                        <div class="ppBannerImg" style="height:28px"></div>
+                      </div>
+                    </div>
+                    <div class="ppDisplaySidebar">
+                      <div class="ppAdPlacement ppAdPlacement--sidebar">
+                        <span class="ppAdTag">SIDEBAR</span>
+                        <div class="ppBannerImg ppBannerImg--sidebar"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+
+        <!-- DESCRIPTION -->
+        <div class="ppDescCol">
+          <h2 class="ppDescTitle">About This Placement</h2>
+          {product.description.map((para) => (
+            <p class="ppDescPara">{para}</p>
+          ))}
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── PRICING / CTA ── -->
+    <section class="ppSection ppPricingSection">
+      <div class="ppWrap ppPricingInner">
+        <div class="ppPricingLeft">
+          <span class="ppPricingEyebrow">Pricing</span>
+          <div class="ppPricingAmount">
+            <span class="ppPricingFrom">Starting at</span>
+            <span class="ppPricingNum">{product.startingAt}</span>
+            <span class="ppPricingUnit">/ {product.startingUnit}</span>
+          </div>
+          <p class="ppPricingNote">Custom packages and volume discounts available. Contact us to discuss a schedule that fits your goals and budget.</p>
+        </div>
+        <div class="ppPricingRight">
+          <a href="/daytona/advertise/#contact" class="ppReserveBtn">Reserve This Placement</a>
+          <a href="/daytona/advertise/#self-service" class="ppBackLink">← View all products</a>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+</Base>
+
+<style>
+  /* ── Layout tokens ── */
+  .ppWrap { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+  @media (max-width: 600px) { .ppWrap { padding: 0 1.25rem; } }
+
+  .ppBody { background: #fff; }
+
+  .ppSection { padding: 72px 0; }
+  @media (max-width: 768px) { .ppSection { padding: 52px 0; } }
+
+  .ppSection--grey { background: #f5f5f7; }
+
+  /* ── Breadcrumb ── */
+  .ppBreadcrumb {
+    background: #fff;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0;
+  }
+  .ppBreadcrumb .ppWrap {
+    display: flex; align-items: center; gap: 8px;
+    padding-top: 12px; padding-bottom: 12px;
+    font-size: 13px; color: #777;
+  }
+  .ppBreadcrumb a {
+    color: var(--brand1, #0077be); text-decoration: none; font-weight: 600;
+  }
+  .ppBreadcrumb a:hover { text-decoration: underline; }
+  .ppBreadcrumb span[aria-hidden] { color: #bbb; }
+
+  /* ── Hero ── */
+  .ppHero {
+    position: relative; overflow: hidden;
+    background: #000e23; min-height: 380px;
+    display: flex; align-items: center;
+  }
+  .ppHero::before {
+    content: "";
+    position: absolute; inset: 0; z-index: 0;
+    background: url("/images/godo-blueprint-h.png") center / cover no-repeat;
+    filter: brightness(1.1) saturate(1.1);
+  }
+  .ppHeroOverlay {
+    position: absolute; inset: 0; z-index: 1;
+    background: linear-gradient(135deg, rgba(0,20,50,.88) 0%, rgba(0,60,110,.78) 100%);
+  }
+  .ppHeroInner {
+    position: relative; z-index: 2;
+    color: #fff; padding: 72px 2rem 80px;
+    max-width: 1200px; margin: 0 auto;
+  }
+  .ppHeroBadge {
+    font-size: 11px; font-weight: 900; letter-spacing: .16em;
+    text-transform: uppercase; color: rgba(255,255,255,.65);
+    margin: 0 0 14px;
+  }
+  .ppHeroTitle {
+    font-size: clamp(30px, 5vw, 52px); font-weight: 900;
+    letter-spacing: -0.03em; line-height: 1.06;
+    color: #fff; margin: 0 0 18px; max-width: 680px;
+    text-shadow: 0 2px 10px rgba(0,0,0,.4);
+  }
+  .ppHeroHook {
+    font-size: clamp(16px, 1.8vw, 20px); line-height: 1.6;
+    color: rgba(255,255,255,.82); max-width: 540px; margin: 0 0 32px;
+  }
+  .ppHeroCta {
+    display: inline-flex; align-items: center;
+    background: #fff; color: #111;
+    font-size: 14px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+    padding: 16px 36px; border-radius: 999px; text-decoration: none;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 4px rgba(255,255,255,.18), 0 6px 24px rgba(0,0,0,.3);
+    transition: transform 160ms, box-shadow 160ms;
+  }
+  .ppHeroCta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 0 6px rgba(255,255,255,.28), 0 8px 32px rgba(0,119,190,.5);
+  }
+
+  /* ── Specs Row ── */
+  .ppSpecsRow {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 600px) { .ppSpecsRow { grid-template-columns: 1fr; gap: 14px; } }
+
+  .ppSpecCard {
+    background: #fff; border: 1px solid #e5e7eb;
+    border-radius: 16px; padding: 28px 24px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+    transition: box-shadow 160ms, transform 160ms;
+  }
+  .ppSpecCard:hover { box-shadow: 0 8px 28px rgba(0,0,0,.08); transform: translateY(-2px); }
+
+  .ppSpecIcon {
+    width: 46px; height: 46px; border-radius: 12px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 10%, transparent);
+    color: var(--brand1, #0077be);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 6px;
+  }
+  .ppSpecValue {
+    font-size: 17px; font-weight: 900; letter-spacing: -0.01em; color: #111;
+  }
+  .ppSpecLabel {
+    font-size: 11px; font-weight: 700; letter-spacing: .09em;
+    text-transform: uppercase; color: var(--brand1, #0077be); opacity: .85;
+  }
+
+  /* ── Content Grid ── */
+  .ppContentGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 56px; align-items: start;
+  }
+  @media (max-width: 900px) { .ppContentGrid { grid-template-columns: 1fr; gap: 40px; } }
+
+  /* ── Mockup column ── */
+  .ppMockupCol { display: flex; flex-direction: column; gap: 12px; }
+  .ppMockupLabel {
+    font-size: 10px; font-weight: 900; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--brand1, #0077be); opacity: .8;
+  }
+
+  .ppDevice {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,.08);
+  }
+
+  /* ── Skeleton helpers ── */
+  .ppLine {
+    height: 7px; border-radius: 4px; background: #e5e7eb;
+    margin-bottom: 5px;
+  }
+  .ppLine--wide   { width: 92%; }
+  .ppLine--med    { width: 64%; }
+  .ppLine--narrow { width: 38%; }
+  .ppLine--dark   { background: #c8d0d8; }
+  .ppLine--link   { background: color-mix(in srgb, var(--brand1, #0077be) 45%, transparent); }
+  .ppLine--title  { height: 10px; background: #c8d0d8; margin-bottom: 8px; }
+
+  /* ── Email frame ── */
+  .ppEmailFrame { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+  .ppEmailHeader {
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 12px; border-bottom: 1px solid #f0f0f0;
+  }
+  .ppEmailLogo {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--brand1, #0077be); flex-shrink: 0;
+  }
+  .ppEmailHeaderLines { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .ppEmailSection { display: flex; flex-direction: column; gap: 5px; }
+
+  /* ── Ad placement highlight ── */
+  .ppAdPlacement {
+    border-radius: 8px;
+    border: 1.5px dashed color-mix(in srgb, var(--brand1, #0077be) 40%, transparent);
+    background: color-mix(in srgb, var(--brand1, #0077be) 5%, transparent);
+    padding: 10px;
+    position: relative;
+  }
+  .ppAdTag {
+    display: inline-block; margin-bottom: 6px;
+    font-size: 8px; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--brand1, #0077be);
+  }
+  .ppAdTag--premium {
+    background: var(--brand1, #0077be); color: #fff;
+    padding: 2px 6px; border-radius: 4px; margin-bottom: 8px;
+  }
+  .ppAdTag--social {
+    display: inline-block; margin: 6px 0 0;
+    font-size: 9px; color: #888; font-weight: 500;
+  }
+
+  .ppTextAdContent { display: flex; flex-direction: column; gap: 5px; }
+  .ppBannerImg {
+    width: 100%; border-radius: 6px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 18%, #e5e7eb);
+  }
+  .ppBannerImg--header { height: 52px; }
+  .ppBannerImg--mid    { height: 36px; }
+  .ppBannerImg--premium { height: 64px; }
+  .ppBannerImg--leader { height: 28px; }
+  .ppBannerImg--sidebar { height: 90px; }
+
+  .ppFeatureHero {
+    width: 100%; height: 60px; border-radius: 6px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 18%, #e5e7eb);
+  }
+
+  /* ── Browser frame ── */
+  .ppBrowserFrame {
+    border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;
+    background: #fff;
+  }
+  .ppBrowserBar {
+    background: #f5f5f7; padding: 8px 12px;
+    display: flex; align-items: center; gap: 8px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  .ppBrowserDots { display: flex; gap: 4px; }
+  .ppBrowserDots span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #ddd; display: block;
+  }
+  .ppBrowserUrl {
+    flex: 1; height: 14px; border-radius: 7px; background: #e5e7eb;
+  }
+  .ppArticleBody { padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+
+  /* ── Display layout ── */
+  .ppDisplayLayout { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .ppDisplayBody { display: flex; gap: 10px; }
+  .ppDisplayMain { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+  .ppDisplaySidebar { width: 60px; flex-shrink: 0; }
+
+  /* ── Phone frame ── */
+  .ppPhoneFrame {
+    max-width: 180px; margin: 0 auto;
+    background: #1a1a1a; border-radius: 28px; padding: 12px 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  }
+  .ppPhoneNotch {
+    width: 48px; height: 8px; border-radius: 4px;
+    background: #333; margin: 0 auto 10px;
+  }
+  .ppPhoneScreen {
+    background: #fff; border-radius: 16px; overflow: hidden;
+    padding: 10px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .ppSocialHeader { display: flex; align-items: center; gap: 8px; }
+  .ppSocialAvatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--brand1, #0077be); flex-shrink: 0;
+  }
+  .ppSocialMeta { flex: 1; }
+  .ppSocialImg {
+    width: 100%; height: 80px; border-radius: 8px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 18%, #e5e7eb);
+  }
+  .ppSocialCaption { display: flex; flex-direction: column; }
+
+  /* ── Description column ── */
+  .ppDescCol { padding-top: 4px; }
+  .ppDescTitle {
+    font-size: clamp(22px, 3vw, 28px); font-weight: 900;
+    letter-spacing: -0.02em; color: #111; margin: 0 0 24px;
+  }
+  .ppDescPara {
+    font-size: 16px; line-height: 1.72; color: #444; margin: 0 0 18px;
+  }
+  .ppDescPara:last-child { margin-bottom: 0; }
+
+  /* ── Pricing / CTA ── */
+  .ppPricingSection { background: #fff; border-top: 1px solid #e5e7eb; }
+  .ppPricingInner {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 40px;
+  }
+  @media (max-width: 700px) { .ppPricingInner { flex-direction: column; align-items: flex-start; } }
+
+  .ppPricingLeft { max-width: 540px; }
+  .ppPricingEyebrow {
+    display: inline-block;
+    font-size: 11px; font-weight: 900; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--brand1, #0077be);
+    margin-bottom: 10px;
+  }
+  .ppPricingAmount {
+    display: flex; align-items: baseline; gap: 8px; margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .ppPricingFrom {
+    font-size: 13px; font-weight: 600; color: #777;
+  }
+  .ppPricingNum {
+    font-size: clamp(36px, 5vw, 48px); font-weight: 900;
+    letter-spacing: -0.04em; color: #111; line-height: 1;
+  }
+  .ppPricingUnit {
+    font-size: 14px; font-weight: 600; color: #777;
+  }
+  .ppPricingNote {
+    font-size: 14px; line-height: 1.6; color: #777; margin: 0;
+  }
+
+  .ppPricingRight {
+    display: flex; flex-direction: column; align-items: flex-end; gap: 14px;
+    flex-shrink: 0;
+  }
+  @media (max-width: 700px) { .ppPricingRight { align-items: flex-start; } }
+
+  .ppReserveBtn {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #111; color: #fff;
+    font-size: 14px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+    padding: 16px 36px; border-radius: 999px; text-decoration: none;
+    transition: background 160ms, transform 140ms;
+    white-space: nowrap;
+  }
+  .ppReserveBtn:hover { background: #0077be; transform: translateY(-1px); }
+
+  .ppBackLink {
+    font-size: 13px; font-weight: 700; color: #888;
+    text-decoration: none; transition: color 140ms;
+  }
+  .ppBackLink:hover { color: var(--brand1, #0077be); }
+</style>
