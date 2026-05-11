@@ -1,10 +1,6 @@
 ---
 import Base from "../../../../layouts/Base.astro";
 
-export function getStaticPaths() {
-  return PRODUCTS.map((p) => ({ params: { product: p.slug }, props: { product: p } }));
-}
-
 interface Product {
   slug: string;
   name: string;
@@ -171,6 +167,10 @@ const PRODUCTS: Product[] = [
     startingUnit: "per week",
   },
 ];
+
+export function getStaticPaths() {
+  return PRODUCTS.map((p) => ({ params: { product: p.slug }, props: { product: p } }));
+}
 
 const { product } = Astro.props;
 ---
