@@ -3,7 +3,7 @@ title: GoDoDaytona — Advertise With Us
 type: sidebar
 active: true
 eventDate: ''
-image: /images/ads/GoDo Blueprint H 3D.png
+image: /images/ads/GoDo Blueprint H 3D with verticle.png
 link: /daytona/advertise/
 city: all
 tagline: Reach thousands of engaged Daytona locals
