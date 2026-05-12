@@ -601,7 +601,7 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
                 </svg>
               </div>
               <div class="catalogCardBody">
-                <span class="catalogCardBadge">Highest Visibility</span>
+                <span class="catalogCardBadge catalogCardBadge--pill">MOST POPULAR</span>
                 <h4 class="catalogCardName">The Top Line</h4>
                 <p class="catalogCardHook">The very first thing 5,000+ locals see every weekday morning.</p>
                 <span class="catalogCardPrice">From $275 / insertion</span>
@@ -658,7 +658,7 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
                 </svg>
               </div>
               <div class="catalogCardBody">
-                <span class="catalogCardBadge">Local Storytelling</span>
+                <span class="catalogCardBadge catalogCardBadge--pill">BEST FOR EVENTS</span>
                 <h4 class="catalogCardName">The Local Spotlight</h4>
                 <p class="catalogCardHook">Your story in 150 words — quick, local, and built to be shared.</p>
                 <span class="catalogCardPrice">From $325 / article</span>
@@ -719,7 +719,7 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
                 </svg>
               </div>
               <div class="catalogCardBody">
-                <span class="catalogCardBadge catalogCardBadge--premium">Full Omnichannel</span>
+                <span class="catalogCardBadge catalogCardBadge--pill">TOTAL DOMINANCE</span>
                 <h4 class="catalogCardName">The Market Takeover</h4>
                 <p class="catalogCardHook">Be everywhere your customers are reading, all week long.</p>
                 <span class="catalogCardPrice">From $550 / week</span>
@@ -1592,9 +1592,9 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
     position: relative;
   }
   .catalogCard:hover {
-    box-shadow: 0 10px 32px rgba(0,0,0,.09);
-    transform: translateY(-2px);
-    border-color: color-mix(in srgb, var(--brand1, #0077be) 45%, transparent);
+    box-shadow: 0 10px 30px rgba(0, 119, 190, 0.2);
+    transform: scale(1.02);
+    border-color: color-mix(in srgb, var(--brand1, #0077be) 55%, transparent);
   }
   .catalogCard--featured {
     border-color: color-mix(in srgb, var(--brand1, #0077be) 28%, transparent);
@@ -1620,6 +1620,15 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
   .catalogCardBadge--premium {
     color: #d97706; opacity: 1;
   }
+  .catalogCardBadge--pill {
+    display: inline-flex; align-items: center;
+    font-size: 8px; font-weight: 900; letter-spacing: .14em;
+    text-transform: uppercase;
+    color: #fff; opacity: 1;
+    background: var(--brand1, #0077be);
+    border-radius: 999px; padding: 3px 9px;
+    margin-bottom: 3px; width: fit-content;
+  }
 
   .catalogCardName {
     font-size: 15px; font-weight: 900; letter-spacing: -0.01em;
@@ -1631,7 +1640,8 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
   }
 
   .catalogCardPrice {
-    font-size: 12px; font-weight: 800;
+    font-size: 14px; font-weight: 900;
+    letter-spacing: -0.02em;
     color: var(--brand1, #0077be);
   }
 
