@@ -1,0 +1,284 @@
+---
+/**
+ * src/layouts/LegalLayout.astro
+ * Shared layout for all GoDoCity legal documents.
+ * Provides a two-column grid: sticky sidebar ToC (desktop) + main content.
+ * Mobile: sidebar hidden, collapsible <details> ToC injected above content.
+ */
+import Base from "./Base.astro";
+
+export interface TocItem {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  pageTitle: string;
+  pageSubhead?: string;
+  effectiveDate?: string;
+  lastUpdated?: string;
+  toc: TocItem[];
+  cityBase?: string;
+  noticeHtml?: string;
+}
+
+const {
+  title,
+  subtitle,
+  pageTitle,
+  pageSubhead,
+  effectiveDate,
+  lastUpdated,
+  toc,
+  cityBase = "daytona",
+  noticeHtml,
+} = Astro.props;
+---
+
+<Base title={title} subtitle={subtitle} cityBase={cityBase}>
+  <div class="lgPage">
+
+    <!-- ── Sticky sidebar (desktop only) ── -->
+    <aside class="lgSidebar" aria-label="Document navigation">
+      <div class="lgSidebarInner">
+        <p class="lgTocHead">Contents</p>
+        <ol class="lgTocList">
+          {toc.map((item, i) => (
+            <li>
+              <a class="lgTocLink" href={`#${item.id}`}>
+                <span class="lgTocNum" aria-hidden="true">{i + 1}</span>
+                {item.label}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </aside>
+
+    <!-- ── Main content ── -->
+    <div class="lgContent">
+
+      <nav class="lgBread" aria-label="Breadcrumb">
+        <a href={`/${cityBase}/`}>Home</a>
+        <span aria-hidden="true">›</span>
+        <a href={`/${cityBase}/legal/`}>Legal</a>
+        <span aria-hidden="true">›</span>
+        <span>{pageTitle}</span>
+      </nav>
+
+      <span class="lgEyebrow">GoDoCity / GoDoDaytona</span>
+      <h1 class="lgTitle">{pageTitle}</h1>
+      {pageSubhead && <p class="lgSubhead">{pageSubhead}</p>}
+      <div class="lgMeta">
+        {effectiveDate && <span>Effective: {effectiveDate}</span>}
+        {lastUpdated && <span>Last Updated: {lastUpdated}</span>}
+      </div>
+      <div class="lgDivider"></div>
+
+      {noticeHtml && (
+        <div class="lgNotice">
+          <Fragment set:html={noticeHtml} />
+        </div>
+      )}
+
+      <!-- Mobile collapsible ToC -->
+      <details class="lgMobileToc">
+        <summary class="lgMobileTocBtn">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+            <path d="M2 3h10M2 7h8M2 11h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          Jump to Section
+          <svg class="lgMobileTocChevron" width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+            <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </summary>
+        <ol class="lgMobileTocInner">
+          {toc.map((item, i) => (
+            <li><a href={`#${item.id}`}><span aria-hidden="true">{i + 1}.</span> {item.label}</a></li>
+          ))}
+        </ol>
+      </details>
+
+      <slot />
+
+    </div>
+  </div>
+</Base>
+
+<style>
+  /* ── Two-column page grid ── */
+  .lgPage {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 48px 2rem 96px;
+    display: grid;
+    grid-template-columns: 216px minmax(0, 1fr);
+    gap: 60px;
+    align-items: start;
+  }
+  @media (max-width: 960px) {
+    .lgPage {
+      grid-template-columns: 1fr;
+      gap: 0;
+      padding: 36px 1.25rem 72px;
+    }
+  }
+
+  /* ── Sticky sidebar ── */
+  .lgSidebar {
+    position: sticky;
+    top: 96px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #e5e7eb transparent;
+  }
+  @media (max-width: 960px) { .lgSidebar { display: none; } }
+
+  .lgSidebarInner {
+    background: #f9f9fb;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 18px 16px;
+  }
+
+  .lgTocHead {
+    font-size: 9.5px; font-weight: 900; letter-spacing: .16em;
+    text-transform: uppercase; color: #bbb;
+    margin: 0 0 10px; padding: 0;
+  }
+
+  .lgTocList { list-style: none; padding: 0; margin: 0; }
+
+  .lgTocLink {
+    display: flex; align-items: baseline; gap: 7px;
+    font-size: 11.5px; font-weight: 600; color: #555;
+    text-decoration: none; padding: 5px 7px; border-radius: 6px;
+    line-height: 1.35; transition: background 120ms, color 120ms;
+  }
+  .lgTocLink:hover {
+    background: color-mix(in srgb, var(--brand1, #0077be) 9%, transparent);
+    color: var(--brand1, #0077be);
+  }
+  .lgTocNum {
+    font-size: 9.5px; font-weight: 900; color: #ccc; min-width: 14px; flex-shrink: 0;
+  }
+
+  /* ── Breadcrumb ── */
+  .lgBread {
+    font-size: 13px; color: #888; margin-bottom: 28px;
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  }
+  .lgBread a { color: var(--brand1, #0077be); text-decoration: none; font-weight: 600; }
+  .lgBread a:hover { text-decoration: underline; }
+  .lgBread span[aria-hidden] { color: #ccc; }
+
+  /* ── Document header ── */
+  .lgEyebrow {
+    display: block; font-size: 11px; font-weight: 900; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--brand1, #0077be); margin-bottom: 10px;
+  }
+  .lgTitle {
+    font-size: clamp(26px, 4vw, 40px); font-weight: 900;
+    letter-spacing: -0.025em; color: #111; margin: 0 0 8px; line-height: 1.1;
+  }
+  .lgSubhead { font-size: 15px; font-weight: 700; color: #888; margin: 0 0 14px; }
+  .lgMeta {
+    font-size: 13px; color: #888; margin-bottom: 22px;
+    display: flex; gap: 24px; flex-wrap: wrap;
+  }
+  .lgDivider { height: 1px; background: #e5e7eb; margin: 0 0 26px; }
+
+  /* ── Notice box ── */
+  .lgNotice {
+    background: color-mix(in srgb, var(--brand1, #0077be) 6%, white);
+    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 22%, transparent);
+    border-radius: 10px; padding: 14px 18px; margin-bottom: 28px;
+  }
+  .lgNotice p { margin: 0; font-size: 14px; line-height: 1.65; color: #333; }
+  .lgNotice a { color: var(--brand1, #0077be); }
+
+  /* ── Mobile ToC ── */
+  .lgMobileToc {
+    display: none;
+    border: 1px solid #e5e7eb; border-radius: 10px;
+    margin-bottom: 32px; overflow: hidden;
+  }
+  @media (max-width: 960px) { .lgMobileToc { display: block; } }
+
+  .lgMobileTocBtn {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 800; color: #111;
+    padding: 13px 16px; cursor: pointer;
+    background: #f9f9fb; list-style: none;
+  }
+  .lgMobileTocBtn::-webkit-details-marker { display: none; }
+  .lgMobileTocChevron { margin-left: auto; transition: transform 200ms; }
+  details[open] .lgMobileTocChevron { transform: rotate(180deg); }
+
+  .lgMobileTocInner {
+    list-style: decimal; padding: 12px 16px 14px 32px; margin: 0;
+    border-top: 1px solid #e5e7eb;
+    display: flex; flex-direction: column; gap: 7px;
+    background: #fff;
+  }
+  .lgMobileTocInner a {
+    font-size: 13px; font-weight: 700; color: #333; text-decoration: none;
+  }
+  .lgMobileTocInner a:hover { color: var(--brand1, #0077be); text-decoration: underline; }
+
+  /* ── Section bodies ── */
+  .lgSection { margin-bottom: 56px; scroll-margin-top: 88px; }
+
+  .lgSection h2 {
+    font-size: clamp(16px, 2.2vw, 21px); font-weight: 900;
+    letter-spacing: -0.015em; color: #111;
+    margin: 0 0 18px; padding-bottom: 10px;
+    border-bottom: 2px solid var(--brand1, #0077be);
+  }
+  .lgSection h3 { font-size: 15px; font-weight: 800; color: #111; margin: 24px 0 8px; }
+  .lgSection h4 {
+    font-size: 12px; font-weight: 900; color: #555;
+    text-transform: uppercase; letter-spacing: .09em;
+    margin: 20px 0 6px;
+  }
+  .lgSection p { font-size: 15px; line-height: 1.78; color: #444; margin: 0 0 14px; }
+  .lgSection p:last-child { margin-bottom: 0; }
+  .lgSection ul, .lgSection ol { padding-left: 22px; margin: 0 0 16px; }
+  .lgSection li { font-size: 15px; line-height: 1.72; color: #444; margin-bottom: 7px; }
+  .lgSection a { color: var(--brand1, #0077be); text-decoration: underline; text-underline-offset: 2px; }
+  .lgSection strong { color: #111; }
+  .lgSection em { font-style: italic; }
+
+  /* Warning callout (arbitration, DMCA, etc.) */
+  .lgAlert {
+    background: #fffbeb; border: 1px solid #fbbf24;
+    border-left: 4px solid #f59e0b;
+    border-radius: 8px; padding: 15px 18px; margin: 0 0 20px;
+  }
+  .lgAlert p { margin: 0; font-size: 13.5px; line-height: 1.65; color: #78350f; }
+  .lgAlert p strong { color: #92400e; }
+
+  /* Info callout */
+  .lgInfo {
+    background: #f0f9ff; border: 1px solid #bae6fd;
+    border-left: 4px solid #0ea5e9;
+    border-radius: 8px; padding: 14px 18px; margin: 0 0 20px;
+  }
+  .lgInfo p { margin: 0; font-size: 13.5px; line-height: 1.65; color: #0c4a6e; }
+
+  /* Definition list */
+  .lgDefList { display: flex; flex-direction: column; gap: 14px; margin: 0 0 16px; }
+  .lgDefItem { }
+  .lgDefTerm { font-size: 13px; font-weight: 900; color: #111; margin-bottom: 3px; text-transform: uppercase; letter-spacing: .06em; }
+  .lgDefBody { font-size: 14.5px; line-height: 1.72; color: #444; }
+
+  /* Print */
+  @media print {
+    .lgSidebar, .lgMobileToc, .lgBread { display: none !important; }
+    .lgPage { grid-template-columns: 1fr; padding: 0; }
+    .lgSection { break-inside: avoid; }
+  }
+</style>

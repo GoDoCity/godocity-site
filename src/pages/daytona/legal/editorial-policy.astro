@@ -1,174 +1,218 @@
 ---
-import Base from "../../../layouts/Base.astro";
+import LegalLayout from "../../../layouts/LegalLayout.astro";
+import type { TocItem } from "../../../layouts/LegalLayout.astro";
+
 const effectiveDate = "May 1, 2026";
 const lastUpdated = "May 1, 2026";
+
+const toc: TocItem[] = [
+  { id: "mission",         label: "Our Editorial Mission" },
+  { id: "independence",    label: "Editorial Independence" },
+  { id: "standards",       label: "Editorial Standards" },
+  { id: "accuracy",        label: "Accuracy & Corrections" },
+  { id: "sourcing",        label: "Sourcing & Attribution" },
+  { id: "conflicts",       label: "Conflicts of Interest" },
+  { id: "sponsored",       label: "Sponsored & Branded Content" },
+  { id: "todays-best",     label: "\"Today's Best\" & Featured Picks" },
+  { id: "native",          label: "Native Advertising & Partnerships" },
+  { id: "events",          label: "Events & Listings Coverage" },
+  { id: "social",          label: "Social Media Policy" },
+  { id: "complaints",      label: "Editorial Complaints" },
+  { id: "contact",         label: "Contact the Newsroom" },
+];
+
+const noticeHtml = `<p>This Editorial Policy governs all content produced and published by GoDoDaytona's editorial team. It applies to articles, guides, newsletters, social media content, event listings, sponsored content, and all other editorial materials published under the GoDoDaytona and GoDoCity brands.</p>`;
 ---
 
-<Base title="Editorial Policy | GoDoDaytona" subtitle="GoDoDaytona's editorial standards, independence policy, and guidelines for sponsored and featured content." cityBase="daytona">
-  <div class="lgWrap">
+<LegalLayout
+  title="Editorial Policy | GoDoDaytona"
+  subtitle="The standards and principles governing all editorial content produced by GoDoDaytona and the GoDoCity network."
+  pageTitle="Editorial Policy"
+  pageSubhead="Standards, Independence & Advertising Disclosure"
+  effectiveDate={effectiveDate}
+  lastUpdated={lastUpdated}
+  toc={toc}
+  cityBase="daytona"
+  noticeHtml={noticeHtml}
+>
 
-    <nav class="lgBread" aria-label="Breadcrumb">
-      <a href="/daytona/">Home</a>
-      <span aria-hidden="true">›</span>
-      <a href="/daytona/legal/">Legal</a>
-      <span aria-hidden="true">›</span>
-      <span>Editorial Policy</span>
-    </nav>
-
-    <span class="lgEyebrow">GoDoDaytona</span>
-    <h1 class="lgTitle">Editorial Policy</h1>
-    <div class="lgMeta">
-      <span>Effective: {effectiveDate}</span>
-      <span>Last Updated: {lastUpdated}</span>
-    </div>
-    <div class="lgDivider"></div>
-
-    <div class="lgNotice">
-      <p>Advertising funds this publication. It does not direct it. The policies below explain exactly where the line is — and how we protect it.</p>
-    </div>
-
-    <nav class="lgToc" aria-label="Table of contents">
-      <p class="lgTocTitle">Contents</p>
-      <ol class="lgTocList">
-        <li><a href="#mission">1. Our Mission</a></li>
-        <li><a href="#independence">2. Editorial Independence</a></li>
-        <li><a href="#standards">3. Reporting Standards</a></li>
-        <li><a href="#sponsored">4. Sponsored & Branded Content</a></li>
-        <li><a href="#featured">"Today's Best," "Featured," and Curated Mentions</a></li>
-        <li><a href="#newsletter">6. Newsletter Advertising</a></li>
-        <li><a href="#corrections">7. Corrections & Updates</a></li>
-        <li><a href="#conflicts">8. Conflicts of Interest</a></li>
-        <li><a href="#community">9. Community-Submitted Content</a></li>
-        <li><a href="#ai">10. Artificial Intelligence</a></li>
-        <li><a href="#contact">11. Contact the Editorial Team</a></li>
-      </ol>
-    </nav>
-
-    <div class="lgSection" id="mission">
-      <h2>1. Our Mission</h2>
-      <p>GoDoDaytona exists to serve the Daytona Beach and Volusia County community with accurate, useful, and engaging local coverage. We cover news, events, dining, guides, business spotlights, and community life through a place-based lens rooted in the people and neighborhoods that make this area worth knowing.</p>
-      <p>Our obligation is to our readers first. Our advertising partners fund the operation; they do not direct it. Those two things must always be true simultaneously, and these policies explain how we keep them that way.</p>
-    </div>
-
-    <div class="lgSection" id="independence">
-      <h2>2. Editorial Independence</h2>
-      <p>Advertising, sponsorship, and paid partnership relationships have no influence over our news coverage decisions. The people who sell advertising at GoDoDaytona do not make editorial decisions. Our editors decide what to cover, how to cover it, and what to publish based solely on newsworthiness, community relevance, and reader value.</p>
-      <p>We do not accept payment — in any form, including advertising purchases, gifts, meals, event tickets, or business favors — in exchange for favorable editorial coverage. Advertising with GoDoDaytona does not generate editorial mentions, endorsements, or inclusions in independent editorial roundups.</p>
-    </div>
-
-    <div class="lgSection" id="standards">
-      <h2>3. Reporting Standards</h2>
-      <p>All editorial content published on GoDoDaytona.com is reviewed by an editor before publication. Our editorial team strives to:</p>
-      <ul>
-        <li>Verify information with primary sources before publishing.</li>
-        <li>Clearly distinguish between reported facts and editorial opinion or analysis.</li>
-        <li>Attribute statements and claims to named sources where possible.</li>
-        <li>Correct errors promptly and transparently.</li>
-        <li>Represent the full diversity of the Daytona Beach community in our coverage.</li>
-        <li>Avoid sensationalism and clickbait that misrepresents the content of a story.</li>
-      </ul>
-    </div>
-
-    <div class="lgSection" id="sponsored">
-      <h2>4. Sponsored & Branded Content</h2>
-      <p>GoDoDaytona publishes paid editorial-format content as part of our advertising product menu. These products include The Deep Dive (Feature Article) and The Local Spotlight (Mini Article). This type of content:</p>
-      <ul>
-        <li>Is always labeled with "Sponsored," "Paid Partnership," "Presented by [Brand]," or an equivalent disclosure that is clearly visible before a reader encounters the substantive content.</li>
-        <li>Is written in the GoDoDaytona editorial voice by our team, but is shaped around the advertiser's message, story, or offer.</li>
-        <li>Is reviewed by our editorial team to meet the same factual accuracy standards as organic editorial content.</li>
-        <li>Is never disguised as independent journalism or presented without disclosure.</li>
-      </ul>
-      <p>Sponsored content is commercially motivated. The views, claims, and characterizations in sponsored content reflect the advertiser's business and messaging, not GoDoDaytona's independent editorial assessment of that business.</p>
-    </div>
-
-    <div class="lgSection" id="featured">
-      <h2>5. "Today's Best," "Featured," and Curated Mentions</h2>
-      <p>GoDoDaytona publishes curated roundups, "Today's Best" selections, "Featured" business spotlights, and similar curated content across our website, newsletter, and social channels. These placements may arise from two distinct contexts:</p>
-      <h3>Organically Selected</h3>
-      <p>An editorial team member identifies a business, event, or experience as genuinely worth sharing with our audience — based on quality, timing, community relevance, or reader interest — with no commercial arrangement involved. These mentions represent the independent opinion of our editorial team and are not labeled as sponsored.</p>
-      <h3>Partnership-Based Placements</h3>
-      <p>A "Featured," "Today's Best," or curated mention that involves a paid commercial arrangement with the featured business. These placements are selected, scheduled, and produced under a contractual advertising agreement. They will be clearly labeled as "Sponsored," "Featured Partner," "Paid Placement," or with an equivalent disclosure.</p>
-      <p><strong>The absence of a sponsorship label means the mention is editorial.</strong> The presence of any sponsorship label means a commercial relationship exists. We do not use sponsorship labels selectively or inconsistently.</p>
-      <p>Paying for an advertising product with GoDoDaytona does not guarantee organic editorial coverage, inclusion in unlabeled roundups, or independent endorsement of any kind.</p>
-    </div>
-
-    <div class="lgSection" id="newsletter">
-      <h2>6. Newsletter Advertising</h2>
-      <p>The GoDoDaytona morning newsletter contains clearly labeled advertising placements, including text ads (The Daily Mention), image banner ads (The Anchor, The Top Line, The High-Impact Showcase), and sponsored content links. All paid inclusions in the newsletter are visually separated from editorial content and labeled "Sponsored," "Presenting Partner," or "Premium Partner" as appropriate to the placement.</p>
-      <p>Our editorial staff selects newsletter story coverage independently of which advertisers are running in a given issue.</p>
-    </div>
-
-    <div class="lgSection" id="corrections">
-      <h2>7. Corrections & Updates</h2>
-      <p>We are committed to accuracy, and mistakes happen. When they do, we correct them as quickly as possible. Our corrections policy:</p>
-      <ul>
-        <li>Factual errors in editorial content are corrected with a labeled "Correction" note appended to the article, including the date of correction and a brief description of what changed.</li>
-        <li>Material errors that significantly change the meaning of a story may require a separate correction notice.</li>
-        <li>We do not silently edit published articles to remove errors without notation.</li>
-        <li>Corrections to sponsored content are coordinated with the advertiser and clearly noted.</li>
-      </ul>
-      <p>To report an error, email <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a> with "Correction Request" in the subject line. Include a link to the article and a description of the error.</p>
-    </div>
-
-    <div class="lgSection" id="conflicts">
-      <h2>8. Conflicts of Interest</h2>
-      <p>GoDoDaytona team members are required to disclose potential conflicts of interest to their editors before working on any story where such a conflict could affect — or appear to affect — their objectivity. Editors will reassign coverage, add a disclosure at the bottom of the published piece, or both, as the situation warrants.</p>
-      <p>We do not accept gifts, complimentary meals, free event tickets, travel, or other items of value from businesses or individuals we cover editorially, except where such access is part of the standard reporting process (e.g., attending a public event or visiting a restaurant on assignment with full disclosure).</p>
-    </div>
-
-    <div class="lgSection" id="community">
-      <h2>9. Community-Submitted Content</h2>
-      <p>We welcome tips, story ideas, event submissions, press releases, and letters from the Daytona Beach community. Submission does not guarantee publication. Submitted content may be edited for length, clarity, and style before publication.</p>
-      <p>We do not publish content that is defamatory, discriminatory, factually unverifiable, or that advocates unlawful activity. Community-submitted content that is published will be attributed to the submitter unless anonymity is requested and granted.</p>
-    </div>
-
-    <div class="lgSection" id="ai">
-      <h2>10. Artificial Intelligence</h2>
-      <p>GoDoDaytona may use AI-assisted tools for research support, first-draft generation, data analysis, and content summarization as part of our editorial workflow. Our policy:</p>
-      <ul>
-        <li>All content published under GoDoDaytona bylines is reviewed, edited, and approved by a human editor before publication.</li>
-        <li>AI tools do not replace editorial judgment, source verification, or community accountability.</li>
-        <li>We do not publish AI-generated content without meaningful human review.</li>
-        <li>Where AI tools are used in a material way in producing a specific story, we may note that in the article.</li>
-      </ul>
-    </div>
-
-    <div class="lgSection" id="contact">
-      <h2>11. Contact the Editorial Team</h2>
-      <p>For editorial questions, corrections, story tips, and feedback:</p>
-      <p><strong>GoDoDaytona Editorial</strong><br><a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a></p>
-      <p>For advertising and sponsorship inquiries, see our <a href="/daytona/advertise/">Advertise</a> page or email <a href="mailto:ads@godocity.com">ads@godocity.com</a>.</p>
-    </div>
-
+  <div class="lgSection" id="mission">
+    <h2>1. Our Editorial Mission</h2>
+    <p>GoDoDaytona is a community-first digital media platform serving the Daytona Beach area and the broader Volusia County community. Our editorial mission is to deliver accurate, useful, and engaging local content that helps residents and visitors discover, experience, and connect with the best that Daytona has to offer.</p>
+    <p>We believe that a thriving local media brand and a thriving local business community are not in conflict — they reinforce each other. Our editorial team is committed to providing genuine value to our audience through honest, community-focused journalism and curation, while our commercial team creates meaningful marketing opportunities for local businesses. These two functions operate independently, under separate leadership, with clearly defined boundaries.</p>
+    <p>GoDoDaytona is part of the GoDoCity network. All GoDoCity affiliate publications adhere to the same core editorial standards set forth in this policy.</p>
   </div>
-</Base>
 
-<style>
-  .lgWrap { max-width: 760px; margin: 0 auto; padding: 56px 2rem 96px; }
-  @media (max-width: 600px) { .lgWrap { padding: 40px 1.25rem 72px; } }
-  .lgBread { font-size: 13px; color: #888; margin-bottom: 32px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .lgBread a { color: var(--brand1, #0077be); text-decoration: none; font-weight: 600; }
-  .lgBread a:hover { text-decoration: underline; }
-  .lgBread span[aria-hidden] { color: #ccc; }
-  .lgEyebrow { display: block; font-size: 11px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; color: var(--brand1, #0077be); margin-bottom: 10px; }
-  .lgTitle { font-size: clamp(28px, 5vw, 42px); font-weight: 900; letter-spacing: -0.025em; color: #111; margin: 0 0 16px; line-height: 1.1; }
-  .lgMeta { font-size: 13px; color: #888; margin-bottom: 28px; display: flex; gap: 24px; flex-wrap: wrap; }
-  .lgDivider { height: 1px; background: #e5e7eb; margin: 0 0 32px; }
-  .lgNotice { background: color-mix(in srgb, var(--brand1, #0077be) 6%, white); border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 20%, transparent); border-radius: 10px; padding: 16px 18px; margin-bottom: 32px; }
-  .lgNotice p { margin: 0; font-size: 14px; line-height: 1.65; color: #333; }
-  .lgToc { background: #f9f9fb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px; margin-bottom: 52px; }
-  .lgTocTitle { font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: #888; margin: 0 0 14px; }
-  .lgTocList { list-style: decimal; padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 7px; }
-  .lgTocList a { font-size: 13px; font-weight: 700; color: #333; text-decoration: none; }
-  .lgTocList a:hover { color: var(--brand1, #0077be); text-decoration: underline; }
-  .lgSection { margin-bottom: 52px; }
-  .lgSection h2 { font-size: clamp(17px, 2.5vw, 21px); font-weight: 900; letter-spacing: -0.01em; color: #111; margin: 0 0 18px; padding-bottom: 10px; border-bottom: 2px solid var(--brand1, #0077be); }
-  .lgSection h3 { font-size: 15px; font-weight: 800; color: #111; margin: 22px 0 8px; }
-  .lgSection p { font-size: 15px; line-height: 1.78; color: #444; margin: 0 0 14px; }
-  .lgSection p:last-child { margin-bottom: 0; }
-  .lgSection ul, .lgSection ol { padding-left: 22px; margin: 0 0 16px; }
-  .lgSection li { font-size: 15px; line-height: 1.72; color: #444; margin-bottom: 7px; }
-  .lgSection a { color: var(--brand1, #0077be); text-decoration: underline; text-underline-offset: 2px; }
-  .lgSection strong { color: #111; }
-  @media print { .lgWrap { padding: 0; } .lgBread { display: none; } }
-</style>
+  <div class="lgSection" id="independence">
+    <h2>2. Editorial Independence</h2>
+    <p><strong>Advertisers and commercial partners have absolutely no influence over GoDoDaytona's organic editorial content.</strong> This is a non-negotiable principle.</p>
+    <p>The following editorial decisions are made exclusively by GoDoDaytona's editorial leadership, without input from, interference by, or prior review by any advertiser, sponsor, or commercial partner:</p>
+    <ul>
+      <li>Which businesses, events, or experiences are covered organically</li>
+      <li>The tone, framing, and conclusions of editorial articles and guides</li>
+      <li>Which businesses are included in or excluded from editorial "best of" roundups, curated lists, or recommendations</li>
+      <li>Event coverage priorities and angles</li>
+      <li>Breaking news coverage and community announcements</li>
+      <li>Social media editorial content (as distinct from paid social advertising)</li>
+    </ul>
+    <p>No advertiser may purchase editorial coverage, influence editorial framing, require editorial approval rights, or demand removal of organic content as a condition of advertising. Any attempt by a commercial partner to exert editorial influence will be treated as a breach of our advertising agreement.</p>
+    <p>The existence of an advertising relationship between a business and GoDoDaytona does not guarantee, increase, or decrease the likelihood that the business will receive organic editorial coverage. Editorial decisions are based solely on journalistic and editorial merit: newsworthiness, community interest, accuracy, and relevance.</p>
+    <div class="lgInfo"><p>If you believe editorial content on GoDoDaytona.com is unduly influenced by advertising relationships, please contact our editorial team at <a href="mailto:editorial@gododaytona.com">editorial@gododaytona.com</a>. We take such concerns seriously and will investigate promptly.</p></div>
+  </div>
+
+  <div class="lgSection" id="standards">
+    <h2>3. Editorial Standards</h2>
+    <p>All editorial content published on GoDoDaytona.com and distributed via our channels adheres to the following standards:</p>
+
+    <h3>Accuracy</h3>
+    <p>We are committed to factual accuracy. Before publishing, our editorial team verifies key facts through primary sources, official records, direct communication with sources, or authoritative secondary sources. We do not publish information we cannot verify.</p>
+
+    <h3>Fairness</h3>
+    <p>We strive to present information fairly and without undue bias. When covering topics with multiple legitimate perspectives, we aim to represent those perspectives accurately. We give subjects of news coverage an opportunity to respond to significant allegations or criticisms where practicable.</p>
+
+    <h3>Transparency</h3>
+    <p>We clearly disclose the nature of all content, including clearly labeling sponsored content, paid partnerships, affiliate relationships, and advertiser-provided content. See Section 7 for our full sponsored content policy.</p>
+
+    <h3>Relevance</h3>
+    <p>Our editorial content is focused on the Daytona Beach community and serves the interests of our local audience. We do not publish content primarily designed to serve the commercial interests of advertisers without clearly labeling it as sponsored.</p>
+
+    <h3>Respect</h3>
+    <p>We cover the community with respect for all people regardless of race, ethnicity, religion, gender, sexual orientation, disability, or socioeconomic status. We do not publish content that demeans, stereotypes, or unfairly targets any group.</p>
+  </div>
+
+  <div class="lgSection" id="accuracy">
+    <h2>4. Accuracy & Corrections</h2>
+    <p>Accuracy is fundamental to our editorial integrity. When we make errors, we correct them promptly and transparently.</p>
+
+    <h3>Corrections Policy</h3>
+    <p>When a factual error is identified in published content, we will:</p>
+    <ul>
+      <li>Correct the error as quickly as reasonably possible</li>
+      <li>Add a correction notice to the article identifying the nature of the correction and the date it was made</li>
+      <li>For significant errors, note the original error and the correction in the notice</li>
+      <li>Avoid "stealth edits" to published content without noting the change</li>
+    </ul>
+    <p>We distinguish between corrections (factual errors), updates (new information added to keep content current), and clarifications (additional context that does not change the factual substance). Each type of change will be noted appropriately.</p>
+
+    <h3>Reporting Errors</h3>
+    <p>If you believe you have identified an error in our content, please contact us at <a href="mailto:editorial@gododaytona.com">editorial@gododaytona.com</a> with the article title, URL, the specific error, and, if possible, a source that supports the correction. We will review all credible error reports and respond within two business days.</p>
+  </div>
+
+  <div class="lgSection" id="sourcing">
+    <h2>5. Sourcing & Attribution</h2>
+    <p>GoDoDaytona uses a variety of sources for its editorial content:</p>
+    <ul>
+      <li><strong>Named sources:</strong> Our preferred approach. We identify sources by name and affiliation where possible.</li>
+      <li><strong>On-the-record statements:</strong> Official statements, press releases, social media posts, and other public communications attributed to their source.</li>
+      <li><strong>Background sources:</strong> Occasionally, sources will speak on background (information used without attribution) or off the record (information not used but used to guide reporting). We use such sourcing sparingly and only when there is a compelling reason the source cannot speak on record.</li>
+      <li><strong>Official records and documents:</strong> Public records, court filings, government databases, and other official documents are cited where relevant.</li>
+      <li><strong>Syndicated and wire content:</strong> When we republish or adapt content from other sources, we clearly attribute the original source.</li>
+    </ul>
+    <p>We do not plagiarize. All content is original or clearly attributed. Quotations from other publications are attributed and linked to the original source.</p>
+  </div>
+
+  <div class="lgSection" id="conflicts">
+    <h2>6. Conflicts of Interest</h2>
+    <p>GoDoCity LLC and GoDoDaytona are committed to avoiding editorial conflicts of interest. Our editorial team members are expected to disclose any personal, financial, or professional relationships that could create a conflict with editorial coverage. When a potential conflict exists, the team member is recused from coverage of that subject.</p>
+    <p>GoDoCity LLC editorial staff and contributors may not:</p>
+    <ul>
+      <li>Accept gifts, free services, or other items of value from businesses they cover editorially (beyond standard press access such as press passes to events)</li>
+      <li>Have undisclosed financial interests in businesses they cover</li>
+      <li>Write editorial coverage of businesses with which they have a personal relationship without disclosure</li>
+      <li>Use their editorial platform to advance personal business interests</li>
+    </ul>
+    <p>Disclosure is not a cure for all conflicts — some conflicts may require a team member's complete recusal from coverage of a subject.</p>
+  </div>
+
+  <div class="lgSection" id="sponsored">
+    <h2>7. Sponsored & Branded Content</h2>
+    <p>GoDoDaytona produces sponsored and branded content in partnership with local businesses. This content is produced by our editorial team in collaboration with advertising partners, and is always clearly distinguished from organic editorial content.</p>
+
+    <h3>Labeling Requirements</h3>
+    <p>All sponsored content is labeled with one or more of the following disclosures, displayed prominently at the top of the content:</p>
+    <ul>
+      <li>"Sponsored" or "Sponsored Content"</li>
+      <li>"Paid Partnership with [Business Name]"</li>
+      <li>"Featured Partnership" or "Featured Sponsor"</li>
+      <li>The <strong>AdDisclosure</strong> banner component ("This story is a featured partnership with [Brand Name]")</li>
+    </ul>
+    <p>These labels appear regardless of the content format — article, newsletter feature, social media post, or video. We do not use labels that obscure the commercial nature of content, such as vague terms like "promoted" alone without context.</p>
+
+    <h3>Editorial Control of Sponsored Content</h3>
+    <p>Even for sponsored content, GoDoDaytona's editorial team maintains final approval over tone, accuracy, and compliance with our editorial standards. Sponsors may review sponsored content for factual accuracy and brand fit, but they may not direct editorial framing, require positive statements that are not substantiated, or demand removal of material disclosures. If a sponsor's requirements are incompatible with our editorial standards, we will decline or discontinue the partnership.</p>
+
+    <h3>FTC Compliance</h3>
+    <p>All sponsored content disclosures are made in compliance with the Federal Trade Commission's Guides Concerning Use of Endorsements and Testimonials in Advertising (16 C.F.R. Part 255) and the FTC's guidelines on native advertising and digital disclosure. We are committed to ensuring that our audience can easily and clearly identify the commercial nature of sponsored content.</p>
+  </div>
+
+  <div class="lgSection" id="todays-best">
+    <h2>8. "Today's Best" & Featured Picks</h2>
+    <p>GoDoDaytona publishes editorial curation features including "Today's Best," "Featured" recommendations, spotlights, and curated local guides. These features may appear in our newsletter, on our website, and on our social media channels.</p>
+
+    <h3>Organic "Today's Best" Features</h3>
+    <p>Organic "Today's Best" and editorial curation features are selected by GoDoDaytona's editorial team based solely on editorial merit — quality, community relevance, timeliness, and reader interest. These features are not influenced by advertising relationships. A business may be featured organically whether or not it is an advertising partner.</p>
+
+    <h3>Paid "Featured" Placements</h3>
+    <p>GoDoDaytona also offers paid "Featured" and "Sponsored Spotlight" advertising products that place a business in prominent editorial-style positions on our platform. These paid placements are always clearly labeled as "Sponsored," "Featured Partner," or similar disclosure language. The existence of a paid "Featured" placement does not imply editorial endorsement.</p>
+
+    <h3>Distinguishing Organic from Paid Features</h3>
+    <p>To ensure our audience can always distinguish between organic editorial curation and paid placements:</p>
+    <ul>
+      <li>Organic editorial picks will not carry sponsorship labels</li>
+      <li>Paid placements will always carry a clear "Sponsored" or "Partner" label</li>
+      <li>When editorial and commercial placements appear in close proximity, visual and textual design will clearly distinguish them</li>
+    </ul>
+    <div class="lgAlert"><p><strong>Important:</strong> The label "Featured" alone may appear in both organic editorial and paid advertising contexts on GoDoDaytona. Paid placements will always include an additional commercial disclosure ("Sponsored," "Paid Partner," "Paid Placement"). Organic editorial features labeled "Featured" or "Editor's Pick" carry no such additional label — they represent the independent judgment of our editorial team.</p></div>
+  </div>
+
+  <div class="lgSection" id="native">
+    <h2>9. Native Advertising & Partnerships</h2>
+    <p>Native advertising — advertising that takes a form similar to editorial content — is an accepted part of our business model. We produce and publish native advertising (also called branded content, sponsored content, or content marketing) in partnership with local businesses.</p>
+    <p>All native advertising published by GoDoDaytona:</p>
+    <ul>
+      <li>Is clearly labeled as sponsored, paid, or branded content</li>
+      <li>Is produced to meet our editorial quality standards</li>
+      <li>Does not contain false or misleading claims</li>
+      <li>Does not disparage competitors in a misleading way</li>
+      <li>Complies with FTC disclosure guidelines</li>
+      <li>Is subject to final editorial approval by GoDoDaytona's editorial team</li>
+    </ul>
+    <p>Native advertising placements are sold and managed by our commercial team. For information on native advertising opportunities, visit our <a href="/daytona/advertise/">Advertise</a> page or see our <a href="/daytona/legal/advertiser-policy/">Advertiser Policy</a>.</p>
+  </div>
+
+  <div class="lgSection" id="events">
+    <h2>10. Events & Listings Coverage</h2>
+    <p>GoDoDaytona covers local events through both editorial coverage and listings. Our editorial team selects events for organic editorial coverage based on newsworthiness, community interest, and relevance to our audience. Event organizers and businesses may not purchase organic editorial event coverage.</p>
+    <p>GoDoDaytona's events calendar may accept submissions from event organizers for listing purposes. Listings are reviewed for accuracy and community relevance. Listing an event does not constitute editorial endorsement, and GoDoDaytona reserves the right to decline or remove any event listing at its discretion.</p>
+    <p>Promoted event listings — which appear in more prominent positions in our newsletter or on our website — are a commercial advertising product and are labeled accordingly.</p>
+  </div>
+
+  <div class="lgSection" id="social">
+    <h2>11. Social Media Policy</h2>
+    <p>GoDoDaytona's official social media accounts (Instagram, Facebook, X/Twitter, and others) are an extension of our editorial brand. Social media content is held to the same editorial standards as our website content.</p>
+    <p>Our social media accounts may share editorial content, community news, event highlights, and promotional content from advertising partners (always labeled). GoDoDaytona's editorial team manages the editorial content calendar for our social channels; our commercial team manages paid social advertising on behalf of advertising partners.</p>
+    <p>GoDoDaytona editorial staff members who maintain personal social media accounts should avoid posting content that could be perceived as a statement from GoDoDaytona that has not been editorially reviewed, and should make clear when they are expressing personal opinions versus representing the publication.</p>
+  </div>
+
+  <div class="lgSection" id="complaints">
+    <h2>12. Editorial Complaints</h2>
+    <p>We take editorial complaints seriously. If you have a complaint about the accuracy, fairness, or compliance with this policy of content published on GoDoDaytona, please contact us at <a href="mailto:editorial@gododaytona.com">editorial@gododaytona.com</a> with:</p>
+    <ul>
+      <li>The URL or title of the content in question</li>
+      <li>A description of your complaint</li>
+      <li>Any supporting evidence</li>
+      <li>Your name and contact information (optional but helpful)</li>
+    </ul>
+    <p>We will acknowledge receipt of editorial complaints within two business days and will strive to resolve substantive complaints within ten business days. If we determine a correction or clarification is warranted, we will make the update and notify the complainant.</p>
+    <p>We are not obligated to respond to complaints that are abusive, that seek to pressure editorial decisions through commercial leverage, or that are submitted in bad faith.</p>
+  </div>
+
+  <div class="lgSection" id="contact">
+    <h2>13. Contact the Newsroom</h2>
+    <p>For editorial inquiries, tips, corrections, or complaints:</p>
+    <p><strong>GoDoDaytona Editorial Team</strong><br />Daytona Beach, FL<br /><a href="mailto:editorial@gododaytona.com">editorial@gododaytona.com</a></p>
+    <p>For advertising inquiries: <a href="mailto:advertise@gododaytona.com">advertise@gododaytona.com</a></p>
+    <p>For general inquiries: <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a></p>
+  </div>
+
+</LegalLayout>

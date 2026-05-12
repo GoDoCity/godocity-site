@@ -1,201 +1,779 @@
 ---
-import Base from "../../../layouts/Base.astro";
-const effectiveDate = "May 1, 2026";
-const lastUpdated = "May 1, 2026";
+import LegalLayout from "../../../layouts/LegalLayout.astro";
+
+const toc = [
+  { id: "acceptance",     label: "Acceptance of Terms" },
+  { id: "service",        label: "Description of Service" },
+  { id: "accounts",       label: "User Accounts & Registration" },
+  { id: "conduct",        label: "Acceptable Use Policy" },
+  { id: "ugc",            label: "User-Generated Content" },
+  { id: "ip",             label: "Intellectual Property" },
+  { id: "dmca",           label: "DMCA Copyright Policy" },
+  { id: "warranties",     label: "Disclaimer of Warranties" },
+  { id: "liability",      label: "Limitation of Liability" },
+  { id: "indemnification",label: "Indemnification" },
+  { id: "links",          label: "Third-Party Services & Links" },
+  { id: "arbitration",    label: "Dispute Resolution & Arbitration" },
+  { id: "class-action",   label: "Class Action Waiver" },
+  { id: "governing-law",  label: "Governing Law & Jurisdiction" },
+  { id: "modification",   label: "Modification & Termination" },
+  { id: "force-majeure",  label: "Force Majeure" },
+  { id: "misc",           label: "Miscellaneous Provisions" },
+  { id: "contact",        label: "Contact" },
+];
+
+const noticeHtml = `<p><strong>Please read these Terms carefully before using GoDoDaytona.com.</strong> By accessing or using the Service, you agree to be bound by these Terms. If you do not agree, please discontinue use immediately.</p>`;
 ---
 
-<Base title="Terms of Service | GoDoDaytona" subtitle="The terms and conditions governing your use of GoDoDaytona.com and all related services." cityBase="daytona">
-  <div class="lgWrap">
+<LegalLayout
+  title="Terms of Service | GoDoDaytona"
+  subtitle="The terms and conditions governing your use of GoDoDaytona.com and all related services operated by GoDoCity LLC."
+  pageTitle="Terms of Service"
+  effectiveDate="May 1, 2026"
+  lastUpdated="May 1, 2026"
+  cityBase="daytona"
+  toc={toc}
+  noticeHtml={noticeHtml}
+>
 
-    <nav class="lgBread" aria-label="Breadcrumb">
-      <a href="/daytona/">Home</a>
-      <span aria-hidden="true">›</span>
-      <a href="/daytona/legal/">Legal</a>
-      <span aria-hidden="true">›</span>
-      <span>Terms of Service</span>
-    </nav>
-
-    <span class="lgEyebrow">GoDoDaytona</span>
-    <h1 class="lgTitle">Terms of Service</h1>
-    <div class="lgMeta">
-      <span>Effective: {effectiveDate}</span>
-      <span>Last Updated: {lastUpdated}</span>
-    </div>
-    <div class="lgDivider"></div>
-
-    <div class="lgNotice">
-      <p>By accessing or using GoDoDaytona.com and any related services, you agree to be bound by these Terms of Service. If you do not agree, please discontinue use immediately.</p>
-    </div>
-
-    <nav class="lgToc" aria-label="Table of contents">
-      <p class="lgTocTitle">Contents</p>
-      <ol class="lgTocList">
-        <li><a href="#acceptance">1. Acceptance of Terms</a></li>
-        <li><a href="#service">2. Description of Service</a></li>
-        <li><a href="#accounts">3. User Accounts</a></li>
-        <li><a href="#conduct">4. Acceptable Use</a></li>
-        <li><a href="#ip">5. Content & Intellectual Property</a></li>
-        <li><a href="#disclaimers">6. Disclaimer of Warranties</a></li>
-        <li><a href="#liability">7. Limitation of Liability</a></li>
-        <li><a href="#indemnification">8. Indemnification</a></li>
-        <li><a href="#links">9. Third-Party Links</a></li>
-        <li><a href="#governing-law">10. Governing Law</a></li>
-        <li><a href="#changes">11. Changes to These Terms</a></li>
-        <li><a href="#contact">12. Contact</a></li>
-      </ol>
-    </nav>
-
-    <div class="lgSection" id="acceptance">
-      <h2>1. Acceptance of Terms</h2>
-      <p>GoDoDaytona.com is published by GoDoCity LLC ("GoDoCity," "we," "us," or "our"). These Terms of Service ("Terms") govern your access to and use of GoDoDaytona.com and all related newsletters, social channels, and services we operate (collectively, the "Service").</p>
-      <p>We may update these Terms at any time by posting a revised version to this page. Your continued use of the Service after any update constitutes your acceptance of the revised Terms.</p>
-    </div>
-
-    <div class="lgSection" id="service">
-      <h2>2. Description of Service</h2>
-      <p>GoDoDaytona.com is a community-focused digital media publication delivering local news, events, dining guides, business spotlights, and advertising opportunities for the Daytona Beach and Volusia County, Florida market. The Service includes our website, email newsletters, social media channels, and any mobile interfaces we operate.</p>
-      <p>Content is produced by our editorial team as well as community contributors. Some content is commercially sponsored; sponsored content is labeled in accordance with our Editorial Policy and FTC guidelines.</p>
-    </div>
-
-    <div class="lgSection" id="accounts">
-      <h2>3. User Accounts</h2>
-      <p>Some features of the Service may require you to create an account or subscribe via email. You are responsible for:</p>
-      <ul>
-        <li>Providing accurate and current information at registration.</li>
-        <li>Maintaining the confidentiality of your login credentials.</li>
-        <li>All activity that occurs under your account.</li>
-      </ul>
-      <p>Notify us immediately at <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a> if you suspect unauthorized access to your account.</p>
-    </div>
-
-    <div class="lgSection" id="conduct">
-      <h2>4. Acceptable Use</h2>
-      <p>You agree to use the Service only for lawful purposes and in accordance with these Terms. You agree not to:</p>
-      <ul>
-        <li>Use the Service for any unlawful purpose or in violation of applicable federal, state, or local regulations.</li>
-        <li>Upload or transmit content that is defamatory, obscene, harassing, threatening, or that infringes on any third party's rights.</li>
-        <li>Attempt to gain unauthorized access to any portion of the Service or its underlying infrastructure.</li>
-        <li>Scrape, crawl, spider, or systematically extract data from the Service without our prior written permission.</li>
-        <li>Interfere with or disrupt the Service or its servers, networks, or security systems.</li>
-        <li>Impersonate any person, entity, or GoDoDaytona staff member.</li>
-        <li>Use the Service to send unsolicited commercial communications (spam).</li>
-      </ul>
-    </div>
-
-    <div class="lgSection" id="ip">
-      <h2>5. Content & Intellectual Property</h2>
-      <p>All content published on the Service — including articles, photography, graphics, logos, newsletter copy, and editorial work product — is owned by or licensed to GoDoCity LLC and is protected by United States and international copyright, trademark, and other intellectual property laws.</p>
-      <p>You may share individual articles via third-party social platforms or link to them using standard hyperlinks, provided you do not republish, reproduce, redistribute, or modify the content without our express written consent.</p>
-      <h3>User-Submitted Content</h3>
-      <p>By submitting tips, letters, event listings, comments, photographs, or other content to GoDoDaytona, you represent that you have the right to submit that content and grant GoDoCity LLC a perpetual, worldwide, royalty-free, non-exclusive license to publish, edit, adapt, and distribute that content across all our channels in any format. You retain ownership of your submitted content.</p>
-    </div>
-
-    <div class="lgSection" id="disclaimers">
-      <h2>6. Disclaimer of Warranties</h2>
-      <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED. GODOCITY LLC EXPRESSLY DISCLAIMS ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, ACCURACY, AND NON-INFRINGEMENT.</p>
-      <p>We do not warrant that the Service will be uninterrupted, error-free, free of viruses or other harmful components, or that defects will be corrected. Information published on the Service is for general informational purposes and does not constitute professional legal, financial, medical, or other advice.</p>
-    </div>
-
-    <div class="lgSection" id="liability">
-      <h2>7. Limitation of Liability</h2>
-      <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, GODOCITY LLC AND ITS OFFICERS, DIRECTORS, EMPLOYEES, CONTRACTORS, AGENTS, AND AFFILIATES SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR PUNITIVE DAMAGES — INCLUDING BUT NOT LIMITED TO LOSS OF PROFITS, REVENUE, DATA, GOODWILL, OR BUSINESS INTERRUPTION — ARISING FROM YOUR USE OF OR INABILITY TO USE THE SERVICE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
-      <p>IN NO EVENT SHALL GODOCITY LLC'S TOTAL LIABILITY TO YOU FOR ALL CLAIMS ARISING FROM THESE TERMS OR USE OF THE SERVICE EXCEED ONE HUNDRED DOLLARS ($100.00).</p>
-    </div>
-
-    <div class="lgSection" id="indemnification">
-      <h2>8. Indemnification</h2>
-      <p>You agree to indemnify, defend, and hold harmless GoDoCity LLC and its affiliates, officers, directors, employees, and agents from any claims, liabilities, damages, losses, costs, and expenses (including reasonable attorneys' fees) arising from: (a) your use of the Service; (b) your violation of these Terms; (c) your violation of any third-party rights; or (d) any content you submit to the Service.</p>
-    </div>
-
-    <div class="lgSection" id="links">
-      <h2>9. Third-Party Links</h2>
-      <p>The Service may contain links to third-party websites, advertisers, or services. We provide these links for your convenience only and do not control, endorse, or assume responsibility for any third-party content, privacy practices, terms, or business practices. Accessing any third-party site is at your own risk.</p>
-    </div>
-
-    <div class="lgSection" id="governing-law">
-      <h2>10. Governing Law</h2>
-      <p>These Terms are governed by and construed in accordance with the laws of the State of Florida, without regard to its conflict-of-law provisions. You agree that any legal action or proceeding arising from these Terms or your use of the Service shall be brought exclusively in the state or federal courts located in Volusia County, Florida, and you hereby consent to the personal jurisdiction of those courts.</p>
-    </div>
-
-    <div class="lgSection" id="changes">
-      <h2>11. Changes to These Terms</h2>
-      <p>We reserve the right to modify these Terms at any time. We will notify users of material changes by updating the "Last Updated" date at the top of this page and, where appropriate, by notice to newsletter subscribers. Your continued use of the Service after changes are posted constitutes your acceptance of the revised Terms.</p>
-    </div>
-
-    <div class="lgSection" id="contact">
-      <h2>12. Contact</h2>
-      <p>If you have questions about these Terms of Service, please contact us:</p>
-      <p><strong>GoDoCity LLC</strong><br>Daytona Beach, FL<br><a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a></p>
-    </div>
-
+  <!-- ─────────────────────────────────────────────────
+       1. ACCEPTANCE OF TERMS
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="acceptance">
+    <h2>1. Acceptance of Terms</h2>
+    <p>
+      GoDoCity LLC ("GoDoCity," "GoDoDaytona," "we," "us," or "our") operates GoDoDaytona.com
+      and related properties. These Terms of Service ("Terms") govern your access to and use of
+      GoDoDaytona.com and all related services, content, and features (collectively, the "Service").
+    </p>
+    <p>
+      By accessing or using the Service in any manner — including browsing, subscribing to our
+      newsletter, submitting content, entering a contest, or otherwise interacting with the Service —
+      you acknowledge that you have read, understood, and agree to be bound by these Terms and our
+      <a href="/daytona/legal/privacy-policy/">Privacy Policy</a>, which is incorporated herein by
+      reference.
+    </p>
+    <p>
+      We may update these Terms at any time. We will indicate the date of the most recent revision
+      at the top of this page. Your continued use of the Service after any updates constitutes
+      acceptance of the revised Terms. If you do not agree to any update, you must discontinue use
+      of the Service.
+    </p>
   </div>
-</Base>
 
-<style>
-  .lgWrap { max-width: 760px; margin: 0 auto; padding: 56px 2rem 96px; }
-  @media (max-width: 600px) { .lgWrap { padding: 40px 1.25rem 72px; } }
+  <!-- ─────────────────────────────────────────────────
+       2. DESCRIPTION OF SERVICE
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="service">
+    <h2>2. Description of Service</h2>
+    <p>
+      GoDoDaytona.com is a community-focused digital media platform delivering local news, events,
+      dining guides, business spotlights, and community content for the Daytona Beach and Volusia
+      County, Florida market. The Service includes the website, email newsletters, social media
+      channels, contests and sweepstakes, and any mobile interfaces we operate.
+    </p>
+    <p>
+      The Service is intended for general informational and community purposes. Content on the
+      Service reflects editorial judgment and does not constitute legal, financial, medical,
+      psychological, or other professional advice. You should seek qualified professional advice
+      for specific situations.
+    </p>
+    <p>
+      Some content on the Service is commercially sponsored. All sponsored content is clearly
+      labeled in accordance with our Editorial Policy and applicable Federal Trade Commission
+      (FTC) guidelines. The presence of advertising or sponsored content does not constitute an
+      endorsement by GoDoCity of any advertiser, product, or service.
+    </p>
+  </div>
 
-  .lgBread {
-    font-size: 13px; color: #888; margin-bottom: 32px;
-    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
-  }
-  .lgBread a { color: var(--brand1, #0077be); text-decoration: none; font-weight: 600; }
-  .lgBread a:hover { text-decoration: underline; }
-  .lgBread span[aria-hidden] { color: #ccc; }
+  <!-- ─────────────────────────────────────────────────
+       3. USER ACCOUNTS & REGISTRATION
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="accounts">
+    <h2>3. User Accounts &amp; Registration</h2>
+    <p>
+      Some features of the Service require account creation or email subscription. When you
+      register or subscribe, you agree to:
+    </p>
+    <ul>
+      <li>Provide accurate, current, and complete information</li>
+      <li>Maintain and promptly update your information to keep it accurate and complete</li>
+      <li>Maintain the confidentiality of your account credentials</li>
+      <li>Accept responsibility for all activity that occurs under your account</li>
+      <li>Use the Service only for lawful purposes in compliance with these Terms</li>
+    </ul>
+    <p>
+      If you believe your account has been compromised or that unauthorized access has occurred,
+      you must notify us immediately at <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a>.
+      GoDoCity is not liable for any loss or damage arising from your failure to maintain the
+      security of your credentials.
+    </p>
+    <p>
+      GoDoCity reserves the right to refuse registration, cancel accounts, or remove usernames
+      at its sole discretion, including if we determine that a username or account violates these
+      Terms or is otherwise inappropriate.
+    </p>
+  </div>
 
-  .lgEyebrow {
-    display: block; font-size: 11px; font-weight: 900; letter-spacing: .16em;
-    text-transform: uppercase; color: var(--brand1, #0077be); margin-bottom: 10px;
-  }
-  .lgTitle {
-    font-size: clamp(28px, 5vw, 42px); font-weight: 900;
-    letter-spacing: -0.025em; color: #111; margin: 0 0 16px; line-height: 1.1;
-  }
-  .lgMeta {
-    font-size: 13px; color: #888; margin-bottom: 28px;
-    display: flex; gap: 24px; flex-wrap: wrap;
-  }
-  .lgDivider { height: 1px; background: #e5e7eb; margin: 0 0 32px; }
+  <!-- ─────────────────────────────────────────────────
+       4. ACCEPTABLE USE POLICY
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="conduct">
+    <h2>4. Acceptable Use Policy</h2>
+    <p>
+      You agree to use the Service only for lawful purposes and in a manner consistent with
+      these Terms and all applicable local, state, federal, and international laws and regulations.
+      You agree that you will not:
+    </p>
+    <ul>
+      <li>Use the Service for any unlawful purpose or in furtherance of any illegal activity</li>
+      <li>Upload, post, transmit, or otherwise make available any content that is defamatory,
+          obscene, harassing, threatening, abusive, hateful, invasive of another's privacy, or
+          otherwise objectionable</li>
+      <li>Attempt to gain unauthorized access to any portion of the Service, other accounts,
+          computer systems, or networks connected to the Service</li>
+      <li>Scrape, crawl, spider, or otherwise extract data from the Service without prior
+          written permission from GoDoCity LLC</li>
+      <li>Interfere with or disrupt the integrity or performance of the Service or the servers,
+          networks, or infrastructure connected to the Service</li>
+      <li>Impersonate any GoDoCity staff member, editor, or representative</li>
+      <li>Send unsolicited commercial email (spam) or other unsolicited communications through
+          or in connection with the Service</li>
+      <li>Reverse-engineer, decompile, disassemble, or otherwise attempt to derive the source
+          code of any software underlying the Service</li>
+      <li>Submit false or fraudulent DMCA takedown notices or counter-notifications</li>
+      <li>Use the Service to facilitate any illegal transactions, including but not limited to
+          the sale of controlled substances or stolen property</li>
+      <li>Violate any applicable export control laws or regulations</li>
+      <li>Collect or harvest personal information of other users without their express consent</li>
+    </ul>
+    <p>
+      GoDoCity reserves the right, but not the obligation, to investigate any reported violation
+      of these policies and to take appropriate action, including removing content, suspending or
+      terminating accounts, and referring matters to law enforcement authorities.
+    </p>
+  </div>
 
-  .lgNotice {
-    background: color-mix(in srgb, var(--brand1, #0077be) 6%, white);
-    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 20%, transparent);
-    border-radius: 10px; padding: 16px 18px; margin-bottom: 32px;
-  }
-  .lgNotice p { margin: 0; font-size: 14px; line-height: 1.65; color: #333; }
+  <!-- ─────────────────────────────────────────────────
+       5. USER-GENERATED CONTENT
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="ugc">
+    <h2>5. User-Generated Content</h2>
+    <p>
+      Users may submit content to the Service, including but not limited to tips, letters to the
+      editor, event listings, photographs, press releases, and comments (collectively,
+      "User-Generated Content" or "UGC"). You retain ownership of any intellectual property rights
+      you hold in UGC you submit.
+    </p>
+    <p>
+      By submitting UGC to the Service, you grant GoDoCity LLC a perpetual, irrevocable,
+      worldwide, royalty-free, sublicensable, non-exclusive license to use, publish, edit,
+      adapt, translate, reformat, distribute, reproduce, and create derivative works from your
+      UGC in any media or format now known or hereafter developed, in connection with the
+      Service and GoDoCity's business, without further compensation to you.
+    </p>
+    <p>
+      You represent and warrant that: (a) you own or have the necessary rights, licenses,
+      consents, and permissions to submit the UGC and to grant the license above; (b) your UGC
+      does not infringe the intellectual property rights, privacy rights, or other rights of any
+      third party; (c) your UGC does not violate any applicable law; and (d) your UGC is
+      accurate and not misleading.
+    </p>
+    <p>
+      GoDoCity does not pre-screen all UGC but reserves the right — at its sole discretion —
+      to review, edit, refuse to publish, remove, or take down any UGC at any time and for
+      any reason, without notice and without liability to you. GoDoCity is not responsible for
+      any UGC submitted by users or for any loss, damage, or liability resulting from such content.
+    </p>
+    <p>
+      The Service is not a backup or archiving service. You are solely responsible for
+      maintaining your own copies of any content you submit.
+    </p>
+  </div>
 
-  .lgToc {
-    background: #f9f9fb; border: 1px solid #e5e7eb;
-    border-radius: 12px; padding: 20px 24px; margin-bottom: 52px;
-  }
-  .lgTocTitle {
-    font-size: 11px; font-weight: 900; letter-spacing: .12em;
-    text-transform: uppercase; color: #888; margin: 0 0 14px;
-  }
-  .lgTocList {
-    list-style: decimal; padding-left: 18px; margin: 0;
-    display: flex; flex-direction: column; gap: 7px;
-  }
-  .lgTocList a { font-size: 13px; font-weight: 700; color: #333; text-decoration: none; }
-  .lgTocList a:hover { color: var(--brand1, #0077be); text-decoration: underline; }
+  <!-- ─────────────────────────────────────────────────
+       6. INTELLECTUAL PROPERTY
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="ip">
+    <h2>6. Intellectual Property</h2>
+    <p>
+      All content on the Service — including but not limited to articles, news stories,
+      photography, graphics, logos, newsletter copy, editorial work product, website design,
+      layout, and source code — is owned by or licensed to GoDoCity LLC and is protected by
+      United States and international copyright, trademark, and other intellectual property laws.
+    </p>
+    <p>
+      You may share individual articles via social media platforms or standard hyperlinks to
+      the original URL. However, you may not republish, reproduce, redistribute, modify, or
+      create derivative works from any content on the Service, in whole or in substantial part,
+      without the express prior written consent of GoDoCity LLC. Unauthorized use may violate
+      copyright, trademark, and other applicable laws and could result in civil and criminal
+      penalties.
+    </p>
+    <p>
+      The GoDoCity and GoDoDaytona names, logos, trade dress, and brand elements are registered
+      or common law trademarks of GoDoCity LLC. Nothing in these Terms grants you any right,
+      title, interest, or license to use our trademarks, service marks, trade names, logos, or
+      brand elements. Any use of our trademarks requires prior written permission.
+    </p>
+  </div>
 
-  .lgSection { margin-bottom: 52px; }
-  .lgSection h2 {
-    font-size: clamp(17px, 2.5vw, 21px); font-weight: 900;
-    letter-spacing: -0.01em; color: #111;
-    margin: 0 0 18px; padding-bottom: 10px;
-    border-bottom: 2px solid var(--brand1, #0077be);
-  }
-  .lgSection h3 { font-size: 15px; font-weight: 800; color: #111; margin: 22px 0 8px; }
-  .lgSection p { font-size: 15px; line-height: 1.78; color: #444; margin: 0 0 14px; }
-  .lgSection p:last-child { margin-bottom: 0; }
-  .lgSection ul, .lgSection ol { padding-left: 22px; margin: 0 0 16px; }
-  .lgSection li { font-size: 15px; line-height: 1.72; color: #444; margin-bottom: 7px; }
-  .lgSection a { color: var(--brand1, #0077be); text-decoration: underline; text-underline-offset: 2px; }
-  .lgSection strong { color: #111; }
+  <!-- ─────────────────────────────────────────────────
+       7. DMCA COPYRIGHT POLICY
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="dmca">
+    <h2>7. DMCA Copyright Policy</h2>
+    <p>
+      GoDoCity LLC respects the intellectual property rights of others and expects users of the
+      Service to do the same. In accordance with the Digital Millennium Copyright Act of 1998
+      (17 U.S.C. § 512) ("DMCA"), GoDoCity will respond expeditiously to claims of copyright
+      infringement committed using the Service if such claims are reported to GoDoCity's
+      Designated Copyright Agent identified below.
+    </p>
 
-  @media print {
-    .lgWrap { padding: 0; }
-    .lgBread { display: none; }
-  }
-</style>
+    <h3>Designated Copyright Agent</h3>
+    <p>
+      GoDoCity LLC<br />
+      Attn: DMCA Copyright Agent<br />
+      Daytona Beach, FL<br />
+      Email: <a href="mailto:dmca@godocity.com">dmca@godocity.com</a>
+    </p>
+
+    <h3>Notice of Claimed Infringement</h3>
+    <p>
+      To be effective under the DMCA, a written notification of claimed copyright infringement
+      must be submitted to our Designated Copyright Agent and must include substantially all
+      of the following six (6) elements required by 17 U.S.C. § 512(c)(3):
+    </p>
+    <ol>
+      <li>A physical or electronic signature of the copyright owner or a person authorized to
+          act on behalf of the owner of an exclusive right that is allegedly infringed;</li>
+      <li>Identification of the copyrighted work or works claimed to have been infringed, or,
+          if a single notification covers multiple copyrighted works at a single online site,
+          a representative list of such works at that site;</li>
+      <li>Identification of the material that is claimed to be infringing or to be the subject
+          of infringing activity and that is to be removed or access to which is to be disabled,
+          along with information reasonably sufficient to permit GoDoCity to locate the material
+          on the Service (e.g., the specific URL);</li>
+      <li>Information reasonably sufficient to permit GoDoCity to contact the complaining party,
+          including a name, address, telephone number, and, if available, an email address;</li>
+      <li>A statement that the complaining party has a good faith belief that use of the
+          material in the manner complained of is not authorized by the copyright owner, its
+          agent, or applicable law; and</li>
+      <li>A statement that the information in the notification is accurate, and under penalty
+          of perjury, that the complaining party is authorized to act on behalf of the owner of
+          an exclusive right that is allegedly infringed.</li>
+    </ol>
+    <p>
+      Please send all DMCA notices to: <a href="mailto:dmca@godocity.com">dmca@godocity.com</a>.
+      Notices that do not comply with the requirements of 17 U.S.C. § 512(c)(3) may not receive
+      a response. Please be aware that under 17 U.S.C. § 512(f), any person who knowingly
+      materially misrepresents that material is infringing may be subject to liability.
+    </p>
+
+    <h3>Counter-Notification Procedure</h3>
+    <p>
+      If material you posted to the Service has been removed or disabled in response to a
+      copyright infringement notice and you believe the removal or disabling was the result of
+      mistake or misidentification of the material, you may file a counter-notification with our
+      Designated Copyright Agent. A valid counter-notification must include substantially all
+      of the following:
+    </p>
+    <ol>
+      <li>Your physical or electronic signature;</li>
+      <li>Identification of the material that has been removed or to which access has been
+          disabled, and the location at which the material appeared before it was removed or
+          access was disabled;</li>
+      <li>A statement under penalty of perjury that you have a good faith belief that the
+          material was removed or disabled as a result of mistake or misidentification of the
+          material to be removed or disabled;</li>
+      <li>Your name, address, and telephone number; your email address; a statement that you
+          consent to the jurisdiction of the Federal District Court for the judicial district in
+          which your address is located (or, if your address is outside the United States, to the
+          jurisdiction of any judicial district in which GoDoCity LLC may be found); and a
+          statement that you will accept service of process from the person who provided the
+          original infringement notification or an agent of such person.</li>
+    </ol>
+    <p>
+      GoDoCity will process counter-notifications in accordance with 17 U.S.C. § 512(g). Upon
+      receipt of a valid counter-notification, GoDoCity may, in its discretion, restore the
+      removed material within ten (10) to fourteen (14) business days, unless the rights owner
+      files a court action seeking to restrain you from engaging in infringing activity relating
+      to the material and provides GoDoCity with notice of that action.
+    </p>
+
+    <h3>Repeat Infringer Policy</h3>
+    <p>
+      In accordance with 17 U.S.C. § 512(i), GoDoCity LLC maintains a policy of terminating,
+      in appropriate circumstances, the accounts of users who are determined to be repeat
+      infringers of copyrighted works. GoDoCity also reserves the right to terminate the
+      accounts of users who infringe any intellectual property rights of others, regardless of
+      whether there is a pattern of repeated infringement.
+    </p>
+
+    <h3>Safe Harbor Notice</h3>
+    <p>
+      GoDoCity claims the protection of the safe harbor provisions of 17 U.S.C. § 512(c) with
+      respect to infringing content posted by users of the Service. Consistent with these
+      provisions, GoDoCity is not liable for infringing content posted by users, provided that
+      GoDoCity: (a) does not have actual knowledge that the material or activity is infringing;
+      (b) in the absence of such actual knowledge, is not aware of facts or circumstances from
+      which infringing activity is apparent, or upon obtaining such knowledge or awareness, acts
+      expeditiously to remove or disable access to the material; (c) does not receive a financial
+      benefit directly attributable to the infringing activity in a case in which GoDoCity has
+      the right and ability to control such activity; and (d) upon notification of claimed
+      infringement as described above, responds expeditiously to remove or disable access to
+      the claimed infringing material.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       8. DISCLAIMER OF WARRANTIES
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="warranties">
+    <h2>8. Disclaimer of Warranties</h2>
+    <p>
+      THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND,
+      EITHER EXPRESS OR IMPLIED. TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, GODOCITY
+      LLC AND ITS OFFICERS, DIRECTORS, EMPLOYEES, CONTRACTORS, AGENTS, LICENSORS, AND SUPPLIERS
+      EXPRESSLY DISCLAIM ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO:
+    </p>
+    <ul>
+      <li>IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
+          NON-INFRINGEMENT</li>
+      <li>WARRANTIES THAT THE SERVICE WILL MEET YOUR REQUIREMENTS OR EXPECTATIONS</li>
+      <li>WARRANTIES THAT THE SERVICE WILL BE UNINTERRUPTED, TIMELY, SECURE, OR ERROR-FREE</li>
+      <li>WARRANTIES AS TO THE ACCURACY, RELIABILITY, COMPLETENESS, OR TIMELINESS OF ANY
+          CONTENT OR INFORMATION PUBLISHED ON OR THROUGH THE SERVICE</li>
+      <li>WARRANTIES THAT DEFECTS IN THE SERVICE WILL BE CORRECTED</li>
+      <li>WARRANTIES THAT THE SERVICE OR THE SERVERS THAT MAKE IT AVAILABLE ARE FREE OF
+          VIRUSES, MALWARE, OR OTHER HARMFUL COMPONENTS</li>
+    </ul>
+    <p>
+      GODOCITY LLC MAKES NO WARRANTY REGARDING ANY GOODS OR SERVICES PURCHASED OR OBTAINED
+      THROUGH THE SERVICE OR ANY TRANSACTIONS ENTERED INTO THROUGH THE SERVICE OR THIRD-PARTY
+      SITES LINKED FROM THE SERVICE. NO ADVICE OR INFORMATION, WHETHER ORAL OR WRITTEN,
+      OBTAINED FROM GODOCITY LLC OR THROUGH OR FROM THE SERVICE WILL CREATE ANY WARRANTY NOT
+      EXPRESSLY STATED IN THESE TERMS.
+    </p>
+    <p>
+      SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF CERTAIN IMPLIED WARRANTIES OR
+      LIMITATIONS ON APPLICABLE STATUTORY RIGHTS OF A CONSUMER. THE DISCLAIMERS AND EXCLUSIONS
+      ABOVE APPLY TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW IN YOUR JURISDICTION. IN
+      SUCH JURISDICTIONS, GODOCITY'S LIABILITY SHALL BE LIMITED TO THE GREATEST EXTENT PERMITTED
+      BY APPLICABLE LAW.
+    </p>
+    <p>
+      Information published on the Service is for general informational and community purposes
+      only and does not constitute legal, financial, medical, psychological, or other professional
+      advice. You should always seek the advice of a qualified professional for any specific
+      situation.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       9. LIMITATION OF LIABILITY
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="liability">
+    <h2>9. Limitation of Liability</h2>
+    <p>
+      TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, IN NO EVENT SHALL GODOCITY LLC, ITS
+      PARENT COMPANY, AFFILIATES, SUBSIDIARIES, OFFICERS, DIRECTORS, EMPLOYEES, CONTRACTORS,
+      AGENTS, LICENSORS, OR SUPPLIERS BE LIABLE FOR ANY:
+    </p>
+    <ul>
+      <li>INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, CONSEQUENTIAL, OR PUNITIVE DAMAGES OF
+          ANY KIND</li>
+      <li>LOSS OF PROFITS, REVENUE, DATA, GOODWILL, OR BUSINESS OPPORTUNITY</li>
+      <li>COST OF SUBSTITUTE GOODS OR SERVICES</li>
+      <li>PERSONAL INJURY OR PROPERTY DAMAGE OF ANY NATURE WHATSOEVER</li>
+      <li>UNAUTHORIZED ACCESS TO OR ALTERATION OF YOUR TRANSMISSIONS OR DATA</li>
+      <li>ANY BUGS, VIRUSES, TROJAN HORSES, OR SIMILAR ITEMS THAT MAY BE TRANSMITTED TO OR
+          THROUGH THE SERVICE BY ANY THIRD PARTY</li>
+      <li>ANY ERRORS OR OMISSIONS IN ANY CONTENT, OR ANY LOSS OR DAMAGE OF ANY KIND INCURRED
+          AS A RESULT OF YOUR USE OF ANY CONTENT POSTED, EMAILED, TRANSMITTED, OR OTHERWISE
+          MADE AVAILABLE THROUGH THE SERVICE</li>
+      <li>ANY OTHER LOSS OR DAMAGE OF ANY KIND, WHETHER BASED IN CONTRACT, TORT (INCLUDING
+          NEGLIGENCE), PRODUCTS LIABILITY, OR OTHERWISE</li>
+    </ul>
+    <p>
+      THE FOREGOING LIMITATIONS APPLY WHETHER BASED ON WARRANTY, CONTRACT, TORT (INCLUDING
+      NEGLIGENCE), STRICT LIABILITY, OR ANY OTHER LEGAL THEORY, AND WHETHER OR NOT GODOCITY
+      LLC HAS BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGE, AND EVEN IF A REMEDY SET FORTH
+      HEREIN IS FOUND TO HAVE FAILED OF ITS ESSENTIAL PURPOSE.
+    </p>
+    <p>
+      OUR TOTAL CUMULATIVE LIABILITY TO YOU FOR ALL CLAIMS ARISING FROM OR RELATING TO THESE
+      TERMS OR THE SERVICE, WHETHER IN CONTRACT, TORT, OR OTHERWISE, SHALL NOT EXCEED THE
+      GREATER OF: (A) THE TOTAL AMOUNT YOU ACTUALLY PAID TO GODOCITY LLC IN THE TWELVE (12)
+      MONTHS IMMEDIATELY PRECEDING THE EVENT GIVING RISE TO THE CLAIM, OR (B) ONE HUNDRED
+      DOLLARS ($100.00).
+    </p>
+    <p>
+      SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF CERTAIN DAMAGES,
+      INCLUDING CONSEQUENTIAL OR INCIDENTAL DAMAGES. THE LIMITATIONS AND EXCLUSIONS ABOVE
+      APPLY TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW IN YOUR JURISDICTION.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       10. INDEMNIFICATION
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="indemnification">
+    <h2>10. Indemnification</h2>
+    <p>
+      To the fullest extent permitted by applicable law, you agree to indemnify, defend, and
+      hold harmless GoDoCity LLC and its affiliates, parent companies, subsidiaries, officers,
+      directors, employees, contractors, and agents (collectively, "GoDoCity Parties") from and
+      against any and all claims, liabilities, damages, losses, costs, and expenses (including
+      reasonable attorneys' fees and court costs) arising from or relating to:
+    </p>
+    <ul>
+      <li>(a) your access to or use of the Service;</li>
+      <li>(b) your violation of these Terms or any applicable law or regulation;</li>
+      <li>(c) content you submit, post, or transmit through or to the Service;</li>
+      <li>(d) your actual or alleged infringement of any third-party intellectual property,
+          privacy, or other rights;</li>
+      <li>(e) your misrepresentation of any information you provide to GoDoCity; or</li>
+      <li>(f) any dispute between you and any third party relating to your use of the Service.</li>
+    </ul>
+    <p>
+      GoDoCity reserves the right, at its own expense, to assume the exclusive defense and
+      control of any matter otherwise subject to indemnification by you, in which event you
+      agree to cooperate fully with GoDoCity in asserting any available defenses. You will not
+      settle any such claim, action, or proceeding without GoDoCity's prior written consent.
+      Your indemnification obligations will survive the termination of these Terms and your
+      use of the Service.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       11. THIRD-PARTY SERVICES & LINKS
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="links">
+    <h2>11. Third-Party Services &amp; Links</h2>
+    <p>
+      The Service may contain links to third-party websites, advertisers, or services and may
+      display third-party content, advertisements, or integrations — including social media
+      widgets, embedded maps, ticketing platforms, and analytics or advertising tools. These
+      are provided solely for your convenience.
+    </p>
+    <p>
+      GoDoCity does not control, endorse, or assume any responsibility for any third-party
+      websites, services, or content, or the privacy practices, terms of service, or business
+      practices of any third party. Links to third-party sites do not constitute an endorsement
+      or recommendation by GoDoCity. Your use of any third-party website or service is entirely
+      at your own risk and is subject to that third party's own terms and privacy policy.
+    </p>
+    <p>
+      Sponsored content from advertisers is clearly labeled as such on the Service. GoDoCity
+      is not responsible for any claims, representations, or warranties made by advertisers in
+      sponsored content. Any transactions you enter into with advertisers are solely between
+      you and that advertiser.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       12. DISPUTE RESOLUTION & BINDING ARBITRATION
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="arbitration">
+    <h2>12. Dispute Resolution &amp; Binding Arbitration</h2>
+
+    <div class="lgAlert">
+      <p>
+        <strong>PLEASE READ THIS SECTION CAREFULLY — IT AFFECTS YOUR LEGAL RIGHTS.</strong>
+        THIS SECTION REQUIRES BINDING INDIVIDUAL ARBITRATION OF DISPUTES AND WAIVES YOUR RIGHT
+        TO A JURY TRIAL AND TO PARTICIPATE IN A CLASS ACTION.
+      </p>
+    </div>
+
+    <h3>12.1 Agreement to Arbitrate</h3>
+    <p>
+      You and GoDoCity LLC agree that any dispute, claim, or controversy arising from or
+      relating to these Terms or the breach, termination, enforcement, interpretation, or
+      validity thereof, or to the use of the Service (collectively, "Disputes"), will be
+      resolved by binding arbitration on an individual basis, rather than in a court of law,
+      <strong>except</strong> that either party may bring individual claims in small claims
+      court if those claims qualify and remain within the small claims court's jurisdiction.
+    </p>
+
+    <h3>12.2 Scope</h3>
+    <p>
+      This agreement to arbitrate is intended to be broadly interpreted. It includes all claims
+      whether based in contract, tort, statute, fraud, misrepresentation, consumer protection,
+      or any other legal or equitable theory. It also covers claims against GoDoCity LLC's
+      employees, officers, directors, affiliates, agents, successors, or assigns.
+    </p>
+
+    <h3>12.3 Pre-Arbitration Dispute Resolution</h3>
+    <p>
+      Before initiating any arbitration proceeding, you agree to first contact GoDoCity LLC at
+      <a href="mailto:legal@godocity.com">legal@godocity.com</a> with a written description of
+      your claim, the specific relief sought, and your contact information. GoDoCity will
+      attempt to resolve the Dispute informally within thirty (30) days of receipt of your
+      notice. If the Dispute is not resolved to your satisfaction within that period, either
+      party may initiate arbitration as set forth below.
+    </p>
+
+    <h3>12.4 AAA Arbitration Rules</h3>
+    <p>
+      Arbitration shall be administered by the American Arbitration Association ("AAA") under
+      its Consumer Arbitration Rules (available at <a href="https://www.adr.org" target="_blank" rel="noopener noreferrer">www.adr.org</a>)
+      for Disputes brought by individuals, or the AAA's Commercial Arbitration Rules for
+      Disputes brought by businesses. The AAA rules will govern all procedural aspects of the
+      arbitration, except where they conflict with these Terms, in which case these Terms shall
+      govern. The arbitrator shall apply Florida substantive law consistent with the Federal
+      Arbitration Act, 9 U.S.C. § 1 et seq.
+    </p>
+
+    <h3>12.5 Arbitration Location</h3>
+    <p>
+      Unless you and GoDoCity agree otherwise in writing, any arbitration shall be conducted
+      in Volusia County, Florida. For claims seeking less than $10,000, you may elect to
+      conduct the arbitration by telephone, video conference, or written submissions only,
+      without an in-person hearing. For claims of $10,000 or more, the right to an in-person
+      hearing will be determined by the applicable AAA rules.
+    </p>
+
+    <h3>12.6 Arbitration Fees</h3>
+    <p>
+      Payment of AAA filing fees and administrative and arbitrator fees will be governed by
+      the AAA's applicable fee schedule and rules. GoDoCity will pay all AAA filing and
+      administrative fees for any consumer Dispute seeking $10,000 or less in relief. For
+      Disputes seeking more than $10,000, the allocation of fees shall be governed by the
+      AAA rules. If the arbitrator determines that any claim you assert is frivolous within
+      the meaning of Federal Rule of Civil Procedure 11, you shall reimburse GoDoCity for all
+      filing fees, arbitrator fees, and reasonable attorneys' fees and costs incurred in
+      connection with that claim.
+    </p>
+
+    <h3>12.7 Arbitrator Authority</h3>
+    <p>
+      The arbitrator shall have exclusive authority to resolve all issues relating to the
+      interpretation, applicability, enforceability, and scope of this arbitration agreement,
+      as well as the merits of any Dispute between you and GoDoCity. The arbitrator may award
+      any relief that would be available in an individual lawsuit, including declaratory or
+      injunctive relief, but only in favor of the individual party seeking relief and only to
+      the extent necessary to provide relief warranted by that party's individual claim. Any
+      arbitration award may be entered as a judgment in any court of competent jurisdiction.
+    </p>
+
+    <h3>12.8 Right to Opt Out</h3>
+    <p>
+      You may opt out of this binding arbitration agreement by providing written notice to
+      GoDoCity at <a href="mailto:legal@godocity.com">legal@godocity.com</a> within thirty
+      (30) days of the date you first agree to these Terms. Your opt-out notice must include
+      your full name, mailing address, and a clear statement that you decline to be bound by
+      the arbitration provision in these Terms. Opting out of arbitration will not affect the
+      Class Action Waiver in Section 13 or any other provision of these Terms.
+    </p>
+
+    <h3>12.9 Severability of Arbitration Provisions</h3>
+    <p>
+      If any portion of this Section 12 is found to be invalid or unenforceable by a court of
+      competent jurisdiction, the invalid or unenforceable provision shall be severed and the
+      remaining arbitration terms shall be enforced to the fullest extent permitted by law.
+      The sole exception to this severability rule: if the Class Action Waiver in Section 13
+      is found to be unenforceable in its entirety, then this entire Section 12 shall be null
+      and void, and any Disputes shall be resolved in a court of competent jurisdiction rather
+      than in arbitration.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       13. CLASS ACTION WAIVER
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="class-action">
+    <h2>13. Class Action Waiver</h2>
+    <p>
+      YOU AND GODOCITY LLC AGREE THAT EACH MAY BRING CLAIMS AGAINST THE OTHER ONLY IN YOUR
+      OR ITS INDIVIDUAL CAPACITY AND NOT AS A PLAINTIFF OR CLASS MEMBER IN ANY PURPORTED
+      CLASS, COLLECTIVE, CONSOLIDATED, PRIVATE ATTORNEY GENERAL, OR REPRESENTATIVE PROCEEDING.
+      THE ARBITRATOR MAY NOT CONSOLIDATE MORE THAN ONE PERSON'S CLAIMS AND MAY NOT PRESIDE
+      OVER ANY FORM OF CLASS, REPRESENTATIVE, OR CONSOLIDATED PROCEEDING.
+    </p>
+    <p>
+      Specifically, this means:
+    </p>
+    <ul>
+      <li>(a) You waive your right to initiate or participate in a class action lawsuit or
+          class-wide arbitration against GoDoCity LLC;</li>
+      <li>(b) You waive your right to consolidate your claims with those of any other person
+          or to seek or obtain classwide relief; and</li>
+      <li>(c) The arbitrator may not award relief to any person other than you individually,
+          and may not award relief that would affect individuals other than you.</li>
+    </ul>
+    <p>
+      IF FOR ANY REASON A CLAIM PROCEEDS IN COURT RATHER THAN IN ARBITRATION — INCLUDING
+      FOLLOWING A VALID OPT-OUT, IN SMALL CLAIMS COURT, OR FOLLOWING A FINDING THAT THE
+      ARBITRATION CLAUSE IS UNENFORCEABLE — YOU AND GODOCITY LLC EACH WAIVE ANY RIGHT TO A
+      JURY TRIAL WITH RESPECT TO THAT CLAIM.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       14. GOVERNING LAW & JURISDICTION
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="governing-law">
+    <h2>14. Governing Law &amp; Jurisdiction</h2>
+    <p>
+      These Terms, and any Dispute arising from or relating to these Terms or your use of
+      the Service, shall be governed by and construed in accordance with the laws of the
+      State of Florida, without regard to its conflict-of-law principles or rules, and without
+      regard to the United Nations Convention on Contracts for the International Sale of Goods.
+    </p>
+    <p>
+      To the extent any Dispute proceeds in court — including following a valid opt-out from
+      arbitration, in small claims court, or in proceedings seeking injunctive relief — the
+      parties irrevocably consent to the exclusive personal jurisdiction and venue of the
+      state and federal courts located in Volusia County, Florida, and waive any objection to
+      the laying of venue in such courts.
+    </p>
+    <p>
+      Nothing in this Section limits GoDoCity's right to seek injunctive or other equitable
+      relief in any court of competent jurisdiction to prevent actual or threatened
+      infringement of intellectual property rights or breach of confidentiality obligations.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       15. MODIFICATION & TERMINATION
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="modification">
+    <h2>15. Modification &amp; Termination</h2>
+    <p>
+      GoDoCity reserves the right to modify, suspend, or discontinue the Service, or any
+      part or feature thereof, with or without notice, at any time and for any reason, without
+      liability to you or any third party.
+    </p>
+    <p>
+      We may update these Terms at any time by posting the revised version to this page with
+      an updated "Last Updated" date. Where practicable, we will communicate material changes
+      to newsletter subscribers. Your continued use of the Service after such changes are
+      posted constitutes your acceptance of the revised Terms. If you do not agree to the
+      revised Terms, you must discontinue use of the Service.
+    </p>
+    <p>
+      GoDoCity may terminate or suspend your access to the Service, in whole or in part, at
+      any time, with or without cause, with or without notice, without liability. Upon
+      termination, your right to use the Service will immediately cease. The following
+      provisions of these Terms shall survive any termination: Sections 5 (UGC license), 6
+      (Intellectual Property), 7 (DMCA), 8 (Disclaimer of Warranties), 9 (Limitation of
+      Liability), 10 (Indemnification), 12 (Arbitration), 13 (Class Action Waiver), 14
+      (Governing Law), and 17 (Miscellaneous).
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       16. FORCE MAJEURE
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="force-majeure">
+    <h2>16. Force Majeure</h2>
+    <p>
+      GoDoCity LLC shall not be liable for any failure or delay in performance of its
+      obligations under these Terms to the extent such failure or delay is caused by
+      circumstances beyond GoDoCity's reasonable control, including but not limited to:
+      acts of God; natural disasters (including hurricanes, floods, and earthquakes); war;
+      terrorism; civil unrest or riots; government action, regulation, or order; pandemic or
+      public health emergency; power failures or outages; internet or telecommunications
+      outages or failures; cyberattacks, distributed denial of service attacks, or other
+      malicious interference; or failure of third-party service providers, hosting platforms,
+      or infrastructure providers.
+    </p>
+    <p>
+      In the event of a force majeure occurrence, GoDoCity will use commercially reasonable
+      efforts to minimize the impact on the Service and to resume normal operations as
+      promptly as practicable.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       17. MISCELLANEOUS PROVISIONS
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="misc">
+    <h2>17. Miscellaneous Provisions</h2>
+
+    <h3>Entire Agreement</h3>
+    <p>
+      These Terms of Service, together with our <a href="/daytona/legal/privacy-policy/">Privacy Policy</a>,
+      <a href="/daytona/legal/editorial-policy/">Editorial Policy</a>,
+      <a href="/daytona/legal/advertiser-policy/">Advertiser Policy</a>, and any other
+      policies, guidelines, or rules incorporated herein by reference, constitute the entire
+      agreement between you and GoDoCity LLC with respect to the Service and supersede all
+      prior or contemporaneous understandings, representations, warranties, and agreements,
+      whether written or oral, relating to the subject matter hereof.
+    </p>
+
+    <h3>Severability</h3>
+    <p>
+      If any provision of these Terms is found by a court or arbitrator of competent
+      jurisdiction to be invalid, illegal, or unenforceable, such provision shall be modified
+      to the minimum extent necessary to make it enforceable, and the remaining provisions of
+      these Terms shall remain in full force and effect.
+    </p>
+
+    <h3>Waiver</h3>
+    <p>
+      GoDoCity's failure to enforce any right or provision of these Terms shall not constitute
+      a waiver of such right or provision. No waiver of any term shall be deemed a further or
+      continuing waiver of such term or any other term. Any waiver must be in writing and
+      signed by an authorized representative of GoDoCity to be effective.
+    </p>
+
+    <h3>No Agency or Partnership</h3>
+    <p>
+      No agency, partnership, joint venture, employment, or franchise relationship is created
+      between you and GoDoCity LLC by virtue of these Terms or your use of the Service. You
+      do not have authority to bind GoDoCity to any obligation.
+    </p>
+
+    <h3>Section Headings</h3>
+    <p>
+      Section headings in these Terms are included for convenience only and shall not affect
+      the construction or interpretation of these Terms.
+    </p>
+
+    <h3>Assignment</h3>
+    <p>
+      You may not assign, transfer, delegate, or sublicense any of your rights or obligations
+      under these Terms, by operation of law or otherwise, without GoDoCity's prior written
+      consent. Any purported assignment in violation of this provision is null and void.
+      GoDoCity may freely assign these Terms in whole or in part, including in connection with
+      a merger, acquisition, reorganization, or sale of all or substantially all of its assets.
+    </p>
+
+    <h3>Notices</h3>
+    <p>
+      Legal notices to GoDoCity must be sent by email to <a href="mailto:legal@godocity.com">legal@godocity.com</a>.
+      Service of process and formal legal process must be delivered to GoDoCity LLC's
+      registered agent in the State of Florida. GoDoCity may provide notices to you via the
+      email address associated with your account or newsletter subscription, or by posting
+      notice on the Service.
+    </p>
+
+    <h3>Language</h3>
+    <p>
+      These Terms are written in the English language. Any translations provided are for
+      convenience only. In the event of any conflict or inconsistency between the English
+      version and any translation, the English version shall control.
+    </p>
+  </div>
+
+  <!-- ─────────────────────────────────────────────────
+       18. CONTACT
+  ───────────────────────────────────────────────── -->
+  <div class="lgSection" id="contact">
+    <h2>18. Contact</h2>
+    <p>
+      Questions, concerns, or notices regarding these Terms of Service may be directed to:
+    </p>
+    <p>
+      <strong>GoDoCity LLC — Legal</strong><br />
+      Daytona Beach, FL<br />
+      General: <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a><br />
+      Legal: <a href="mailto:legal@godocity.com">legal@godocity.com</a><br />
+      DMCA: <a href="mailto:dmca@godocity.com">dmca@godocity.com</a>
+    </p>
+  </div>
+
+</LegalLayout>

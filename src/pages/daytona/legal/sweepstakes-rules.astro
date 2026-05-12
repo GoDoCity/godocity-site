@@ -1,193 +1,235 @@
 ---
-import Base from "../../../layouts/Base.astro";
+import LegalLayout from "../../../layouts/LegalLayout.astro";
+import type { TocItem } from "../../../layouts/LegalLayout.astro";
+
 const effectiveDate = "May 1, 2026";
 const lastUpdated = "May 1, 2026";
+
+const toc: TocItem[] = [
+  { id: "sponsor",      label: "Sponsor" },
+  { id: "eligibility",  label: "Eligibility" },
+  { id: "period",       label: "Promotion Period" },
+  { id: "entry",        label: "How to Enter" },
+  { id: "amoe",         label: "Alternate Method of Entry" },
+  { id: "prizes",       label: "Prizes" },
+  { id: "winner",       label: "Winner Selection & Notification" },
+  { id: "odds",         label: "Odds of Winning" },
+  { id: "acceptance",   label: "Prize Acceptance & Conditions" },
+  { id: "taxes",        label: "Taxes" },
+  { id: "publicity",    label: "Publicity Consent" },
+  { id: "release",      label: "Release of Liability" },
+  { id: "general",      label: "General Conditions" },
+  { id: "disputes",     label: "Disputes & Governing Law" },
+  { id: "contact",      label: "Sponsor Contact" },
+];
+
+const noticeHtml = `<p><strong>NO PURCHASE NECESSARY TO ENTER OR WIN. A PURCHASE OR PAYMENT OF ANY KIND WILL NOT IMPROVE YOUR CHANCES OF WINNING.</strong> These Official Rules apply to all GoDoDaytona sweepstakes and contests unless a specific promotion's published rules expressly state otherwise. Void where prohibited by law.</p>`;
 ---
 
-<Base title="Sweepstakes Rules | GoDoDaytona" subtitle="Official rules for the Full Court Giveaway and all future GoDoDaytona sweepstakes and contests." cityBase="daytona">
-  <div class="lgWrap">
+<LegalLayout
+  title="Sweepstakes Rules | GoDoDaytona"
+  subtitle="Official rules for GoDoDaytona sweepstakes and contests, including the Full Court Giveaway and all future promotions."
+  pageTitle="Sweepstakes Rules"
+  pageSubhead="Official Rules — Full Court Giveaway & All GoDoDaytona Promotions"
+  effectiveDate={effectiveDate}
+  lastUpdated={lastUpdated}
+  toc={toc}
+  cityBase="daytona"
+  noticeHtml={noticeHtml}
+>
 
-    <nav class="lgBread" aria-label="Breadcrumb">
-      <a href="/daytona/">Home</a>
-      <span aria-hidden="true">›</span>
-      <a href="/daytona/legal/">Legal</a>
-      <span aria-hidden="true">›</span>
-      <span>Sweepstakes Rules</span>
-    </nav>
-
-    <span class="lgEyebrow">GoDoDaytona</span>
-    <h1 class="lgTitle">Sweepstakes Rules</h1>
-    <p class="lgSubhead">Full Court Giveaway — Official Rules</p>
-    <div class="lgMeta">
-      <span>Effective: {effectiveDate}</span>
-      <span>Last Updated: {lastUpdated}</span>
-    </div>
-    <div class="lgDivider"></div>
-
-    <div class="lgNotice">
-      <p><strong>NO PURCHASE NECESSARY.</strong> A PURCHASE WILL NOT IMPROVE YOUR CHANCES OF WINNING. These rules apply to all GoDoDaytona sweepstakes unless a specific promotion's published rules state otherwise.</p>
-    </div>
-
-    <nav class="lgToc" aria-label="Table of contents">
-      <p class="lgTocTitle">Contents</p>
-      <ol class="lgTocList">
-        <li><a href="#sponsor">1. Sponsor</a></li>
-        <li><a href="#eligibility">2. Eligibility</a></li>
-        <li><a href="#period">3. Promotion Period</a></li>
-        <li><a href="#entry">4. How to Enter</a></li>
-        <li><a href="#prizes">5. Prizes</a></li>
-        <li><a href="#winner">6. Winner Selection & Notification</a></li>
-        <li><a href="#odds">7. Odds of Winning</a></li>
-        <li><a href="#acceptance">8. Prize Acceptance & Conditions</a></li>
-        <li><a href="#publicity">9. Publicity Consent</a></li>
-        <li><a href="#release">10. Release of Liability</a></li>
-        <li><a href="#general">11. General Conditions</a></li>
-        <li><a href="#disputes">12. Disputes</a></li>
-        <li><a href="#contact">13. Sponsor Contact</a></li>
-      </ol>
-    </nav>
-
-    <div class="lgSection" id="sponsor">
-      <h2>1. Sponsor</h2>
-      <p>GoDoCity LLC, Daytona Beach, Florida ("Sponsor"). The promotion may be administered with the participation of local business partners who contribute prizes; contributing partners are not co-sponsors and have no administrative authority over the promotion.</p>
-    </div>
-
-    <div class="lgSection" id="eligibility">
-      <h2>2. Eligibility</h2>
-      <p>Promotions are open to legal residents of the United States who are 18 years of age or older at the time of entry, unless the specific promotion's rules state a different age or geographic requirement.</p>
-      <p>The following persons are not eligible to enter:</p>
-      <ul>
-        <li>Employees, contractors, and agents of GoDoCity LLC and its affiliates.</li>
-        <li>Employees of any prize-contributing partner business.</li>
-        <li>Immediate family members (spouse, parent, sibling, child) and household members of any of the above.</li>
-      </ul>
-      <p>Void where prohibited or restricted by law.</p>
-    </div>
-
-    <div class="lgSection" id="period">
-      <h2>3. Promotion Period</h2>
-      <p>Each GoDoDaytona promotion will specify its own entry start date and time, and entry end date and time, all in Eastern Time. All entries must be received by the stated deadline. Entries received after the stated entry period ends will not be considered. Sponsor's computer system is the official timekeeping device.</p>
-    </div>
-
-    <div class="lgSection" id="entry">
-      <h2>4. How to Enter</h2>
-      <p>Entry methods and requirements are specified in each promotion. Accepted methods may include, but are not limited to:</p>
-      <ul>
-        <li><strong>Online entry form:</strong> Complete and submit the official entry form at the designated GoDoDaytona.com entry page during the promotion period.</li>
-        <li><strong>Email entry:</strong> Send an email to the address specified in the promotion with required information in the body.</li>
-        <li><strong>Newsletter subscription entry:</strong> Subscribe to the GoDoDaytona newsletter during the promotion period as specified in the promotion details.</li>
-        <li><strong>Social media entry:</strong> Follow, like, comment on, or share content from an official GoDoDaytona social account as specified in the promotion.</li>
-      </ul>
-      <p><strong>Entry limits:</strong> Unless otherwise stated, limit one (1) entry per person per entry method per promotion period. Multiple entries from the same person using different email addresses, accounts, or identities may result in disqualification of all entries from that person. Mass entries, automated entries, entries via scripts or bots, and entries through third-party services are void.</p>
-      <p>Entries become the property of Sponsor and will not be returned. Sponsor is not responsible for lost, late, misdirected, damaged, illegible, or incomplete entries.</p>
-    </div>
-
-    <div class="lgSection" id="prizes">
-      <h2>5. Prizes</h2>
-      <p>Prize descriptions and approximate retail values (ARV) are stated in each individual promotion's materials. Unless the promotion specifies otherwise:</p>
-      <ul>
-        <li>All prizes are awarded "as is" with no warranty, express or implied.</li>
-        <li>No prize substitutions, exchanges, or cash equivalents are permitted, except at Sponsor's sole discretion.</li>
-        <li>Prizes are non-transferable and non-assignable.</li>
-        <li>All federal, state, and local taxes on prizes, and any other costs associated with acceptance or use of a prize, are the sole responsibility of the winner.</li>
-        <li>Prizes must be claimed within the timeframe specified in the winner notification. Unclaimed prizes may not be awarded.</li>
-      </ul>
-    </div>
-
-    <div class="lgSection" id="winner">
-      <h2>6. Winner Selection & Notification</h2>
-      <p>Winners will be selected as specified in the promotion — either by random drawing from all eligible entries received using a randomization process, or by a judged panel as described in the specific promotion's rules. Drawings and judged selections will occur on or about the date(s) stated in the promotion materials.</p>
-      <p>Potential winners will be contacted by Sponsor via the email address provided at entry within five (5) business days of selection. Sponsor will make up to three (3) attempts to contact each potential winner over a period of five (5) days. If a potential winner:</p>
-      <ul>
-        <li>Cannot be reached after three contact attempts,</li>
-        <li>Is found to be ineligible,</li>
-        <li>Fails to respond within 72 hours of the final notification attempt, or</li>
-        <li>Fails to execute required documents within the stated timeframe,</li>
-      </ul>
-      <p>then that person will be disqualified and an alternate winner may be selected from the remaining eligible entries using the same method.</p>
-    </div>
-
-    <div class="lgSection" id="odds">
-      <h2>7. Odds of Winning</h2>
-      <p>Odds of winning depend on the number of eligible entries received during the promotion period. Sponsor cannot predict the number of entries in advance. Past promotions are not indicative of future odds.</p>
-    </div>
-
-    <div class="lgSection" id="acceptance">
-      <h2>8. Prize Acceptance & Conditions</h2>
-      <p>As a condition of prize award, winners may be required to execute and return the following within 10 days of notification:</p>
-      <ul>
-        <li>An Affidavit of Eligibility confirming compliance with these Official Rules.</li>
-        <li>A Release of Liability.</li>
-        <li>A Publicity Release (where permitted by law).</li>
-      </ul>
-      <p>Failure to execute and return required documents within the specified timeframe may result in disqualification and forfeiture of the prize. If a winner is a minor in their state of residence, a parent or legal guardian may be required to execute documents on their behalf.</p>
-    </div>
-
-    <div class="lgSection" id="publicity">
-      <h2>9. Publicity Consent</h2>
-      <p>Except where prohibited by law, acceptance of a prize constitutes the winner's consent to GoDoCity LLC's use of the winner's name, general location (city/state), likeness, photograph, and statements about the promotion for promotional, advertising, and publicity purposes in any media format — including print, digital, social media, and broadcast — without additional compensation or prior notice.</p>
-    </div>
-
-    <div class="lgSection" id="release">
-      <h2>10. Release of Liability</h2>
-      <p>By entering, each participant agrees to release, indemnify, and hold harmless GoDoCity LLC, its officers, directors, employees, agents, partners, affiliates, and prize-contributing partners from any and all liability for any injury, loss, or damage of any kind arising in whole or in part from:</p>
-      <ul>
-        <li>Participation in the promotion or any promotion-related activity.</li>
-        <li>Acceptance, possession, use, or misuse of any prize.</li>
-        <li>Any printing or typographical errors in promotion materials.</li>
-        <li>Technical failures or interruptions affecting the administration of the promotion.</li>
-      </ul>
-    </div>
-
-    <div class="lgSection" id="general">
-      <h2>11. General Conditions</h2>
-      <p>Sponsor reserves the right to cancel, suspend, modify, or terminate any promotion at any time if Sponsor determines, in its sole judgment, that fraud, technical failures, unauthorized human intervention, or any other factor beyond Sponsor's reasonable control has impaired the integrity, fairness, or proper administration of the promotion. In such an event, Sponsor may, at its discretion, award prizes by random drawing from among all eligible, non-suspect entries received prior to the event requiring such action.</p>
-      <p>All decisions by Sponsor regarding eligibility, winner selection, prize award, and interpretation of these rules are final and binding. No correspondence will be entered into except as required by applicable law.</p>
-      <p>Sponsor is not responsible for any typographical or other errors in the offer or administration of the promotion, including but not limited to errors in advertising, the official rules, the selection and announcement of winners, or the distribution of prizes.</p>
-    </div>
-
-    <div class="lgSection" id="disputes">
-      <h2>12. Disputes</h2>
-      <p>All disputes, claims, and causes of action arising from or related to any GoDoDaytona promotion or these Official Rules shall be resolved individually, without resort to any form of class action or consolidated proceeding. All disputes shall be governed by and construed in accordance with the laws of the State of Florida, without regard to conflict-of-law principles. Any legal action must be filed exclusively in the state or federal courts located in Volusia County, Florida.</p>
-      <p>By entering, participants waive the right to seek punitive, incidental, or consequential damages, and waive the right to a jury trial.</p>
-    </div>
-
-    <div class="lgSection" id="contact">
-      <h2>13. Sponsor Contact</h2>
-      <p>For questions about any GoDoDaytona promotion:</p>
-      <p><strong>GoDoCity LLC</strong><br>Daytona Beach, FL<br><a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a></p>
-    </div>
-
+  <div class="lgSection" id="sponsor">
+    <h2>1. Sponsor</h2>
+    <p><strong>GoDoCity LLC</strong>, Daytona Beach, Florida ("Sponsor"). The Sponsor administers all GoDoDaytona sweepstakes and contests. Individual promotions may involve local or regional business partners who contribute prizes ("Prize Partners"). Prize Partners are not co-sponsors and have no administrative authority over the promotion. Prize Partners are responsible only for the fulfillment of the specific prizes they contribute.</p>
+    <p>GoDoDaytona is a digital media brand operated by GoDoCity LLC as part of the GoDoCity network. All promotions are administered solely by GoDoCity LLC unless otherwise stated in the specific promotion's official rules.</p>
   </div>
-</Base>
 
-<style>
-  .lgWrap { max-width: 760px; margin: 0 auto; padding: 56px 2rem 96px; }
-  @media (max-width: 600px) { .lgWrap { padding: 40px 1.25rem 72px; } }
-  .lgBread { font-size: 13px; color: #888; margin-bottom: 32px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .lgBread a { color: var(--brand1, #0077be); text-decoration: none; font-weight: 600; }
-  .lgBread a:hover { text-decoration: underline; }
-  .lgBread span[aria-hidden] { color: #ccc; }
-  .lgEyebrow { display: block; font-size: 11px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; color: var(--brand1, #0077be); margin-bottom: 10px; }
-  .lgTitle { font-size: clamp(28px, 5vw, 42px); font-weight: 900; letter-spacing: -0.025em; color: #111; margin: 0 0 6px; line-height: 1.1; }
-  .lgSubhead { font-size: 15px; font-weight: 700; color: #888; margin: 0 0 16px; }
-  .lgMeta { font-size: 13px; color: #888; margin-bottom: 28px; display: flex; gap: 24px; flex-wrap: wrap; }
-  .lgDivider { height: 1px; background: #e5e7eb; margin: 0 0 32px; }
-  .lgNotice { background: color-mix(in srgb, var(--brand1, #0077be) 6%, white); border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 20%, transparent); border-radius: 10px; padding: 16px 18px; margin-bottom: 32px; }
-  .lgNotice p { margin: 0; font-size: 14px; line-height: 1.65; color: #333; }
-  .lgToc { background: #f9f9fb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px; margin-bottom: 52px; }
-  .lgTocTitle { font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: #888; margin: 0 0 14px; }
-  .lgTocList { list-style: decimal; padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 7px; }
-  .lgTocList a { font-size: 13px; font-weight: 700; color: #333; text-decoration: none; }
-  .lgTocList a:hover { color: var(--brand1, #0077be); text-decoration: underline; }
-  .lgSection { margin-bottom: 52px; }
-  .lgSection h2 { font-size: clamp(17px, 2.5vw, 21px); font-weight: 900; letter-spacing: -0.01em; color: #111; margin: 0 0 18px; padding-bottom: 10px; border-bottom: 2px solid var(--brand1, #0077be); }
-  .lgSection h3 { font-size: 15px; font-weight: 800; color: #111; margin: 22px 0 8px; }
-  .lgSection p { font-size: 15px; line-height: 1.78; color: #444; margin: 0 0 14px; }
-  .lgSection p:last-child { margin-bottom: 0; }
-  .lgSection ul, .lgSection ol { padding-left: 22px; margin: 0 0 16px; }
-  .lgSection li { font-size: 15px; line-height: 1.72; color: #444; margin-bottom: 7px; }
-  .lgSection a { color: var(--brand1, #0077be); text-decoration: underline; text-underline-offset: 2px; }
-  .lgSection strong { color: #111; }
-  @media print { .lgWrap { padding: 0; } .lgBread { display: none; } }
-</style>
+  <div class="lgSection" id="eligibility">
+    <h2>2. Eligibility</h2>
+    <p>Unless the specific promotion's published rules state a different requirement, all GoDoDaytona promotions are open to:</p>
+    <ul>
+      <li>Legal residents of the fifty (50) United States and the District of Columbia</li>
+      <li>Who are at least eighteen (18) years of age at the time of entry</li>
+      <li>With a valid U.S. mailing address</li>
+    </ul>
+    <p>The following individuals are <strong>not eligible</strong> to enter any GoDoDaytona promotion:</p>
+    <ul>
+      <li>Employees, contractors, agents, and officers of GoDoCity LLC and its affiliated entities</li>
+      <li>Employees of any Prize Partner contributing prizes to the specific promotion</li>
+      <li>Members of the immediate family (spouse, parent, sibling, child, whether by blood, marriage, or adoption) of any ineligible person listed above</li>
+      <li>Persons residing in the same household as any ineligible person listed above, whether or not related</li>
+    </ul>
+    <p>Void where prohibited or restricted by law. Participants are responsible for complying with all applicable laws and regulations of their state and locality.</p>
+    <p>GoDoCity LLC reserves the right to verify the eligibility of any entrant or winner. Failure to provide requested eligibility documentation within the stated timeframe may result in disqualification.</p>
+  </div>
+
+  <div class="lgSection" id="period">
+    <h2>3. Promotion Period</h2>
+    <p>Each GoDoDaytona promotion specifies its own entry start date and time, and entry end date and time, all in Eastern Time (ET). All entries must be received by the stated entry deadline. Entries received after the entry period closes will not be considered regardless of when they were sent.</p>
+    <p>Sponsor's computer system is the official timekeeping device for all promotions. Sponsor shall not be responsible for any discrepancy between the time shown on a user's device and the time recorded by Sponsor's systems.</p>
+    <div class="lgInfo"><p>Specific promotion periods for active promotions are published on the promotion entry page at GoDoDaytona.com. Past promotion archives are available at <a href="/daytona/">gododaytona.com</a>.</p></div>
+  </div>
+
+  <div class="lgSection" id="entry">
+    <h2>4. How to Enter</h2>
+    <p>Entry methods and requirements are specified in each individual promotion. Accepted entry methods may include, but are not limited to:</p>
+    <ul>
+      <li><strong>Online entry form:</strong> Complete and submit the official entry form at the designated GoDoDaytona entry page during the promotion period. All required fields must be completed accurately.</li>
+      <li><strong>Email entry:</strong> Send an email to the address specified in the promotion with all required information in the body of the email.</li>
+      <li><strong>Newsletter subscription entry:</strong> Subscribe to the GoDoDaytona email newsletter during the promotion period as specified in the promotion details. Existing subscribers who re-subscribe using a new email address are not eligible to receive an additional entry through this method.</li>
+      <li><strong>Social media entry:</strong> Follow, like, comment on, share, or otherwise engage with official GoDoDaytona social content as specified in the promotion. Must use a public account and comply with the respective platform's terms of service.</li>
+      <li><strong>In-person entry:</strong> Where applicable, complete and submit a physical entry form at a designated location as specified in the promotion.</li>
+    </ul>
+
+    <h3>Entry Limits</h3>
+    <p>Unless the specific promotion's rules state otherwise, each person is limited to one (1) entry per available entry method per promotion period. For example, if a promotion offers both an online form entry and a newsletter subscription entry, an eligible person may submit one entry via each method, for a maximum of two entries total.</p>
+    <p>Multiple entries from the same person using different email addresses, names, or identities may result in the disqualification of all entries from that person. Entries on behalf of another person are not permitted.</p>
+
+    <h3>Prohibited Entry Methods</h3>
+    <p>The following entry methods are void and will be disqualified:</p>
+    <ul>
+      <li>Automated entries, including entries generated by scripts, bots, macros, or other automated means</li>
+      <li>Entries submitted through third-party entry services or sweepstakes aggregators</li>
+      <li>Entries that use false, inaccurate, or incomplete information</li>
+      <li>Entries that circumvent entry limits through use of multiple accounts, email addresses, or identities</li>
+      <li>Entries that violate the terms of service of any platform used for entry</li>
+    </ul>
+
+    <h3>Entry Ownership</h3>
+    <p>Entries become the property of Sponsor upon receipt and will not be returned. Sponsor is not responsible for lost, late, misdirected, damaged, illegible, incomplete, or postage-due entries.</p>
+  </div>
+
+  <div class="lgSection" id="amoe">
+    <h2>5. Alternate Method of Entry (AMOE)</h2>
+    <p>To obtain a free method of entry for any GoDoDaytona promotion that otherwise requires a purchase, subscription, or social media action, eligible participants may send a handwritten postcard to the address below with:</p>
+    <ul>
+      <li>Their full legal name</li>
+      <li>Complete U.S. mailing address (street, city, state, ZIP)</li>
+      <li>Email address</li>
+      <li>Date of birth (to confirm eligibility)</li>
+      <li>The name of the specific promotion they are entering</li>
+    </ul>
+    <p>Mail to: <strong>GoDoCity LLC — [Promotion Name] Entry, Daytona Beach, FL</strong></p>
+    <p>AMOE entries must be received by the promotion's entry deadline. Only one AMOE entry per person per promotion period. AMOE entries receive the same consideration as online entries. No mechanical reproductions accepted. Sponsor is not responsible for AMOE entries that are lost, late, damaged, or misdirected in mail.</p>
+  </div>
+
+  <div class="lgSection" id="prizes">
+    <h2>6. Prizes</h2>
+    <p>Prize descriptions and approximate retail values ("ARV") are stated in each individual promotion's materials. Unless the promotion's specific rules state otherwise:</p>
+    <ul>
+      <li>All prizes are awarded "as is" with no warranty, express or implied</li>
+      <li>No cash substitution, prize exchange, or transfer of prizes is permitted, except at Sponsor's sole discretion or as required by applicable law</li>
+      <li>Prizes are non-transferable and non-assignable</li>
+      <li>If a stated prize becomes unavailable for any reason, Sponsor reserves the right to substitute a prize of equal or greater value</li>
+      <li>Prizes must be claimed within the timeframe specified in the winner notification; unclaimed prizes will be forfeited</li>
+      <li>All costs and expenses associated with accepting and using a prize not expressly stated as included — including transportation, meals, accommodations, or other incidental expenses — are the sole responsibility of the winner</li>
+    </ul>
+    <div class="lgAlert"><p><strong>Tax Notice:</strong> All federal, state, and local taxes on prizes are the sole responsibility of the winner. See Section 10 for details.</p></div>
+  </div>
+
+  <div class="lgSection" id="winner">
+    <h2>7. Winner Selection & Notification</h2>
+
+    <h3>Selection Method</h3>
+    <p>Winners will be selected as specified in the individual promotion's rules:</p>
+    <ul>
+      <li><strong>Random drawing:</strong> A potential winner will be selected at random from all eligible entries received during the promotion period, using a randomization process. Random drawings will take place on or about the date stated in the promotion materials.</li>
+      <li><strong>Judged competition:</strong> For skill-based promotions, a panel of judges selected by Sponsor will evaluate eligible entries based on stated criteria. Judging decisions are final.</li>
+    </ul>
+
+    <h3>Notification Process</h3>
+    <p>Potential winners will be notified by Sponsor via the email address provided at entry within five (5) business days of selection. Sponsor will make up to three (3) attempts to contact each potential winner over a period of five (5) business days from the initial notification attempt.</p>
+
+    <h3>Winner Forfeiture</h3>
+    <p>A potential winner will be disqualified and the prize may be forfeited if the potential winner:</p>
+    <ul>
+      <li>Cannot be reached after three (3) contact attempts within five (5) business days</li>
+      <li>Is found to be ineligible under these Official Rules or the specific promotion's rules</li>
+      <li>Fails to respond to the notification within seventy-two (72) hours of the final contact attempt</li>
+      <li>Fails to execute and return required documents within the stated timeframe</li>
+      <li>Declines the prize</li>
+    </ul>
+    <p>In the event of forfeiture, an alternate potential winner may be selected from the remaining eligible entries using the same selection method, time permitting.</p>
+
+    <h3>Verification</h3>
+    <p>All potential winners are subject to verification of eligibility before a prize is awarded. Sponsor reserves the right to disqualify any entrant who has not complied with these Official Rules.</p>
+  </div>
+
+  <div class="lgSection" id="odds">
+    <h2>8. Odds of Winning</h2>
+    <p>Odds of winning depend on the total number of eligible entries received during the specific promotion period. Sponsor cannot predict in advance the number of entries a promotion will receive. Past promotions are not indicative of the odds for future promotions.</p>
+    <p>For skill-based or judged promotions, odds of winning depend on the number of eligible entries received and the quality of the entry relative to other eligible entries, as evaluated by the judging panel based on stated criteria.</p>
+  </div>
+
+  <div class="lgSection" id="acceptance">
+    <h2>9. Prize Acceptance & Conditions</h2>
+    <p>As a condition of prize award, winners may be required to execute and return within ten (10) days of the prize notification:</p>
+    <ul>
+      <li>An <strong>Affidavit of Eligibility</strong> confirming the winner's compliance with all requirements of these Official Rules and the specific promotion's rules</li>
+      <li>A <strong>Release of Liability</strong> releasing GoDoCity LLC, its officers, directors, employees, agents, affiliates, and Prize Partners from any and all claims arising from participation in the promotion or the receipt and use of the prize</li>
+      <li>A <strong>Publicity Release</strong> (where permitted by applicable law) authorizing GoDoCity LLC to use the winner's name, likeness, and statements for promotional purposes without additional compensation</li>
+    </ul>
+    <p>Failure to execute and return required documents within the specified timeframe will result in disqualification and forfeiture of the prize. If the winner is a minor in their state of residence, a parent or legal guardian may be required to execute all required documents on the winner's behalf, and to accompany the minor in connection with any prize experience.</p>
+    <p>By accepting a prize, winners confirm acceptance of these Official Rules and all conditions of the prize award.</p>
+  </div>
+
+  <div class="lgSection" id="taxes">
+    <h2>10. Taxes</h2>
+    <p>All federal, state, and local income taxes on prizes, and all other taxes, fees, and costs associated with accepting or using a prize, are the sole responsibility of the winner. For prizes with an ARV of $600 or more, or as otherwise required by applicable law, GoDoCity LLC will issue the winner an IRS Form 1099-MISC or other appropriate tax form. Winners must provide GoDoCity LLC with their Social Security Number or Individual Taxpayer Identification Number for tax reporting purposes. Failure to provide required tax information may result in forfeiture of the prize.</p>
+    <p>Winners are advised to consult a tax advisor regarding the tax implications of winning a prize.</p>
+  </div>
+
+  <div class="lgSection" id="publicity">
+    <h2>11. Publicity Consent</h2>
+    <p>Except where prohibited by applicable law, acceptance of a prize constitutes winner's consent to GoDoCity LLC's use of the winner's name, city and state of residence, photograph, likeness, voice, and statements regarding the promotion and/or prize for promotional, advertising, marketing, and publicity purposes in any and all media — including print, digital, social media, email, broadcast, and video — without additional compensation, consideration, or prior notice.</p>
+    <p>Where required by law (including in states such as Tennessee and Nebraska), winners have the right to decline this publicity consent. Declination of consent does not affect the winner's entitlement to the prize.</p>
+  </div>
+
+  <div class="lgSection" id="release">
+    <h2>12. Release of Liability</h2>
+    <p>By entering any GoDoDaytona promotion, each participant releases, indemnifies, and holds harmless GoDoCity LLC, its parent companies, affiliates, subsidiaries, partners, officers, directors, agents, employees, and Prize Partners (collectively, "Released Parties") from any and all liability for any injury, loss, or damage of any kind — including personal injury, death, property damage, and loss of data — arising directly or indirectly from:</p>
+    <ul>
+      <li>Participation in the promotion or any promotion-related activity</li>
+      <li>The acceptance, possession, use, or misuse of any prize</li>
+      <li>Any error, omission, interruption, deletion, defect, delay in operation or transmission, communications line failure, theft, destruction, or unauthorized access to or alteration of entries</li>
+      <li>Any problems with or technical malfunction of any telephone network or lines, computer online systems, servers, or providers, computer equipment, software, failure of any email or entry to be received by Sponsor due to technical problems or traffic congestion on the Internet or at any website, or any combination thereof, including any injury or damage to participants or any other person's computer relating to or resulting from participation in this promotion</li>
+      <li>Any typographical, printing, or other errors in the offer or administration of the promotion, including but not limited to errors in advertising, these Official Rules, the selection and announcement of winners, or the distribution of prizes</li>
+    </ul>
+    <div class="lgAlert"><p><strong>Important:</strong> Released Parties are not responsible for typographical errors or omissions in promotion materials or in these Official Rules. Any reference to prize values in promotional materials is approximate and subject to change based on availability and market conditions.</p></div>
+  </div>
+
+  <div class="lgSection" id="general">
+    <h2>13. General Conditions</h2>
+
+    <h3>Right to Modify or Cancel</h3>
+    <p>Sponsor reserves the right to cancel, suspend, modify, or terminate any promotion at any time if Sponsor determines, in its sole judgment, that fraud, technical failures, force majeure, unauthorized human intervention, or any other factor beyond Sponsor's reasonable control has impaired the integrity, fairness, security, or proper administration of the promotion. In such event, Sponsor may, at its sole discretion, award prizes by random drawing from among all eligible, non-suspect entries received prior to the event requiring such action, or elect to not award prizes if no eligible entries were received before the event.</p>
+
+    <h3>Right to Disqualify</h3>
+    <p>Sponsor reserves the right to disqualify any individual it finds to be tampering with the entry process or the operation of the promotion, to be acting in violation of these Official Rules, or to be acting in a disruptive manner. Any attempt by any person to deliberately damage any website or undermine the legitimate operation of the promotion is a violation of criminal and civil laws, and should such an attempt be made, Sponsor reserves the right to seek damages and other remedies to the fullest extent permitted by law.</p>
+
+    <h3>Finality of Decisions</h3>
+    <p>All decisions by Sponsor regarding eligibility, winner selection, prize award, and interpretation of these Official Rules are final and binding on all participants. No correspondence will be entered into except as required by applicable law.</p>
+
+    <h3>Privacy</h3>
+    <p>Personal information collected in connection with any GoDoDaytona promotion will be used in accordance with our <a href="/daytona/legal/privacy-policy/">Privacy Policy</a>. By entering, participants consent to the collection, use, and disclosure of their personal information as described in the Privacy Policy and these Official Rules.</p>
+
+    <h3>Platform Terms</h3>
+    <p>Promotions administered through social media platforms are not sponsored, endorsed, administered by, or associated with those platforms. Any questions or complaints about a promotion should be directed to GoDoCity LLC, not to the platform. By participating in a promotion through a social media platform, participants release that platform from any and all liability arising from participation in the promotion.</p>
+  </div>
+
+  <div class="lgSection" id="disputes">
+    <h2>14. Disputes & Governing Law</h2>
+    <p>All disputes, claims, and causes of action arising from or related to any GoDoDaytona promotion or these Official Rules shall be governed by and construed in accordance with the laws of the State of Florida, without regard to conflict-of-law principles. This governing law applies regardless of the participant's state of residence; participants from all 50 states and the District of Columbia are subject to Florida law for purposes of these rules.</p>
+    <p>All disputes must be resolved individually, without resort to any form of class action, collective action, or consolidated proceeding. By entering, participants agree to waive the right to participate in any class action lawsuit or class-wide arbitration related to any GoDoDaytona promotion.</p>
+    <p>Any legal action arising from or related to a GoDoDaytona promotion must be filed exclusively in the state or federal courts located in Volusia County, Florida, and participants consent to personal jurisdiction in those courts.</p>
+    <p>By entering, participants waive the right to seek punitive, incidental, or consequential damages, and the right to a trial by jury, in any legal proceeding related to a GoDoDaytona promotion.</p>
+  </div>
+
+  <div class="lgSection" id="contact">
+    <h2>15. Sponsor Contact</h2>
+    <p>For questions about any GoDoDaytona promotion, these Official Rules, or to request an Alternate Method of Entry (see Section 5):</p>
+    <p><strong>GoDoCity LLC — Promotions</strong><br />Daytona Beach, FL<br /><a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a></p>
+    <p>Please include the name of the specific promotion in your inquiry. We will respond to promotion questions within three (3) business days.</p>
+  </div>
+
+</LegalLayout>
