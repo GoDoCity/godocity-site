@@ -1,0 +1,73 @@
+---
+/**
+ * src/components/AdDisclosure.astro
+ * Reusable sponsored-content disclosure banner.
+ * Place at the top of Deep Dive (Feature Article) and Local Spotlight (Mini Article) pages.
+ *
+ * Props:
+ *   brandName  — the advertiser's business name (required)
+ *   policyUrl  — override for the "Learn more" link (defaults to /daytona/legal/advertiser-policy/)
+ */
+
+interface Props {
+  brandName: string;
+  policyUrl?: string;
+}
+
+const {
+  brandName,
+  policyUrl = "/daytona/legal/advertiser-policy/",
+} = Astro.props;
+---
+
+<div class="adDisc" role="note" aria-label="Sponsored content disclosure">
+  <svg class="adDiscIcon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1.4"/>
+    <path d="M7 6v4M7 4.5v.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+  </svg>
+  <p class="adDiscText">
+    This story is a featured partnership with <strong class="adDiscBrand">{brandName}</strong>.
+    Sponsored content is produced by GoDoDaytona's editorial team in coordination with our advertising partners and is always labeled accordingly.
+    <a class="adDiscLink" href={policyUrl}>Learn more about our advertiser policy</a>.
+  </p>
+</div>
+
+<style>
+  .adDisc {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 6%, white);
+    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 22%, transparent);
+    border-left: 3px solid var(--brand1, #0077be);
+    border-radius: 8px;
+    padding: 13px 16px;
+    margin: 0 0 28px;
+  }
+
+  .adDiscIcon {
+    flex-shrink: 0;
+    margin-top: 1px;
+    color: var(--brand1, #0077be);
+  }
+
+  .adDiscText {
+    font-size: 13px;
+    line-height: 1.65;
+    color: #555;
+    margin: 0;
+  }
+
+  .adDiscBrand {
+    font-weight: 800;
+    color: #111;
+  }
+
+  .adDiscLink {
+    color: var(--brand1, #0077be);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+  }
+  .adDiscLink:hover { opacity: .8; }
+</style>

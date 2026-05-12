@@ -27,7 +27,16 @@ const siteName = Astro.props?.title ?? (rawBase ? `GoDo${getDisplayName(rawBase)
       <div class="footerCol">
         <div class="footerHead">About</div>
         <a class="footerLink" href={`${cityBase}/contact/`}>Contact</a>
-        <a class="footerLink" href={`${cityBase}/legal/`}>Legal</a>
+        <a class="footerLink" href={`${cityBase}/advertise/`}>Advertise</a>
+      </div>
+
+      <div class="footerCol">
+        <div class="footerHead">Legal</div>
+        <a class="footerLink" href={`${cityBase}/legal/terms-of-service/`}>Terms of Service</a>
+        <a class="footerLink" href={`${cityBase}/legal/privacy-policy/`}>Privacy Policy</a>
+        <a class="footerLink" href={`${cityBase}/legal/editorial-policy/`}>Editorial Policy</a>
+        <a class="footerLink" href={`${cityBase}/legal/advertiser-policy/`}>Advertiser Policy</a>
+        <a class="footerLink" href={`${cityBase}/legal/sweepstakes-rules/`}>Sweepstakes Rules</a>
       </div>
 
       <div class="footerCol footerColWide">
@@ -62,10 +71,13 @@ const siteName = Astro.props?.title ?? (rawBase ? `GoDo${getDisplayName(rawBase)
 
   .footerCols {
     display: grid;
-    grid-template-columns: 1fr 1fr 1.8fr;
+    grid-template-columns: 1fr 1fr 1fr 1.5fr;
     gap: 18px;
   }
-  @media (max-width: 860px) {
+  @media (max-width: 900px) {
+    .footerCols { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 540px) {
     .footerCols { grid-template-columns: 1fr; }
   }
 
