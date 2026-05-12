@@ -1,193 +1,238 @@
 ---
-import Base from "../../../layouts/Base.astro";
+import LegalLayout from "../../../layouts/LegalLayout.astro";
+import type { TocItem } from "../../../layouts/LegalLayout.astro";
+
 const effectiveDate = "May 1, 2026";
 const lastUpdated = "May 1, 2026";
+
+const toc: TocItem[] = [
+  { id: "overview",       label: "Overview" },
+  { id: "independence",   label: "Editorial Independence Guarantee" },
+  { id: "products",       label: "Advertising Products" },
+  { id: "featured",       label: "Featured & Sponsored Content Defined" },
+  { id: "standards",      label: "Advertising Content Standards" },
+  { id: "prohibited",     label: "Prohibited Content" },
+  { id: "approval",       label: "Ad Review & Approval" },
+  { id: "ftc",            label: "FTC Compliance & Disclosure" },
+  { id: "performance",    label: "Performance & Reporting" },
+  { id: "billing",        label: "Billing & Payment" },
+  { id: "cancellation",   label: "Cancellation & Refunds" },
+  { id: "indemnification",label: "Advertiser Indemnification" },
+  { id: "contact",        label: "Contact Advertising" },
+];
+
+const noticeHtml = `<p>This Advertiser Policy governs all commercial relationships between GoDoCity LLC and advertising partners on GoDoDaytona.com and related properties. By purchasing advertising on GoDoDaytona, you agree to these policies. This policy should be read in conjunction with our <a href="/daytona/legal/editorial-policy/">Editorial Policy</a> and <a href="/daytona/legal/terms-of-service/">Terms of Service</a>.</p>`;
 ---
 
-<Base title="Advertiser Policy | GoDoDaytona" subtitle="Standards, disclosure requirements, and terms for all paid advertising and partnership placements on GoDoDaytona." cityBase="daytona">
-  <div class="lgWrap">
+<LegalLayout
+  title="Advertiser Policy | GoDoDaytona"
+  subtitle="Standards and policies governing all advertising relationships on GoDoDaytona.com and the GoDoCity network."
+  pageTitle="Advertiser Policy"
+  pageSubhead="Advertising Standards, Disclosure & Partner Guidelines"
+  effectiveDate={effectiveDate}
+  lastUpdated={lastUpdated}
+  toc={toc}
+  cityBase="daytona"
+  noticeHtml={noticeHtml}
+>
 
-    <nav class="lgBread" aria-label="Breadcrumb">
-      <a href="/daytona/">Home</a>
-      <span aria-hidden="true">›</span>
-      <a href="/daytona/legal/">Legal</a>
-      <span aria-hidden="true">›</span>
-      <span>Advertiser Policy</span>
-    </nav>
-
-    <span class="lgEyebrow">GoDoDaytona</span>
-    <h1 class="lgTitle">Advertiser Policy</h1>
-    <div class="lgMeta">
-      <span>Effective: {effectiveDate}</span>
-      <span>Last Updated: {lastUpdated}</span>
-    </div>
-    <div class="lgDivider"></div>
-
-    <div class="lgNotice">
-      <p>By submitting or placing an advertisement with GoDoDaytona, you agree to the terms below. Questions? Email <a href="mailto:ads@godocity.com">ads@godocity.com</a></p>
-    </div>
-
-    <nav class="lgToc" aria-label="Table of contents">
-      <p class="lgTocTitle">Contents</p>
-      <ol class="lgTocList">
-        <li><a href="#overview">1. Overview</a></li>
-        <li><a href="#featured">2. Featured Ads & Paid Sponsorships</a></li>
-        <li><a href="#standards">3. Ad Standards & Acceptable Content</a></li>
-        <li><a href="#prohibited">4. Prohibited Content</a></li>
-        <li><a href="#ftc">5. FTC Disclosure Compliance</a></li>
-        <li><a href="#refusal">6. Right to Refuse or Remove</a></li>
-        <li><a href="#review">7. Content Review & Approval</a></li>
-        <li><a href="#payment">8. Payment & Cancellation</a></li>
-        <li><a href="#performance">9. Performance & Results</a></li>
-        <li><a href="#contact">10. Contact</a></li>
-      </ol>
-    </nav>
-
-    <div class="lgSection" id="overview">
-      <h2>1. Overview</h2>
-      <p>GoDoDaytona accepts advertising and community partnership arrangements across several formats: newsletter placements, social media posts, digital display advertising, and branded editorial content. All advertising is handled directly through our team.</p>
-      <p>Advertising with GoDoDaytona is a commercial transaction. It does not purchase editorial coverage, inclusion in independent editorial roundups, or favorable journalistic treatment of any kind. For a clear explanation of the separation between advertising and editorial at GoDoDaytona, see our <a href="/daytona/legal/editorial-policy/">Editorial Policy</a>.</p>
-    </div>
-
-    <div class="lgSection" id="featured">
-      <h2>2. Featured Ads & Paid Sponsorships</h2>
-      <p>Several of GoDoDaytona's advertising products use editorial-style formats, including branded articles and curated content placements. This section explains exactly what these products are.</p>
-      <h3>Sponsored Editorial Products</h3>
-      <p>The Local Spotlight (Mini Article) and The Deep Dive (Feature Article) are <strong>paid sponsorships</strong>. This means:</p>
-      <ul>
-        <li>These placements are purchased by the advertiser at the rates listed in our media kit.</li>
-        <li>Content is produced by GoDoDaytona's editorial team and shaped around the advertiser's message, story, or offer.</li>
-        <li>All such content is labeled "Sponsored," "Paid Partnership," or "Featured Partner" in accordance with FTC guidelines. This disclosure appears at or near the top of the content, before the substantive body.</li>
-        <li>Payment for a sponsored content placement does not guarantee specific editorial claims, business rankings, awards language, or independent editorial endorsements.</li>
-      </ul>
-      <h3>"Featured" Designation in Paid Placements</h3>
-      <p>When the word "Featured" appears in the context of a paid advertising product or placement — including "Featured Business," "Featured Partner," or "Today's Best (Sponsored)" — it indicates a <strong>commercial arrangement</strong>, not an independent editorial recommendation. Paid "Featured" placements are always labeled as sponsored or paid.</p>
-      <p>Unlabeled "Featured" mentions in GoDoDaytona editorial content represent the independent opinion of our editorial team and are not available for purchase.</p>
-    </div>
-
-    <div class="lgSection" id="standards">
-      <h2>3. Ad Standards & Acceptable Content</h2>
-      <p>We welcome advertising from:</p>
-      <ul>
-        <li>Local and regional businesses serving the Daytona Beach and Volusia County market.</li>
-        <li>Regional and national brands relevant to our community audience.</li>
-        <li>Event organizers, nonprofits, civic organizations, and governmental agencies.</li>
-      </ul>
-      <p>All advertising must:</p>
-      <ul>
-        <li>Accurately represent the advertiser's business, product, or service.</li>
-        <li>Comply with all applicable federal, state, and local laws and regulations.</li>
-        <li>Include all legally required disclosures (e.g., contractor license numbers, financial disclaimers, healthcare caveats).</li>
-        <li>Not be misleading, deceptive, or make unsubstantiated claims.</li>
-        <li>Deliver to a functioning landing page that accurately reflects the advertised offer.</li>
-      </ul>
-    </div>
-
-    <div class="lgSection" id="prohibited">
-      <h2>4. Prohibited Content</h2>
-      <p>GoDoDaytona does not accept advertising that:</p>
-      <ul>
-        <li>Promotes illegal products, services, or activities under federal, Florida, or Volusia County law.</li>
-        <li>Contains adult content, explicit imagery, graphic violence, or material inappropriate for a general community audience.</li>
-        <li>Advertises tobacco products, e-cigarettes, vaping products, or cannabis (regardless of local legality).</li>
-        <li>Promotes payday loans, predatory lending, title loans, bail bonds, or financial products with deceptive terms.</li>
-        <li>Contains false, misleading, or unsubstantiated health, safety, or financial claims.</li>
-        <li>Attacks, demeans, or disparages competitors, public figures, private individuals, or protected groups.</li>
-        <li>Discriminates in any way on the basis of race, color, religion, sex, national origin, disability, sexual orientation, gender identity, or age.</li>
-        <li>Promotes multi-level marketing, pyramid schemes, or fraudulent investment opportunities.</li>
-        <li>Contains malware, spyware, auto-playing audio, or deceptive redirect behavior.</li>
-      </ul>
-      <p>This list is not exhaustive. GoDoDaytona reserves the right to reject advertising for any reason consistent with our community standards.</p>
-    </div>
-
-    <div class="lgSection" id="ftc">
-      <h2>5. FTC Disclosure Compliance</h2>
-      <p>All sponsored and paid partnership content published by GoDoDaytona carries clear disclosures in compliance with the Federal Trade Commission's Guides Concerning the Use of Endorsements and Testimonials in Advertising (16 C.F.R. Part 255).</p>
-      <p>Advertisers who provide testimonials, customer reviews, or third-party endorsements in their submitted creative are solely responsible for ensuring those claims comply with FTC guidance, including material connection disclosures where applicable.</p>
-      <p>GoDoDaytona will apply our standard sponsorship disclosures to all paid content we produce. Advertisers may not request removal or modification of required disclosure language.</p>
-    </div>
-
-    <div class="lgSection" id="refusal">
-      <h2>6. Right to Refuse or Remove</h2>
-      <p>GoDoDaytona reserves the right to refuse, modify, postpone, suspend, or permanently remove any advertisement at our sole discretion and without liability, including if:</p>
-      <ul>
-        <li>The ad does not comply with this policy or our community standards.</li>
-        <li>The advertiser's business has been subject to regulatory action, significant unresolved consumer complaints, or legal proceedings that we determine create reputational risk for our readers.</li>
-        <li>The creative is factually inaccurate, deceptive, or misleading in our judgment.</li>
-        <li>The advertiser engages in conduct inconsistent with GoDoDaytona's values.</li>
-      </ul>
-      <p>In the event of removal, we will notify the advertiser and provide a prorated refund for undelivered placements where applicable.</p>
-    </div>
-
-    <div class="lgSection" id="review">
-      <h2>7. Content Review & Approval</h2>
-      <p>All creative assets — including images, copy, links, and landing pages — must be submitted to our team at least:</p>
-      <ul>
-        <li><strong>3 business days</strong> before the requested run date for newsletter and social placements.</li>
-        <li><strong>5 business days</strong> before the requested run date for digital display and sponsored editorial content.</li>
-        <li><strong>7 business days</strong> for feature articles (The Deep Dive), to allow for research, writing, editing, and advertiser review.</li>
-      </ul>
-      <p>We may request edits to creative that does not meet our standards. Advertisers will be given the opportunity to revise and resubmit. If revised creative is not received before the run date, the placement may be rescheduled at no penalty or refunded.</p>
-      <p>For sponsored editorial products, the advertiser will receive a draft for review before publication. We welcome factual corrections and minor editorial clarifications. We do not accept changes that compromise factual accuracy or remove required disclosures.</p>
-    </div>
-
-    <div class="lgSection" id="payment">
-      <h2>8. Payment & Cancellation</h2>
-      <p>Payment is due in advance of the run date unless a separate invoicing arrangement has been agreed upon in writing by both parties. We accept payment by credit card, ACH transfer, and check.</p>
-      <h3>Cancellations</h3>
-      <ul>
-        <li>Cancellations made <strong>more than 72 hours</strong> before the scheduled run date receive a full credit toward a future placement.</li>
-        <li>Cancellations made <strong>within 72 hours</strong> of the run date may be subject to a cancellation fee equal to 50% of the placement cost.</li>
-        <li>Sponsored editorial content (The Local Spotlight, The Deep Dive) that has already entered production may not be cancelled without charge after the editorial process has begun.</li>
-      </ul>
-      <p>Credits are valid for 12 months from the date of issuance and are non-transferable.</p>
-    </div>
-
-    <div class="lgSection" id="performance">
-      <h2>9. Performance & Results</h2>
-      <p>GoDoDaytona makes no guarantee of specific clicks, impressions, leads, conversions, sales, or return on investment from any placement. Advertising performance varies based on creative quality, offer strength, timing, market conditions, and audience behavior — all factors outside our direct control.</p>
-      <p>Where available, we provide performance reporting data (opens, clicks, impressions) upon request following the conclusion of a campaign. Reporting data is provided for informational purposes and does not constitute a warranty of performance.</p>
-    </div>
-
-    <div class="lgSection" id="contact">
-      <h2>10. Contact</h2>
-      <p>Advertising inquiries and campaign questions:</p>
-      <p><strong>GoDoDaytona Advertising</strong><br><a href="mailto:ads@godocity.com">ads@godocity.com</a></p>
-      <p>Policy questions:</p>
-      <p><a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a></p>
-      <p>To view our full advertising product menu, visit the <a href="/daytona/advertise/">Advertise</a> page.</p>
-    </div>
-
+  <div class="lgSection" id="overview">
+    <h2>1. Overview</h2>
+    <p>GoDoDaytona offers a range of advertising and marketing products designed to connect local and regional businesses with our engaged community audience in the Daytona Beach and Volusia County area. GoDoDaytona is part of the GoDoCity network, a multi-city digital media platform with consistent standards and brand-safe environments.</p>
+    <p>Our advertising platform is built on three core commitments:</p>
+    <ul>
+      <li><strong>Brand safety:</strong> Your brand appears alongside quality, community-focused editorial content in a controlled, curated environment</li>
+      <li><strong>Editorial integrity:</strong> Our editorial content is independent of advertising relationships — this protects the audience trust that makes our platform valuable to advertisers</li>
+      <li><strong>Clear disclosure:</strong> All commercial content is clearly labeled, ensuring FTC compliance and audience trust</li>
+    </ul>
+    <p>Advertising on GoDoDaytona is available to local businesses, regional brands, national brands with a local connection, and event organizers. We reserve the right to decline advertising from any entity at our discretion.</p>
   </div>
-</Base>
 
-<style>
-  .lgWrap { max-width: 760px; margin: 0 auto; padding: 56px 2rem 96px; }
-  @media (max-width: 600px) { .lgWrap { padding: 40px 1.25rem 72px; } }
-  .lgBread { font-size: 13px; color: #888; margin-bottom: 32px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .lgBread a { color: var(--brand1, #0077be); text-decoration: none; font-weight: 600; }
-  .lgBread a:hover { text-decoration: underline; }
-  .lgBread span[aria-hidden] { color: #ccc; }
-  .lgEyebrow { display: block; font-size: 11px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; color: var(--brand1, #0077be); margin-bottom: 10px; }
-  .lgTitle { font-size: clamp(28px, 5vw, 42px); font-weight: 900; letter-spacing: -0.025em; color: #111; margin: 0 0 16px; line-height: 1.1; }
-  .lgMeta { font-size: 13px; color: #888; margin-bottom: 28px; display: flex; gap: 24px; flex-wrap: wrap; }
-  .lgDivider { height: 1px; background: #e5e7eb; margin: 0 0 32px; }
-  .lgNotice { background: color-mix(in srgb, var(--brand1, #0077be) 6%, white); border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 20%, transparent); border-radius: 10px; padding: 16px 18px; margin-bottom: 32px; }
-  .lgNotice p { margin: 0; font-size: 14px; line-height: 1.65; color: #333; }
-  .lgNotice a { color: var(--brand1, #0077be); }
-  .lgToc { background: #f9f9fb; border: 1px solid #e5e7eb; border-radius: 12px; padding: 20px 24px; margin-bottom: 52px; }
-  .lgTocTitle { font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: #888; margin: 0 0 14px; }
-  .lgTocList { list-style: decimal; padding-left: 18px; margin: 0; display: flex; flex-direction: column; gap: 7px; }
-  .lgTocList a { font-size: 13px; font-weight: 700; color: #333; text-decoration: none; }
-  .lgTocList a:hover { color: var(--brand1, #0077be); text-decoration: underline; }
-  .lgSection { margin-bottom: 52px; }
-  .lgSection h2 { font-size: clamp(17px, 2.5vw, 21px); font-weight: 900; letter-spacing: -0.01em; color: #111; margin: 0 0 18px; padding-bottom: 10px; border-bottom: 2px solid var(--brand1, #0077be); }
-  .lgSection h3 { font-size: 15px; font-weight: 800; color: #111; margin: 22px 0 8px; }
-  .lgSection p { font-size: 15px; line-height: 1.78; color: #444; margin: 0 0 14px; }
-  .lgSection p:last-child { margin-bottom: 0; }
-  .lgSection ul, .lgSection ol { padding-left: 22px; margin: 0 0 16px; }
-  .lgSection li { font-size: 15px; line-height: 1.72; color: #444; margin-bottom: 7px; }
-  .lgSection a { color: var(--brand1, #0077be); text-decoration: underline; text-underline-offset: 2px; }
-  .lgSection strong { color: #111; }
-  @media print { .lgWrap { padding: 0; } .lgBread { display: none; } }
-</style>
+  <div class="lgSection" id="independence">
+    <h2>2. Editorial Independence Guarantee</h2>
+    <p><strong>Advertising on GoDoDaytona does not purchase, guarantee, or influence organic editorial coverage.</strong> This is an absolute rule with no exceptions.</p>
+    <p>As an advertising partner, you acknowledge and agree to the following:</p>
+    <ul>
+      <li>Your advertising investment does not create any obligation for GoDoDaytona's editorial team to cover your business, events, or announcements organically</li>
+      <li>Your advertising investment does not create any right to review, approve, modify, or veto organic editorial content about your business or your competitors</li>
+      <li>Your advertising investment does not prevent GoDoDaytona from publishing accurate, factual editorial content about your business that you may find unflattering</li>
+      <li>Requesting that GoDoDaytona suppress, modify, or favorably slant organic editorial content as a condition of advertising is a violation of this policy and will result in termination of the advertising relationship</li>
+    </ul>
+    <p>This independence is what makes GoDoDaytona's audience trust valuable. An audience that trusts the editorial content is an audience that engages with the advertising content.</p>
+    <div class="lgInfo"><p>If you have purchased sponsored or branded content from GoDoDaytona, that content is separate from organic editorial coverage and is governed by Section 4 of this policy. Sponsored content is labeled, controlled by separate workflows, and involves a collaborative production process with your team.</p></div>
+  </div>
+
+  <div class="lgSection" id="products">
+    <h2>3. Advertising Products</h2>
+    <p>GoDoDaytona offers a range of advertising products across its digital properties. Product details, pricing, and availability are described at <a href="/daytona/advertise/">gododaytona.com/advertise</a>. Current advertising products include, but are not limited to:</p>
+
+    <h3>Newsletter Advertising</h3>
+    <p>Paid placements within GoDoDaytona's email newsletter, including banner positions, sponsored content sections, and event promotions. Newsletter advertising reaches GoDoDaytona's subscriber base directly in their inbox.</p>
+
+    <h3>Website Display Advertising</h3>
+    <p>Banner and display ad placements across GoDoDaytona.com, including homepage placements, section placements, and article-level placements.</p>
+
+    <h3>Sponsored & Branded Content</h3>
+    <p>Editorial-style articles, guides, and features produced by GoDoDaytona's editorial team in collaboration with the advertiser. See Section 4 for how this product is defined and disclosed.</p>
+
+    <h3>Event Sponsorships & Promotions</h3>
+    <p>Sponsorship and promotional placements tied to specific events, contests, or seasonal content initiatives.</p>
+
+    <h3>Sweepstakes & Giveaway Sponsorships</h3>
+    <p>Co-branding opportunities within GoDoDaytona-administered sweepstakes and giveaway promotions. Prize-contributing sponsors must comply with our <a href="/daytona/legal/sweepstakes-rules/">Sweepstakes Rules</a> and are not co-sponsors of the promotion.</p>
+
+    <h3>Social Media Advertising</h3>
+    <p>Paid social media content and promotion on GoDoDaytona's official social media channels.</p>
+  </div>
+
+  <div class="lgSection" id="featured">
+    <h2>4. Featured & Sponsored Content Defined</h2>
+    <p>GoDoDaytona uses the following commercial content formats. All formats are clearly labeled in compliance with FTC guidelines:</p>
+
+    <h3>"Featured" Advertising Placement</h3>
+    <p><strong>A "Featured" designation in a paid advertising context represents a commercial arrangement and not editorial endorsement.</strong> When a business or content item is labeled "Featured" in conjunction with a commercial disclosure (such as "Sponsored," "Paid," or "Partner"), it indicates that the prominent placement was purchased as an advertising product.</p>
+
+    <h3>"Sponsored Content" / "Branded Content"</h3>
+    <p>Longer-form editorial-style articles or features that are produced in partnership with an advertising sponsor. This content is written by GoDoDaytona's editorial team with input from the sponsor, and is labeled "Sponsored Content," "Paid Partnership," or "Featured Partnership" at the top of the piece.</p>
+
+    <h3>"Local Spotlight" (Mini Sponsored Article)</h3>
+    <p>A shorter sponsored editorial feature highlighting a local business, event, or service. Labeled as sponsored content.</p>
+
+    <h3>"Deep Dive" (Long-Form Sponsored Feature)</h3>
+    <p>A comprehensive sponsored editorial feature providing in-depth coverage of a business, product, or experience. Labeled as sponsored content with our AdDisclosure component.</p>
+
+    <h3>Affiliate Relationships</h3>
+    <p>GoDoDaytona may from time to time include affiliate links in editorial content through which we may earn a commission if a reader makes a purchase. All affiliate relationships are disclosed in compliance with FTC guidelines. The inclusion of affiliate links does not influence editorial coverage decisions.</p>
+  </div>
+
+  <div class="lgSection" id="standards">
+    <h2>5. Advertising Content Standards</h2>
+    <p>All advertising content submitted to or produced for GoDoDaytona must meet the following standards:</p>
+    <ul>
+      <li><strong>Truthfulness:</strong> All advertising claims must be accurate and substantiated. Misleading, deceptive, or unsubstantiated claims are not permitted.</li>
+      <li><strong>Clarity:</strong> Advertising must be clearly identifiable as advertising and must not be designed to confuse readers about its commercial nature.</li>
+      <li><strong>Brand safety:</strong> Advertising content must be appropriate for a general community audience and consistent with GoDoDaytona's brand-safe editorial environment.</li>
+      <li><strong>Legal compliance:</strong> All advertising must comply with applicable federal, state, and local laws and regulations, including FTC guidelines, FDA regulations where applicable, and any industry-specific regulatory requirements.</li>
+      <li><strong>Quality:</strong> Display ad creative must meet our technical specifications for file size, format, dimensions, and animation restrictions. Creative that does not meet specifications may be rejected or scaled to fit.</li>
+    </ul>
+  </div>
+
+  <div class="lgSection" id="prohibited">
+    <h2>6. Prohibited Content</h2>
+    <p>GoDoDaytona does not accept advertising that contains or promotes the following:</p>
+
+    <h3>Illegal Products & Services</h3>
+    <ul>
+      <li>Illegal drugs, controlled substances, or drug paraphernalia</li>
+      <li>Counterfeit goods or services</li>
+      <li>Illegal weapons or weapon accessories</li>
+      <li>Services that facilitate illegal activity</li>
+      <li>Products or services that violate applicable federal, state, or local law</li>
+    </ul>
+
+    <h3>Deceptive & Harmful Practices</h3>
+    <ul>
+      <li>False, misleading, or deceptive advertising claims</li>
+      <li>Bait-and-switch advertising tactics</li>
+      <li>Phishing, malware, or other malicious content</li>
+      <li>Get-rich-quick schemes, pyramid schemes, or multi-level marketing programs with misleading income claims</li>
+      <li>Fake news, disinformation, or content designed to deceive readers about its nature or source</li>
+      <li>Unauthorized data collection or privacy violations</li>
+    </ul>
+
+    <h3>Harmful or Offensive Content</h3>
+    <ul>
+      <li>Content that is obscene, pornographic, or sexually explicit</li>
+      <li>Content that promotes or glorifies violence, hate speech, or discrimination based on race, ethnicity, religion, gender, sexual orientation, disability, or national origin</li>
+      <li>Content that targets or could be harmful to minors</li>
+      <li>Content that demeans, harasses, or bullies any individual or group</li>
+    </ul>
+
+    <h3>Restricted Categories</h3>
+    <p>The following categories are subject to additional review and restrictions, and may require prior written approval:</p>
+    <ul>
+      <li>Alcohol and tobacco products (must comply with all applicable laws and platform age restrictions)</li>
+      <li>Cannabis and CBD products (subject to Florida law and platform policy)</li>
+      <li>Political advertising (subject to additional disclosure requirements)</li>
+      <li>Financial products and services (must comply with applicable regulations)</li>
+      <li>Healthcare products and services (must comply with FDA and FTC guidelines)</li>
+      <li>Legal services (must comply with applicable bar association advertising rules)</li>
+      <li>Contests and sweepstakes not administered by GoDoDaytona (must comply with all applicable laws)</li>
+    </ul>
+
+    <h3>Competitive Advertising</h3>
+    <p>Advertising that disparages GoDoCity LLC, GoDoDaytona, or other GoDoCity network publications is not permitted.</p>
+
+    <p>GoDoDaytona reserves the right to reject or remove any advertising at its sole discretion, including advertising in categories not listed above, if we determine that the advertising is inconsistent with our editorial standards or brand values.</p>
+  </div>
+
+  <div class="lgSection" id="approval">
+    <h2>7. Ad Review & Approval</h2>
+    <p>All advertising content is subject to review and approval by GoDoDaytona's commercial and editorial teams before publication. By submitting advertising creative or content, you represent and warrant that:</p>
+    <ul>
+      <li>You have the right to use all content, images, trademarks, and other materials included in the advertising</li>
+      <li>The advertising complies with this Advertiser Policy and all applicable laws</li>
+      <li>The advertising does not infringe the intellectual property rights, privacy rights, or other rights of any third party</li>
+      <li>All claims in the advertising are truthful, accurate, and substantiated</li>
+    </ul>
+    <p>We reserve the right to request modifications to advertising creative that does not comply with our standards, and to reject advertising that cannot be brought into compliance. Rejection of advertising does not entitle the advertiser to a refund unless otherwise specified in the advertising agreement.</p>
+    <p>For sponsored content, GoDoDaytona's editorial team will produce a draft for advertiser review. The advertiser may request factual corrections or brand-related adjustments, but may not direct editorial framing or require removal of material disclosures.</p>
+  </div>
+
+  <div class="lgSection" id="ftc">
+    <h2>8. FTC Compliance & Disclosure</h2>
+    <p>GoDoCity LLC is committed to full compliance with Federal Trade Commission ("FTC") guidelines governing advertising disclosure, including the FTC's Guides Concerning Use of Endorsements and Testimonials in Advertising (16 C.F.R. Part 255) and the FTC's guidance on native advertising and digital disclosure.</p>
+    <p>As an advertising partner, you are responsible for ensuring that your advertising content, including any claims, endorsements, testimonials, or influencer marketing, complies with applicable FTC guidelines. By purchasing advertising, you represent and warrant that:</p>
+    <ul>
+      <li>All endorsements or testimonials in your advertising reflect the honest opinions of the endorsers</li>
+      <li>Any material connection between your business and an endorser is disclosed where required by law</li>
+      <li>Any health or performance claims in your advertising are substantiated and comply with applicable FDA and FTC requirements</li>
+    </ul>
+    <p>GoDoDaytona will apply appropriate commercial disclosures to all sponsored and branded content. Advertisers may not request that disclosures be removed, obscured, or minimized.</p>
+  </div>
+
+  <div class="lgSection" id="performance">
+    <h2>9. Performance & Reporting</h2>
+    <p>GoDoDaytona provides advertising performance reports to partners as specified in individual advertising agreements. Reporting may include impressions, clicks, click-through rates, open rates (for newsletter advertising), and other engagement metrics, depending on the advertising product.</p>
+    <p>All performance data is provided in good faith based on our analytics systems. Performance metrics are estimates and may differ from those reported by your own analytics tools due to differences in tracking methodologies, ad-blocker usage, and measurement timing. GoDoDaytona does not warrant that reported metrics will match third-party measurements.</p>
+    <p>We do not guarantee specific performance outcomes (impressions, clicks, conversions) unless specifically stated in a written advertising agreement. Advertising products are sold on a best-efforts basis.</p>
+  </div>
+
+  <div class="lgSection" id="billing">
+    <h2>10. Billing & Payment</h2>
+    <p>Payment terms are specified in individual advertising agreements and invoices. Standard payment terms are net-30 from invoice date unless otherwise agreed in writing. GoDoDaytona reserves the right to require prepayment for new advertising partners or for campaigns above certain thresholds.</p>
+    <p>Late payments may be subject to a late fee of 1.5% per month (or the maximum permitted by applicable law, whichever is less). GoDoCity LLC reserves the right to suspend or cancel advertising campaigns for accounts with outstanding unpaid balances.</p>
+    <p>All prices are in U.S. dollars. Prices are subject to change with reasonable notice. Price changes do not affect campaigns covered by existing signed agreements during their stated terms.</p>
+  </div>
+
+  <div class="lgSection" id="cancellation">
+    <h2>11. Cancellation & Refunds</h2>
+    <p>Cancellation and refund policies vary by advertising product and are specified in individual advertising agreements. General policies:</p>
+    <ul>
+      <li><strong>Standard display and newsletter advertising:</strong> Cancellations received at least 5 business days before the scheduled publication date may receive a full credit. Cancellations with less than 5 business days notice may forfeit the campaign value.</li>
+      <li><strong>Sponsored content:</strong> Cancellations before production begins may receive a full credit. Cancellations after production has begun may be subject to a kill fee of up to 50% of the campaign value to cover production costs already incurred.</li>
+      <li><strong>Sold-out inventory:</strong> Once newsletter or event-based inventory is sold, it cannot be resold, so cancellations of such placements are generally non-refundable.</li>
+    </ul>
+    <p>Refunds will not be issued for advertising that ran but did not meet performance expectations, unless GoDoDaytona failed to deliver the contracted placements as agreed. Credits and make-goods for under-delivery will be provided at GoDoDaytona's discretion.</p>
+  </div>
+
+  <div class="lgSection" id="indemnification">
+    <h2>12. Advertiser Indemnification</h2>
+    <p>By purchasing advertising on GoDoDaytona, you agree to defend, indemnify, and hold harmless GoDoCity LLC, its officers, directors, employees, agents, and representatives from and against any claims, liabilities, damages, losses, and expenses (including reasonable attorneys' fees) arising out of or in connection with:</p>
+    <ul>
+      <li>Your advertising content, including any claims that the content is false, misleading, or infringing</li>
+      <li>Your breach of this Advertiser Policy or any advertising agreement</li>
+      <li>Your violation of applicable laws or regulations in connection with your advertising</li>
+      <li>Any third-party claims arising from your advertising content, including intellectual property infringement claims</li>
+    </ul>
+  </div>
+
+  <div class="lgSection" id="contact">
+    <h2>13. Contact Advertising</h2>
+    <p>For advertising inquiries, to request a media kit, or to discuss partnership opportunities:</p>
+    <p><strong>GoDoDaytona Advertising</strong><br />Daytona Beach, FL<br /><a href="mailto:advertise@gododaytona.com">advertise@gododaytona.com</a></p>
+    <p>View our advertising products and pricing: <a href="/daytona/advertise/">gododaytona.com/advertise</a></p>
+    <p>For legal and compliance questions: <a href="mailto:legal@gododaytona.com">legal@gododaytona.com</a></p>
+  </div>
+
+</LegalLayout>
