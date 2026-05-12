@@ -1,0 +1,136 @@
+---
+import Base from "../../../layouts/Base.astro";
+
+const docs = [
+  {
+    slug: "terms-of-service",
+    title: "Terms of Service",
+    desc: "The rules that govern your use of GoDoDaytona.com and all related services.",
+    icon: "M9 1L2 4v5c0 4.55 3.05 8.74 7 9.93C13 17.74 16 13.55 16 9V4L9 1z",
+  },
+  {
+    slug: "privacy-policy",
+    title: "Privacy Policy",
+    desc: "How we collect, use, and protect the information you share with us.",
+    icon: "M4 3h10v2H4V3zm0 4h10v2H4V7zm0 4h6v2H4v-2zm8 4l2-2 2 2m0-4v6",
+  },
+  {
+    slug: "editorial-policy",
+    title: "Editorial Policy",
+    desc: "Our commitment to accuracy, independence, and transparent sponsored content disclosure.",
+    icon: "M3 4h12v2H3V4zm0 4h12v2H3V8zm0 4h8v2H3v-2zm10 0l2 2 2-2m0-4v7",
+  },
+  {
+    slug: "advertiser-policy",
+    title: "Advertiser Policy",
+    desc: "Standards, disclosures, and terms for all paid partnerships and advertising placements.",
+    icon: "M2 14l4-8 3 5 2-3 3 6M1 17h16",
+  },
+  {
+    slug: "sweepstakes-rules",
+    title: "Sweepstakes Rules",
+    desc: "Official rules for the Full Court Giveaway and all future GoDoDaytona contests.",
+    icon: "M9 1l2 4 5 .7-3.5 3.4.8 5L9 12l-4.3 2.1.8-5L2 5.7 7 5z",
+  },
+];
+---
+
+<Base title="Legal & Policy Documents | GoDoDaytona" subtitle="Terms of service, privacy policy, editorial guidelines, and advertiser policies for GoDoDaytona." cityBase="daytona">
+
+  <div class="lgHubWrap">
+
+    <div class="lgHubHero">
+      <span class="lgHubEyebrow">GoDoDaytona</span>
+      <h1 class="lgHubTitle">Legal & Policy Documents</h1>
+      <p class="lgHubSub">Transparency is a community value. Here you'll find every policy that governs how GoDoDaytona operates — from how we handle your data to how we label sponsored content.</p>
+    </div>
+
+    <div class="lgHubGrid">
+      {docs.map(doc => (
+        <a class="lgHubCard" href={`/daytona/legal/${doc.slug}/`}>
+          <div class="lgHubCardIcon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d={doc.icon} stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="lgHubCardBody">
+            <strong class="lgHubCardTitle">{doc.title}</strong>
+            <p class="lgHubCardDesc">{doc.desc}</p>
+          </div>
+          <span class="lgHubCardArrow" aria-hidden="true">→</span>
+        </a>
+      ))}
+    </div>
+
+    <p class="lgHubNote">Questions about any of our policies? Email <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a></p>
+
+  </div>
+
+</Base>
+
+<style>
+  .lgHubWrap {
+    max-width: 760px; margin: 0 auto;
+    padding: 56px 2rem 96px;
+  }
+  @media (max-width: 600px) { .lgHubWrap { padding: 40px 1.25rem 72px; } }
+
+  .lgHubHero { margin-bottom: 48px; }
+  .lgHubEyebrow {
+    display: inline-block; font-size: 11px; font-weight: 900;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: var(--brand1, #0077be); margin-bottom: 10px;
+  }
+  .lgHubTitle {
+    font-size: clamp(28px, 5vw, 42px); font-weight: 900;
+    letter-spacing: -0.025em; color: #111; margin: 0 0 14px; line-height: 1.1;
+  }
+  .lgHubSub {
+    font-size: 16px; line-height: 1.72; color: #555; margin: 0;
+    max-width: 580px;
+  }
+
+  .lgHubGrid {
+    display: flex; flex-direction: column; gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .lgHubCard {
+    display: flex; align-items: flex-start; gap: 18px;
+    background: #fff; border: 1.5px solid #e5e7eb;
+    border-radius: 14px; padding: 20px 20px 20px 20px;
+    text-decoration: none; color: inherit;
+    transition: border-color 150ms, box-shadow 150ms, transform 130ms;
+  }
+  .lgHubCard:hover {
+    border-color: var(--brand1, #0077be);
+    box-shadow: 0 4px 18px rgba(0,0,0,.07);
+    transform: translateY(-1px);
+  }
+
+  .lgHubCardIcon {
+    width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+    background: color-mix(in srgb, var(--brand1, #0077be) 10%, transparent);
+    color: var(--brand1, #0077be);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .lgHubCardBody { flex: 1; min-width: 0; }
+  .lgHubCardTitle {
+    display: block; font-size: 15px; font-weight: 800; color: #111;
+    margin-bottom: 4px;
+  }
+  .lgHubCardDesc { font-size: 13.5px; line-height: 1.6; color: #666; margin: 0; }
+  .lgHubCardArrow {
+    font-size: 18px; color: #ccc; flex-shrink: 0; align-self: center;
+    transition: color 140ms;
+  }
+  .lgHubCard:hover .lgHubCardArrow { color: var(--brand1, #0077be); }
+
+  .lgHubNote {
+    font-size: 13px; color: #888; margin: 0; text-align: center;
+  }
+  .lgHubNote a {
+    color: var(--brand1, #0077be); text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+</style>
