@@ -2,24 +2,24 @@
 import LegalLayout from "../../../layouts/LegalLayout.astro";
 
 const toc = [
-  { id: "overview",      label: "Overview & Scope" },
-  { id: "collection",    label: "Information We Collect" },
-  { id: "use",           label: "How We Use Information" },
-  { id: "sharing",       label: "How We Share Information" },
-  { id: "cookies",       label: "Cookies & Tracking Technologies" },
-  { id: "advertising",   label: "Advertising & Analytics" },
-  { id: "retention",     label: "Data Retention" },
-  { id: "security",      label: "Data Security" },
-  { id: "children",      label: "Children's Privacy" },
-  { id: "ccpa",          label: "California Rights (CCPA/CPRA)" },
-  { id: "vcdpa",         label: "Virginia Rights (VCDPA)" },
-  { id: "cpa",           label: "Colorado Rights (CPA)" },
-  { id: "ctdpa",         label: "Connecticut Rights (CTDPA)" },
-  { id: "other-states",  label: "Other State Privacy Rights" },
-  { id: "choices",       label: "Your Choices & Controls" },
-  { id: "international", label: "International Users" },
-  { id: "changes",       label: "Changes to This Policy" },
-  { id: "contact",       label: "Contact Us" },
+  { id: "about",        label: "About This Policy" },
+  { id: "collect",      label: "Information We Collect" },
+  { id: "use",          label: "How We Use Your Information" },
+  { id: "share",        label: "How We Share Information" },
+  { id: "cookies",      label: "Cookies, Pixels & Tracking" },
+  { id: "email",        label: "Email Communications" },
+  { id: "retention",    label: "Data Retention" },
+  { id: "security",     label: "Data Security" },
+  { id: "children",     label: "Children's Privacy" },
+  { id: "ccpa",         label: "California Rights (CCPA/CPRA)" },
+  { id: "vcdpa",        label: "Virginia Rights (VCDPA)" },
+  { id: "colorado",     label: "Colorado Rights (CPA)" },
+  { id: "connecticut",  label: "Connecticut Rights (CTDPA)" },
+  { id: "other-states", label: "Other State Privacy Rights" },
+  { id: "dnt",          label: "Do Not Track" },
+  { id: "international",label: "International Users" },
+  { id: "changes",      label: "Changes to This Policy" },
+  { id: "contact",      label: "Contact & Privacy Requests" },
 ];
 
 const noticeHtml = `<p>We do not sell your personal information. This Policy explains what we collect, why we collect it, and your rights to control it.</p>`;
@@ -36,273 +36,601 @@ const noticeHtml = `<p>We do not sell your personal information. This Policy exp
   noticeHtml={noticeHtml}
 >
 
-  <div class="lgSection" id="overview">
-    <h2>1. Overview & Scope</h2>
-    <p>This Privacy Policy applies to information collected through GoDoDaytona.com and all other digital properties operated by GoDoCity LLC as part of the GoDoDaytona brand (collectively, the "Service"). GoDoDaytona is a local affiliate of the GoDoCity network, a multi-city digital media platform serving communities across the United States.</p>
-    <p>This policy applies to information we collect when you use our Service, subscribe to our newsletter, engage with our advertising products, enter a promotion, or otherwise interact with us. It does not apply to information collected by third parties that may link to or be accessible from our Service.</p>
-    <p>If you have questions about this policy or our privacy practices, please contact us at <a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a>.</p>
+  <!-- 1. ABOUT THIS POLICY -->
+  <div class="lgSection" id="about">
+    <h2>1. About This Policy</h2>
+    <p>
+      This Privacy Policy explains how GoDoCity LLC ("GoDoCity," "GoDoDaytona," "we," "us," or
+      "our") collects, uses, shares, and protects information in connection with GoDoDaytona.com,
+      our email newsletter, social media channels, contests and sweepstakes, and all related
+      services (collectively, the "Service"). By using the Service, you agree to the collection
+      and use of information in accordance with this Policy.
+    </p>
+    <p>
+      This Policy should be read together with our
+      <a href="/daytona/legal/terms-of-service/">Terms of Service</a>, which govern your use of
+      the Service and are incorporated herein by reference.
+    </p>
+    <p>
+      For California residents, additional rights are described in
+      <a href="#ccpa">Section 10 (California Rights — CCPA/CPRA)</a>.
+    </p>
   </div>
 
-  <div class="lgSection" id="collection">
+  <!-- 2. INFORMATION WE COLLECT -->
+  <div class="lgSection" id="collect">
     <h2>2. Information We Collect</h2>
 
     <h3>Information You Provide Directly</h3>
-    <p>We collect information you voluntarily provide, including:</p>
+    <p>We collect information you voluntarily provide when interacting with the Service:</p>
     <ul>
-      <li><strong>Account registration:</strong> Name, email address, password, and optional profile information</li>
-      <li><strong>Newsletter subscriptions:</strong> Email address and optional name and zip code</li>
-      <li><strong>Contact forms:</strong> Name, email address, phone number, and message content</li>
-      <li><strong>Advertising inquiries:</strong> Business name, contact details, billing information, and campaign information</li>
-      <li><strong>Sweepstakes &amp; contests:</strong> Name, email, address, phone number, and any additional information required by the specific promotion</li>
-      <li><strong>User-generated content:</strong> Comments, event submissions, photos, and any other content you submit</li>
-      <li><strong>Survey responses:</strong> Opinions, preferences, and feedback you share with us</li>
+      <li><strong>Newsletter subscription:</strong> email address; optionally, first name and zip code</li>
+      <li><strong>Contact and advertiser inquiry forms:</strong> name, email address, business name, phone number, and the content of your message</li>
+      <li><strong>Contest and sweepstakes entries:</strong> name, email address, mailing address, and any entry-specific information required by the contest rules</li>
+      <li><strong>Community submissions:</strong> tips, letters to the editor, event listings, photographs, press releases, and any other content you choose to submit — including any personal information contained in that content</li>
     </ul>
 
     <h3>Information Collected Automatically</h3>
-    <p>When you use the Service, we automatically collect certain technical and usage information, including:</p>
+    <p>
+      When you visit the Service, we and our service providers automatically collect certain
+      information about your device and browsing activity:
+    </p>
     <ul>
-      <li><strong>Log data:</strong> IP address, browser type and version, operating system, referring URLs, pages visited, time and date of visits, and time spent on pages</li>
-      <li><strong>Device information:</strong> Hardware model, unique device identifiers, mobile network information, and operating system version</li>
-      <li><strong>Location data:</strong> General geographic location based on IP address; precise location only with your explicit permission</li>
-      <li><strong>Interaction data:</strong> Links clicked, content viewed, scroll depth, video plays, and other engagement signals</li>
-      <li><strong>Cookie &amp; tracking data:</strong> See Section 5 for details</li>
+      <li>IP address and approximate geolocation (typically city and state level)</li>
+      <li>Browser type, version, and language settings</li>
+      <li>Operating system and device type (desktop, mobile, tablet)</li>
+      <li>Pages visited, links clicked, scroll depth, and time spent on page</li>
+      <li>Referring URL (the page or platform you came from before visiting our Service)</li>
+      <li>UTM parameters and campaign tracking codes in URLs</li>
     </ul>
+    <p>
+      This information is collected through cookies, pixels, and similar tracking technologies
+      as described in <a href="#cookies">Section 5</a>.
+    </p>
 
     <h3>Information from Third Parties</h3>
-    <p>We may receive information about you from third parties, including:</p>
+    <p>We may receive information about you from the following third-party sources:</p>
     <ul>
-      <li>Social media platforms when you interact with our social accounts or use social login features</li>
-      <li>Advertising and analytics partners who provide demographic and behavioral data</li>
-      <li>Business partners who refer you to our advertising services</li>
-      <li>Publicly available sources such as business directories</li>
+      <li><strong>Social media platforms</strong> when you interact with our social media accounts, share our content, or connect with us through a social platform</li>
+      <li><strong>Advertising and analytics partners</strong> who provide aggregated and anonymized data for advertising performance measurement — this does not include your name or email address</li>
+      <li><strong>Contest co-sponsors</strong> who may share information you provided during a jointly administered contest or sweepstakes for purposes of prize fulfillment</li>
     </ul>
   </div>
 
+  <!-- 3. HOW WE USE YOUR INFORMATION -->
   <div class="lgSection" id="use">
-    <h2>3. How We Use Information</h2>
-
-    <h3>Service Operation</h3>
+    <h2>3. How We Use Your Information</h2>
+    <p>We use the information we collect for the following purposes:</p>
     <ul>
-      <li>To provide, operate, maintain, and improve the Service</li>
-      <li>To deliver our email newsletter and other communications you have subscribed to</li>
-      <li>To process transactions and send related information including confirmations and receipts</li>
-      <li>To respond to your comments, questions, and requests</li>
-      <li>To administer sweepstakes, contests, and promotions</li>
+      <li>Deliver our newsletter and editorial content to subscribers</li>
+      <li>Respond to inquiries, advertiser requests, and community submissions</li>
+      <li>Improve the Service through analytics, user research, and testing</li>
+      <li>Administer contests, sweepstakes, and community programs</li>
+      <li>Send transactional emails related to your specific requests or account activity</li>
+      <li>Detect and prevent fraud, abuse, spam, and technical issues</li>
+      <li>Comply with applicable legal obligations and enforce our Terms of Service</li>
+      <li>Measure and analyze the effectiveness of advertising (aggregated; never sold)</li>
     </ul>
-
-    <h3>Personalization & Analytics</h3>
-    <ul>
-      <li>To personalize your experience and deliver content relevant to your interests and location</li>
-      <li>To monitor and analyze trends, usage, and activity in connection with the Service</li>
-      <li>To measure the effectiveness of our content and advertising</li>
-      <li>To conduct research and develop new features and products</li>
-    </ul>
-
-    <h3>Advertising</h3>
-    <ul>
-      <li>To serve relevant advertising to users on behalf of our advertising partners</li>
-      <li>To provide advertisers with aggregated analytics and campaign performance data</li>
-      <li>To enable interest-based advertising through third-party advertising networks</li>
-    </ul>
-
-    <h3>Legal & Safety</h3>
-    <ul>
-      <li>To comply with legal obligations and respond to lawful requests from governmental authorities</li>
-      <li>To detect, prevent, and address fraud, abuse, security incidents, and other harmful activity</li>
-      <li>To enforce our Terms of Service and other policies</li>
-      <li>To protect the rights, property, and safety of GoDoCity LLC, our users, and the public</li>
-    </ul>
-
-    <h3>Legal Basis</h3>
-    <p>Where required by law, we process personal data on the following legal bases: performance of a contract (fulfilling newsletter subscriptions, processing advertising orders); legitimate interests (improving the Service, preventing fraud, marketing); consent (optional analytics, certain marketing); and legal obligation (tax records, law enforcement requests).</p>
+    <p>
+      Where required by applicable law, our legal bases for processing personal data include:
+      <strong>performance of a contract</strong> (e.g., delivering newsletter content you
+      subscribed to); <strong>legitimate interests</strong> (e.g., improving the Service,
+      preventing fraud and abuse, operating our business); <strong>consent</strong> (where
+      explicitly obtained from you, such as for certain cookies or communications); and
+      <strong>legal compliance</strong> (processing required by applicable law).
+    </p>
   </div>
 
-  <div class="lgSection" id="sharing">
+  <!-- 4. HOW WE SHARE INFORMATION -->
+  <div class="lgSection" id="share">
     <h2>4. How We Share Information</h2>
-    <p>We do not sell your personal information to third parties. We may share your information in the following circumstances:</p>
 
     <h3>Service Providers</h3>
-    <p>We share information with vendors, consultants, and other service providers who need access to information to perform work on our behalf — including email service providers, hosting and infrastructure providers, payment processors, analytics providers, and customer support tools. Service providers are contractually obligated to use information only for the purpose of providing services to us and to maintain appropriate security.</p>
+    <p>
+      We share data with third-party vendors who act as data processors on our behalf. These
+      include email delivery and newsletter platforms (such as Mailchimp or similar services),
+      web hosting and content delivery network (CDN) providers, web analytics tools (such as
+      Google Analytics), contest and sweepstakes administration platforms, and payment
+      processors for advertising sales. All such vendors process your data solely under our
+      instructions, pursuant to written data processing agreements, and are prohibited from
+      using your personal data for their own independent purposes.
+    </p>
 
-    <h3>Advertising Partners</h3>
-    <p>We may share aggregated, anonymized audience data with advertising partners. We do not share personally identifiable information with advertisers without your consent, except in connection with a specific promotion you have opted into.</p>
+    <h3>Advertising</h3>
+    <p>
+      We work with third-party advertising networks and analytics providers who may collect
+      information through cookies, pixels, and similar tracking technologies placed on our
+      pages. This data is used to measure advertising performance and may be used by these
+      networks to serve interest-based or targeted advertising on other platforms. Please see
+      <a href="#cookies">Section 5 (Cookies, Pixels &amp; Tracking)</a> for more information
+      and opt-out options.
+    </p>
+    <p>
+      <strong>We do not share your name, email address, or other directly identifying
+      personal information with advertisers.</strong>
+    </p>
+
+    <h3>Legal &amp; Safety Disclosures</h3>
+    <p>
+      We may disclose your information to law enforcement, government authorities, or other
+      third parties when: (a) required by applicable law, regulation, subpoena, or court order;
+      (b) we believe in good faith that disclosure is necessary to protect the rights, property,
+      or safety of GoDoCity LLC, our users, or the general public; or (c) we are investigating
+      suspected fraud, violations of our Terms of Service, or other unlawful activity.
+    </p>
 
     <h3>Business Transfers</h3>
-    <p>If GoDoCity LLC is involved in a merger, acquisition, financing, reorganization, bankruptcy, or sale of all or a portion of our assets, your information may be transferred as part of that transaction. We will provide notice before your information is transferred and becomes subject to a different privacy policy.</p>
+    <p>
+      In the event of a merger, acquisition, reorganization, bankruptcy, or sale of all or
+      substantially all of GoDoCity LLC's assets, user information may be transferred as part
+      of that transaction. We will provide notice to you — by updating this Privacy Policy
+      and, where practicable, by emailing newsletter subscribers — before any such transfer
+      occurs, and we will describe the options available to you at that time.
+    </p>
 
-    <h3>Legal Requirements</h3>
-    <p>We may disclose your information if we believe disclosure is in accordance with, or required by, any applicable law, legal process, or governmental request, including to meet national security or law enforcement requirements.</p>
-
-    <h3>Protection of Rights</h3>
-    <p>We may disclose information if we believe your actions are inconsistent with our policies, if we believe you have violated the law, or to protect the rights, property, and safety of GoDoCity LLC or others.</p>
-
-    <h3>With Your Consent</h3>
-    <p>We may share information with your consent or at your direction, such as when you interact with a third-party integration or social sharing feature.</p>
+    <h3>Aggregated and De-Identified Data</h3>
+    <p>
+      We may share aggregated, de-identified, or anonymized information — such as
+      "approximately 35% of our readers are between the ages of 25 and 44" — with partners,
+      advertisers, and the public. Such information cannot reasonably be used to identify you
+      individually and is not subject to this Privacy Policy.
+    </p>
   </div>
 
+  <!-- 5. COOKIES, PIXELS & TRACKING -->
   <div class="lgSection" id="cookies">
-    <h2>5. Cookies & Tracking Technologies</h2>
-    <p>We use cookies, pixel tags, web beacons, local storage, and similar tracking technologies to collect information about your browsing activities and to distinguish you from other users of the Service.</p>
+    <h2>5. Cookies, Pixels &amp; Tracking</h2>
 
-    <h3>Types of Cookies We Use</h3>
-    <div class="lgDefList">
-      <div class="lgDefItem">
-        <div class="lgDefTerm">Strictly Necessary Cookies</div>
-        <div class="lgDefBody">Essential for the Service to function. They are usually set in response to actions you take such as setting privacy preferences, logging in, or filling in forms. You can set your browser to block these cookies, but parts of the Service may not work.</div>
-      </div>
-      <div class="lgDefItem">
-        <div class="lgDefTerm">Performance & Analytics Cookies</div>
-        <div class="lgDefBody">Allow us to count visits and traffic sources so we can measure and improve Service performance. They help us understand which pages are most and least popular. All information is aggregated and anonymous.</div>
-      </div>
-      <div class="lgDefItem">
-        <div class="lgDefTerm">Functional Cookies</div>
-        <div class="lgDefBody">Enable enhanced functionality and personalization such as remembering your preferences and newsletter subscription status. May be set by us or by third-party providers whose services we have added to our pages.</div>
-      </div>
-      <div class="lgDefItem">
-        <div class="lgDefTerm">Advertising & Targeting Cookies</div>
-        <div class="lgDefBody">Set through the Service by our advertising partners to build a profile of your interests and show you relevant advertising on other sites. They work by uniquely identifying your browser and device.</div>
-      </div>
-    </div>
+    <h3>What We Use</h3>
+    <p>
+      We and our third-party partners use cookies, web beacons, pixels, local storage objects,
+      and similar tracking technologies (collectively, "Tracking Technologies") to operate,
+      maintain, and improve the Service, and to deliver and measure advertising.
+    </p>
+
+    <h3>Types of Tracking Technologies</h3>
+    <ul>
+      <li><strong>Session Cookies:</strong> Temporary cookies stored in your browser's memory that expire automatically when you close your browser session. Used to maintain session state and enable core Service functionality during your visit.</li>
+      <li><strong>Persistent Cookies:</strong> Cookies stored on your device for a defined period of time, even after you close your browser. Used to remember your preferences and recognize you as a returning visitor.</li>
+      <li><strong>Web Beacons / Pixels:</strong> Small transparent image files (1x1 pixels) or short snippets of code embedded in web pages and emails. When loaded, they send a signal to a server confirming that a page has been viewed or an email has been opened. Used to measure content and email engagement.</li>
+      <li><strong>Third-Party Pixels:</strong> Code placed on our pages by third-party platforms to enable advertising measurement, remarketing, and analytics functionality (described in detail below).</li>
+    </ul>
 
     <h3>Specific Technologies We Use</h3>
-    <h4>Google Analytics</h4>
-    <p>We use Google Analytics, a web analytics service provided by Google LLC. Google Analytics uses cookies to help analyze how users use the Service. The information generated (including your anonymized IP address) is transmitted to and stored by Google. You can opt out by installing the <a href="https://tools.google.com/dlpage/gaoptout" rel="noopener noreferrer">Google Analytics Opt-out Browser Add-on</a>.</p>
 
-    <h4>Meta Pixel (Facebook Pixel)</h4>
-    <p>We use the Meta Pixel, a tool provided by Meta Platforms, Inc. The Meta Pixel allows us to measure the effectiveness of advertising by understanding actions people take on our website. The Pixel may connect your activity to your Facebook profile if you are logged into Facebook. You can control this through your <a href="https://www.facebook.com/settings?tab=ads" rel="noopener noreferrer">Facebook Ad Settings</a>.</p>
+    <h4>Google Analytics</h4>
+    <p>
+      We use Google Analytics to understand how visitors interact with the Service, including
+      which pages are visited, session duration, traffic sources, and user demographics
+      (aggregated). Google Analytics sets cookies to collect this behavioral data, which is
+      transmitted to and stored by Google on servers in the United States and other countries.
+      We have enabled IP anonymization to truncate IP addresses before storage. You may opt
+      out of Google Analytics data collection by installing the
+      <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics opt-out browser add-on</a>.
+    </p>
+
+    <h4>Google Tag Manager</h4>
+    <p>
+      We use Google Tag Manager ("GTM") to deploy and manage analytics tags, tracking scripts,
+      and other code snippets on the Service without requiring direct code changes. GTM itself
+      does not collect personal data, but it may load other tracking scripts as described in
+      this Section.
+    </p>
+
+    <h4>Meta (Facebook) Pixel</h4>
+    <p>
+      We use the Meta Pixel (formerly Facebook Pixel) to measure the effectiveness of
+      advertising we run on Facebook and Instagram, and to enable remarketing to users who
+      have previously visited the Service. When you visit certain pages of our Service, the
+      Meta Pixel transmits certain behavioral data to Meta Platforms, Inc. You may opt out
+      of interest-based advertising through
+      <a href="https://www.facebook.com/settings?tab=ads" target="_blank" rel="noopener noreferrer">Facebook's ad settings</a>
+      or through the opt-out tools listed below.
+    </p>
 
     <h4>Email Tracking Pixels</h4>
-    <p>Our newsletters may contain a single-pixel image (a "web beacon") that allows us to measure open rates, click rates, and other engagement metrics. If you prefer not to be tracked via email pixels, you can disable image loading in your email client settings.</p>
+    <p>
+      Our newsletter emails contain a single transparent pixel image that confirms when an
+      email has been opened and whether embedded links have been clicked. This data is used
+      solely to measure newsletter engagement and improve content quality. To prevent email
+      open tracking, you may disable automatic image loading in your email client settings.
+    </p>
 
     <h4>Newsletter Service Provider Tracking</h4>
-    <p>We use third-party email service providers to send our newsletter. These providers may use tracking technologies to measure email delivery, open rates, and link clicks. Data collected is used in aggregate to improve our editorial and advertising performance.</p>
+    <p>
+      Our email delivery platform sets cookies on our website and tracks user engagement with
+      our newsletter (including opens, clicks, and unsubscribes) in accordance with its own
+      privacy policy and data processing agreement with GoDoCity LLC.
+    </p>
 
-    <h3>Managing Cookies</h3>
-    <p>Most web browsers accept cookies by default. You can usually set your browser to remove or reject cookies, though this may affect the availability and functionality of parts of the Service. You may also opt out of interest-based advertising through the Digital Advertising Alliance's <strong>optout.aboutads.info</strong> or the Network Advertising Initiative's <strong>optout.networkadvertising.org</strong>.</p>
+    <h3>Cookie Controls</h3>
+    <p>You have several options for controlling tracking technologies:</p>
+    <ul>
+      <li><strong>Browser settings:</strong> Most modern web browsers allow you to block, delete, or be notified about cookies through your browser's privacy or security settings. Please consult your browser's help documentation for instructions.</li>
+      <li><strong>Google Analytics opt-out:</strong> Install the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics opt-out browser add-on</a> to prevent your data from being used by Google Analytics across all websites.</li>
+      <li><strong>Industry opt-out tools:</strong> Opt out of interest-based advertising from participating companies via the <a href="http://optout.networkadvertising.org" target="_blank" rel="noopener noreferrer">Network Advertising Initiative (NAI) opt-out tool</a> or the <a href="http://optout.aboutads.info" target="_blank" rel="noopener noreferrer">Digital Advertising Alliance (DAA) opt-out tool</a>.</li>
+      <li><strong>Cookie consent:</strong> Where required by applicable law (such as for users in the EU/UK), we will obtain your consent before placing non-essential cookies.</li>
+    </ul>
+    <p>
+      Please note that blocking or deleting certain cookies may affect the functionality of
+      some features of the Service. Opting out of interest-based advertising does not mean
+      you will see fewer ads — only that ads may be less relevant to your interests.
+    </p>
   </div>
 
-  <div class="lgSection" id="advertising">
-    <h2>6. Advertising & Analytics</h2>
-    <p>GoDoDaytona.com is supported by advertising. We work with advertising partners to serve ads that may be relevant to your interests. These partners may use cookies and similar technologies to collect information about your visits to GoDoDaytona.com and other websites to provide targeted advertising.</p>
-    <p>We may use aggregated, de-identified audience data to create custom audience segments for our advertising partners. This data does not identify you personally. Advertisers receive only aggregated performance reports and do not receive your personal information.</p>
-    <p>Sponsored content, paid partnerships, and native advertising on GoDoDaytona.com are always clearly labeled in accordance with FTC guidelines and our <a href="/daytona/legal/editorial-policy/">Editorial Policy</a>. See our <a href="/daytona/legal/advertiser-policy/">Advertiser Policy</a> for details on how advertising content is handled.</p>
+  <!-- 6. EMAIL COMMUNICATIONS -->
+  <div class="lgSection" id="email">
+    <h2>6. Email Communications</h2>
+    <p>
+      Newsletter subscribers receive regular emails containing local news, events, dining
+      guides, business spotlights, community announcements, and advertising. You may
+      unsubscribe from newsletter emails at any time by clicking the unsubscribe link
+      included in every marketing email, or by emailing us at
+      <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a> with "unsubscribe"
+      in the subject line. We process unsubscribe requests within ten (10) business days.
+    </p>
+    <p>
+      Transactional emails — including contest entry confirmations, inquiry responses, and
+      account-related notices — are sent as needed in connection with your specific requests
+      and are not subject to marketing unsubscribe requirements.
+    </p>
+    <p>
+      <strong>We do not sell, rent, or share your email address with third parties for
+      their own marketing or promotional purposes.</strong>
+    </p>
   </div>
 
+  <!-- 7. DATA RETENTION -->
   <div class="lgSection" id="retention">
     <h2>7. Data Retention</h2>
-    <p>We retain your personal information for as long as necessary to fulfill the purposes outlined in this Privacy Policy, unless a longer retention period is required or permitted by law. Retention criteria include:</p>
+    <p>
+      We retain personal information only for as long as necessary to fulfill the purposes for
+      which it was collected and to comply with our legal obligations. Our general retention
+      practices are as follows:
+    </p>
     <ul>
-      <li>The length of time we have an ongoing relationship with you and provide services</li>
-      <li>Whether there is a legal obligation requiring retention</li>
-      <li>Whether retention is advisable in light of our legal position (statutes of limitations, litigation, regulatory investigations)</li>
+      <li><strong>Newsletter subscribers:</strong> Email address and subscription data are retained while your subscription is active. After you unsubscribe, your email address is retained in a suppression list to prevent inadvertent re-enrollment.</li>
+      <li><strong>Contact form submissions:</strong> Retained for up to twenty-four (24) months from the date of submission.</li>
+      <li><strong>Contest entry data:</strong> Retained for the duration required to administer the contest, fulfill legal and prize obligations, and satisfy any applicable statutory record-keeping requirements, then deleted or anonymized.</li>
+      <li><strong>Analytics data:</strong> Retained in accordance with Google Analytics default retention settings (26 months by default, which we may adjust based on our needs and applicable law).</li>
+      <li><strong>Security and access logs:</strong> Retained for up to twelve (12) months.</li>
     </ul>
-    <p>For newsletter subscribers, we retain your email and preferences for as long as you remain subscribed plus a reasonable period thereafter. For advertising customers, we retain transaction records for a minimum of seven years. For sweepstakes entrants, records are retained for a minimum of three years after the promotion ends.</p>
-    <p>When personal information is no longer needed, we will delete or anonymize it. If immediate deletion is not possible (e.g., information stored in backup archives), we will securely store and isolate your information from further processing until deletion is possible.</p>
+    <p>
+      We may retain certain information for longer periods where required by law, to resolve
+      disputes, enforce our agreements, or for legitimate business purposes such as fraud
+      prevention.
+    </p>
   </div>
 
+  <!-- 8. DATA SECURITY -->
   <div class="lgSection" id="security">
     <h2>8. Data Security</h2>
-    <p>We implement appropriate technical and organizational security measures designed to protect your information against unauthorized access, disclosure, alteration, or destruction, including encryption of data in transit (TLS/SSL), access controls, and regular security reviews.</p>
-    <p>However, no method of transmission over the Internet or electronic storage is 100% secure. We cannot guarantee absolute security. In the event of a data breach posing risk to your rights and freedoms, we will notify you and relevant authorities as required by applicable law.</p>
-    <p>You are responsible for maintaining the secrecy of your account credentials. Please notify us immediately at <a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a> if you suspect unauthorized use of your account.</p>
+    <p>
+      We implement technical and organizational security measures designed to protect your
+      personal information from unauthorized access, disclosure, alteration, or destruction.
+      These measures include:
+    </p>
+    <ul>
+      <li>HTTPS/TLS encryption for all data transmitted between your browser and the Service</li>
+      <li>Access controls limiting who within our organization can access personal data, based on need</li>
+      <li>Vendor agreements requiring service providers to maintain appropriate technical and organizational security measures</li>
+      <li>Regular review of our data collection, storage, and processing practices</li>
+    </ul>
+    <p>
+      No method of electronic transmission or data storage is completely secure. While we
+      strive to use commercially acceptable means to protect your personal information, we
+      cannot guarantee absolute security. In the event of a data breach that materially
+      affects your personal information, we will notify you as required by applicable law.
+    </p>
   </div>
 
+  <!-- 9. CHILDREN'S PRIVACY -->
   <div class="lgSection" id="children">
     <h2>9. Children's Privacy</h2>
-    <p>The Service is not directed to children under 13 years of age. We do not knowingly collect personal information from children under 13. If you are a parent or guardian and believe your child has provided us with personal information, please contact us at <a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a> so that we may take appropriate action. If we learn we have collected personal information from a child under 13 without parental consent, we will delete it as quickly as possible.</p>
+    <p>
+      The Service is not directed to, and is not intended for use by, children under the age
+      of 13. We do not knowingly collect personal information from children under 13. If you
+      are a parent or guardian and believe that your child under 13 has provided personal
+      information to us through the Service, please contact us immediately at
+      <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a> and we will take
+      prompt steps to delete that information from our records.
+    </p>
+    <p>
+      For users in the European Union or United Kingdom, the minimum age for consent to
+      data processing is 16 years (or such lower age as may be permitted under the laws of
+      the user's Member State or country), except where verifiable parental consent has been
+      obtained in accordance with applicable law.
+    </p>
   </div>
 
+  <!-- 10. CALIFORNIA RIGHTS (CCPA / CPRA) -->
   <div class="lgSection" id="ccpa">
-    <h2>10. California Privacy Rights (CCPA / CPRA)</h2>
-    <p>If you are a California resident, the California Consumer Privacy Act ("CCPA") as amended by the California Privacy Rights Act ("CPRA") provides you with additional rights regarding your personal information.</p>
+    <h2>10. California Rights (CCPA/CPRA)</h2>
 
-    <h3>Categories of Information Collected</h3>
-    <p>In the past 12 months we have collected: identifiers (name, email, IP address); internet or other electronic network activity (browsing history, interaction with the Service); geolocation data (general location from IP); inferences drawn about preferences; and commercial information (transaction records for advertising customers).</p>
+    <h3>Your California Privacy Rights</h3>
+    <p>
+      If you are a California resident, the California Consumer Privacy Act of 2018 (CCPA),
+      as amended and expanded by the California Privacy Rights Act of 2020 (CPRA),
+      grants you specific rights regarding your personal information. This section describes
+      those rights and how to exercise them.
+    </p>
 
-    <h3>Your California Rights</h3>
+    <h4>Right to Know</h4>
+    <p>
+      You have the right to request that we disclose: (a) the categories of personal
+      information we have collected about you; (b) the specific pieces of personal information
+      we have collected about you; (c) the categories of sources from which we collected the
+      information; (d) the business or commercial purpose for collecting, sharing, or selling
+      the information; and (e) the categories of third parties with whom we share the information.
+    </p>
+
+    <h4>Right to Delete</h4>
+    <p>
+      You have the right to request that we delete personal information we have collected
+      from you, subject to certain exceptions. We may deny a deletion request where retaining
+      the information is necessary to: complete a transaction, detect security incidents,
+      debug errors, comply with a legal obligation, engage in research in the public interest,
+      or enable internal uses reasonably aligned with your expectations.
+    </p>
+
+    <h4>Right to Correct</h4>
+    <p>
+      You have the right to request correction of inaccurate personal information we maintain
+      about you, taking into account the nature of the information and our purposes for
+      processing it.
+    </p>
+
+    <h4>Right to Opt Out of Sale / Sharing</h4>
+    <p>
+      <strong>We do not sell personal information.</strong> We do not share personal
+      information for cross-context behavioral advertising as defined by the CPRA.
+      No opt-out action is required with respect to sale or sharing of personal information.
+    </p>
+
+    <h4>Right to Limit Use of Sensitive Personal Information</h4>
+    <p>
+      We do not collect or use sensitive personal information (as defined by the CPRA, such
+      as Social Security numbers, precise geolocation, racial or ethnic origin, health data,
+      or biometric data) beyond what is strictly necessary to provide the Service to you.
+    </p>
+
+    <h4>Right to Non-Discrimination</h4>
+    <p>
+      We will not discriminate against you for exercising any of your CCPA/CPRA rights.
+      We will not deny you goods or services, charge you different prices, provide a
+      different level of service quality, or suggest that you will receive different
+      treatment for exercising your rights.
+    </p>
+
+    <h4>Categories of Personal Information Collected</h4>
+    <p>
+      In the preceding twelve (12) months, we have collected the following categories of
+      personal information (per CCPA statutory categories):
+    </p>
     <ul>
-      <li><strong>Know:</strong> Request disclosure of the categories and specific pieces of personal information we have collected about you, the categories of sources, our business purpose, and the categories of third parties with whom we share it.</li>
-      <li><strong>Delete:</strong> Request deletion of personal information we have collected from you, subject to certain exceptions.</li>
-      <li><strong>Correct:</strong> Request correction of inaccurate personal information we maintain about you.</li>
-      <li><strong>Opt-Out of Sale/Sharing:</strong> GoDoCity LLC does not sell your personal information as defined under CCPA. We may share data with advertising partners in ways that could be considered "sharing" under CPRA. You can opt out by contacting us.</li>
-      <li><strong>Limit Use of Sensitive Personal Information:</strong> To the extent we collect sensitive personal information as defined by CPRA, you have the right to limit its use and disclosure.</li>
-      <li><strong>Non-Discrimination:</strong> We will not discriminate against you for exercising any CCPA/CPRA rights.</li>
+      <li><strong>Identifiers:</strong> Email address, IP address, and cookie identifiers</li>
+      <li><strong>Internet or other electronic network activity information:</strong> Pages visited, links clicked, scroll behavior, session duration, and traffic source</li>
+      <li><strong>Geolocation data:</strong> City- and state-level approximation derived from IP address</li>
+      <li><strong>Commercial information:</strong> Advertising purchase records (applicable to advertisers only)</li>
+      <li><strong>Inferences:</strong> Inferences drawn from the above categories to create a profile about a user's preferences and interests, used for internal analytics purposes</li>
     </ul>
 
-    <h3>How to Exercise California Rights</h3>
-    <p>Email <a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a> with "California Privacy Request" in the subject line. We will verify your identity before processing. We will respond within 45 days, with the option to extend by an additional 45 days where reasonably necessary with prior notice. You may designate an authorized agent; we will require written authorization and may verify your identity directly.</p>
-    <p>California residents may also contact the California Privacy Protection Agency at <strong>cppa.ca.gov</strong> with privacy concerns.</p>
+    <h4>Categories of Third Parties with Whom Information Is Shared</h4>
+    <ul>
+      <li>Service providers (analytics platforms, email delivery services, web hosting)</li>
+      <li>Advertising measurement partners (aggregated/anonymized performance data only)</li>
+      <li>Legal authorities and law enforcement (when required by law)</li>
+    </ul>
+
+    <h4>How to Exercise Your California Rights</h4>
+    <p>
+      To submit a request to know, delete, or correct, please email
+      <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a> with the subject
+      line <strong>"California Privacy Request."</strong> We will verify your identity before
+      processing your request to prevent unauthorized disclosure. We will respond to
+      verifiable requests within forty-five (45) calendar days of receipt. If we require
+      additional time, we will notify you and may extend our response period by an additional
+      forty-five (45) days.
+    </p>
+    <p>
+      You may designate an authorized agent to make a CCPA request on your behalf. Authorized
+      agents must provide written proof of authorization, and we may require you to directly
+      verify your identity with us before processing the request.
+    </p>
+
+    <h4>Shine the Light</h4>
+    <p>
+      California Civil Code § 1798.83 ("Shine the Light" law) permits California residents
+      to request information about personal information we have shared with third parties
+      for their direct marketing purposes in the preceding calendar year. <strong>We do not
+      share personal information with third parties for their own direct marketing
+      purposes.</strong> Accordingly, no such disclosure is applicable.
+    </p>
   </div>
 
+  <!-- 11. VIRGINIA RIGHTS (VCDPA) -->
   <div class="lgSection" id="vcdpa">
-    <h2>11. Virginia Privacy Rights (VCDPA)</h2>
-    <p>If you are a resident of Virginia, the Virginia Consumer Data Protection Act ("VCDPA") provides you with the following rights regarding your personal data:</p>
+    <h2>11. Virginia Rights (VCDPA)</h2>
+    <p>
+      If you are a Virginia resident, the Virginia Consumer Data Protection Act (VCDPA)
+      grants you the following rights with respect to your personal data:
+    </p>
     <ul>
-      <li><strong>Access:</strong> Confirm whether we are processing your personal data and access such data.</li>
-      <li><strong>Correction:</strong> Correct inaccuracies in your personal data.</li>
-      <li><strong>Deletion:</strong> Delete personal data provided by or obtained about you.</li>
-      <li><strong>Portability:</strong> Obtain a copy of your personal data in a portable format.</li>
-      <li><strong>Opt-Out:</strong> Opt out of the processing of your personal data for targeted advertising, the sale of personal data, or profiling that produces legal or similarly significant effects.</li>
+      <li>The right to confirm whether we are processing your personal data</li>
+      <li>The right to access the personal data we have collected about you</li>
+      <li>The right to correct inaccuracies in your personal data</li>
+      <li>The right to delete personal data you have provided to us or that we have collected about you</li>
+      <li>The right to obtain a portable copy of personal data you have provided to us, in a format that is readily usable</li>
+      <li>The right to opt out of: (a) targeted advertising; (b) the sale of personal data; and (c) profiling in furtherance of decisions that produce legal or similarly significant effects concerning you</li>
     </ul>
-    <p>To submit a request, contact us at <a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a> with "Virginia Privacy Request" in the subject line. We will respond within 45 days. If we decline your request, you may appeal; if your appeal is denied, you may contact the Virginia Attorney General.</p>
+    <p>
+      <strong>We do not sell personal data</strong> and <strong>do not engage in profiling</strong> that produces legal effects or similarly significant effects.
+    </p>
+    <p>
+      To exercise your Virginia privacy rights, please email
+      <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a> with the subject
+      line <strong>"Virginia Privacy Request."</strong> We will respond within forty-five
+      (45) days of receipt; we may extend our response period by an additional forty-five
+      (45) days when reasonably necessary, with prior notice. If we decline to act on your
+      request, you may appeal our decision by emailing
+      <a href="mailto:legal@godocity.com">legal@godocity.com</a> with the subject line
+      "Virginia Privacy Appeal," and we will respond within sixty (60) days.
+    </p>
   </div>
 
-  <div class="lgSection" id="cpa">
-    <h2>12. Colorado Privacy Rights (CPA)</h2>
-    <p>If you are a resident of Colorado, the Colorado Privacy Act ("CPA") provides you with rights to access, correct, delete, and obtain a portable copy of your personal data, and to opt out of targeted advertising and the sale of personal data.</p>
-    <p>To submit a request, contact us at <a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a> with "Colorado Privacy Request" in the subject line. If your request is denied, you may appeal. If you are dissatisfied with the outcome of an appeal, you may contact the Colorado Attorney General at <strong>coag.gov</strong>.</p>
+  <!-- 12. COLORADO RIGHTS (CPA) -->
+  <div class="lgSection" id="colorado">
+    <h2>12. Colorado Rights (CPA)</h2>
+    <p>
+      If you are a Colorado resident, the Colorado Privacy Act (CPA) grants you the following
+      rights with respect to your personal data:
+    </p>
+    <ul>
+      <li>The right to access personal data we have collected about you</li>
+      <li>The right to correct inaccuracies in your personal data</li>
+      <li>The right to delete personal data concerning you</li>
+      <li>The right to obtain a portable copy of personal data you have provided to us</li>
+      <li>The right to opt out of targeted advertising, sale of personal data, and profiling in furtherance of decisions with legal or significant effects</li>
+    </ul>
+    <p>
+      <strong>We do not sell personal data.</strong> To exercise your Colorado privacy rights,
+      please email <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a> with the
+      subject line <strong>"Colorado Privacy Request."</strong> We will respond within
+      forty-five (45) days of receipt, with the option to extend by an additional forty-five
+      (45) days upon notice. You may appeal a denial by emailing
+      <a href="mailto:legal@godocity.com">legal@godocity.com</a>.
+    </p>
   </div>
 
-  <div class="lgSection" id="ctdpa">
-    <h2>13. Connecticut Privacy Rights (CTDPA)</h2>
-    <p>If you are a resident of Connecticut, the Connecticut Data Privacy Act ("CTDPA") provides you with the right to access, correct, delete, and obtain a portable copy of your personal data, and to opt out of targeted advertising and the sale of personal data.</p>
-    <p>To submit a request, contact us at <a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a> with "Connecticut Privacy Request" in the subject line. We will respond within 45 days. If we deny your request, you may appeal within 30 days. If you are dissatisfied with the outcome, you may contact the Connecticut Attorney General.</p>
+  <!-- 13. CONNECTICUT RIGHTS (CTDPA) -->
+  <div class="lgSection" id="connecticut">
+    <h2>13. Connecticut Rights (CTDPA)</h2>
+    <p>
+      If you are a Connecticut resident, the Connecticut Data Privacy Act (CTDPA) grants you
+      the following rights with respect to your personal data:
+    </p>
+    <ul>
+      <li>The right to access personal data we process about you</li>
+      <li>The right to correct inaccuracies in your personal data</li>
+      <li>The right to delete personal data concerning you</li>
+      <li>The right to obtain a portable copy of personal data you have provided to us</li>
+      <li>The right to opt out of targeted advertising, sale of personal data, and profiling in furtherance of solely automated decisions with legal or similarly significant effects</li>
+    </ul>
+    <p>
+      <strong>We do not sell personal data.</strong> To exercise your Connecticut privacy
+      rights, please email <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a>
+      with the subject line <strong>"Connecticut Privacy Request."</strong> We will respond
+      within forty-five (45) days; we may extend our response by an additional forty-five (45)
+      days with notice. You may appeal a decision by emailing
+      <a href="mailto:legal@godocity.com">legal@godocity.com</a>.
+    </p>
   </div>
 
+  <!-- 14. OTHER STATE PRIVACY RIGHTS -->
   <div class="lgSection" id="other-states">
     <h2>14. Other State Privacy Rights</h2>
-    <p>Privacy laws in additional states — including Texas, Montana, Oregon, Nevada, Utah, Iowa, Indiana, Tennessee, and others — may provide you with certain rights regarding your personal data. While specific requirements vary by state, GoDoCity LLC is committed to honoring reasonable privacy requests from residents of all U.S. states to the extent required by applicable law.</p>
-    <p>If you believe you have privacy rights under your state's law that are not addressed above, please contact us at <a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a>. We will work to evaluate and respond to your request in accordance with applicable law.</p>
-    <div class="lgInfo"><p>GoDoCity LLC does not currently target the European Union or United Kingdom and does not intentionally collect personal data from residents of those jurisdictions. If you believe GDPR or UK GDPR applies to your use of the Service, please contact us and we will work to address your request.</p></div>
+    <p>
+      We recognize that additional state privacy laws have been enacted or are taking effect
+      across the United States. These include, but are not limited to, laws in Nevada, Utah,
+      Iowa, Indiana, Tennessee, Montana, Oregon, Texas, Delaware, New Hampshire, New Jersey,
+      and other states. Where applicable and to the extent required by law, we will honor
+      rights granted to residents under these statutes.
+    </p>
+    <p>
+      If you believe you have privacy rights under your state's applicable law that are not
+      addressed in this Privacy Policy, or if you would like to understand how this Policy
+      applies to you specifically, please contact us at
+      <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a>. We continually
+      monitor applicable state privacy legislation and update this Policy as new laws take
+      effect.
+    </p>
   </div>
 
-  <div class="lgSection" id="choices">
-    <h2>15. Your Choices & Controls</h2>
-
-    <h3>Email Communications</h3>
-    <p>You may opt out of promotional email communications by clicking the "unsubscribe" link in any such email or by contacting us at <a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a>. We may still send transactional messages such as receipts, account notices, and service updates.</p>
-
-    <h3>Cookies</h3>
-    <p>You can control cookies through your browser settings. See Section 5 for details on managing cookies and opting out of interest-based advertising.</p>
-
-    <h3>Analytics Opt-Out</h3>
-    <p>You may opt out of Google Analytics by installing the Google Analytics Opt-out Browser Add-on. You may control Meta Pixel data collection through Facebook's ad settings.</p>
-
-    <h3>Do Not Track</h3>
-    <p>Some browsers include a "Do Not Track" feature. Because there is no universal standard for how to interpret these signals, our Service does not currently respond to browser Do Not Track signals. We will update this policy if industry standards are adopted.</p>
-
-    <h3>Access, Correction & Deletion</h3>
-    <p>Regardless of your state of residence, you may request access to, correction of, or deletion of personal information we hold about you by contacting <a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a>. We will evaluate requests in good faith and respond within a reasonable timeframe.</p>
+  <!-- 15. DO NOT TRACK -->
+  <div class="lgSection" id="dnt">
+    <h2>15. Do Not Track</h2>
+    <p>
+      Some web browsers include a "Do Not Track" (DNT) feature that sends a signal to websites
+      indicating that you prefer not to be tracked across websites. Currently, there is no
+      established industry standard, regulatory requirement, or consistent technical
+      specification for how websites should respond to DNT signals.
+    </p>
+    <p>
+      At this time, we do not alter our data collection or processing practices in response
+      to browser DNT signals. However, the opt-out mechanisms described in
+      <a href="#cookies">Section 5 (Cookies, Pixels &amp; Tracking)</a> are available to
+      you regardless of your DNT setting, and provide meaningful controls over tracking
+      technologies on our Service.
+    </p>
   </div>
 
+  <!-- 16. INTERNATIONAL USERS -->
   <div class="lgSection" id="international">
     <h2>16. International Users</h2>
-    <p>GoDoCity LLC is based in the United States and the Service is intended primarily for users in the United States. If you access the Service from outside the United States, your information may be transferred to, stored, and processed in the United States or other countries where our service providers operate. Data protection laws in these countries may differ from those in your country of residence.</p>
-    <p>By using the Service, you consent to the transfer of your information to the United States and other countries where we operate, consistent with applicable law.</p>
+    <p>
+      GoDoDaytona.com is operated from the United States. If you access or use the Service
+      from a location outside the United States, please be aware that your personal information
+      will be transferred to, processed, and stored in the United States, where data privacy
+      and protection laws may differ from those in your country of residence. By using the
+      Service from outside the United States, you consent to the transfer of your information
+      to the United States.
+    </p>
+    <p>
+      <strong>For EU and UK residents:</strong> We do not currently offer services
+      specifically directed at the European Union or United Kingdom market, and we do not
+      rely on EU/UK-specific data transfer mechanisms (such as Standard Contractual Clauses
+      or an adequacy decision) as a basis for transferring your data. If you are located in
+      the EU or UK and use our Service, please note that the General Data Protection
+      Regulation (GDPR) or UK GDPR may apply to our processing of your personal data. You
+      may have rights under those frameworks — including rights of access, erasure,
+      portability, objection, and restriction — that we will honor upon written request
+      submitted to <a href="mailto:legal@godocity.com">legal@godocity.com</a>.
+    </p>
   </div>
 
+  <!-- 17. CHANGES TO THIS POLICY -->
   <div class="lgSection" id="changes">
     <h2>17. Changes to This Policy</h2>
-    <p>We may update this Privacy Policy from time to time. When we do, we will revise the "Last Updated" date at the top of this policy. For material changes, we will provide additional notice through the Service or by email. We encourage you to review this policy periodically.</p>
-    <p>Your continued use of the Service following the posting of changes constitutes your acceptance of such changes. If you do not agree with any changes, you should discontinue use of the Service.</p>
+    <p>
+      We may update this Privacy Policy from time to time to reflect changes in our practices,
+      technologies, legal requirements, or for other operational reasons. When we make changes,
+      we will update the "Last Updated" date at the top of this page. For material changes —
+      those that significantly affect your privacy rights or how we handle your personal
+      information — we will provide more prominent notice, including where appropriate an
+      email notification to newsletter subscribers summarizing the key changes.
+    </p>
+    <p>
+      Your continued use of the Service after any changes to this Privacy Policy are posted
+      constitutes your acceptance of the updated Policy. If you do not agree to the revised
+      Policy, please discontinue use of the Service and, if applicable, unsubscribe from our
+      newsletter.
+    </p>
   </div>
 
+  <!-- 18. CONTACT & PRIVACY REQUESTS -->
   <div class="lgSection" id="contact">
-    <h2>18. Contact Us</h2>
-    <p>If you have questions, comments, or concerns about this Privacy Policy or our privacy practices, please contact us:</p>
-    <p><strong>GoDoCity LLC — Privacy</strong><br />Daytona Beach, FL<br /><a href="mailto:privacy@gododaytona.com">privacy@gododaytona.com</a></p>
-    <p>For general inquiries: <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a></p>
-    <p>We will make every reasonable effort to resolve your concerns. If you are a resident of a state with a formal privacy complaint process, you may also contact your state's attorney general or privacy protection authority.</p>
+    <h2>18. Contact &amp; Privacy Requests</h2>
+    <p>
+      For privacy requests, questions, concerns, or to exercise any of the rights described
+      in this Policy, please contact us using the information below:
+    </p>
+    <p>
+      <strong>GoDoCity LLC — Privacy</strong><br />
+      Email: <a href="mailto:hello@gododaytona.com">hello@gododaytona.com</a>
+      (subject line: "Privacy Request")<br />
+      Legal: <a href="mailto:legal@godocity.com">legal@godocity.com</a>
+    </p>
+    <p>
+      Requests submitted by mail:<br />
+      GoDoCity LLC, Attn: Privacy<br />
+      Daytona Beach, FL
+    </p>
+    <p>
+      We will respond to all verifiable privacy requests within the timeframes required by
+      applicable law. To help us process your request efficiently, please include your full
+      name, email address, state of residence, and a description of the specific right you
+      wish to exercise.
+    </p>
   </div>
 
 </LegalLayout>
