@@ -314,6 +314,17 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                         {e.data.location && <p class="gpcLoc">{e.data.location}</p>}
                       </div>
                     </div>
+                    {/* Mobile horizontal body — shown only at < 768px */}
+                    <div class="gpcBody">
+                      {(() => { const vt = vibeTag(e.data.category); return vt ? <span class={`vibTag vibTag--${vt.type}`}>{vt.label}</span> : null; })()}
+                      <div class="gpcDateRow">
+                        <span class="gpcMon">{mon}</span>
+                        <span class="gpcDay">{day}</span>
+                        {dow && <span class="gpcDow">{dow}</span>}
+                      </div>
+                      <h3 class="gpcTitle">{e.data.title}</h3>
+                      {e.data.location && <p class="gpcLoc">{e.data.location}</p>}
+                    </div>
                   </a>
                 );
               })}
@@ -432,6 +443,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                     </a>
                   );
                   return (
+                    <>
                     <div
                       class={`lineupRow evCard${hidden ? " lineupRow--hidden evCard--hidden" : ""}${isHighImpact ? " lineupRow--hiImpact" : ""}`}
                       data-month={monthKey}
@@ -486,6 +498,24 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                         </>
                       )}
                     </div>
+                    {[2, 6, 10].includes(idx) && (
+                      <div class="inFeedAd" role="complementary" aria-label="Event Spotlight advertisement">
+                        <span class="inFeedAdTag">Sponsored</span>
+                        <div class="inFeedAdSlot">
+                          <div class="inFeedAdThumb" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                              <path d="M11 3l1.8 5.5H18l-4.5 3.2 1.7 5.3L11 14l-4.2 3 1.7-5.3L4 8.5h5.2L11 3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                            </svg>
+                          </div>
+                          <div class="inFeedAdContent">
+                            <p class="inFeedAdTitle">Your Event Here</p>
+                            <p class="inFeedAdSub">Event Spotlight · reaches 76k+ monthly readers</p>
+                            <a href="/daytona/advertise/" class="inFeedAdCta">Book This Slot →</a>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    </>
                   );
                 })}
               </div>
@@ -830,6 +860,20 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     gap: 12px;
     flex-wrap: wrap;
   }
+
+  @media (max-width: 767px) {
+    .evHero { min-height: 320px; }
+    .evHeroOverlay {
+      background: linear-gradient(
+        160deg,
+        rgba(0,0,0,.88) 0%,
+        rgba(0,10,30,.84) 55%,
+        rgba(0,5,20,.80) 100%
+      );
+    }
+    .evHeroTitle { font-size: clamp(26px, 8vw, 38px); }
+  }
+
   .evBtnBlue {
     display: inline-flex;
     align-items: center;
@@ -935,8 +979,92 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
   }
-  @media (max-width: 740px) { .godoPicksGrid { grid-template-columns: 1fr; } }
-  @media (min-width: 541px) and (max-width: 740px) { .godoPicksGrid { grid-template-columns: repeat(2, 1fr); } }
+  /* Desktop: .gpcBody hidden (text lives inside the poster overlay) */
+  @media (min-width: 768px) {
+    .gpcBody { display: none; }
+  }
+
+  /* Mobile portrait (< 768px): horizontal card with small image + body */
+  @media (max-width: 767px) {
+    .godoPicksGrid { grid-template-columns: 1fr; }
+    .godoPickCard {
+      flex-direction: row;
+      align-items: stretch;
+      min-height: 96px;
+      aspect-ratio: unset;
+    }
+    .gpcImgWrap {
+      aspect-ratio: unset;
+      width: 110px;
+      min-width: 110px;
+      height: auto;
+      min-height: 96px;
+      border-radius: 0;
+      flex-shrink: 0;
+    }
+    .gpcOverlay  { display: none; }
+    .gpcPosterGrad { display: none; }
+    .gcAnalytics { display: none; }
+    .gcBadge {
+      top: 8px; left: 8px;
+      font-size: 8px;
+      padding: 3px 7px;
+    }
+    .gpcBody {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 12px 14px;
+      justify-content: center;
+      flex: 1;
+      min-width: 0;
+    }
+    .gpcBody .gpcMon {
+      font-size: 8.5px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--brand1, #0077be);
+    }
+    .gpcBody .gpcDay {
+      font-size: 15px;
+      font-weight: 900;
+      color: #111;
+      line-height: 1;
+    }
+    .gpcBody .gpcDow { color: #aaa; font-size: 10px; }
+    .gpcBody .gpcTitle {
+      font-size: 13px;
+      font-weight: 900;
+      color: #111;
+      line-height: 1.3;
+      margin: 2px 0 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .gpcBody .gpcLoc {
+      font-size: 11px;
+      color: #888;
+      margin: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+
+  /* Landscape phone/tablet: restore multi-column grid */
+  @media (orientation: landscape) and (max-width: 900px) and (max-height: 600px) {
+    .godoPickCard { flex-direction: column; }
+    .gpcImgWrap   { width: 100%; min-height: unset; aspect-ratio: 2/3; }
+    .gpcOverlay   { display: flex; }
+    .gpcPosterGrad{ display: block; }
+    .gpcBody      { display: none; }
+    .godoPicksGrid { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (orientation: landscape) and (max-width: 600px) and (max-height: 420px) {
+    .godoPicksGrid { grid-template-columns: repeat(2, 1fr); }
+  }
 
   .godoPickCard {
     display: block;
@@ -1271,9 +1399,15 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     color: #fff;
     border-color: var(--brand1, #0077be);
   }
+  /* Date-box -15% on all mobile widths */
+  @media (max-width: 767px) {
+    .lineupDateBox { width: 41px; min-height: 44px; }
+    .ldbDay { font-size: 19px; }
+  }
   @media (max-width: 480px) {
-    .lineupDateBox { width: 42px; min-height: 46px; }
-    .ldbDay { font-size: 18px; }
+    .lineupDateBox { width: 38px; min-height: 40px; }
+    .ldbDay { font-size: 17px; }
+    .ldbMon { font-size: 7px; }
     .lineupThumb { width: 68px; height: 54px; }
     .lineupCta { display: none; }
   }
@@ -1348,6 +1482,74 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     color: #aaa;
   }
 
+
+
+  /* ── In-Feed Ad Slots ── */
+  .inFeedAd {
+    position: relative;
+    background: color-mix(in srgb, var(--brand1, #0077be) 6%, #fff);
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 22%, transparent);
+    border-radius: 12px;
+    padding: 14px 16px 14px 14px;
+    margin: 6px 0;
+  }
+  .inFeedAdTag {
+    position: absolute;
+    top: 8px; right: 10px;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--brand1, #0077be) 80%, #000);
+    background: color-mix(in srgb, var(--brand1, #0077be) 14%, #fff);
+    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 24%, transparent);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+  .inFeedAdSlot {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .inFeedAdThumb {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 10%, #fff);
+    border: 1.5px dashed color-mix(in srgb, var(--brand1, #0077be) 32%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: color-mix(in srgb, var(--brand1, #0077be) 50%, transparent);
+  }
+  .inFeedAdContent { flex: 1; min-width: 0; }
+  .inFeedAdTitle {
+    font-size: 13px;
+    font-weight: 800;
+    color: #222;
+    margin: 0 0 2px;
+    padding-right: 60px;
+  }
+  .inFeedAdSub {
+    font-size: 11px;
+    color: #888;
+    margin: 0 0 9px;
+    line-height: 1.4;
+  }
+  .inFeedAdCta {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    background: var(--brand1, #0077be);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 130ms;
+  }
+  .inFeedAdCta:hover { background: #005fa3; }
 
   /* ── High-Impact Lineup Variant ── */
   .lineupRow--hiImpact {
