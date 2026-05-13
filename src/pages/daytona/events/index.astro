@@ -1,7 +1,5 @@
 ---
 import Base from "../../../layouts/Base.astro";
-import InteractiveMap from "../../../components/InteractiveMap.astro";
-import NewsletterBanner from "../../../components/NewsletterBanner.astro";
 import { getCollection } from "astro:content";
 import manualFeedData from "../../../data/manual-events.json";
 import {
@@ -200,190 +198,342 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 ---
 
 <Base
-  title="Events"
-  cityBase="Daytona"
+  title="Events | GoDoDaytona"
+  subtitle="Curated picks, local happenings, and everything worth showing up for in Daytona Beach and Volusia County."
+  cityBase="daytona"
 >
-  <NewsletterBanner city="Daytona" vibeCheckText={daytonaConfig?.vibeCheckText} accentColor={daytonaConfig?.accentColor} />
-  <section class="section">
-    <div class="eventsContainer">
 
-      {/* ── FEATURED GRID — 3-column static row, horizontal scroll if >3 ── */}
-      {sponsoredEvents.length > 0 && (
-        <div class="container">
-          <div class="featuredSection">
-            <div class="featuredHeadRow">
-              <span class="featuredSectionTitle">Featured Events</span>
-              <div class="featuredActions">
-                <a class="featuredActionBtn" href="/daytona/advertise/">Advertise With Us</a>
-                <a class="featuredActionBtn featuredActionBtn--add" href="/submit-event/">+ Add Event</a>
+  <!-- ── Sticky "Add Your Event" button ── -->
+  <div class="evStickyBtn">
+    <a href="/daytona/advertise/" class="evStickyLink">
+      <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+        <path d="M6.5 1v11M1 6.5h11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      Add Your Event
+    </a>
+  </div>
+
+  <!-- ── Blueprint Hero ── -->
+  <section class="evHero">
+    <div class="evHeroOverlay" aria-hidden="true"></div>
+    <div class="evHeroInner">
+      <p class="evHeroEyebrow">Daytona Beach Events Hub</p>
+      <h1 class="evHeroTitle">What's Going On<br>in Daytona.</h1>
+      <p class="evHeroSub">GoDo Picks, daily listings, and everything worth showing up for — curated by locals, for locals.</p>
+      <div class="evHeroCtas">
+        <a href="#lineup" class="evBtnBlue">Browse All Events ↓</a>
+        <a href="/daytona/advertise/" class="evBtnGhost">Promote Your Event</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Main Hub Layout ── -->
+  <div class="evHub">
+    <div class="evHubLayout">
+
+      <!-- ══════════════════════════════════════════
+           MAIN COLUMN
+      ══════════════════════════════════════════ -->
+      <main class="evHubMain">
+
+        <!-- ── SECTION 1: GoDo Picks (VIP Row) ── -->
+        {sponsoredEvents.length > 0 && (
+          <section class="evSection godoPicks" aria-label="GoDo Picks">
+            <div class="evSectionHead">
+              <div>
+                <span class="evEyebrow">Curated by GoDoDaytona</span>
+                <h2 class="evSectionTitle">GoDo Picks.</h2>
               </div>
+              <a href="/daytona/advertise/" class="evSectionAction">Feature Your Event →</a>
             </div>
-            <div class="featuredGrid">
-              {sponsoredEvents.map((e, idx) => {
+            <div class="godoPicksGrid">
+              {sponsoredEvents.slice(0, 3).map((e, idx) => {
                 const d      = new Date(e.data.eventDate);
                 const mon    = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
                 const day    = isNaN(d) ? "??" : d.getDate();
+                const dow    = isNaN(d) ? "" : d.toLocaleDateString("en-US", { weekday: "long" });
                 const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
                 const evSlug = e.slug.split("/").pop();
                 const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
                 const isExt  = !!e.data.url;
                 const fbUrl  = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " Daytona")}`;
-                return (
-                  <a class="featuredCard"
-                     href={href}
-                     target={isExt ? "_blank" : "_self"}
-                     rel={isExt ? "noopener noreferrer" : ""}
-                     data-external={isExt ? "true" : undefined}
-                     data-fallback={isExt ? fbUrl : undefined}>
-                    <div class="fcImgWrap">
-                      <img class="fcImg"
-                        src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
-                        alt={e.data.title} loading={idx === 0 ? "eager" : "lazy"} />
-                      <span class="fcSponsorBadge">SPONSORED</span>
-                      <div class="fcImgOverlay" aria-hidden="true"></div>
-                      <div class="fcOverlayCopy">
-                        <div class="fcDate">{mon} {day}</div>
-                        <div class="fcTitle">{e.data.title}</div>
-                        <div class="fcCity">{cityDisplayName(evCity)}</div>
-                      </div>
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div class="container">
-
-        {/* ── MAP ── */}
-        {mapPins.length > 0 && (
-          <div class="mapBlock">
-            <InteractiveMap locations={mapPins} height="300px" center={[29.2108, -81.0228]} />
-          </div>
-        )}
-
-        {/* ── FILTER BAR ── */}
-        <div class="filterBar">
-          <label class="filterLabel" for="monthFilter">Filter:</label>
-          <select class="filterSelect" id="monthFilter">
-            <option value="all">All upcoming</option>
-            {monthOptions.map(o => (
-              <option value={o.key}>{o.label}</option>
-            ))}
-          </select>
-          <span class="filterCount" id="filterCount">
-            {regularEvents.length} event{regularEvents.length !== 1 ? "s" : ""}
-          </span>
-        </div>
-
-        {/* ── Scraper fallback notice — shown when live fetch returned nothing ── */}
-        {scrapedCount === 0 && (
-          <div class="scrapeNotice">
-            Local events are loading — check back in 5 minutes.
-          </div>
-        )}
-
-        {/* ── EVENT FEED — slim horizontal rows, 125×82px thumbnails ── */}
-        {regularEvents.length === 0 ? (
-          <p class="noEvents">No upcoming events — <a href="/submit-event/">submit one</a>.</p>
-        ) : (
-          <>
-            <div class="eventFeed" id="eventGrid">
-              {regularEvents.map((e, idx) => {
-                const d        = new Date(e.data.eventDate);
-                const mon      = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                const day      = isNaN(d) ? "??" : d.getDate();
-                const dow      = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-                const evCity   = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-                const evSlug   = e.slug.split("/").pop();
-                const href     = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
-                const isExt    = !!e.data.url;
-                const hidden   = idx >= PAGE_SIZE;
-                const evLat    = e.data.lat ?? CITY_CENTERS[evCity]?.lat;
-                const evLng    = e.data.lng ?? CITY_CENTERS[evCity]?.lng;
-                const dist     = distLabel(evLat, evLng);
-                const fbUrl    = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " " + cityDisplayName(evCity))}`;
+                const mockViews = [142, 89, 214][idx] ?? 100;
                 return (
                   <a
-                    class={`evCard${hidden ? " evCard--hidden" : ""}`}
+                    class="godoPickCard"
                     href={href}
                     target={isExt ? "_blank" : "_self"}
                     rel={isExt ? "noopener noreferrer" : ""}
-                    data-month={monthKey}
-                    data-idx={String(idx)}
                     data-external={isExt ? "true" : undefined}
                     data-fallback={isExt ? fbUrl : undefined}
                   >
-                    {/* 100×65 thumbnail */}
-                    <div class="evCardImg">
+                    <div class="gpcImgWrap">
                       <img
+                        class="gpcImg"
                         src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
-                        alt={e.data.title} loading="lazy" decoding="async" />
+                        alt={e.data.title}
+                        loading={idx === 0 ? "eager" : "lazy"}
+                      />
+                      <span class="gcBadge">
+                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true">
+                          <path d="M4.5 1l1 2.3L8 3.7l-2 1.8.6 2.5L4.5 6.8 2 8l.6-2.5-2-1.8 2.5-.4L4.5 1z" fill="currentColor"/>
+                        </svg>
+                        GoDo Choice
+                      </span>
+                      <span class="gcAnalytics" aria-label={`${mockViews} views`}>
+                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true">
+                          <path d="M1 7L3 4.5l1.5 1.5L6.5 3 8 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        {mockViews} views
+                      </span>
                     </div>
-
-                    {/* Date column — sits between thumb and text */}
-                    <div class="evCardDate" aria-label={`${mon} ${day}`}>
-                      <span class="evCardMon">{mon}</span>
-                      <span class="evCardDay">{day}</span>
-                    </div>
-
-                    {/* Title + venue + meta */}
-                    <div class="evCardBody">
-                      <div class="evCardTitle">
-                        {e.data.title}
-                        {isExt && <span class="evCardExt" aria-label="External link">↗</span>}
+                    <div class="gpcBody">
+                      <div class="gpcDateRow">
+                        <span class="gpcMon">{mon}</span>
+                        <span class="gpcDay">{day}</span>
+                        {dow && <span class="gpcDow">{dow}</span>}
                       </div>
-                      {e.data.location && (
-                        <div class="evCardVenue">{e.data.location}</div>
-                      )}
-                      <div class="evCardMeta">
-                        <span class="evCardCity">{cityDisplayName(evCity)}</span>
-                        {dist && <span class="evCardDist">{dist}</span>}
-                        {/* Badge only for explicitly sponsored events — no auto-tags */}
-                      </div>
+                      <h3 class="gpcTitle">{e.data.title}</h3>
+                      {e.data.location && <p class="gpcLoc">{e.data.location}</p>}
+                      <p class="gpcCity">{cityDisplayName(evCity)}</p>
                     </div>
                   </a>
                 );
               })}
             </div>
-
-            {regularEvents.length > PAGE_SIZE && (
-              <div class="loadMoreRow">
-                <button class="loadMoreBtn" id="loadMoreBtn" type="button">
-                  Load more events
-                  <span class="loadMoreCount" id="loadMoreCount">
-                    ({Math.min(PAGE_SIZE, regularEvents.length - PAGE_SIZE)} more)
-                  </span>
-                </button>
-              </div>
-            )}
-          </>
+          </section>
         )}
 
-        {/* ── SUGGEST AN EVENT CTA ── */}
-        <div class="suggestRow">
-          <p class="suggestText">Know about an event we're missing?</p>
-          <a class="suggestBtn" href="/submit-event/">Suggest an Event →</a>
-        </div>
-
-        </div>{/* /.container (map + feed) */}
-
-      {/* ── SUBMIT EVENT FOOTER ── */}
-      <div class="submitFooter">
-        <div class="submitInner">
-          <div class="submitText">
-            <p class="submitHeadline">Know about an event we're missing?</p>
-            <p class="submitSub">GoDo Daytona is built by locals, for locals. Add your event free — thousands of Daytonans will see it.</p>
+        <!-- ── SECTION 2: The Daily Lineup ── -->
+        <section class="evSection lineupSection" id="lineup" aria-label="Daily Lineup">
+          <div class="evSectionHead lineupHead">
+            <div>
+              <span class="evEyebrow">Every Event, Every Day</span>
+              <h2 class="evSectionTitle">The Daily Lineup.</h2>
+            </div>
+            <div class="lineupFilters">
+              <label class="filterLabel" for="monthFilter">Filter:</label>
+              <select class="filterSelect" id="monthFilter">
+                <option value="all">All upcoming</option>
+                {monthOptions.map(o => (
+                  <option value={o.key}>{o.label}</option>
+                ))}
+              </select>
+              <span class="filterCount" id="filterCount">
+                {regularEvents.length} event{regularEvents.length !== 1 ? "s" : ""}
+              </span>
+            </div>
           </div>
-          <a class="submitBtn" href="/submit-event/">Submit an Event →</a>
-        </div>
-      </div>
 
-    </div>{/* /.eventsContainer */}
-  </section>
+          {regularEvents.length === 0 ? (
+            <p class="noEvents">No upcoming events — <a href="/submit-event/">submit one</a>.</p>
+          ) : (
+            <>
+              <div class="lineupFeed" id="eventGrid">
+                {regularEvents.map((e, idx) => {
+                  const d        = new Date(e.data.eventDate);
+                  const mon      = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                  const day      = isNaN(d) ? "??" : d.getDate();
+                  const timeStr  = isNaN(d) ? "" : d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true });
+                  const monthKey = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+                  const evCity   = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+                  const evSlug   = e.slug.split("/").pop();
+                  const href     = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
+                  const isExt    = !!e.data.url;
+                  const hidden   = idx >= PAGE_SIZE;
+                  const evLat    = e.data.lat ?? CITY_CENTERS[evCity]?.lat;
+                  const evLng    = e.data.lng ?? CITY_CENTERS[evCity]?.lng;
+                  const dist     = distLabel(evLat, evLng);
+                  const fbUrl    = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " " + cityDisplayName(evCity))}`;
+                  const showTime = timeStr && !isNaN(d) && timeStr !== "12:00 AM";
+                  return (
+                    <div
+                      class={`lineupRow evCard${hidden ? " lineupRow--hidden evCard--hidden" : ""}`}
+                      data-month={monthKey}
+                      data-idx={String(idx)}
+                    >
+                      <div class="lineupThumb">
+                        <img
+                          src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
+                          alt={e.data.title}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                        <div class="lineupDateChip">
+                          <span class="ldcMon">{mon}</span>
+                          <span class="ldcDay">{day}</span>
+                        </div>
+                      </div>
+                      <div class="lineupBody">
+                        <h3 class="lineupTitle">{e.data.title}</h3>
+                        <div class="lineupMeta">
+                          {showTime && (
+                            <span class="lineupTime">
+                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                                <circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/>
+                                <path d="M5 2.5v2.5l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                              </svg>
+                              {timeStr}
+                            </span>
+                          )}
+                          {e.data.location && (
+                            <span class="lineupLoc">
+                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                                <path d="M5 1C3.3 1 2 2.3 2 4c0 2.5 3 5.5 3 5.5S8 6.5 8 4C8 2.3 6.7 1 5 1z" stroke="currentColor" stroke-width="1.2"/>
+                                <circle cx="5" cy="4" r="1" fill="currentColor"/>
+                              </svg>
+                              {e.data.location}
+                            </span>
+                          )}
+                          {dist && <span class="lineupDist">{dist}</span>}
+                          <span class="lineupCity">{cityDisplayName(evCity)}</span>
+                        </div>
+                      </div>
+                      <a
+                        href={href}
+                        class="lineupCta"
+                        target={isExt ? "_blank" : "_self"}
+                        rel={isExt ? "noopener noreferrer" : ""}
+                        data-external={isExt ? "true" : undefined}
+                        data-fallback={isExt ? fbUrl : undefined}
+                      >
+                        {isExt ? "Get Tickets" : "More Info"}
+                        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                          <path d="M2 5.5h7M5.5 2l3.5 3.5-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </a>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {regularEvents.length > PAGE_SIZE && (
+                <div class="loadMoreRow">
+                  <button class="loadMoreBtn" id="loadMoreBtn" type="button">
+                    Load more events
+                    <span class="loadMoreCount" id="loadMoreCount">
+                      ({Math.min(PAGE_SIZE, regularEvents.length - PAGE_SIZE)} more)
+                    </span>
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+        </section>
+
+        <!-- ── SECTION 3: Community Calendar ── -->
+        <section class="evSection communityCalSection" aria-label="Community Calendar">
+          <div class="evSectionHead">
+            <div>
+              <span class="evEyebrow">Community Calendar</span>
+              <h2 class="evSectionTitle">More Around Town.</h2>
+            </div>
+          </div>
+          <div class="citySpark">
+            <div class="csPlaceholder">
+              <div class="csPlaceholderIcon" aria-hidden="true">
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                  <rect x="3" y="6" width="30" height="27" rx="4" stroke="currentColor" stroke-width="2"/>
+                  <line x1="3" y1="14" x2="33" y2="14" stroke="currentColor" stroke-width="2"/>
+                  <line x1="11" y1="3" x2="11" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <line x1="25" y1="3" x2="25" y2="9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                  <circle cx="11" cy="22" r="2" fill="currentColor" opacity=".35"/>
+                  <circle cx="18" cy="22" r="2" fill="currentColor"/>
+                  <circle cx="25" cy="22" r="2" fill="currentColor" opacity=".35"/>
+                  <circle cx="11" cy="29" r="2" fill="currentColor" opacity=".35"/>
+                  <circle cx="18" cy="29" r="2" fill="currentColor" opacity=".35"/>
+                </svg>
+              </div>
+              <p class="csPlaceholderTitle">Community Events Widget</p>
+              <p class="csPlaceholderSub">Drop a CitySpark or similar community calendar embed below to populate this section automatically.</p>
+              <div class="csEmbedSlot">
+                <!-- CitySpark widget embed code goes here -->
+                <span class="csEmbedLabel">&#x3C;!-- CitySpark embed --&#x3E;</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+      <!-- ══════════════════════════════════════════
+           SIDEBAR — Event Spotlight Ad Inventory
+      ══════════════════════════════════════════ -->
+      <aside class="evHubSidebar" aria-label="Event Spotlight advertising">
+        <div class="sidebarSticky">
+
+          <p class="sidebarEyebrow">Event Spotlight Slots</p>
+
+          <!-- Slot 1 -->
+          <div class="sidebarSlot">
+            <div class="slotMeta">
+              <span class="slotName">Slot 1 — Bands &amp; Venues</span>
+              <span class="slotDims">300 × 250</span>
+            </div>
+            <div class="slotAd">
+              <div class="slotAdInner">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                  <circle cx="14" cy="14" r="12" stroke="currentColor" stroke-width="1.5" opacity=".25"/>
+                  <path d="M9 20v-9l5-3 5 3v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <rect x="11.5" y="15" width="5" height="5" rx="1" fill="currentColor" opacity=".3"/>
+                </svg>
+                <p class="slotAdTitle">Your Event Here</p>
+                <p class="slotAdSub">300 × 250 · Event Spotlight</p>
+                <a href="/daytona/advertise/" class="slotAdCta">Book This Slot</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slot 2 -->
+          <div class="sidebarSlot">
+            <div class="slotMeta">
+              <span class="slotName">Slot 2 — Venue Partner</span>
+              <span class="slotDims">300 × 250</span>
+            </div>
+            <div class="slotAd">
+              <div class="slotAdInner">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                  <path d="M14 3l2.5 7.5H24l-6.5 4.5 2.5 7.5L14 18l-6.5 4.5 2.5-7.5L4 10.5h7.5L14 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" opacity=".4"/>
+                </svg>
+                <p class="slotAdTitle">Promote Your Venue</p>
+                <p class="slotAdSub">300 × 250 · Event Spotlight</p>
+                <a href="/daytona/advertise/" class="slotAdCta">Book This Slot</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Slot 3 -->
+          <div class="sidebarSlot">
+            <div class="slotMeta">
+              <span class="slotName">Slot 3 — Sponsor Takeover</span>
+              <span class="slotDims">300 × 250</span>
+            </div>
+            <div class="slotAd">
+              <div class="slotAdInner">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
+                  <rect x="3" y="3" width="22" height="22" rx="5" stroke="currentColor" stroke-width="1.5" opacity=".25"/>
+                  <path d="M8 14h12M8 10h8M8 18h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <p class="slotAdTitle">Sponsor the Hub</p>
+                <p class="slotAdSub">300 × 250 · Event Spotlight</p>
+                <a href="/daytona/advertise/" class="slotAdCta">Book This Slot</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sidebar submit CTA -->
+          <div class="sidebarSubmit">
+            <p class="sidebarSubmitTitle">Got an event to share?</p>
+            <p class="sidebarSubmitSub">Free listings for local events. Thousands of Daytonans will see it.</p>
+            <a href="/submit-event/" class="sidebarSubmitBtn">Submit an Event →</a>
+          </div>
+
+        </div>
+      </aside>
+
+    </div>
+  </div>
+
 </Base>
 
 <script is:inline>
@@ -457,314 +607,640 @@ const FALLBACK_IMG = "https://images.unsplash.com/photo-1492684223066-81342ee5ff
 </script>
 
 <style>
-  /* overflow-x:clip prevents the 100vw negative-margin from creating a scrollbar
-     without creating a new block-formatting context (unlike overflow:hidden) */
-  .eventsContainer { padding-bottom: 64px; overflow-x: clip; }
-
-  /* ── Featured Section — 3-column static grid ── */
-  .featuredSection { width: 100%; margin-bottom: 24px; }
-  .featuredHeadRow {
-    width: 100%;
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px; gap: 10px; flex-wrap: wrap;
+  /* ── Sticky Add Your Event button ── */
+  .evStickyBtn {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    z-index: 900;
+    filter: drop-shadow(0 4px 16px rgba(0,119,190,.35));
   }
-  .featuredSectionTitle {
-    font-size: 11px; font-weight: 900; letter-spacing: .1em;
-    text-transform: uppercase; color: #0077be !important;
-  }
-  .featuredActions { display: flex; gap: 6px; }
-  .featuredActionBtn {
-    display: inline-flex; align-items: center;
-    height: 28px; padding: 0 12px; border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.2);
-    background: transparent; color: var(--muted);
-    font-size: 11px; font-weight: 700; text-decoration: none;
-    transition: border-color 140ms, color 140ms;
+  .evStickyLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    background: var(--brand1, #0077be);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: .01em;
+    padding: 11px 20px;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: transform 140ms, background 140ms;
     white-space: nowrap;
   }
-  .featuredActionBtn:hover { border-color: #0077be !important; color: #0077be !important; }
-  .featuredActionBtn--add {
-    border-color: rgba(0,119,190,.35); color: #0077be !important;
-  }
-  .featuredActionBtn--add:hover { border-color: #0077be !important; background: #f0f7ff; }
-
-  /* 3-column grid — scrollable horizontally if >3 cards */
-  .featuredGrid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(220px, 1fr));
-    gap: 14px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 4px; /* room for scrollbar */
-  }
-  .featuredGrid::-webkit-scrollbar { height: 4px; }
-  .featuredGrid::-webkit-scrollbar-track { background: rgba(255,255,255,.04); border-radius: 999px; }
-  .featuredGrid::-webkit-scrollbar-thumb { background: rgba(0,119,190,.35); border-radius: 999px; }
-
-  .featuredCard {
-    flex-shrink: 0;
-    border-radius: 12px;
-    overflow: hidden;
-    text-decoration: none;
-    scroll-snap-align: start;
-    transition: transform 150ms, box-shadow 150ms;
-    border: 1px solid var(--border, rgba(255,255,255,.10));
-    box-shadow: 0 2px 10px rgba(0,0,0,.08);
-  }
-  .featuredCard:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.18); }
-
-  .fcImgWrap { position: relative; height: 200px; background: rgba(255,255,255,.05); overflow: hidden; }
-  .fcImg { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .fcImgOverlay {
-    position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.20) 55%, transparent 100%);
-  }
-  .fcSponsorBadge {
-    position: absolute; top: 10px; right: 10px; z-index: 2;
-    font-size: 10px; font-weight: 900; letter-spacing: .08em;
-    background: #0077be !important; color: #fff; padding: 3px 9px; border-radius: 999px;
-  }
-  .fcOverlayCopy { position: absolute; bottom: 14px; left: 14px; right: 14px; z-index: 2; }
-  .fcDate  { font-size: 11px; font-weight: 900; color: #0077be !important; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 3px; }
-  .fcTitle { font-size: 16px; font-weight: 800; color: #fff; line-height: 1.2; margin-bottom: 3px; }
-  .fcCity  { font-size: 12px; color: rgba(255,255,255,.65); }
-
-  @media (max-width: 640px) {
-    .featuredGrid { grid-template-columns: repeat(3, minmax(180px, 1fr)); }
-    .fcImgWrap { height: 160px; }
-    .fcTitle { font-size: 14px; }
+  .evStickyLink:hover { background: #005fa3; transform: translateY(-1px); }
+  @media (max-width: 540px) {
+    .evStickyBtn { bottom: 16px; right: 16px; }
+    .evStickyLink { font-size: 12px; padding: 10px 16px; }
   }
 
-  /* Map */
-  .mapBlock { margin-bottom: 20px; }
-
-  /* ── Filter Bar ── */
-  .filterBar { display: flex; align-items: center; gap: 10px; margin-bottom: 2px; flex-wrap: wrap; }
-  .filterLabel { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; }
-  .filterSelect {
-    height: 32px; padding: 0 28px 0 10px; border-radius: 6px;
-    border: 1px solid var(--border, rgba(255,255,255,.12));
-    background: var(--surface, rgba(255,255,255,.05));
-    color: var(--text); font-size: 13px; font-family: inherit;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23999' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat; background-position: right 9px center;
-    cursor: pointer; outline: none;
-  }
-  .filterSelect:focus { border-color: #0077be; }
-  .filterSelect option { background: #1a1a1a; }
-  .filterCount { font-size: 12px; color: var(--faint); margin-left: auto; }
-
-  /* ── EVENT FEED — NOOGA slim 3-column rows ── */
-  .eventFeed {
-    display: flex; flex-direction: column;
-    margin-bottom: 24px;
-  }
-
-  .evCard {
+  /* ── Blueprint Hero ── */
+  .evHero {
+    position: relative;
+    min-height: 320px;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    gap: 10px;
-    text-decoration: none;
-    border-bottom: 1px solid var(--border, #242424);
-    padding: 12px 0;
-    transition: opacity 120ms;
-  }
-  .evCard:first-child { border-top: 1px solid var(--border, #242424); }
-  .evCard:hover { opacity: .82; }
-  .evCard--hidden { display: none !important; }
-
-  /* Col 1 — 125×82px landscape thumbnail (+25%) */
-  .evCardImg {
-    flex-shrink: 0;
-    width: 125px;
-    height: 82px;
+    background: #0a0f1e url("/images/godo-blueprint-h.png") center/cover no-repeat;
     overflow: hidden;
-    border-radius: 6px;
-    background: var(--surface2, rgba(255,255,255,.05));
-    margin-right: 1.5rem;
   }
-  .evCardImg img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .evHeroOverlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(5,10,30,.82) 0%, rgba(0,60,110,.68) 100%);
+  }
+  .evHeroInner {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 72px clamp(20px, 4vw, 60px) 72px;
+    width: 100%;
+  }
+  .evHeroEyebrow {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 900;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.6);
+    margin-bottom: 12px;
+  }
+  .evHeroTitle {
+    font-size: clamp(32px, 5vw, 54px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: #fff;
+    line-height: 1.08;
+    margin: 0 0 14px;
+  }
+  .evHeroSub {
+    font-size: clamp(15px, 1.8vw, 18px);
+    color: rgba(255,255,255,.72);
+    line-height: 1.6;
+    margin: 0 0 32px;
+    max-width: 560px;
+  }
+  .evHeroCtas {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .evBtnBlue {
+    display: inline-flex;
+    align-items: center;
+    padding: 13px 26px;
+    background: var(--brand1, #0077be);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 140ms, transform 140ms;
+  }
+  .evBtnBlue:hover { background: #005fa3; transform: translateY(-1px); }
+  .evBtnGhost {
+    display: inline-flex;
+    align-items: center;
+    padding: 13px 26px;
+    background: rgba(255,255,255,.1);
+    border: 1.5px solid rgba(255,255,255,.28);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 140ms;
+  }
+  .evBtnGhost:hover { background: rgba(255,255,255,.18); }
 
-  /* Col 2 — Date block: mini-calendar icon, brand-blue month tab + large day */
-  .evCardDate {
+  /* ── Hub layout ── */
+  .evHub {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 48px clamp(16px, 3vw, 48px) 96px;
+  }
+  .evHubLayout {
+    display: grid;
+    grid-template-columns: 1fr 308px;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 1000px) {
+    .evHubLayout { grid-template-columns: 1fr; }
+  }
+
+  /* ── Section shared ── */
+  .evSection { margin-bottom: 64px; }
+  .evSectionHead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .evEyebrow {
+    display: block;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--brand1, #0077be);
+    margin-bottom: 4px;
+  }
+  .evSectionTitle {
+    font-size: clamp(20px, 2.8vw, 28px);
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    color: #111;
+    margin: 0;
+  }
+  .evSectionAction {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--brand1, #0077be);
+    text-decoration: none;
+    white-space: nowrap;
     flex-shrink: 0;
-    width: 44px;
-    margin-right: 1.5rem;
+  }
+  .evSectionAction:hover { text-decoration: underline; text-underline-offset: 2px; }
+
+  /* ── GoDo Picks — VIP Row ── */
+  .godoPicksGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 740px) { .godoPicksGrid { grid-template-columns: 1fr; } }
+  @media (min-width: 541px) and (max-width: 740px) { .godoPicksGrid { grid-template-columns: repeat(2, 1fr); } }
+
+  .godoPickCard {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
-    border: 2px solid #0077be;
-    border-radius: 4px;
+    border-radius: 16px;
     overflow: hidden;
+    text-decoration: none;
+    border: 2px solid color-mix(in srgb, var(--brand1, #0077be) 30%, transparent);
+    box-shadow: 0 0 0 0 transparent, 0 4px 16px rgba(0,119,190,.1);
+    transition: transform 180ms, box-shadow 180ms, border-color 180ms;
+    background: #fff;
   }
-  .evCardMon {
-    background: #0077be;
+  .godoPickCard:hover {
+    transform: translateY(-4px) scale(1.01);
+    border-color: var(--brand1, #0077be);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand1, #0077be) 18%, transparent),
+                0 12px 36px rgba(0,119,190,.22);
+  }
+
+  .gpcImgWrap {
+    position: relative;
+    aspect-ratio: 16/10;
+    overflow: hidden;
+    background: #e5e7eb;
+  }
+  .gpcImg {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 300ms;
+  }
+  .godoPickCard:hover .gpcImg { transform: scale(1.04); }
+
+  /* GoDo Choice badge */
+  .gcBadge {
+    position: absolute;
+    top: 10px; left: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--brand1, #0077be);
     color: #fff;
     font-size: 9px;
     font-weight: 900;
+    letter-spacing: .12em;
     text-transform: uppercase;
-    letter-spacing: .06em;
-    line-height: 1;
-    text-align: center;
-    padding: 3px 0;
+    padding: 4px 9px;
+    border-radius: 999px;
   }
-  .evCardDay {
-    font-size: 20px;
+
+  /* Analytics badge */
+  .gcAnalytics {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0,0,0,.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: rgba(255,255,255,.9);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .06em;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+
+  .gpcBody {
+    padding: 14px 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+  }
+  .gpcDateRow {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin-bottom: 2px;
+  }
+  .gpcMon {
+    font-size: 9.5px;
     font-weight: 900;
-    color: var(--text);
-    text-align: center;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--brand1, #0077be);
+  }
+  .gpcDay {
+    font-size: 18px;
+    font-weight: 900;
+    color: #111;
+    letter-spacing: -0.02em;
     line-height: 1;
-    padding: 5px 0 6px;
-    background: var(--surface, rgba(255,255,255,.05));
+  }
+  .gpcDow {
+    font-size: 11px;
+    font-weight: 600;
+    color: #888;
+    margin-left: 2px;
+  }
+  .gpcTitle {
+    font-size: 15px;
+    font-weight: 800;
+    color: #111;
+    line-height: 1.3;
+    margin: 0;
+  }
+  .gpcLoc {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gpcCity {
+    font-size: 11px;
+    color: #aaa;
+    margin: 0;
+    font-weight: 600;
+  }
+
+  /* ── Daily Lineup ── */
+  .lineupHead { align-items: flex-start; }
+  .lineupFilters {
     display: flex;
     align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .filterLabel {
+    font-size: 12px;
+    font-weight: 700;
+    color: #888;
+  }
+  .filterSelect {
+    font-size: 12px;
+    font-weight: 600;
+    color: #111;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 6px 10px;
+    background: #fff;
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23888' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 26px;
+  }
+  .filterSelect:focus { outline: 2px solid var(--brand1, #0077be); outline-offset: 1px; }
+  .filterCount {
+    font-size: 12px;
+    color: #aaa;
+    font-weight: 600;
+  }
+
+  .lineupFeed { display: flex; flex-direction: column; gap: 0; }
+
+  .lineupRow {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 0;
+    border-bottom: 1px solid #f0f0f0;
+    text-decoration: none;
+    transition: background 120ms;
+  }
+  .lineupRow:first-child { border-top: 1px solid #f0f0f0; }
+  .lineupRow--hidden { display: none !important; }
+  .evCard--hidden { display: none !important; }
+
+  .lineupThumb {
+    position: relative;
+    width: 80px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #e5e7eb;
+  }
+  .lineupThumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+  }
+  .lineupDateChip {
+    position: absolute;
+    bottom: 0; left: 0;
+    background: rgba(0,0,0,.62);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    border-top: 1px solid rgba(0,119,190,.35);
+    padding: 2px 6px;
+    min-width: 32px;
+  }
+  .ldcMon {
+    font-size: 7px;
+    font-weight: 900;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: rgba(255,255,255,.8);
+  }
+  .ldcDay {
+    font-size: 14px;
+    font-weight: 900;
+    line-height: 1.1;
   }
 
-  /* Col 3 — Text: title, venue, meta */
-  .evCardBody { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-
-  .evCardTitle {
-    font-size: 18px; font-weight: 800; color: var(--text);
-    line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  .lineupBody {
+    flex: 1;
+    min-width: 0;
   }
-  .evCardExt { font-size: 11px; color: var(--faint); margin-left: 4px; }
-
-  .evCardVenue {
-    font-size: 15px; font-weight: 700; color: #0077be;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  .lineupTitle {
+    font-size: 14px;
+    font-weight: 800;
+    color: #111;
+    line-height: 1.3;
+    margin: 0 0 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-
-  .evCardMeta { display: flex; align-items: center; gap: 5px; }
-  .evCardCity { font-size: 15px; font-weight: 600; color: var(--muted); }
-  .evCardDist {
-    font-size: 15px; font-weight: 700; color: #0077be;
-    background: #f0f7ff; padding: 1px 6px; border-radius: 999px;
+  .lineupMeta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
   }
-
-  /* ── Source badges — Community Event / Featured ── */
-  .evSrcBadge {
-    display: inline-block;
-    font-size: 10px; font-weight: 700; letter-spacing: .04em;
-    padding: 2px 7px; border-radius: 999px;
-    white-space: nowrap; flex-shrink: 0;
-  }
-  .evSrcBadge--featured {
-    background: #f0f7ff;
-    color: #0077be !important;
-    border: 1px solid rgba(0,119,190,.3);
-  }
-  .evSrcBadge--community {
-    background: var(--surface2, rgba(255,255,255,.06));
-    color: var(--muted);
-    border: 1px solid var(--border, rgba(255,255,255,.12));
-  }
-
-  /* Load More */
-  .loadMoreRow { display: flex; justify-content: center; padding: 12px 0; }
-  .loadMoreBtn {
-    height: 40px; padding: 0 24px; border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.15);
-    background: transparent; color: var(--text);
-    font-size: 13px; font-weight: 700; font-family: inherit;
-    cursor: pointer; transition: border-color 140ms, background 140ms;
-  }
-  .loadMoreBtn:hover { border-color: #0077be; background: #f0f7ff; }
-  .loadMoreCount { color: var(--faint); font-weight: 400; margin-left: 4px; }
-
-  /* ── Suggest an Event CTA ── */
-  .suggestRow {
-    display: flex; align-items: center; justify-content: space-between;
-    gap: 12px; flex-wrap: wrap;
-    padding: 20px 0 8px;
-    border-top: 1px solid #2a2a2a;
-  }
-  .suggestText { font-size: 14px; color: var(--muted); margin: 0; }
-  .suggestBtn {
-    display: inline-flex; align-items: center;
-    height: 36px; padding: 0 18px; border-radius: 999px;
-    border: 1px solid rgba(255,255,255,.2);
-    background: transparent; color: var(--text);
-    font-size: 13px; font-weight: 700; text-decoration: none;
-    transition: border-color 140ms, color 140ms;
+  .lineupTime, .lineupLoc, .lineupDist, .lineupCity {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11.5px;
+    color: #888;
+    font-weight: 500;
     white-space: nowrap;
   }
-  .suggestBtn:hover { border-color: #0077be; color: #0077be; }
+  .lineupLoc { max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lineupDist { color: #bbb; }
+  .lineupCity { font-weight: 700; color: #bbb; }
 
-  .noEvents { color: var(--muted); font-size: 15px; padding: 24px 0; }
-  .noEvents a { color: #0077be; }
-
-  /* Scraper zero-results notice */
-  .scrapeNotice {
-    font-size: 13px; color: var(--muted);
-    background: rgba(255,255,255,.04);
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 8px;
-    padding: 10px 14px;
-    margin-bottom: 12px;
+  .lineupCta {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    font-size: 11.5px;
+    font-weight: 800;
+    color: var(--brand1, #0077be);
+    text-decoration: none;
+    padding: 7px 14px;
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 35%, transparent);
+    border-radius: 999px;
+    transition: background 130ms, color 130ms;
+    white-space: nowrap;
+  }
+  .lineupCta:hover {
+    background: var(--brand1, #0077be);
+    color: #fff;
+  }
+  @media (max-width: 480px) {
+    .lineupThumb { width: 60px; height: 48px; }
+    .lineupCta { display: none; }
   }
 
-  @media (max-width: 520px) {
-    .filterBar    { gap: 6px; }
-    .filterCount  { margin-left: 0; width: 100%; }
-    .evCardTitle  { font-size: 16px; }
-    .evCardVenue  { font-size: 13px; }
-    .evCardCity   { font-size: 13px; }
-    .evCardDist   { font-size: 13px; }
+  .loadMoreRow { display: flex; justify-content: center; margin-top: 24px; }
+  .loadMoreBtn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 28px;
+    border-radius: 999px;
+    border: 1.5px solid #e5e7eb;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    color: #444;
+    cursor: pointer;
+    transition: border-color 130ms, color 130ms;
   }
+  .loadMoreBtn:hover { border-color: var(--brand1, #0077be); color: var(--brand1, #0077be); }
+  .loadMoreCount { color: #aaa; font-weight: 500; }
 
-  /* ── Submit Event Footer ──────────────────────────────────────────────── */
-  .submitFooter {
-    background: linear-gradient(135deg, #003f88 0%, #0077be 100%);
-    border-top: 3px solid #0055a4;
-    padding: clamp(32px, 5vw, 52px) 2rem;
+  .noEvents {
+    font-size: 14px;
+    color: #888;
+    padding: 24px 0;
+  }
+  .noEvents a { color: var(--brand1, #0077be); }
+
+  /* ── Community Calendar ── */
+  .citySpark {
+    border: 2px dashed #e5e7eb;
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .csPlaceholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 48px 32px;
+    background: #f9f9fb;
+    gap: 12px;
+  }
+  .csPlaceholderIcon { color: #d1d5db; }
+  .csPlaceholderTitle {
+    font-size: 16px;
+    font-weight: 800;
+    color: #555;
+    margin: 0;
+  }
+  .csPlaceholderSub {
+    font-size: 13.5px;
+    color: #888;
+    line-height: 1.65;
+    margin: 0;
+    max-width: 400px;
+  }
+  .csEmbedSlot {
     margin-top: 8px;
+    background: #f0f0f2;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 12px 20px;
+    width: 100%;
+    max-width: 380px;
   }
-  .submitInner {
-    max-width: 900px;
-    margin: 0 auto;
+  .csEmbedLabel {
+    font-size: 11px;
+    font-family: monospace;
+    color: #aaa;
+  }
+
+  /* ── Sidebar ── */
+  .evHubSidebar { }
+  .sidebarSticky {
+    position: sticky;
+    top: 96px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .sidebarEyebrow {
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: #bbb;
+    margin: 0;
+  }
+
+  .sidebarSlot {
+    border: 1.5px dashed #e5e7eb;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .slotMeta {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 32px;
+    padding: 8px 12px;
+    background: #f9f9fb;
+    border-bottom: 1px solid #f0f0f0;
   }
-  .submitText { flex: 1; }
-  .submitHeadline {
-    margin: 0 0 8px;
-    font-size: clamp(20px, 3vw, 28px);
-    font-weight: 900;
-    color: #fff;
-    line-height: 1.15;
-    letter-spacing: -0.01em;
+  .slotName {
+    font-size: 9.5px;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: .08em;
   }
-  .submitSub {
+  .slotDims {
+    font-size: 9px;
+    color: #ccc;
+    font-family: monospace;
+  }
+  .slotAd {
+    width: 100%;
+    aspect-ratio: 300/250;
+    background: #f7f8fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .slotAdInner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    padding: 20px;
+    color: #d1d5db;
+  }
+  .slotAdTitle {
+    font-size: 13px;
+    font-weight: 800;
+    color: #aaa;
     margin: 0;
-    font-size: 15px;
-    color: rgba(255,255,255,0.78);
-    line-height: 1.55;
-    max-width: 540px;
   }
-  .submitBtn {
-    display: inline-flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    height: 48px; padding: 0 32px;
+  .slotAdSub {
+    font-size: 10px;
+    color: #ccc;
+    margin: 0;
+  }
+  .slotAdCta {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 16px;
+    background: var(--brand1, #0077be);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
     border-radius: 999px;
-    background: #fff;
-    color: #003f88;
-    font-size: 14px; font-weight: 900;
-    letter-spacing: .04em;
     text-decoration: none;
-    transition: filter 140ms, transform 120ms;
-    white-space: nowrap;
+    margin-top: 4px;
+    transition: background 130ms;
   }
-  .submitBtn:hover { filter: brightness(0.95); transform: translateY(-1px); }
+  .slotAdCta:hover { background: #005fa3; }
 
-  @media (max-width: 620px) {
-    .submitInner { flex-direction: column; align-items: flex-start; gap: 20px; }
-    .submitBtn { width: 100%; justify-content: center; }
+  .sidebarSubmit {
+    background: color-mix(in srgb, var(--brand1, #0077be) 6%, white);
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 22%, transparent);
+    border-radius: 14px;
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .sidebarSubmitTitle {
+    font-size: 13px;
+    font-weight: 800;
+    color: #111;
+    margin: 0;
+  }
+  .sidebarSubmitSub {
+    font-size: 12px;
+    color: #777;
+    line-height: 1.5;
+    margin: 0;
+  }
+  .sidebarSubmitBtn {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 6px;
+    padding: 9px 18px;
+    background: var(--brand1, #0077be);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 800;
+    border-radius: 999px;
+    text-decoration: none;
+    transition: background 130ms;
+    align-self: flex-start;
+  }
+  .sidebarSubmitBtn:hover { background: #005fa3; }
+
+  @media (max-width: 1000px) {
+    .evHubSidebar { display: none; }
   }
 </style>
