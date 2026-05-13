@@ -87,7 +87,8 @@ const manualEvents = ((manualFeedData as any).quickEntry ?? [])
       category:  e.category  ?? null,
       lat:       e.lat       ?? null,
       lng:       e.lng       ?? null,
-      sponsored: e.sponsored ?? false,
+      sponsored:    e.sponsored    ?? false,
+      isHighImpact: e.isHighImpact ?? false,
     },
   }));
 
@@ -225,12 +226,15 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     </a>
   </div>
 
-  <!-- ── Blueprint Hero ── -->
+  <!-- ── Concert/Nightlife Hero ── -->
   <section class="evHero">
     <div class="evHeroOverlay" aria-hidden="true"></div>
     <div class="evHeroInner">
-      <p class="evHeroEyebrow">Daytona Beach Events Hub</p>
-      <h1 class="evHeroTitle">What's Going On<br>in Daytona.</h1>
+      <p class="evHeroEyebrow">Daytona Beach · Live Events Guide</p>
+      <h1 class="evHeroTitle">
+        <span class="evHeroAccent">Events</span><br>
+        Worth Showing Up For.
+      </h1>
       <p class="evHeroSub">GoDo Picks, daily listings, and everything worth showing up for — curated by locals, for locals.</p>
       <div class="evHeroCtas">
         <a href="#lineup" class="evBtnBlue">Browse All Events ↓</a>
@@ -358,97 +362,129 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                   const evLng    = e.data.lng ?? CITY_CENTERS[evCity]?.lng;
                   const dist     = distLabel(evLat, evLng);
                   const fbUrl    = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " " + cityDisplayName(evCity))}`;
-                  const showTime = timeStr && !isNaN(d) && timeStr !== "12:00 AM";
+                  const showTime    = timeStr && !isNaN(d) && timeStr !== "12:00 AM";
+                  const isHighImpact = !!e.data.isHighImpact;
+                  const evImg        = e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG;
+                  /* Shared social SVGs as inline helpers */
+                  const calSvg = (
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                      <rect x="1.5" y="3" width="12" height="10.5" rx="2" stroke="currentColor" stroke-width="1.3"/>
+                      <path d="M5 1.5v3M10 1.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                      <path d="M1.5 6.5h12" stroke="currentColor" stroke-width="1.3"/>
+                      <path d="M7.5 9v3M6 10.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                    </svg>
+                  );
+                  const shareSvg = (
+                    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
+                      <circle cx="11.5" cy="3"   r="1.8" stroke="currentColor" stroke-width="1.3"/>
+                      <circle cx="11.5" cy="12"  r="1.8" stroke="currentColor" stroke-width="1.3"/>
+                      <circle cx="3"    cy="7.5" r="1.8" stroke="currentColor" stroke-width="1.3"/>
+                      <path d="M4.7 6.6l5 -2.7M4.7 8.4l5 2.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                    </svg>
+                  );
+                  const metaBlock = (
+                    <div class="lineupMeta">
+                      {showTime && (
+                        <span class="lineupTime">
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                            <circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/>
+                            <path d="M5 2.5v2.5l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                          </svg>
+                          {timeStr}
+                        </span>
+                      )}
+                      {e.data.location && (
+                        <span class="lineupLoc">
+                          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                            <path d="M5 1C3.3 1 2 2.3 2 4c0 2.5 3 5.5 3 5.5S8 6.5 8 4C8 2.3 6.7 1 5 1z" stroke="currentColor" stroke-width="1.2"/>
+                            <circle cx="5" cy="4" r="1" fill="currentColor"/>
+                          </svg>
+                          {e.data.location}
+                        </span>
+                      )}
+                      {dist && <span class="lineupDist">{dist}</span>}
+                      <span class="lineupCity">{cityDisplayName(evCity)}</span>
+                    </div>
+                  );
+                  const actionBtns = (
+                    <div class="lineupActions">
+                      <button class="laBtn laBtn--cal" type="button" title="Add to Calendar"
+                        data-title={e.data.title} data-date={isNaN(d) ? "" : d.toISOString()}
+                        data-location={e.data.location ?? ""} aria-label="Add to Calendar">
+                        {calSvg}
+                      </button>
+                      <button class="laBtn laBtn--share" type="button" title="Share this event"
+                        data-url={href} data-title={e.data.title} aria-label="Share this event">
+                        {shareSvg}
+                      </button>
+                    </div>
+                  );
+                  const ctaLink = (extraClass?: string) => (
+                    <a href={href} class={`lineupCta${extraClass ? " " + extraClass : ""}`}
+                      target={isExt ? "_blank" : "_self"}
+                      rel={isExt ? "noopener noreferrer" : ""}
+                      data-external={isExt ? "true" : undefined}
+                      data-fallback={isExt ? fbUrl : undefined}>
+                      {isExt ? "Get Tickets" : "More Info"}
+                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                        <path d="M2 5.5h7M5.5 2l3.5 3.5-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </a>
+                  );
                   return (
                     <div
-                      class={`lineupRow evCard${hidden ? " lineupRow--hidden evCard--hidden" : ""}`}
+                      class={`lineupRow evCard${hidden ? " lineupRow--hidden evCard--hidden" : ""}${isHighImpact ? " lineupRow--hiImpact" : ""}`}
                       data-month={monthKey}
                       data-idx={String(idx)}
                     >
-                      <div class="lineupDateBox">
-                        <span class="ldbMon">{mon}</span>
-                        <span class="ldbDay">{day}</span>
-                      </div>
-                      <div class="lineupThumb">
-                        <img
-                          src={e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG}
-                          alt={e.data.title}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                      <div class="lineupBody">
-                        <h3 class="lineupTitle">{e.data.title}</h3>
-                        {(() => { const vt = vibeTag(e.data.category); return vt ? <span class={`vibTag vibTag--${vt.type}`}>{vt.label}</span> : null; })()}
-                        <div class="lineupMeta">
-                          {showTime && (
-                            <span class="lineupTime">
-                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                                <circle cx="5" cy="5" r="4" stroke="currentColor" stroke-width="1.2"/>
-                                <path d="M5 2.5v2.5l1.5 1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                      {isHighImpact ? (
+                        /* ── High-Impact variant: full-width 16:9 card ── */
+                        <>
+                          <div class="hiImgWrap">
+                            <img class="hiImg" src={evImg} alt={e.data.title} loading="lazy" decoding="async" />
+                            <div class="hiImgGrad" aria-hidden="true"></div>
+                            <span class="hiBadge">
+                              <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true">
+                                <path d="M4.5 1l1 2.3L8 3.7l-2 1.8.6 2.5L4.5 6.8 2 8l.6-2.5-2-1.8 2.5-.4L4.5 1z" fill="currentColor"/>
                               </svg>
-                              {timeStr}
+                              High Impact
                             </span>
-                          )}
-                          {e.data.location && (
-                            <span class="lineupLoc">
-                              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-                                <path d="M5 1C3.3 1 2 2.3 2 4c0 2.5 3 5.5 3 5.5S8 6.5 8 4C8 2.3 6.7 1 5 1z" stroke="currentColor" stroke-width="1.2"/>
-                                <circle cx="5" cy="4" r="1" fill="currentColor"/>
-                              </svg>
-                              {e.data.location}
-                            </span>
-                          )}
-                          {dist && <span class="lineupDist">{dist}</span>}
-                          <span class="lineupCity">{cityDisplayName(evCity)}</span>
-                        </div>
-                      </div>
-                      <div class="lineupActions">
-                        <button
-                          class="laBtn laBtn--cal"
-                          type="button"
-                          title="Add to Calendar"
-                          data-title={e.data.title}
-                          data-date={isNaN(d) ? "" : d.toISOString()}
-                          data-location={e.data.location ?? ""}
-                          aria-label="Add to Calendar"
-                        >
-                          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
-                            <rect x="1.5" y="3" width="12" height="10.5" rx="2" stroke="currentColor" stroke-width="1.3"/>
-                            <path d="M5 1.5v3M10 1.5v3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                            <path d="M1.5 6.5h12" stroke="currentColor" stroke-width="1.3"/>
-                            <path d="M7.5 9v3M6 10.5h3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                          </svg>
-                        </button>
-                        <button
-                          class="laBtn laBtn--share"
-                          type="button"
-                          title="Share this event"
-                          data-url={href}
-                          data-title={e.data.title}
-                          aria-label="Share this event"
-                        >
-                          <svg width="15" height="15" viewBox="0 0 15 15" fill="none" aria-hidden="true">
-                            <circle cx="11.5" cy="3" r="1.8" stroke="currentColor" stroke-width="1.3"/>
-                            <circle cx="11.5" cy="12" r="1.8" stroke="currentColor" stroke-width="1.3"/>
-                            <circle cx="3" cy="7.5" r="1.8" stroke="currentColor" stroke-width="1.3"/>
-                            <path d="M4.7 6.6l5 -2.7M4.7 8.4l5 2.7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
-                          </svg>
-                        </button>
-                      </div>
-                      <a
-                        href={href}
-                        class="lineupCta"
-                        target={isExt ? "_blank" : "_self"}
-                        rel={isExt ? "noopener noreferrer" : ""}
-                        data-external={isExt ? "true" : undefined}
-                        data-fallback={isExt ? fbUrl : undefined}
-                      >
-                        {isExt ? "Get Tickets" : "More Info"}
-                        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                          <path d="M2 5.5h7M5.5 2l3.5 3.5-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                      </a>
+                            <div class="hiDateOverlay">
+                              <span class="ldbMon">{mon}</span>
+                              <span class="ldbDay">{day}</span>
+                            </div>
+                          </div>
+                          <div class="hiBody">
+                            <div class="hiBodyLeft">
+                              {(() => { const vt = vibeTag(e.data.category); return vt ? <span class={`vibTag vibTag--${vt.type}`}>{vt.label}</span> : null; })()}
+                              <h3 class="hiTitle">{e.data.title}</h3>
+                              {metaBlock}
+                            </div>
+                            <div class="hiBodyRight">
+                              {actionBtns}
+                              {ctaLink("lineupCta--hi")}
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        /* ── Standard row ── */
+                        <>
+                          <div class="lineupDateBox">
+                            <span class="ldbMon">{mon}</span>
+                            <span class="ldbDay">{day}</span>
+                          </div>
+                          <div class="lineupThumb">
+                            <img src={evImg} alt={e.data.title} loading="lazy" decoding="async" />
+                          </div>
+                          <div class="lineupBody">
+                            <h3 class="lineupTitle">{e.data.title}</h3>
+                            {(() => { const vt = vibeTag(e.data.category); return vt ? <span class={`vibTag vibTag--${vt.type}`}>{vt.label}</span> : null; })()}
+                            {metaBlock}
+                          </div>
+                          {actionBtns}
+                          {ctaLink()}
+                        </>
+                      )}
                     </div>
                   );
                 })}
@@ -731,18 +767,23 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     .evStickyLink { font-size: 12px; padding: 10px 16px; }
   }
 
-  /* ── Blueprint Hero ── */
+  /* ── Concert / Nightlife Hero ── */
   .evHero {
     position: relative;
-    min-height: 340px;
+    min-height: 440px;
     display: flex;
     align-items: center;
-    background: #0a0f1e url("/images/godo-blueprint-h.png") center/cover no-repeat;
+    background: #060810 url("https://images.unsplash.com/photo-1540039155733-5bb30b4f0e64?w=1600&q=80") center/cover no-repeat;
     overflow: hidden;
   }
   .evHeroOverlay {
     position: absolute; inset: 0;
-    background: linear-gradient(135deg, rgba(5,10,30,.86) 0%, rgba(0,60,110,.70) 100%);
+    background: linear-gradient(
+      160deg,
+      rgba(0,0,0,.78) 0%,
+      rgba(0,10,30,.70) 60%,
+      rgba(0,5,20,.60) 100%
+    );
   }
   .evHeroInner {
     position: relative;
@@ -769,7 +810,15 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     line-height: 1.08;
     margin: 0 0 14px;
   }
-  .evHeroSub {
+  .evHeroAccent {
+    color: var(--brand1, #0077be);
+    display: block;
+    font-size: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+  }
+    .evHeroSub {
     font-size: clamp(15px, 1.8vw, 18px);
     color: rgba(255,255,255,.72);
     line-height: 1.6;
@@ -1115,8 +1164,8 @@ function vibeTag(category?: string): { label: string; type: string } | null {
 
   /* Thumbnail (no date overlay) */
   .lineupThumb {
-    width: 72px;
-    height: 56px;
+    width: 88px;
+    height: 68px;
     flex-shrink: 0;
     border-radius: 10px;
     overflow: hidden;
@@ -1225,7 +1274,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
   @media (max-width: 480px) {
     .lineupDateBox { width: 42px; min-height: 46px; }
     .ldbDay { font-size: 18px; }
-    .lineupThumb { width: 56px; height: 46px; }
+    .lineupThumb { width: 68px; height: 54px; }
     .lineupCta { display: none; }
   }
 
@@ -1297,6 +1346,132 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     font-size: 11px;
     font-family: monospace;
     color: #aaa;
+  }
+
+
+  /* ── High-Impact Lineup Variant ── */
+  .lineupRow--hiImpact {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+    border-bottom: none;
+    border-radius: 16px;
+    border: 2px solid color-mix(in srgb, var(--brand1, #0077be) 30%, transparent);
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(0,119,190,.10);
+    margin-bottom: 4px;
+    transition: box-shadow 200ms, border-color 200ms;
+  }
+  .lineupRow--hiImpact:first-child { border-top: none; }
+  .lineupRow--hiImpact:hover {
+    border-color: var(--brand1, #0077be);
+    box-shadow: 0 8px 32px rgba(0,119,190,.20);
+    background: transparent;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand1, #0077be) 18%, transparent),
+                0 12px 36px rgba(0,119,190,.18);
+  }
+  .lineupRow--hiImpact:hover .hiImg { transform: scale(1.04); }
+
+  .hiImgWrap {
+    position: relative;
+    aspect-ratio: 16/9;
+    overflow: hidden;
+    background: #e5e7eb;
+  }
+  .hiImg {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 320ms cubic-bezier(.22,.68,0,1.2);
+  }
+  .hiImgGrad {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      to bottom,
+      transparent 40%,
+      rgba(0,0,0,.55) 100%
+    );
+    pointer-events: none;
+  }
+  .hiBadge {
+    position: absolute;
+    top: 12px; left: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--brand1, #0077be);
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    border-radius: 999px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.25);
+  }
+  .hiDateOverlay {
+    position: absolute;
+    bottom: 12px; left: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(0,0,0,.6);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #fff;
+    border-radius: 8px;
+    padding: 6px 10px;
+    gap: 0;
+    min-width: 44px;
+    text-align: center;
+  }
+  .hiDateOverlay .ldbMon {
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.75);
+    line-height: 1;
+  }
+  .hiDateOverlay .ldbDay {
+    font-size: 22px;
+    font-weight: 900;
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  .hiBody {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px 18px 18px;
+    flex-wrap: wrap;
+  }
+  .hiBodyLeft {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .hiTitle {
+    font-size: 18px;
+    font-weight: 900;
+    color: #111;
+    line-height: 1.25;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  .hiBodyRight {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .lineupCta--hi {
+    font-size: 13px;
+    padding: 9px 20px;
   }
 
   /* ── Sidebar ── */
