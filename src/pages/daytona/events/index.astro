@@ -807,7 +807,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     min-height: 440px;
     display: flex;
     align-items: center;
-    background: #080a10 url("/images/db-bandshell.png") center top/cover no-repeat;
+    background: #080a10 url("/images/DB%20Bandshell.png") center top/cover no-repeat;
     overflow: hidden;
   }
   .evHeroOverlay {
@@ -995,10 +995,17 @@ function vibeTag(category?: string): { label: string; type: string } | null {
       flex-direction: row;
       align-items: stretch;
       height: auto;
-      min-height: 88px;
+      min-height: 80px;
       aspect-ratio: unset;
-      background: #fff;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #eee;
+      border-radius: 0;
+      box-shadow: none;
     }
+    .godoPickCard:first-child { border-top: 1px solid #eee; }
+    .godoPickCard:hover { transform: none; box-shadow: none;
+      background: color-mix(in srgb, var(--brand1,#0077be) 3%, #fff); }
     .gpcImgWrap {
       aspect-ratio: unset;
       width: 40%;
@@ -1105,22 +1112,20 @@ function vibeTag(category?: string): { label: string; type: string } | null {
       position: absolute;
       bottom: 0;
       right: 0;
-      background: rgba(0,119,190,.92);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      background: var(--brand1, #0077be);
       color: #fff;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 4px 8px;
-      border-radius: 10px 0 10px 0;
+      padding: 5px 9px;
+      border-radius: 10px 0 0 0;
       gap: 0;
-      min-width: 34px;
+      min-width: 38px;
       text-align: center;
-      box-shadow: -2px -2px 8px rgba(0,0,0,.35);
+      box-shadow: -2px -2px 10px rgba(0,0,0,.4);
     }
     .ldcMon {
-      font-size: 7px;
+      font-size: 8px;
       font-weight: 900;
       letter-spacing: .1em;
       text-transform: uppercase;
@@ -1128,7 +1133,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
       line-height: 1;
     }
     .ldcDay {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 900;
       line-height: 1.1;
     }
@@ -1192,8 +1197,12 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     .gpcPosterGrad{ display: block; }
     .gpcBody      { display: none; }
     .godoPicksGrid { grid-template-columns: repeat(3, 1fr); }
-    /* Lineup rows: cap thumbnail, let title wrap */
-    .lineupThumb  { max-width: 120px; width: 120px !important; height: 90px !important; }
+    /* Lineup rows: cap thumbnail, let title wrap, tight gap */
+    .evHubLayout { gap: 12px; }
+    .lineupFeed  { gap: 0; }
+    .lineupThumb  { max-width: 160px; width: 160px !important; height: 108px !important; }
+    .lineupBody   { padding: 2px 8px 0 10px; }
+    .lineupRow    { gap: 8px; padding: 8px 0; }
     .lineupTitle  { white-space: normal; overflow: visible; text-overflow: unset;
                     display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
   }
