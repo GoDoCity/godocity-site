@@ -303,6 +303,13 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                         </svg>
                         {mockViews} views
                       </span>
+                      <span class="gcTrending" aria-label={`${mockViews} people interested`}>
+                        <svg width="11" height="8" viewBox="0 0 11 8" fill="none" aria-hidden="true">
+                          <ellipse cx="5.5" cy="4" rx="4.5" ry="3" stroke="currentColor" stroke-width="1.2"/>
+                          <circle cx="5.5" cy="4" r="1.4" fill="currentColor"/>
+                        </svg>
+                        Trending · {mockViews}
+                      </span>
                       <div class="gpcOverlay">
                         {(() => { const vt = vibeTag(e.data.category); return vt ? <span class={`vibTag vibTag--${vt.type}`}>{vt.label}</span> : null; })()}
                         <div class="gpcDateRow">
@@ -807,7 +814,11 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     min-height: 440px;
     display: flex;
     align-items: center;
-    background: #080a10 url("/images/DB%20Bandshell.png") center top/cover no-repeat;
+    background-color: #080a10;
+    background-image: url('/images/DB%20Bandshell.png') !important;
+    background-position: center top !important;
+    background-size: cover !important;
+    background-repeat: no-repeat;
     overflow: hidden;
   }
   .evHeroOverlay {
@@ -988,6 +999,15 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     .gpcBody { display: none; }
   }
 
+  /* Trending chip — desktop: hidden; mobile: shown bottom-left of image */
+  .gcTrending { display: none; }
+
+  /* ── Blueprint Glow: VIP pulse for mobile GoDo Picks ── */
+  @keyframes blueprintPulse {
+    0%, 100% { border-color: rgba(0, 119, 190, 0.20); }
+    50%       { border-color: var(--brand1, #0077be); box-shadow: 0 0 0 3px rgba(0,119,190,.12); }
+  }
+
   /* ══════════════════════════════════════════════════════
      MOBILE PORTRAIT (< 768px) — clean 110px fixed grid
      All rows: image 110px fixed | text fills remainder
@@ -997,25 +1017,29 @@ function vibeTag(category?: string): { label: string; type: string } | null {
 
     .evHub { padding: 24px 16px 64px; }
 
-    /* ── GoDo Picks: fixed 110px grid ── */
+    /* ── GoDo Picks: VIP prestige list rows ── */
     .godoPicksGrid { grid-template-columns: 1fr; gap: 0; }
     .godoPickCard {
       display: grid !important;
       grid-template-columns: 110px 1fr !important;
       gap: 12px !important;
-      background: #ffffff !important;
-      border: none !important;
-      border-bottom: 1px solid #eee !important;
-      border-radius: 0 !important;
+      background: rgba(248, 251, 255, 0.90) !important;
+      backdrop-filter: blur(4px) !important;
+      -webkit-backdrop-filter: blur(4px) !important;
+      border: 1.5px solid rgba(0, 119, 190, 0.20) !important;
+      border-bottom: 1.5px solid rgba(0, 119, 190, 0.20) !important;
+      border-radius: 10px !important;
       box-shadow: none !important;
-      padding: 10px 0 !important;
+      padding: 10px 10px 10px 10px !important;
+      margin-bottom: 8px !important;
       height: auto !important;
       min-height: unset !important;
       aspect-ratio: unset !important;
       align-items: start;
+      animation: blueprintPulse 3.2s ease-in-out infinite;
     }
-    .godoPickCard:first-child { border-top: 1px solid #eee !important; }
-    .godoPickCard:hover { background: #f9f9fb !important; transform: none !important; box-shadow: none !important; }
+    .godoPickCard:first-child { border-top: 1.5px solid rgba(0, 119, 190, 0.20) !important; margin-top: 0; }
+    .godoPickCard:hover { background: rgba(240, 248, 255, 0.97) !important; transform: none !important; box-shadow: 0 2px 12px rgba(0,119,190,.12) !important; }
     .gpcImgWrap {
       width: 110px !important;
       height: 82px !important;
@@ -1030,6 +1054,26 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     .gpcOverlay   { display: none !important; }
     .gpcPosterGrad{ display: none !important; }
     .gcAnalytics  { display: none !important; }
+
+    /* ── Trending indicator: bottom-left of card image ── */
+    .gcTrending {
+      display: inline-flex !important;
+      position: absolute;
+      bottom: 0; left: 0;
+      background: rgba(0, 0, 0, 0.62);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      color: #fff;
+      font-size: 8.5px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 4px 7px 4px 6px;
+      border-radius: 0 6px 0 8px;
+      align-items: center;
+      gap: 4px;
+      pointer-events: none;
+    }
     .gcBadge { top: 6px; left: 6px; font-size: 7.5px; padding: 2px 6px; }
     .gpcBody {
       display: flex !important;
@@ -1131,6 +1175,8 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     .gpcOverlay    { display: flex !important; }
     .gpcPosterGrad { display: block !important; }
     .gpcBody       { display: none !important; }
+    .gcTrending    { display: none !important; }
+    .godoPickCard  { animation: none !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
 
     /* Lineup: 160px fixed column, tight gap */
     .evHubLayout { gap: 12px; }
