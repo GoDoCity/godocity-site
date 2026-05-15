@@ -816,7 +816,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     align-items: center;
     background-color: #080a10;
     background-image: url('/images/DB%20Bandshell.png') !important;
-    background-position: center top !important;
+    background-position: center 20% !important;
     background-size: cover !important;
     background-repeat: no-repeat;
     overflow: hidden;
@@ -1055,11 +1055,11 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     .gpcPosterGrad{ display: none !important; }
     .gcAnalytics  { display: none !important; }
 
-    /* ── Trending indicator: bottom-left of card image ── */
+    /* ── Trending indicator: bottom-RIGHT of card image ── */
     .gcTrending {
       display: inline-flex !important;
       position: absolute;
-      bottom: 0; left: 0;
+      bottom: 0; right: 0; left: auto;
       background: rgba(0, 0, 0, 0.62);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
@@ -1069,12 +1069,21 @@ function vibeTag(category?: string): { label: string; type: string } | null {
       letter-spacing: .06em;
       text-transform: uppercase;
       padding: 4px 7px 4px 6px;
-      border-radius: 0 6px 0 8px;
+      border-radius: 6px 0 8px 0;
       align-items: center;
       gap: 4px;
       pointer-events: none;
     }
-    .gcBadge { top: 6px; left: 6px; font-size: 7.5px; padding: 2px 6px; }
+    /* Editor's Choice badge: bottom-left, small, top half of image stays clear */
+    .gcBadge {
+      top: auto !important;
+      bottom: 26px !important;
+      left: 0 !important;
+      font-size: 8px !important;
+      padding: 2px 7px 2px 5px !important;
+      border-radius: 0 4px 4px 0 !important;
+      letter-spacing: .08em !important;
+    }
     .gpcBody {
       display: flex !important;
       flex-direction: column;
@@ -1208,12 +1217,14 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                 box-shadow 200ms,
                 border-color 200ms;
     background: #0a0f1e;
+    animation: blueprintPulse 3.2s ease-in-out infinite;
   }
   .godoPickCard:hover {
     transform: translateY(-6px) scale(1.02);
     border-color: var(--brand1, #0077be);
     box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand1, #0077be) 22%, transparent),
                 0 20px 48px rgba(0,119,190,.30);
+    animation-play-state: paused;
   }
 
   /* Full-bleed poster image */
@@ -1243,7 +1254,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     pointer-events: none;
   }
 
-  /* Editor's Choice badge — top-left */
+  /* Editor's Choice badge — top-left on desktop, repositioned on mobile */
   .gcBadge {
     position: absolute;
     top: 12px; left: 12px;
@@ -1252,11 +1263,11 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     gap: 4px;
     background: var(--brand1, #0077be);
     color: #fff;
-    font-size: 9px;
+    font-size: 10px;
     font-weight: 900;
-    letter-spacing: .12em;
+    letter-spacing: .10em;
     text-transform: uppercase;
-    padding: 5px 10px;
+    padding: 4px 10px;
     border-radius: 999px;
     box-shadow: 0 2px 10px rgba(0,0,0,.3);
   }
