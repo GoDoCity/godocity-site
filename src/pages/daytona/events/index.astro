@@ -509,19 +509,54 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                         </>
                       )}
                     </div>
-                    {[2, 6, 10].includes(idx) && (
-                      <div class="inFeedAd" role="complementary" aria-label="Event Spotlight advertisement">
-                        <span class="inFeedAdTag">Sponsored</span>
+                    {idx === 2 && (
+                      /* ── GoDo VIP Headliner ($375) ── */
+                      <div class="inFeedAd inFeedAd--vip" role="complementary" aria-label="GoDo VIP advertising slot">
+                        <span class="inFeedAdTag inFeedAdTag--vip">★ $375/wk · VIP Slot</span>
                         <div class="inFeedAdSlot">
-                          <div class="inFeedAdThumb" aria-hidden="true">
-                            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
-                              <path d="M11 3l1.8 5.5H18l-4.5 3.2 1.7 5.3L11 14l-4.2 3 1.7-5.3L4 8.5h5.2L11 3z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+                          <div class="inFeedAdThumb inFeedAdThumb--vip" aria-hidden="true">
+                            {/* eye / trending icon */}
+                            <svg width="22" height="16" viewBox="0 0 22 16" fill="none" aria-hidden="true">
+                              <ellipse cx="11" cy="8" rx="10" ry="7" stroke="currentColor" stroke-width="1.6"/>
+                              <circle cx="11" cy="8" r="3.5" fill="currentColor" opacity=".7"/>
+                              <circle cx="11" cy="8" r="1.4" fill="#fff"/>
                             </svg>
                           </div>
                           <div class="inFeedAdContent">
-                            <p class="inFeedAdTitle">Your Event Here</p>
-                            <p class="inFeedAdSub">Event Spotlight · reaches 76k+ monthly readers</p>
-                            <a href="/daytona/advertise/" class="inFeedAdCta">Book This Slot →</a>
+                            <p class="inFeedAdTitle">★ GODO VIP HEADLINER</p>
+                            <p class="inFeedAdSub">Maximize your turnout at the top of Daytona's premier daily feed. Includes homepage features.</p>
+                            <a href="/daytona/advertise/products/godo-vip/" class="inFeedAdCta inFeedAdCta--vip">Reserve This Slot →</a>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {idx === 6 && (
+                      /* ── High-Impact Sponsor ($225) ── */
+                      <div class="inFeedAd inFeedAd--hi" role="complementary" aria-label="High-Impact advertising slot">
+                        <span class="inFeedAdTag">✦ $225/wk · High-Impact</span>
+                        <div class="inFeedAdSlot inFeedAdSlot--hi">
+                          <p class="inFeedAdTitle">✦ HIGH-IMPACT SPONSOR</p>
+                          <p class="inFeedAdSub">Break through the feed with an enhanced full-width display, <strong>priority positioning</strong>, and detailed description bolding.</p>
+                          <a href="/daytona/advertise/products/high-impact-listing/" class="inFeedAdCta">Reserve This Slot →</a>
+                        </div>
+                      </div>
+                    )}
+                    {idx === 10 && (
+                      /* ── Event Spotlight ($150) ── */
+                      <div class="inFeedAd" role="complementary" aria-label="Event Spotlight advertising slot">
+                        <span class="inFeedAdTag">☉ $150/wk · Sponsored</span>
+                        <div class="inFeedAdSlot">
+                          <div class="inFeedAdThumb" aria-hidden="true">
+                            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden="true">
+                              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
+                              <circle cx="11" cy="11" r="3" fill="currentColor" opacity=".5"/>
+                              <path d="M11 3v2M11 17v2M3 11h2M17 11h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            </svg>
+                          </div>
+                          <div class="inFeedAdContent">
+                            <p class="inFeedAdTitle">☉ EVENT SPOTLIGHT</p>
+                            <p class="inFeedAdSub">Clean, targeted native placement directly inside the daily lineup feed. Reaches 76k+ monthly readers.</p>
+                            <a href="/daytona/advertise/products/event-spotlight/" class="inFeedAdCta">Book This Slot →</a>
                           </div>
                         </div>
                       </div>
@@ -586,61 +621,64 @@ function vibeTag(category?: string): { label: string; type: string } | null {
       <aside class="evHubSidebar" aria-label="Event Spotlight advertising">
         <div class="sidebarSticky">
 
-          <p class="sidebarEyebrow">Event Spotlight Slots</p>
+          <p class="sidebarEyebrow">Ad Inventory — 2026 Rates</p>
 
-          <!-- Slot 1 -->
-          <div class="sidebarSlot">
+          <!-- Slot 1: GoDo VIP -->
+          <div class="sidebarSlot sidebarSlot--vip">
             <div class="slotMeta">
-              <span class="slotName">Slot 1 — Bands &amp; Venues</span>
-              <span class="slotDims">300 × 250</span>
+              <span class="slotName">★ GoDo VIP Headliner</span>
+              <span class="slotDims slotDims--price">$375/wk</span>
             </div>
-            <div class="slotAd">
+            <div class="slotAd slotAd--vip">
               <div class="slotAdInner">
-                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-                  <circle cx="14" cy="14" r="12" stroke="currentColor" stroke-width="1.5" opacity=".25"/>
-                  <path d="M9 20v-9l5-3 5 3v9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <rect x="11.5" y="15" width="5" height="5" rx="1" fill="currentColor" opacity=".3"/>
+                <svg width="28" height="20" viewBox="0 0 28 20" fill="none" aria-hidden="true">
+                  <ellipse cx="14" cy="10" rx="13" ry="9" stroke="currentColor" stroke-width="1.6" opacity=".6"/>
+                  <circle cx="14" cy="10" r="4.5" fill="currentColor" opacity=".5"/>
+                  <circle cx="14" cy="10" r="1.8" fill="#fff"/>
                 </svg>
-                <p class="slotAdTitle">Your Event Here</p>
-                <p class="slotAdSub">300 × 250 · Event Spotlight</p>
-                <a href="/daytona/advertise/" class="slotAdCta">Book This Slot</a>
+                <p class="slotAdTitle">GoDo VIP Headliner</p>
+                <p class="slotAdSub">Top of Events Hub · GoDo Picks · Homepage feature · 76k+ impressions</p>
+                <a href="/daytona/advertise/products/godo-vip/" class="slotAdCta slotAdCta--vip">Reserve Slot →</a>
               </div>
             </div>
           </div>
 
-          <!-- Slot 2 -->
+          <!-- Slot 2: High-Impact -->
           <div class="sidebarSlot">
             <div class="slotMeta">
-              <span class="slotName">Slot 2 — Venue Partner</span>
-              <span class="slotDims">300 × 250</span>
+              <span class="slotName">✦ High-Impact Listing</span>
+              <span class="slotDims slotDims--price">$225/wk</span>
             </div>
             <div class="slotAd">
               <div class="slotAdInner">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-                  <path d="M14 3l2.5 7.5H24l-6.5 4.5 2.5 7.5L14 18l-6.5 4.5 2.5-7.5L4 10.5h7.5L14 3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" opacity=".4"/>
+                  <rect x="3" y="6" width="22" height="16" rx="3" stroke="currentColor" stroke-width="1.5" opacity=".4"/>
+                  <rect x="3" y="6" width="22" height="5" rx="3" fill="currentColor" opacity=".15"/>
+                  <path d="M7 17h14M7 20h9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
                 </svg>
-                <p class="slotAdTitle">Promote Your Venue</p>
-                <p class="slotAdSub">300 × 250 · Event Spotlight</p>
-                <a href="/daytona/advertise/" class="slotAdCta">Book This Slot</a>
+                <p class="slotAdTitle">High-Impact Listing</p>
+                <p class="slotAdSub">Full-width Daily Lineup row · Priority positioning · Bold format</p>
+                <a href="/daytona/advertise/products/high-impact-listing/" class="slotAdCta">Reserve Slot →</a>
               </div>
             </div>
           </div>
 
-          <!-- Slot 3 -->
+          <!-- Slot 3: Event Spotlight -->
           <div class="sidebarSlot">
             <div class="slotMeta">
-              <span class="slotName">Slot 3 — Sponsor Takeover</span>
-              <span class="slotDims">300 × 250</span>
+              <span class="slotName">☉ Event Spotlight</span>
+              <span class="slotDims slotDims--price">$150/wk</span>
             </div>
             <div class="slotAd">
               <div class="slotAdInner">
                 <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true">
-                  <rect x="3" y="3" width="22" height="22" rx="5" stroke="currentColor" stroke-width="1.5" opacity=".25"/>
-                  <path d="M8 14h12M8 10h8M8 18h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <circle cx="14" cy="14" r="10" stroke="currentColor" stroke-width="1.5" opacity=".3"/>
+                  <circle cx="14" cy="14" r="4" fill="currentColor" opacity=".4"/>
+                  <path d="M14 4v3M14 21v3M4 14h3M21 14h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
                 </svg>
-                <p class="slotAdTitle">Sponsor the Hub</p>
-                <p class="slotAdSub">300 × 250 · Event Spotlight</p>
-                <a href="/daytona/advertise/" class="slotAdCta">Book This Slot</a>
+                <p class="slotAdTitle">Event Spotlight</p>
+                <p class="slotAdSub">Native in-feed placement · Daily Lineup positions 3, 7 &amp; 11</p>
+                <a href="/daytona/advertise/products/event-spotlight/" class="slotAdCta">Book This Slot →</a>
               </div>
             </div>
           </div>
@@ -852,16 +890,15 @@ function vibeTag(category?: string): { label: string; type: string } | null {
   }
   .evHeroAccent {
     color: var(--brand1, #0077be);
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.6),
-                 -1px -1px 0px #ffffff,
-                  1px -1px 0px #ffffff,
-                 -1px  1px 0px #ffffff,
-                  1px  1px 0px #ffffff;
-    display: block;
-    font-size: inherit;
-    font-weight: inherit;
-    letter-spacing: inherit;
-    line-height: inherit;
+    display: inline-block;
+    font-size: clamp(37px, 5.75vw, 62px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    padding: 8px 24px;
+    border: 2px solid rgba(255,255,255,0.85);
+    border-radius: 6px;
+    text-shadow: 0 2px 14px rgba(0,0,0,0.55);
   }
     .evHeroSub {
     font-size: clamp(15px, 1.8vw, 18px);
@@ -1074,15 +1111,16 @@ function vibeTag(category?: string): { label: string; type: string } | null {
       gap: 4px;
       pointer-events: none;
     }
-    /* Editor's Choice badge: top-left of thumbnail, compact so image face stays clear */
+    /* Editor's Choice badge: top-left of thumbnail, one-line only */
     .gcBadge {
       top: 6px !important;
       left: 6px !important;
       bottom: auto !important;
-      font-size: 8px !important;
-      padding: 2px 7px !important;
+      font-size: 10px !important;
+      padding: 2px 6px !important;
       border-radius: 999px !important;
-      letter-spacing: .08em !important;
+      letter-spacing: .06em !important;
+      white-space: nowrap !important;
     }
     .gpcBody {
       display: flex !important;
@@ -1691,6 +1729,41 @@ function vibeTag(category?: string): { label: string; type: string } | null {
   }
   .inFeedAdCta:hover { background: #005fa3; }
 
+  /* ── VIP in-feed slot ── */
+  .inFeedAd--vip {
+    background: rgba(248, 251, 255, 0.97);
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 40%, transparent);
+    animation: blueprintPulse 3.2s ease-in-out infinite;
+  }
+  .inFeedAdTag--vip {
+    background: color-mix(in srgb, var(--brand1, #0077be) 20%, #fff);
+    border-color: color-mix(in srgb, var(--brand1, #0077be) 40%, transparent);
+    color: var(--brand1, #0077be);
+    font-weight: 900;
+  }
+  .inFeedAdThumb--vip {
+    background: color-mix(in srgb, var(--brand1, #0077be) 15%, #fff);
+    border-color: color-mix(in srgb, var(--brand1, #0077be) 40%, transparent);
+    color: var(--brand1, #0077be);
+  }
+  .inFeedAdCta--vip {
+    background: var(--brand1, #0077be);
+  }
+  .inFeedAdCta--vip:hover { background: #005fa3; }
+
+  /* ── High-Impact in-feed slot ── */
+  .inFeedAd--hi {
+    background: color-mix(in srgb, var(--brand1, #0077be) 4%, #fff);
+    border-color: color-mix(in srgb, var(--brand1, #0077be) 30%, transparent);
+  }
+  .inFeedAdSlot--hi {
+    flex-direction: column;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .inFeedAdSlot--hi .inFeedAdTitle { padding-right: 80px; font-size: 14px; }
+  .inFeedAdSlot--hi .inFeedAdSub   { font-size: 12px; color: #555; }
+
   /* ── High-Impact Lineup Variant ── */
   .lineupRow--hiImpact {
     flex-direction: column;
@@ -1892,6 +1965,27 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     transition: background 130ms;
   }
   .slotAdCta:hover { background: #005fa3; }
+
+  /* ── Price chip replacing dimensions ── */
+  .slotDims--price {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--brand1, #0077be);
+    background: color-mix(in srgb, var(--brand1, #0077be) 10%, #fff);
+    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 25%, transparent);
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+  /* ── VIP sidebar slot ── */
+  .sidebarSlot--vip .slotAd { animation: blueprintPulse 3.2s ease-in-out infinite; }
+  .slotAd--vip {
+    background: rgba(248, 251, 255, 0.97);
+    border-color: color-mix(in srgb, var(--brand1, #0077be) 40%, transparent) !important;
+  }
+  .slotAdCta--vip {
+    background: var(--brand1, #0077be);
+  }
+  .slotAdCta--vip:hover { background: #005fa3; }
 
   .sidebarSubmit {
     background: color-mix(in srgb, var(--brand1, #0077be) 6%, white);
