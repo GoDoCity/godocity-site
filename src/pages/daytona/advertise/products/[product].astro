@@ -178,6 +178,65 @@ export function getStaticPaths() {
       startingAt: "$550",
       startingUnit: "per week",
     },
+    {
+      slug: "godo-vip",
+      name: "GoDo VIP — The Headliner",
+      subtitle: "Events Hub · GoDo Picks Top Slot",
+      valueHook: "Pin your event to the most-coveted editorial slot in Daytona's events discovery engine.",
+      badge: "VIP · Top 3 Slots",
+      specs: {
+        reach: "76k+ Monthly Impressions",
+        placement: "GoDo Picks — Events Hub Top",
+        leadTime: "2 Business Days",
+      },
+      description: [
+        "GoDo VIP places your event as one of the three hand-curated GoDo Picks at the top of the Events Hub — the first thing every visitor sees the moment they land on the page. These aren't algorithm-ranked results; they're editorial placements treated as personal recommendations from the GoDo team. That carries trust no banner can buy.",
+        "Your event appears in the premium poster-style card format with your image, date, vibe tag, and a direct link. On desktop it's a full-bleed vertical poster with a glowing Blueprint Blue border. On mobile it's the lead row in a VIP glassmorphic card list — complete with a 'Trending' indicator displaying live social proof. The card pulses with a slow Blueprint Glow animation that distinguishes it visually from every standard listing below.",
+        "Only three slots exist per weekly cycle, and they routinely sell out. If your event deserves to be the first thing 76k+ local readers see this week, this is the placement. Book early — once the week fills, it's gone.",
+      ],
+      mockupType: "events-vip",
+      startingAt: "$375",
+      startingUnit: "per week",
+    },
+    {
+      slug: "high-impact-listing",
+      name: "High-Impact Listing",
+      subtitle: "Events Hub · Daily Lineup Featured Row",
+      valueHook: "Command the Daily Lineup with a full-width featured row that stops the scroll.",
+      badge: "Maximum Real Estate",
+      specs: {
+        reach: "76k+ Monthly Impressions",
+        placement: "Daily Lineup — Full-Width Featured Row",
+        leadTime: "2 Business Days",
+      },
+      description: [
+        "The High-Impact Listing is the largest format in the Daily Lineup — a full-width card that breaks out of the standard thumbnail-and-text row layout and takes over the entire content column. While every other event competes for attention in a compact list, yours spans the full width with a 16:9 hero image, an oversized title, and a prominent call-to-action. It stops the scroll because it's built to.",
+        "The placement includes a 'High Impact' badge, a full hero image slot, your vibe tag in the matching brand color, and the same date-and-location metadata as standard listings — just at a scale that makes everything else on the page feel like a footnote. On mobile, it renders as a prominent horizontal card that maintains the same visual hierarchy advantage over surrounding events.",
+        "Ideal for ticketed events, grand openings, fundraisers, and any occasion where attendance is the entire objective. Pair it with an Event Spotlight in-feed slot below for full-funnel coverage of the Events Hub experience.",
+      ],
+      mockupType: "events-high-impact",
+      startingAt: "$225",
+      startingUnit: "per week",
+    },
+    {
+      slug: "event-spotlight",
+      name: "Event Spotlight",
+      subtitle: "Events Hub · In-Feed Native Placement",
+      valueHook: "Reach active event-seekers mid-browse with a native in-feed placement that earns clicks.",
+      specs: {
+        reach: "76k+ Monthly Impressions",
+        placement: "Events Hub In-Feed — After Events 3, 7 & 11",
+        leadTime: "1 Business Day",
+      },
+      description: [
+        "The Event Spotlight is a native in-feed card injected directly into the Daily Lineup at positions 3, 7, and 11 — the natural scroll pauses where readers stop to decide what to do next. It looks and reads like editorial content because it's built to the same visual spec. The only difference is the small 'Sponsored' label that meets our transparency standards.",
+        "Each in-feed slot reaches a reader who has already demonstrated intent: they came to GoDoDaytona specifically looking for something to do. That's a fundamentally different audience posture than a display ad or a social impression. They're in discovery mode. Your event shows up exactly when the decision is being made.",
+        "At $150 per week, it's the most accessible entry point into the Events Hub ad inventory — and the highest-intent traffic on the page. Stack two or three weeks for sustained visibility through your event's run-up, or combine it with a GoDo VIP or High-Impact Listing slot for full-funnel domination of the Events Hub experience.",
+      ],
+      mockupType: "events-spotlight",
+      startingAt: "$150",
+      startingUnit: "per week",
+    },
   ];
 
   return PRODUCTS.map((p) => ({ params: { product: p.slug }, props: { product: p } }));
