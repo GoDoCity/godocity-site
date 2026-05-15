@@ -26,6 +26,38 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
     </div>
   </section>
 
+  <!-- ══════════════════════════════════════════
+       INTERACTIVE PLACEMENT ROUTER
+  ══════════════════════════════════════════ -->
+  <div class="adRouter" id="placement-router">
+    <div class="adRouterInner">
+      <p class="adRouterLabel">Find the right placement in seconds</p>
+      <div class="adRouterFields">
+        <div class="adRouterField">
+          <label class="adRouterFieldLabel" for="routerWho">I am a…</label>
+          <select class="adRouterSelect" id="routerWho">
+            <option value="">Select type</option>
+            <option value="venue">Concert Promoter or Venue</option>
+            <option value="business">Local Business</option>
+            <option value="nonprofit">Non-Profit</option>
+            <option value="regional">Regional Brand</option>
+          </select>
+        </div>
+        <div class="adRouterField">
+          <label class="adRouterFieldLabel" for="routerGoal">I want to…</label>
+          <select class="adRouterSelect" id="routerGoal">
+            <option value="">Select goal</option>
+            <option value="event">Promote an Event</option>
+            <option value="awareness">Build Brand Awareness</option>
+            <option value="newsletter">Sponsor a Newsletter</option>
+          </select>
+        </div>
+        <button class="adRouterBtn" id="routerBtn" type="button">Find My Placement →</button>
+      </div>
+      <p class="adRouterResult" id="routerResult"></p>
+    </div>
+  </div>
+
   <div class="adBody">
 
     <!-- ═══════════════════════════════════════════
@@ -835,7 +867,7 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
           <h3 class="catalogGroupLabel">Events Hub · 2026 Rates</h3>
           <div class="productCatalogGrid">
 
-            <a href="/daytona/advertise/products/godo-vip/" class="catalogCard catalogCard--featured">
+            <a href="/daytona/advertise/products/godo-vip/" class="catalogCard catalogCard--featured" id="card-godo-vip" data-tier="vip">
               <div class="catalogCardIcon" aria-hidden="true">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <path d="M10 2l2.2 5h5.3l-4.3 3.1 1.7 5.2L10 12.3l-4.9 3 1.7-5.2L2.5 7h5.3L10 2z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
@@ -854,7 +886,7 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
               <span class="catalogCardArrow" aria-hidden="true">→</span>
             </a>
 
-            <a href="/daytona/advertise/products/high-impact-listing/" class="catalogCard catalogCard--featured">
+            <a href="/daytona/advertise/products/high-impact-listing/" class="catalogCard catalogCard--featured" id="card-high-impact" data-tier="hi">
               <div class="catalogCardIcon" aria-hidden="true">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <rect x="1" y="3" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
@@ -871,7 +903,7 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
               <span class="catalogCardArrow" aria-hidden="true">→</span>
             </a>
 
-            <a href="/daytona/advertise/products/event-spotlight/" class="catalogCard">
+            <a href="/daytona/advertise/products/event-spotlight/" class="catalogCard" id="card-event-spotlight" data-tier="spotlight">
               <div class="catalogCardIcon" aria-hidden="true">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                   <rect x="1" y="3" width="18" height="14" rx="2.5" stroke="currentColor" stroke-width="1.8"/>
@@ -884,6 +916,68 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
                 <h4 class="catalogCardName">Event Spotlight</h4>
                 <p class="catalogCardHook">Native in-feed placement reaching 76k+ monthly readers right as they browse upcoming events.</p>
                 <span class="catalogCardPrice">$150 / week</span>
+              </div>
+              <span class="catalogCardArrow" aria-hidden="true">→</span>
+            </a>
+
+          </div>
+        </div>
+
+        <!-- GoDo Studio Newsletter Bundle -->
+        <div class="productCatalogGroup">
+          <h3 class="catalogGroupLabel">GoDo Studio · Newsletter Bundle</h3>
+          <div class="productCatalogGrid">
+
+            <a href="#contact" class="catalogCard catalogCard--featured" id="card-local-pack">
+              <div class="catalogCardIcon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <rect x="1" y="3" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M1 7l9 6 9-6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                  <path d="M10 2l1.2 2.8L14 5.2l-2.2 2 .7 2.8L10 8.6 7.5 10l.7-2.8-2.2-2 2.8-.4L10 2z" fill="currentColor" opacity=".35"/>
+                </svg>
+              </div>
+              <div class="catalogCardBody">
+                <span class="catalogCardBadge catalogCardBadge--premium">Best Value Bundle</span>
+                <h4 class="catalogCardName">The GoDo Local Pack</h4>
+                <p class="catalogCardHook">1 GoDo VIP Pick + 2 Newsletter Mentions — full-funnel weekly coverage at a bundled rate.</p>
+                <span class="catalogCardPrice">$450 / month</span>
+                <span class="catalogCardScarcity">
+                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true"><circle cx="5" cy="5" r="4" fill="#ef4444"/></svg>
+                  Save $250 vs. buying separately
+                </span>
+              </div>
+              <span class="catalogCardArrow" aria-hidden="true">→</span>
+            </a>
+
+            <a href="/daytona/advertise/products/daily-mention/" class="catalogCard">
+              <div class="catalogCardIcon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <rect x="1" y="3" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M1 7l9 6 9-6" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="catalogCardBody">
+                <span class="catalogCardBadge">Newsletter · Native Text</span>
+                <h4 class="catalogCardName">The Daily Mention</h4>
+                <p class="catalogCardHook">Your brand woven into the morning briefing as a native text mention. 5,000+ daily inboxes.</p>
+                <span class="catalogCardPrice">From $150 / insertion</span>
+              </div>
+              <span class="catalogCardArrow" aria-hidden="true">→</span>
+            </a>
+
+            <a href="/daytona/advertise/products/top-line/" class="catalogCard">
+              <div class="catalogCardIcon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <rect x="1" y="3" width="18" height="14" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                  <rect x="1" y="3" width="18" height="5" rx="2.5" fill="currentColor" opacity=".2"/>
+                  <path d="M1 8h18" stroke="currentColor" stroke-width="1.8"/>
+                </svg>
+              </div>
+              <div class="catalogCardBody">
+                <span class="catalogCardBadge catalogCardBadge--pill">HIGHEST VISIBILITY</span>
+                <h4 class="catalogCardName">The Top Line</h4>
+                <p class="catalogCardHook">Full-width header placement — the very first thing 5,000+ locals see every weekday morning.</p>
+                <span class="catalogCardPrice">From $275 / insertion</span>
               </div>
               <span class="catalogCardArrow" aria-hidden="true">→</span>
             </a>
@@ -1028,6 +1122,59 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
   </div>{/* /.adBody */}
 
 </Base>
+
+<script is:inline>
+(function () {
+  var btn = document.getElementById('routerBtn');
+  if (!btn) return;
+
+  var ROUTES = [
+    { who: 'venue',    goal: 'event',      card: 'card-godo-vip',      label: 'GoDo VIP Headliner' },
+    { who: 'regional', goal: 'event',      card: 'card-godo-vip',      label: 'GoDo VIP Headliner' },
+    { who: 'business', goal: 'event',      card: 'card-high-impact',   label: 'High-Impact Listing' },
+    { who: 'nonprofit',goal: 'event',      card: 'card-event-spotlight',label: 'Event Spotlight' },
+    { who: 'venue',    goal: 'awareness',  card: 'card-high-impact',   label: 'High-Impact Listing' },
+    { who: 'business', goal: 'awareness',  card: 'card-high-impact',   label: 'High-Impact Listing' },
+    { who: 'regional', goal: 'awareness',  card: 'card-high-impact',   label: 'High-Impact Listing' },
+    { who: 'nonprofit',goal: 'awareness',  card: 'card-event-spotlight',label: 'Event Spotlight' },
+    { who: 'venue',    goal: 'newsletter', card: 'card-local-pack',    label: 'GoDo Local Pack' },
+    { who: 'business', goal: 'newsletter', card: 'card-local-pack',    label: 'GoDo Local Pack' },
+    { who: 'regional', goal: 'newsletter', card: 'card-local-pack',    label: 'GoDo Local Pack' },
+    { who: 'nonprofit',goal: 'newsletter', card: 'card-local-pack',    label: 'GoDo Local Pack' },
+  ];
+
+  btn.addEventListener('click', function () {
+    var who  = document.getElementById('routerWho').value;
+    var goal = document.getElementById('routerGoal').value;
+    var result = document.getElementById('routerResult');
+
+    if (!who || !goal) {
+      if (result) result.textContent = 'Please select both options above.';
+      return;
+    }
+
+    var match = ROUTES.find(function (r) { return r.who === who && r.goal === goal; });
+    if (!match) {
+      if (result) result.textContent = 'Contact us and we\'ll find the right fit.';
+      return;
+    }
+
+    var card = document.getElementById(match.card);
+    if (!card) return;
+
+    // Remove any existing highlight
+    document.querySelectorAll('.catalogCard--highlight').forEach(function (el) {
+      el.classList.remove('catalogCard--highlight');
+      void el.offsetWidth; // reflow to restart animation
+    });
+
+    card.classList.add('catalogCard--highlight');
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    if (result) result.textContent = '✓ Best match: ' + match.label + ' — see it highlighted below.';
+  });
+})();
+</script>
 
 <style>
   /* ═══════════════════════════════════════════════════════════
@@ -1999,5 +2146,99 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
     font-weight: 700;
     text-decoration: underline;
     text-underline-offset: 2px;
+  }
+
+  /* ─── Interactive Placement Router ─────────────────────────── */
+  .adRouter {
+    background: #f0f6fb;
+    border-top: 3px solid var(--brand1, #0077be);
+    border-bottom: 1px solid #d6e8f5;
+    padding: 28px 0 32px;
+  }
+  .adRouterInner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem;
+  }
+  .adRouterLabel {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--brand1, #0077be);
+    margin: 0 0 14px;
+  }
+  .adRouterFields {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .adRouterField {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-width: 180px;
+  }
+  .adRouterFieldLabel {
+    font-size: 12px;
+    font-weight: 600;
+    color: #444;
+  }
+  .adRouterSelect {
+    appearance: none;
+    -webkit-appearance: none;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%230077be'/%3E%3C/svg%3E") no-repeat right 12px center;
+    border: 1.5px solid #c0d9ec;
+    border-radius: 6px;
+    padding: 9px 32px 9px 12px;
+    font-size: 14px;
+    color: #1a1a2e;
+    cursor: pointer;
+    transition: border-color .15s;
+  }
+  .adRouterSelect:focus {
+    outline: none;
+    border-color: var(--brand1, #0077be);
+    box-shadow: 0 0 0 3px rgba(0,119,190,.14);
+  }
+  .adRouterBtn {
+    background: var(--brand1, #0077be);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 22px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s, transform .1s;
+    flex-shrink: 0;
+  }
+  .adRouterBtn:hover { background: #005f99; }
+  .adRouterBtn:active { transform: scale(.97); }
+  .adRouterResult {
+    margin-top: 12px;
+    font-size: 13px;
+    color: #555;
+    min-height: 18px;
+  }
+  @media (max-width: 600px) {
+    .adRouterInner { padding: 0 1.25rem; }
+    .adRouterField { min-width: 100%; }
+    .adRouterBtn { width: 100%; text-align: center; padding: 12px; }
+  }
+
+  /* Highlight pulse when router scrolls to a card */
+  @keyframes routerHighlight {
+    0%   { box-shadow: 0 0 0 0 rgba(0,119,190,0); outline: 3px solid transparent; }
+    20%  { box-shadow: 0 0 0 8px rgba(0,119,190,.25); outline: 3px solid var(--brand1,#0077be); }
+    100% { box-shadow: 0 0 0 0 rgba(0,119,190,0); outline: 3px solid transparent; }
+  }
+  .catalogCard--highlight {
+    animation: routerHighlight 2s ease-out forwards;
+    border-radius: 12px;
   }
 </style>
