@@ -194,7 +194,7 @@ export function getStaticPaths() {
         "Who it's for: local venues running ticketed shows, concert promoters launching on-sale periods, bars and restaurants promoting themed nights, and any event organizer who needs to generate urgency and drive attendance. If the success of your event depends on Daytona knowing about it before the week begins, this slot delivers that certainty. Your image, your date, your direct link — elevated with a pulsing Blueprint Blue border and a 'Trending' social-proof indicator that sets your card visually apart from everything below it.",
         "Why it works: three slots, 76k+ monthly impressions, zero competition within the editorial zone. The GoDo Picks section sits above the Daily Lineup, above the filters, above every other piece of content on the page. First position on the most-visited events page in Daytona. Slots routinely sell out mid-week — book before Thursday for the following week's cycle.",
       ],
-      mockupType: "display",
+      mockupType: "events-vip",
       startingAt: "$375",
       startingUnit: "per week",
     },
@@ -214,7 +214,7 @@ export function getStaticPaths() {
         "Who it's for: music festivals, community fundraisers, grand opening parties, recurring nightlife events running multi-week campaigns, and any organizer whose event deserves more visual real estate than a list item. The format works especially well when paired with strong event photography: your image renders at full width, and the 'High Impact' badge signals editorial priority to readers who are actively scanning for something worth attending.",
         "Why it works: full-width display in a content stream built for discovery, surrounded by standard-format events that make the contrast unmissable. On mobile, the card maintains its visual dominance over surrounding rows. On desktop with the sidebar active, it takes the entire main-column width — no competing ad slots, no shared real estate. Combine with an Event Spotlight in-feed unit at positions 3, 7, and 11 for full-funnel Events Hub coverage.",
       ],
-      mockupType: "display",
+      mockupType: "events-hi",
       startingAt: "$225",
       startingUnit: "per week",
     },
@@ -233,7 +233,7 @@ export function getStaticPaths() {
         "Who it's for: smaller recurring events, new venues building awareness, promoters with a single night to sell, and any business that wants Events Hub visibility without committing to the full-width High-Impact format. At $150 per week it's the most accessible entry point into the Events Hub advertising stack — and because it reaches readers who navigated specifically to find something to attend, the audience intent rivals placements that cost multiples more.",
         "Why it works: discovery-mode readers are the highest-value segment in local media. They didn't land here from a social share or a search for something specific — they opened the Events Hub because they want to go somewhere, and they haven't decided where yet. Your placement appears at the exact scroll depth where undecided readers are most open to a new suggestion. Stack multiple weeks for sustained pre-event momentum, or combine with GoDo VIP or High-Impact for full-funnel Events Hub coverage.",
       ],
-      mockupType: "display",
+      mockupType: "events-spotlight",
       startingAt: "$150",
       startingUnit: "per week",
     },
@@ -834,6 +834,88 @@ const { product } = Astro.props as { product: Product };
               </div>
             )}
 
+            {/* ══ GODO VIP HEADLINER — events-vip ══ */}
+            {product.mockupType === "events-vip" && (
+              <div class="ppPhoneShell">
+                <div class="ppPhoneNotch"></div>
+                <div class="ppPhoneScreen ppEvScreen">
+                  <div class="ppEvHeader">
+                    <div class="ppNLLogo ppNLLogo--sm" aria-hidden="true">G</div>
+                    <span class="ppEvHeaderTitle">Events Hub</span>
+                  </div>
+                  <div class="ppEvSectionLabel">⭐ GoDo Picks</div>
+                  <div class="ppPicksRow">
+                    <div class="ppPickCard ppPickCard--active">
+                      <div class="ppPickImg ppPickImg--active">
+                        <span class="ppPickBadge">★</span>
+                        <div class="ppAdBadge ppAdBadge--sm ppAdBadge--vip">YOUR EVENT</div>
+                        <span class="ppPickTrend">👁 Trending</span>
+                      </div>
+                    </div>
+                    <div class="ppPickCard ppPickCard--dim"><div class="ppPickImg"></div></div>
+                    <div class="ppPickCard ppPickCard--dim"><div class="ppPickImg"></div></div>
+                  </div>
+                  <div class="ppEvSectionLabel ppEvSectionLabel--sm">Daily Lineup</div>
+                  <div class="ppEvRow ppEvRow--faint"></div>
+                  <div class="ppEvRow ppEvRow--faint"></div>
+                </div>
+              </div>
+            )}
+
+            {/* ══ HIGH-IMPACT LISTING — events-hi ══ */}
+            {product.mockupType === "events-hi" && (
+              <div class="ppPhoneShell">
+                <div class="ppPhoneNotch"></div>
+                <div class="ppPhoneScreen ppEvScreen">
+                  <div class="ppEvHeader">
+                    <div class="ppNLLogo ppNLLogo--sm" aria-hidden="true">G</div>
+                    <span class="ppEvHeaderTitle">Daily Lineup</span>
+                  </div>
+                  <div class="ppEvRow ppEvRow--faint"></div>
+                  <div class="ppEvRow ppEvRow--faint"></div>
+                  <div class="ppAdZone ppAdZone--hiCard">
+                    <span class="ppSponsorTag">✦ HIGH-IMPACT SPONSOR</span>
+                    <div class="ppHiCardImg">
+                      <div class="ppAdBadge ppAdBadge--sm">YOUR EVENT HERE</div>
+                    </div>
+                    <div class="ppHiCardBody">
+                      <div class="ppSkel ppSkel--90 ppSkel--xs ppSkel--dark"></div>
+                      <div class="ppSkel ppSkel--70 ppSkel--xs" style="margin-top:3px"></div>
+                    </div>
+                  </div>
+                  <div class="ppEvRow ppEvRow--faint"></div>
+                  <div class="ppEvRow ppEvRow--faint"></div>
+                </div>
+              </div>
+            )}
+
+            {/* ══ EVENT SPOTLIGHT — events-spotlight ══ */}
+            {product.mockupType === "events-spotlight" && (
+              <div class="ppPhoneShell">
+                <div class="ppPhoneNotch"></div>
+                <div class="ppPhoneScreen ppEvScreen">
+                  <div class="ppEvHeader">
+                    <div class="ppNLLogo ppNLLogo--sm" aria-hidden="true">G</div>
+                    <span class="ppEvHeaderTitle">Daily Lineup</span>
+                  </div>
+                  <div class="ppEvRow ppEvRow--faint"></div>
+                  <div class="ppEvRow ppEvRow--faint"></div>
+                  <div class="ppAdZone ppAdZone--spotRow">
+                    <span class="ppSponsorTag">☉ EVENT SPOTLIGHT</span>
+                    <div class="ppSpotRowInner">
+                      <div class="ppEvThumb ppEvThumb--spot"></div>
+                      <div class="ppSpotRowText">
+                        <div class="ppAdBadge ppAdBadge--sm">YOUR EVENT</div>
+                        <div class="ppSkel ppSkel--80 ppSkel--xs" style="margin-top:4px"></div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="ppEvRow ppEvRow--faint"></div>
+                  <div class="ppEvRow ppEvRow--faint"></div>
+                </div>
+              </div>
+            )}
+
           </div>{/* /.ppMockupStage */}
 
           {/* ─── ANNOTATION CALLOUTS ─── */}
@@ -885,6 +967,24 @@ const { product } = Astro.props as { product: Product };
               <div class="ppAnnot ppAnnot--primary"><div class="ppAnnotDot ppAnnotDot--lg"></div><div><strong class="ppAnnotTitle">3 positions simultaneously</strong><p class="ppAnnotBody">Leaderboard above every article, sidebar alongside content, and in-feed between editorial blocks — all at once.</p></div></div>
               <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Run-of-site or category targeting</strong><p class="ppAnnotBody">Reach the full audience across all sections, or focus on Food & Drink, Real Estate, or Events.</p></div></div>
               <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Real-time impression reporting</strong><p class="ppAnnotBody">Live dashboard access so you can see exactly how your campaign performs — and adjust mid-flight.</p></div></div>
+            </>)}
+
+            {product.mockupType === "events-vip" && (<>
+              <div class="ppAnnot ppAnnot--primary"><div class="ppAnnotDot ppAnnotDot--lg"></div><div><strong class="ppAnnotTitle">GoDo Picks — absolute first position</strong><p class="ppAnnotBody">Your card is the first thing every Events Hub visitor sees, before any scrolling, before any other listing. Editorial endorsement, not an algorithm slot.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Pulsing Blueprint Blue border</strong><p class="ppAnnotBody">The animated glow border and "Trending" eye indicator visually separate your card from every standard listing below — unmissable even mid-scroll.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">3 slots only — sells out weekly</strong><p class="ppAnnotBody">One of just three curated GoDo Picks per week. Book by Thursday for the following week's cycle — slots don't last.</p></div></div>
+            </>)}
+
+            {product.mockupType === "events-hi" && (<>
+              <div class="ppAnnot ppAnnot--primary"><div class="ppAnnotDot ppAnnotDot--lg"></div><div><strong class="ppAnnotTitle">Full-width stacked card</strong><p class="ppAnnotBody">Breaks the standard 110px thumbnail grid entirely — your event spans the full content column at 16:9, commanding twice the visual real estate of any surrounding listing.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">High-Impact badge + priority signal</strong><p class="ppAnnotBody">The "High Impact" badge tells readers this is a featured event before they read a word. Strong visual hierarchy that makes everything else on the page recede.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Works on mobile and desktop</strong><p class="ppAnnotBody">On mobile it renders as a dominant horizontal card. On desktop with the sidebar active it takes the full main-column width — no shared real estate.</p></div></div>
+            </>)}
+
+            {product.mockupType === "events-spotlight" && (<>
+              <div class="ppAnnot ppAnnot--primary"><div class="ppAnnotDot ppAnnotDot--lg"></div><div><strong class="ppAnnotTitle">Injected at positions 3, 7 &amp; 11</strong><p class="ppAnnotBody">Placed at the natural scroll pauses in the Daily Lineup — where readers stop, evaluate, and decide whether to click. Discovery-mode intent at maximum.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">Native editorial format</strong><p class="ppAnnotBody">Matches the visual spec of organic listings exactly. The "Sponsored" label meets transparency standards while the format reads as a trusted local recommendation.</p></div></div>
+              <div class="ppAnnot"><div class="ppAnnotDot"></div><div><strong class="ppAnnotTitle">76k+ monthly readers, intent audience</strong><p class="ppAnnotBody">These readers came here specifically to find something to attend — a fundamentally higher-intent posture than a social impression or display click.</p></div></div>
             </>)}
 
           </div>{/* /.ppAnnotGroup */}
@@ -1807,6 +1907,108 @@ const { product } = Astro.props as { product: Product };
   .ppDeskLeaderImg    { height: 26px; }
   .ppDeskInFeedImg    { height: 20px; }
   .ppDeskSidebarImg   { height: 80px; }
+
+  /* ── Events Hub mockup elements ── */
+  .ppEvScreen { gap: 6px; padding: 8px; }
+  .ppEvHeader {
+    display: flex; align-items: center; gap: 6px;
+    padding-bottom: 4px; border-bottom: 1px solid #eee;
+  }
+  .ppEvHeaderTitle { font-size: 9px; font-weight: 800; color: #222; }
+  .ppEvSectionLabel {
+    font-size: 7.5px; font-weight: 900; letter-spacing: .1em;
+    text-transform: uppercase; color: var(--brand1, #0077be);
+  }
+  .ppEvSectionLabel--sm { margin-top: 2px; opacity: .7; }
+
+  /* GoDo Picks row */
+  .ppPicksRow { display: flex; gap: 5px; }
+  .ppPickCard {
+    flex: 1; border-radius: 8px; overflow: hidden;
+    border: 1.5px solid #e5e7eb;
+  }
+  .ppPickCard--active {
+    border-color: var(--brand1, #0077be);
+    animation: ppVipPulse 2.8s ease-in-out infinite;
+    box-shadow: 0 0 0 2px rgba(0,119,190,.15);
+  }
+  .ppPickCard--dim { opacity: .45; }
+  .ppPickImg {
+    position: relative; height: 54px;
+    background: linear-gradient(160deg, #c8dff0 0%, #a0c4df 100%);
+    display: flex; flex-direction: column;
+    align-items: flex-start; justify-content: flex-end;
+    padding: 3px;
+  }
+  .ppPickImg--active {
+    background: linear-gradient(160deg, #1a5f8a 0%, #0d3d5c 100%);
+  }
+  .ppPickBadge {
+    position: absolute; top: 3px; left: 3px;
+    font-size: 7px; background: var(--brand1, #0077be);
+    color: #fff; padding: 1px 4px; border-radius: 999px;
+  }
+  .ppPickTrend {
+    font-size: 6.5px; font-weight: 800; color: #fff;
+    background: rgba(0,0,0,.55); padding: 2px 4px;
+    border-radius: 4px 0 4px 0; position: absolute;
+    bottom: 0; right: 0;
+  }
+  .ppAdBadge--vip {
+    background: var(--brand1, #0077be); color: #fff;
+    font-size: 6px; padding: 2px 5px;
+    position: absolute; bottom: 0; left: 0;
+    border-radius: 0 4px 0 0;
+  }
+  @keyframes ppVipPulse {
+    0%, 100% { border-color: rgba(0,119,190,.35); }
+    50%       { border-color: var(--brand1, #0077be); box-shadow: 0 0 0 3px rgba(0,119,190,.18); }
+  }
+
+  /* Standard event row skeleton */
+  .ppEvRow {
+    height: 28px; border-radius: 6px;
+    background: #f3f4f6;
+    display: flex; align-items: center;
+    gap: 6px; padding: 0 6px;
+  }
+  .ppEvRow::before {
+    content: ''; width: 20px; height: 20px;
+    border-radius: 4px; background: #dde1e7; flex-shrink: 0;
+  }
+  .ppEvRow::after {
+    content: ''; flex: 1; height: 7px;
+    border-radius: 3px; background: #dde1e7;
+  }
+  .ppEvRow--faint { opacity: .55; }
+
+  /* High-Impact full-width card */
+  .ppAdZone--hiCard {
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 40%, transparent);
+    border-radius: 8px; overflow: hidden; padding: 0;
+    background: color-mix(in srgb, var(--brand1, #0077be) 5%, #fff);
+  }
+  .ppAdZone--hiCard .ppSponsorTag { margin: 5px 6px 3px; display: block; }
+  .ppHiCardImg {
+    width: 100%; height: 36px;
+    background: linear-gradient(135deg, #1a5f8a 0%, #0a3550 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ppHiCardBody { padding: 5px 6px 6px; }
+
+  /* Event Spotlight native row */
+  .ppAdZone--spotRow {
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 30%, transparent);
+    border-radius: 6px; padding: 5px 6px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 4%, #fff);
+  }
+  .ppAdZone--spotRow .ppSponsorTag { display: block; margin-bottom: 4px; }
+  .ppSpotRowInner { display: flex; gap: 6px; align-items: center; }
+  .ppEvThumb--spot {
+    width: 28px; height: 22px; border-radius: 4px; flex-shrink: 0;
+    background: linear-gradient(135deg, #2a7aaa 0%, #155a8a 100%);
+  }
+  .ppSpotRowText { flex: 1; min-width: 0; }
 </style>
 
 <script>
