@@ -35,8 +35,8 @@ const sections = SECTIONS
 <Base title="Guides — GoDo Daytona" cityBase="daytona">
   <div class="gd-page">
 
-    <!-- Breadcrumb -->
-    <div class="gd-breadcrumb">
+    <!-- Breadcrumb hidden for hero-flush layout -->
+    <div class="gd-breadcrumb" style="display:none" aria-hidden="true">
       <a href="/daytona/">GoDo Daytona</a>
       <span aria-hidden="true">›</span>
       <span>Guides</span>
@@ -205,6 +205,8 @@ const sections = SECTIONS
     background-position: center 35% !important;
     background-repeat: no-repeat !important;
     border-bottom: 3px solid #0055a4;
+    margin-top: 0 !important;
+    padding-top: 0 !important;
     padding: 52px 2rem 40px;
     overflow: hidden;
   }
