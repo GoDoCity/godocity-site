@@ -221,8 +221,6 @@ const sections = SECTIONS
     text-align: center;
   }
   .gd-header-title {
-    color: #0a2b5e !important;
-    -webkit-text-fill-color: #0a2b5e !important;
     font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
     font-size: clamp(2.8rem, 6vw, 5rem);
     font-weight: 800 !important;
@@ -232,15 +230,18 @@ const sections = SECTIONS
     line-height: 1;
     display: inline-block !important;
     background: transparent !important;
-    padding: 10px 28px !important;
     border: 2px solid #ffffff !important;
     border-radius: 6px;
+    padding: 10px 28px !important;
+    box-shadow: none;
+    background: linear-gradient(180deg, #0055a5 0%, #0a2b5e 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
     text-shadow:
       -1px -1px 0 #ffffff,
        1px -1px 0 #ffffff,
       -1px  1px 0 #ffffff,
        1px  1px 0 #ffffff !important;
-    box-shadow: none;
   }
   .gd-header-sub {
     color: #ffffff !important;
