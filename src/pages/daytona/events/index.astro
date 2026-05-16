@@ -889,18 +889,23 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     margin: 0 0 14px;
   }
   .evHeroAccent {
-    color: var(--brand1, #0077be);
-    display: inline-block;
-    font-size: clamp(37px, 5.75vw, 62px);
+    color: var(--brand1, #0077be) !important;
+    display: inline-block !important;
+    font-size: clamp(37px, 5.75vw, 62px) !important;
     font-weight: 900;
-    letter-spacing: 2px;
-    text-transform: uppercase;
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
     line-height: 1.08;
-    padding: 10px 28px;
-    background: transparent !important;
-    border: 2px solid rgba(255,255,255,0.9) !important;
+    padding: 10px 28px !important;
+    background: #ffffff !important;
+    border: 2px solid #ffffff !important;
     border-radius: 6px;
-    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+    text-shadow:
+      -1px -1px 0 #fff,
+       1px -1px 0 #fff,
+      -1px  1px 0 #fff,
+       1px  1px 0 #fff,
+       0px  2px 4px rgba(0, 0, 0, 0.4) !important;
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
     .evHeroSub {
