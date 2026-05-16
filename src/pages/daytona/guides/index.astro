@@ -209,16 +209,9 @@ const sections = SECTIONS
     overflow: hidden;
   }
   .gd-header::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      180deg,
-      rgba(0, 0, 0, 0.15) 0%,
-      rgba(0, 0, 0, 0.35) 100%
-    ) !important;
-    z-index: 1;
-    pointer-events: none;
+    display: none !important;
+    background: transparent !important;
+    content: none !important;
   }
   .gd-header-inner {
     position: relative;
@@ -228,8 +221,8 @@ const sections = SECTIONS
     text-align: center;
   }
   .gd-header-title {
-    color: #007acc !important;
-    -webkit-text-fill-color: #007acc !important;
+    color: #0077be !important;
+    -webkit-text-fill-color: #0077be !important;
     font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
     font-size: clamp(2.8rem, 6vw, 5rem);
     font-weight: 800 !important;
@@ -255,7 +248,7 @@ const sections = SECTIONS
     font-size: clamp(1.1rem, 2vw, 1.35rem) !important;
     letter-spacing: 0.5px !important;
     margin: 14px 0 28px;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6) !important;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5) !important;
   }
   .gd-header-nav {
     display: flex;
