@@ -222,6 +222,7 @@ const sections = SECTIONS
   }
   .gd-header-inner {
     position: relative;
+    z-index: 2;
     max-width: 1200px;
     margin: 0 auto;
     text-align: center;
@@ -587,7 +588,7 @@ const sections = SECTIONS
   ───────────────────────────────────────────── */
   @media (max-width: 640px) {
     .gd-header { padding: 36px 1rem 28px; }
-    .gd-header-sub { display: none; }
+    .gd-header-sub { display: block; font-size: 0.95rem !important; }
     .gd-topic-bar { padding: 16px 1rem; }
     .gd-section-body { padding: 28px 1rem 40px; }
     .gd-breadcrumb { padding: 12px 1rem; }
