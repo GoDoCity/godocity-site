@@ -195,11 +195,28 @@ const sections = SECTIONS
      Page header
   ───────────────────────────────────────────── */
   .gd-header {
-    background: linear-gradient(160deg, #0A2B5E 0%, #0077be 100%);
-    padding: 52px 2rem 40px;
+    position: relative;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    background-color: #060810;
+    background-image: url('/images/daytona-guide-hero.png') !important;
+    background-size: cover !important;
+    background-position: center 35% !important;
+    background-repeat: no-repeat !important;
     border-bottom: 3px solid #0055a4;
+    padding: 52px 2rem 40px;
+    overflow: hidden;
+  }
+  .gd-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(160deg, rgba(10,43,94,0.55) 0%, rgba(0,119,190,0.40) 100%);
+    pointer-events: none;
   }
   .gd-header-inner {
+    position: relative;
     max-width: 1200px;
     margin: 0 auto;
     text-align: center;
@@ -210,16 +227,29 @@ const sections = SECTIONS
     font-weight: 900;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #fff;
+    color: var(--brand1, #0077be);
     margin: 0 0 10px;
     line-height: 1;
+    display: inline-block;
+    background: #ffffff !important;
+    padding: 10px 32px !important;
+    border: 2px solid #ffffff !important;
+    border-radius: 6px;
+    text-shadow:
+      -1px -1px 0 #ffffff,
+       1px -1px 0 #ffffff,
+      -1px  1px 0 #ffffff,
+       1px  1px 0 #ffffff,
+       0px  2px 4px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
   .gd-header-sub {
     font-size: 1rem;
-    color: rgba(255,255,255,0.55);
-    margin: 0 0 28px;
-    font-weight: 400;
+    color: rgba(255,255,255,0.85);
+    margin: 14px 0 28px;
+    font-weight: 500;
     letter-spacing: 0.01em;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
   .gd-header-nav {
     display: flex;
