@@ -1,6 +1,6 @@
 ---
 name: Charles D. King
-photo: /images/CDK photo.png
+photo: /images/cdk photo 2.png
 role: Newsletter Editor
 featured: true
 ---
