@@ -225,14 +225,14 @@ const sections = SECTIONS
     font-family: "Montserrat", "Century Gothic", AppleGothic, Arial, sans-serif;
     font-size: clamp(2.8rem, 6vw, 5rem);
     font-weight: 900;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--brand1, #0077be);
+    letter-spacing: 2px !important;
+    text-transform: uppercase !important;
+    color: var(--brand1, #0077be) !important;
     margin: 0 0 10px;
     line-height: 1;
-    display: inline-block;
-    background: #ffffff !important;
-    padding: 10px 32px !important;
+    display: inline-block !important;
+    background: transparent !important;
+    padding: 10px 28px !important;
     border: 2px solid #ffffff !important;
     border-radius: 6px;
     text-shadow:
@@ -240,7 +240,7 @@ const sections = SECTIONS
        1px -1px 0 #ffffff,
       -1px  1px 0 #ffffff,
        1px  1px 0 #ffffff,
-       0px  2px 4px rgba(0, 0, 0, 0.35);
+       0px  2px 4px rgba(0, 0, 0, 0.4) !important;
     box-shadow: 0 4px 20px rgba(0,0,0,0.3);
   }
   .gd-header-sub {
