@@ -8,6 +8,8 @@ export interface MapLocation {
   url?: string;
   articleHref?: string;
   articleTitle?: string;
+  isAdvertiser?: boolean;       // true → premium branded pin
+  advertiserIcon?: string;      // optional logo URL; falls back to star badge
 }
 
 export interface Props {
@@ -109,14 +111,39 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
       var latlng = [pin.lat, pin.lng];
       bounds.push(latlng);
 
-      /* ── Numbered yellow pin ── */
-      var numberedPin = window.L.divIcon({
-        className: '',
-        html: '<div class="imap-pin" aria-label="Location ' + pin.num + '">' + pin.num + '</div>',
-        iconSize:    [30, 30],
-        iconAnchor:  [15, 15],
-        popupAnchor: [0, -18],
-      });
+      /* ── Pin icon: advertiser (branded) or standard numbered ── */
+      var pinIcon;
+      if (pin.isAdvertiser) {
+        /* Option A: logo thumbnail in a premium ring
+           Option B: star badge fallback when no logo is provided */
+        var innerHtml = pin.advertiserIcon
+          ? '<img src="' + pin.advertiserIcon + '" class="imap-adv-logo"'
+            + ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"'
+            + ' alt="' + pin.label + '" />'
+            + '<span class="imap-adv-star" style="display:none">★</span>'
+          : '<span class="imap-adv-star">★</span>';
+
+        pinIcon = window.L.divIcon({
+          className: '',
+          html: '<div class="imap-pin imap-pin--adv" aria-label="Featured: ' + pin.label + '">'
+              + '<div class="imap-adv-pulse"></div>'
+              + '<div class="imap-adv-ring">' + innerHtml + '</div>'
+              + '</div>',
+          iconSize:    [44, 44],
+          iconAnchor:  [22, 22],
+          popupAnchor: [0, -26],
+        });
+      } else {
+        /* Standard numbered yellow pin */
+        pinIcon = window.L.divIcon({
+          className: '',
+          html: '<div class="imap-pin" aria-label="Location ' + pin.num + '">' + pin.num + '</div>',
+          iconSize:    [30, 30],
+          iconAnchor:  [15, 15],
+          popupAnchor: [0, -18],
+        });
+      }
+      var numberedPin = pinIcon;
 
       /* ── Popup content ── */
       var popup = '';
@@ -231,6 +258,74 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
 
   :global(.leaflet-marker-icon:hover .imap-pin) {
     transform: scale(1.2);
+  }
+
+  /* ── Advertiser premium pin ── */
+  :global(.imap-pin--adv) {
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    line-height: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Radar pulse ring */
+  @keyframes imapRadar {
+    0%   { transform: scale(1);   opacity: 0.7; }
+    70%  { transform: scale(2.2); opacity: 0;   }
+    100% { transform: scale(2.2); opacity: 0;   }
+  }
+  :global(.imap-adv-pulse) {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(0, 119, 190, 0.35);
+    animation: imapRadar 2.2s ease-out infinite;
+    pointer-events: none;
+  }
+
+  /* Outer branded ring */
+  :global(.imap-adv-ring) {
+    position: relative;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 3px solid #0077be;
+    background: #fff;
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 120ms ease;
+  }
+  :global(.leaflet-marker-icon:hover .imap-adv-ring) {
+    transform: scale(1.15);
+  }
+
+  /* Option A — logo thumbnail */
+  :global(.imap-adv-logo) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+  }
+
+  /* Option B — star badge fallback */
+  :global(.imap-adv-star) {
+    font-size: 20px;
+    line-height: 1;
+    color: #0077be;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   /* ── Leaflet chrome ── */
