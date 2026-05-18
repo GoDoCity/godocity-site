@@ -9,7 +9,7 @@ import Base from "../layouts/Base.astro";
         <h1 style="margin:10px 0 8px;font-size:34px">Advertise with GoDoCity</h1>
         <p class="lede">
           This is the placeholder page for your media kit, sponsorships, and newsletter placements.
-          When you’re ready, we’ll add ad packages by city and a lead form.
+          When you're ready, we'll add ad packages by city and a lead form.
         </p>
         <div class="tagrow">
           <a class="tag" href="https://daytona.godocity.com/">GoDoDaytona</a>
@@ -18,4 +18,186 @@ import Base from "../layouts/Base.astro";
       </div>
     </div>
   </section>
+
+  <!-- ═══════════════════════════════════════════
+       INTERACTIVE MAP PIN FEATURE SECTION
+  ═══════════════════════════════════════════ -->
+  <section class="ad-feature-section">
+    <div class="ad-feature-container">
+
+      <div class="ad-feature-text">
+        <span class="badge">New Feature</span>
+        <h2>Interactive Map Placement &amp; Branded Pins</h2>
+        <p>
+          Maximize your local footprint where users are actively exploring. Every premium sponsorship
+          package instantly places your business directly onto the interactive city map with an
+          exclusive, high-visibility animated marker.
+        </p>
+        <ul class="feature-bullets">
+          <li><strong>Continuous Visibility:</strong> Your business stands out 24/7 on our regional event and guide maps.</li>
+          <li><strong>Eye-Catching Motion:</strong> Premium markers feature a pulsing radar animation that draws the eye naturally during map scans.</li>
+          <li><strong>Custom Brand Tailoring:</strong> Upgrade to feature your exact corporate logo or custom thumbnail floating inside our high-contrast brand frame.</li>
+        </ul>
+        <a href="/daytona/advertise/" class="ad-feature-cta">View Daytona Media Kit →</a>
+      </div>
+
+      <div class="ad-feature-diagram-box">
+        <div class="map-mockup-bg">
+          <div class="sample-advertiser-pin">
+            <div class="pulse-ring"></div>
+            <div class="pin-core-logo">
+              <span class="mock-star">★</span>
+            </div>
+          </div>
+        </div>
+        <span class="diagram-caption">Live Interactive Map Pin Preview</span>
+      </div>
+
+    </div>
+  </section>
 </Base>
+
+<style>
+  /* ─── Feature section ─────────────────────────────────────── */
+  .ad-feature-section {
+    padding: 60px 20px;
+    background: #ffffff;
+    border-top: 1px solid #e5e7eb;
+  }
+  .ad-feature-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+  @media (max-width: 768px) {
+    .ad-feature-container { grid-template-columns: 1fr; }
+  }
+
+  /* ─── Text side ───────────────────────────────────────────── */
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #0a2b5e;
+    background: rgba(10,43,94,.08);
+    border: 1px solid rgba(10,43,94,.2);
+    border-radius: 999px;
+    padding: 3px 10px;
+    margin-bottom: 14px;
+  }
+  .ad-feature-text h2 {
+    font-size: clamp(22px, 3vw, 34px);
+    font-weight: 800;
+    color: #0a0f1e;
+    letter-spacing: -.5px;
+    margin: 0 0 14px;
+    line-height: 1.15;
+  }
+  .ad-feature-text p {
+    font-size: 16px;
+    color: #444;
+    line-height: 1.7;
+    margin: 0 0 20px;
+  }
+  .feature-bullets {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 28px;
+  }
+  .feature-bullets li {
+    margin-bottom: 12px;
+    position: relative;
+    padding-left: 24px;
+    font-size: 15px;
+    color: #444;
+    line-height: 1.6;
+  }
+  .feature-bullets li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #0a2b5e;
+    font-weight: 800;
+  }
+  .ad-feature-cta {
+    display: inline-block;
+    background: #0a2b5e;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background .15s;
+  }
+  .ad-feature-cta:hover { background: #0055a5; }
+
+  /* ─── Diagram box ─────────────────────────────────────────── */
+  .ad-feature-diagram-box {
+    background: #f4f6f9;
+    border: 1px solid #e1e6eb;
+    border-radius: 12px;
+    padding: 40px;
+    text-align: center;
+  }
+  .map-mockup-bg {
+    height: 200px;
+    background-color: #e5e9f0;
+    background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
+    background-size: 16px 16px;
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .sample-advertiser-pin {
+    position: relative;
+    width: 44px;
+    height: 44px;
+  }
+  .pin-core-logo {
+    position: relative;
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    background: #ffffff;
+    border: 3px solid #0a2b5e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .mock-star {
+    color: #0a2b5e;
+    font-size: 20px;
+  }
+  .pulse-ring {
+    position: absolute;
+    z-index: 1;
+    top: 0; left: 0;
+    width: 44px;
+    height: 44px;
+    border: 3px solid #0055a5;
+    border-radius: 50%;
+    animation: mockRadar 2.2s ease-out infinite;
+  }
+  @keyframes mockRadar {
+    0%   { transform: scale(1);   opacity: 0.6; }
+    100% { transform: scale(2.2); opacity: 0;   }
+  }
+  .diagram-caption {
+    display: block;
+    margin-top: 15px;
+    font-size: 0.85rem;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+</style>
