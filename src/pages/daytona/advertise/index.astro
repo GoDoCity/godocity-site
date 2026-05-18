@@ -919,6 +919,40 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
           </div>
         </div>
 
+        <!-- ── Interactive Map Pin Feature ─────────────────────── -->
+        <div class="adMapFeature">
+          <div class="adMapFeatureInner">
+
+            <div class="adMapFeatureText">
+              <span class="adMapBadge">New Feature</span>
+              <h3 class="adMapTitle">Interactive Map Placement &amp; Branded Pins</h3>
+              <p class="adMapDesc">
+                Maximize your local footprint where users are actively exploring. Every premium
+                sponsorship package instantly places your business directly onto the interactive
+                city map with an exclusive, high-visibility animated marker.
+              </p>
+              <ul class="adMapBullets">
+                <li><strong>Continuous Visibility:</strong> Your business stands out 24/7 on our regional event and guide maps.</li>
+                <li><strong>Eye-Catching Motion:</strong> Premium markers feature a pulsing radar animation that draws the eye naturally during map scans.</li>
+                <li><strong>Custom Brand Tailoring:</strong> Upgrade to feature your exact corporate logo or custom thumbnail floating inside our high-contrast brand frame.</li>
+              </ul>
+            </div>
+
+            <div class="adMapDiagram">
+              <div class="adMapMockBg">
+                <div class="adMapPin">
+                  <div class="adMapPulse"></div>
+                  <div class="adMapPinCore">
+                    <span class="adMapStar">★</span>
+                  </div>
+                </div>
+              </div>
+              <span class="adMapCaption">Live Interactive Map Pin Preview</span>
+            </div>
+
+          </div>
+        </div>
+
         <div class="productCatalogGroup">
           <h3 class="catalogGroupLabel">Social &amp; Display</h3>
           <div class="productCatalogGrid">
@@ -2381,5 +2415,133 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
     .adBundleCta { grid-column: 1; grid-row: auto; }
     .adBundleCards { min-width: 0; }
     .adBundleCta { width: 100%; text-align: center; display: block; padding: 14px; }
+  }
+
+  /* ─── Interactive Map Pin Feature ──────────────────────────── */
+  .adMapFeature {
+    background: #f4f6f9;
+    border: 1px solid #e1e6eb;
+    border-radius: 14px;
+    padding: 48px 40px;
+    margin-bottom: 48px;
+  }
+  .adMapFeatureInner {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 40px;
+    align-items: center;
+  }
+  @media (max-width: 768px) {
+    .adMapFeatureInner { grid-template-columns: 1fr; }
+    .adMapFeature { padding: 32px 20px; }
+  }
+  .adMapBadge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #0a2b5e;
+    background: rgba(10,43,94,.08);
+    border: 1px solid rgba(10,43,94,.2);
+    border-radius: 999px;
+    padding: 3px 10px;
+    margin-bottom: 14px;
+  }
+  .adMapTitle {
+    font-size: clamp(20px, 2.5vw, 28px);
+    font-weight: 800;
+    color: #0a0f1e;
+    letter-spacing: -.3px;
+    margin: 0 0 12px;
+    line-height: 1.2;
+  }
+  .adMapDesc {
+    font-size: 15px;
+    color: #444;
+    line-height: 1.7;
+    margin: 0 0 18px;
+  }
+  .adMapBullets {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .adMapBullets li {
+    position: relative;
+    padding-left: 22px;
+    font-size: 14px;
+    color: #444;
+    line-height: 1.6;
+  }
+  .adMapBullets li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    font-weight: 800;
+    color: #0a2b5e;
+  }
+  .adMapDiagram {
+    text-align: center;
+  }
+  .adMapMockBg {
+    height: 180px;
+    background-color: #e5e9f0;
+    background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
+    background-size: 16px 16px;
+    border-radius: 10px;
+    border: 1px solid #d0d8e4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .adMapPin {
+    position: relative;
+    width: 44px;
+    height: 44px;
+  }
+  .adMapPinCore {
+    position: relative;
+    z-index: 2;
+    width: 44px;
+    height: 44px;
+    background: #ffffff;
+    border: 3px solid #0a2b5e;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+  }
+  .adMapStar {
+    color: #0a2b5e;
+    font-size: 20px;
+    line-height: 1;
+  }
+  .adMapPulse {
+    position: absolute;
+    z-index: 1;
+    top: 0; left: 0;
+    width: 44px;
+    height: 44px;
+    border: 3px solid #0055a5;
+    border-radius: 50%;
+    animation: adMapRadar 2.2s ease-out infinite;
+  }
+  @keyframes adMapRadar {
+    0%   { transform: scale(1);   opacity: 0.6; }
+    100% { transform: scale(2.2); opacity: 0;   }
+  }
+  .adMapCaption {
+    display: block;
+    margin-top: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .08em;
   }
 </style>
