@@ -3,7 +3,7 @@ title: Navigating the Coastal Critter Life
 topic: LOCAL
 featured: false
 showToC: true
-image: /images/Local Pets.png
+image: /images/Local Pets 2.png
 description: Let’s face it, living on our stretch of the Atlantic is paradise, but keeping your furry co-pilots legal, healthy, and safe requires an exact local playbook. Whether you are walking the shaded grids of Ormond Beach, living beachside in Daytona Beach Shores, or cooling off in New Smyrna Beach, navigating coastal pet care requires knowing exactly where to go when the unexpected happens.
 date: 2026-05-19T18:15:00
 author: Jax Sterling
@@ -26,7 +26,6 @@ While standard sections of Volusia County public beaches remain off-limits to pe
 - **Stray & Nuisance Reports:** If you spot a lost pet or need to report a stray animal issue across any of our coastal cities, bypass 911 and dial the Volusia County Animal Clinic Click to open side panel for more information dispatch hub directly at **(386) 248-1777**.
 - **Shelter Operations:** Lost pets found wandering the coastal strip are securely routed to the Halifax Humane Society Click to open side panel for more information main facility, situated right off the highway at _2364 LPGA Blvd, Daytona Beach, FL 32124_ | **(386) 274-4703**.
 - **After-Hours Vet Emergencies:** When a medical crisis hits in the middle of the night, skip the standard clinic wait times and head straight to our area’s dedicated 24/7 emergency assets: the Veterinary Emergency Center Click to open side panel for more information in South Daytona or the Animal Emergency Hospital Volusia Click to open side panel for more information in Ormond Beach.
-
 - Volusia County Animal Services | 1250 Indian Lake Rd, Daytona Beach, FL 32124 | (386) 248-1777
 - Halifax Humane Society (Main Hub) | 2364 LPGA Blvd, Daytona Beach, FL 32124 | (386) 274-4703
 - Vet Emergency Center East Volusia | 2300 S Ridgewood Ave, South Daytona, FL 32119 | (386) 761-1911
