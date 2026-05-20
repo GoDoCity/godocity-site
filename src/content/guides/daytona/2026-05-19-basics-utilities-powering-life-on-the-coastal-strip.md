@@ -48,16 +48,10 @@ If you are moving from out of state or purchasing a primary home, you must solid
 - **Driver's Licenses & Vehicle Tags:** Managed by the **Volusia County Revenue Collector**. The main coastal office is located at _250 N Beach St, Daytona Beach, FL 32114_ | **(386) 254-4610**. You must update your address within 30 days of moving.
 - **Homestead Exemption:** If you own your home as a primary residence, file for your homestead property tax exemption through the **Volusia County Property Appraiser** before March 1st to significantly lower your local tax liability.
 - 
+- **Utilities and VC Tax Collector**
 - **FPL** (Regional Power), Online Account Portal \* Hub Dispatch \* **(800) 468-8243**
 - **TECO** Peoples Gas, Regional Service Hub Dispatch \* **(877) 832-6247**
 - **Volusia Tax Collector**, 250 N Beach St, Daytona Beach, FL 32114 \* **(386) 254-4610**
-- **City of Daytona Beach**, 301 S Ridgewood Ave, Daytona, 32114 \* **(386) 671-8100**
-- **City of Ormond Beach**, 22 S Beach St, Ormond Beach, FL 32174 \* **(386) 610-0450**
-- **City of Port Orange**, 1000 City Center Cir, Port Orange, FL 32129 \* **(386) 506-5720**
-- **Daytona Beach Shores**, 2990 S Atlantic Ave, DB Shores, FL 32118 \* **(386) 763-5326**
-- **New Smyrna Beach**, 210 Sams Ave, New Smyrna Beach, FL 32168 \* **(386) 427-1361**
-- **South Daytona**, 1672 S Ridgewood Ave, South Daytona, 32119 \* **(386) 322-3002**
-- **Holly Hill Utilities**, 1065 Ridgewood Ave, Holly Hill, FL 32117 \* **(386) 248-9432**
-- **Ponce Inlet Utilities**, 4300 S Atlantic Ave, Ponce Inlet, FL 32127 \* **(386) 236-2150**
+- 
 
 > **Local Insight: The Irrigation Restriction Radar** To preserve our local aquifer, East Volusia maintains strict, mandatory lawn watering restrictions enforced by municipal code rangers across every city. During Daylight Saving Time, odd-numbered residential addresses may water only on Wednesdays and Saturdays, while even-numbered addresses are restricted to Thursdays and Sundays. Never run your automated systems between 10:00 a.m. and 4:00 p.m., or you're looking at a swift city compliance warning on your front door.
