@@ -45,8 +45,9 @@ const { Content } = await entry.render();
 
 const journalistNorm = normName(data.name);
 
-const allPosts = await getCollection("posts");
-const allDiy   = await getCollection("diy");
+const allPosts  = await getCollection("posts");
+const allDiy    = await getCollection("diy");
+const allGuides = await getCollection("guides");
 
 const daytonaPosts = allPosts.filter(p => {
   const city = String(p?.data?.city ?? "daytona").toLowerCase().trim();
@@ -61,6 +62,15 @@ const matchedPosts = daytonaPosts.filter(p => {
 
 const matchedDiy = allDiy.filter(e => {
   const articleAuthor = typeof e.data.author === "string" ? e.data.author : "";
+  const authorNorm    = normName(articleAuthor);
+  return authorNorm === journalistNorm || authorNorm.includes(journalistNorm) || journalistNorm.includes(authorNorm);
+});
+
+const daytona_guides = allGuides.filter(g =>
+  typeof g.id === "string" && g.id.startsWith("daytona/")
+);
+const matchedGuides = daytona_guides.filter(g => {
+  const articleAuthor = typeof g.data.author === "string" ? g.data.author : "";
   const authorNorm    = normName(articleAuthor);
   return authorNorm === journalistNorm || authorNorm.includes(journalistNorm) || journalistNorm.includes(authorNorm);
 });
@@ -97,6 +107,19 @@ const articles: ArticleItem[] = [
     date:   formatDate(e.data.pubDate),
     kicker: e.data.topic ? `DIY — ${e.data.topic}` : "DIY",
   })),
+  ...matchedGuides.map(g => {
+    const guideSlug = g.slug.split("/").pop() ?? g.slug;
+    const topic     = typeof g.data.topic    === "string" ? g.data.topic.trim() : "";
+    const subtopic  = typeof g.data.subtopic === "string" ? g.data.subtopic.trim() : "";
+    return {
+      href:   `/daytona/guides/${guideSlug}/`,
+      title:  g.data.title ?? g.slug,
+      img:    typeof g.data.image === "string" ? g.data.image : "",
+      desc:   typeof g.data.description === "string" ? g.data.description.slice(0, 160) : "",
+      date:   formatDate(g.data.date),
+      kicker: topic ? (subtopic ? `${topic} — ${subtopic}` : topic) : "Guide",
+    };
+  }),
 ].sort((a, b) => (b.date > a.date ? 1 : b.date < a.date ? -1 : 0));
 ---
 
