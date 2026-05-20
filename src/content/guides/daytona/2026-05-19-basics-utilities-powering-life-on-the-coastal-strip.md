@@ -5,7 +5,6 @@ featured: false
 showToC: true
 image: /images/Basics for Daytona.png
 description: |-
-  Basics & Utilities: Powering Life on the Coastal Strip
   Let’s face it, moving to or relocating across the East Volusia coastal ribbon is the ultimate lifestyle upgrade, but setting up a household requires navigating a complex grid of local utilities and county infrastructure. From the beachside dunes of Ormond-by-the-Sea down to the pristine shores of Ponce Inlet, setting up your power, fiber internet, gas, and property records shouldn't feel like a guessing game.
 
   Because our region is divided into individual city footprints, your utility provider depends entirely on your exact street address. Here is the definitive local playbook to get your home operational.
