@@ -56,13 +56,15 @@ const daytonaPosts = allPosts.filter(p => {
 
 const matchedPosts = daytonaPosts.filter(p => {
   const articleAuthor = typeof p.data.author === "string" ? p.data.author : "";
-  const authorNorm    = normName(articleAuthor);
+  if (articleAuthor === data.name) return true;
+  const authorNorm = normName(articleAuthor);
   return authorNorm === journalistNorm || authorNorm.includes(journalistNorm) || journalistNorm.includes(authorNorm);
 });
 
 const matchedDiy = allDiy.filter(e => {
   const articleAuthor = typeof e.data.author === "string" ? e.data.author : "";
-  const authorNorm    = normName(articleAuthor);
+  if (articleAuthor === data.name) return true;
+  const authorNorm = normName(articleAuthor);
   return authorNorm === journalistNorm || authorNorm.includes(journalistNorm) || journalistNorm.includes(authorNorm);
 });
 
@@ -71,7 +73,8 @@ const daytona_guides = allGuides.filter(g =>
 );
 const matchedGuides = daytona_guides.filter(g => {
   const articleAuthor = typeof g.data.author === "string" ? g.data.author : "";
-  const authorNorm    = normName(articleAuthor);
+  if (articleAuthor === data.name) return true;
+  const authorNorm = normName(articleAuthor);
   return authorNorm === journalistNorm || authorNorm.includes(journalistNorm) || journalistNorm.includes(authorNorm);
 });
 
