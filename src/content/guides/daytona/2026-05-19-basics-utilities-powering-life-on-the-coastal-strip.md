@@ -1,5 +1,5 @@
 ---
-title: 'Basics & Utilities: Powering Life on the Coastal Strip'
+title: Powering Life on the Coastal Strip
 topic: LOCAL
 featured: false
 showToC: true
