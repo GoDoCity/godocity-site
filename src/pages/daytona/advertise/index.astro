@@ -2485,10 +2485,16 @@ import LegalDisclaimer from "../../../components/LegalDisclaimer.astro";
     color: #0a2b5e;
   }
   .adMapDiagram {
+    display: block !important;
     text-align: center;
+    min-height: 220px;
+  }
+  @media (max-width: 768px) {
+    .adMapDiagram { min-height: 200px; }
   }
   .adMapMockBg {
     height: 180px;
+    min-height: 180px;
     background-color: #e5e9f0;
     background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
     background-size: 16px 16px;
