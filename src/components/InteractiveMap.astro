@@ -232,11 +232,23 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
     margin: 0 0 28px;
     position: relative;
     z-index: 1;
+    /* Prevent height-collapse on mobile when parent layout re-stacks */
+    min-height: 350px !important;
+  }
+
+  @media (max-width: 768px) {
+    .imapWrap {
+      min-height: 320px !important;
+      height: 320px !important;
+      border-radius: 10px;
+    }
   }
 
   .imapEl {
     display: block !important;
     width: 100% !important;
+    /* Mirror wrapper floor so Leaflet never reads a 0px offsetHeight */
+    min-height: inherit !important;
   }
 
   /* ── Numbered yellow pin ── */

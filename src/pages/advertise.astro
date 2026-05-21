@@ -139,14 +139,20 @@ import Base from "../layouts/Base.astro";
 
   /* ─── Diagram box ─────────────────────────────────────────── */
   .ad-feature-diagram-box {
+    display: block !important;
     background: #f4f6f9;
     border: 1px solid #e1e6eb;
     border-radius: 12px;
     padding: 40px;
     text-align: center;
+    min-height: 260px;
+  }
+  @media (max-width: 768px) {
+    .ad-feature-diagram-box { min-height: 220px; padding: 28px 20px; }
   }
   .map-mockup-bg {
     height: 200px;
+    min-height: 160px;
     background-color: #e5e9f0;
     background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
     background-size: 16px 16px;
