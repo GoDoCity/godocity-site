@@ -3,7 +3,6 @@ import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import manualFeedData from "../../../data/manual-events.json";
 import {
-  getAllSheetEvents,
   GREATER_DAYTONA,
   CITY_DISPLAY,
   cityDisplayName,
@@ -58,16 +57,86 @@ function addUtm(url) {
   }
 }
 
+/* ── Engine event mapping helpers ─────────────────────────────────────────── */
+function extractCity(addr: string): string {
+  const lc = addr.toLowerCase();
+  if (lc.includes("ormond beach"))         return "ormond beach";
+  if (lc.includes("port orange"))          return "port orange";
+  if (lc.includes("daytona beach shores")) return "daytona beach shores";
+  if (lc.includes("south daytona"))        return "south daytona";
+  if (lc.includes("holly hill"))           return "holly hill";
+  if (lc.includes("new smyrna beach"))     return "new smyrna beach";
+  if (lc.includes("new smyrna"))           return "new smyrna beach";
+  if (lc.includes("flagler beach"))        return "flagler beach";
+  if (lc.includes("edgewater"))            return "edgewater";
+  if (lc.includes("daytona"))             return "daytona beach";
+  return "daytona beach";
+}
+
+function mapEngineCategory(raw: string | null): string {
+  if (!raw) return "";
+  const lc = raw.toLowerCase();
+  if (lc.includes("racing") || lc.includes("motorsport") || lc.includes("nascar") || lc.includes("speedway")) return "Racing & Motorsports";
+  if (lc.includes("music") || lc.includes("concert") || lc.includes("band") || lc.includes("nightlife") || lc.includes("comedy") || lc.includes("jazz") || lc.includes("blues") || lc.includes("rock") || lc.includes("country") || lc.includes("edm")) return "Music & Nightlife";
+  if (lc.includes("food") || lc.includes("drink") || lc.includes("culinary") || lc.includes("brewery") || lc.includes("wine") || lc.includes("beer") || lc.includes("tasting")) return "Food & Drink";
+  if (lc.includes("market") || lc.includes("fair") || lc.includes("festival") || lc.includes("craft") || lc.includes("family") || lc.includes("kids") || lc.includes("children") || lc.includes("community")) return "Markets & Fairs";
+  if (lc.includes("art") || lc.includes("gallery") || lc.includes("museum") || lc.includes("theater") || lc.includes("theatre") || lc.includes("culture") || lc.includes("exhibit") || lc.includes("dance") || lc.includes("film") || lc.includes("opera")) return "Arts & Culture";
+  if (lc.includes("sport") || lc.includes("outdoor") || lc.includes("athletic") || lc.includes("surf") || lc.includes("kayak") || lc.includes("run") || lc.includes("bike") || lc.includes("swim") || lc.includes("hike") || lc.includes("golf")) return "Outdoors & Sports";
+  return "";
+}
+
+function hasFeaturedTag(tags: string | null): boolean {
+  if (!tags) return false;
+  try { const t = JSON.parse(tags); return Array.isArray(t) && t.includes("featured"); } catch { return false; }
+}
+
+function hasHighImpactTag(tags: string | null): boolean {
+  if (!tags) return false;
+  try { const t = JSON.parse(tags); return Array.isArray(t) && t.includes("high-impact"); } catch { return false; }
+}
+
 let allEvents = [];
 try { allEvents = await getCollection("events"); } catch { allEvents = []; }
 console.log(`[CLEANUP] Markdown directory is empty: ${allEvents.length === 0}`);
 
-/* ── Sheet events — normalised, deduped, date-filtered by events.js ─────────
-   getAllSheetEvents() uses the module-level singleton, so importFromSheet()
-   runs only ONCE per build regardless of how many pages import this module.   */
-let sheetEvents: any[] = [];
-try { sheetEvents = await getAllSheetEvents(); } catch { sheetEvents = []; }
-const scrapedCount = 0; // scraper permanently disabled
+/* ── Live engine events — GoDoEVENTS Worker, fetched at build time ───────────
+   Replaces the Google Sheets feed. manual-events.json remains a hand-curated
+   fallback for events that need to be pinned before the next engine sync.      */
+let engineEvents: any[] = [];
+try {
+  const _today = new Date();
+  _today.setUTCHours(0, 0, 0, 0);
+  const _from = _today.toISOString();
+  const _res = await fetch(
+    `https://godoevents-engine.yellowcabking.workers.dev/api/events?market=daytona&limit=200&from=${encodeURIComponent(_from)}`
+  );
+  if (_res.ok) {
+    const _json: any = await _res.json();
+    engineEvents = (_json.events ?? []).map((e: any) => ({
+      slug: `daytona/engine-${e.id}`,
+      data: {
+        title:        e.title        ?? "Untitled Event",
+        eventDate:    e.start_datetime,
+        endDate:      e.end_datetime ?? null,
+        location:     e.venue_name   ?? (e.venue_address?.split(",")[0] ?? ""),
+        city:         extractCity(e.venue_address ?? ""),
+        url:          (e.event_url && e.event_url.trim() !== "" && e.event_url !== "#")
+                        ? e.event_url : null,
+        image:        e.image_url || e.image_medium || null,
+        category:     mapEngineCategory(e.category),
+        lat:          e.latitude  ?? null,
+        lng:          e.longitude ?? null,
+        sponsored:    hasFeaturedTag(e.partner_tags),
+        isHighImpact: hasHighImpactTag(e.partner_tags),
+        source:       `engine-${e.source ?? "unknown"}`,
+        coordSource:  (e.latitude != null && e.longitude != null) ? "known_venue" : null,
+      },
+    }));
+  }
+} catch (err) {
+  console.warn("[events] Engine fetch failed, falling back to manual-events.json:", err);
+}
+const scrapedCount = 0;
 
 /* ── Manual Quick-Entry feed (src/data/manual-events.json) ──────────────────
    Paste event objects here as a fallback when scrapers are blocked.
@@ -97,8 +166,8 @@ function sortKey(e: any): string {
   return String(e.data?.eventDate ?? "").split("T")[0] || "9999-99-99";
 }
 
-/* Merge: markdown → manual → sheet (coord overrides already applied in events.js) */
-const allEventsWithLive = [...allEvents, ...manualEvents, ...sheetEvents];
+/* Merge: markdown → manual → engine */
+const allEventsWithLive = [...allEvents, ...manualEvents, ...engineEvents];
 
 /* ── Filter: Greater Daytona area + date >= yesterday, with sponsor override ── */
 const upcomingEvents = allEventsWithLive
@@ -116,7 +185,7 @@ const upcomingEvents = allEventsWithLive
 
 console.log(
   `[events] Markdown: ${allEvents.length} | Manual: ${manualEvents.length} | ` +
-  `Sheet: ${sheetEvents.length} | Scraped: ${scrapedCount} | Total upcoming: ${upcomingEvents.length}`
+  `Engine: ${engineEvents.length} | Total upcoming: ${upcomingEvents.length}`
 );
 
 // Warn about events with no usable coordinates (will be excluded from map)
