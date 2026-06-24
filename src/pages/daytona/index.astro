@@ -4,7 +4,7 @@ import InteractiveMap from "../../components/InteractiveMap.astro";
 import NewsletterBanner from "../../components/NewsletterBanner.astro";
 import AdSlot from "../../components/AdSlot.astro";
 import { getCollection } from "astro:content";
-import { getGreaterDaytonaEvents, cityDisplayName } from "../../lib/events.js";
+import { cityDisplayName } from "../../lib/events.js";
 import { getCityConfig } from "../../lib/cityConfigs.js";
 const daytonaConfig = getCityConfig("daytona");
 
@@ -80,10 +80,55 @@ const feed = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
 const latest = feed.slice(0, 3);
 const listFeed = feed.slice(3, 7);  /* ── Latest Feed — exactly 4 rows below the 3-card grid (Rule of 4) ── */
 
-/* ── Sheet events via centralised singleton ──────────────────────────────────
-   getGreaterDaytonaEvents() shares the same module-level promise as the Events
-   page and ArticleSidebar — importFromSheet() runs only ONCE per build.       */
-const allDaytona = await getGreaterDaytonaEvents();
+/* ── Live engine events for homepage sidebar ─────────────────────────────────
+   Fetches up to 50 upcoming events from the GoDoEVENTS engine at build time.
+   Replaces the Google Sheets singleton for the sidebar slider and map pins.   */
+function _hpExtractCity(addr: string): string {
+  const lc = (addr ?? "").toLowerCase();
+  if (lc.includes("ormond beach"))         return "ormond beach";
+  if (lc.includes("port orange"))          return "port orange";
+  if (lc.includes("daytona beach shores")) return "daytona beach shores";
+  if (lc.includes("south daytona"))        return "south daytona";
+  if (lc.includes("holly hill"))           return "holly hill";
+  if (lc.includes("new smyrna beach"))     return "new smyrna beach";
+  if (lc.includes("new smyrna"))           return "new smyrna beach";
+  if (lc.includes("flagler beach"))        return "flagler beach";
+  if (lc.includes("daytona"))             return "daytona beach";
+  return "daytona beach";
+}
+function _hpHasFeatured(tags: string | null): boolean {
+  if (!tags) return false;
+  try { const t = JSON.parse(tags); return Array.isArray(t) && t.includes("featured"); } catch { return false; }
+}
+
+let allDaytona: any[] = [];
+try {
+  const _hpToday = new Date();
+  _hpToday.setUTCHours(0, 0, 0, 0);
+  const _hpRes = await fetch(
+    `https://godoevents-engine.yellowcabking.workers.dev/api/events?market=daytona&limit=50&from=${encodeURIComponent(_hpToday.toISOString())}`
+  );
+  if (_hpRes.ok) {
+    const _hpJson: any = await _hpRes.json();
+    allDaytona = (_hpJson.events ?? []).map((e: any) => ({
+      slug: `daytona/engine-${e.id}`,
+      data: {
+        title:     e.title      ?? "Untitled Event",
+        eventDate: e.start_datetime,
+        location:  e.venue_name ?? (e.venue_address?.split(",")[0] ?? ""),
+        city:      _hpExtractCity(e.venue_address ?? ""),
+        url:       (e.event_url && e.event_url.trim() !== "" && e.event_url !== "#")
+                     ? e.event_url : "https://www.daytonabeach.com/events/",
+        image:     e.image_url || e.image_medium || null,
+        lat:       e.latitude  ?? null,
+        lng:       e.longitude ?? null,
+        sponsored: _hpHasFeatured(e.partner_tags),
+      },
+    }));
+  }
+} catch (err) {
+  console.warn("[homepage] Engine fetch failed:", err);
+}
 
 /* Home sidebar: sponsored slider (up to 5) + up to 3 regular events */
 const homeSponsored = allDaytona.filter((e: any) => e.data.sponsored === true).slice(0, 5);

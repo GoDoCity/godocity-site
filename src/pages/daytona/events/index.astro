@@ -95,6 +95,65 @@ function hasHighImpactTag(tags: string | null): boolean {
   try { const t = JSON.parse(tags); return Array.isArray(t) && t.includes("high-impact"); } catch { return false; }
 }
 
+/* ── Server-side deduplication for engine events ─────────────────────────────
+   Phase 1: Drop Parking/Tailgate noise that shadows a real event on same day+venue.
+   Phase 2: Fuzzy title dedup — catches "Artist at Venue" vs "Venue: Artist"
+            reversals by shared significant-token overlap. Keeps the entry with
+            a real ticket URL when both are otherwise equal.                   */
+function dedupeEngineEvents(events: any[]): any[] {
+  const mainKeys = new Set<string>();
+  for (const e of events) {
+    if (!/^(parking|tailgate|vip\s+parking|premier\s+parking|premium\s+parking)/i.test(e.data.title ?? "")) {
+      mainKeys.add(`${(e.data.eventDate ?? "").split("T")[0]}|${(e.data.location ?? "").toLowerCase().slice(0, 32)}`);
+    }
+  }
+  const phase1 = events.filter(e => {
+    if (/^(parking|tailgate|vip\s+parking|premier\s+parking|premium\s+parking)/i.test(e.data.title ?? "")) {
+      const k = `${(e.data.eventDate ?? "").split("T")[0]}|${(e.data.location ?? "").toLowerCase().slice(0, 32)}`;
+      return !mainKeys.has(k);
+    }
+    return true;
+  });
+
+  function sigTokens(s: string): string[] {
+    return s.toLowerCase().replace(/[^a-z0-9\s]/g, " ").split(/\s+/).filter(w => w.length > 3);
+  }
+
+  const seen: Array<{ dayVenue: string; prefix: string; tokens: string[]; resultIdx: number }> = [];
+  const phase2: any[] = [];
+
+  for (const e of phase1) {
+    const day      = (e.data.eventDate ?? "").split("T")[0];
+    const venue    = (e.data.location  ?? "").toLowerCase().slice(0, 32);
+    const dayVenue = `${day}|${venue}`;
+    const norm     = (e.data.title ?? "").toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
+    const prefix   = norm.slice(0, 15);
+    const tokens   = sigTokens(e.data.title ?? "");
+
+    const dupeIdx = seen.findIndex(s =>
+      s.dayVenue === dayVenue && (
+        (prefix.length >= 4 && s.prefix === prefix) ||
+        (tokens.length >= 2 && s.tokens.length >= 2 &&
+          tokens.filter(t => s.tokens.includes(t)).length >= 2)
+      )
+    );
+
+    if (dupeIdx >= 0) {
+      const existing = phase2[seen[dupeIdx].resultIdx];
+      if (e.data.url && !existing.data.url) {
+        phase2[seen[dupeIdx].resultIdx] = e;
+        seen[dupeIdx].prefix = prefix;
+        seen[dupeIdx].tokens = tokens;
+      }
+    } else {
+      seen.push({ dayVenue, prefix, tokens, resultIdx: phase2.length });
+      phase2.push(e);
+    }
+  }
+
+  return phase2;
+}
+
 let allEvents = [];
 try { allEvents = await getCollection("events"); } catch { allEvents = []; }
 console.log(`[CLEANUP] Markdown directory is empty: ${allEvents.length === 0}`);
@@ -112,7 +171,7 @@ try {
   );
   if (_res.ok) {
     const _json: any = await _res.json();
-    engineEvents = (_json.events ?? []).map((e: any) => ({
+    const _rawMapped = (_json.events ?? []).map((e: any) => ({
       slug: `daytona/engine-${e.id}`,
       data: {
         title:        e.title        ?? "Untitled Event",
@@ -121,7 +180,7 @@ try {
         location:     e.venue_name   ?? (e.venue_address?.split(",")[0] ?? ""),
         city:         extractCity(e.venue_address ?? ""),
         url:          (e.event_url && e.event_url.trim() !== "" && e.event_url !== "#")
-                        ? e.event_url : null,
+                        ? e.event_url : "https://www.daytonabeach.com/events/",
         image:        e.image_url || e.image_medium || null,
         category:     mapEngineCategory(e.category),
         lat:          e.latitude  ?? null,
@@ -132,6 +191,7 @@ try {
         coordSource:  (e.latitude != null && e.longitude != null) ? "known_venue" : null,
       },
     }));
+    engineEvents = dedupeEngineEvents(_rawMapped);
   }
 } catch (err) {
   console.warn("[events] Engine fetch failed, falling back to manual-events.json:", err);
@@ -707,7 +767,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                 </svg>
                 <p class="slotAdTitle">GoDo VIP Headliner</p>
                 <p class="slotAdSub">Top of Events Hub · GoDo Picks · Homepage feature · 76k+ impressions</p>
-                <a href="/daytona/advertise/products/godo-vip/" class="slotAdCta slotAdCta--vip">Reserve Slot →</a>
+                <a href="mailto:ads@godoevents.com?subject=GoDo%20VIP%20Headliner%20%E2%80%94%20Reserve%20My%20Slot&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20GoDo%20VIP%20Headliner%20slot%20(%24375%2Fwk)%20on%20the%20Daytona%20Events%20Hub.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!" class="slotAdCta slotAdCta--vip">Reserve Slot →</a>
               </div>
             </div>
           </div>
@@ -727,7 +787,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                 </svg>
                 <p class="slotAdTitle">High-Impact Listing</p>
                 <p class="slotAdSub">Full-width Daily Lineup row · Priority positioning · Bold format</p>
-                <a href="/daytona/advertise/products/high-impact-listing/" class="slotAdCta">Reserve Slot →</a>
+                <a href="mailto:ads@godoevents.com?subject=High-Impact%20Listing%20%E2%80%94%20Reserve%20My%20Slot&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20High-Impact%20Listing%20slot%20(%24225%2Fwk)%20on%20the%20Daytona%20Events%20Hub.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!" class="slotAdCta">Reserve Slot →</a>
               </div>
             </div>
           </div>
@@ -747,7 +807,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                 </svg>
                 <p class="slotAdTitle">Event Spotlight</p>
                 <p class="slotAdSub">Native in-feed placement · Daily Lineup positions 3, 7 &amp; 11</p>
-                <a href="/daytona/advertise/products/event-spotlight/" class="slotAdCta">Book This Slot →</a>
+                <a href="mailto:ads@godoevents.com?subject=Event%20Spotlight%20%E2%80%94%20Book%20This%20Slot&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20Event%20Spotlight%20slot%20(%24150%2Fwk)%20on%20the%20Daytona%20Events%20Hub.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!" class="slotAdCta">Book This Slot →</a>
               </div>
             </div>
           </div>
@@ -774,47 +834,55 @@ function vibeTag(category?: string): { label: string; type: string } | null {
   var shown     = PAGE_SIZE;
   var filter    = "all";
 
-  var grid      = document.getElementById("eventGrid");
-  var filterSel = document.getElementById("monthFilter");
-  var countEl   = document.getElementById("filterCount");
-  var moreBtn   = document.getElementById("loadMoreBtn");
-  var moreCount = document.getElementById("loadMoreCount");
+  function init() {
+    var grid      = document.getElementById("eventGrid");
+    var filterSel = document.getElementById("monthFilter");
+    var countEl   = document.getElementById("filterCount");
+    var moreBtn   = document.getElementById("loadMoreBtn");
+    var moreCount = document.getElementById("loadMoreCount");
 
-  if (grid) {
-    var allCards = Array.prototype.slice.call(grid.querySelectorAll(".evCard"));
+    if (grid) {
+      var allCards = Array.prototype.slice.call(grid.querySelectorAll(".evCard"));
 
-    function visibleCards() {
-      return allCards.filter(function (c) {
-        return filter === "all" || c.getAttribute("data-month") === filter;
-      });
-    }
+      function visibleCards() {
+        return allCards.filter(function (c) {
+          return filter === "all" || c.getAttribute("data-month") === filter;
+        });
+      }
 
-    function applyState() {
-      var visible = visibleCards();
-      var total   = visible.length;
-      allCards.forEach(function (c) { c.classList.add("evCard--hidden"); });
-      visible.slice(0, shown).forEach(function (c) { c.classList.remove("evCard--hidden"); });
-      if (countEl) countEl.textContent = total + " event" + (total !== 1 ? "s" : "");
-      if (moreBtn) {
-        var remaining = total - shown;
-        if (remaining > 0) {
-          moreBtn.style.display = "";
-          if (moreCount) moreCount.textContent = "(" + Math.min(PAGE_SIZE, remaining) + " more)";
-        } else {
-          moreBtn.style.display = "none";
+      function applyState() {
+        var visible   = visibleCards();
+        var total     = visible.length;
+        allCards.forEach(function (c) { c.classList.add("evCard--hidden"); });
+        visible.slice(0, shown).forEach(function (c) { c.classList.remove("evCard--hidden"); });
+        if (countEl) countEl.textContent = total + " event" + (total !== 1 ? "s" : "");
+        if (moreBtn) {
+          var remaining = total - shown;
+          if (remaining > 0) {
+            moreBtn.style.display = "";
+            if (moreCount) moreCount.textContent = "(" + remaining + " more)";
+          } else {
+            moreBtn.style.display = "none";
+          }
         }
       }
-    }
 
-    if (filterSel) {
-      filterSel.addEventListener("change", function () {
-        filter = filterSel.value; shown = PAGE_SIZE; applyState();
-      });
+      if (filterSel) {
+        filterSel.addEventListener("change", function () {
+          filter = filterSel.value; shown = PAGE_SIZE; applyState();
+        });
+      }
+      if (moreBtn) {
+        moreBtn.addEventListener("click", function () { shown += PAGE_SIZE; applyState(); });
+      }
+      applyState();
     }
-    if (moreBtn) {
-      moreBtn.addEventListener("click", function () { shown += PAGE_SIZE; applyState(); });
-    }
-    applyState();
+  } // end init()
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
   }
 
   /* ── Social action buttons ── */
