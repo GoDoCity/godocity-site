@@ -8,10 +8,13 @@
  * the same resolved result — no duplicate Eventbrite / Mapbox API calls.
  *
  * Consumers
- *   ArticleSidebar.astro         → getGreaterDaytonaEvents()
- *   [city]/[topic]/index.astro   → getGreaterDaytonaEvents()
- *   daytona/events/index.astro   → getAllSheetEvents()
- *   daytona/index.astro          → getGreaterDaytonaEvents()
+ *   ArticleSidebar.astro         → getCityEvents(city)
+ *   [city]/[topic]/index.astro   → getCityEvents(city)
+ *   daytona/events/index.astro   → engine fetch directly (no sheet)
+ *   daytona/index.astro          → engine fetch directly (no sheet)
+ *
+ * getCityEvents("daytona") is intercepted to use the live engine API;
+ * all other city slugs still fall through to the Google Sheets singleton.
  */
 import { importFromSheet } from "./sheet-import.js";
 import { getCityConfig } from "./cityConfigs.js";
@@ -157,6 +160,71 @@ export function normalizeSheetEvent(raw) {
   };
 }
 
+// ── Daytona engine singleton (replaces Google Sheets for daytona city slug) ──
+// Follows the same module-level singleton pattern as _promise below so the
+// engine is fetched at most once per build regardless of how many pages call
+// getCityEvents("daytona").
+
+function _extractEngineCity(addr) {
+  const lc = (addr ?? "").toLowerCase();
+  if (lc.includes("ormond beach"))         return "ormond beach";
+  if (lc.includes("port orange"))          return "port orange";
+  if (lc.includes("daytona beach shores")) return "daytona beach shores";
+  if (lc.includes("south daytona"))        return "south daytona";
+  if (lc.includes("holly hill"))           return "holly hill";
+  if (lc.includes("new smyrna beach"))     return "new smyrna beach";
+  if (lc.includes("new smyrna"))           return "new smyrna beach";
+  if (lc.includes("flagler beach"))        return "flagler beach";
+  if (lc.includes("daytona"))             return "daytona beach";
+  return "daytona beach";
+}
+
+function _engineHasFeatured(tags) {
+  if (!tags) return false;
+  try { const t = JSON.parse(tags); return Array.isArray(t) && t.includes("featured"); } catch { return false; }
+}
+
+let _daytonaEnginePromise = null;
+
+function _getDaytonaEngineEvents() {
+  if (_daytonaEnginePromise !== null) return _daytonaEnginePromise;
+  _daytonaEnginePromise = (async () => {
+    try {
+      const today = new Date();
+      today.setUTCHours(0, 0, 0, 0);
+      const res = await fetch(
+        `https://godoevents-engine.yellowcabking.workers.dev/api/events?market=daytona&limit=50&from=${encodeURIComponent(today.toISOString())}`
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      const events = (json.events ?? []).map(e => ({
+        slug: `daytona/engine-${e.id}`,
+        data: {
+          title:     e.title      ?? "Untitled Event",
+          eventDate: e.start_datetime,
+          endDate:   e.end_datetime  ?? null,
+          location:  e.venue_name    ?? (e.venue_address?.split(",")[0] ?? ""),
+          city:      _extractEngineCity(e.venue_address ?? ""),
+          url:       (e.event_url && e.event_url.trim() !== "" && e.event_url !== "#")
+                       ? e.event_url : "https://www.daytonabeach.com/events/",
+          image:     e.image_url || e.image_medium || null,
+          lat:       e.latitude  ?? null,
+          lng:       e.longitude ?? null,
+          sponsored: _engineHasFeatured(e.partner_tags),
+          proTip:    null,
+          source:    `engine-${e.source ?? "unknown"}`,
+        },
+      }));
+      console.log(`[events] getCityEvents(daytona) → ${events.length} engine events`);
+      return events;
+    } catch (err) {
+      console.warn("[events] Daytona engine fetch failed:", err?.message ?? err);
+      return [];
+    }
+  })();
+  return _daytonaEnginePromise;
+}
+
 // ── Singleton fetch ───────────────────────────────────────────────────────────
 let _promise = null;
 
@@ -213,6 +281,10 @@ export async function getGreaterDaytonaEvents() {
  * @param {string} slug — matches a key in CITY_CONFIGS (e.g. "daytona", "asheville")
  */
 export async function getCityEvents(slug) {
+  // Daytona uses the live engine API — all other cities still use the sheet.
+  if (String(slug ?? "").toLowerCase() === "daytona") {
+    return _getDaytonaEngineEvents();
+  }
   const config = getCityConfig(slug);
   const regionCities = config?.regionCities ?? new Set([String(slug ?? "").toLowerCase()]);
   const raw = await getRawSheetEvents();

@@ -854,7 +854,10 @@ function vibeTag(category?: string): { label: string; type: string } | null {
         var visible   = visibleCards();
         var total     = visible.length;
         allCards.forEach(function (c) { c.classList.add("evCard--hidden"); });
-        visible.slice(0, shown).forEach(function (c) { c.classList.remove("evCard--hidden"); });
+        visible.slice(0, shown).forEach(function (c) {
+          c.classList.remove("evCard--hidden");
+          c.classList.remove("lineupRow--hidden");
+        });
         if (countEl) countEl.textContent = total + " event" + (total !== 1 ? "s" : "");
         if (moreBtn) {
           var remaining = total - shown;
