@@ -31,8 +31,41 @@ const cityConfig   = getCityConfig(city);
 const vibeCheckText = cityConfig?.vibeCheckText ?? "What's happening in your city this week?";
 
 const allEvents    = await getCityEvents(city);
-const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
-const regularList     = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
+
+/* Pull local Sveltia CMS events for this city — normalise featured→sponsored.
+   getCityEvents("daytona") returns only the live engine API; local CMS events
+   (e.g. "GoDo 4th of July") are in the content collection and must be merged. */
+let _cmsEvents: any[] = [];
+try {
+  const regionCities = cityConfig?.regionCities ?? new Set([String(city).toLowerCase()]);
+  const _allLocal = await getCollection("events");
+  _cmsEvents = (_allLocal as any[])
+    .filter((e: any) => {
+      const evCity = (e.data.city ?? "").toLowerCase().trim();
+      return regionCities.has(evCity);
+    })
+    .map((e: any) => ({
+      ...e,
+      data: { ...e.data, sponsored: e.data.sponsored === true || e.data.featured === true },
+    }));
+} catch {}
+
+/* CMS-sponsored events lead the merged feed; engine events follow.
+   Title-based dedup prevents the same event from appearing twice. */
+const _seenTitles = new Set<string>();
+const mergedEvents: any[] = [
+  ..._cmsEvents.filter((e: any) => e.data.sponsored === true),
+  ..._cmsEvents.filter((e: any) => !e.data.sponsored),
+  ...allEvents,
+].filter((e: any) => {
+  const t = (e.data.title ?? "").toLowerCase().trim();
+  if (_seenTitles.has(t)) return false;
+  _seenTitles.add(t);
+  return true;
+});
+
+const sponsoredSlides = mergedEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
+const regularList     = mergedEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
 
 const allAds = await getCollection("ads").catch(() => [] as any[]);
 const featuredEventAds = allAds.filter((a: any) => {

@@ -4,7 +4,7 @@ import InteractiveMap from "../../components/InteractiveMap.astro";
 import NewsletterBanner from "../../components/NewsletterBanner.astro";
 import AdSlot from "../../components/AdSlot.astro";
 import { getCollection } from "astro:content";
-import { cityDisplayName } from "../../lib/events.js";
+import { cityDisplayName, GREATER_DAYTONA } from "../../lib/events.js";
 import { getCityConfig } from "../../lib/cityConfigs.js";
 const daytonaConfig = getCityConfig("daytona");
 
@@ -130,9 +130,40 @@ try {
   console.warn("[homepage] Engine fetch failed:", err);
 }
 
+/* Pull local Sveltia CMS events and merge them in — normalise featured→sponsored.
+   The engine API fetch above only returns third-party aggregated events; local CMS
+   events (e.g. "GoDo 4th of July") live in getCollection("events") and must be
+   prepended so they surface in the Upcoming Events sidebar slider. */
+let _homeCmsEvents: any[] = [];
+try {
+  const _allLocal = await getCollection("events");
+  _homeCmsEvents = (_allLocal as any[])
+    .filter((e: any) => {
+      const evCity = (e.data.city ?? "").toLowerCase().trim();
+      return GREATER_DAYTONA.has(evCity);
+    })
+    .map((e: any) => ({
+      ...e,
+      data: { ...e.data, sponsored: e.data.sponsored === true || e.data.featured === true },
+    }));
+} catch {}
+
+/* CMS-sponsored first → CMS-regular → engine events; title-based dedup */
+const _homeSeenTitles = new Set<string>();
+const allDaytonaMerged: any[] = [
+  ..._homeCmsEvents.filter((e: any) => e.data.sponsored === true),
+  ..._homeCmsEvents.filter((e: any) => !e.data.sponsored),
+  ...allDaytona,
+].filter((e: any) => {
+  const t = (e.data.title ?? "").toLowerCase().trim();
+  if (_homeSeenTitles.has(t)) return false;
+  _homeSeenTitles.add(t);
+  return true;
+});
+
 /* Home sidebar: sponsored slider (up to 5) + up to 3 regular events */
-const homeSponsored = allDaytona.filter((e: any) => e.data.sponsored === true).slice(0, 5);
-const homeRegular   = allDaytona.filter((e: any) => !e.data.sponsored).slice(0, 3);
+const homeSponsored = allDaytonaMerged.filter((e: any) => e.data.sponsored === true).slice(0, 5);
+const homeRegular   = allDaytonaMerged.filter((e: any) => !e.data.sponsored).slice(0, 3);
 
 /* Map pins — events with valid non-ocean coordinates */
 const homePins = allDaytona
