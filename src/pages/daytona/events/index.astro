@@ -399,7 +399,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
         {sponsoredEvents.length > 0 && (
           <section class="topBillingTicker" id="topBillingTicker" aria-label="Top-billed featured events">
             <div class="tbtTrack">
-              {sponsoredEvents.slice(0, 3).map((e, idx) => {
+              {sponsoredEvents.slice(0, 4).map((e, idx) => {
                 const d      = new Date(e.data.eventDate);
                 const mon    = isNaN(d.getTime()) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
                 const day    = isNaN(d.getTime()) ? "??" : d.getDate();
@@ -446,9 +446,9 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                 );
               })}
             </div>
-            {sponsoredEvents.slice(0, 3).length > 1 && (
+            {sponsoredEvents.slice(0, 4).length > 1 && (
               <div class="tbtDots" id="tbtDots">
-                {sponsoredEvents.slice(0, 3).map((_, idx) => (
+                {sponsoredEvents.slice(0, 4).map((_, idx) => (
                   <button class={`tbtDot${idx === 0 ? " tbtDot--active" : ""}`}
                           data-tbt-dot={String(idx)}
                           type="button"
@@ -470,7 +470,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
               <a href="/daytona/advertise/" class="evSectionAction">Feature Your Event →</a>
             </div>
             <div class="godoPicksGrid">
-              {sponsoredEvents.slice(0, 3).map((e, idx) => {
+              {sponsoredEvents.slice(0, 4).map((e, idx) => {
                 const d      = new Date(e.data.eventDate);
                 const mon    = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
                 const day    = isNaN(d) ? "??" : d.getDate();
@@ -830,27 +830,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
 
           <p class="sidebarEyebrow">Ad Inventory — 2026 Rates</p>
 
-          <!-- Slot 1: GoDo VIP -->
-          <div class="sidebarSlot sidebarSlot--vip">
-            <div class="slotMeta">
-              <span class="slotName">★ GoDo VIP Headliner</span>
-              <span class="slotDims slotDims--price">$375/wk</span>
-            </div>
-            <div class="slotAd slotAd--vip">
-              <div class="slotAdInner">
-                <svg width="28" height="20" viewBox="0 0 28 20" fill="none" aria-hidden="true">
-                  <ellipse cx="14" cy="10" rx="13" ry="9" stroke="currentColor" stroke-width="1.6" opacity=".6"/>
-                  <circle cx="14" cy="10" r="4.5" fill="currentColor" opacity=".5"/>
-                  <circle cx="14" cy="10" r="1.8" fill="#fff"/>
-                </svg>
-                <p class="slotAdTitle">GoDo VIP Headliner</p>
-                <p class="slotAdSub">Top of Events Hub · GoDo Picks · Homepage feature · 76k+ impressions</p>
-                <a href="mailto:ads@godoevents.com?subject=GoDo%20VIP%20Headliner%20%E2%80%94%20Reserve%20My%20Slot&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20GoDo%20VIP%20Headliner%20slot%20(%24375%2Fwk)%20on%20the%20Daytona%20Events%20Hub.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!" class="slotAdCta slotAdCta--vip">Reserve Slot →</a>
-              </div>
-            </div>
-          </div>
-
-          <!-- Slot 2: High-Impact -->
+          <!-- Slot 1: High-Impact -->
           <div class="sidebarSlot">
             <div class="slotMeta">
               <span class="slotName">✦ High-Impact Listing</span>
