@@ -1628,8 +1628,10 @@ function vibeTag(category?: string): { label: string; type: string } | null {
     overflow: hidden;
     background: #e5e7eb;
   }
-  /* Date chip overlay (mobile only — hidden on desktop) */
-  .lineupDateChip { display: none; }
+  /* Date chip overlay — shown on mobile (set in @media max-width 767px above), hidden on desktop */
+  @media (min-width: 768px) {
+    .lineupDateChip { display: none; }
+  }
 
   .lineupThumb img {
     width: 100%; height: 100%;
@@ -2038,6 +2040,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
   }
 
   /* ── Sidebar ── */
+  .evHubMain { min-width: 0; }
   .evHubSidebar { }
   .sidebarSticky {
     position: sticky;

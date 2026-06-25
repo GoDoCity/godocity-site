@@ -17,6 +17,7 @@
  */
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
+import ArticleSidebar from "../../../components/ArticleSidebar.astro";
 
 /* ── Generate one route per city that has at least one DIY guide ─────────── */
 export async function getStaticPaths() {
@@ -102,46 +103,50 @@ function formatDate(d: Date | null): string {
   cityBase={city}
 >
   <section class="diyLanding">
-    <div class="container" style="max-width: 980px;">
+    <div class="diyContainer">
 
-      <div class="landingKicker">
-        <span class="kCity">{cityLabel}</span>
-        <span class="kSep">/</span>
-        <span class="kCat">DIY</span>
+      <div class="diyMain">
+        <div class="landingKicker">
+          <span class="kCity">{cityLabel}</span>
+          <span class="kSep">/</span>
+          <span class="kCat">DIY</span>
+        </div>
+
+        <h1 class="landingTitle">DIY Guides</h1>
+        <p class="landingCount">{allItems.length} guide{allItems.length !== 1 ? "s" : ""}</p>
+
+        {allItems.length === 0 ? (
+          <p class="emptyState">No DIY guides yet for {cityLabel}. Check back soon!</p>
+        ) : (
+          <ul class="diyList">
+            {allItems.map((item) => {
+              const dateStr = formatDate(item.date);
+              return (
+                <li class="diyCard">
+                  <a class="cardLink" href={item.href} aria-label={`Read: ${item.title}`}>
+                    <div class="cardThumbWrap">
+                      {item.heroImage
+                        ? <img class="cardThumb" src={item.heroImage} alt="" loading="lazy" decoding="async" />
+                        : <div class="cardThumbEmpty" aria-hidden="true" />
+                      }
+                    </div>
+                    <div class="cardBody">
+                      <div class="cardKicker">
+                        <span class="kDiyPill">{item.type === "diy" ? "DIY GUIDE" : "DIY"}</span>
+                      </div>
+                      <div class="cardTitle">{item.title}</div>
+                      {dateStr && <div class="cardDate">{dateStr}</div>}
+                      {item.description && <div class="cardDesc">{item.description}</div>}
+                    </div>
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        )}
       </div>
 
-      <h1 class="landingTitle">DIY Guides</h1>
-      <p class="landingCount">{allItems.length} guide{allItems.length !== 1 ? "s" : ""}</p>
-
-      {allItems.length === 0 ? (
-        <p class="emptyState">No DIY guides yet for {cityLabel}. Check back soon!</p>
-      ) : (
-        <ul class="diyList">
-          {allItems.map((item) => {
-            const dateStr = formatDate(item.date);
-            return (
-              <li class="diyCard">
-                <a class="cardLink" href={item.href} aria-label={`Read: ${item.title}`}>
-                  <div class="cardThumbWrap">
-                    {item.heroImage
-                      ? <img class="cardThumb" src={item.heroImage} alt="" loading="lazy" decoding="async" />
-                      : <div class="cardThumbEmpty" aria-hidden="true" />
-                    }
-                  </div>
-                  <div class="cardBody">
-                    <div class="cardKicker">
-                      <span class="kDiyPill">{item.type === "diy" ? "DIY GUIDE" : "DIY"}</span>
-                    </div>
-                    <div class="cardTitle">{item.title}</div>
-                    {dateStr && <div class="cardDate">{dateStr}</div>}
-                    {item.description && <div class="cardDesc">{item.description}</div>}
-                  </div>
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      )}
+      <ArticleSidebar city={city} pageType="DIY" />
 
     </div>
   </section>
@@ -149,6 +154,20 @@ function formatDate(d: Date | null): string {
 
 <style>
   .diyLanding { padding: 28px 0 64px; }
+
+  .diyContainer {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 48px;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    align-items: start;
+  }
+  .diyMain { min-width: 0; }
+  @media (max-width: 1023px) {
+    .diyContainer { grid-template-columns: 1fr; }
+  }
 
   /* Kicker row */
   .landingKicker {

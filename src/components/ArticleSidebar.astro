@@ -18,9 +18,14 @@ import AdSlot from "./AdSlot.astro";
 
 interface Props {
   city: string;
+  pageType?: string;
 }
 
-const { city } = Astro.props;
+const { city, pageType = "Content" } = Astro.props;
+
+const vipMailto    = `mailto:ads@godoevents.com?subject=${encodeURIComponent(`GoDo ${pageType} — VIP Headliner Slot`)}&body=${encodeURIComponent(`Hi GoDo Team,\n\nI'm interested in the VIP Headliner slot ($375/wk) on the GoDo ${pageType} section.\n\nPlease send availability and next steps.\n\nThanks!`)}`;
+const hiMailto     = `mailto:ads@godoevents.com?subject=${encodeURIComponent(`GoDo ${pageType} — High-Impact Listing`)}&body=${encodeURIComponent(`Hi GoDo Team,\n\nI'm interested in the High-Impact Listing slot ($225/wk) on the GoDo ${pageType} section.\n\nPlease send availability and next steps.\n\nThanks!`)}`;
+const spotMailto   = `mailto:ads@godoevents.com?subject=${encodeURIComponent(`GoDo ${pageType} — Content Spotlight`)}&body=${encodeURIComponent(`Hi GoDo Team,\n\nI'm interested in the Content Spotlight slot ($150/wk) on the GoDo ${pageType} section.\n\nPlease send availability and next steps.\n\nThanks!`)}`;
 const cityCap      = getShortName(city); // "Daytona" not "Daytona Beach"
 const cityConfig   = getCityConfig(city);
 const vibeCheckText = cityConfig?.vibeCheckText ?? "What's happening in your city this week?";
@@ -222,6 +227,41 @@ const hasEvents      = hasSlider || hasList || hasFeaturedAds;
       <a class="guideRow" href={`/${city}/guides/drive/`}>🚗 Drive</a>
       <a class="guideRow" href={`/${city}/guides/surf/`}>🏄 Surf</a>
       <a class="guideRow" href={`/${city}/guides/local/`}>⭐ Local</a>
+    </div>
+  </div>
+
+  <!-- 5 — Premium Ad Inventory -->
+  <div class="railSection sbAdInventory">
+    <div class="railHead">
+      <span class="railTitle">Advertise Here</span>
+      <span class="sbAdRates">2026 Rates</span>
+    </div>
+
+    <div class="sbAdSlot sbAdSlot--vip">
+      <div class="sbAdSlotMeta">
+        <span class="sbAdSlotName">★ VIP Headliner</span>
+        <span class="sbAdSlotPrice">$375/wk</span>
+      </div>
+      <p class="sbAdSlotDesc">Top-of-page placement · 76k+ monthly impressions · Maximum visibility</p>
+      <a href={vipMailto} class="sbAdSlotCta sbAdSlotCta--vip">Reserve Slot →</a>
+    </div>
+
+    <div class="sbAdSlot">
+      <div class="sbAdSlotMeta">
+        <span class="sbAdSlotName">✦ High-Impact</span>
+        <span class="sbAdSlotPrice">$225/wk</span>
+      </div>
+      <p class="sbAdSlotDesc">Mid-page featured placement · Priority positioning · Bold format</p>
+      <a href={hiMailto} class="sbAdSlotCta">Reserve Slot →</a>
+    </div>
+
+    <div class="sbAdSlot">
+      <div class="sbAdSlotMeta">
+        <span class="sbAdSlotName">☉ Content Spotlight</span>
+        <span class="sbAdSlotPrice">$150/wk</span>
+      </div>
+      <p class="sbAdSlotDesc">Native in-content placement · Targeted local audience</p>
+      <a href={spotMailto} class="sbAdSlotCta">Book This Slot →</a>
     </div>
   </div>
 
@@ -521,4 +561,53 @@ const hasEvents      = hasSlider || hasList || hasFeaturedAds;
   .feaCal { flex-shrink: 0; }
   .feaInfo { display: flex; flex-direction: column; gap: 3px; }
   .feaTagline { font-size: 12px; color: var(--faint, #555); line-height: 1.4; }
+
+  /* ── Premium Ad Inventory ── */
+  .sbAdInventory { margin-top: 4px; }
+  .sbAdRates {
+    font-size: 10px; font-weight: 700; color: var(--faint);
+    opacity: .7; white-space: nowrap;
+  }
+  .sbAdSlot {
+    border: 1.5px dashed color-mix(in srgb, var(--brand1, #0077be) 28%, transparent);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: color-mix(in srgb, var(--brand1, #0077be) 4%, transparent);
+  }
+  .sbAdSlot--vip {
+    border-color: color-mix(in srgb, var(--brand1, #0077be) 55%, transparent);
+    background: color-mix(in srgb, var(--brand1, #0077be) 8%, transparent);
+  }
+  .sbAdSlotMeta {
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .sbAdSlotName {
+    font-size: 11.5px; font-weight: 900; color: var(--text);
+  }
+  .sbAdSlotPrice {
+    font-size: 10.5px; font-weight: 900;
+    color: var(--brand1, #0077be);
+    background: color-mix(in srgb, var(--brand1, #0077be) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 28%, transparent);
+    padding: 2px 7px; border-radius: 999px;
+  }
+  .sbAdSlotDesc {
+    font-size: 11px; color: var(--faint); line-height: 1.5; margin: 0;
+  }
+  .sbAdSlotCta {
+    display: inline-flex; align-items: center;
+    padding: 6px 14px; border-radius: 999px;
+    background: var(--brand1, #0077be); color: #fff;
+    font-size: 10.5px; font-weight: 800; text-decoration: none;
+    transition: opacity 130ms; align-self: flex-start;
+    white-space: nowrap;
+  }
+  .sbAdSlotCta:hover { opacity: .82; }
+  .sbAdSlotCta--vip {
+    box-shadow: 0 2px 10px color-mix(in srgb, var(--brand1, #0077be) 30%, transparent);
+  }
 </style>

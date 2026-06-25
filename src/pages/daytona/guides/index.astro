@@ -158,6 +158,50 @@ const sections = SECTIONS
     })}
 
   </div>
+
+  <!-- ── Premium Ad Inventory Strip ── -->
+  <section class="gd-adStrip">
+    <div class="gd-adStripInner">
+      <p class="gd-adStripEyebrow">Advertise on GoDo Guides — 2026 Rates</p>
+      <div class="gd-adStripSlots">
+
+        <!-- VIP Headliner -->
+        <div class="gd-adSlot gd-adSlot--vip">
+          <div class="gd-adSlotMeta">
+            <span class="gd-adSlotName">★ VIP Headliner</span>
+            <span class="gd-adSlotPrice">$375/wk</span>
+          </div>
+          <p class="gd-adSlotDesc">Top-of-page placement on Daytona's premier Guides hub · 76k+ monthly impressions · Maximum visibility above the fold</p>
+          <a href="mailto:ads@godoevents.com?subject=GoDo%20Guides%20%E2%80%94%20VIP%20Headliner%20Slot&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20VIP%20Headliner%20slot%20(%24375%2Fwk)%20on%20the%20GoDo%20Guides%20section.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!"
+             class="gd-adSlotCta gd-adSlotCta--vip">Reserve Slot →</a>
+        </div>
+
+        <!-- High-Impact Listing -->
+        <div class="gd-adSlot">
+          <div class="gd-adSlotMeta">
+            <span class="gd-adSlotName">✦ High-Impact Listing</span>
+            <span class="gd-adSlotPrice">$225/wk</span>
+          </div>
+          <p class="gd-adSlotDesc">Featured mid-page placement inside a Guide section · Priority positioning · Bolded format reaches engaged readers</p>
+          <a href="mailto:ads@godoevents.com?subject=GoDo%20Guides%20%E2%80%94%20High-Impact%20Listing&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20High-Impact%20Listing%20slot%20(%24225%2Fwk)%20on%20the%20GoDo%20Guides%20section.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!"
+             class="gd-adSlotCta">Reserve Slot →</a>
+        </div>
+
+        <!-- Content Spotlight -->
+        <div class="gd-adSlot">
+          <div class="gd-adSlotMeta">
+            <span class="gd-adSlotName">☉ Content Spotlight</span>
+            <span class="gd-adSlotPrice">$150/wk</span>
+          </div>
+          <p class="gd-adSlotDesc">Native in-content placement inside a targeted Guide category · Direct response from local audiences</p>
+          <a href="mailto:ads@godoevents.com?subject=GoDo%20Guides%20%E2%80%94%20Content%20Spotlight&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20Content%20Spotlight%20slot%20(%24150%2Fwk)%20on%20the%20GoDo%20Guides%20section.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!"
+             class="gd-adSlotCta">Book This Slot →</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
   <NewsletterBanner city="Daytona" />
 </Base>
 
@@ -592,4 +636,82 @@ const sections = SECTIONS
     .gd-header-nav { gap: 6px; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; justify-content: center !important; }
     .gd-nav-link { font-size: 0.6rem; padding: 6px 12px; height: auto; flex-shrink: 0; }
   }
+
+  /* ── Premium Ad Inventory Strip ── */
+  .gd-adStrip {
+    background: #060810;
+    border-top: 1px solid rgba(255,255,255,.08);
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    padding: 48px 2rem;
+  }
+  .gd-adStripInner {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .gd-adStripEyebrow {
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.35);
+    margin: 0 0 22px;
+    text-align: center;
+  }
+  .gd-adStripSlots {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  @media (max-width: 860px) { .gd-adStripSlots { grid-template-columns: 1fr; } }
+  .gd-adSlot {
+    border: 1.5px dashed rgba(255,255,255,.14);
+    border-radius: 14px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(255,255,255,.02);
+    transition: border-color 140ms, background 140ms;
+  }
+  .gd-adSlot:hover { border-color: rgba(0,119,190,.4); background: rgba(0,119,190,.04); }
+  .gd-adSlot--vip {
+    border-color: rgba(0,119,190,.45);
+    background: rgba(0,119,190,.06);
+  }
+  .gd-adSlotMeta {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  }
+  .gd-adSlotName {
+    font-size: 12.5px; font-weight: 900; color: rgba(255,255,255,.88);
+  }
+  .gd-adSlotPrice {
+    font-size: 11px; font-weight: 900;
+    color: #56b4e9;
+    background: rgba(0,119,190,.18);
+    border: 1px solid rgba(0,119,190,.4);
+    padding: 2px 9px; border-radius: 999px;
+    white-space: nowrap;
+  }
+  .gd-adSlot--vip .gd-adSlotPrice { background: rgba(0,119,190,.28); border-color: rgba(0,119,190,.6); }
+  .gd-adSlotDesc {
+    font-size: 12px; color: rgba(255,255,255,.38); line-height: 1.55; margin: 0; flex: 1;
+  }
+  .gd-adSlotCta {
+    display: inline-flex; align-items: center;
+    padding: 8px 18px; border-radius: 999px;
+    background: rgba(0,119,190,.22);
+    border: 1px solid rgba(0,119,190,.45);
+    color: #56b4e9;
+    font-size: 11.5px; font-weight: 800; text-decoration: none;
+    transition: background 130ms, border-color 130ms;
+    align-self: flex-start; white-space: nowrap;
+  }
+  .gd-adSlotCta:hover { background: rgba(0,119,190,.38); border-color: rgba(0,119,190,.75); }
+  .gd-adSlotCta--vip {
+    background: rgba(0,119,190,.32);
+    border-color: rgba(0,119,190,.65);
+    box-shadow: 0 2px 12px rgba(0,119,190,.2);
+  }
+  .gd-adSlotCta--vip:hover { background: rgba(0,119,190,.48); border-color: rgba(0,119,190,.9); }
+  @media (max-width: 640px) { .gd-adStrip { padding: 32px 1rem; } }
 </style>
