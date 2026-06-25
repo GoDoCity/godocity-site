@@ -51,7 +51,42 @@ const hasEvents      = hasSlider || hasList || hasFeaturedAds;
 
 <aside class="articleSidebar">
 
-  <!-- 1 — Newsletter -->
+  <!-- 1 — Premium Ad Inventory (above the fold) -->
+  <div class="railSection sbAdInventory">
+    <div class="railHead">
+      <span class="railTitle">Advertise Here</span>
+      <span class="sbAdRates">2026 Rates</span>
+    </div>
+
+    <div class="sbAdSlot sbAdSlot--vip">
+      <div class="sbAdSlotMeta">
+        <span class="sbAdSlotName">★ VIP Headliner</span>
+        <span class="sbAdSlotPrice">$375/wk</span>
+      </div>
+      <p class="sbAdSlotDesc">Top-of-page placement · 76k+ monthly impressions · Maximum visibility</p>
+      <a href={vipMailto} class="sbAdSlotCta sbAdSlotCta--vip">Reserve Slot →</a>
+    </div>
+
+    <div class="sbAdSlot">
+      <div class="sbAdSlotMeta">
+        <span class="sbAdSlotName">✦ High-Impact</span>
+        <span class="sbAdSlotPrice">$225/wk</span>
+      </div>
+      <p class="sbAdSlotDesc">Mid-page featured placement · Priority positioning · Bold format</p>
+      <a href={hiMailto} class="sbAdSlotCta">Reserve Slot →</a>
+    </div>
+
+    <div class="sbAdSlot">
+      <div class="sbAdSlotMeta">
+        <span class="sbAdSlotName">☉ Content Spotlight</span>
+        <span class="sbAdSlotPrice">$150/wk</span>
+      </div>
+      <p class="sbAdSlotDesc">Native in-content placement · Targeted local audience</p>
+      <a href={spotMailto} class="sbAdSlotCta">Book This Slot →</a>
+    </div>
+  </div>
+
+  <!-- 2 — Newsletter -->
   <div class="nlStickyWrap">
     <div class="nlBox">
       <div class="nlBoxHead"><em>Good News <strong>{cityCap}!</strong></em></div>
@@ -230,40 +265,6 @@ const hasEvents      = hasSlider || hasList || hasFeaturedAds;
     </div>
   </div>
 
-  <!-- 5 — Premium Ad Inventory -->
-  <div class="railSection sbAdInventory">
-    <div class="railHead">
-      <span class="railTitle">Advertise Here</span>
-      <span class="sbAdRates">2026 Rates</span>
-    </div>
-
-    <div class="sbAdSlot sbAdSlot--vip">
-      <div class="sbAdSlotMeta">
-        <span class="sbAdSlotName">★ VIP Headliner</span>
-        <span class="sbAdSlotPrice">$375/wk</span>
-      </div>
-      <p class="sbAdSlotDesc">Top-of-page placement · 76k+ monthly impressions · Maximum visibility</p>
-      <a href={vipMailto} class="sbAdSlotCta sbAdSlotCta--vip">Reserve Slot →</a>
-    </div>
-
-    <div class="sbAdSlot">
-      <div class="sbAdSlotMeta">
-        <span class="sbAdSlotName">✦ High-Impact</span>
-        <span class="sbAdSlotPrice">$225/wk</span>
-      </div>
-      <p class="sbAdSlotDesc">Mid-page featured placement · Priority positioning · Bold format</p>
-      <a href={hiMailto} class="sbAdSlotCta">Reserve Slot →</a>
-    </div>
-
-    <div class="sbAdSlot">
-      <div class="sbAdSlotMeta">
-        <span class="sbAdSlotName">☉ Content Spotlight</span>
-        <span class="sbAdSlotPrice">$150/wk</span>
-      </div>
-      <p class="sbAdSlotDesc">Native in-content placement · Targeted local audience</p>
-      <a href={spotMailto} class="sbAdSlotCta">Book This Slot →</a>
-    </div>
-  </div>
 
 </aside>
 

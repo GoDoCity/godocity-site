@@ -158,6 +158,20 @@ let allEvents = [];
 try { allEvents = await getCollection("events"); } catch { allEvents = []; }
 console.log(`[CLEANUP] Markdown directory is empty: ${allEvents.length === 0}`);
 
+/* ── Sveltia CMS merge: normalise featured:true → sponsored:true so that
+   any event marked "Featured: Yes" in the CMS editor gets top billing.
+   Then hoist those entries to the absolute front of the combined array.    */
+allEvents = allEvents.map((e: any) => ({
+  ...e,
+  data: {
+    ...e.data,
+    sponsored:    e.data.sponsored === true || e.data.featured === true,
+    isHighImpact: e.data.isHighImpact === true,
+  },
+}));
+const localFeatured = allEvents.filter((e: any) => e.data.sponsored === true);
+const localRegular  = allEvents.filter((e: any) => !e.data.sponsored);
+
 /* ── Live engine events — GoDoEVENTS Worker, fetched at build time ───────────
    Replaces the Google Sheets feed. manual-events.json remains a hand-curated
    fallback for events that need to be pinned before the next engine sync.      */
@@ -226,8 +240,8 @@ function sortKey(e: any): string {
   return String(e.data?.eventDate ?? "").split("T")[0] || "9999-99-99";
 }
 
-/* Merge: markdown → manual → engine */
-const allEventsWithLive = [...allEvents, ...manualEvents, ...engineEvents];
+/* Merge: featured-local first → remaining-local → manual → engine */
+const allEventsWithLive = [...localFeatured, ...localRegular, ...manualEvents, ...engineEvents];
 
 /* ── Filter: Greater Daytona area + date >= yesterday, with sponsor override ── */
 const upcomingEvents = allEventsWithLive
@@ -381,7 +395,71 @@ function vibeTag(category?: string): { label: string; type: string } | null {
       ══════════════════════════════════════════ -->
       <main class="evHubMain">
 
-        <!-- ── SECTION 1: GoDo Picks (VIP Row) ── -->
+        <!-- ── TOP-BILLING TICKER: auto-cycles 3 featured events every 4.5 s ── -->
+        {sponsoredEvents.length > 0 && (
+          <section class="topBillingTicker" id="topBillingTicker" aria-label="Top-billed featured events">
+            <div class="tbtTrack">
+              {sponsoredEvents.slice(0, 3).map((e, idx) => {
+                const d      = new Date(e.data.eventDate);
+                const mon    = isNaN(d.getTime()) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+                const day    = isNaN(d.getTime()) ? "??" : d.getDate();
+                const dow    = isNaN(d.getTime()) ? "" : d.toLocaleDateString("en-US", { weekday: "long" });
+                const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
+                const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`;
+                const isExt  = !!e.data.url;
+                const evImg  = e.data.image || CATEGORY_IMG[e.data.category ?? ""] || FALLBACK_IMG;
+                const fbUrl  = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " Daytona")}`;
+                return (
+                  <div class={`tbtSlide${idx === 0 ? " tbtSlide--active" : ""}`} data-tbt-idx={String(idx)}>
+                    <img class="tbtImg" src={evImg} alt={e.data.title}
+                         loading={idx === 0 ? "eager" : "lazy"} decoding="async" />
+                    <div class="tbtGrad" aria-hidden="true" />
+                    <div class="tbtContent">
+                      <div class="tbtDateBox">
+                        <span class="tbtMon">{mon}</span>
+                        <span class="tbtDay">{day}</span>
+                        {dow && <span class="tbtDow">{dow}</span>}
+                      </div>
+                      <div class="tbtText">
+                        <span class="tbtBadge">
+                          <svg width="8" height="8" viewBox="0 0 8 8" fill="none" aria-hidden="true">
+                            <path d="M4 1l.8 1.8L7 3.3l-1.5 1.4.4 2L4 5.8 2.1 6.7l.4-2L1 3.3l2.2-.5L4 1z" fill="currentColor"/>
+                          </svg>
+                          FEATURED
+                        </span>
+                        <h2 class="tbtTitle">{e.data.title}</h2>
+                        {e.data.location && <p class="tbtLoc">{e.data.location}</p>}
+                      </div>
+                      <a class="tbtCta"
+                         href={href}
+                         target={isExt ? "_blank" : "_self"}
+                         rel={isExt ? "noopener noreferrer" : ""}
+                         data-external={isExt ? "true" : undefined}
+                         data-fallback={isExt ? fbUrl : undefined}>
+                        {isExt ? "Get Tickets" : "More Info"}
+                        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                          <path d="M2 5.5h7M5.5 2l3.5 3.5-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            {sponsoredEvents.slice(0, 3).length > 1 && (
+              <div class="tbtDots" id="tbtDots">
+                {sponsoredEvents.slice(0, 3).map((_, idx) => (
+                  <button class={`tbtDot${idx === 0 ? " tbtDot--active" : ""}`}
+                          data-tbt-dot={String(idx)}
+                          type="button"
+                          aria-label={`Go to featured event ${idx + 1}`} />
+                ))}
+              </div>
+            )}
+          </section>
+        )}
+
+      <!-- ── SECTION 1: GoDo Picks (VIP Row) ── -->
         {sponsoredEvents.length > 0 && (
           <section class="evSection godoPicks" aria-label="GoDo Picks">
             <div class="evSectionHead">
@@ -828,6 +906,41 @@ function vibeTag(category?: string): { label: string; type: string } | null {
 </Base>
 
 <script is:inline>
+/* ── Top-Billing Ticker ── */
+(function () {
+  var ticker = document.getElementById("topBillingTicker");
+  if (!ticker) return;
+  var slides   = Array.prototype.slice.call(ticker.querySelectorAll(".tbtSlide"));
+  var dotsWrap = document.getElementById("tbtDots");
+  var dots     = dotsWrap ? Array.prototype.slice.call(dotsWrap.querySelectorAll(".tbtDot")) : [];
+  var total    = slides.length;
+  var current  = 0;
+  if (total <= 1) return;
+
+  function goTo(idx) {
+    slides[current].classList.remove("tbtSlide--active");
+    if (dots[current]) dots[current].classList.remove("tbtDot--active");
+    current = (idx + total) % total;
+    slides[current].classList.add("tbtSlide--active");
+    if (dots[current]) dots[current].classList.add("tbtDot--active");
+  }
+
+  var timer = setInterval(function () { goTo(current + 1); }, 4500);
+
+  dots.forEach(function (dot, i) {
+    dot.addEventListener("click", function () {
+      clearInterval(timer);
+      goTo(i);
+      timer = setInterval(function () { goTo(current + 1); }, 4500);
+    });
+  });
+
+  ticker.addEventListener("mouseenter", function () { clearInterval(timer); });
+  ticker.addEventListener("mouseleave", function () {
+    timer = setInterval(function () { goTo(current + 1); }, 4500);
+  });
+})();
+
 (function () {
   /* ── Pagination + filter ── */
   var PAGE_SIZE = 20;
@@ -952,6 +1065,118 @@ function vibeTag(category?: string): { label: string; type: string } | null {
 </script>
 
 <style>
+  /* ── Top-Billing Ticker ── */
+  .topBillingTicker {
+    position: relative;
+    margin-bottom: 40px;
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,119,190,.18), 0 2px 8px rgba(0,0,0,.10);
+    border: 2px solid color-mix(in srgb, var(--brand1, #0077be) 35%, transparent);
+  }
+  .tbtTrack {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+  .tbtSlide {
+    grid-row: 1; grid-column: 1;
+    position: relative;
+    min-height: 220px;
+    display: flex;
+    align-items: flex-end;
+    opacity: 0;
+    transition: opacity 600ms ease;
+    pointer-events: none;
+  }
+  .tbtSlide--active { opacity: 1; pointer-events: auto; }
+  .tbtImg {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover; display: block;
+  }
+  .tbtGrad {
+    position: absolute; inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(0,0,0,.82) 0%,
+      rgba(0,0,0,.55) 55%,
+      rgba(0,0,0,.18) 100%
+    );
+    pointer-events: none;
+  }
+  .tbtContent {
+    position: relative; z-index: 1;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 22px 26px;
+    flex-wrap: nowrap;
+  }
+  .tbtDateBox {
+    flex-shrink: 0;
+    background: var(--brand1, #0077be);
+    color: #fff;
+    border-radius: 10px;
+    padding: 8px 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    min-width: 54px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.35);
+  }
+  .tbtMon { font-size: 9px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.8); line-height: 1; }
+  .tbtDay { font-size: 26px; font-weight: 900; line-height: 1.1; letter-spacing: -0.02em; color: #fff; }
+  .tbtDow { font-size: 8px; color: rgba(255,255,255,.65); font-weight: 700; white-space: nowrap; margin-top: 1px; }
+  .tbtText { flex: 1; min-width: 0; }
+  .tbtBadge {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(0,119,190,.85);
+    color: #fff;
+    font-size: 8.5px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 999px;
+    margin-bottom: 7px;
+  }
+  .tbtTitle {
+    font-size: clamp(15px, 2vw, 22px);
+    font-weight: 900; color: #fff; line-height: 1.2; margin: 0 0 5px;
+    text-shadow: 0 1px 4px rgba(0,0,0,.4);
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .tbtLoc { font-size: 12.5px; color: rgba(255,255,255,.65); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tbtCta {
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 10px 20px;
+    background: var(--brand1, #0077be); color: #fff;
+    font-size: 12.5px; font-weight: 800;
+    border-radius: 999px; text-decoration: none;
+    transition: background 130ms; white-space: nowrap;
+    box-shadow: 0 2px 14px rgba(0,119,190,.45);
+  }
+  .tbtCta:hover { background: #005fa3; }
+  .tbtDots {
+    position: absolute; bottom: 12px; right: 18px;
+    display: flex; gap: 6px; z-index: 2;
+  }
+  .tbtDot {
+    width: 7px; height: 7px; border-radius: 50%;
+    border: none; padding: 0;
+    background: rgba(255,255,255,.4);
+    cursor: pointer;
+    transition: background 200ms, transform 200ms;
+  }
+  .tbtDot--active { background: #fff; transform: scale(1.3); }
+  @media (max-width: 640px) {
+    .tbtContent { padding: 14px 14px; gap: 10px; flex-wrap: wrap; }
+    .tbtSlide { min-height: 160px; }
+    .tbtCta { font-size: 11px; padding: 8px 14px; }
+    .topBillingTicker { border-radius: 12px; margin-bottom: 28px; }
+  }
+
   /* ── Sticky Add Your Event button ── */
   .evStickyBtn {
     position: fixed;
