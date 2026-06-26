@@ -167,14 +167,14 @@ const carouselPosts = all
    getGreaterDaytonaEvents() uses the module-level singleton + filesystem cache
    in src/lib/events.js — importFromSheet() runs ONCE per build regardless of
    how many topic pages Astro generates.                                       */
-import { getCityEvents } from "../../../lib/events.js";
+import { getMergedCityEvents } from "../../../lib/getMergedCityEvents.ts";
 import { getDisplayName, getShortName } from "../../../lib/cityConfigs.js";
 
 let sponsoredSlides: any[] = [];
 let upcomingEvents: any[] = [];
 try {
-  const allEvents = await getCityEvents(city);
-  sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
+  const allEvents = await getMergedCityEvents(city);
+  sponsoredSlides = allEvents.filter((e: any) =>  e.data.sponsored).slice(0, 5);
   upcomingEvents  = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
 } catch { sponsoredSlides = []; upcomingEvents = []; }
 ---
