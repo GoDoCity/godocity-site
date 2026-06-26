@@ -15,8 +15,8 @@
  */
 import Base from "./Base.astro";
 import { getMergedCityEvents } from "../lib/getMergedCityEvents.ts";
-import { cityDisplayName } from "../lib/events.js";
 import { getShortName } from "../lib/cityConfigs.js";
+import SidebarEventsList from "../components/SidebarEventsList.astro";
 
 interface Props {
   title: string;
@@ -103,48 +103,7 @@ const emoji = topicEmoji[topic] ?? "📖";
             <a class="gl-ev-more" href={`/${cityBase}/events/`}>See all</a>
           </div>
 
-          {!hasEvents ? (
-            <p class="gl-no-events">No upcoming events yet.</p>
-          ) : (
-            <div class="gl-ev-list">
-
-              {/* Flat list — sponsored badge inline, no carousel */}
-              {eventList.map((e: any) => {
-                const d       = new Date(e.data.eventDate);
-                const dow     = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                const day     = d.getDate();
-                const eMon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                const mon     = d.toLocaleDateString("en-US", { month: "short" });
-                const evCity  = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-                const cityLbl = cityDisplayName(evCity);
-                return (
-                  <a
-                    class="gl-ev-row"
-                    href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
-                    target={e.data.url ? "_blank" : "_self"}
-                    rel={e.data.url ? "noopener" : ""}
-                  >
-                    <div class="gl-ev-cal">
-                      <div class="gl-eDow">{dow}</div>
-                      <div class="gl-eDay">{day}</div>
-                      <div class="gl-eMon">{eMon}</div>
-                    </div>
-                    <div class="gl-ev-info">
-                      <div class="gl-ev-name">{e.data.title}</div>
-                      <div class="gl-ev-meta">
-                        <span>{mon} {day}</span>
-                        <span class="gl-ev-sep">|</span>
-                        <span class="gl-ev-city">{cityLbl}</span>
-                        {e.data.sponsored && <span class="gl-sp-badge">SPONSORED</span>}
-                      </div>
-                    </div>
-                  </a>
-                );
-              })}
-
-            </div>
-          )}
-
+          <SidebarEventsList events={eventList} city={cityBase} />
           <a class="gl-submit-ev" href="/submit-event/">+ Submit an event →</a>
         </div>
 
@@ -631,52 +590,6 @@ const emoji = topicEmoji[topic] ?? "📖";
     text-decoration: none;
   }
   .gl-ev-more:hover { text-decoration: underline; }
-
-  .gl-ev-list { display: grid; }
-
-  /* Event row */
-  .gl-ev-row {
-    display: grid;
-    grid-template-columns: 44px 1fr;
-    gap: 10px;
-    align-items: center;
-    text-decoration: none;
-    padding: 11px 0;
-    border-bottom: 1px solid var(--border, var(--text-primary));
-    transition: opacity 140ms;
-  }
-  .gl-ev-row:last-child { border-bottom: none; }
-  .gl-ev-row:hover { opacity: 0.76; }
-
-  /* Shared calendar block */
-  .gl-ev-cal {
-    width: 48px;
-    height: 48px;
-    border-radius: 10px;
-    background: transparent;
-    border: 1px solid var(--brand1);
-    display: grid;
-    place-items: center;
-    text-align: center;
-    line-height: 1;
-  }
-  .gl-eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
-  .gl-eDay { font-size: 19px; font-weight: 900; color: var(--brand1); margin-top: 1px; }
-  .gl-eMon { font-size: 8px;  font-weight: 700; letter-spacing: .08em; color: var(--brand1); text-transform: uppercase; }
-
-  .gl-ev-info { display: flex; flex-direction: column; gap: 2px; }
-  .gl-ev-name { font-weight: 800; font-size: 13px; color: var(--text); line-height: 1.25; }
-  .gl-ev-meta { font-size: 11px; color: var(--faint, rgba(232,237,244,.58)); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-  .gl-ev-sep  { opacity: 0.4; }
-  .gl-ev-city { color: var(--text); font-weight: 700; }
-  .gl-sp-badge {
-    display: inline-block; font-size: 7.5px; font-weight: 900; letter-spacing: .08em;
-    background: rgba(0,0,0,.07); color: var(--text);
-    border: 1px solid var(--line); padding: 1px 4px; border-radius: 999px;
-    white-space: nowrap;
-  }
-
-  .gl-no-events { font-size: 12px; color: var(--faint); padding: 10px 0; margin: 0; }
 
   .gl-submit-ev {
     display: block;

@@ -1,0 +1,150 @@
+---
+/**
+ * SidebarEventsList.astro
+ *
+ * Single source of truth for sidebar event rows across every layout.
+ * Callers pass the already-merged array; this component slices to 6,
+ * renders each row, and applies the tinted-blue card style for sponsored
+ * events — identical on every page that uses it.
+ *
+ * Usage:
+ *   import SidebarEventsList from "./SidebarEventsList.astro";
+ *   <SidebarEventsList events={mergedEvents} city={city} />
+ */
+import { cityDisplayName } from "../lib/events.js";
+
+interface Props {
+  events: any[];
+  city: string;
+}
+
+const { events, city } = Astro.props;
+const list = events.slice(0, 6);
+---
+
+{list.length === 0 ? (
+  <p class="sel-empty">No upcoming events yet.</p>
+) : (
+  <div class="sel-list">
+    {list.map((e: any) => {
+      const d       = new Date(e.data.eventDate);
+      const dow     = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+      const day     = d.getDate();
+      const mon     = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+      const monFull = d.toLocaleDateString("en-US", { month: "short" });
+      const evCity  = (e.data.city ?? (e.slug?.split("/")[0] ?? city)).toLowerCase().trim();
+      const evSlug  = e.slug?.split("/").pop() ?? "";
+      const href    = e.data.url ?? `/${evCity}/events/${evSlug}/`;
+      const cityLbl = cityDisplayName(evCity);
+      return (
+        <a
+          class={`sel-row${e.data.sponsored ? " is-sponsored" : ""}`}
+          href={href}
+          target={e.data.url ? "_blank" : "_self"}
+          rel={e.data.url ? "noopener" : ""}
+        >
+          <div class="sel-cal">
+            <div class="sel-dow">{dow}</div>
+            <div class="sel-day">{day}</div>
+            <div class="sel-mon">{mon}</div>
+          </div>
+          <div class="sel-info">
+            <div class="sel-name">{e.data.title}</div>
+            <div class="sel-meta">
+              <span>{monFull} {day}</span>
+              <span class="sel-sep">|</span>
+              <span class="sel-city">{cityLbl}</span>
+              {e.data.sponsored && <span class="sel-badge">SPONSORED</span>}
+            </div>
+          </div>
+        </a>
+      );
+    })}
+  </div>
+)}
+
+<style>
+  .sel-list { display: grid; }
+
+  .sel-row {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px;
+    align-items: center;
+    text-decoration: none;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border, #e5e7eb);
+    transition: opacity 140ms;
+    border-radius: 0;
+    color: inherit;
+  }
+  .sel-row:last-child { border-bottom: none; }
+  .sel-row:hover { opacity: 0.76; }
+
+  /* Tinted blue card for sponsored rows — matches the homepage slider style */
+  .sel-row.is-sponsored {
+    background: #f0f7ff;
+    border: 1px solid rgba(0, 119, 190, 0.22);
+    border-radius: 8px;
+    padding: 12px 10px;
+    margin: 4px 0 8px;
+  }
+  .sel-row.is-sponsored:last-child { border-bottom: 1px solid rgba(0, 119, 190, 0.22); }
+
+  /* Calendar block */
+  .sel-cal {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: transparent;
+    border: 1.5px solid var(--brand1, #0077be);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .sel-dow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1, #0077be); }
+  .sel-day { font-size: 19px; font-weight: 900; color: var(--brand1, #0077be); margin-top: 1px; }
+  .sel-mon { font-size: 8px;  font-weight: 700; letter-spacing: .08em; color: var(--brand1, #0077be); text-transform: uppercase; }
+
+  /* Text block */
+  .sel-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .sel-name {
+    font-weight: 800;
+    font-size: 14px;
+    line-height: 1.2;
+    color: var(--text, #111);
+    /* Prevent very long titles overflowing */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .sel-meta {
+    font-size: 11.5px;
+    color: var(--faint, #6b7280);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+  .sel-sep   { opacity: 0.4; }
+  .sel-city  { color: var(--brand1, #0077be); font-weight: 700; }
+
+  /* SPONSORED pill badge */
+  .sel-badge {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: .08em;
+    background: rgba(0, 119, 190, 0.14);
+    color: var(--brand1, #0077be);
+    border: 1px solid rgba(0, 119, 190, 0.32);
+    padding: 1px 5px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .sel-empty { font-size: 13px; color: var(--faint, #6b7280); padding: 10px 0; margin: 0; }
+</style>

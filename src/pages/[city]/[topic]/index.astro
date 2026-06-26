@@ -2,6 +2,7 @@
 import Base from "../../../layouts/Base.astro";
 import AdSlot from "../../../components/AdSlot.astro";
 import { getCollection } from "astro:content";
+import SidebarEventsList from "../../../components/SidebarEventsList.astro";
 
 /* ── Tag helpers ── */
 function tagKey(raw) {
@@ -323,41 +324,7 @@ try {
 
           <div class="moduleCard eventsCard">
             <div class="moduleTitle">Upcoming Events</div>
-            {upcomingEvents.length > 0 ? (
-              <div class="eventsList">
-                {upcomingEvents.map((e: any, i: number) => {
-                  const d   = new Date(e.data.eventDate);
-                  const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                  const day = d.getDate();
-                  const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                  const evSlug = e.slug.split("/").pop();
-                  return (
-                    <>
-                      {i > 0 && <div class="eventDivider" aria-hidden="true"></div>}
-                      <a class="eventRow"
-                         href={e.data.url ?? `/${city}/events/${evSlug}/`}
-                         target={e.data.url ? "_blank" : "_self"}
-                         rel={e.data.url ? "noopener" : ""}>
-                        <div class="eventDate">
-                          <div class="eventDow">{dow}</div>
-                          <div class="eventNum">{day}</div>
-                          <div class="eventMon">{mon}</div>
-                        </div>
-                        <div class="eventInfo">
-                          <div class="eventName">{e.data.title}</div>
-                          <div class="eventPlace">
-                            {e.data.location}
-                            {e.data.sponsored && <span class="sponsoredBadge">SPONSORED</span>}
-                          </div>
-                        </div>
-                      </a>
-                    </>
-                  );
-                })}
-              </div>
-            ) : (
-              <p class="noEvents">No upcoming events — check back soon.</p>
-            )}
+            <SidebarEventsList events={upcomingEvents} city={city} />
             <a class="eventsLink" href={`/${city}/events/`}>See all events →</a>
           </div>
         </aside>
@@ -745,36 +712,7 @@ try {
   .newsletterButton:hover { opacity: .82; }
 
   /* ── Sidebar ── */
-  /* Events sidebar */
   .eventsCard { padding: 0; background: none !important; border: none !important; box-shadow: none !important; }
-  .eventsList { margin-top: 10px; display: grid; gap: 8px; }
-  .eventRow {
-    display: grid; grid-template-columns: 48px 1fr;
-    gap: 12px; align-items: center;
-    text-decoration: none;
-  }
-  .eventDate {
-    width: 48px; height: 48px; border-radius: 10px;
-    background: transparent; border: 1px solid var(--brand1);
-    display: grid; place-items: center; text-align: center; line-height: 1;
-    flex-shrink: 0;
-    font-family: "Century Gothic", AppleGothic, Arial, sans-serif;
-  }
-  .eventDow { font-size: 10px; font-weight: 700; letter-spacing: .08em; color: var(--brand1); text-transform: uppercase; line-height: 1; font-family: "Century Gothic", AppleGothic, Arial, sans-serif !important; }
-  .eventNum { font-size: 19px; font-weight: 700; color: var(--brand1); margin-top: 1px; line-height: 1; font-family: "Century Gothic", AppleGothic, Arial, sans-serif !important; }
-  .eventMon { font-size: 8px; font-weight: 700; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; line-height: 1; font-family: "Century Gothic", AppleGothic, Arial, sans-serif !important; }
-  .eventName { font-weight: 800; font-size: 15px; line-height: 1.2; color: var(--text); margin-bottom: 3px; }
-  .eventPlace { opacity: .72; font-size: 13px; color: var(--faint); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
-  .sponsoredBadge {
-    display: inline-block;
-    font-size: 8px; font-weight: 900; letter-spacing: .08em;
-    background: rgba(0,119,190,.18); color: var(--brand1);
-    border: 1px solid rgba(0,119,190,.35);
-    padding: 1px 5px; border-radius: 999px;
-    white-space: nowrap; opacity: 1;
-  }
-  .eventDivider { height: 1px; background: rgba(255,255,255,.08); border-radius: 999px; }
-  .noEvents { font-size: 13px; color: var(--faint); padding: 10px 0 4px; margin: 0; }
   .eventsLink {
     display: block; margin-top: 12px;
     font-size: 13px; font-weight: 700; color: var(--link);
