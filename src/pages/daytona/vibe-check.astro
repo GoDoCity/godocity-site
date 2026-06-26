@@ -1,14 +1,10 @@
 ---
 import Base from "../../layouts/Base.astro";
 import SidebarPoll from "../../components/SidebarPoll.astro";
-import { getGreaterDaytonaEvents, cityDisplayName } from "../../lib/events.js";
+import SidebarEventsList from "../../components/SidebarEventsList.astro";
+import { getMergedCityEvents } from "../../lib/getMergedCityEvents.ts";
 
-const allEvents      = await getGreaterDaytonaEvents();
-const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
-const regularList     = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 4);
-const hasSlider  = sponsoredSlides.length > 0;
-const hasList    = regularList.length > 0;
-const hasEvents  = hasSlider || hasList;
+const eventList = await getMergedCityEvents("daytona");
 ---
 
 <Base title="Vibe Check | GoDo Daytona" subtitle="Community polls for Daytona" cityBase="daytona">
@@ -115,94 +111,21 @@ const hasEvents  = hasSlider || hasList;
             <span class="vRailTitle">Upcoming Events</span>
             <a class="vRailMore" href="/daytona/events/">See all</a>
           </div>
-
-          {!hasEvents ? (
-            <p class="vNoEvents">No upcoming events yet.</p>
-          ) : (
-            <div class="vEventList">
-
-              {hasSlider && (
-                <div class="vEvSlider" id="vcSlider" aria-label="Featured sponsored events">
-                  {sponsoredSlides.map((e: any, idx: number) => {
-                    const d       = new Date(e.data.eventDate);
-                    const dow     = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                    const day     = d.getDate();
-                    const eMon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                    const mon     = d.toLocaleDateString("en-US", { month: "short" });
-                    const evCity  = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-                    const cityLabel = cityDisplayName(evCity);
-                    return (
-                      <a class={`vEvSlide${idx === 0 ? " vEvSlide--active" : ""}`}
-                         href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
-                         target={e.data.url ? "_blank" : "_self"}
-                         rel={e.data.url ? "noopener" : ""}
-                         aria-hidden={idx !== 0 ? "true" : undefined}
-                         data-vc-slide-idx={String(idx)}>
-                        <div class="vEventCal">
-                          <div class="veDow">{dow}</div>
-                          <div class="veDay">{day}</div>
-                          <div class="veMon">{eMon}</div>
-                        </div>
-                        <div class="veInfo">
-                          <div class="veName">{e.data.title}</div>
-                          <div class="vePlace">
-                            <span>{mon} {day}</span>
-                            <span class="veCSep">|</span>
-                            <span class="veCityName">{cityLabel}</span>
-                            <span class="veSponBadge">SPONSORED</span>
-                          </div>
-                        </div>
-                      </a>
-                    );
-                  })}
-                  {sponsoredSlides.length > 1 && (
-                    <div class="vcDots" id="vcDots">
-                      {sponsoredSlides.map((_: any, idx: number) => (
-                        <button
-                          class={`vcDot${idx === 0 ? " vcDot--active" : ""}`}
-                          aria-label={`Go to slide ${idx + 1}`}
-                          data-vc-dot={String(idx)}
-                          type="button"
-                        ></button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {hasList && regularList.map((e: any) => {
-                const d       = new Date(e.data.eventDate);
-                const dow     = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                const day     = d.getDate();
-                const eMon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                const mon     = d.toLocaleDateString("en-US", { month: "short" });
-                const evCity  = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-                const cityLabel = cityDisplayName(evCity);
-                return (
-                  <a class="vEventRow"
-                     href={e.data.url ?? `/${e.data.city ?? evCity}/events/${e.slug.split("/").pop()}/`}
-                     target={e.data.url ? "_blank" : "_self"}
-                     rel={e.data.url ? "noopener" : ""}>
-                    <div class="vEventCal">
-                      <div class="veDow">{dow}</div>
-                      <div class="veDay">{day}</div>
-                      <div class="veMon">{eMon}</div>
-                    </div>
-                    <div class="veInfo">
-                      <div class="veName">{e.data.title}</div>
-                      <div class="vePlace">
-                        <span>{mon} {day}</span>
-                        <span class="veCSep">|</span>
-                        <span class="veCityName">{cityLabel}</span>
-                      </div>
-                    </div>
-                  </a>
-                );
-              })}
-
-            </div>
-          )}
+          <SidebarEventsList events={eventList} city="daytona" />
           <a class="vSubmitEventLink" href="/submit-event/">+ Submit an event →</a>
+        </div>
+
+        <!-- Display Ad -->
+        <div class="displayAdSlot">
+          <div class="adSlotLabel">Advertisement</div>
+          <a class="displayAdCard" href="/daytona/advertise/">
+            <div class="displayAdInner">
+              <div class="displayAdIcon">📢</div>
+              <div class="displayAdTitle">Your Ad Here</div>
+              <div class="displayAdDesc">Reach thousands of Daytona locals</div>
+              <div class="displayAdCta">Advertise with us →</div>
+            </div>
+          </a>
         </div>
 
       </aside>
@@ -210,36 +133,6 @@ const hasEvents  = hasSlider || hasList;
 
   </div>
 </Base>
-
-<script>
-  /* ── Vibe Check page sidebar slider ── */
-  (function () {
-    var slider = document.getElementById("vcSlider");
-    if (!slider) return;
-    var slides  = Array.prototype.slice.call(slider.querySelectorAll(".vEvSlide"));
-    var dotsEl  = document.getElementById("vcDots");
-    var dots    = dotsEl ? Array.prototype.slice.call(dotsEl.querySelectorAll(".vcDot")) : [];
-    var current = 0;
-    var total   = slides.length;
-    var timer: ReturnType<typeof setInterval> | null = null;
-    if (total <= 1) return;
-    function goTo(idx: number) {
-      slides[current].classList.remove("vEvSlide--active");
-      slides[current].setAttribute("aria-hidden", "true");
-      if (dots[current]) dots[current].classList.remove("vcDot--active");
-      current = (idx + total) % total;
-      slides[current].classList.add("vEvSlide--active");
-      slides[current].removeAttribute("aria-hidden");
-      if (dots[current]) dots[current].classList.add("vcDot--active");
-    }
-    function startAuto() { timer = setInterval(function () { goTo(current + 1); }, 5000); }
-    function resetAuto() { if (timer) clearInterval(timer); startAuto(); }
-    dots.forEach(function (dot, i) { dot.addEventListener("click", function () { goTo(i); resetAuto(); }); });
-    slider.addEventListener("mouseenter", function () { if (timer) clearInterval(timer); });
-    slider.addEventListener("mouseleave", startAuto);
-    startAuto();
-  })();
-</script>
 
 <style>
   .vibeWrap {
@@ -477,73 +370,6 @@ const hasEvents  = hasSlider || hasList;
   }
   .vRailMore { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
   .vRailMore:hover { text-decoration: underline; }
-
-  /* ── Events list ── */
-  .vEventList { display: grid; }
-
-  /* ── Sponsored slider ── */
-  .vEvSlider {
-    display: grid;
-    grid-template-columns: 1fr;
-    margin-bottom: 4px;
-    border-bottom: 1px solid var(--border);
-  }
-  .vEvSlide {
-    grid-row: 1;
-    grid-column: 1;
-    display: grid; grid-template-columns: 44px 1fr; gap: 10px;
-    align-items: center; text-decoration: none;
-    padding: 12px 8px;
-    background: rgba(249,217,0,.06);
-    border-radius: 8px;
-    margin: 8px -6px 0;
-    opacity: 0;
-    transition: opacity 500ms ease;
-    pointer-events: none;
-  }
-  .vEvSlide--active { opacity: 1; pointer-events: auto; }
-  .vcDots { grid-row: 2; grid-column: 1; display: flex; gap: 5px; justify-content: center; padding: 8px 0 4px; }
-  .vcDot {
-    width: 6px; height: 6px; border-radius: 50%;
-    border: none; padding: 0;
-    background: var(--border, rgba(255,255,255,.25));
-    cursor: pointer; transition: background 200ms, transform 200ms;
-  }
-  .vcDot--active { background: var(--brand1); transform: scale(1.3); }
-
-  /* ── Regular event rows ── */
-  .vEventRow {
-    display: grid; grid-template-columns: 44px 1fr; gap: 10px;
-    align-items: center; text-decoration: none;
-    padding: 12px 0; border-bottom: 1px solid var(--border);
-    transition: opacity 140ms;
-  }
-  .vEventRow:last-child { border-bottom: none; }
-  .vEventRow:hover { opacity: .76; }
-
-  .vEventCal {
-    width: 44px; height: 44px; border-radius: 10px;
-    background: var(--pillBg); border: 1px solid var(--pillBorder);
-    display: grid; place-items: center; text-align: center; line-height: 1;
-    flex-shrink: 0;
-  }
-  .veDow { font-size: 9px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
-  .veDay { font-size: 17px; font-weight: 900; color: var(--text); margin-top: 1px; }
-  .veMon { font-size: 7px; font-weight: 700; letter-spacing: .08em; color: var(--faint); text-transform: uppercase; }
-  .veInfo { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .veName { font-weight: 800; font-size: 14px; color: var(--text); line-height: 1.2; }
-  .vePlace { font-size: 11px; color: var(--faint); display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-  .veCSep { opacity: .4; }
-  .veCityName { color: var(--brand1); font-weight: 700; }
-  .vNoEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
-  .veSponBadge {
-    display: inline-block;
-    font-size: 8px; font-weight: 900; letter-spacing: .08em;
-    background: rgba(249,217,0,.18); color: var(--brand1);
-    border: 1px solid rgba(249,217,0,.35);
-    padding: 1px 5px; border-radius: 999px;
-    white-space: nowrap;
-  }
   .vSubmitEventLink {
     display: block; margin-top: 10px;
     font-size: 12px; font-weight: 700;
@@ -551,6 +377,33 @@ const hasEvents  = hasSlider || hasList;
     opacity: .85; transition: opacity 120ms;
   }
   .vSubmitEventLink:hover { opacity: 1; }
+
+  /* ── Display Ad ── */
+  .displayAdSlot { display: grid; gap: 5px; }
+  .adSlotLabel {
+    font-size: 8.5px; font-weight: 700; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--faint); text-align: center;
+  }
+  .displayAdCard {
+    display: block; text-decoration: none;
+    border-radius: 14px; overflow: hidden;
+    border: 1.5px dashed var(--border);
+    transition: border-color 140ms, box-shadow 140ms;
+  }
+  .displayAdCard:hover {
+    border-color: var(--brand1);
+    box-shadow: 0 0 0 1px rgba(0,119,190,.15);
+  }
+  .displayAdInner {
+    padding: 28px 20px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    text-align: center;
+    background: var(--pillBg);
+  }
+  .displayAdIcon { font-size: 28px; line-height: 1; }
+  .displayAdTitle { font-size: 15px; font-weight: 900; color: var(--text); }
+  .displayAdDesc  { font-size: 12.5px; color: var(--faint); }
+  .displayAdCta   { font-size: 12.5px; font-weight: 700; color: var(--brand1); margin-top: 4px; }
 
   /* ── Pulse Partners ── */
   .vPulsePartner { display: grid; gap: 0; }
@@ -606,20 +459,6 @@ const hasEvents  = hasSlider || hasList;
 
   /* Past poll winner text → Deep Slate instead of yellow */
   :global(html[data-theme="clean-white"]) .vibePastWinner { color: #374151; }
-
-  /* Sidebar event calendar day-of-week + city name → Deep Slate */
-  :global(html[data-theme="clean-white"]) .veDow { color: #374151; }
-  :global(html[data-theme="clean-white"]) .veCityName { color: #374151; }
-
-  /* Sponsored badge → legible on white */
-  :global(html[data-theme="clean-white"]) .veSponBadge {
-    background: rgba(55,65,81,.08);
-    color: #374151;
-    border-color: rgba(55,65,81,.25);
-  }
-
-  /* "Submit an event" link → Deep Slate */
-  :global(html[data-theme="clean-white"]) .vSubmitEventLink { color: #374151; }
 
   /* Pulse partner hover ring → neutral instead of yellow glow */
   :global(html[data-theme="clean-white"]) .vppCard:hover {
