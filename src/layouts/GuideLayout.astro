@@ -14,8 +14,9 @@
  * Sidebar:  mini newsletter sign-up (sticky) + upcoming events list
  */
 import Base from "./Base.astro";
+import { getCollection } from "astro:content";
 import { getCityEvents, cityDisplayName } from "../lib/events.js";
-import { getShortName } from "../lib/cityConfigs.js";
+import { getShortName, getCityConfig } from "../lib/cityConfigs.js";
 
 interface Props {
   title: string;
@@ -29,9 +30,37 @@ interface Props {
 const { title, subtitle, cityBase = "daytona", topic = "", showToC = false, hideHeader = false } = Astro.props;
 
 /* ── Events for sidebar ── */
-const allEvents       = await getCityEvents(cityBase);
-const sponsoredSlides = allEvents.filter((e: any) => e.data.sponsored === true).slice(0, 5);
-const regularList     = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
+const allEvents = await getCityEvents(cityBase);
+
+/* Merge Sveltia CMS events — same logic as ArticleSidebar.astro.
+   CMS sponsored events (featured:true or sponsored:true) lead the feed. */
+let _cmsEvents: any[] = [];
+try {
+  const cityConfig   = getCityConfig(cityBase);
+  const regionCities = cityConfig?.regionCities ?? new Set([String(cityBase).toLowerCase()]);
+  const _allLocal    = await getCollection("events");
+  _cmsEvents = (_allLocal as any[])
+    .filter((e: any) => regionCities.has((e.data.city ?? "").toLowerCase().trim()))
+    .map((e: any) => ({
+      ...e,
+      data: { ...e.data, sponsored: e.data.sponsored === true || e.data.featured === true },
+    }));
+} catch { /* CMS unavailable — fall back to engine-only */ }
+
+const _seen = new Set<string>();
+const mergedEvents: any[] = [
+  ..._cmsEvents.filter((e: any) =>  e.data.sponsored),
+  ..._cmsEvents.filter((e: any) => !e.data.sponsored),
+  ...allEvents,
+].filter((e: any) => {
+  const t = (e.data.title ?? "").toLowerCase().trim();
+  if (_seen.has(t)) return false;
+  _seen.add(t);
+  return true;
+});
+
+const sponsoredSlides = mergedEvents.filter((e: any) =>  e.data.sponsored).slice(0, 5);
+const regularList     = mergedEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
 const hasSlider = sponsoredSlides.length > 0;
 const hasList   = regularList.length > 0;
 const hasEvents = hasSlider || hasList;
