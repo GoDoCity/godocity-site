@@ -170,13 +170,10 @@ const carouselPosts = all
 import { getMergedCityEvents } from "../../../lib/getMergedCityEvents.ts";
 import { getDisplayName, getShortName } from "../../../lib/cityConfigs.js";
 
-let sponsoredSlides: any[] = [];
 let upcomingEvents: any[] = [];
 try {
-  const allEvents = await getMergedCityEvents(city);
-  sponsoredSlides = allEvents.filter((e: any) =>  e.data.sponsored).slice(0, 5);
-  upcomingEvents  = allEvents.filter((e: any) => !e.data.sponsored).slice(0, 3);
-} catch { sponsoredSlides = []; upcomingEvents = []; }
+  upcomingEvents = (await getMergedCityEvents(city)).slice(0, 6);
+} catch { upcomingEvents = []; }
 ---
 
 <Base title={topic === "diy" ? "DIY" : `${topicLabelStr} | GoDo${cityCap}`} cityBase={city}>
@@ -324,54 +321,11 @@ try {
             <div class="moduleFineprint">100% free. Unsubscribe anytime.</div>
           </div>
 
-          {sponsoredSlides.length > 0 && (
-            <div class="moduleCard sideEventsCarousel">
-              <div class="moduleTitle">Featured Events</div>
-              <div class="sideEvSlider" id="topicSlider">
-                {sponsoredSlides.map((e: any, idx: number) => {
-                  const d   = new Date(e.data.eventDate);
-                  const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                  const day = d.getDate();
-                  const mon = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                  const evSlug = e.slug.split("/").pop();
-                  return (
-                    <a class={`sideEvSlide${idx === 0 ? " sideEvSlide--active" : ""}`}
-                       href={e.data.url ?? `/${city}/events/${evSlug}/`}
-                       target={e.data.url ? "_blank" : "_self"}
-                       rel={e.data.url ? "noopener" : ""}
-                       aria-hidden={idx !== 0 ? "true" : undefined}
-                       data-slide-idx={String(idx)}>
-                      <div class="eventDate">
-                        <div class="eventDow">{dow}</div>
-                        <div class="eventNum">{day}</div>
-                        <div class="eventMon">{mon}</div>
-                      </div>
-                      <div class="eventInfo">
-                        <div class="eventName">{e.data.title}</div>
-                        <div class="eventPlace">{e.data.location}</div>
-                      </div>
-                    </a>
-                  );
-                })}
-                {sponsoredSlides.length > 1 && (
-                  <div class="sbDots" id="topicSliderDots">
-                    {sponsoredSlides.map((_: any, idx: number) => (
-                      <button class={`sbDot${idx === 0 ? " sbDot--active" : ""}`}
-                              aria-label={`Go to slide ${idx + 1}`}
-                              data-sb-dot={String(idx)}
-                              type="button"></button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
           <div class="moduleCard eventsCard">
             <div class="moduleTitle">Upcoming Events</div>
             {upcomingEvents.length > 0 ? (
               <div class="eventsList">
-                {upcomingEvents.map((e, i) => {
+                {upcomingEvents.map((e: any, i: number) => {
                   const d   = new Date(e.data.eventDate);
                   const dow = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
                   const day = d.getDate();
@@ -391,7 +345,10 @@ try {
                         </div>
                         <div class="eventInfo">
                           <div class="eventName">{e.data.title}</div>
-                          <div class="eventPlace">{e.data.location}</div>
+                          <div class="eventPlace">
+                            {e.data.location}
+                            {e.data.sponsored && <span class="sponsoredBadge">SPONSORED</span>}
+                          </div>
                         </div>
                       </a>
                     </>
@@ -807,7 +764,15 @@ try {
   .eventNum { font-size: 19px; font-weight: 700; color: var(--brand1); margin-top: 1px; line-height: 1; font-family: "Century Gothic", AppleGothic, Arial, sans-serif !important; }
   .eventMon { font-size: 8px; font-weight: 700; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; line-height: 1; font-family: "Century Gothic", AppleGothic, Arial, sans-serif !important; }
   .eventName { font-weight: 800; font-size: 15px; line-height: 1.2; color: var(--text); margin-bottom: 3px; }
-  .eventPlace { opacity: .72; font-size: 13px; color: var(--faint); }
+  .eventPlace { opacity: .72; font-size: 13px; color: var(--faint); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .sponsoredBadge {
+    display: inline-block;
+    font-size: 8px; font-weight: 900; letter-spacing: .08em;
+    background: rgba(0,119,190,.18); color: var(--brand1);
+    border: 1px solid rgba(0,119,190,.35);
+    padding: 1px 5px; border-radius: 999px;
+    white-space: nowrap; opacity: 1;
+  }
   .eventDivider { height: 1px; background: rgba(255,255,255,.08); border-radius: 999px; }
   .noEvents { font-size: 13px; color: var(--faint); padding: 10px 0 4px; margin: 0; }
   .eventsLink {
@@ -816,52 +781,6 @@ try {
     text-decoration: none;
   }
   .eventsLink:hover { text-decoration: underline; }
-
-  /* ── Sidebar Featured Events Carousel ── */
-  .sideEventsCarousel { padding: 0; background: none !important; border: none !important; box-shadow: none !important; }
-  .sideEvSlider {
-    display: grid;
-    grid-template-columns: 1fr;
-    margin-top: 8px;
-  }
-  .sideEvSlide {
-    grid-row: 1;
-    grid-column: 1;
-    display: grid;
-    grid-template-columns: 44px 1fr;
-    gap: 12px;
-    align-items: center;
-    text-decoration: none;
-    padding: 10px 8px;
-    background: rgba(0,119,190,.06);
-    border-radius: 10px;
-    opacity: 0;
-    transition: opacity 500ms ease;
-    pointer-events: none;
-  }
-  .sideEvSlide--active {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .sbDots {
-    grid-row: 2;
-    grid-column: 1;
-    display: flex;
-    gap: 5px;
-    justify-content: center;
-    padding: 8px 0 2px;
-  }
-  .sbDot {
-    width: 6px; height: 6px; border-radius: 50%;
-    border: none; padding: 0;
-    background: rgba(255,255,255,.20);
-    cursor: pointer;
-    transition: background 200ms, transform 200ms;
-  }
-  .sbDot--active {
-    background: var(--brand1);
-    transform: scale(1.3);
-  }
 </style>
 
 <script is:inline>
@@ -884,34 +803,5 @@ try {
   if (next && track) next.addEventListener("click", function () { track.scrollBy({ left: track.offsetWidth * 0.85, behavior: "smooth" }); });
   if (prev && track) prev.addEventListener("click", function () { track.scrollBy({ left: -track.offsetWidth * 0.85, behavior: "smooth" }); });
 
-  /* Sidebar Featured Events Slider */
-  (function () {
-    var slider = document.getElementById("topicSlider");
-    if (!slider) return;
-    var slides  = Array.prototype.slice.call(slider.querySelectorAll(".sideEvSlide"));
-    var dotsEl  = document.getElementById("topicSliderDots");
-    var dots    = dotsEl ? Array.prototype.slice.call(dotsEl.querySelectorAll(".sbDot")) : [];
-    var current = 0;
-    var total   = slides.length;
-    var timer   = null;
-    if (total <= 1) return;
-    function goTo(idx) {
-      slides[current].classList.remove("sideEvSlide--active");
-      slides[current].setAttribute("aria-hidden", "true");
-      if (dots[current]) dots[current].classList.remove("sbDot--active");
-      current = (idx + total) % total;
-      slides[current].classList.add("sideEvSlide--active");
-      slides[current].removeAttribute("aria-hidden");
-      if (dots[current]) dots[current].classList.add("sbDot--active");
-    }
-    function startAuto() { timer = setInterval(function () { goTo(current + 1); }, 5000); }
-    function resetAuto() { if (timer) clearInterval(timer); startAuto(); }
-    dots.forEach(function (dot, i) {
-      dot.addEventListener("click", function () { goTo(i); resetAuto(); });
-    });
-    slider.addEventListener("mouseenter", function () { if (timer) clearInterval(timer); });
-    slider.addEventListener("mouseleave", startAuto);
-    startAuto();
-  })();
 })();
 </script>
