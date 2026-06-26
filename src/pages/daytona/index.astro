@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import InteractiveMap from "../../components/InteractiveMap.astro";
 import NewsletterBanner from "../../components/NewsletterBanner.astro";
 import AdSlot from "../../components/AdSlot.astro";
+import SidebarEventsList from "../../components/SidebarEventsList.astro";
 import { getCollection } from "astro:content";
 import { cityDisplayName, GREATER_DAYTONA } from "../../lib/events.js";
 import { getCityConfig } from "../../lib/cityConfigs.js";
@@ -161,9 +162,7 @@ const allDaytonaMerged: any[] = [
   return true;
 });
 
-/* Home sidebar: sponsored slider (up to 5) + up to 3 regular events */
-const homeSponsored = allDaytonaMerged.filter((e: any) => e.data.sponsored === true).slice(0, 5);
-const homeRegular   = allDaytonaMerged.filter((e: any) => !e.data.sponsored).slice(0, 3);
+/* Home sidebar events — passed directly to SidebarEventsList (slices to 6 internally) */
 
 /* Map pins — events with valid non-ocean coordinates */
 const homePins = allDaytona
@@ -531,88 +530,7 @@ const guideCards = guideHero
               <a class="railMore" href="/daytona/events/">See all</a>
             </div>
 
-            {(homeSponsored.length === 0 && homeRegular.length === 0) ? (
-              <p class="noEvents">No upcoming events — check back soon.</p>
-            ) : (
-              <div class="eventList">
-
-                {/* ── Smart Slider: sponsored events, fades every 5 s ── */}
-                {homeSponsored.length > 0 && (
-                  <div class="evSlider" id="homeSlider" aria-label="Featured sponsored events">
-                    {homeSponsored.map((e: any, idx: number) => {
-                      const d      = new Date(e.data.eventDate);
-                      const dow    = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                      const day    = d.getDate();
-                      const eMon   = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                      const mon    = d.toLocaleDateString("en-US", { month: "short" });
-                      const evCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-                      const evSlug = e.slug.split("/").pop();
-                      return (
-                        <a class={`evSlide${idx === 0 ? " evSlide--active" : ""}`}
-                           href={e.data.url ?? `/daytona/events/${evSlug}/`}
-                           target={e.data.url ? "_blank" : "_self"}
-                           rel={e.data.url ? "noopener" : ""}
-                           aria-hidden={idx !== 0 ? "true" : undefined}
-                           data-slide-idx={String(idx)}>
-                          <div class="eventCal">
-                            <div class="eDow">{dow}</div>
-                            <div class="eDay">{day}</div>
-                            <div class="eMon">{eMon}</div>
-                          </div>
-                          <div class="eventInfo">
-                            <div class="eName">{e.data.title}</div>
-                            <div class="ePlace">
-                              <span>{mon} {day}</span>
-                              <span class="evCitySep">|</span>
-                              <span class="evCityName">{cityDisplayName(evCity)}</span>
-                              <span class="evSrcBadge evSrcBadge--featured">Sponsored</span>
-                            </div>
-                          </div>
-                        </a>
-                      );
-                    })}
-                    {homeSponsored.length > 1 && (
-                      <div class="sbDots" id="homeDots">
-                        {homeSponsored.map((_: any, idx: number) => (
-                          <button
-                            class={`sbDot${idx === 0 ? " sbDot--active" : ""}`}
-                            aria-label={`Go to slide ${idx + 1}`}
-                            data-sb-dot={String(idx)}
-                            type="button"
-                          ></button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-
-                {/* ── Static list: regular upcoming events ── */}
-                {homeRegular.map((e: any) => {
-                  const d      = new Date(e.data.eventDate);
-                  const dow    = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-                  const day    = d.getDate();
-                  const mon    = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-                  const evSlug = e.slug.split("/").pop();
-                  return (
-                    <a class="eventRow"
-                       href={e.data.url ?? `/daytona/events/${evSlug}/`}
-                       target={e.data.url ? "_blank" : "_self"}
-                       rel={e.data.url ? "noopener" : ""}>
-                      <div class="eventCal">
-                        <div class="eDow">{dow}</div>
-                        <div class="eDay">{day}</div>
-                        <div class="eMon">{mon}</div>
-                      </div>
-                      <div class="eventInfo">
-                        <div class="eName">{e.data.title}</div>
-                        <div class="ePlace">{e.data.location}</div>
-                      </div>
-                    </a>
-                  );
-                })}
-
-              </div>
-            )}
+            <SidebarEventsList events={allDaytonaMerged} city="daytona" />
           </div>
 
           <div class="displayAdSlot">
@@ -1316,71 +1234,6 @@ const guideCards = guideHero
     .railMore { font-size: 13px; font-weight: 700; color: var(--link); text-decoration: none; }
     .railMore:hover { text-decoration: underline; }
 
-    /* Events — dividers only, no boxes */
-    .eventList { display: grid; }
-    .eventRow {
-      display: grid; grid-template-columns: 48px 1fr;
-      gap: 12px; align-items: center; text-decoration: none;
-      padding: 13px 0; border-bottom: 1px solid var(--border);
-      transition: opacity 140ms;
-    }
-    .eventRow:hover { opacity: .76; }
-    .eventCal {
-      width: 48px; height: 48px; border-radius: 10px;
-      background: transparent; border: 1px solid var(--brand1);
-      display: grid; place-items: center; text-align: center; line-height: 1;
-    }
-    .eDow { font-size: 10px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: var(--brand1); }
-    .eDay { font-size: 19px; font-weight: 900; color: var(--brand1); margin-top: 1px; }
-    .eMon { font-size: 8px; font-weight: 700; color: var(--brand1); text-transform: uppercase; letter-spacing: .06em; }
-    .eName { font-weight: 800; font-size: 15px; color: var(--text); line-height: 1.2; }
-    .ePlace { font-size: 13px; color: var(--faint); margin-top: 2px; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-    .evCitySep { opacity: .4; }
-    .evCityName { color: var(--brand1); font-weight: 700; }
-    .evSrcBadge {
-      display: inline-block;
-      font-size: 9px; font-weight: 700; letter-spacing: .04em;
-      padding: 1px 6px; border-radius: 999px; white-space: nowrap;
-    }
-    .evSrcBadge--featured {
-      background: #f0f7ff; color: var(--brand1);
-      border: 1px solid rgba(0,119,190,.3);
-    }
-    .evSrcBadge--community {
-      background: rgba(255,255,255,.06); color: var(--muted);
-      border: 1px solid rgba(255,255,255,.12);
-    }
-    /* ── Upcoming Events Smart Slider ── */
-    .evSlider {
-      display: grid;
-      grid-template-columns: 1fr;
-      margin-bottom: 4px;
-      border-bottom: 1px solid var(--border);
-    }
-    .evSlide {
-      grid-row: 1;
-      grid-column: 1;
-      display: grid; grid-template-columns: 48px 1fr; gap: 12px;
-      align-items: center; text-decoration: none;
-      padding: 13px 10px;
-      background: #f0f7ff;
-      border-radius: 8px;
-      margin: 8px -8px 0;
-      opacity: 0;
-      transition: opacity 500ms ease;
-      pointer-events: none;
-    }
-    .evSlide--active { opacity: 1; pointer-events: auto; }
-    .sbDots { grid-row: 2; grid-column: 1; display: flex; gap: 5px; justify-content: center; padding: 8px 0 4px; }
-    .sbDot {
-      width: 6px; height: 6px; border-radius: 50%;
-      border: none; padding: 0;
-      background: rgba(128,128,128,.25);
-      cursor: pointer; transition: background 200ms, transform 200ms;
-    }
-    .sbDot--active { background: var(--brand1); transform: scale(1.3); }
-    .noEvents { font-size: 13px; color: var(--faint); padding: 12px 0; margin: 0; }
-
     /* Display ad */
     .displayAdSlot { display: grid; gap: 5px; }
     .adSlotLabel {
@@ -1504,8 +1357,6 @@ const guideCards = guideHero
     :global(html[data-theme="clean-white"]) .cardKicker { color: #374151; }
     :global(html[data-theme="clean-white"]) .latestKicker { color: #374151; }
 
-    /* Sidebar event calendar city name → Deep Slate */
-    :global(html[data-theme="clean-white"]) .evCityName { color: #374151; }
 
     /* Section header accent lines → light grey instead of neon yellow */
     :global(html[data-theme="clean-white"]) .railHead { border-bottom-color: #E5E7EB; }
@@ -1564,34 +1415,5 @@ const guideCards = guideHero
     })();
   </script>
   <script is:inline>
-    /* ── Home Sidebar Smart Slider ── */
-    (function () {
-      var slider = document.getElementById("homeSlider");
-      if (!slider) return;
-      var slides  = Array.prototype.slice.call(slider.querySelectorAll(".evSlide"));
-      var dotsEl  = document.getElementById("homeDots");
-      var dots    = dotsEl ? Array.prototype.slice.call(dotsEl.querySelectorAll(".sbDot")) : [];
-      var current = 0;
-      var total   = slides.length;
-      var timer   = null;
-      if (total <= 1) return;
-      function goTo(idx) {
-        slides[current].classList.remove("evSlide--active");
-        slides[current].setAttribute("aria-hidden", "true");
-        if (dots[current]) { dots[current].classList.remove("sbDot--active"); }
-        current = (idx + total) % total;
-        slides[current].classList.add("evSlide--active");
-        slides[current].removeAttribute("aria-hidden");
-        if (dots[current]) { dots[current].classList.add("sbDot--active"); }
-      }
-      function startAuto() { timer = setInterval(function () { goTo(current + 1); }, 5000); }
-      function resetAuto() { if (timer) clearInterval(timer); startAuto(); }
-      dots.forEach(function (dot, i) {
-        dot.addEventListener("click", function () { goTo(i); resetAuto(); });
-      });
-      slider.addEventListener("mouseenter", function () { if (timer) clearInterval(timer); });
-      slider.addEventListener("mouseleave", startAuto);
-      startAuto();
-    })();
   </script>
 </Base>
