@@ -1,4 +1,6 @@
 ---
+export const prerender = false;
+
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import manualFeedData from "../../../data/manual-events.json";
@@ -172,19 +174,27 @@ allEvents = allEvents.map((e: any) => ({
 const localFeatured = allEvents.filter((e: any) => e.data.sponsored === true);
 const localRegular  = allEvents.filter((e: any) => !e.data.sponsored);
 
-/* ── Live engine events — GoDoEVENTS Worker, fetched at build time ───────────
-   Replaces the Google Sheets feed. manual-events.json remains a hand-curated
-   fallback for events that need to be pinned before the next engine sync.      */
+/* ── Live engine events — GoDoEVENTS Worker, fetched at request time ─────────
+   ENGINE_URL is resolved from the Cloudflare runtime env (SSR) so the URL is
+   never baked into the bundle at build time. Cache-Control: no-store ensures
+   Cloudflare's edge never serves stale event data.                             */
+Astro.response.headers.set("Cache-Control", "no-store");
+
 let engineEvents: any[] = [];
 try {
+  const _runtimeEngineUrl: string | undefined = (Astro.locals as any).runtime?.env?.ENGINE_URL;
+  const _engineBase = (_runtimeEngineUrl ?? import.meta.env.ENGINE_URL ?? "https://godoevents-engine.yellowcabking.workers.dev").replace(/\/$/, "");
   const _today = new Date();
   _today.setUTCHours(0, 0, 0, 0);
   const _from = _today.toISOString();
-  const _res = await fetch(
-    `https://godoevents-engine.yellowcabking.workers.dev/api/events?market=daytona&limit=200&from=${encodeURIComponent(_from)}`
-  );
+  const _apiUrl = `${_engineBase}/api/events?market=daytona&limit=200&from=${encodeURIComponent(_from)}`;
+  console.log(`[daytona/events] ENGINE_BASE: ${_engineBase}`);
+  console.log(`[daytona/events] Fetching: ${_apiUrl}`);
+  const _res = await fetch(_apiUrl, { cache: "no-store", cf: { cacheTtl: 0, cacheEverything: false } } as RequestInit);
+  console.log(`[daytona/events] Engine HTTP status: ${_res.status}`);
   if (_res.ok) {
     const _json: any = await _res.json();
+    console.log(`[daytona/events] Raw events from engine: ${(_json.events ?? []).length}`);
     const _rawMapped = (_json.events ?? []).map((e: any) => ({
       slug: `daytona/engine-${e.id}`,
       data: {
