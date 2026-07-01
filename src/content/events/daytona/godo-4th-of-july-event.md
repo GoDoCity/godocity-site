@@ -10,4 +10,5 @@ description: Come out and the enjoy the events and sign up at the GoDoCity tent.
 url: ''
 image: /images/GoDo Blueprint H 3D color vert.png
 featured: true
+isSponsored: true
 ---
