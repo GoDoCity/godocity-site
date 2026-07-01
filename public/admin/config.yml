@@ -168,6 +168,7 @@ collections:
       - {label: "Ticket / Info URL", name: "url", widget: "string", required: false, hint: "Leave blank to link to events page."}
       - {label: "Event Image", name: "image", widget: "image", required: false}
       - {label: "Featured", name: "featured", widget: "boolean", required: false, default: false, hint: "ON = pinned to top of events list."}
+      - {label: "Sponsored Ad Slot", name: "isSponsored", widget: "boolean", required: false, default: false, hint: "ON = paid placement — GoDo Picks card shows the gold SPONSORED badge."}
       - {label: "Body", name: "body", widget: "markdown", required: false}
 
   - name: "diy-guides"

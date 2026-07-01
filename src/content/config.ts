@@ -138,6 +138,7 @@ const events = defineCollection({
     image:       z.string().optional(),
     featured:      z.boolean().optional().default(false),
     sponsored:     z.boolean().optional().default(false),
+    isSponsored:   z.boolean().optional().default(false), // Sveltia "Sponsored Ad Slot" toggle → gold SPONSORED badge on GoDo Picks
     isHighImpact:  z.boolean().optional().default(false),
     lat:         z.number().optional(),
     lng:         z.number().optional(),

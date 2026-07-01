@@ -41,8 +41,8 @@ export async function getMergedCityEvents(city: string): Promise<any[]> {
         ...e,
         data: {
           ...e.data,
-          // Normalise: featured CMS events are treated as sponsored in the feed
-          sponsored: e.data.sponsored === true || e.data.featured === true,
+          // Normalise: featured or paid-ad-slot CMS events are treated as sponsored in the feed
+          sponsored: e.data.sponsored === true || e.data.featured === true || e.data.isSponsored === true,
         },
       }));
   } catch {

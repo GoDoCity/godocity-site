@@ -168,8 +168,11 @@ allEvents = allEvents.map((e: any) => ({
   ...e,
   data: {
     ...e.data,
-    sponsored:    e.data.sponsored === true || e.data.featured === true,
-    isHighImpact: e.data.isHighImpact === true,
+    // Placement: featured, sponsored, or a paid ad slot all earn top billing
+    sponsored:     e.data.sponsored === true || e.data.featured === true || e.data.isSponsored === true,
+    // Badge: only the Sveltia "Sponsored Ad Slot" toggle renders the gold SPONSORED badge
+    isSponsoredAd: e.data.isSponsored === true,
+    isHighImpact:  e.data.isHighImpact === true,
   },
 }));
 const localFeatured = allEvents.filter((e: any) => e.data.sponsored === true);
@@ -212,8 +215,9 @@ try {
         category:     mapEngineCategory(e.category),
         lat:          e.latitude  ?? null,
         lng:          e.longitude ?? null,
-        sponsored:    hasFeaturedTag(e.partner_tags),
-        isHighImpact: hasHighImpactTag(e.partner_tags),
+        sponsored:     hasFeaturedTag(e.partner_tags),
+        isSponsoredAd: false, // engine events have no CMS toggle — badge is dashboard-controlled
+        isHighImpact:  hasHighImpactTag(e.partner_tags),
         source:       `engine-${e.source ?? "unknown"}`,
         coordSource:  (e.latitude != null && e.longitude != null) ? "known_venue" : null,
       },
@@ -243,8 +247,9 @@ const manualEvents = ((manualFeedData as any).quickEntry ?? [])
       category:  e.category  ?? null,
       lat:       e.lat       ?? null,
       lng:       e.lng       ?? null,
-      sponsored:    e.sponsored    ?? false,
-      isHighImpact: e.isHighImpact ?? false,
+      sponsored:     e.sponsored    ?? false,
+      isSponsoredAd: e.isSponsored  ?? false,
+      isHighImpact:  e.isHighImpact ?? false,
     },
   }));
 
@@ -288,16 +293,17 @@ upcomingEvents
 const allSponsored    = upcomingEvents.filter(e => e.data.sponsored === true);
 const sponsoredEvents = allSponsored.slice(0, 5);
 
-/* GoDo Picks: 6 grid cards. Paid/featured events lead and carry isSponsored
-   (rendered as a SPONSORED badge); the remainder is filled with the nearest
-   image-bearing organic events, badged Editor's Choice. Fill events are
-   removed from the Daily Lineup so nothing appears twice on the page. */
+/* GoDo Picks: 6 grid cards. Featured/sponsored events lead; the remainder is
+   filled with the nearest image-bearing organic events. The gold SPONSORED
+   badge renders only when the event's Sveltia "Sponsored Ad Slot" toggle
+   (isSponsored → isSponsoredAd) is ON — everything else shows Editor's
+   Choice. Fill events are removed from the Daily Lineup so nothing appears
+   twice on the page. */
 const godoPicks: Array<{ ev: any; isSponsored: boolean }> = [
-  ...allSponsored.map(e => ({ ev: e, isSponsored: true })),
-  ...upcomingEvents.filter(e => !e.data.sponsored && e.data.image)
-                   .map(e => ({ ev: e, isSponsored: false })),
-].slice(0, 6);
-const _pickSlugs   = new Set(godoPicks.filter(p => !p.isSponsored).map(p => p.ev.slug));
+  ...allSponsored,
+  ...upcomingEvents.filter(e => !e.data.sponsored && e.data.image),
+].slice(0, 6).map(e => ({ ev: e, isSponsored: e.data.isSponsoredAd === true }));
+const _pickSlugs   = new Set(godoPicks.filter(p => !p.ev.data.sponsored).map(p => p.ev.slug));
 const regularEvents = upcomingEvents.filter(e => !e.data.sponsored && !_pickSlugs.has(e.slug));
 
 /* ── Map pins — Hide & Seek filter ───────────────────────────────────────────

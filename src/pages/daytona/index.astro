@@ -144,7 +144,7 @@ try {
     })
     .map((e: any) => ({
       ...e,
-      data: { ...e.data, sponsored: e.data.sponsored === true || e.data.featured === true },
+      data: { ...e.data, sponsored: e.data.sponsored === true || e.data.featured === true || e.data.isSponsored === true },
     }));
 } catch {}
 
