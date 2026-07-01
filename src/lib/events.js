@@ -184,6 +184,31 @@ function _engineHasFeatured(tags) {
   try { const t = JSON.parse(tags); return Array.isArray(t) && t.includes("featured"); } catch { return false; }
 }
 
+/* Hosts that must never be a CTA destination — our own domains currently
+   resolve to a parked placeholder, so an event_url pointing there dead-ends. */
+const PLACEHOLDER_HOSTS = new Set([
+  "godocity.com", "www.godocity.com",
+  "godoevents.com", "www.godoevents.com",
+]);
+
+/**
+ * Engine event_url → real external http(s) link, or null.
+ * Rejects blanks, "#", non-http schemes, and our placeholder domains.
+ * Callers decide the fallback (usually the Daytona official calendar).
+ */
+export function resolveEngineEventUrl(raw) {
+  const url = (raw ?? "").trim();
+  if (!url || url === "#") return null;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    if (PLACEHOLDER_HOSTS.has(u.hostname.toLowerCase())) return null;
+    return url;
+  } catch {
+    return null;
+  }
+}
+
 let _daytonaEnginePromise = null;
 
 function _getDaytonaEngineEvents() {
@@ -205,8 +230,7 @@ function _getDaytonaEngineEvents() {
           endDate:   e.end_datetime  ?? null,
           location:  e.venue_name    ?? (e.venue_address?.split(",")[0] ?? ""),
           city:      _extractEngineCity(e.venue_address ?? ""),
-          url:       (e.event_url && e.event_url.trim() !== "" && e.event_url !== "#")
-                       ? e.event_url : "https://www.daytonabeach.com/events/",
+          url:       resolveEngineEventUrl(e.event_url) ?? "https://www.daytonabeach.com/events/",
           image:     e.image_url || e.image_medium || null,
           lat:       e.latitude  ?? null,
           lng:       e.longitude ?? null,

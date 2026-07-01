@@ -5,7 +5,7 @@ import NewsletterBanner from "../../components/NewsletterBanner.astro";
 import AdSlot from "../../components/AdSlot.astro";
 import SidebarEventsList from "../../components/SidebarEventsList.astro";
 import { getCollection } from "astro:content";
-import { cityDisplayName, GREATER_DAYTONA } from "../../lib/events.js";
+import { cityDisplayName, GREATER_DAYTONA, isStrictlyFuture, resolveEngineEventUrl } from "../../lib/events.js";
 import { getCityConfig } from "../../lib/cityConfigs.js";
 const daytonaConfig = getCityConfig("daytona");
 
@@ -118,8 +118,7 @@ try {
         eventDate: e.start_datetime,
         location:  e.venue_name ?? (e.venue_address?.split(",")[0] ?? ""),
         city:      _hpExtractCity(e.venue_address ?? ""),
-        url:       (e.event_url && e.event_url.trim() !== "" && e.event_url !== "#")
-                     ? e.event_url : "https://www.daytonabeach.com/events/",
+        url:       resolveEngineEventUrl(e.event_url) ?? "https://www.daytonabeach.com/events/",
         image:     e.image_url || e.image_medium || null,
         lat:       e.latitude  ?? null,
         lng:       e.longitude ?? null,
@@ -149,13 +148,16 @@ try {
     }));
 } catch {}
 
-/* CMS-sponsored first → CMS-regular → engine events; title-based dedup */
+/* CMS-sponsored first → CMS-regular → engine events; title-based dedup.
+   isStrictlyFuture drops anything older than yesterday (EST) so the widget
+   can never surface stale rows the engine's `from` filter let through. */
 const _homeSeenTitles = new Set<string>();
 const allDaytonaMerged: any[] = [
   ..._homeCmsEvents.filter((e: any) => e.data.sponsored === true),
   ..._homeCmsEvents.filter((e: any) => !e.data.sponsored),
   ...allDaytona,
 ].filter((e: any) => {
+  if (!isStrictlyFuture(e.data.eventDate, e.data.sponsored === true)) return false;
   const t = (e.data.title ?? "").toLowerCase().trim();
   if (_homeSeenTitles.has(t)) return false;
   _homeSeenTitles.add(t);

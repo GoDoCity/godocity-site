@@ -10,6 +10,7 @@ import {
   cityDisplayName,
   isStrictlyFuture,
   HARD_CUTOFF,
+  resolveEngineEventUrl,
 } from "../../../lib/events.js";
 import { getCityConfig } from "../../../lib/cityConfigs.js";
 const daytonaConfig = getCityConfig("daytona");
@@ -190,7 +191,10 @@ try {
   const _apiUrl = `${_engineBase}/api/events?market=daytona&limit=200&from=${encodeURIComponent(_from)}`;
   console.log(`[daytona/events] ENGINE_BASE: ${_engineBase}`);
   console.log(`[daytona/events] Fetching: ${_apiUrl}`);
-  const _res = await fetch(_apiUrl, { cache: "no-store", cf: { cacheTtl: 0, cacheEverything: false } } as RequestInit);
+  // NOTE: cache "no-store" must NOT be combined with cf.cacheTtl — workerd
+  // throws "CacheTtl: 0, is not compatible with cache: no-store header" and
+  // the whole engine feed silently renders empty in production.
+  const _res = await fetch(_apiUrl, { cache: "no-store" } as RequestInit);
   console.log(`[daytona/events] Engine HTTP status: ${_res.status}`);
   if (_res.ok) {
     const _json: any = await _res.json();
@@ -203,8 +207,7 @@ try {
         endDate:      e.end_datetime ?? null,
         location:     e.venue_name   ?? (e.venue_address?.split(",")[0] ?? ""),
         city:         extractCity(e.venue_address ?? ""),
-        url:          (e.event_url && e.event_url.trim() !== "" && e.event_url !== "#")
-                        ? e.event_url : "https://www.daytonabeach.com/events/",
+        url:          resolveEngineEventUrl(e.event_url) ?? "https://www.daytonabeach.com/events/",
         image:        e.image_url || e.image_medium || null,
         category:     mapEngineCategory(e.category),
         lat:          e.latitude  ?? null,
@@ -284,7 +287,18 @@ upcomingEvents
    sponsored card must never bleed into a non-sponsored event row. */
 const allSponsored    = upcomingEvents.filter(e => e.data.sponsored === true);
 const sponsoredEvents = allSponsored.slice(0, 5);
-const regularEvents   = upcomingEvents.filter(e => !e.data.sponsored);
+
+/* GoDo Picks: 6 grid cards. Paid/featured events lead and carry isSponsored
+   (rendered as a SPONSORED badge); the remainder is filled with the nearest
+   image-bearing organic events, badged Editor's Choice. Fill events are
+   removed from the Daily Lineup so nothing appears twice on the page. */
+const godoPicks: Array<{ ev: any; isSponsored: boolean }> = [
+  ...allSponsored.map(e => ({ ev: e, isSponsored: true })),
+  ...upcomingEvents.filter(e => !e.data.sponsored && e.data.image)
+                   .map(e => ({ ev: e, isSponsored: false })),
+].slice(0, 6);
+const _pickSlugs   = new Set(godoPicks.filter(p => !p.isSponsored).map(p => p.ev.slug));
+const regularEvents = upcomingEvents.filter(e => !e.data.sponsored && !_pickSlugs.has(e.slug));
 
 /* ── Map pins — Hide & Seek filter ───────────────────────────────────────────
    We only plot a pin when we're confident in the coordinates:
@@ -388,7 +402,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
         <span class="evHeroAccent">Events</span><br>
         Worth Showing Up For.
       </h1>
-      <p class="evHeroSub">GoDo Picks, daily listings, and everything worth showing up for — curated by locals, for locals.</p>
+      <p class="evHeroSub">Curated by locals, for locals.</p>
       <div class="evHeroCtas">
         <a href="#lineup" class="evBtnBlue">Browse All Events ↓</a>
         <a href="/daytona/advertise/" class="evBtnGhost">Promote Your Event</a>
@@ -446,7 +460,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                          rel={isExt ? "noopener noreferrer" : ""}
                          data-external={isExt ? "true" : undefined}
                          data-fallback={isExt ? fbUrl : undefined}>
-                        {isExt ? "Get Tickets" : "More Info"}
+                        {isExt ? "More Info" : "Event Details"}
                         <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
                           <path d="M2 5.5h7M5.5 2l3.5 3.5-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
@@ -470,7 +484,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
         )}
 
       <!-- ── SECTION 1: GoDo Picks (VIP Row) ── -->
-        {sponsoredEvents.length > 0 && (
+        {godoPicks.length > 0 && (
           <section class="evSection godoPicks" aria-label="GoDo Picks">
             <div class="evSectionHead">
               <div>
@@ -480,7 +494,8 @@ function vibeTag(category?: string): { label: string; type: string } | null {
               <a href="/daytona/advertise/" class="evSectionAction">Feature Your Event →</a>
             </div>
             <div class="godoPicksGrid">
-              {sponsoredEvents.slice(0, 4).map((e, idx) => {
+              {godoPicks.map((pick, idx) => {
+                const e      = pick.ev;
                 const d      = new Date(e.data.eventDate);
                 const mon    = isNaN(d) ? "???" : d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
                 const day    = isNaN(d) ? "??" : d.getDate();
@@ -490,7 +505,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                 const href   = e.data.url ? addUtm(e.data.url) : `/${e.data.city ?? evCity}/events/${evSlug}/`;
                 const isExt  = !!e.data.url;
                 const fbUrl  = `https://www.google.com/search?q=${encodeURIComponent(e.data.title + " Daytona")}`;
-                const mockViews = [142, 89, 214][idx] ?? 100;
+                const mockViews = [142, 89, 214, 176, 121, 98][idx] ?? 100;
                 return (
                   <a
                     class="godoPickCard"
@@ -508,12 +523,21 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                         loading={idx === 0 ? "eager" : "lazy"}
                       />
                       <div class="gpcPosterGrad" aria-hidden="true"></div>
-                      <span class="gcBadge">
-                        <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true">
-                          <path d="M4.5 1l1 2.3L8 3.7l-2 1.8.6 2.5L4.5 6.8 2 8l.6-2.5-2-1.8 2.5-.4L4.5 1z" fill="currentColor"/>
-                        </svg>
-                        Editor's Choice
-                      </span>
+                      {pick.isSponsored ? (
+                        <span class="gcBadge gcBadge--sponsored">
+                          <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true">
+                            <path d="M4.5 1l1 2.3L8 3.7l-2 1.8.6 2.5L4.5 6.8 2 8l.6-2.5-2-1.8 2.5-.4L4.5 1z" fill="currentColor"/>
+                          </svg>
+                          Sponsored
+                        </span>
+                      ) : (
+                        <span class="gcBadge">
+                          <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true">
+                            <path d="M4.5 1l1 2.3L8 3.7l-2 1.8.6 2.5L4.5 6.8 2 8l.6-2.5-2-1.8 2.5-.4L4.5 1z" fill="currentColor"/>
+                          </svg>
+                          Editor's Choice
+                        </span>
+                      )}
                       <span class="gcAnalytics" aria-label={`${mockViews} views`}>
                         <svg width="9" height="9" viewBox="0 0 9 9" fill="none" aria-hidden="true">
                           <path d="M1 7L3 4.5l1.5 1.5L6.5 3 8 4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -564,6 +588,10 @@ function vibeTag(category?: string): { label: string; type: string } | null {
               <h2 class="evSectionTitle">The Daily Lineup.</h2>
             </div>
             <div class="lineupFilters">
+              <div class="viewToggle" role="group" aria-label="Lineup display density" id="viewToggle">
+                <button class="vtBtn vtBtn--active" data-view="card" type="button" aria-pressed="true">Card View</button>
+                <button class="vtBtn" data-view="text" type="button" aria-pressed="false">Text Only</button>
+              </div>
               <label class="filterLabel" for="monthFilter">Filter:</label>
               <select class="filterSelect" id="monthFilter">
                 <option value="all">All upcoming</option>
@@ -660,7 +688,7 @@ function vibeTag(category?: string): { label: string; type: string } | null {
                       rel={isExt ? "noopener noreferrer" : ""}
                       data-external={isExt ? "true" : undefined}
                       data-fallback={isExt ? fbUrl : undefined}>
-                      {isExt ? "Get Tickets" : "More Info"}
+                      {isExt ? "More Info" : "Event Details"}
                       <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
                         <path d="M2 5.5h7M5.5 2l3.5 3.5-3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
@@ -982,6 +1010,23 @@ document.addEventListener("DOMContentLoaded", function () {
         moreBtn.addEventListener("click", function () { shown += PAGE_SIZE; applyState(); });
       }
       applyState();
+
+      /* ── Card View / Text Only display toggle ── */
+      var toggleWrap = document.getElementById("viewToggle");
+      if (toggleWrap) {
+        var vtBtns = Array.prototype.slice.call(toggleWrap.querySelectorAll(".vtBtn"));
+        vtBtns.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var mode = btn.getAttribute("data-view");
+            grid.classList.toggle("lineupFeed--text", mode === "text");
+            vtBtns.forEach(function (b) {
+              var active = b === btn;
+              b.classList.toggle("vtBtn--active", active);
+              b.setAttribute("aria-pressed", active ? "true" : "false");
+            });
+          });
+        });
+      }
     }
   } // end init()
 
@@ -1672,6 +1717,13 @@ document.addEventListener("DOMContentLoaded", function () {
     box-shadow: 0 2px 10px rgba(0,0,0,.3);
   }
 
+  /* Sponsored badge — premium gold, matches the sidebar ad-slot aesthetic */
+  .gcBadge--sponsored {
+    background: linear-gradient(135deg, #b45309 0%, #f59e0b 60%, #fbbf24 100%);
+    color: #fff;
+    box-shadow: 0 2px 12px rgba(245,158,11,.45);
+  }
+
   /* Analytics badge — top-right */
   .gcAnalytics {
     position: absolute;
@@ -1777,6 +1829,41 @@ document.addEventListener("DOMContentLoaded", function () {
     font-size: 12px;
     color: #aaa;
     font-weight: 600;
+  }
+
+  /* ── Card View / Text Only toggle ── */
+  .viewToggle {
+    display: inline-flex;
+    border: 1.5px solid #e5e7eb;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .vtBtn {
+    font-size: 12px;
+    font-weight: 700;
+    color: #888;
+    background: #fff;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background 130ms, color 130ms;
+    white-space: nowrap;
+  }
+  .vtBtn + .vtBtn { border-left: 1.5px solid #e5e7eb; }
+  .vtBtn--active { background: var(--brand1, #0077be); color: #fff; }
+
+  /* ── Text Only mode: strip thumbnails + tags for dense scannable rows.
+       Date box is forced visible (mobile normally hides it) so each row
+       keeps its date anchor without the image chip. ── */
+  .lineupFeed--text .lineupThumb   { display: none !important; }
+  .lineupFeed--text .hiImgWrap     { display: none !important; }
+  .lineupFeed--text .vibTag        { display: none !important; }
+  .lineupFeed--text .lineupDateBox { display: flex !important; }
+  .lineupFeed--text .lineupRow     { padding-top: 8px; padding-bottom: 8px; }
+  .lineupFeed--text .lineupRow:not(.lineupRow--hiImpact) {
+    display: flex !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
   }
 
   .lineupFeed { display: flex; flex-direction: column; gap: 0; }
