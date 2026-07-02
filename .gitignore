@@ -4,6 +4,9 @@ dist/
 # Astro cache
 .astro/
 
+# Wrangler local dev cache
+.wrangler/
+
 # Dependencies
 node_modules/
 

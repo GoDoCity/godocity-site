@@ -10,6 +10,15 @@
 const base = Astro.props?.cityBase ? `/${Astro.props.cityBase}` : "";
 const cityBase = base || "/daytona";
 
+/* Cities whose events feed lives on the unified GoDoEVENTS hub. The Events
+   pill routes straight there (no redirect hop); cities not yet on the engine
+   keep their local /[city]/events/ listing. */
+const UNIFIED_EVENTS_HUB = "https://godoevents-site.pages.dev";
+const unifiedEventsCities = new Set(["daytona"]);
+const eventsHref = unifiedEventsCities.has(cityBase.replace("/", ""))
+  ? `${UNIFIED_EVENTS_HUB}${cityBase}/events/`
+  : `${cityBase}/events/`;
+
 const currentPath = Astro.url.pathname;
 function isActive(href: string): boolean {
   if (href === `${cityBase}/`) return currentPath === href;
@@ -48,7 +57,7 @@ const pills = [
   { label: "Home",      href: `${cityBase}/`,           dropdown: null,      colorGroup: "home"      },
   { label: "Topics",    href: `${cityBase}/posts/`,     dropdown: "topics",  colorGroup: "topic"     },
   { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides",  colorGroup: "guides"    },
-  { label: "Events",    href: `${cityBase}/events/`,    dropdown: null,      colorGroup: "events"    },
+  { label: "Events",    href: eventsHref,               dropdown: null,      colorGroup: "events"    },
   { label: "DIY",       href: `${cityBase}/diy/`,       dropdown: "diy",     colorGroup: "diy"       },
   { label: "Advertise", href: `${cityBase}/advertise/`, dropdown: null,      colorGroup: "advertise" },
 ];
@@ -149,7 +158,7 @@ const pills = [
           <a class="drawerLink" href={g.href}>{g.emoji} {g.label}</a>
         ))}
       </div>
-      <a class="drawerLink" href={`${cityBase}/events/`}>Events</a>
+      <a class="drawerLink" href={eventsHref}>Events</a>
       <div class="drawerSection">
         <div class="drawerSectionLabel">DIY</div>
         <div class="drawerPillGrid">

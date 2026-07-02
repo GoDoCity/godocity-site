@@ -1,0 +1,6 @@
+# Daytona's events feed moved to the unified GoDoEVENTS hub (master template).
+# Catches every legacy bookmark and the internal /daytona/events/ links
+# (footer, homepage rails, sidebars) in one place. Detail pages under
+# /daytona/events/<slug>/ are NOT redirected — they still render locally.
+/daytona/events https://godoevents-site.pages.dev/daytona/events/ 301
+/daytona/events/ https://godoevents-site.pages.dev/daytona/events/ 301

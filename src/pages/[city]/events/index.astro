@@ -1,9 +1,9 @@
 ---
 /**
  * src/pages/[city]/events/index.astro
- * Generic events listing for any city slug configured in cityConfigs.js.
- * NOTE: src/pages/daytona/events/index.astro takes priority for /daytona/events/
- *       (static routes beat dynamic routes in Astro).
+ * Generic events listing for city slugs NOT yet on the unified GoDoEVENTS hub.
+ * Daytona is excluded: its feed lives at godoevents-site.pages.dev/daytona/events/
+ * (see public/_redirects) so the retired local layout can never resurface.
  */
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
@@ -12,7 +12,11 @@ import { allCitySlugs, getDisplayName, getCityConfig } from "../../../lib/cityCo
 import NewsletterBanner from "../../../components/NewsletterBanner.astro";
 
 export async function getStaticPaths() {
-  return allCitySlugs.map(slug => ({ params: { city: slug } }));
+  // Daytona's events listing is served by the unified GoDoEVENTS hub —
+  // skip it here so no local /daytona/events/ page is ever emitted again.
+  return allCitySlugs
+    .filter(slug => slug !== "daytona")
+    .map(slug => ({ params: { city: slug } }));
 }
 
 const { city } = Astro.params;

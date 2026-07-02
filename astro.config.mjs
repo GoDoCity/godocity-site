@@ -19,6 +19,15 @@ function generateRedirects() {
         const postsDir = join(__dirname, "src/content/posts");
         const lines = [];
 
+        // Hand-maintained rules (public/_redirects) come first — this hook
+        // overwrites the copy Astro placed in dist, so merge them back in.
+        // Currently: /daytona/events → unified GoDoEVENTS hub.
+        const staticRedirects = join(__dirname, "public/_redirects");
+        if (existsSync(staticRedirects)) {
+          const manual = await readFile(staticRedirects, "utf-8");
+          lines.push(...manual.split("\n").map(l => l.trimEnd()).filter(Boolean));
+        }
+
         // Posts in src/content/posts/daytona/ — slug = "daytona/<name>"
         const daytonaDir = join(postsDir, "daytona");
         if (existsSync(daytonaDir)) {
