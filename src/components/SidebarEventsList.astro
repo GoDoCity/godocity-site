@@ -7,16 +7,23 @@
  * renders each row, and applies the tinted-blue card style for sponsored
  * events — identical on every page that uses it.
  *
+ * featureTop (opt-in — main city landing page only):
+ *   Turns the top slot into an auto-rotating showcase that cycles the
+ *   sponsored / featured events every 4.5 s, falling back to the curated
+ *   GoDo Picks (nearest-upcoming) when no paid ads are in the stream so the
+ *   space never sits idle. The rows below stay standard static chronological
+ *   listings. A light blueprint-blue tint sets the rotating slot apart.
+ *
  * Live sync: for ENGINE_CITIES the server-rendered rows are only a
  * build-time snapshot (this site is fully static). A client script
  * re-fetches the GoDoEVENTS engine API on every page view and replaces
- * the rows, so the rail always matches the unified events hub even when
- * the last deploy is days old. If the fetch fails, the build-time
- * snapshot stays in place.
+ * the rows (and rebuilds the rotating slot), so the rail always matches the
+ * unified events hub even when the last deploy is days old. If the fetch
+ * fails, the build-time snapshot stays in place and keeps rotating.
  *
  * Usage:
- *   import SidebarEventsList from "./SidebarEventsList.astro";
  *   <SidebarEventsList events={mergedEvents} city={city} />
+ *   <SidebarEventsList events={mergedEvents} city={city} featureTop />
  */
 import {
   cityDisplayName,
@@ -29,13 +36,43 @@ import {
 interface Props {
   events: any[];
   city: string;
+  /** Main-page only: rotate the top slot through featured ads / GoDo Picks. */
+  featureTop?: boolean;
 }
 
-const { events, city } = Astro.props;
-const list = events.slice(0, 6);
+const { events, city, featureTop = false } = Astro.props;
 
 const marketSlug = String(city ?? "").toLowerCase().trim();
 const isLive = ENGINE_CITIES.has(marketSlug);
+
+// Split the feed when featureTop is on: sponsored events lead the rotating
+// slot; with none in the stream, fall back to the nearest-upcoming picks so
+// the showcase always has something live to cycle. The remaining events drop
+// into the static list below — no event appears in both zones.
+const sponsored  = events.filter((e: any) => e.data?.sponsored);
+const rotating   = featureTop ? (sponsored.length ? sponsored : events).slice(0, 5) : [];
+const rotKeys    = new Set(rotating.map((e: any) => e.slug ?? e.data?.title));
+const staticList = featureTop
+  ? events.filter((e: any) => !rotKeys.has(e.slug ?? e.data?.title)).slice(0, 6)
+  : events.slice(0, 6);
+
+const hasAny = rotating.length > 0 || staticList.length > 0;
+
+// Shared row-field derivation (server render) — used by both zones.
+function rowFields(e: any) {
+  const d       = new Date(e.data.eventDate);
+  const evCity  = (e.data.city ?? (e.slug?.split("/")[0] ?? city)).toLowerCase().trim();
+  const evSlug  = e.slug?.split("/").pop() ?? "";
+  return {
+    dow:     d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase(),
+    day:     d.getDate(),
+    mon:     d.toLocaleDateString("en-US", { month: "short" }).toUpperCase(),
+    monFull: d.toLocaleDateString("en-US", { month: "short" }),
+    href:    e.data.url ?? `/${evCity}/events/${evSlug}/`,
+    cityLbl: cityDisplayName(evCity),
+    isExt:   !!e.data.url,
+  };
+}
 ---
 
 <div
@@ -45,39 +82,74 @@ const isLive = ENGINE_CITIES.has(marketSlug);
   data-sel-market={isLive ? marketSlug : undefined}
   data-sel-hub={isLive ? EVENTS_HUB_BASE : undefined}
   data-sel-city-display={isLive ? JSON.stringify(CITY_DISPLAY) : undefined}
+  data-sel-feature-top={featureTop ? "1" : undefined}
 >
-{list.length === 0 ? (
+{featureTop && rotating.length > 0 && (
+  <div class="sel-feature" aria-label="Featured events">
+    {rotating.map((e: any, i: number) => {
+      const f = rowFields(e);
+      return (
+        <a
+          class={`sel-fslide${i === 0 ? " sel-fslide--active" : ""}`}
+          href={f.href}
+          target={f.isExt ? "_blank" : "_self"}
+          rel={f.isExt ? "noopener" : ""}
+        >
+          <div class="sel-cal">
+            <div class="sel-dow">{f.dow}</div>
+            <div class="sel-day">{f.day}</div>
+            <div class="sel-mon">{f.mon}</div>
+          </div>
+          <div class="sel-info">
+            <span class="sel-fbadge">{e.data.sponsored ? "FEATURED" : "GODO PICK"}</span>
+            <div class="sel-name">{e.data.title}</div>
+            <div class="sel-meta">
+              <span>{f.monFull} {f.day}</span>
+              <span class="sel-sep">|</span>
+              <span class="sel-city">{f.cityLbl}</span>
+            </div>
+          </div>
+        </a>
+      );
+    })}
+    {rotating.length > 1 && (
+      <div class="sel-fdots">
+        {rotating.map((_: any, i: number) => (
+          <button
+            class={`sel-fdot${i === 0 ? " sel-fdot--active" : ""}`}
+            type="button"
+            aria-label={`Go to featured event ${i + 1}`}
+          />
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
+{!hasAny ? (
   <p class="sel-empty">No upcoming events yet.</p>
 ) : (
   <div class="sel-list">
-    {list.map((e: any) => {
-      const d       = new Date(e.data.eventDate);
-      const dow     = d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
-      const day     = d.getDate();
-      const mon     = d.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
-      const monFull = d.toLocaleDateString("en-US", { month: "short" });
-      const evCity  = (e.data.city ?? (e.slug?.split("/")[0] ?? city)).toLowerCase().trim();
-      const evSlug  = e.slug?.split("/").pop() ?? "";
-      const href    = e.data.url ?? `/${evCity}/events/${evSlug}/`;
-      const cityLbl = cityDisplayName(evCity);
+    {staticList.map((e: any) => {
+      const f = rowFields(e);
       return (
         <a
           class={`sel-row${e.data.sponsored ? " is-sponsored" : ""}`}
-          href={href}
-          target={e.data.url ? "_blank" : "_self"}
-          rel={e.data.url ? "noopener" : ""}
+          href={f.href}
+          target={f.isExt ? "_blank" : "_self"}
+          rel={f.isExt ? "noopener" : ""}
         >
           <div class="sel-cal">
-            <div class="sel-dow">{dow}</div>
-            <div class="sel-day">{day}</div>
-            <div class="sel-mon">{mon}</div>
+            <div class="sel-dow">{f.dow}</div>
+            <div class="sel-day">{f.day}</div>
+            <div class="sel-mon">{f.mon}</div>
           </div>
           <div class="sel-info">
             <div class="sel-name">{e.data.title}</div>
             <div class="sel-meta">
-              <span>{monFull} {day}</span>
+              <span>{f.monFull} {f.day}</span>
               <span class="sel-sep">|</span>
-              <span class="sel-city">{cityLbl}</span>
+              <span class="sel-city">{f.cityLbl}</span>
               {e.data.sponsored && <span class="sel-badge">SPONSORED</span>}
             </div>
           </div>
@@ -92,7 +164,9 @@ const isLive = ENGINE_CITIES.has(marketSlug);
   /* Client-side live sync — engine cities only (wrapper carries data-sel-live).
      Mirrors the server pipeline in events.js: map engine rows → drop past
      events (yesterday EST cutoff, sponsored always pass) → chronological
-     sort → slice 6. One fetch per market is shared by every rail on the page. */
+     sort. One fetch per market is shared by every rail on the page.
+     When the wrapper is data-sel-feature-top, the top slot is rebuilt as a
+     rotating carousel (sponsored → GoDo Picks fallback) + static rows below. */
 
   const PLACEHOLDER_HOSTS = new Set([
     "godocity.com", "www.godocity.com",
@@ -175,22 +249,31 @@ const isLive = ENGINE_CITIES.has(marketSlug);
     return n;
   }
 
-  function buildRow(e: any, map: Record<string, string>, hub: string, market: string): HTMLElement {
+  function calBlock(dow: string, day: string, mon: string): HTMLElement {
+    const cal = el("div", "sel-cal");
+    cal.append(el("div", "sel-dow", dow), el("div", "sel-day", day), el("div", "sel-mon", mon));
+    return cal;
+  }
+
+  function fmt(e: any) {
     const d = new Date(e.start_datetime);
     const ok = !isNaN(d.getTime());
-    const dow = ok ? d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase() : "";
-    const day = ok ? String(d.getDate()) : "";
-    const mon = ok ? d.toLocaleDateString("en-US", { month: "short" }).toUpperCase() : "";
-    const monFull = ok ? d.toLocaleDateString("en-US", { month: "short" }) : "";
+    return {
+      dow: ok ? d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase() : "",
+      day: ok ? String(d.getDate()) : "",
+      mon: ok ? d.toLocaleDateString("en-US", { month: "short" }).toUpperCase() : "",
+      monFull: ok ? d.toLocaleDateString("en-US", { month: "short" }) : "",
+    };
+  }
+
+  function buildRow(e: any, map: Record<string, string>, hub: string, market: string): HTMLElement {
+    const { dow, day, mon, monFull } = fmt(e);
     const sponsored = isSponsored(e.partner_tags);
 
     const a = el("a", `sel-row${sponsored ? " is-sponsored" : ""}`) as HTMLAnchorElement;
     a.href = liveUrl(e.event_url, e.id, hub);
     a.target = "_blank";
     a.rel = "noopener";
-
-    const cal = el("div", "sel-cal");
-    cal.append(el("div", "sel-dow", dow), el("div", "sel-day", day), el("div", "sel-mon", mon));
 
     const info = el("div", "sel-info");
     info.append(el("div", "sel-name", e.title ?? "Untitled Event"));
@@ -201,8 +284,79 @@ const isLive = ENGINE_CITIES.has(marketSlug);
     if (sponsored) meta.append(el("span", "sel-badge", "SPONSORED"));
     info.append(meta);
 
-    a.append(cal, info);
+    a.append(calBlock(dow, day, mon), info);
     return a;
+  }
+
+  function buildSlide(e: any, map: Record<string, string>, hub: string, market: string, active: boolean): HTMLElement {
+    const { dow, day, mon, monFull } = fmt(e);
+    const sponsored = isSponsored(e.partner_tags);
+
+    const a = el("a", `sel-fslide${active ? " sel-fslide--active" : ""}`) as HTMLAnchorElement;
+    a.href = liveUrl(e.event_url, e.id, hub);
+    a.target = "_blank";
+    a.rel = "noopener";
+
+    const info = el("div", "sel-info");
+    info.append(el("span", "sel-fbadge", sponsored ? "FEATURED" : "GODO PICK"));
+    info.append(el("div", "sel-name", e.title ?? "Untitled Event"));
+    const meta = el("div", "sel-meta");
+    meta.append(el("span", "", `${monFull} ${day}`));
+    meta.append(el("span", "sel-sep", "|"));
+    meta.append(el("span", "sel-city", cityLabel(e.venue_address, map, market)));
+    info.append(meta);
+
+    a.append(calBlock(dow, day, mon), info);
+    return a;
+  }
+
+  function buildFeature(rotating: any[], map: Record<string, string>, hub: string, market: string): HTMLElement {
+    const feature = el("div", "sel-feature");
+    feature.setAttribute("aria-label", "Featured events");
+    rotating.forEach((e, i) => feature.append(buildSlide(e, map, hub, market, i === 0)));
+    if (rotating.length > 1) {
+      const dots = el("div", "sel-fdots");
+      rotating.forEach((_, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = `sel-fdot${i === 0 ? " sel-fdot--active" : ""}`;
+        b.setAttribute("aria-label", `Go to featured event ${i + 1}`);
+        dots.append(b);
+      });
+      feature.append(dots);
+    }
+    return feature;
+  }
+
+  /* Auto-rotate a .sel-feature every 4.5 s; pause on hover, dots jump.
+     Returns a stop() so a rebuild can clear the old timer. */
+  function startCarousel(feature: HTMLElement): () => void {
+    const slides = Array.from(feature.querySelectorAll<HTMLElement>(".sel-fslide"));
+    const dots   = Array.from(feature.querySelectorAll<HTMLElement>(".sel-fdot"));
+    if (slides.length <= 1) return () => {};
+    let cur = 0;
+
+    function goTo(idx: number) {
+      slides[cur].classList.remove("sel-fslide--active");
+      if (dots[cur]) dots[cur].classList.remove("sel-fdot--active");
+      cur = (idx + slides.length) % slides.length;
+      slides[cur].classList.add("sel-fslide--active");
+      if (dots[cur]) dots[cur].classList.add("sel-fdot--active");
+    }
+
+    let timer = window.setInterval(() => goTo(cur + 1), 4500);
+    const restart = () => { timer = window.setInterval(() => goTo(cur + 1), 4500); };
+
+    dots.forEach((dot, i) => dot.addEventListener("click", (ev) => {
+      ev.preventDefault();
+      window.clearInterval(timer);
+      goTo(i);
+      restart();
+    }));
+    feature.addEventListener("mouseenter", () => window.clearInterval(timer));
+    feature.addEventListener("mouseleave", restart);
+
+    return () => window.clearInterval(timer);
   }
 
   async function hydrate(wrap: HTMLElement): Promise<void> {
@@ -215,18 +369,42 @@ const isLive = ENGINE_CITIES.has(marketSlug);
     try { map = JSON.parse(wrap.dataset.selCityDisplay ?? "{}"); } catch {}
 
     const events = await fetchMarket(engine, market);
-    if (!events) return; // fetch failed — keep the build-time snapshot
+    if (!events) return; // fetch failed — keep the build-time snapshot (still rotating)
 
     const upcoming = events
       .filter((e: any) => isSponsored(e.partner_tags) || dateKey(e.start_datetime) >= cutoff)
-      .sort((a: any, b: any) => dateKey(a.start_datetime).localeCompare(dateKey(b.start_datetime)))
-      .slice(0, 6);
+      .sort((a: any, b: any) => dateKey(a.start_datetime).localeCompare(dateKey(b.start_datetime)));
     if (upcoming.length === 0) return; // empty feed — keep the snapshot
 
+    if (wrap.dataset.selFeatureTop) {
+      const sponsored = upcoming.filter((e: any) => isSponsored(e.partner_tags));
+      const rotating  = (sponsored.length ? sponsored : upcoming).slice(0, 5);
+      const rotIds    = new Set(rotating.map((e: any) => e.id));
+      const rest      = upcoming.filter((e: any) => !rotIds.has(e.id)).slice(0, 6);
+
+      const feature = buildFeature(rotating, map, hub, market);
+      const listDiv = el("div", "sel-list");
+      for (const e of rest) listDiv.append(buildRow(e, map, hub, market));
+
+      const w = wrap as any;
+      if (typeof w._selStop === "function") w._selStop(); // clear the snapshot's timer
+      wrap.replaceChildren(feature, listDiv);
+      w._selStop = startCarousel(feature);
+      return;
+    }
+
     const listDiv = el("div", "sel-list");
-    for (const e of upcoming) listDiv.append(buildRow(e, map, hub, market));
+    for (const e of upcoming.slice(0, 6)) listDiv.append(buildRow(e, map, hub, market));
     wrap.replaceChildren(listDiv);
   }
+
+  // Start any server-rendered carousels immediately, so the slot keeps
+  // rotating even before the fetch resolves (or if it fails). hydrate()
+  // clears this timer and restarts on a fresh rebuild.
+  document.querySelectorAll<HTMLElement>(".sel-wrap[data-sel-feature-top]").forEach((wrap) => {
+    const feature = wrap.querySelector<HTMLElement>(".sel-feature");
+    if (feature) (wrap as any)._selStop = startCarousel(feature);
+  });
 
   document
     .querySelectorAll<HTMLElement>(".sel-wrap[data-sel-live]")
@@ -263,6 +441,57 @@ const isLive = ENGINE_CITIES.has(marketSlug);
     margin: 4px 0 8px;
   }
   .sel-row.is-sponsored:last-child { border-bottom: 1px solid rgba(0, 119, 190, 0.22); }
+
+  /* ── Featured rotating top slot (featureTop) ──────────────────────────
+     Distinct light blueprint-blue card so the rotating ad showcase reads as
+     clearly elevated above the plain static rows underneath it. */
+  .sel-feature {
+    position: relative;
+    background: color-mix(in srgb, var(--brand1, #0077be) 11%, #fff);
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 34%, transparent);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    box-shadow: 0 3px 14px color-mix(in srgb, var(--brand1, #0077be) 16%, transparent);
+  }
+  .sel-fslide {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 12px;
+    text-decoration: none;
+    color: inherit;
+    transition: opacity 400ms ease;
+  }
+  .sel-fslide:not(.sel-fslide--active) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .sel-fslide--active { position: relative; opacity: 1; }
+  .sel-fslide:hover { opacity: 0.82; }
+
+  .sel-fbadge {
+    justify-self: start;
+    display: inline-block;
+    font-size: 8px; font-weight: 900; letter-spacing: .1em;
+    background: var(--brand1, #0077be); color: #fff;
+    padding: 2px 7px; border-radius: 999px;
+    margin-bottom: 4px;
+  }
+
+  .sel-fdots {
+    display: flex; justify-content: center; gap: 6px;
+    padding: 2px 0 10px;
+  }
+  .sel-fdot {
+    width: 6px; height: 6px; border-radius: 999px;
+    border: none; padding: 0; cursor: pointer;
+    background: color-mix(in srgb, var(--brand1, #0077be) 30%, transparent);
+    transition: background 140ms, transform 140ms;
+  }
+  .sel-fdot--active { background: var(--brand1, #0077be); transform: scale(1.35); }
 
   /* Calendar block */
   .sel-cal {
