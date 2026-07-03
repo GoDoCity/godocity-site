@@ -20,12 +20,19 @@
  */
 
 import { getCollection } from "astro:content";
-import { getCityEvents  } from "./events.js";
+import { getCityEvents, ENGINE_CITIES } from "./events.js";
 import { getCityConfig  } from "./cityConfigs.js";
 
 export async function getMergedCityEvents(city: string): Promise<any[]> {
   // ── 1. Engine / sheet events ────────────────────────────────────────
   const engineEvents: any[] = await getCityEvents(city);
+
+  // Engine-backed cities are fully live-synced: the sidebar mirrors the
+  // unified events hub exactly — chronological live engine feed, no
+  // CMS/markdown merge that could surface stale local entries.
+  if (ENGINE_CITIES.has(String(city ?? "").toLowerCase().trim())) {
+    return engineEvents;
+  }
 
   // ── 2. Sveltia CMS events ───────────────────────────────────────────
   let cmsEvents: any[] = [];

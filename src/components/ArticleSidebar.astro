@@ -13,6 +13,7 @@
  */
 import { getCollection } from "astro:content";
 import { getMergedCityEvents } from "../lib/getMergedCityEvents.ts";
+import { getEventsUrl } from "../lib/events.js";
 import { getShortName, getCityConfig } from "../lib/cityConfigs.js";
 import AdSlot from "./AdSlot.astro";
 import SidebarEventsList from "./SidebarEventsList.astro";
@@ -101,7 +102,7 @@ const hasEvents      = hasFeaturedAds || eventList.length > 0;
   <div class="railSection">
     <div class="railHead">
       <span class="railTitle">Upcoming Events</span>
-      <a class="railMore" href={`/${city}/events/`}>See all</a>
+      <a class="railMore" href={getEventsUrl(city)}>See all</a>
     </div>
 
     {hasFeaturedAds && featuredEventAds.map((a: any) => {

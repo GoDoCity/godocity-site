@@ -15,6 +15,7 @@
  */
 import Base from "./Base.astro";
 import { getMergedCityEvents } from "../lib/getMergedCityEvents.ts";
+import { getEventsUrl } from "../lib/events.js";
 import { getShortName } from "../lib/cityConfigs.js";
 import SidebarEventsList from "../components/SidebarEventsList.astro";
 
@@ -100,7 +101,7 @@ const emoji = topicEmoji[topic] ?? "📖";
         <div class="gl-events">
           <div class="gl-ev-head">
             <span class="gl-ev-title">Upcoming Events</span>
-            <a class="gl-ev-more" href={`/${cityBase}/events/`}>See all</a>
+            <a class="gl-ev-more" href={getEventsUrl(cityBase)}>See all</a>
           </div>
 
           <SidebarEventsList events={eventList} city={cityBase} />

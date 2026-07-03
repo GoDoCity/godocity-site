@@ -209,6 +209,19 @@ export function resolveEngineEventUrl(raw) {
   }
 }
 
+/* ── Unified events hub routing ──────────────────────────────────────────────
+   Cities in ENGINE_CITIES are fully served by the live GoDoEVENTS engine:
+   their "See all" links point at the unified hub and their sidebars render
+   the live engine feed only. Add a city here when it migrates to the engine. */
+export const ENGINE_CITIES = new Set(["daytona"]);
+export const EVENTS_HUB_BASE = "https://godoevents-site.pages.dev";
+export const ENGINE_API_BASE = "https://godoevents-engine.yellowcabking.workers.dev";
+
+export function getEventsUrl(slug) {
+  const s = String(slug ?? "").toLowerCase().trim();
+  return ENGINE_CITIES.has(s) ? `${EVENTS_HUB_BASE}/${s}/events/` : `/${s}/events/`;
+}
+
 let _daytonaEnginePromise = null;
 
 function _getDaytonaEngineEvents() {
@@ -218,7 +231,7 @@ function _getDaytonaEngineEvents() {
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0);
       const res = await fetch(
-        `https://godoevents-engine.yellowcabking.workers.dev/api/events?market=daytona&limit=50&from=${encodeURIComponent(today.toISOString())}`
+        `${ENGINE_API_BASE}/api/events?market=daytona&limit=50&from=${encodeURIComponent(today.toISOString())}`
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
@@ -239,8 +252,13 @@ function _getDaytonaEngineEvents() {
           source:    `engine-${e.source ?? "unknown"}`,
         },
       }));
-      console.log(`[events] getCityEvents(daytona) → ${events.length} engine events`);
-      return events;
+      // Sidebar guarantee: strictly upcoming, chronological by nearest date —
+      // identical ordering to the unified events hub.
+      const upcoming = events
+        .filter(e => isStrictlyFuture(e.data.eventDate, e.data.sponsored === true))
+        .sort((a, b) => (dateSortKey(a) < dateSortKey(b) ? -1 : dateSortKey(a) > dateSortKey(b) ? 1 : 0));
+      console.log(`[events] getCityEvents(daytona) → ${upcoming.length} live engine events`);
+      return upcoming;
     } catch (err) {
       console.warn("[events] Daytona engine fetch failed:", err?.message ?? err);
       return [];

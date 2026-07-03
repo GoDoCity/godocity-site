@@ -6,7 +6,7 @@
  *       (static routes beat dynamic routes in Astro).
  */
 import Base from "../../layouts/Base.astro";
-import { getCityEvents, cityDisplayName } from "../../lib/events.js";
+import { getCityEvents, cityDisplayName, getEventsUrl } from "../../lib/events.js";
 import { allCitySlugs, getDisplayName, getCityConfig } from "../../lib/cityConfigs.js";
 import { getCollection } from "astro:content";
 import NewsletterBanner from "../../components/NewsletterBanner.astro";
@@ -146,7 +146,7 @@ function dateText(post: any) {
                   );
                 })}
               </div>
-              <a class="evMore" href={`/${city}/events/`}>See all events →</a>
+              <a class="evMore" href={getEventsUrl(city)}>See all events →</a>
             </div>
           )}
 

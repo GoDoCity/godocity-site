@@ -7,11 +7,24 @@
  * renders each row, and applies the tinted-blue card style for sponsored
  * events — identical on every page that uses it.
  *
+ * Live sync: for ENGINE_CITIES the server-rendered rows are only a
+ * build-time snapshot (this site is fully static). A client script
+ * re-fetches the GoDoEVENTS engine API on every page view and replaces
+ * the rows, so the rail always matches the unified events hub even when
+ * the last deploy is days old. If the fetch fails, the build-time
+ * snapshot stays in place.
+ *
  * Usage:
  *   import SidebarEventsList from "./SidebarEventsList.astro";
  *   <SidebarEventsList events={mergedEvents} city={city} />
  */
-import { cityDisplayName } from "../lib/events.js";
+import {
+  cityDisplayName,
+  CITY_DISPLAY,
+  ENGINE_CITIES,
+  ENGINE_API_BASE,
+  EVENTS_HUB_BASE,
+} from "../lib/events.js";
 
 interface Props {
   events: any[];
@@ -20,8 +33,19 @@ interface Props {
 
 const { events, city } = Astro.props;
 const list = events.slice(0, 6);
+
+const marketSlug = String(city ?? "").toLowerCase().trim();
+const isLive = ENGINE_CITIES.has(marketSlug);
 ---
 
+<div
+  class="sel-wrap"
+  data-sel-live={isLive ? "1" : undefined}
+  data-sel-engine={isLive ? ENGINE_API_BASE : undefined}
+  data-sel-market={isLive ? marketSlug : undefined}
+  data-sel-hub={isLive ? EVENTS_HUB_BASE : undefined}
+  data-sel-city-display={isLive ? JSON.stringify(CITY_DISPLAY) : undefined}
+>
 {list.length === 0 ? (
   <p class="sel-empty">No upcoming events yet.</p>
 ) : (
@@ -62,8 +86,157 @@ const list = events.slice(0, 6);
     })}
   </div>
 )}
+</div>
 
-<style>
+<script>
+  /* Client-side live sync — engine cities only (wrapper carries data-sel-live).
+     Mirrors the server pipeline in events.js: map engine rows → drop past
+     events (yesterday EST cutoff, sponsored always pass) → chronological
+     sort → slice 6. One fetch per market is shared by every rail on the page. */
+
+  const PLACEHOLDER_HOSTS = new Set([
+    "godocity.com", "www.godocity.com",
+    "godoevents.com", "www.godoevents.com",
+  ]);
+
+  const marketFetches = new Map<string, Promise<any[] | null>>();
+
+  function fetchMarket(engine: string, market: string): Promise<any[] | null> {
+    let p = marketFetches.get(market);
+    if (!p) {
+      p = (async () => {
+        try {
+          const today = new Date();
+          today.setUTCHours(0, 0, 0, 0);
+          const res = await fetch(
+            `${engine}/api/events?market=${encodeURIComponent(market)}&limit=50&from=${encodeURIComponent(today.toISOString())}`
+          );
+          if (!res.ok) return null;
+          const json = await res.json();
+          return json.events ?? [];
+        } catch {
+          return null;
+        }
+      })();
+      marketFetches.set(market, p);
+    }
+    return p;
+  }
+
+  /* Yesterday in EST/EDT — same HARD_CUTOFF rule as events.js */
+  const cutoff = new Date(Date.now() - 86_400_000)
+    .toLocaleDateString("en-CA", { timeZone: "America/New_York" });
+
+  function dateKey(raw: unknown): string {
+    return String(raw ?? "").split("T")[0];
+  }
+
+  function isSponsored(tags: unknown): boolean {
+    if (!tags) return false;
+    try {
+      const t = JSON.parse(String(tags));
+      return Array.isArray(t) && t.includes("featured");
+    } catch {
+      return false;
+    }
+  }
+
+  /* Ticket URL if real and external, else the hub's event detail page —
+     same behaviour as the unified events hub itself. */
+  function liveUrl(raw: unknown, id: unknown, hub: string): string {
+    const url = String(raw ?? "").trim();
+    if (url && url !== "#") {
+      try {
+        const u = new URL(url);
+        if ((u.protocol === "http:" || u.protocol === "https:") &&
+            !PLACEHOLDER_HOSTS.has(u.hostname.toLowerCase())) {
+          return url;
+        }
+      } catch {}
+    }
+    return `${hub}/events/${id}`;
+  }
+
+  /* Longest CITY_DISPLAY key found in the venue address wins, so
+     "daytona beach shores" beats "daytona beach" beats "daytona". */
+  function cityLabel(addr: unknown, map: Record<string, string>, market: string): string {
+    const lc = String(addr ?? "").toLowerCase();
+    let best = "";
+    for (const key of Object.keys(map)) {
+      if (key.length > best.length && lc.includes(key)) best = key;
+    }
+    return best ? map[best] : (map[market] ?? market);
+  }
+
+  function el(tag: string, cls: string, text?: string): HTMLElement {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  function buildRow(e: any, map: Record<string, string>, hub: string, market: string): HTMLElement {
+    const d = new Date(e.start_datetime);
+    const ok = !isNaN(d.getTime());
+    const dow = ok ? d.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase() : "";
+    const day = ok ? String(d.getDate()) : "";
+    const mon = ok ? d.toLocaleDateString("en-US", { month: "short" }).toUpperCase() : "";
+    const monFull = ok ? d.toLocaleDateString("en-US", { month: "short" }) : "";
+    const sponsored = isSponsored(e.partner_tags);
+
+    const a = el("a", `sel-row${sponsored ? " is-sponsored" : ""}`) as HTMLAnchorElement;
+    a.href = liveUrl(e.event_url, e.id, hub);
+    a.target = "_blank";
+    a.rel = "noopener";
+
+    const cal = el("div", "sel-cal");
+    cal.append(el("div", "sel-dow", dow), el("div", "sel-day", day), el("div", "sel-mon", mon));
+
+    const info = el("div", "sel-info");
+    info.append(el("div", "sel-name", e.title ?? "Untitled Event"));
+    const meta = el("div", "sel-meta");
+    meta.append(el("span", "", `${monFull} ${day}`));
+    meta.append(el("span", "sel-sep", "|"));
+    meta.append(el("span", "sel-city", cityLabel(e.venue_address, map, market)));
+    if (sponsored) meta.append(el("span", "sel-badge", "SPONSORED"));
+    info.append(meta);
+
+    a.append(cal, info);
+    return a;
+  }
+
+  async function hydrate(wrap: HTMLElement): Promise<void> {
+    const engine = wrap.dataset.selEngine ?? "";
+    const market = wrap.dataset.selMarket ?? "";
+    const hub = wrap.dataset.selHub ?? "";
+    if (!engine || !market) return;
+
+    let map: Record<string, string> = {};
+    try { map = JSON.parse(wrap.dataset.selCityDisplay ?? "{}"); } catch {}
+
+    const events = await fetchMarket(engine, market);
+    if (!events) return; // fetch failed — keep the build-time snapshot
+
+    const upcoming = events
+      .filter((e: any) => isSponsored(e.partner_tags) || dateKey(e.start_datetime) >= cutoff)
+      .sort((a: any, b: any) => dateKey(a.start_datetime).localeCompare(dateKey(b.start_datetime)))
+      .slice(0, 6);
+    if (upcoming.length === 0) return; // empty feed — keep the snapshot
+
+    const listDiv = el("div", "sel-list");
+    for (const e of upcoming) listDiv.append(buildRow(e, map, hub, market));
+    wrap.replaceChildren(listDiv);
+  }
+
+  document
+    .querySelectorAll<HTMLElement>(".sel-wrap[data-sel-live]")
+    .forEach((wrap) => { void hydrate(wrap); });
+</script>
+
+{/* is:global — rows rebuilt by the live-sync script have no Astro scope
+    attribute, so scoped selectors would miss them. All classes are
+    sel- prefixed, so the global reach is effectively component-local. */}
+<style is:global>
   .sel-list { display: grid; }
 
   .sel-row {
