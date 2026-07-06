@@ -417,6 +417,11 @@ function rowFields(e: any) {
     attribute, so scoped selectors would miss them. All classes are
     sel- prefixed, so the global reach is effectively component-local. */}
 <style is:global>
+  /* Breathing room below the section header's blue divider line so the
+     rotating featured card (and the rows) don't run into it. Applies to
+     every sidebar site-wide since this component is the single source. */
+  .sel-wrap { margin-top: 12px; }
+
   .sel-list { display: grid; }
 
   .sel-row {
