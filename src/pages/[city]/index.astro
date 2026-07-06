@@ -7,9 +7,11 @@
  */
 import Base from "../../layouts/Base.astro";
 import { getCityEvents, cityDisplayName, getEventsUrl } from "../../lib/events.js";
-import { allCitySlugs, getDisplayName, getCityConfig } from "../../lib/cityConfigs.js";
+import { allCitySlugs, getDisplayName, getCityConfig, getVibeCheck } from "../../lib/cityConfigs.js";
 import { getCollection } from "astro:content";
 import NewsletterBanner from "../../components/NewsletterBanner.astro";
+import WeatherBanner from "../../components/WeatherBanner.astro";
+import SidebarPoll from "../../components/SidebarPoll.astro";
 
 export async function getStaticPaths() {
   return allCitySlugs.map(slug => ({ params: { city: slug } }));
@@ -18,6 +20,7 @@ export async function getStaticPaths() {
 const { city } = Astro.params;
 const displayName = getDisplayName(city);
 const config = getCityConfig(city);
+const vibeCheck = getVibeCheck(city);
 
 /* ── Events ── */
 let upcomingEvents: any[] = [];
@@ -62,6 +65,8 @@ function dateText(post: any) {
 
 <Base title={`GoDo${displayName}`} subtitle={`Local news, events & guides for ${displayName}`} cityBase={city}>
   <NewsletterBanner city={displayName} accentColor={config?.accentColor} vibeCheckText={config?.vibeCheckText} />
+  {/* Live weather strip — coordinates resolved from this city's mapCenter config. */}
+  <WeatherBanner citySlug={city} />
   <section class="section">
     <div class="cityContainer">
 
@@ -148,6 +153,16 @@ function dateText(post: any) {
               </div>
               <a class="evMore" href={getEventsUrl(city)}>See all events →</a>
             </div>
+          )}
+
+          {/* SidebarPoll brings its own card chrome — no .sideCard wrapper needed */}
+          {vibeCheck && (
+            <SidebarPoll
+              title="Vibe Check"
+              question={vibeCheck.question}
+              options={vibeCheck.options}
+              pollId={vibeCheck.pollId}
+            />
           )}
 
           <div class="sideCard guideCard">

@@ -5,6 +5,10 @@ interface Props {
   vibeCheckUrl?: string;  // defaults to /{city}/vibe-check/
   vibeCheckText?: string; // the question shown in the alert bar
   accentColor?: string;   // pill/highlight color for the Vibe Check bar
+  showVibeCheck?: boolean; // render the bottom Vibe Check strip. Default FALSE —
+                           // the poll now lives as an interactive SidebarPoll in
+                           // the right rail across every city. Pass true to opt a
+                           // page back into the legacy full-width bar.
 }
 
 const {
@@ -13,6 +17,7 @@ const {
   vibeCheckUrl  = `/${city.toLowerCase()}/vibe-check/`,
   vibeCheckText = `What's on in ${city} this weekend?`,
   accentColor,
+  showVibeCheck = false,
 } = Astro.props;
 ---
 
@@ -40,9 +45,11 @@ const {
     </div>
     <div class="nlThanks" id="nlThanks" aria-live="polite">Thank you! You're on the list. ✓</div>
   </div>
-  <a class="homeAlertBar" id="alertBand" href={vibeCheckUrl}>
-    🗳️ <strong>Vibe Check:</strong> {vibeCheckText} <span class="habVote">Vote Now →</span>
-  </a>
+  {showVibeCheck && (
+    <a class="homeAlertBar" id="alertBand" href={vibeCheckUrl}>
+      🗳️ <strong>Vibe Check:</strong> {vibeCheckText} <span class="habVote">Vote Now →</span>
+    </a>
+  )}
 </div>
 
 <script is:inline>

@@ -1,0 +1,376 @@
+---
+/**
+ * WeatherBanner.astro
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Horizontal "Today in {city}" weather strip beneath the NewsletterBanner.
+ *
+ * Fully DYNAMIC + multi-city. Coordinates are resolved from the central
+ * cityConfig (`mapCenter`) via `citySlug`, or passed explicitly through
+ * `lat`/`lon`. The server renders only a skeleton; a client script fetches live
+ * conditions from Open-Meteo (free, no API key) and maps the response straight
+ * into the layout — so hundreds of cities work automatically with zero per-city
+ * code.
+ *
+ * Usage:
+ *   <WeatherBanner citySlug="daytona" />          // config-driven
+ *   <WeatherBanner lat={35.59} lon={-82.55} city="Asheville" />  // explicit
+ */
+import { getCityConfig, getShortName } from "../lib/cityConfigs.js";
+
+interface Props {
+  citySlug?: string;  // resolves lat/lon/name from cityConfig
+  lat?: number;       // explicit override
+  lon?: number;       // explicit override
+  city?: string;      // display-name override
+}
+
+const { citySlug, lat: latProp, lon: lonProp, city: cityProp } = Astro.props;
+
+const cfg = citySlug ? getCityConfig(citySlug) : null;
+const lat = latProp ?? cfg?.mapCenter?.lat ?? null;
+const lon = lonProp ?? cfg?.mapCenter?.lng ?? null;
+const city =
+  cityProp ??
+  (citySlug ? getShortName(citySlug) : null) ??
+  cfg?.shortName ??
+  cfg?.displayName ??
+  "your city";
+
+// Without coordinates there is nothing to fetch — render nothing rather than a
+// broken widget. Keeps the component safe to drop onto any city page.
+const hasCoords = typeof lat === "number" && typeof lon === "number";
+---
+
+{hasCoords && (
+  <section
+    class="wxBar"
+    data-state="loading"
+    data-lat={lat}
+    data-lon={lon}
+    aria-label={`Current weather for ${city}`}
+  >
+    <div class="wxInner">
+
+      {/* ── Current conditions ── */}
+      <div class="wxCurrent">
+        <div class="wxCurrentHead">
+          <span class="wxKicker">Today in {city}</span>
+        </div>
+        <div class="wxNow">
+          <span class="wxNowIcon" data-wx-icon aria-hidden="true">🌡️</span>
+          <span class="wxNowTemp" data-wx-temp>--°</span>
+          <div class="wxNowMeta">
+            <span class="wxCond" data-wx-cond>Loading forecast…</span>
+            <span class="wxHiLo" data-wx-hilo></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="wxDivider" aria-hidden="true"></div>
+
+      {/* ── Hourly forecast (populated client-side) ── */}
+      <ul class="wxHourly" data-wx-hourly>
+        {Array.from({ length: 6 }).map(() => (
+          <li class="wxHour wxHour--skeleton">
+            <span class="wxHourLabel">&nbsp;</span>
+            <span class="wxHourIcon" aria-hidden="true">·</span>
+            <span class="wxHourTemp">--°</span>
+          </li>
+        ))}
+      </ul>
+
+    </div>
+  </section>
+)}
+
+<script>
+  // ── WMO weather code → icon + human description ──────────────────────────
+  // https://open-meteo.com/en/docs — `weather_code` field
+  type WxMeta = { icon: string; label: string };
+  const WMO: Record<number, WxMeta> = {
+    0:  { icon: "☀️", label: "Clear" },
+    1:  { icon: "🌤️", label: "Mostly Sunny" },
+    2:  { icon: "⛅", label: "Partly Cloudy" },
+    3:  { icon: "☁️", label: "Overcast" },
+    45: { icon: "🌫️", label: "Fog" },
+    48: { icon: "🌫️", label: "Rime Fog" },
+    51: { icon: "🌦️", label: "Light Drizzle" },
+    53: { icon: "🌦️", label: "Drizzle" },
+    55: { icon: "🌦️", label: "Heavy Drizzle" },
+    56: { icon: "🌧️", label: "Freezing Drizzle" },
+    57: { icon: "🌧️", label: "Freezing Drizzle" },
+    61: { icon: "🌦️", label: "Light Rain" },
+    63: { icon: "🌧️", label: "Rain" },
+    65: { icon: "🌧️", label: "Heavy Rain" },
+    66: { icon: "🌧️", label: "Freezing Rain" },
+    67: { icon: "🌧️", label: "Freezing Rain" },
+    71: { icon: "🌨️", label: "Light Snow" },
+    73: { icon: "🌨️", label: "Snow" },
+    75: { icon: "❄️", label: "Heavy Snow" },
+    77: { icon: "🌨️", label: "Snow Grains" },
+    80: { icon: "🌦️", label: "Light Showers" },
+    81: { icon: "🌧️", label: "Showers" },
+    82: { icon: "⛈️", label: "Violent Showers" },
+    85: { icon: "🌨️", label: "Snow Showers" },
+    86: { icon: "🌨️", label: "Snow Showers" },
+    95: { icon: "⛈️", label: "Thunderstorm" },
+    96: { icon: "⛈️", label: "Storm w/ Hail" },
+    99: { icon: "⛈️", label: "Storm w/ Hail" },
+  };
+  const describe = (code: number): WxMeta => WMO[code] ?? { icon: "🌡️", label: "—" };
+
+  const round = (n: number) => Math.round(n);
+
+  function setText(root: Element, sel: string, value: string) {
+    const el = root.querySelector<HTMLElement>(sel);
+    if (el) el.textContent = value;
+  }
+
+  function fmtHour(iso: string): string {
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], { hour: "numeric" }).replace(/\s/g, " ");
+  }
+
+  function render(bar: HTMLElement, data: any) {
+    const cur = data.current;
+    const daily = data.daily;
+    const hourly = data.hourly;
+    if (!cur || !hourly?.time?.length) {
+      bar.dataset.state = "error";
+      return;
+    }
+
+    // ── Current ──
+    const meta = describe(cur.weather_code);
+    setText(bar, "[data-wx-icon]", meta.icon);
+    setText(bar, "[data-wx-temp]", `${round(cur.temperature_2m)}°`);
+    setText(bar, "[data-wx-cond]", meta.label);
+
+    const hi = daily?.temperature_2m_max?.[0];
+    const lo = daily?.temperature_2m_min?.[0];
+    const feels = cur.apparent_temperature;
+    const parts: string[] = [];
+    if (typeof hi === "number") parts.push(`H ${round(hi)}°`);
+    if (typeof lo === "number") parts.push(`L ${round(lo)}°`);
+    if (typeof feels === "number") parts.push(`Feels ${round(feels)}°`);
+    setText(bar, "[data-wx-hilo]", parts.join(" · "));
+
+    // ── Hourly: start at the current hour, show the next 6 ──
+    const nowHour = String(cur.time).slice(0, 13); // "YYYY-MM-DDTHH"
+    let start = hourly.time.findIndex((t: string) => t.slice(0, 13) === nowHour);
+    if (start < 0) start = hourly.time.findIndex((t: string) => t >= cur.time);
+    if (start < 0) start = 0;
+
+    const rows: string[] = [];
+    for (let i = start; i < start + 6 && i < hourly.time.length; i++) {
+      const hm = describe(hourly.weather_code[i]);
+      const label = i === start ? "Now" : fmtHour(hourly.time[i]);
+      rows.push(
+        `<li class="wxHour">
+           <span class="wxHourLabel">${label}</span>
+           <span class="wxHourIcon" aria-hidden="true">${hm.icon}</span>
+           <span class="wxHourTemp">${round(hourly.temperature_2m[i])}°</span>
+         </li>`
+      );
+    }
+    const ul = bar.querySelector("[data-wx-hourly]");
+    if (ul && rows.length) ul.innerHTML = rows.join("");
+
+    bar.dataset.state = "ready";
+  }
+
+  async function loadWeather(bar: HTMLElement) {
+    const lat = bar.dataset.lat;
+    const lon = bar.dataset.lon;
+    if (!lat || !lon) {
+      bar.dataset.state = "error";
+      return;
+    }
+    const url =
+      "https://api.open-meteo.com/v1/forecast" +
+      `?latitude=${encodeURIComponent(lat)}` +
+      `&longitude=${encodeURIComponent(lon)}` +
+      "&current=temperature_2m,apparent_temperature,weather_code" +
+      "&daily=temperature_2m_max,temperature_2m_min" +
+      "&hourly=temperature_2m,weather_code" +
+      "&temperature_unit=fahrenheit&timezone=auto&forecast_days=2";
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      render(bar, await res.json());
+    } catch (err) {
+      console.warn("[WeatherBanner] fetch failed:", err);
+      bar.dataset.state = "error";
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>(".wxBar").forEach(loadWeather);
+</script>
+
+<style>
+  .wxBar {
+    max-width: 1280px;
+    margin: 18px auto 0;
+    padding: 0 2.5rem;
+    box-sizing: border-box;
+  }
+  /* Gracefully collapse if the live fetch fails — no broken widget */
+  .wxBar[data-state="error"] { display: none; }
+
+  .wxInner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 16px 24px;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background:
+      linear-gradient(135deg,
+        color-mix(in srgb, var(--brand1) 10%, transparent) 0%,
+        transparent 55%),
+      var(--surface);
+    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.06);
+    position: relative;
+    overflow: hidden;
+  }
+  /* Brand accent rail on the leading edge */
+  .wxInner::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    width: 4px;
+    background: var(--brand1);
+  }
+
+  /* Skeleton shimmer while loading */
+  .wxBar[data-state="loading"] .wxInner { animation: wxPulse 1.4s ease-in-out infinite; }
+  @keyframes wxPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.62; } }
+
+  /* ── Current conditions ── */
+  .wxCurrent {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .wxKicker {
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand1);
+  }
+  .wxNow {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .wxNowIcon {
+    font-size: 40px;
+    line-height: 1;
+  }
+  .wxNowTemp {
+    font-size: 44px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+  .wxNowMeta {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .wxCond {
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.1;
+  }
+  .wxHiLo {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--faint);
+    line-height: 1.1;
+  }
+
+  /* ── Vertical divider ── */
+  .wxDivider {
+    width: 1px;
+    align-self: stretch;
+    background: var(--border);
+    flex-shrink: 0;
+  }
+
+  /* ── Hourly forecast ── */
+  .wxHourly {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+  }
+  .wxHour {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex: 1;
+    min-width: 62px;
+    padding: 8px 4px;
+    border-radius: 12px;
+    transition: background 140ms;
+  }
+  .wxHour:hover { background: color-mix(in srgb, var(--brand1) 8%, transparent); }
+  .wxHour--skeleton { opacity: 0.5; }
+  .wxHourLabel {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .wxHourIcon {
+    font-size: 24px;
+    line-height: 1;
+  }
+  .wxHourTemp {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Mobile ── */
+  @media (max-width: 768px) {
+    .wxBar {
+      padding: 0 1.25rem;
+      margin-top: 14px;
+    }
+    .wxInner {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 14px;
+      padding: 14px 16px;
+    }
+    .wxCurrent { align-items: center; text-align: center; }
+    .wxNow { justify-content: center; }
+    .wxDivider {
+      width: auto;
+      height: 1px;
+      align-self: stretch;
+    }
+    .wxHourly { gap: 4px; }
+    .wxHour { min-width: 54px; }
+  }
+
+  /* ── Clean White theme — swap brand accent for neutral slate ── */
+  :global(html[data-theme="clean-white"]) .wxKicker { color: #374151; }
+  :global(html[data-theme="clean-white"]) .wxInner::before { background: #374151; }
+</style>

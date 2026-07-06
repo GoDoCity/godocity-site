@@ -2,12 +2,15 @@
 import Base from "../../layouts/Base.astro";
 import InteractiveMap from "../../components/InteractiveMap.astro";
 import NewsletterBanner from "../../components/NewsletterBanner.astro";
+import WeatherBanner from "../../components/WeatherBanner.astro";
 import AdSlot from "../../components/AdSlot.astro";
 import SidebarEventsList from "../../components/SidebarEventsList.astro";
+import SidebarPoll from "../../components/SidebarPoll.astro";
 import { getCollection } from "astro:content";
 import { cityDisplayName, isStrictlyFuture, resolveEngineEventUrl, getEventsUrl, ENGINE_API_BASE } from "../../lib/events.js";
-import { getCityConfig } from "../../lib/cityConfigs.js";
+import { getCityConfig, getVibeCheck } from "../../lib/cityConfigs.js";
 const daytonaConfig = getCityConfig("daytona");
+const vibeCheck = getVibeCheck("daytona");
 
 function isDaytonaPost(post) {
   const city = String(post?.data?.city ?? "daytona").toLowerCase().trim();
@@ -243,11 +246,14 @@ const guideCards = guideHero
 ---
 
 <Base title="GoDoDay" subtitle="Good News Daytona" cityBase="daytona">
+  {/* Vibe Check bar is off by default now — the interactive poll lives in the sidebar. */}
   <NewsletterBanner
     city="Daytona"
     vibeCheckText={daytonaConfig?.vibeCheckText}
     accentColor={daytonaConfig?.accentColor}
   />
+  {/* Live daily-briefing weather strip — coordinates come from cityConfig. */}
+  <WeatherBanner citySlug="daytona" />
   <script is:inline>
   (function(){
     function bleedFix() {
@@ -508,6 +514,22 @@ const guideCards = guideHero
 
             <SidebarEventsList events={allDaytonaMerged} city="daytona" featureTop />
           </div>
+
+          {/* ── VIBE CHECK — interactive poll, relocated from the full-width bar ── */}
+          {vibeCheck && (
+            <div class="railSection vibeRailSection">
+              <div class="railHead">
+                <span class="railTitle">Vibe Check</span>
+                <a class="railMore" href="/daytona/vibe-check/">All polls</a>
+              </div>
+              <SidebarPoll
+                title="This Week's Poll"
+                question={vibeCheck.question}
+                options={vibeCheck.options}
+                pollId={vibeCheck.pollId}
+              />
+            </div>
+          )}
 
           <div class="displayAdSlot">
             <div class="adSlotLabel">Advertisement</div>
@@ -1194,6 +1216,8 @@ const guideCards = guideHero
       align-self: start; /* ensures it doesn't stretch past its content */
     }
     .railSection { display: grid; gap: 0; }
+    /* Vibe Check poll needs breathing room between its header and the poll card */
+    .vibeRailSection { gap: 14px; }
     .railHead {
       display: flex; justify-content: space-between; align-items: baseline;
       padding-bottom: 10px; border-bottom: 2px solid var(--brand1);

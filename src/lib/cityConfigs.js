@@ -26,9 +26,18 @@ export const CITY_CONFIGS = {
     theme: "godo-blue",
     /** Primary brand colour — mirrors themes.css --brand1 for use in JS contexts */
     brand1: "#0077be",
-    /** Vibe Check question shown in the NewsletterBanner alert bar */
+    /** Vibe Check question — reused as the sidebar poll question */
     vibeCheckText: "Who has the best tacos in Ormond?",
-    /** Lat/lng used as the default map centre on the events page */
+    /**
+     * Sidebar Vibe Check poll. Present = the interactive SidebarPoll renders in
+     * the right rail; omit on a city to skip the poll until options are curated.
+     * `question` falls back to vibeCheckText when not set here.
+     */
+    vibeCheck: {
+      pollId: "ormond-tacos",
+      options: ["La Fiesta", "Tortilla Republic", "Cabo's Mexican", "Other"],
+    },
+    /** Lat/lng used as the default map centre AND the weather widget location */
     mapCenter: { lat: 29.2108, lng: -81.0228 },
     /**
      * All city/neighbourhood name strings that count as part of this region.
@@ -178,6 +187,36 @@ export function getShortName(slug) {
   const cfg = getCityConfig(slug);
   if (cfg?.shortName) return cfg.shortName;
   return getDisplayName(slug);
+}
+
+/**
+ * Returns the sidebar Vibe Check poll config for a city, or null when the city
+ * has no curated poll. Shape: { pollId, question, options: {label}[] }.
+ * `question` falls back to the city's vibeCheckText.
+ * @param {string} slug
+ * @returns {{ pollId: string, question: string, options: { label: string }[] } | null}
+ */
+export function getVibeCheck(slug) {
+  const cfg = getCityConfig(slug);
+  const vc = cfg?.vibeCheck;
+  if (!vc?.pollId || !Array.isArray(vc.options) || vc.options.length === 0) return null;
+  return {
+    pollId: vc.pollId,
+    question: vc.question ?? cfg?.vibeCheckText ?? "What's the vibe this week?",
+    options: vc.options.map((o) => ({ label: String(o) })),
+  };
+}
+
+/**
+ * Returns the { lat, lon } used to drive the weather widget for a city, or null
+ * when the city has no mapCenter configured.
+ * @param {string} slug
+ * @returns {{ lat: number, lon: number } | null}
+ */
+export function getCityCoords(slug) {
+  const c = getCityConfig(slug)?.mapCenter;
+  if (!c || typeof c.lat !== "number" || typeof c.lng !== "number") return null;
+  return { lat: c.lat, lon: c.lng };
 }
 
 /** All configured city slugs — useful for getStaticPaths() in dynamic routes. */
