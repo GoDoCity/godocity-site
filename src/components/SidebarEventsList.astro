@@ -7,7 +7,7 @@
  * renders each row, and applies the tinted-blue card style for sponsored
  * events — identical on every page that uses it.
  *
- * featureTop (opt-in — main city landing page only):
+ * featureTop (default ON — unified across every sidebar site-wide):
  *   Turns the top slot into an auto-rotating showcase that cycles the
  *   sponsored / featured events every 4.5 s, falling back to the curated
  *   GoDo Picks (nearest-upcoming) when no paid ads are in the stream so the
@@ -36,11 +36,13 @@ import {
 interface Props {
   events: any[];
   city: string;
-  /** Main-page only: rotate the top slot through featured ads / GoDo Picks. */
+  /** Rotate the top slot through featured ads / GoDo Picks. Default true so
+      every sidebar on the site shows the rotating blue slot; pass featureTop={false}
+      to opt a rail back into a plain flat list. */
   featureTop?: boolean;
 }
 
-const { events, city, featureTop = false } = Astro.props;
+const { events, city, featureTop = true } = Astro.props;
 
 const marketSlug = String(city ?? "").toLowerCase().trim();
 const isLive = ENGINE_CITIES.has(marketSlug);

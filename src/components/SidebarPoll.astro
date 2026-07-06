@@ -5,6 +5,9 @@ export interface Props {
   options?: { label: string }[];
   pollId?: string;
   formAction?: string;
+  /** Dedicated poll page (e.g. /daytona/vibe-check/). When set, the card title
+      links here and a "see all polls" anchor is shown below the results. */
+  pageUrl?: string;
 }
 
 const {
@@ -18,6 +21,7 @@ const {
   ],
   pollId = "ormond-tacos",
   formAction = "#",
+  pageUrl,
 } = Astro.props;
 
 // Read at server/build time where env vars are always resolved
@@ -26,7 +30,10 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 ---
 
 <div class="pollCard" data-poll-id={pollId} data-question={question} data-sb-url={supabaseUrl} data-sb-key={supabaseKey}>
-  <div class="pollTitle">{title}</div>
+  {pageUrl
+    ? <a class="pollTitle pollTitleLink" href={pageUrl}>{title} <span class="pollTitleArrow" aria-hidden="true">→</span></a>
+    : <div class="pollTitle">{title}</div>
+  }
   <div class="pollQuestion">{question}</div>
 
   <!-- Voting form -->
@@ -70,6 +77,10 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
   </div>
 
   <div class="pollFooter" data-poll-footer></div>
+
+  {pageUrl && (
+    <a class="pollPageLink" href={pageUrl}>See all polls & past results →</a>
+  )}
 
   <div class="pollDevBar" data-poll-dev-bar>
     <button
@@ -280,9 +291,12 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 <style>
   .pollCard {
     border-radius: 18px;
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
-    background: var(--surface, rgba(255, 255, 255, 0.035));
-    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    /* Distinct blueprint-blue tint (11% brand mix) so the interactive poll
+       stands out against the white page — unified with the WeatherBanner and
+       the rotating featured-events slot. */
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 34%, transparent);
+    background: color-mix(in srgb, var(--brand1, #0077be) 11%, #fff);
+    box-shadow: 0 3px 14px color-mix(in srgb, var(--brand1, #0077be) 16%, transparent);
     padding: 16px;
     max-width: 680px;
   }
@@ -295,6 +309,30 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     color: var(--brand1);
     margin-bottom: 8px;
   }
+  /* Linked title → dedicated poll page */
+  a.pollTitleLink {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-decoration: none;
+    transition: opacity 130ms;
+  }
+  a.pollTitleLink:hover { opacity: 0.75; }
+  a.pollTitleLink:hover .pollTitleArrow { transform: translateX(2px); }
+  .pollTitleArrow { transition: transform 130ms; font-size: 11px; }
+
+  /* "See all polls" anchor below the results */
+  .pollPageLink {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--brand1);
+    text-decoration: none;
+    transition: opacity 130ms;
+  }
+  .pollPageLink:hover { opacity: 0.75; text-decoration: underline; }
 
   .pollQuestion {
     font-weight: 950;
@@ -317,8 +355,9 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     cursor: pointer;
     padding: 8px 10px;
     border-radius: 10px;
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.07));
-    background: var(--surface, rgba(255, 255, 255, 0.02));
+    /* Crisp white chips read clearly on the blue-tinted card */
+    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 18%, transparent);
+    background: #fff;
     transition: background 120ms, border-color 120ms;
     align-items: center;
   }

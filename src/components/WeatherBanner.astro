@@ -223,13 +223,12 @@ const hasCoords = typeof lat === "number" && typeof lon === "number";
     gap: 24px;
     padding: 16px 24px;
     border-radius: 16px;
-    border: 1px solid var(--border);
-    background:
-      linear-gradient(135deg,
-        color-mix(in srgb, var(--brand1) 10%, transparent) 0%,
-        transparent 55%),
-      var(--surface);
-    box-shadow: 0 2px 14px rgba(0, 0, 0, 0.06);
+    /* Distinct blueprint-blue tint (11% brand mix) so the banner reads as an
+       elevated card instead of blending into the white page. Matches the
+       SidebarPoll card and the rotating featured-events slot. */
+    background: color-mix(in srgb, var(--brand1, #0077be) 11%, #fff);
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 34%, transparent);
+    box-shadow: 0 3px 14px color-mix(in srgb, var(--brand1, #0077be) 16%, transparent);
     position: relative;
     overflow: hidden;
   }
