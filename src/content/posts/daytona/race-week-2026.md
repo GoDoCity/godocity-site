@@ -50,4 +50,4 @@ This year's field has a legitimate three-way battle shaping up between the Ford 
 
 - - -
 
-*Charles King has covered the Daytona 500 for GoDo Daytona since 2015. Send tips to tips@godocity.com.*
+*Charles King has covered the Daytona 500 for GoDoDaytona since 2015. Send tips to tips@godocity.com.*
