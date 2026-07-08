@@ -95,21 +95,6 @@ const shortName = getShortName(city);
             </div>
           </div>
 
-          <!-- Newsletter opt-in — pre-checked; its true/false state travels with
-               the payload as `newsletter-optin` (see collectBody below). -->
-          <label class="optinRow" for="tip-newsletter">
-            <input
-              class="optinCheckbox"
-              id="tip-newsletter"
-              name="newsletter-optin"
-              type="checkbox"
-              checked
-            />
-            <span class="optinLabel">
-              Also send me the free GoDo{shortName} daily newsletter for local news and weekend event guides.
-            </span>
-          </label>
-
           <div class="fieldGroup">
             <label class="fieldLabel" for="tip-subject">
               Tip / Story Subject <span class="req" aria-label="required">*</span>
@@ -146,9 +131,26 @@ const shortName = getShortName(city);
               <span class="req">*</span> Required. Tips are read by the GoDo{shortName} desk —
               we may follow up by email to verify before we publish.
             </p>
-            <button class="connectSubmitBtn" id="connectSubmitBtn" type="button">
-              Send Tip →
-            </button>
+
+            <div class="connectAction">
+              <!-- Newsletter opt-in — pre-checked; its true/false state travels
+                   with the payload as `newsletter-optin` (see collectBody below). -->
+              <label class="optinRow" for="tip-newsletter">
+                <input
+                  class="optinCheckbox"
+                  id="tip-newsletter"
+                  name="newsletter-optin"
+                  type="checkbox"
+                  checked
+                />
+                <span class="optinLabel">
+                  Also send me the free GoDo{shortName} daily newsletter for local news and weekend event guides.
+                </span>
+              </label>
+              <button class="connectSubmitBtn" id="connectSubmitBtn" type="button">
+                Send Tip →
+              </button>
+            </div>
           </div>
 
           <p class="connectError" id="connectError" role="alert" aria-live="polite"></p>
@@ -256,20 +258,23 @@ const shortName = getShortName(city);
   /* ── Footer / submit ── */
   .connectFooter {
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 20px;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 16px;
     margin-top: 2px;
   }
   .connectNote {
-    flex: 1;
-    min-width: 220px;
     font-size: 12.5px;
     line-height: 1.5;
     color: var(--faint, #6b7280);
     margin: 0;
   }
+  /* Opt-in row (left, grows) sits alongside the Send Tip button (right). */
+  .connectAction {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  .connectAction .optinRow { flex: 1; }
 
   .connectSubmitBtn {
     flex-shrink: 0;
@@ -322,7 +327,7 @@ const shortName = getShortName(city);
   .optinLabel {
     font-size: 13.5px;
     line-height: 1.5;
-    font-weight: 600;
+    font-weight: 400;
     color: var(--muted, #2d3748);
   }
 
@@ -390,7 +395,7 @@ const shortName = getShortName(city);
   @media (max-width: 540px) {
     .connectForm { padding: 20px 16px; }
     .fieldRow { grid-template-columns: 1fr; }
-    .connectFooter { flex-direction: column; }
+    .connectAction { flex-direction: column; }
     .connectSubmitBtn { width: 100%; justify-content: center; }
   }
 </style>
