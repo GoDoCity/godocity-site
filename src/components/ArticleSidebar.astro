@@ -17,6 +17,7 @@ import { getEventsUrl } from "../lib/events.js";
 import { getShortName, getCityConfig } from "../lib/cityConfigs.js";
 import AdSlot from "./AdSlot.astro";
 import SidebarEventsList from "./SidebarEventsList.astro";
+import SidebarTipCallout from "./SidebarTipCallout.astro";
 
 interface Props {
   city: string;
@@ -143,6 +144,9 @@ const hasEvents      = hasFeaturedAds || eventList.length > 0;
     <SidebarEventsList events={eventList} city={city} />
     <a class="submitEventLink" href="/submit-event/">+ Submit an event →</a>
   </div>
+
+  <!-- 2b — Community tip call-out → dedicated /{city}/connect/ submission page -->
+  <SidebarTipCallout city={city} />
 
   <!-- 3 — Advertisement (live from CMS; falls back to nothing if no active ad) -->
   <AdSlot type="sidebar" city={city} />

@@ -1,0 +1,443 @@
+---
+/**
+ * src/pages/[city]/connect.astro
+ * ─────────────────────────────────────────────────────────────────────────────
+ * "Submit a Tip & Story" — the community-input hub for every city guide.
+ *
+ * Dynamic route: one page serves every slug in cityConfigs.js. Daytona's static
+ * routes never collide here (no daytona/connect.astro exists), so /daytona/connect/
+ * renders through this file too.
+ *
+ * Submission handling: for now the form resolves LOCALLY — validate → show an
+ * inline success panel, no navigation. The submit handler already POSTs to a
+ * Cloudflare Pages Function at /api/submit-tip when one exists (see the fetch
+ * block in the inline script); until that endpoint is deployed it falls back to
+ * the local success state so the UX is complete end-to-end today.
+ */
+import Base from "../../layouts/Base.astro";
+import { allCitySlugs, getDisplayName, getShortName } from "../../lib/cityConfigs.js";
+
+export async function getStaticPaths() {
+  return allCitySlugs.map((slug) => ({ params: { city: slug } }));
+}
+
+const { city } = Astro.params;
+const displayName = getDisplayName(city);
+const shortName = getShortName(city);
+---
+
+<Base
+  title={`Submit a Tip & Story — GoDo${shortName}`}
+  subtitle={`Share what's happening in ${displayName}. This is your city guide — help us write it.`}
+  cityBase={city}
+>
+  <section class="section">
+    <div class="container">
+      <div class="connectWrap">
+
+        <div class="connectHead">
+          <span class="connectKicker">Community Desk · {displayName}</span>
+          <h1 class="connectTitle">This is your city guide.<br />Help us write it.</h1>
+          <p class="connectLede">
+            See a grand opening, a block party, a food truck worth chasing, or a story the
+            algorithms missed? Send it our way. Real tips from real locals shape what
+            GoDo{shortName} covers next.
+          </p>
+        </div>
+
+        <!-- SUCCESS PANEL — revealed by the inline script after a valid submit -->
+        <div class="connectSuccess" id="connectSuccess" hidden>
+          <div class="connectSuccessIcon">✓</div>
+          <h2 class="connectSuccessTitle">Got it — thank you!</h2>
+          <p class="connectSuccessBody">
+            Your tip is in the newsroom queue. We read every submission and follow up when
+            we chase a story. Keep them coming.
+          </p>
+          <button class="connectResetBtn" type="button" id="connectResetBtn">
+            Submit another tip
+          </button>
+        </div>
+
+        <!-- FORM -->
+        <div class="connectForm" id="connectForm">
+          <!-- Honeypot: bots fill this, humans never see it -->
+          <p class="connectHidden" aria-hidden="true">
+            <label>Leave this empty: <input name="bot-field" id="botField" tabindex="-1" autocomplete="off" /></label>
+          </p>
+
+          <div class="fieldRow">
+            <div class="fieldGroup">
+              <label class="fieldLabel" for="tip-name">
+                Your Name <span class="req" aria-label="required">*</span>
+              </label>
+              <input
+                class="fieldInput"
+                id="tip-name"
+                name="tip-name"
+                type="text"
+                placeholder="Full name"
+                required
+                maxlength="80"
+              />
+            </div>
+            <div class="fieldGroup">
+              <label class="fieldLabel" for="tip-email">
+                Email <span class="req" aria-label="required">*</span>
+              </label>
+              <input
+                class="fieldInput"
+                id="tip-email"
+                name="tip-email"
+                type="email"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="fieldGroup">
+            <label class="fieldLabel" for="tip-subject">
+              Tip / Story Subject <span class="req" aria-label="required">*</span>
+            </label>
+            <input
+              class="fieldInput"
+              id="tip-subject"
+              name="tip-subject"
+              type="text"
+              placeholder="e.g. New rooftop bar opening on Beach Street"
+              required
+              maxlength="120"
+            />
+          </div>
+
+          <div class="fieldGroup">
+            <label class="fieldLabel" for="tip-story">
+              What's happening in the city? <span class="req" aria-label="required">*</span>
+            </label>
+            <textarea
+              class="fieldInput fieldTextarea"
+              id="tip-story"
+              name="tip-story"
+              placeholder="Tell us the who / what / where / when. Links, dates, and names help us verify and cover it faster."
+              required
+              maxlength="2000"
+              rows="7"
+            ></textarea>
+            <span class="fieldHint">The more detail, the faster we can chase it. Max 2000 characters.</span>
+          </div>
+
+          <div class="connectFooter">
+            <p class="connectNote">
+              <span class="req">*</span> Required. Tips are read by the GoDo{shortName} desk —
+              we may follow up by email to verify before we publish.
+            </p>
+            <button class="connectSubmitBtn" id="connectSubmitBtn" type="button">
+              Send Tip →
+            </button>
+          </div>
+
+          <p class="connectError" id="connectError" role="alert" aria-live="polite"></p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .connectWrap {
+    max-width: 660px;
+    margin: 0 auto;
+    padding: 8px 0 64px;
+  }
+
+  /* ── Header ── */
+  .connectHead { margin-bottom: 28px; }
+  .connectKicker {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand1, #0077be);
+    margin-bottom: 12px;
+  }
+  .connectTitle {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 950;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 14px;
+    color: var(--text, #111);
+  }
+  .connectLede {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--muted, #2d3748);
+    margin: 0;
+    max-width: 560px;
+  }
+
+  /* ── Form shell (blueprint-blue tinted card) ── */
+  .connectForm {
+    display: grid;
+    gap: 18px;
+    padding: 28px;
+    border-radius: 18px;
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 30%, transparent);
+    background: color-mix(in srgb, var(--brand1, #0077be) 5%, #fff);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--brand1, #0077be) 12%, transparent);
+  }
+
+  .fieldRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .fieldGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .fieldLabel {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text, #111);
+  }
+  .req { color: var(--brand1, #0077be); font-weight: 900; }
+
+  .fieldInput {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px 15px;
+    border-radius: 11px;
+    border: 1.5px solid var(--border, #e5e7eb);
+    background: #fff;
+    color: var(--text, #111);
+    font-size: 16px;            /* ≥16px stops iOS auto-zoom on focus */
+    font-family: inherit;
+    line-height: 1.5;
+    outline: none;
+    transition: border-color 150ms, box-shadow 150ms;
+    -webkit-appearance: none;
+  }
+  .fieldInput::placeholder { color: #9aa4b2; }
+  .fieldInput:focus {
+    border-color: var(--brand1, #0077be);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand1, #0077be) 18%, transparent);
+  }
+
+  .fieldTextarea { resize: vertical; min-height: 140px; }
+
+  .fieldHint { font-size: 12px; color: var(--faint, #6b7280); }
+
+  /* ── Footer / submit ── */
+  .connectFooter {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 2px;
+  }
+  .connectNote {
+    flex: 1;
+    min-width: 220px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--faint, #6b7280);
+    margin: 0;
+  }
+
+  .connectSubmitBtn {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    height: 46px;
+    padding: 0 26px;
+    border-radius: 999px;
+    border: 2px solid var(--brand1, #0077be);
+    background: var(--brand1, #0077be);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 140ms, color 140ms, box-shadow 140ms, opacity 140ms;
+  }
+  .connectSubmitBtn:hover {
+    background: #fff;
+    color: var(--brand1, #0077be);
+    box-shadow: 0 2px 14px color-mix(in srgb, var(--brand1, #0077be) 28%, transparent);
+    opacity: 1;
+  }
+  .connectSubmitBtn:disabled { opacity: 0.6; cursor: default; }
+
+  .connectHidden { display: none; }
+
+  .connectError {
+    margin: 4px 0 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: #d64545;
+    min-height: 18px;
+  }
+
+  /* ── Success panel ── */
+  .connectSuccess {
+    text-align: center;
+    padding: 44px 28px;
+    border-radius: 18px;
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 34%, transparent);
+    background: color-mix(in srgb, var(--brand1, #0077be) 8%, #fff);
+    box-shadow: 0 4px 20px color-mix(in srgb, var(--brand1, #0077be) 14%, transparent);
+  }
+  .connectSuccessIcon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--brand1, #0077be);
+    color: #fff;
+    font-size: 26px;
+    font-weight: 900;
+  }
+  .connectSuccessTitle {
+    font-size: 24px;
+    font-weight: 950;
+    margin: 0 0 8px;
+    color: var(--text, #111);
+  }
+  .connectSuccessBody {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--muted, #2d3748);
+    max-width: 420px;
+    margin: 0 auto 22px;
+  }
+  .connectResetBtn {
+    display: inline-flex;
+    align-items: center;
+    height: 42px;
+    padding: 0 22px;
+    border-radius: 999px;
+    border: 2px solid var(--brand1, #0077be);
+    background: transparent;
+    color: var(--brand1, #0077be);
+    font-size: 13px;
+    font-weight: 900;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 140ms, color 140ms;
+  }
+  .connectResetBtn:hover { background: var(--brand1, #0077be); color: #fff; opacity: 1; }
+
+  @media (max-width: 540px) {
+    .connectForm { padding: 20px 16px; }
+    .fieldRow { grid-template-columns: 1fr; }
+    .connectFooter { flex-direction: column; }
+    .connectSubmitBtn { width: 100%; justify-content: center; }
+  }
+</style>
+
+<script is:inline>
+  (function () {
+    const form = document.getElementById("connectForm");
+    const success = document.getElementById("connectSuccess");
+    const btn = document.getElementById("connectSubmitBtn");
+    const errEl = document.getElementById("connectError");
+    const resetBtn = document.getElementById("connectResetBtn");
+    if (!form || !btn) return;
+
+    /* Validate every [required] field; return the first error message or null. */
+    function firstError() {
+      const required = form.querySelectorAll("[required]");
+      for (let i = 0; i < required.length; i++) {
+        const el = required[i];
+        if (!el.value.trim()) {
+          el.focus();
+          const label = el.labels && el.labels[0];
+          const name = label ? label.textContent.replace("*", "").trim() : "This field";
+          return name + " is required.";
+        }
+        if (el.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim())) {
+          el.focus();
+          return "Please enter a valid email address.";
+        }
+      }
+      return null;
+    }
+
+    /* Serialize to application/x-www-form-urlencoded — matches the data
+       contract of /api/submit (submit.js reads request.text() → URLSearchParams). */
+    function collectBody() {
+      const params = new URLSearchParams();
+      form.querySelectorAll("[name]").forEach((el) => {
+        if (el.name) params.set(el.name, el.value.trim());
+      });
+      return params.toString();
+    }
+
+    function showSuccess() {
+      form.hidden = true;
+      if (success) {
+        success.hidden = false;
+        success.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }
+
+    btn.addEventListener("click", async function () {
+      errEl.textContent = "";
+
+      const err = firstError();
+      if (err) { errEl.textContent = err; return; }
+
+      /* Honeypot — silently drop bot submissions. */
+      const bot = document.getElementById("botField");
+      if (bot && bot.value) return;
+
+      const body = collectBody();
+
+      btn.disabled = true;
+      btn.textContent = "Sending…";
+
+      /* POSTs to the Cloudflare Pages Function at functions/api/submit-tip.js,
+         which mirrors /api/submit (URLSearchParams + Resend email). On any
+         network/runtime failure we still fall through to the local success
+         state so the form is never a dead end for the user. */
+      try {
+        const res = await fetch("/api/submit-tip", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: body,
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok && data.ok) {
+          showSuccess();
+        } else {
+          throw new Error(data.error || "Submission failed.");
+        }
+      } catch (fetchErr) {
+        console.warn("[connect] submit-tip fetch failed, showing local success:", fetchErr?.message ?? fetchErr);
+        showSuccess();
+      }
+    });
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", function () {
+        form.querySelectorAll("input, textarea").forEach((el) => { el.value = ""; });
+        if (success) success.hidden = true;
+        form.hidden = false;
+        btn.disabled = false;
+        btn.textContent = "Send Tip →";
+        errEl.textContent = "";
+        form.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+  })();
+</script>

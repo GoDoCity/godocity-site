@@ -6,6 +6,7 @@ import WeatherBanner from "../../components/WeatherBanner.astro";
 import AdSlot from "../../components/AdSlot.astro";
 import SidebarEventsList from "../../components/SidebarEventsList.astro";
 import SidebarPoll from "../../components/SidebarPoll.astro";
+import SidebarTipCallout from "../../components/SidebarTipCallout.astro";
 import { getCollection } from "astro:content";
 import { cityDisplayName, isStrictlyFuture, resolveEngineEventUrl, getEventsUrl, ENGINE_API_BASE } from "../../lib/events.js";
 import { getCityConfig, getVibeCheck } from "../../lib/cityConfigs.js";
@@ -514,6 +515,9 @@ const guideCards = guideHero
 
             <SidebarEventsList events={allDaytonaMerged} city="daytona" featureTop />
           </div>
+
+          {/* ── Community tip call-out → /daytona/connect/ ── */}
+          <SidebarTipCallout city="daytona" />
 
           {/* ── VIBE CHECK — interactive poll, relocated from the full-width bar ── */}
           {vibeCheck && (

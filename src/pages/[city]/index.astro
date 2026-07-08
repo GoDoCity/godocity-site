@@ -12,6 +12,7 @@ import { getCollection } from "astro:content";
 import NewsletterBanner from "../../components/NewsletterBanner.astro";
 import WeatherBanner from "../../components/WeatherBanner.astro";
 import SidebarPoll from "../../components/SidebarPoll.astro";
+import SidebarTipCallout from "../../components/SidebarTipCallout.astro";
 
 export async function getStaticPaths() {
   return allCitySlugs.map(slug => ({ params: { city: slug } }));
@@ -165,6 +166,9 @@ function dateText(post: any) {
               pageUrl={`/${city}/vibe-check/`}
             />
           )}
+
+          {/* Community tip call-out → /{city}/connect/ */}
+          <SidebarTipCallout city={city} />
 
           <div class="sideCard guideCard">
             <div class="sideTitle">Explore {displayName}</div>

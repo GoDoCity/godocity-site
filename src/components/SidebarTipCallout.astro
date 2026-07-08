@@ -1,0 +1,103 @@
+---
+/**
+ * src/components/SidebarTipCallout.astro
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Passive, site-wide community-input call-out for the universal right rail.
+ *
+ * Drops into ArticleSidebar.astro (or any rail) and anchors straight to the
+ * dedicated /{city}/connect/ submission page. Styling reuses the blueprint-blue
+ * tinted-card idiom shared by SidebarPoll + the featured-event cards, so it sits
+ * naturally in the rail on the white light theme.
+ *
+ * Usage:
+ *   <SidebarTipCallout city="daytona" />
+ */
+interface Props {
+  /** City slug — builds the /{city}/connect/ link. Defaults to daytona. */
+  city?: string;
+  /** Optional headline override. */
+  heading?: string;
+  /** Optional supporting line override. */
+  blurb?: string;
+}
+
+const {
+  city = "daytona",
+  heading = "See a story happening? 📣",
+  blurb = "This is your city guide. Tip us on what's popping off — an opening, a closing, a can't-miss local moment.",
+} = Astro.props;
+
+const connectUrl = `/${city}/connect/`;
+---
+
+<aside class="tipCallout" aria-labelledby="tipCalloutHeading">
+  <span class="tipCalloutKicker">Community Desk</span>
+  <h3 class="tipCalloutHeading" id="tipCalloutHeading">{heading}</h3>
+  <p class="tipCalloutBlurb">{blurb}</p>
+  <a class="tipCalloutBtn" href={connectUrl}>
+    Submit a Tip <span class="tipCalloutArrow" aria-hidden="true">→</span>
+  </a>
+</aside>
+
+<style>
+  .tipCallout {
+    display: grid;
+    gap: 8px;
+    padding: 18px;
+    border-radius: 16px;
+    /* Blueprint-blue tinted card — matches SidebarPoll / featured-event slots */
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 34%, transparent);
+    background: color-mix(in srgb, var(--brand1, #0077be) 9%, #fff);
+    box-shadow: 0 3px 14px color-mix(in srgb, var(--brand1, #0077be) 14%, transparent);
+  }
+
+  .tipCalloutKicker {
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--brand1, #0077be);
+  }
+
+  .tipCalloutHeading {
+    margin: 0;
+    font-size: 19px;
+    font-weight: 950;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--text, #111);
+  }
+
+  .tipCalloutBlurb {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--faint, #555);
+  }
+
+  .tipCalloutBtn {
+    margin-top: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-start;
+    padding: 9px 18px;
+    border-radius: 999px;
+    border: 2px solid var(--brand1, #0077be);
+    background: var(--brand1, #0077be);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    text-decoration: none;
+    transition: background 140ms, color 140ms, box-shadow 140ms;
+  }
+  .tipCalloutBtn:hover {
+    background: #fff;
+    color: var(--brand1, #0077be);
+    box-shadow: 0 2px 12px color-mix(in srgb, var(--brand1, #0077be) 28%, transparent);
+    opacity: 1; /* override global a:hover fade so the swap reads cleanly */
+  }
+  .tipCalloutArrow { transition: transform 140ms; }
+  .tipCalloutBtn:hover .tipCalloutArrow { transform: translateX(3px); }
+</style>
