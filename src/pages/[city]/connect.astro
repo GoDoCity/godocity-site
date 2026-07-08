@@ -151,8 +151,13 @@ const shortName = getShortName(city);
     padding: 8px 0 64px;
   }
 
-  /* ── Header ── */
-  .connectHead { margin-bottom: 28px; }
+  /* The hidden attribute must beat .connectForm's display:grid / .connectSuccess,
+     otherwise toggling [hidden] in JS wouldn't actually hide the panels. */
+  .connectForm[hidden],
+  .connectSuccess[hidden] { display: none !important; }
+
+  /* ── Header (centered to mirror the card + form beneath it) ── */
+  .connectHead { margin-bottom: 28px; text-align: center; }
   .connectKicker {
     display: inline-block;
     font-size: 11px;
@@ -174,7 +179,7 @@ const shortName = getShortName(city);
     font-size: 16px;
     line-height: 1.6;
     color: var(--muted, #2d3748);
-    margin: 0;
+    margin: 0 auto;
     max-width: 560px;
   }
 

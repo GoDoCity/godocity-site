@@ -18,6 +18,7 @@ import { getMergedCityEvents } from "../lib/getMergedCityEvents.ts";
 import { getEventsUrl } from "../lib/events.js";
 import { getShortName } from "../lib/cityConfigs.js";
 import SidebarEventsList from "../components/SidebarEventsList.astro";
+import SidebarTipCallout from "../components/SidebarTipCallout.astro";
 
 interface Props {
   title: string;
@@ -107,6 +108,9 @@ const emoji = topicEmoji[topic] ?? "📖";
           <SidebarEventsList events={eventList} city={cityBase} />
           <a class="gl-submit-ev" href="/submit-event/">+ Submit an event →</a>
         </div>
+
+        <!-- 3 — Community tip call-out → /{city}/connect/ -->
+        <SidebarTipCallout city={cityBase} />
 
       </aside>
     </div>

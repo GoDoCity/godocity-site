@@ -14,6 +14,7 @@
  */
 import Base           from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
+import SidebarTipCallout from "../../../components/SidebarTipCallout.astro";
 import { getCollection, render } from "astro:content";
 import { getShortName } from "../../../lib/cityConfigs.js";
 
@@ -256,6 +257,9 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
             </div>
           </div>
 
+          {/* Community tip call-out → /{city}/connect/ */}
+          <SidebarTipCallout city={city} />
+
         </aside>
       </div>
     </div>
@@ -489,6 +493,9 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
             ))}
           </div>
         </div>
+
+        {/* Community tip call-out → /{city}/connect/ */}
+        <SidebarTipCallout city={city} />
 
       </aside>
     </div>

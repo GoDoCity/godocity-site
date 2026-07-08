@@ -3,6 +3,7 @@ import Base from "../../../layouts/Base.astro";
 import AdSlot from "../../../components/AdSlot.astro";
 import { getCollection } from "astro:content";
 import SidebarEventsList from "../../../components/SidebarEventsList.astro";
+import SidebarTipCallout from "../../../components/SidebarTipCallout.astro";
 
 /* ── Tag helpers ── */
 function tagKey(raw) {
@@ -327,6 +328,9 @@ try {
             <SidebarEventsList events={upcomingEvents} city={city} />
             <a class="eventsLink" href={`/${city}/events/`}>See all events →</a>
           </div>
+
+          <!-- Community tip call-out → /{city}/connect/ -->
+          <SidebarTipCallout city={city} />
         </aside>
       </div>
 
