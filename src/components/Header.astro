@@ -1,12 +1,13 @@
 ---
 import NavMenu from "./NavMenu.astro";
-import { getDisplayName } from "../lib/cityConfigs.js";
+import { getShortName } from "../lib/cityConfigs.js";
 
 const { title, cityBase } = Astro.props;
 
-// Always show "GoDo [City]" in the brand badge so every city gets its identity.
-// Falls back to the page title on non-city pages (no cityBase).
-const brandName = cityBase ? `GoDo${getDisplayName(cityBase)}` : title;
+// Always show "GoDo[City]" in the brand badge so every city gets its identity.
+// Uses the SHORT city name (e.g. "Daytona", not "Daytona Beach") to keep the
+// brand punchy and unified. Falls back to the page title on non-city pages.
+const brandName = cityBase ? `GoDo${getShortName(cityBase)}` : title;
 ---
 
 <header class="topbar">

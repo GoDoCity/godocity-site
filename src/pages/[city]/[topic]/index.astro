@@ -124,7 +124,8 @@ export async function getStaticPaths() {
 const { city, topic } = Astro.params;
 const { topicKey } = Astro.props;
 const topicLabelStr = tagLabel(topicKey);
-const cityCap = getDisplayName(city);
+const cityCap = getDisplayName(city);   // full place name
+const cityShort = getShortName(city);   // brand short name
 
 const all = await getCollection("posts");
 const posts = all
@@ -178,7 +179,7 @@ try {
 } catch { upcomingEvents = []; }
 ---
 
-<Base title={topic === "diy" ? "DIY" : `${topicLabelStr} | GoDo${cityCap}`} cityBase={city}>
+<Base title={topic === "diy" ? "DIY" : `${topicLabelStr} | GoDo${cityShort}`} cityBase={city}>
   <section class="section">
     <div class="container" style="max-width: 1280px; margin: 0 auto; padding: 0 2rem;">
 
@@ -281,7 +282,7 @@ try {
           {carouselPosts.length > 0 && (
             <div class="carouselSection">
               <div class="carouselHeader">
-                <div class="carouselTitle">More from GoDo{cityCap}</div>
+                <div class="carouselTitle">More from GoDo{cityShort}</div>
                 <div class="carouselArrows">
                   <button class="carouselNextBtn" id="carouselPrev" type="button" aria-label="Scroll left">&#8249;</button>
                   <button class="carouselNextBtn" id="carouselNext" type="button" aria-label="Scroll right">&#8250;</button>

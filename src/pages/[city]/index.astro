@@ -7,7 +7,7 @@
  */
 import Base from "../../layouts/Base.astro";
 import { getCityEvents, cityDisplayName, getEventsUrl } from "../../lib/events.js";
-import { allCitySlugs, getDisplayName, getCityConfig, getVibeCheck } from "../../lib/cityConfigs.js";
+import { allCitySlugs, getDisplayName, getShortName, getCityConfig, getVibeCheck } from "../../lib/cityConfigs.js";
 import { getCollection } from "astro:content";
 import NewsletterBanner from "../../components/NewsletterBanner.astro";
 import WeatherBanner from "../../components/WeatherBanner.astro";
@@ -64,7 +64,7 @@ function dateText(post: any) {
 }
 ---
 
-<Base title={`GoDo${displayName}`} subtitle={`Local news, events & guides for ${displayName}`} cityBase={city}>
+<Base title={`GoDo${getShortName(city)}`} subtitle={`Local news, events & guides for ${displayName}`} cityBase={city}>
   <NewsletterBanner city={displayName} accentColor={config?.accentColor} vibeCheckText={config?.vibeCheckText} />
   {/* Live weather strip — coordinates resolved from this city's mapCenter config. */}
   <WeatherBanner citySlug={city} />

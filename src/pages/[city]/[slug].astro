@@ -7,7 +7,7 @@ import Base from "../../layouts/Base.astro";
 import InteractiveMap from "../../components/InteractiveMap.astro";
 import { getCollection, render } from "astro:content";
 import ArticleSidebar from "../../components/ArticleSidebar.astro";
-import { getDisplayName } from "../../lib/cityConfigs.js";
+import { getDisplayName, getShortName } from "../../lib/cityConfigs.js";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
@@ -31,7 +31,8 @@ const { data }    = post;
 const { Content } = await render(post);
 
 const city    = data.city ?? post.slug.split("/")[0];
-const cityCap = getDisplayName(city);
+const cityCap = getDisplayName(city);   // full place name, e.g. "Daytona Beach"
+const cityShort = getShortName(city);   // brand short name, e.g. "Daytona"
 
 /* ── Helpers ── */
 function tagSlugFromRaw(raw) {
@@ -123,7 +124,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 ---
 
 <Base
-  title={`${data.title} | GoDo${cityCap}`}
+  title={`${data.title} | GoDo${cityShort}`}
   subtitle={`Good news for ${cityCap}`}
   cityBase={city}
 >
@@ -210,9 +211,9 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
 
     {/* ── More from strip — spans full container width, into sidebar gutter ── */}
     {morePosts.length > 0 && (
-      <section class="moreFrom" aria-label={`More from GoDo${cityCap}`}>
+      <section class="moreFrom" aria-label={`More from GoDo${cityShort}`}>
         <div class="moreFromHead">
-          <span class="moreFromTitle">More from GoDo{cityCap}</span>
+          <span class="moreFromTitle">More from GoDo{cityShort}</span>
           <a class="moreFromAll" href={`/${city}/`}>See all →</a>
         </div>
         <div class="moreFromOuter">

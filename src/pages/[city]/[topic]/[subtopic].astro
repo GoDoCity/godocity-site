@@ -2,7 +2,7 @@
 import Base from "../../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import ArticleSidebar from "../../../components/ArticleSidebar.astro";
-import { getDisplayName } from "../../../lib/cityConfigs.js";
+import { getDisplayName, getShortName } from "../../../lib/cityConfigs.js";
 
 /* ── String helpers ── */
 function tagKey(raw) {
@@ -89,7 +89,8 @@ const topicKey     = tagKey(topic);
 const subtopicKey  = tagKey(subtopic);
 const topicLabel   = tagLabel(topicKey);
 const subtopicLabel = tagLabel(subtopicKey);
-const cityCap      = getDisplayName(city);
+const cityCap      = getDisplayName(city);   // full place name
+const cityShort    = getShortName(city);     // brand short name
 
 /* Filter posts: city + category === topic + subtopic === subtopic (case-insensitive) */
 const posts = (allPosts as any[])
@@ -116,7 +117,7 @@ function articleHref(post) {
 }
 ---
 
-<Base title={`${subtopicLabel} | ${topicLabel} | GoDo${cityCap}`} cityBase={city}>
+<Base title={`${subtopicLabel} | ${topicLabel} | GoDo${cityShort}`} cityBase={city}>
   <section class="stSection">
     <div class="stWrap">
 
