@@ -49,6 +49,34 @@ const siteName = Astro.props?.title ?? (rawBase ? `GoDo${getShortName(rawBase)}`
 
         <!-- Removed City Directory + removed extra footer pills (keeps footer clean) -->
 
+        {/* Official social handles. No Twitter/X or Threads handle yet, so those
+            icons are intentionally omitted (avoids shipping a dead link). This is
+            a JSX comment — it is stripped from the rendered HTML. */}
+        <div class="footerSocial" aria-label="Follow us on social media">
+          <a
+            class="footerSocialLink"
+            href="https://instagram.com/godo.daytona"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GoDoDaytona on Instagram"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path fill-rule="evenodd" clip-rule="evenodd" d="M7.75 2h8.5A5.75 5.75 0 0 1 22 7.75v8.5A5.75 5.75 0 0 1 16.25 22h-8.5A5.75 5.75 0 0 1 2 16.25v-8.5A5.75 5.75 0 0 1 7.75 2Zm0 1.5A4.25 4.25 0 0 0 3.5 7.75v8.5a4.25 4.25 0 0 0 4.25 4.25h8.5a4.25 4.25 0 0 0 4.25-4.25v-8.5A4.25 4.25 0 0 0 16.25 3.5h-8.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 1.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7ZM17.5 5.75a1 1 0 1 1 0 2 1 1 0 0 1 0-2Z"/>
+            </svg>
+          </a>
+          <a
+            class="footerSocialLink"
+            href="https://facebook.com/GoDoDaytona"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="GoDoDaytona on Facebook"
+          >
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
+              <path d="M13.5 21v-7h2.4l.36-2.8H13.5V9.41c0-.81.22-1.36 1.38-1.36h1.48V5.54c-.26-.03-1.14-.11-2.16-.11-2.14 0-3.6 1.31-3.6 3.7v2.07H8.2V14h2.4v7h2.9Z"/>
+            </svg>
+          </a>
+        </div>
+
         <div class="footerFine footerCopyright">© {year} GoDoCity. All rights reserved.</div>
       </div>
     </div>
@@ -101,4 +129,32 @@ const siteName = Astro.props?.title ?? (rawBase ? `GoDo${getShortName(rawBase)}`
     line-height: 1.35;
   }
   .footerCopyright { margin-top: 10px; }
+
+  /* ── Social handles ── */
+  .footerSocial {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+  }
+  .footerSocialLink {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    color: #111111 !important;
+    border: 1px solid #d0d0d0;
+    transition: color 140ms, border-color 140ms, background 140ms;
+  }
+  .footerSocialLink:hover {
+    color: #0057ff !important;
+    border-color: #0057ff;
+    background: rgba(0, 87, 255, 0.06);
+  }
+  .footerSocialLink svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+  }
 </style>
