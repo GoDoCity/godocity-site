@@ -9,6 +9,7 @@
  *            and emails the desk via Resend. No npm packages (Workers runtime).
  *
  * Expected fields: tip-name, tip-email, tip-subject, tip-story
+ *                  newsletter-optin ("true" | "false") — daily-newsletter opt-in
  */
 
 /* Notification target — hard-coded, same as submit.js */
@@ -35,11 +36,49 @@ export async function onRequestPost({ request, env }) {
       return jsonResponse({ ok: false, error: "Invalid email address." }, 400);
     }
 
+    /* Newsletter opt-in — the form sends a real "true"/"false" string. */
+    const wantsNewsletter = d["newsletter-optin"] === "true";
+
     console.log("[submit-tip] New tip:", JSON.stringify({
-      name:    d["tip-name"],
-      email:   d["tip-email"],
-      subject: d["tip-subject"],
+      name:       d["tip-name"],
+      email:      d["tip-email"],
+      subject:    d["tip-subject"],
+      newsletter: wantsNewsletter,
     }, null, 2));
+
+    /* Optional Beehiiv subscribe — only fires when the opt-in box was checked
+       AND Beehiiv credentials are bound in the Cloudflare env. No-ops otherwise,
+       so the tip flow never breaks if Beehiiv isn't wired up yet. */
+    if (wantsNewsletter && env.BEEHIIV_API_KEY && env.BEEHIIV_PUBLICATION_ID) {
+      try {
+        const bhRes = await fetch(
+          `https://api.beehiiv.com/v2/publications/${env.BEEHIIV_PUBLICATION_ID}/subscriptions`,
+          {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${env.BEEHIIV_API_KEY}`,
+              "Content-Type":  "application/json",
+            },
+            body: JSON.stringify({
+              email:               d["tip-email"],
+              reactivate_existing: true,
+              send_welcome_email:  true,
+              utm_source:          "community-tip-form",
+            }),
+          }
+        );
+        if (!bhRes.ok) {
+          const t = await bhRes.text().catch(() => "");
+          console.warn("[submit-tip] Beehiiv subscribe error:", bhRes.status, t);
+        } else {
+          console.log("[submit-tip] Beehiiv subscribed:", d["tip-email"]);
+        }
+      } catch (bhErr) {
+        console.warn("[submit-tip] Beehiiv subscribe failed:", bhErr?.message ?? bhErr);
+      }
+    } else if (wantsNewsletter) {
+      console.log("[submit-tip] Newsletter opt-in (Beehiiv not configured — add manually):", d["tip-email"]);
+    }
 
     /* Email via Resend — key bound from Cloudflare env */
     const resendKey = env.RESEND_API_KEY;
@@ -124,10 +163,11 @@ function buildEmailHtml(d) {
         </tr>
         <tr><td style="padding:20px 16px;">
           <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
-            ${row("Subject", d["tip-subject"])}
-            ${row("From",    d["tip-name"])}
-            ${row("Email",   d["tip-email"])}
-            ${row("Tip",     d["tip-story"])}
+            ${row("Subject",    d["tip-subject"])}
+            ${row("From",       d["tip-name"])}
+            ${row("Email",      d["tip-email"])}
+            ${row("Newsletter", d["newsletter-optin"] === "true" ? "✅ Yes — add to subscriber list" : "No")}
+            ${row("Tip",        d["tip-story"])}
           </table>
         </td></tr>
         <tr><td style="padding:12px 28px 24px;font-size:12px;color:#999;">

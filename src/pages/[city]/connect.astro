@@ -95,6 +95,21 @@ const shortName = getShortName(city);
             </div>
           </div>
 
+          <!-- Newsletter opt-in — pre-checked; its true/false state travels with
+               the payload as `newsletter-optin` (see collectBody below). -->
+          <label class="optinRow" for="tip-newsletter">
+            <input
+              class="optinCheckbox"
+              id="tip-newsletter"
+              name="newsletter-optin"
+              type="checkbox"
+              checked
+            />
+            <span class="optinLabel">
+              Also send me the free GoDo{shortName} daily newsletter for local news and weekend event guides.
+            </span>
+          </label>
+
           <div class="fieldGroup">
             <label class="fieldLabel" for="tip-subject">
               Tip / Story Subject <span class="req" aria-label="required">*</span>
@@ -281,6 +296,36 @@ const shortName = getShortName(city);
   }
   .connectSubmitBtn:disabled { opacity: 0.6; cursor: default; }
 
+  /* ── Newsletter opt-in checkbox ── */
+  .optinRow {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    cursor: pointer;
+    padding: 13px 15px;
+    border-radius: 11px;
+    border: 1.5px solid color-mix(in srgb, var(--brand1, #0077be) 22%, transparent);
+    background: color-mix(in srgb, var(--brand1, #0077be) 4%, #fff);
+    transition: border-color 150ms, background 150ms;
+  }
+  .optinRow:hover {
+    border-color: color-mix(in srgb, var(--brand1, #0077be) 45%, transparent);
+  }
+  .optinCheckbox {
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    margin: 1px 0 0;               /* nudge to align with first line of label */
+    accent-color: var(--brand1, #0077be);
+    cursor: pointer;
+  }
+  .optinLabel {
+    font-size: 13.5px;
+    line-height: 1.5;
+    font-weight: 600;
+    color: var(--muted, #2d3748);
+  }
+
   .connectHidden { display: none; }
 
   .connectError {
@@ -383,7 +428,14 @@ const shortName = getShortName(city);
     function collectBody() {
       const params = new URLSearchParams();
       form.querySelectorAll("[name]").forEach((el) => {
-        if (el.name) params.set(el.name, el.value.trim());
+        if (!el.name) return;
+        /* Checkboxes carry a static value="on"; send their checked state instead
+           so the desk / Beehiiv receives a real true|false opt-in flag. */
+        if (el.type === "checkbox") {
+          params.set(el.name, el.checked ? "true" : "false");
+        } else {
+          params.set(el.name, el.value.trim());
+        }
       });
       return params.toString();
     }
@@ -435,7 +487,12 @@ const shortName = getShortName(city);
 
     if (resetBtn) {
       resetBtn.addEventListener("click", function () {
-        form.querySelectorAll("input, textarea").forEach((el) => { el.value = ""; });
+        form.querySelectorAll("input, textarea").forEach((el) => {
+          /* Restore checkboxes to their HTML default (opt-in stays pre-checked);
+             clear everything else. */
+          if (el.type === "checkbox") el.checked = el.hasAttribute("checked");
+          else el.value = "";
+        });
         if (success) success.hidden = true;
         form.hidden = false;
         btn.disabled = false;
