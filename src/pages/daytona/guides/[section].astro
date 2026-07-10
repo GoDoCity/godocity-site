@@ -67,6 +67,7 @@ const ribbonConfig: Record<string, RibbonItem[]> = {
   ],
 };
 const ribbonItems: RibbonItem[] = ribbonConfig[section] ?? [];
+const ribbonIds: string[] = ribbonItems.map((r) => r.id);
 
 type ExternalLink = { label: string; href: string; description?: string };
 const citySafetyLinks: ExternalLink[] = [
@@ -146,10 +147,16 @@ function authorSlug(name: string): string {
     <!-- ── Content sections ── -->
     {ribbonItems.length > 0 ? (
       ribbonItems.map((cat, catIdx) => {
-        /* All real guides land in the first ribbon section until subtopic assignment rolls out */
-        const catGuides = catIdx === 0 ? topicGuides : topicGuides.filter(
-          g => g.data.subtopic && toAnchor(g.data.subtopic) === cat.id
-        );
+        /* Strict subtopic match: a guide lands only in the section whose id
+           equals its subtopic anchor. The first section doubles as the
+           catch-all for guides with no subtopic (or one that maps to no
+           ribbon category), so nothing is orphaned. */
+        const catGuides = topicGuides.filter((g) => {
+          const sub = g.data.subtopic ? toAnchor(g.data.subtopic) : null;
+          if (sub === cat.id) return true;
+          if (catIdx === 0 && (!sub || !ribbonIds.includes(sub))) return true;
+          return false;
+        });
         const hasContent = catGuides.length > 0;
         const isCitySafety = cat.id === "city-safety";
 

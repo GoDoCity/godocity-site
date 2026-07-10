@@ -68,7 +68,7 @@ const emoji = topicEmoji[topic] ?? "📖";
       <!-- Left / Center: article (inline ToC injected by script when showToC=true) -->
       <div class="gl-main">
 
-        <article class="gl-article" id="guide-article">
+        <article class="gl-article" id="guide-article" data-toc={showToC ? "true" : "false"}>
           <slot />
         </article>
 
@@ -211,25 +211,29 @@ const emoji = topicEmoji[topic] ?? "📖";
   }
 </style>
 
-<!-- ── Inline collapsible ToC builder (runs only when showToC is true) ── -->
-{showToC && (
-  <script>
+<!-- ── Inline collapsible ToC builder (gated by the article's data-toc flag) ── -->
+<script>
     (function () {
       var article = document.getElementById("guide-article");
       if (!article) return;
+      /* Reads the boolean set from the showToC prop. Kept as a runtime guard
+         (rather than an Astro {showToC && …} wrapper) so hoisting can't strip
+         or unconditionally include the script. */
+      if (article.dataset.toc !== "true") return;
 
-      /* ── PASS 0: Repair headings buried in ** bold / * italic markers ──────
+      /* ── PASS 0: Repair markdown-hash headings Markdown left as plain text ──
          Handles: <p><strong>## Section Title</strong></p>
                   <p>## Section Title</p>
-         e.g. when author writes **## Heading** in Decap CMS editor            */
+                  <p>#Section Title</p>   (single hash / missing space — a
+                                           common CMS authoring typo)
+         Maps # / ## → h2, ### → h3 (h1 is reserved for the article title).    */
       var pars = Array.prototype.slice.call(article.querySelectorAll("p"));
       pars.forEach(function (p) {
         var raw = (p.textContent || "").replace(/^\s*\*+\s*/, "").trim();
-        var h3m = raw.match(/^###\s+([\s\S]+)/);
-        var h2m = !h3m && raw.match(/^##\s+([\s\S]+)/);
-        if (!h2m && !h3m) return;
-        var level = h3m ? "h3" : "h2";
-        var cleanText = ((h3m || h2m)[1] || "").replace(/\*+\s*$/, "").trim();
+        var hm = raw.match(/^(#{1,3})\s*(\S[\s\S]*?)$/);
+        if (!hm) return;
+        var level = hm[1].length >= 3 ? "h3" : "h2";
+        var cleanText = (hm[2] || "").replace(/\*+\s*$/, "").trim();
         if (!cleanText) return;
         var newH = document.createElement(level);
         newH.textContent = cleanText;
@@ -288,7 +292,6 @@ const emoji = topicEmoji[topic] ?? "📖";
       }
     })();
   </script>
-)}
 
 <!-- ── Image caption builder (wraps article images in <figure> with <figcaption>) ── -->
 <script>
@@ -409,6 +412,20 @@ const emoji = topicEmoji[topic] ?? "📖";
     scroll-margin-top: 80px;
   }
   .gl-article :global(p) { margin: 0 0 18px; }
+
+  /* ── Inline body hyperlinks — dynamic city brand, underlined.
+     Scoped to prose (p/li) so eyebrow pills, byline, social icons and the
+     injected ToC links keep their own styling. ── */
+  .gl-article :global(p a),
+  .gl-article :global(li a:not(.gl-itoc-link)) {
+    color: var(--brand1, #007B7F);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .gl-article :global(p a:hover),
+  .gl-article :global(li a:not(.gl-itoc-link):hover) {
+    filter: brightness(85%);
+  }
 
   /* ── Auto editorial-bold for ***…*** blocks ── */
   .gl-article :global(p > em:first-child > strong),
