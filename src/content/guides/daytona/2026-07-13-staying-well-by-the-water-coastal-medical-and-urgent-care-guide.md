@@ -3,7 +3,7 @@ title: 'Staying Well by the Water: Coastal Medical and Urgent Care Guide'
 topic: COAST
 featured: false
 showToC: true
-image: /images/ads/pasted-image-1783982946962.png
+image: /images/ads/pasted-image-1783983653742.png
 description: Where to go for immediate care, routine checkups, and specialized physical therapy along the coast.
 date: 2026-07-13T16:59
 author: Blair Archer
