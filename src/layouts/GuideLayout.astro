@@ -124,11 +124,17 @@ const emoji = topicEmoji[topic] ?? "📖";
     background-color: var(--theme-accent) !important;
     border: 2px solid var(--line) !important;
     border-radius: 12px;
-    padding: 16px 20px;
+    padding: 20px 24px;
     margin-bottom: 32px;
     width: 100%;
     box-sizing: border-box;
-    color: white;
+    color: #ffffff;
+  }
+
+  /* Sit the ToC directly under the featured image as one cohesive block
+     (the image wrapper carries a 32px bottom margin). */
+  .sg-hero-img-wrap + #guide-toc.gl-itoc {
+    margin-top: -18px;
   }
 
   .gl-itoc-summary {
@@ -139,7 +145,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     font-weight: 900;
     letter-spacing: 0.09em;
     text-transform: uppercase;
-    color: white;
+    color: #ffffff;
     cursor: pointer;
     list-style: none;
     user-select: none;
@@ -162,7 +168,7 @@ const emoji = topicEmoji[topic] ?? "📖";
   .gl-itoc-chevron {
     font-size: 22px;
     line-height: 1;
-    color: var(--muted);
+    color: #ffffff;
     transition: transform 200ms ease;
     flex-shrink: 0;
     margin-left: auto;
@@ -188,19 +194,19 @@ const emoji = topicEmoji[topic] ?? "📖";
     padding: 2px 0;
     font-size: 1.15rem;
     font-weight: 600;
-    color: white;
+    color: #ffffff;
     text-decoration: none;
     line-height: 1.35;
     transition: color 140ms;
   }
-  .gl-itoc-link:hover { color: var(--text); }
+  .gl-itoc-link:hover { color: rgba(255, 255, 255, 0.75); }
 
   .gl-itoc-item--sub .gl-itoc-link {
     font-size: 0.875rem;
     font-weight: 500;
-    color: var(--muted);
+    color: #ffffff;
   }
-  .gl-itoc-item--sub .gl-itoc-link:hover { color: var(--text); }
+  .gl-itoc-item--sub .gl-itoc-link:hover { color: rgba(255, 255, 255, 0.75); }
 
   @media (max-width: 900px) {
     #guide-toc.gl-itoc {
@@ -283,14 +289,19 @@ const emoji = topicEmoji[topic] ?? "📖";
 
       details.appendChild(list);
 
-      /* Inject directly above the first content heading (h2 OR h3).
+      /* Placement: render the ToC immediately below the featured image so the
+         two read as one cohesive block. When there's no hero image, fall back
+         to sitting directly above the first content heading (h2 OR h3).
          `headings` is guaranteed non-empty here (we return early above when
          it's empty), so we never fall back to article.firstChild — which used
-         to drop the ToC at the very top of the article, ABOVE the title, byline
-         and hero image, whenever a guide's body had no <h2>.
-         insertAdjacentElement("beforebegin") places it before the heading
-         regardless of DOM nesting depth. */
-      headings[0].insertAdjacentElement("beforebegin", details);
+         to drop the ToC at the very top of the article, ABOVE the title/byline.
+         insertAdjacentElement places it correctly regardless of DOM nesting. */
+      var heroWrap = article.querySelector(".sg-hero-img-wrap");
+      if (heroWrap) {
+        heroWrap.insertAdjacentElement("afterend", details);
+      } else {
+        headings[0].insertAdjacentElement("beforebegin", details);
+      }
     })();
   </script>
 
