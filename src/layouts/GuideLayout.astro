@@ -283,13 +283,14 @@ const emoji = topicEmoji[topic] ?? "📖";
 
       details.appendChild(list);
 
-      /* Inject immediately before the first h2 (keeps intro text above ToC) */
-      var firstH2 = article.querySelector("h2");
-      if (firstH2) {
-        article.insertBefore(details, firstH2);
-      } else {
-        article.insertBefore(details, article.firstChild);
-      }
+      /* Inject directly above the first content heading (h2 OR h3).
+         `headings` is guaranteed non-empty here (we return early above when
+         it's empty), so we never fall back to article.firstChild — which used
+         to drop the ToC at the very top of the article, ABOVE the title, byline
+         and hero image, whenever a guide's body had no <h2>.
+         insertAdjacentElement("beforebegin") places it before the heading
+         regardless of DOM nesting depth. */
+      headings[0].insertAdjacentElement("beforebegin", details);
     })();
   </script>
 
@@ -300,6 +301,9 @@ const emoji = topicEmoji[topic] ?? "📖";
     if (!article) return;
     var imgs = Array.prototype.slice.call(article.querySelectorAll("img"));
     imgs.forEach(function (img: HTMLImageElement) {
+      /* The featured hero fills its own aspect-ratio wrapper — never wrap it
+         in a <figure> or give it a caption (its alt is the article title). */
+      if (img.classList.contains("sg-hero-img")) return;
       var alt = (img.getAttribute("alt") || "").trim();
       if (!alt) return;
       /* Skip if already inside a <figure> */
@@ -437,8 +441,11 @@ const emoji = topicEmoji[topic] ?? "📖";
     font-style: normal;
   }
 
-  /* Images — :global() required so slot/markdown content images match */
-  .gl-article :global(img) {
+  /* Images — :global() required so slot/markdown content images match.
+     Excludes .sg-hero-img: the featured hero must fill its fixed-ratio
+     wrapper (object-fit:cover) and this auto width/height reset would force
+     it back to intrinsic size, letterboxing it against the wrapper bg. */
+  .gl-article :global(img:not(.sg-hero-img)) {
     max-width: 100% !important;
     width: auto !important;
     height: auto !important;
@@ -452,7 +459,7 @@ const emoji = topicEmoji[topic] ?? "📖";
     margin: 0 0 24px;
     text-align: center;
   }
-  .gl-article :global(figure img) {
+  .gl-article :global(figure img:not(.sg-hero-img)) {
     max-width: 100% !important;
     width: auto !important;
     height: auto !important;

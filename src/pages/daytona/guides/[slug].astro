@@ -228,12 +228,19 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
     margin-bottom: 32px;
     background: #1c2028;
   }
-  .sg-hero-img {
+  /* Fill the fixed-ratio wrapper edge-to-edge. !important keeps the hero
+     immune to the layout's global .gl-article img reset (auto width/height),
+     which would otherwise render it at intrinsic size and letterbox it
+     against the wrapper's dark background. */
+  .sg-hero-img-wrap .sg-hero-img {
     display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    object-fit: cover !important;
     object-position: center;
+    margin: 0 !important;
+    border-radius: 0 !important;
   }
 
   @media (max-width: 640px) {
