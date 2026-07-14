@@ -161,6 +161,10 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
           </p>
         </header>
 
+        {data.description && (
+          <p class="articleDek">{data.description}</p>
+        )}
+
         {heroImg && (
           <div class="heroWrap">
             <img class="heroImg" src={heroImg} alt={data.title}
@@ -314,6 +318,16 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   .blSep  { opacity: .45; margin: 0 6px; }
   .bylineAuthor { color: var(--brand1); text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 2px; font-weight: 700; transition: text-decoration-color 130ms; }
   .bylineAuthor:hover { text-decoration-color: var(--brand1); }
+  /* Article description / hook — professional subtitle above the hero image */
+  .articleDek {
+    margin: 0 0 26px;
+    max-width: 680px;
+    font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+    line-height: 1.5;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--faint);
+  }
 
   .heroWrap { width: 100%; aspect-ratio: 16/9; max-height: 450px; border-radius: 14px; overflow: hidden; background: var(--surface2); margin: 0 0 2rem; display: block; }
   .heroImg { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; }
@@ -347,9 +361,7 @@ const CK_SRC = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEB
   }
   /* Paragraphs */
   .articleBody :global(p) { margin: 0 0 1.8em; }
-  /* Links */
-  .articleBody :global(a) { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
-  .articleBody :global(a:hover) { opacity: .8; }
+  /* Inline prose links styled globally — see global.css "Article prose hyperlinks". */
   /* Emphasis */
   .articleBody :global(strong) { font-weight: 800; color: var(--text); }
   .articleBody :global(em) { font-style: italic; }

@@ -166,6 +166,10 @@ const subtopicLabel = tagLabelFromKey(subtopicKey).toUpperCase();
             <a class="bylineAuthor" href={`/daytona/journalists/${authorSlug}/`}>{author}</a>
           </p>
 
+          {post.data.description && (
+            <p class="postDek">{post.data.description}</p>
+          )}
+
           <figure class="heroFigure">
             <img class="heroFull" src={hero} alt={post.data.title ?? "Post image"} loading="eager" decoding="async"
               onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
@@ -506,6 +510,17 @@ const subtopicLabel = tagLabelFromKey(subtopicKey).toUpperCase();
     transition: text-decoration-color 130ms;
   }
   .bylineAuthor:hover { text-decoration-color: var(--brand1); }
+
+  /* Article description / hook — professional subtitle above the hero image */
+  .postDek {
+    margin: 0 0 26px;
+    max-width: 680px;
+    font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+    line-height: 1.5;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--faint);
+  }
 
   .heroFigure { margin: 0 0 2rem; }
   .heroFull {

@@ -446,3 +446,42 @@ a.article:hover {
 a.card:hover {
   background: var(--theme-hover) !important;
 }
+
+/* =========================
+   Article prose hyperlinks (shared — single source of truth)
+   ========================= */
+/* One rule for inline links inside EVERY article body — Guides, Posts/News,
+   Topic articles, and DIY. Brand-blue + underlined, scoped to prose <p>/<li>
+   only, so it never leaks into header nav, eyebrow pills, bylines, social
+   icons, or the injected Table of Contents (.gl-itoc-link). This replaces the
+   old per-layout link rules (no more whack-a-mole). */
+.gl-article p a,
+.gl-article li a:not(.gl-itoc-link),
+.guideMarkdown p a,
+.guideMarkdown li a:not(.gl-itoc-link),
+.postBody p a,
+.postBody li a:not(.gl-itoc-link),
+.articleBody p a,
+.articleBody li a:not(.gl-itoc-link),
+.diyIntro p a,
+.diyIntro li a,
+.diySteps p a,
+.diySteps li a {
+  color: var(--theme-accent, #0077be);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.gl-article p a:hover,
+.gl-article li a:not(.gl-itoc-link):hover,
+.guideMarkdown p a:hover,
+.guideMarkdown li a:not(.gl-itoc-link):hover,
+.postBody p a:hover,
+.postBody li a:not(.gl-itoc-link):hover,
+.articleBody p a:hover,
+.articleBody li a:not(.gl-itoc-link):hover,
+.diyIntro p a:hover,
+.diyIntro li a:hover,
+.diySteps p a:hover,
+.diySteps li a:hover {
+  filter: brightness(0.85);
+}

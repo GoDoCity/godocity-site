@@ -428,19 +428,8 @@ const emoji = topicEmoji[topic] ?? "📖";
   }
   .gl-article :global(p) { margin: 0 0 18px; }
 
-  /* ── Inline body hyperlinks — dynamic city brand, underlined.
-     Scoped to prose (p/li) so eyebrow pills, byline, social icons and the
-     injected ToC links keep their own styling. ── */
-  .gl-article :global(p a),
-  .gl-article :global(li a:not(.gl-itoc-link)) {
-    color: var(--brand1, #007B7F);
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-  .gl-article :global(p a:hover),
-  .gl-article :global(li a:not(.gl-itoc-link):hover) {
-    filter: brightness(85%);
-  }
+  /* ── Inline body hyperlinks are now styled globally (see global.css →
+     "Article prose hyperlinks"), so every article layout stays in sync. ── */
 
   /* ── Auto editorial-bold for ***…*** blocks ── */
   .gl-article :global(p > em:first-child > strong),
