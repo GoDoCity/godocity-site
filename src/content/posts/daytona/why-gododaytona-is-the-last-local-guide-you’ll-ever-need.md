@@ -11,7 +11,7 @@ description: Tired of missing out on the best local events or hearing about a ne
 thumbnail: ''
 heroImage: /images/GoDo Blueprint H.png
 city: daytona
-featured: false
+featured: true
 ---
 
 Welcome to a new era of **hyper-localism**. GoDoDaytona isn’t just another news site; it’s a service-oriented media network designed to act as your personal **"Urban Navigator."** Our mission is to cut through the noise of national headlines and algorithms to bring you exactly what matters in our backyard from the progress on the latest **riverfront developments** to the **hidden gems** in the Midtown district. We believe that a stronger community starts with **better information**, and we are building the infrastructure to make sure you never feel like a stranger in your own city.
