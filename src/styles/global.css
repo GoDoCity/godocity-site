@@ -56,6 +56,10 @@
   --faint: #6b7280;
   --pillBg: #f9f9f9;
   --pillBorder: #e5e7eb;
+
+  /* Brand-blue link color — resolves legacy var(--link) usages (.railMore,
+     card hovers, CTAs) that previously fell back to inherited black. */
+  --link: var(--theme-accent, #0077be);
 }
 
 /* =========================
@@ -466,7 +470,13 @@ a.card:hover {
 .diyIntro p a,
 .diyIntro li a,
 .diySteps p a,
-.diySteps li a {
+.diySteps li a,
+/* Links that double as section headings (e.g. "Bethune Grill" in an H3).
+   Headings never hold TOC links (those live in <li>), so no exclusion needed. */
+.postBody h1 a, .postBody h2 a, .postBody h3 a, .postBody h4 a,
+.gl-article h1 a, .gl-article h2 a, .gl-article h3 a, .gl-article h4 a,
+.articleBody h1 a, .articleBody h2 a, .articleBody h3 a, .articleBody h4 a,
+.guideMarkdown h1 a, .guideMarkdown h2 a, .guideMarkdown h3 a, .guideMarkdown h4 a {
   color: var(--theme-accent, #0077be);
   text-decoration: underline;
   text-underline-offset: 2px;
@@ -482,6 +492,10 @@ a.card:hover {
 .diyIntro p a:hover,
 .diyIntro li a:hover,
 .diySteps p a:hover,
-.diySteps li a:hover {
+.diySteps li a:hover,
+.postBody h1 a:hover, .postBody h2 a:hover, .postBody h3 a:hover, .postBody h4 a:hover,
+.gl-article h1 a:hover, .gl-article h2 a:hover, .gl-article h3 a:hover, .gl-article h4 a:hover,
+.articleBody h1 a:hover, .articleBody h2 a:hover, .articleBody h3 a:hover, .articleBody h4 a:hover,
+.guideMarkdown h1 a:hover, .guideMarkdown h2 a:hover, .guideMarkdown h3 a:hover, .guideMarkdown h4 a:hover {
   filter: brightness(0.85);
 }

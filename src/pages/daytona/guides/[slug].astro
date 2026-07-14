@@ -154,7 +154,8 @@ const pubDateISO = guide.data.date ? guide.data.date.toISOString() : null;
 
   /* ── Description / subtitle — professional muted-gray hook above the hero ── */
   .sg-subtitle {
-    max-width: 680px;
+    /* Full content-column width — matches the headline above and hero below. */
+    width: 100%;
     font-size: clamp(1.1rem, 1.6vw, 1.3rem);
     line-height: 1.5;
     letter-spacing: -0.01em;
