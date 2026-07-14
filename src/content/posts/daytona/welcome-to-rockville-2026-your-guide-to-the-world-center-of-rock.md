@@ -11,7 +11,7 @@ description: Get ready to turn the volume up to 11. Daytona International Speedw
 thumbnail: /images/Rockville 2026 2.png
 heroImage: ''
 city: daytona
-featured: true
+featured: false
 ---
 
 Whether you’re a lifelong metalhead or just looking for the ultimate Florida weekend, Welcome to Rockville is back and bigger than ever. With headliners like **Guns N’ Roses, Foo Fighters, Bring Me The Horizon,** and **My Chemical Romance,** this year’s lineup is a powerhouse that promises to shake the Speedway’s infield. It’s not just about the music, though; expect carnival rides, art installations, and a massive selection of local and regional food vendors.
