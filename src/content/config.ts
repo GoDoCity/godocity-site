@@ -33,6 +33,7 @@ const posts = defineCollection({
     sponsorTier: z.enum(["None", "Featured", "Spotlight", "Partner Highlight", "Local Guide"]).optional(),
     city:        z.string().optional(),
     featured:    z.boolean().optional(),
+    showTableOfContents: z.boolean().default(true),
     map_locations: z.array(z.object({
       label:   z.string(),
       address: z.string().optional(),

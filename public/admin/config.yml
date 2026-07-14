@@ -134,6 +134,7 @@ collections:
       - {label: "Hero Image", name: "heroImage", widget: "image", required: false}
       - {label: "City", name: "city", widget: "hidden", default: "daytona"}
       - {label: "Featured", name: "featured", widget: "boolean", required: false, default: false}
+      - {label: "Show Table of Contents", name: "showTableOfContents", widget: "boolean", default: true}
       - {label: "Body", name: "body", widget: "markdown"}
 
   - name: "daytona-events"

@@ -121,6 +121,8 @@ const pubText = pub
   : "";
 const featured = isFeatured(post);
 const hero = heroImage(post);
+/* ToC toggle — defaults on; authors disable per-post via Sveltia frontmatter */
+const showTableOfContents = post.data.showTableOfContents !== false;
 const author = typeof post.data.author === "string" && post.data.author.trim()
   ? post.data.author.trim() : "Charles King";
 const authorSlug = author.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -169,7 +171,7 @@ const subtopicLabel = tagLabelFromKey(subtopicKey).toUpperCase();
               onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
           </figure>
 
-          <article class="postBody">
+          <article class="postBody" id="post-body" data-toc={showTableOfContents ? "true" : "false"}>
             <Content />
           </article>
 
@@ -213,6 +215,227 @@ const subtopicLabel = tagLabelFromKey(subtopicKey).toUpperCase();
   </section>
 
 </Base>
+
+<!-- ══ GLOBAL styles: inline ToC box (ported 1:1 from GuideLayout) ═══════════
+     Pure-white text on the brand-blue theme accent. is:global is required so
+     the runtime-injected #guide-toc (built after hydration) is styled — Astro's
+     scoped styles never reach JS-created nodes. ══════════════════════════════ -->
+<style is:global>
+  /* ── Inline collapsible ToC ── */
+  #guide-toc.gl-itoc {
+    background-color: var(--theme-accent) !important;
+    border: 2px solid var(--line) !important;
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    width: 100%;
+    box-sizing: border-box;
+    color: #ffffff;
+  }
+
+  /* Sit the ToC directly under the featured image as one cohesive block.
+     .heroFigure carries a 32px (2rem) bottom margin; -18px pulls the ToC up to
+     a clean 14px gap. */
+  .heroFigure + #guide-toc.gl-itoc {
+    margin-top: -18px;
+  }
+
+  .gl-itoc-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: #ffffff;
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    gap: 8px;
+  }
+  .gl-itoc-summary::-webkit-details-marker { display: none !important; }
+  summary.gl-itoc-summary::-webkit-details-marker { display: none !important; }
+  .gl-itoc-summary::marker { display: none !important; }
+  summary.gl-itoc-summary { list-style: none; }
+
+  .gl-itoc-hamburger {
+    display: inline-block;
+    width: 18px;
+    height: 13px;
+    flex-shrink: 0;
+    margin-right: 2px;
+    vertical-align: middle;
+  }
+
+  .gl-itoc-chevron {
+    font-size: 22px;
+    line-height: 1;
+    color: #ffffff;
+    transition: transform 200ms ease;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+  #guide-toc[open] .gl-itoc-chevron {
+    transform: rotate(90deg);
+  }
+
+  .gl-itoc-list {
+    list-style: none;
+    margin: 10px 0 2px;
+    padding: 0;
+    display: grid;
+    gap: 0;
+  }
+
+  .gl-itoc li  { margin: 0 !important; padding: 2px 0 !important; }
+  .gl-itoc-item { padding: 2px 0 !important; }
+  .gl-itoc-item--sub { padding-left: 16px; padding-top: 2px !important; padding-bottom: 2px !important; }
+
+  .gl-itoc-link {
+    display: block;
+    padding: 2px 0;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #ffffff;
+    text-decoration: none;
+    line-height: 1.35;
+    transition: color 140ms;
+  }
+  .gl-itoc-link:hover { color: rgba(255, 255, 255, 0.75); }
+
+  .gl-itoc-item--sub .gl-itoc-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #ffffff;
+  }
+  .gl-itoc-item--sub .gl-itoc-link:hover { color: rgba(255, 255, 255, 0.75); }
+
+  @media (max-width: 900px) {
+    #guide-toc.gl-itoc {
+      width: 100%;
+      border-radius: 10px;
+      background-color: var(--theme-accent) !important;
+    }
+  }
+</style>
+
+<!-- ── Inline collapsible ToC builder (hoisted; gated by the article's data-toc flag) ── -->
+<script>
+  (function () {
+    var article = document.getElementById("post-body");
+    if (!article) return;
+    /* Reads the boolean set from the showTableOfContents prop. Kept as a runtime
+       guard (rather than an Astro {show && …} wrapper) so hoisting can't strip
+       or unconditionally include the script. */
+    if (article.dataset.toc !== "true") return;
+
+    /* ── PASS 0: Repair headings Markdown left as plain paragraphs ──
+       Handles: <p><strong>## Section Title</strong></p>
+                <p>## Section Title</p>
+                <p>#Section Title</p>       (single hash / missing space)
+                <p><strong>1. Section Title</strong></p>
+                <p>2) Section Title</p>     (list-style headers a listicle
+                                             author intended as sections)
+       Maps # / ## / list-number → h2, ### → h3 (h1 is the article title).
+       Only <p> nodes are scanned, so real Markdown <ol>/<li> lists (which
+       render as list items, never paragraphs) are never disturbed. */
+    var pars = Array.prototype.slice.call(article.querySelectorAll("p"));
+    pars.forEach(function (p) {
+      var raw = (p.textContent || "").replace(/^\s*\*+\s*/, "").trim();
+      /* Hash-style: #, ##, ### */
+      var hm = raw.match(/^(#{1,3})\s*(\S[\s\S]*?)$/);
+      /* List-style: "1. Title" or "2) Title" — keep the number in the heading */
+      var lm = !hm && raw.match(/^(\d{1,3}[.)]\s+\S[\s\S]*?)$/);
+      if (!hm && !lm) return;
+      var level = hm && hm[1].length >= 3 ? "h3" : "h2";
+      var cleanText = (hm ? hm[2] : lm[1]).replace(/\*+\s*$/, "").trim();
+      if (!cleanText) return;
+      var newH = document.createElement(level);
+      newH.textContent = cleanText;
+      if (p.parentNode) p.parentNode.replaceChild(newH, p);
+    });
+
+    /* ── PASS 0b: Repair list-style headers Markdown turned into single-item
+       ordered lists ──
+       A standalone "1. Title" / "2. Title" line (blank-line separated, the way
+       a listicle author writes section headers) is parsed as its OWN
+       <ol start="N"><li>Title</li></ol> rather than a paragraph. A genuine
+       multi-step list keeps every item under one <ol> with 2+ <li>, so we only
+       promote single-item lists whose sole item is a short, single-line,
+       block-free heading — leaving real ordered lists untouched. */
+    var ols = Array.prototype.slice.call(article.querySelectorAll("ol"));
+    ols.forEach(function (ol: HTMLElement) {
+      if (ol.children.length !== 1) return;
+      var li = ol.children[0];
+      if (li.tagName !== "LI") return;
+      /* Skip items carrying real block content (nested lists, multi-paragraph,
+         hard line breaks) — those are genuine list entries, not headers. */
+      if (li.querySelector("ul, ol, p + p, br")) return;
+      var text = (li.textContent || "").trim();
+      if (!text || text.length > 120 || /[\r\n]/.test(text)) return;
+      var start = parseInt(ol.getAttribute("start") || "1", 10);
+      var newH = document.createElement("h2");
+      newH.textContent = (isNaN(start) ? 1 : start) + ". " + text;
+      if (ol.parentNode) ol.parentNode.replaceChild(newH, ol);
+    });
+
+    var headings = Array.prototype.slice.call(
+      article.querySelectorAll("h2, h3")
+    );
+    if (headings.length === 0) return;
+
+    /* Assign IDs to headings that lack one */
+    headings.forEach(function (h: HTMLElement, i: number) {
+      if (!h.id) h.id = "toc-" + i;
+    });
+
+    /* Build <details> accordion */
+    var details = document.createElement("details");
+    details.id        = "guide-toc";
+    details.className = "gl-itoc";
+    /* Open on desktop (≥900 px), closed on mobile */
+    details.open = window.innerWidth >= 900;
+
+    var summary = document.createElement("summary");
+    summary.className   = "gl-itoc-summary";
+    summary.innerHTML   =
+      '<svg class="gl-itoc-hamburger" aria-hidden="true" width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="18" height="2" rx="1" fill="currentColor"/><rect x="0" y="5.5" width="18" height="2" rx="1" fill="currentColor"/><rect x="0" y="11" width="18" height="2" rx="1" fill="currentColor"/></svg>In this post <span class="gl-itoc-chevron" aria-hidden="true">&#8250;</span>';
+    details.appendChild(summary);
+
+    var list = document.createElement("ul");
+    list.className = "gl-itoc-list";
+
+    headings.forEach(function (h: HTMLElement) {
+      var li = document.createElement("li");
+      li.className = h.tagName === "H3"
+        ? "gl-itoc-item gl-itoc-item--sub"
+        : "gl-itoc-item";
+
+      var a = document.createElement("a");
+      a.href        = "#" + h.id;
+      a.textContent = h.textContent;
+      a.className   = "gl-itoc-link";
+
+      li.appendChild(a);
+      list.appendChild(li);
+    });
+
+    details.appendChild(list);
+
+    /* Placement: render the ToC immediately below the featured image so the two
+       read as one cohesive block. The hero lives in a sibling <figure> just
+       above the article body, so we insert after it. When there's no hero,
+       fall back to sitting directly above the first content heading. */
+    var main = article.closest(".postMain") || article.parentNode;
+    var heroFig = main ? main.querySelector(".heroFigure") : null;
+    if (heroFig) {
+      heroFig.insertAdjacentElement("afterend", details);
+    } else {
+      headings[0].insertAdjacentElement("beforebegin", details);
+    }
+  })();
+</script>
 
 <style>
   .section { padding: 24px 0; }
