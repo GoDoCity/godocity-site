@@ -138,6 +138,63 @@ const {
     text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
   }
   .nlCity { font-style: italic; font-weight: 900; }
+
+  /* ── "Daytona" — Florida sunset gradient ──
+   * Scoped to godo-blue (Daytona) on purpose. NewsletterBanner is shared, and
+   * the band is var(--theme-gradient): Asheville is lime (#76FF03), Macon is
+   * magenta (#FF00FF). A warm coral/gold reads well on Daytona's blue but goes
+   * muddy on those, so every other city keeps the crisp white.
+   * "Good News" is untouched and stays white.
+   *
+   * Coral (#ff6b6b) only clears WCAG AA large-text (3:1) because of the scrim
+   * on .nlBand below — on the raw band it measures 1.73:1, and 1.0:1 against
+   * the cyan end. Weakening the scrim makes this word unreadable.
+   */
+  html[data-theme="godo-blue"] .nlCity {
+    /* Solid gold fallback — used if background-clip:text is unsupported, so the
+       word can never render invisible. */
+    color: #ffa800;
+    /* .nlHead's text-shadow is inherited and would show through the clipped
+       glyphs as a smudge. drop-shadow applies to the painted result instead. */
+    text-shadow: none;
+    filter: drop-shadow(0 2px 5px rgba(0, 0, 0, .5));
+  }
+
+  @supports ((-webkit-background-clip: text) or (background-clip: text)) {
+    html[data-theme="godo-blue"] .nlCity {
+      background-image: linear-gradient(95deg, #ff6b6b 0%, #ff8a3c 52%, #ffa800 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+  }
+
+  /* Sunset scrim — darkens the band under the content so the coral reads.
+   * Layered into .nlBand's own background rather than a pseudo-element: ::after
+   * is the geometric pattern and ::before is the pulse line, both already taken.
+   * Sits above --theme-gradient, below the pattern and content, and fades to
+   * fully transparent at the edges so the blue is untouched there. */
+  html[data-theme="godo-blue"] .nlBand {
+    --sunset-scrim: radial-gradient(
+      ellipse 85% 78% at 50% 38%,
+      rgba(0, 0, 0, .58) 0%,
+      rgba(0, 0, 0, .44) 55%,
+      rgba(0, 0, 0, .14) 85%,
+      rgba(0, 0, 0, 0) 100%
+    );
+    background: var(--sunset-scrim), var(--theme-gradient);
+  }
+
+  /* Windows high-contrast: hand the word back to the system palette. */
+  @media (forced-colors: active) {
+    html[data-theme="godo-blue"] .nlCity {
+      background-image: none;
+      -webkit-text-fill-color: revert;
+      color: revert;
+      filter: none;
+    }
+  }
   .nlSub {
     font-size: 1.1rem;
     font-weight: 400;
@@ -237,6 +294,11 @@ const {
       min-height: 0;
       background: var(--theme-gradient);
       padding-bottom: 0;
+    }
+    /* The #nlBand rule above outranks the class-based scrim and would strip it
+       on mobile, dropping the coral to 1.73:1. Re-apply it at ID specificity. */
+    html[data-theme="godo-blue"] #nlBand {
+      background: var(--sunset-scrim), var(--theme-gradient);
     }
     .nlInner {
       flex: 0 1 auto;
