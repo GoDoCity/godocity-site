@@ -91,7 +91,9 @@ const allItems: FeedItem[] = [...diyItems, ...postItems].sort(
 function formatDate(d: Date | null): string {
   if (!d) return "";
   try {
-    return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    // pubDate is date-only in frontmatter, so it parses as UTC midnight. Format
+    // in UTC — rendering in a negative-offset zone would show the previous day.
+    return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
   } catch {
     return "";
   }

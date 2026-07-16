@@ -42,8 +42,10 @@ const trimmed = words.length > 200 ? words.slice(0, 200).join(" ") + "…" : int
 const paras   = trimmed.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
 while (paras.length < 2) paras.push("");
 
+// pubDate is date-only in frontmatter, so it parses as UTC midnight. Format in
+// UTC — rendering in a negative-offset zone would show the previous day.
 const pubDateStr = pubDate
-  ? new Date(pubDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
+  ? new Date(pubDate).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" })
   : "";
 
 const authorSlug = author

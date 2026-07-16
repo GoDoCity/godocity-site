@@ -4,3 +4,9 @@
 # /daytona/events/<slug>/ are NOT redirected — they still render locally.
 /daytona/events https://godoevents-site.pages.dev/daytona/events/ 301
 /daytona/events/ https://godoevents-site.pages.dev/daytona/events/ 301
+
+# DIY topic "Repair" was rebranded to "Maintain". Keeps old inbound links and
+# bookmarks to the topic feed alive. Individual guides live at /diy/<slug>/ and
+# are unaffected by the topic rename.
+/:city/diy/repair /:city/diy/maintain/ 301
+/:city/diy/repair/ /:city/diy/maintain/ 301

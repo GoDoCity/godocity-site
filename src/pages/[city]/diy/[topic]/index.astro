@@ -3,14 +3,14 @@
  * src/pages/[city]/diy/[topic]/index.astro
  * DIY subtopic feed — merges the `diy` collection AND posts (category:DIY)
  * for the given city and topic slug.
- * URL pattern: /daytona/diy/paint/  /daytona/diy/repair/
+ * URL pattern: /daytona/diy/paint/  /daytona/diy/maintain/
  */
 import Base from "../../../../layouts/Base.astro";
 import ArticleSidebar from "../../../../components/ArticleSidebar.astro";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
-  const DIY_TOPICS = ["clean", "paint", "repair", "decorate", "craft", "recipe", "build"];
+  const DIY_TOPICS = ["clean", "paint", "maintain", "decorate", "craft", "recipe", "build"];
   const diyEntries  = await getCollection("diy");
   const allPosts    = await getCollection("posts");
 
@@ -65,7 +65,9 @@ function getPostDate(item: any) {
 }
 function formatDate(d: any): string {
   if (!d) return "";
-  try { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }); } catch { return ""; }
+  // pubDate is date-only in frontmatter, so it parses as UTC midnight. Format
+  // in UTC — rendering in a negative-offset zone would show the previous day.
+  try { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" }); } catch { return ""; }
 }
 const FALLBACK_IMG = "/images/old-mural-backup.png";
 

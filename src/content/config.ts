@@ -160,7 +160,7 @@ const diy = defineCollection({
       z.array(z.string()).min(1),
     ]).transform((v) => Array.isArray(v) ? v : v.split("\n").map((s) => s.trim()).filter(Boolean)),
     community_note: z.string().optional(),
-    topic:          z.enum(["Clean", "Paint", "Repair", "Decorate", "Craft", "Recipe"]).optional(),
+    topic:          z.enum(["Clean", "Paint", "Maintain", "Decorate", "Craft", "Recipe"]).optional(),
     cities:         z.array(z.string()).optional().default([]),
     pubDate:        z.coerce.date().optional(),
     author:         authorEnum.optional().default("Julian Wells"),
