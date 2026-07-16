@@ -155,10 +155,13 @@ const diy = defineCollection({
       z.string().min(1),
       z.array(z.string()).min(1),
     ]).transform((v) => Array.isArray(v) ? v : v.split("\n").map((s) => s.trim()).filter(Boolean)),
+    // Kept raw (string or array) — DiyPill parses it. Splitting on "\n" here
+    // dropped the blank lines that separate a "Step N: Title" from its body,
+    // which is what made titles and text render as separate numbered steps.
     steps: z.union([
       z.string().min(1),
       z.array(z.string()).min(1),
-    ]).transform((v) => Array.isArray(v) ? v : v.split("\n").map((s) => s.trim()).filter(Boolean)),
+    ]),
     community_note: z.string().optional(),
     topic:          z.enum(["Clean", "Paint", "Maintain", "Decorate", "Craft", "Recipe"]).optional(),
     cities:         z.array(z.string()).optional().default([]),

@@ -6,7 +6,7 @@ export interface Props {
   title:           string;
   intro:           string;
   materials:       string[];
-  steps:           string[];
+  steps:           string | string[];
   community_note?: string;
   city?:           string;
   topic?:          string;
@@ -32,9 +32,60 @@ const {
 const normMaterials: string[] = Array.isArray(materials)
   ? materials
   : String(materials).split("\n").map((s) => s.trim()).filter(Boolean);
-const normSteps: string[] = Array.isArray(steps)
-  ? steps
-  : String(steps).split("\n").map((s) => s.trim()).filter(Boolean);
+/* ── Steps ──
+ * Guides are authored in four shapes, so the parser keys off explicit
+ * "Step N:" markers rather than line breaks:
+ *   - YAML array, one sentence per step            (hang-hurricane-shutters)
+ *   - folded scalar, steps split by single "\n"    (how-to-tie-dye-easter-eggs)
+ *   - literal scalar, steps split by blank lines   (diy-vanilla-the-mother-jar)
+ *   - literal scalar, "Step N: Title\nbody" blocks (the-sweet-way-to-dodge…)
+ * Only the last shape has titles. Blank lines alone can't tell it apart from
+ * the folded shape, where the first line is a step and not a heading.
+ */
+interface Step { title: string | null; text: string }
+
+const STEP_MARKER = /^step\s*\d+\s*[:.)–—-]\s*/i; // "Step 1: " / "Step 2."
+const NUM_MARKER  = /^\d+\s*[.)]\s+/;             // "2. " / "3) "
+
+/* The number badge already shows the count — drop any marker the author typed
+   so it doesn't read "1  Step 1: Prep the Base". */
+const stripMarker = (s: string): string =>
+  s.replace(STEP_MARKER, "").replace(NUM_MARKER, "").trim();
+
+function parseSteps(raw: string | string[]): Step[] {
+  if (Array.isArray(raw)) {
+    return raw
+      .map((s) => ({ title: null, text: stripMarker(String(s).trim()) }))
+      .filter((s) => s.text);
+  }
+
+  const src = String(raw ?? "").replace(/\r\n/g, "\n").trim();
+  if (!src) return [];
+
+  const hasTitles = /^[ \t]*step\s*\d+\s*[:.)–—-]/im.test(src);
+
+  if (!hasTitles) {
+    return src
+      .split("\n")
+      .map((l) => l.trim())
+      .filter(Boolean)
+      .map((text) => ({ title: null, text: stripMarker(text) }));
+  }
+
+  return src
+    .split(/\n\s*\n+/)
+    .map((block) => {
+      const lines = block.split("\n").map((l) => l.trim()).filter(Boolean);
+      if (!lines.length) return null;
+      const head = stripMarker(lines[0]);
+      const body = lines.slice(1).join(" ").trim();
+      // A title with no body beneath it is just a step.
+      return body ? { title: head, text: body } : { title: null, text: head };
+    })
+    .filter((s): s is Step => s !== null && Boolean(s.text));
+}
+
+const normSteps: Step[] = parseSteps(steps);
 
 /* ── Intro: enforce ≤200 words, split into paragraphs ── */
 const words   = intro.split(/\s+/).filter(Boolean);
@@ -125,8 +176,13 @@ const topicLabel = topic ? topic.trim().split(" ").map((w) => w ? w[0].toUpperCa
         <ol class="stepList">
           {normSteps.map((step, i) => (
             <li class="stepItem">
+              {/* Labelled, not aria-hidden: list-style:none drops list
+                  semantics in Safari/VoiceOver, losing the step number. */}
               <div class="stepNum" aria-label={`Step ${i + 1}`}>{i + 1}</div>
-              <p class="stepText">{step}</p>
+              <div class="stepBody">
+                {step.title && <h3 class="stepTitle">{step.title}</h3>}
+                <p class="stepText">{step.text}</p>
+              </div>
             </li>
           ))}
         </ol>
@@ -291,10 +347,18 @@ const topicLabel = topic ? topic.trim().split(" ").map((w) => w ? w[0].toUpperCa
     font-size: 20px; font-weight: 900; letter-spacing: -0.5px;
     font-family: 'Manrope', sans-serif; margin-top: 2px;
   }
+  .stepBody { min-width: 0; padding-top: 8px; }
+  .stepTitle {
+    font-size: 17px; font-weight: 900; color: #1a1a1a;
+    line-height: 1.35; margin: 0 0 4px; letter-spacing: -0.01em;
+    font-family: 'Manrope', sans-serif;
+  }
   .stepText {
     font-size: 17px; color: #1a1a1a; line-height: 1.65; margin: 0;
-    padding-top: 10px; font-family: 'Manrope', sans-serif;
+    font-family: 'Manrope', sans-serif;
   }
+  /* Untitled steps keep the original single-line optical centring. */
+  .stepBody:not(:has(.stepTitle)) { padding-top: 10px; }
 
   /* ── 6 — Community Note ── */
   .communityNote {

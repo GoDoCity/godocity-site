@@ -7,6 +7,21 @@ backend:
 media_folder: "public/images"
 public_folder: "/images"
 
+# Global slug rules — applies to every collection's "{{slug}}" filename template.
+#
+# Sveltia defaults to `encoding: unicode`, which keeps emoji in the filename
+# (e.g. "...actually-works-🦟.md"). Astro then strips the emoji when deriving the
+# URL slug, leaving a dangling "...actually-works-". Switching to `ascii` makes
+# Sveltia drop the emoji at filename-generation time instead, and `trim` (on by
+# default, set here explicitly) removes the trailing separator it leaves behind.
+# Net effect: emoji stay in the title field and still render in the H1 and tab
+# title — only the filename is sanitized.
+slug:
+  encoding: "ascii"
+  clean_accents: true
+  sanitize_replacement: "-"
+  trim: true
+
 collections:
 
   - name: "daytona-news"
