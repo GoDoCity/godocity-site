@@ -10,7 +10,6 @@ materials: |-
   Empty spray bottle
   Optional: 15 drops of lemongrass, lavender, or lemon eucalyptus essential oil
 steps: |-
-  Steps
   Step 1: Prep the Base
   Pour 240 milliliters of clean water directly into your empty spray bottle.
 
@@ -24,8 +23,6 @@ steps: |-
   To maximize your protection, avoid wearing dark colors, reds, or oranges. Light, neutral colors or pastels will help you stay invisible to passing pests.
 community_note: If you need a heavy-duty natural alternative that won't evaporate as quickly as a water-based spray, mix 2.5 ounces of coconut oil with 15 drops of rosemary or lavender oil in a small jar. Shake well and apply the mixture by hand to create a long-lasting, skin-nourishing barrier before stepping outdoors. Have you tried the vanilla trick on your backyard patio? Join our local Vibe Check to share your go-to chemical-free bug hacks. See you out there!
 topic: Recipe
-cities:
-  - daytona
 pubDate: 2026-07-16
 author: Charles King
 heroImage: /images/pasted-image-1784233090523.png
