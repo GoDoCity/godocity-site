@@ -10,3 +10,9 @@
 # are unaffected by the topic rename.
 /:city/diy/repair /:city/diy/maintain/ 301
 /:city/diy/repair/ /:city/diy/maintain/ 301
+
+# The mosquito guide's filename ended in an emoji, which Astro strips from the
+# slug — leaving a trailing hyphen. File renamed; this catches the brief window
+# the old URL was live. The emoji still lives in the title field.
+/diy/the-sweet-way-to-dodge-mosquitoes-a-diy-vanilla-spray-that-actually-works- /diy/the-sweet-way-to-dodge-mosquitoes-a-diy-vanilla-spray-that-actually-works/ 301
+/diy/the-sweet-way-to-dodge-mosquitoes-a-diy-vanilla-spray-that-actually-works-/ /diy/the-sweet-way-to-dodge-mosquitoes-a-diy-vanilla-spray-that-actually-works/ 301
