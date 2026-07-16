@@ -8,7 +8,8 @@ sponsorTier: None
 tags:
   - 'Tags: #DaytonaBeach #BeachsideBites #LocalEats #DaytonaDining #FloridaFoodie'
 description: Skip the blinding neon signs and greasy fried-everything traps. These five local culinary secrets deliver incredibly fresh flavors, authentic beach vibes, and prices that won't give you heart palpitations.
-heroImage: /images/uploads/burger.webp
+thumbnail: ''
+heroImage: /images/pasted-image-1784231289913.png
 city: daytona
 featured: true
 map_locations:
