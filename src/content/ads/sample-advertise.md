@@ -1,8 +1,8 @@
 ---
 title: GoDoDaytona — Advertise With Us
-type: sidebar
-active: false
-eventDate: ''
+type: banner
+active: true
+eventDate: 2026-07-20
 image: /images/ads/GoDo Blueprint H 3D with verticle.png
 link: /daytona/advertise/
 city: all
