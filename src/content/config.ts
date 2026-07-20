@@ -197,7 +197,7 @@ const ads = defineCollection({
   type: "content",
   schema: z.object({
     title:   z.string(),
-    type:      z.enum(["sidebar", "in-feed", "banner", "featured-event"]),
+    type:      z.enum(["sidebar", "in-feed", "banner", "featured-event", "guides-strip"]),
     image:     z.string().optional().transform(v => v === "" ? undefined : v),
     link:      z.string(),
     active:    z.boolean().default(true),

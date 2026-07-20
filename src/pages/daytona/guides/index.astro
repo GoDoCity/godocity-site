@@ -30,6 +30,62 @@ const SECTIONS = [
 
 const sections = SECTIONS
   .map(s => ({ ...s, guides: sorted.filter(g => g.data.topic === s.topic) }));
+
+// ── Guides Hub ad strip ──────────────────────────────────────────────
+// Active ads with the "Guides Hub Strip" placement replace the default rate
+// cards below the hero (slot-by-slot). Empty slots keep showing the rate card.
+const FALLBACK_AD_IMG = "/images/old-mural-backup.png";
+let guideStripAds: any[] = [];
+try {
+  const allAds = await getCollection("ads");
+  guideStripAds = allAds
+    .filter((a: any) => {
+      if (!a.data.active) return false;
+      if (a.data.type !== "guides-strip") return false;
+      const adCity = (a.data.city ?? "all").toLowerCase();
+      return adCity === "all" || adCity === "daytona";
+    })
+    .slice(0, 3);
+} catch {
+  // ads collection not yet populated — fall back to rate cards
+}
+function stripAdDest(a: any): string {
+  const slug = a.data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  const sep  = a.data.link.includes("?") ? "&" : "?";
+  return `${a.data.link}${sep}utm_source=godocity&utm_medium=guides_strip&utm_campaign=${slug}`;
+}
+
+// Default advertise-here rate cards (shown when a slot has no active ad).
+const RATE_CARDS = [
+  {
+    vip: true,
+    name: "★ VIP Headliner",
+    price: "$375/wk",
+    desc: "Top-of-page placement on Daytona's premier Guides hub · 76k+ monthly impressions · Maximum visibility above the fold",
+    cta: "Reserve Slot →",
+    mailto: "mailto:ads@godoevents.com?subject=GoDo%20Guides%20%E2%80%94%20VIP%20Headliner%20Slot&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20VIP%20Headliner%20slot%20(%24375%2Fwk)%20on%20the%20GoDo%20Guides%20section.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!",
+  },
+  {
+    vip: false,
+    name: "✦ High-Impact Listing",
+    price: "$225/wk",
+    desc: "Featured mid-page placement inside a Guide section · Priority positioning · Bolded format reaches engaged readers",
+    cta: "Reserve Slot →",
+    mailto: "mailto:ads@godoevents.com?subject=GoDo%20Guides%20%E2%80%94%20High-Impact%20Listing&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20High-Impact%20Listing%20slot%20(%24225%2Fwk)%20on%20the%20GoDo%20Guides%20section.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!",
+  },
+  {
+    vip: false,
+    name: "☉ Content Spotlight",
+    price: "$150/wk",
+    desc: "Native in-content placement inside a targeted Guide category · Direct response from local audiences",
+    cta: "Book This Slot →",
+    mailto: "mailto:ads@godoevents.com?subject=GoDo%20Guides%20%E2%80%94%20Content%20Spotlight&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20Content%20Spotlight%20slot%20(%24150%2Fwk)%20on%20the%20GoDo%20Guides%20section.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!",
+  },
+];
+
+// One entry per slot: a live ad if present, else the default rate card.
+const STRIP_SLOTS = RATE_CARDS.map((card, i) => ({ card, ad: guideStripAds[i] ?? null }));
+const hasLiveAds = guideStripAds.length > 0;
 ---
 
 <Base title="Guides — GoDoDaytona" cityBase="daytona">
@@ -55,43 +111,48 @@ const sections = SECTIONS
       </div>
     </header>
 
-  <!-- ── Premium Ad Inventory Strip (directly below hero) ── -->
+  <!-- ── Guides Hub Strip (directly below hero) — live CMS ads replace rate cards slot-by-slot ── -->
   <section class="gd-adStrip">
     <div class="gd-adStripInner">
-      <p class="gd-adStripEyebrow">Advertise on GoDo Guides — 2026 Rates</p>
+      <p class="gd-adStripEyebrow">{hasLiveAds ? "Featured Sponsors" : "Advertise on GoDo Guides — 2026 Rates"}</p>
       <div class="gd-adStripSlots">
 
-        <div class="gd-adSlot gd-adSlot--vip">
-          <div class="gd-adSlotMeta">
-            <span class="gd-adSlotName">★ VIP Headliner</span>
-            <span class="gd-adSlotPrice">$375/wk</span>
-          </div>
-          <p class="gd-adSlotDesc">Top-of-page placement on Daytona's premier Guides hub · 76k+ monthly impressions · Maximum visibility above the fold</p>
-          <a href="mailto:ads@godoevents.com?subject=GoDo%20Guides%20%E2%80%94%20VIP%20Headliner%20Slot&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20VIP%20Headliner%20slot%20(%24375%2Fwk)%20on%20the%20GoDo%20Guides%20section.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!"
-             class="gd-adSlotCta gd-adSlotCta--vip">Reserve Slot →</a>
-        </div>
-
-        <div class="gd-adSlot">
-          <div class="gd-adSlotMeta">
-            <span class="gd-adSlotName">✦ High-Impact Listing</span>
-            <span class="gd-adSlotPrice">$225/wk</span>
-          </div>
-          <p class="gd-adSlotDesc">Featured mid-page placement inside a Guide section · Priority positioning · Bolded format reaches engaged readers</p>
-          <a href="mailto:ads@godoevents.com?subject=GoDo%20Guides%20%E2%80%94%20High-Impact%20Listing&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20High-Impact%20Listing%20slot%20(%24225%2Fwk)%20on%20the%20GoDo%20Guides%20section.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!"
-             class="gd-adSlotCta">Reserve Slot →</a>
-        </div>
-
-        <div class="gd-adSlot">
-          <div class="gd-adSlotMeta">
-            <span class="gd-adSlotName">☉ Content Spotlight</span>
-            <span class="gd-adSlotPrice">$150/wk</span>
-          </div>
-          <p class="gd-adSlotDesc">Native in-content placement inside a targeted Guide category · Direct response from local audiences</p>
-          <a href="mailto:ads@godoevents.com?subject=GoDo%20Guides%20%E2%80%94%20Content%20Spotlight&body=Hi%20GoDo%20Team%2C%0A%0AI%27m%20interested%20in%20the%20Content%20Spotlight%20slot%20(%24150%2Fwk)%20on%20the%20GoDo%20Guides%20section.%0A%0APlease%20send%20availability%20and%20next%20steps.%0A%0AThanks!"
-             class="gd-adSlotCta">Book This Slot →</a>
-        </div>
+        {STRIP_SLOTS.map(({ card, ad }) => (
+          ad ? (
+            <a class="gd-adSlot gd-adSlot--live" href={stripAdDest(ad)}
+               target="_blank" rel="noopener noreferrer sponsored"
+               aria-label={`Sponsored: ${ad.data.title}`}>
+              <span class="gd-adLiveTag">Sponsored</span>
+              <div class="gd-adLiveImg">
+                <img src={ad.data.image || FALLBACK_AD_IMG}
+                     alt={ad.data.altText || ad.data.title}
+                     loading="lazy" decoding="async"
+                     onerror={`this.src='${FALLBACK_AD_IMG}';this.onerror=null;`} />
+              </div>
+              <div class="gd-adLiveBody">
+                <span class="gd-adLiveTitle">{ad.data.title}</span>
+                {ad.data.tagline && <p class="gd-adLiveDesc">{ad.data.tagline}</p>}
+                <span class="gd-adLiveCta">Learn More →</span>
+              </div>
+            </a>
+          ) : (
+            <div class={`gd-adSlot${card.vip ? " gd-adSlot--vip" : ""}`}>
+              <div class="gd-adSlotMeta">
+                <span class="gd-adSlotName">{card.name}</span>
+                <span class="gd-adSlotPrice">{card.price}</span>
+              </div>
+              <p class="gd-adSlotDesc">{card.desc}</p>
+              <a href={card.mailto} class={`gd-adSlotCta${card.vip ? " gd-adSlotCta--vip" : ""}`}>{card.cta}</a>
+            </div>
+          )
+        ))}
 
       </div>
+      {hasLiveAds && (
+        <p class="gd-adStripDisclosure">
+          <a href="/daytona/advertise/#ad-policy" rel="nofollow">Advertiser Disclosure</a>
+        </p>
+      )}
     </div>
   </section>
 
@@ -710,5 +771,63 @@ const sections = SECTIONS
     box-shadow: 0 2px 12px rgba(0,119,190,.2);
   }
   .gd-adSlotCta--vip:hover { background: rgba(0,119,190,.48); border-color: rgba(0,119,190,.9); }
+
+  /* ── Live CMS ad card (fills a strip slot when an active Guides Hub Strip ad exists) ── */
+  .gd-adSlot--live {
+    position: relative;
+    border: 1.5px solid rgba(0,119,190,.5);
+    background: rgba(0,119,190,.05);
+    padding: 0;
+    overflow: hidden;
+    text-decoration: none;
+    gap: 0;
+  }
+  .gd-adSlot--live:hover {
+    border-color: rgba(0,119,190,.8);
+    background: rgba(0,119,190,.08);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0,0,0,.28);
+  }
+  .gd-adLiveTag {
+    position: absolute; top: 10px; left: 10px; z-index: 2;
+    font-size: 8.5px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase;
+    color: #cfe8fb; background: rgba(0,0,0,.55);
+    border: 1px solid rgba(0,119,190,.55);
+    padding: 3px 8px; border-radius: 999px;
+  }
+  .gd-adLiveImg {
+    width: 100%; aspect-ratio: 4/3; overflow: hidden;
+    background: rgba(255,255,255,.03);
+  }
+  .gd-adLiveImg img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform 320ms ease;
+  }
+  .gd-adSlot--live:hover .gd-adLiveImg img { transform: scale(1.04); }
+  .gd-adLiveBody {
+    padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1;
+  }
+  .gd-adLiveTitle {
+    font-size: 14px; font-weight: 900; color: rgba(255,255,255,.92); line-height: 1.25;
+  }
+  .gd-adLiveDesc {
+    font-size: 12px; color: rgba(255,255,255,.5); line-height: 1.5; margin: 0; flex: 1;
+  }
+  .gd-adLiveCta {
+    align-self: flex-start; white-space: nowrap;
+    display: inline-flex; align-items: center;
+    padding: 8px 18px; border-radius: 999px;
+    background: rgba(0,119,190,.32); border: 1px solid rgba(0,119,190,.65);
+    color: #56b4e9; font-size: 11.5px; font-weight: 800;
+    transition: background 130ms, border-color 130ms;
+  }
+  .gd-adSlot--live:hover .gd-adLiveCta { background: rgba(0,119,190,.48); border-color: rgba(0,119,190,.9); }
+  .gd-adStripDisclosure { text-align: center; margin: 18px 0 0; }
+  .gd-adStripDisclosure a {
+    font-size: 10px; color: rgba(255,255,255,.4);
+    text-decoration: underline; text-underline-offset: 2px;
+  }
+  .gd-adStripDisclosure a:hover { color: rgba(255,255,255,.7); }
+
   @media (max-width: 640px) { .gd-adStrip { padding: 32px 1rem; } }
 </style>

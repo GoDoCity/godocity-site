@@ -381,10 +381,11 @@ collections:
           - {label: "Sidebar Ad", value: "sidebar"}
           - {label: "In-Feed Ad", value: "in-feed"}
           - {label: "Banner", value: "banner"}
+          - {label: "Guides Hub Strip", value: "guides-strip"}
           - {label: "Featured Event Spotlight", value: "featured-event"}
       - {label: "Active", name: "active", widget: "boolean", default: true, hint: "Toggle ON to run this ad network-wide. Toggle OFF to pause instantly."}
       - {label: "Event Date", name: "eventDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false, hint: "For Featured Event type only. Displays on the sidebar widget card."}
-      - {label: "Ad Image / Creative", name: "image", widget: "image", required: false, media_folder: "/public/images/ads", public_folder: "/images/ads", hint: "Sidebar: 600×400px recommended. In-feed: 800×600px. Banner: 1200×300px."}
+      - {label: "Ad Image / Creative", name: "image", widget: "image", required: false, media_folder: "/public/images/ads", public_folder: "/images/ads", hint: "Sidebar: 600×400px recommended. In-feed: 800×600px. Banner: 1200×300px. Guides Hub Strip: 800×600px — fills one of the 3 slots below the Guides hero (replaces a rate card)."}
       - {label: "Destination URL", name: "link", widget: "string", hint: "Where the ad clicks through to. UTM params are appended automatically."}
       - label: "Target City"
         name: "city"

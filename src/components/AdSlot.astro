@@ -20,10 +20,10 @@ interface Props {
 
 const { type, city = "all" } = Astro.props;
 
-let ad: any = null;
+let eligible: any[] = [];
 try {
   const allAds = await getCollection("ads");
-  const eligible = allAds.filter((a: any) => {
+  eligible = allAds.filter((a: any) => {
     if (!a.data.active) return false;
     if (a.data.type !== type) return false;
     const adCity = (a.data.city ?? "all").toLowerCase();
@@ -32,36 +32,52 @@ try {
     if (adCity !== "all" && reqCity !== "all" && adCity !== reqCity) return false;
     return true;
   });
-  if (eligible.length > 0) ad = eligible[0];
 } catch {
   // ads collection not yet populated — render nothing
 }
 
-// Build UTM-tagged destination URL
-let dest = "#";
-if (ad) {
+// Build a UTM-tagged destination URL for a single ad.
+function utmDest(ad: any): string {
   const slug = ad.data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   const sep  = ad.data.link.includes("?") ? "&" : "?";
-  dest = `${ad.data.link}${sep}utm_source=godocity&utm_medium=native_ad&utm_campaign=${slug}`;
+  return `${ad.data.link}${sep}utm_source=godocity&utm_medium=native_ad&utm_campaign=${slug}`;
 }
 
-const imgSrc  = ad?.data?.image  || "/images/old-mural-backup.png";
-const altText = ad?.data?.altText || ad?.data?.title || "Sponsored advertisement";
+const FALLBACK_IMG = "/images/old-mural-backup.png";
+
+// Sidebar rotates client-side through up to 3 active ads (equal exposure per
+// page load / navigation). In-feed & banner keep a single deterministic pick.
+const rotationAds = eligible.slice(0, 3).map((ad) => ({
+  ad,
+  dest:    utmDest(ad),
+  imgSrc:  ad?.data?.image  || FALLBACK_IMG,
+  altText: ad?.data?.altText || ad?.data?.title || "Sponsored advertisement",
+}));
+
+const primary = rotationAds[0] ?? null;
+const ad      = primary?.ad ?? null;
+const dest    = primary?.dest ?? "#";
+const imgSrc  = primary?.imgSrc  || FALLBACK_IMG;
+const altText = primary?.altText || "Sponsored advertisement";
 ---
 
-{/* ── SIDEBAR ── */}
-{ad && type === "sidebar" && (
-  <div class="adSidebar">
+{/* ── SIDEBAR (client-side rotation across up to 3 active ads) ── */}
+{type === "sidebar" && rotationAds.length > 0 && (
+  <div class="adSidebar" data-ad-rotator>
     <div class="adLabel">SPONSORED</div>
-    <a class="adSidebarCard" href={dest} target="_blank" rel="noopener noreferrer sponsored">
-      <div class="adSidebarImgWrap">
-        <img class="adSidebarImg" src={imgSrc} alt={altText}
-          loading="lazy" decoding="async"
-          onerror={`this.src='/images/old-mural-backup.png';this.onerror=null;`} />
+    {rotationAds.map((r, i) => (
+      <div class="adSidebarSlot" data-ad-slot hidden={i !== 0} aria-hidden={i !== 0 ? "true" : undefined}>
+        <a class="adSidebarCard" href={r.dest} target="_blank" rel="noopener noreferrer sponsored">
+          <div class="adSidebarImgWrap">
+            <img class="adSidebarImg" src={r.imgSrc} alt={r.altText}
+              loading="lazy" decoding="async"
+              onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+          </div>
+          {r.ad.data.tagline && <div class="adSidebarTagline">{r.ad.data.tagline}</div>}
+          <div class="adSidebarCta">Learn More →</div>
+        </a>
       </div>
-      {ad.data.tagline && <div class="adSidebarTagline">{ad.data.tagline}</div>}
-      <div class="adSidebarCta">Learn More →</div>
-    </a>
+    ))}
     <div class="adDisclosure">
       <a href="/daytona/advertise/#ad-policy" rel="nofollow">Advertiser Disclosure</a>
     </div>
@@ -109,8 +125,31 @@ const altText = ad?.data?.altText || ad?.data?.title || "Sponsored advertisement
   </div>
 )}
 
+<script>
+  // Sidebar ad rotation — give up to 3 active sponsors equal exposure by
+  // revealing a random one on each page load / navigation. Server-render leaves
+  // the first slot visible so the unit still works with JS disabled.
+  function initAdRotators() {
+    document.querySelectorAll<HTMLElement>("[data-ad-rotator]").forEach((rotator) => {
+      const slots = Array.from(rotator.querySelectorAll<HTMLElement>("[data-ad-slot]"));
+      if (slots.length <= 1) return;
+      const pick = Math.floor(Math.random() * slots.length);
+      slots.forEach((slot, i) => {
+        const show = i === pick;
+        slot.hidden = !show;
+        if (show) slot.removeAttribute("aria-hidden");
+        else slot.setAttribute("aria-hidden", "true");
+      });
+    });
+  }
+  initAdRotators();
+  // Re-roll after client-side navigation if View Transitions are ever enabled.
+  document.addEventListener("astro:page-load", initAdRotators);
+</script>
+
 <style>
   /* ── Shared ── */
+  .adSidebarSlot[hidden] { display: none !important; }
   .adLabel {
     font-size: 9px; font-weight: 800; letter-spacing: .14em;
     text-transform: uppercase; color: var(--faint, #999);
