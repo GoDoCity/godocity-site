@@ -183,8 +183,8 @@ collections:
       - {label: "Short Description", name: "description", widget: "text", required: false}
       - {label: "Ticket / Info URL", name: "url", widget: "string", required: false, hint: "Leave blank to link to events page."}
       - {label: "Event Image", name: "image", widget: "image", required: false}
-      - {label: "Featured", name: "featured", widget: "boolean", required: false, default: false, hint: "ON = pinned to top of events list."}
-      - {label: "Sponsored Ad Slot", name: "isSponsored", widget: "boolean", required: false, default: false, hint: "ON = paid placement — GoDo Picks card shows the gold SPONSORED badge."}
+      - {label: "Featured", name: "featured", widget: "boolean", required: false, default: false, hint: "ON = pinned to the top of the events list."}
+      - {label: "Sponsored / Spotlight", name: "isSponsored", widget: "boolean", required: false, default: false, hint: "ON = paid spotlight — leads the top-billing ticker and GoDo Picks on /daytona/events/ with the gold SPONSORED badge. OFF = a free listing."}
       - {label: "Body", name: "body", widget: "markdown", required: false}
 
   - name: "diy-guides"
