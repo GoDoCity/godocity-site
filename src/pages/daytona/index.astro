@@ -157,8 +157,9 @@ const homePins = allDaytona
       lng:          e.data.lng,
       image:        e.data.image ?? "/images/daytona-placeholder.jpg",
       url:          e.data.url ?? null,
-      isAdvertiser: e.data.sponsored === true,
-      // advertiserIcon: e.data.advertiserIcon ?? undefined,
+      // "Branded Pins / Star Placement" — featured/sponsored events get the star pin.
+      featured:     e.data.featured === true,
+      sponsored:    e.data.sponsored === true,
     };
   });
 

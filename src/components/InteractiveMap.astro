@@ -10,6 +10,8 @@ export interface MapLocation {
   articleTitle?: string;
   isAdvertiser?: boolean;       // true → premium branded pin
   advertiserIcon?: string;      // optional logo URL; falls back to star badge
+  featured?: boolean;           // event flag → premium star pin ("Branded Pins")
+  sponsored?: boolean;          // event flag → premium star pin ("Star Placement")
 }
 
 export interface Props {
@@ -111,9 +113,12 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
       var latlng = [pin.lat, pin.lng];
       bounds.push(latlng);
 
-      /* ── Pin icon: advertiser (branded) or standard numbered ── */
+      /* ── Pin icon: premium (branded/featured/sponsored) or standard numbered ──
+         "Branded Pins / Star Placement" — any event flagged featured OR sponsored
+         gets the premium star pin and is lifted above standard markers. */
+      var isPremium = pin.isAdvertiser === true || pin.featured === true || pin.sponsored === true;
       var pinIcon;
-      if (pin.isAdvertiser) {
+      if (isPremium) {
         /* Option A: logo thumbnail in a premium ring
            Option B: star badge fallback when no logo is provided */
         var innerHtml = pin.advertiserIcon
@@ -175,7 +180,11 @@ const mapId = `imap-${Math.random().toString(36).slice(2, 8)}`;
           + 'text-decoration:none;line-height:1.4;">View Details \u2192</a>';
       }
 
-      window.L.marker(latlng, { icon: numberedPin })
+      /* Premium markers get a large zIndexOffset so they always sit above the
+         standard numbered pins. Leaflet stacks by projected pixel-Y, whose
+         spread across a full map can reach a few thousand, so the offset must
+         comfortably exceed that (popups live in a separate pane and stay on top). */
+      window.L.marker(latlng, { icon: numberedPin, zIndexOffset: isPremium ? 100000 : 0, riseOnHover: true })
         .bindPopup(popup, { maxWidth: 240 })
         .addTo(map);
     }

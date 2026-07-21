@@ -93,7 +93,15 @@ const cityKey = city.toLowerCase().trim();
 const center  = CITY_CENTERS[cityKey] ?? { lat: 29.2108, lng: -81.0228 };
 const pinLat  = data.lat ?? center.lat;
 const pinLng  = data.lng ?? center.lng;
-const mapPin  = [{ label: data.title, address: data.location + (data.address ? `, ${data.address}` : ""), lat: pinLat, lng: pinLng }];
+const mapPin  = [{
+  label:     data.title,
+  address:   data.location + (data.address ? `, ${data.address}` : ""),
+  lat:       pinLat,
+  lng:       pinLng,
+  // "Branded Pins / Star Placement" — featured/sponsored events get the star pin.
+  featured:  data.featured === true,
+  sponsored: data.sponsored === true || data.isSponsored === true,
+}];
 
 /* ── Related events ── */
 const today = new Date();
