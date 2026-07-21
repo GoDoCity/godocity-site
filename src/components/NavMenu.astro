@@ -45,12 +45,12 @@ const guideItems = [
 ];
 
 const diyItems = [
-  { label: "Clean",    href: `${cityBase}/diy/clean/` },
-  { label: "Paint",    href: `${cityBase}/diy/paint/` },
-  { label: "Maintain", href: `${cityBase}/diy/maintain/` },
-  { label: "Decorate", href: `${cityBase}/diy/decorate/` },
-  { label: "Recipe",   href: `${cityBase}/diy/recipe/` },
-  { label: "Craft",    href: `${cityBase}/diy/craft/` },
+  { label: "Clean",       href: `${cityBase}/diy/clean/` },
+  { label: "Paint",       href: `${cityBase}/diy/paint/` },
+  { label: "Body & Mind", href: `${cityBase}/diy/body-mind/` },
+  { label: "Decorate",    href: `${cityBase}/diy/decorate/` },
+  { label: "Recipe",      href: `${cityBase}/diy/recipe/` },
+  { label: "Craft",       href: `${cityBase}/diy/craft/` },
 ];
 
 const pills = [
@@ -59,6 +59,7 @@ const pills = [
   { label: "Guides",    href: `${cityBase}/guides/`,    dropdown: "guides",  colorGroup: "guides"    },
   { label: "Events",    href: eventsHref,               dropdown: null,      colorGroup: "events"    },
   { label: "DIY",       href: `${cityBase}/diy/`,       dropdown: "diy",     colorGroup: "diy"       },
+  { label: "The Find",  href: `${cityBase}/the-find/`,  dropdown: null,      colorGroup: "find"      },
   { label: "Advertise", href: `${cityBase}/advertise/`, dropdown: null,      colorGroup: "advertise" },
 ];
 ---
@@ -168,6 +169,7 @@ const pills = [
         </div>
         <a class="drawerLink" href={`${cityBase}/diy/`} style="margin-top:4px;">All DIY guides →</a>
       </div>
+      <a class="drawerLink" href={`${cityBase}/the-find/`}>The Find</a>
       <a class="drawerLink drawerAdvertise" href={`${cityBase}/advertise/`}>Advertise</a>
     </div>
   </aside>
@@ -624,6 +626,17 @@ const pills = [
   .pill--diy[aria-current="page"] {
     border-color: color-mix(in srgb, var(--pill-diy) 75%, transparent);
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--pill-diy) 18%, transparent);
+  }
+
+  .pill--find {
+    color: var(--pill-find);
+    border-color: color-mix(in srgb, var(--pill-find) 55%, transparent);
+    background: color-mix(in srgb, var(--pill-find) 14%, white);
+  }
+  .pill--find:hover,
+  .pill--find[aria-current="page"] {
+    border-color: color-mix(in srgb, var(--pill-find) 75%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--pill-find) 18%, transparent);
   }
 
   .pill--advertise {

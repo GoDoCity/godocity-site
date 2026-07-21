@@ -244,6 +244,62 @@ collections:
       - {label: "Hero Image", name: "heroImage", widget: "image", required: false, hint: "Optional banner image displayed above the title."}
       - {label: "Category", name: "category", widget: "hidden", default: "DIY"}
 
+  - name: "the-find"
+    label: "The Find"
+    label_singular: "Roundup"
+    folder: "src/content/the-find"
+    create: true
+    delete: true
+    slug: "{{slug}}"
+    summary: "{{title}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string", hint: "Roundup headline (e.g. '8 Beach-Day Essentials Under $30')."}
+      - {label: "Publish Date", name: "pubDate", widget: "datetime", required: false, date_format: "YYYY-MM-DD", time_format: false}
+      - {label: "Cover Image", name: "coverImage", widget: "image", required: false, hint: "Banner image shown at the top of the roundup."}
+      - {label: "Short Intro", name: "intro", widget: "text", required: false, hint: "1–2 sentence lead-in displayed under the title."}
+      - label: "Scope"
+        name: "scope"
+        widget: "select"
+        default: "network"
+        hint: "Network-Wide shows this roundup on EVERY city's The Find feed. City-Specific limits it to the City Tag below."
+        options:
+          - {label: "Network-Wide (All Cities)", value: "network"}
+          - {label: "City-Specific", value: "city"}
+      - label: "City Tag"
+        name: "cityTag"
+        widget: "select"
+        default: "daytona"
+        required: false
+        hint: "Only applies when Scope = City-Specific. Which city's feed this roundup is limited to."
+        options:
+          - {label: "Daytona", value: "daytona"}
+          - {label: "Asheville", value: "asheville"}
+          - {label: "Macon", value: "macon"}
+          - {label: "Jacksonville", value: "jacksonville"}
+          - {label: "San Diego", value: "sandiego"}
+      - {label: "City", name: "city", widget: "hidden", default: "daytona"}
+      - label: "Product Items"
+        name: "products"
+        widget: "list"
+        label_singular: "Product"
+        summary: "{{fields.name}} — {{fields.price}}"
+        hint: "Add one block per product. Drag to reorder."
+        fields:
+          - {label: "Item Name", name: "name", widget: "string"}
+          - {label: "Price", name: "price", widget: "string", required: false, hint: 'e.g. "$19"'}
+          - {label: "Product Image", name: "image", widget: "image", required: false}
+          - {label: "Description", name: "description", widget: "markdown", required: false, hint: "2 short paragraphs recommended."}
+          - {label: "Buy Link / URL", name: "url", widget: "string", required: false, hint: "Product page (Amazon) or local shop URL."}
+          - label: "Item Type"
+            name: "itemType"
+            widget: "select"
+            default: "amazon"
+            hint: "Amazon Affiliate = 'Check Price on Amazon' button. Local Sponsor = 'LOCAL FIND' badge + 'Visit Local Shop' button."
+            options:
+              - {label: "Amazon Affiliate", value: "amazon"}
+              - {label: "Local Sponsor", value: "local"}
+      - {label: "Body", name: "body", widget: "markdown", required: false, hint: "Optional notes rendered below the product list."}
+
   - name: "guides"
     label: "Guides"
     folder: "src/content/guides/daytona"

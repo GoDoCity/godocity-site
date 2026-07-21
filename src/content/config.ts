@@ -172,6 +172,31 @@ const diy = defineCollection({
   }),
 });
 
+/* "The Find" — curated product roundups (Amazon affiliate + local sponsor picks) */
+const theFind = defineCollection({
+  type: "content",
+  schema: z.object({
+    title:      z.string(),
+    pubDate:    z.coerce.date().optional(),
+    coverImage: z.string().optional().transform(v => v === "" ? undefined : v),
+    intro:      z.string().optional(),
+    // Scope controls which city feeds this roundup appears on.
+    //   "network" → renders on EVERY city's /the-find/ feed (no re-authoring).
+    //   "city"    → renders only on the cityTag city's feed.
+    scope:      z.enum(["network", "city"]).optional().default("network"),
+    cityTag:    z.string().optional().default("daytona"), // only used when scope === "city"
+    city:       z.string().optional().default("daytona"), // legacy / fallback
+    products: z.array(z.object({
+      name:        z.string(),
+      price:       z.string().optional().default(""),
+      image:       z.string().optional().transform(v => v === "" ? undefined : v),
+      description: z.string().optional().default(""),
+      url:         z.string().optional().default(""),
+      itemType:    z.enum(["amazon", "local"]).optional().default("amazon"),
+    })).optional().default([]),
+  }),
+});
+
 const topics = defineCollection({
   type: "content",
   schema: z.object({
@@ -208,4 +233,4 @@ const ads = defineCollection({
   }),
 });
 
-export const collections = { posts, guides, cityGuides, globalSponsors, events, diy, topics, journalists, ads };
+export const collections = { posts, guides, cityGuides, globalSponsors, events, diy, "the-find": theFind, topics, journalists, ads };

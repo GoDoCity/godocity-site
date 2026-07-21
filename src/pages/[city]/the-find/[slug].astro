@@ -1,0 +1,311 @@
+---
+/**
+ * src/pages/[city]/the-find/[slug].astro
+ * ─────────────────────────────────────────────────────────────────────────────
+ * "The Find" roundup detail — renders a curated product list per city.
+ *
+ * URL: /[city]/the-find/[slug]/
+ *
+ * Network-wide roundups (scope: network) are generated under EVERY city, so the
+ * same roundup is reachable at /daytona/the-find/x/, /asheville/the-find/x/, …
+ * City-specific roundups are generated only under their cityTag city.
+ *
+ * Each product is either:
+ *   • Amazon Affiliate → "Check Price on Amazon →" button (affiliate tag appended)
+ *   • Local Sponsor    → "LOCAL FIND" badge + "Visit Local Shop →" button
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+import Base from "../../../layouts/Base.astro";
+import ArticleSidebar from "../../../components/ArticleSidebar.astro";
+import { getCollection } from "astro:content";
+import { marked } from "marked";
+import { allCitySlugs, getShortName } from "../../../lib/cityConfigs.js";
+import { roundupInCity } from "../../../lib/theFind.ts";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("the-find");
+  const paths: { params: { city: string; slug: string }; props: { entry: any } }[] = [];
+  for (const entry of entries) {
+    for (const slug of allCitySlugs) {
+      if (roundupInCity(entry.data, slug)) {
+        paths.push({ params: { city: slug, slug: entry.slug }, props: { entry } });
+      }
+    }
+  }
+  return paths;
+}
+
+const { city } = Astro.params;
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await entry.render();
+
+const cityLabel = getShortName(city);
+const FALLBACK_IMG = "/images/old-mural-backup.png";
+
+/* Amazon Associates tag — appended to Amazon links so purchases are tracked. */
+const AMAZON_AFFILIATE_TAG = "gododaytona-20";
+
+/** Append the affiliate tag to an amazon.com URL (skips non-Amazon links). */
+function withAffiliateTag(url: string): string {
+  if (!url) return "#";
+  try {
+    const u = new URL(url);
+    if (/(^|\.)amazon\./i.test(u.hostname)) {
+      if (!u.searchParams.has("tag")) u.searchParams.set("tag", AMAZON_AFFILIATE_TAG);
+      return u.toString();
+    }
+    return url;
+  } catch {
+    return url || "#";
+  }
+}
+
+/** Split a description into paragraphs on blank lines, rendering inline markdown
+ *  (bold, italics, links) within each paragraph via `marked`. */
+function renderParagraphs(text: string): string[] {
+  return String(text ?? "")
+    .split(/\n\s*\n/)
+    .map((p) => p.replace(/\s*\n\s*/g, " ").trim())
+    .filter(Boolean)
+    .map((p) => marked.parseInline(p) as string);
+}
+
+function formatDate(d: Date | null | undefined): string {
+  if (!d) return "";
+  try {
+    return new Date(d).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "UTC" });
+  } catch {
+    return "";
+  }
+}
+
+const products = data.products ?? [];
+const dateStr = formatDate(data.pubDate);
+---
+
+<Base title={`${data.title} | GoDo${cityLabel} — The Find`} subtitle={data.intro} cityBase={city}>
+  <section class="findDetail">
+    <div class="fdWrap">
+
+      <div class="fdLayout">
+        <article class="fdMain">
+
+          <div class="fdBreadcrumb">
+            <a class="fdBreadLink" href={`/${city}/the-find/`}>The Find</a>
+            <span class="fdBreadSep" aria-hidden="true">›</span>
+            <span class="fdBreadCurrent">Roundup</span>
+          </div>
+
+          <h1 class="fdTitle">{data.title}</h1>
+          {dateStr && <div class="fdMeta">{dateStr}</div>}
+          {data.intro && <p class="fdIntro">{data.intro}</p>}
+
+          {data.coverImage && (
+            <div class="fdCover">
+              <img src={data.coverImage} alt={data.title}
+                loading="eager" decoding="async"
+                onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+            </div>
+          )}
+
+          <ol class="productList">
+            {products.map((p, i) => {
+              const isLocal = p.itemType === "local";
+              const href = isLocal ? (p.url || "#") : withAffiliateTag(p.url);
+              const paras = renderParagraphs(p.description);
+              return (
+                <li class={`productCard ${isLocal ? "isLocal" : "isAmazon"}`}>
+                  {isLocal && <span class="localBadge">★ LOCAL FIND</span>}
+
+                  <div class="pcMedia">
+                    <span class="pcRank">{i + 1}</span>
+                    <img class="pcImg" src={p.image || FALLBACK_IMG} alt={p.name}
+                      loading="lazy" decoding="async"
+                      onerror={`this.src='${FALLBACK_IMG}';this.onerror=null;`} />
+                  </div>
+
+                  <div class="pcBody">
+                    <div class="pcHead">
+                      <h2 class="pcName">{p.name}</h2>
+                      {p.price && <span class="pcPrice">{p.price}</span>}
+                    </div>
+
+                    {paras.length > 0 && (
+                      <div class="pcDesc">
+                        {paras.map((para) => <p set:html={para} />)}
+                      </div>
+                    )}
+
+                    {isLocal ? (
+                      <a class="pcBtn pcBtnLocal" href={href} target="_blank" rel="noopener nofollow">
+                        Visit Local Shop →
+                      </a>
+                    ) : (
+                      <a class="pcBtn pcBtnAmazon" href={href} target="_blank" rel="noopener nofollow sponsored">
+                        Check Price on Amazon →
+                      </a>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+
+          {/* Optional editor's notes / affiliate disclosure from the body */}
+          <div class="fdNotes">
+            <Content />
+          </div>
+
+          <div class="fdBack">
+            <a class="fdBackPill" href={`/${city}/the-find/`}>← All roundups</a>
+          </div>
+
+        </article>
+
+        <ArticleSidebar city={city} pageType="The Find" />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .findDetail { padding: 28px 0 64px; }
+  .fdWrap { max-width: 1240px; margin: 0 auto; padding: 0 2rem; }
+  @media (max-width: 600px) { .fdWrap { padding: 0 1rem; } }
+
+  .fdLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 48px;
+    align-items: start;
+  }
+  @media (max-width: 1023px) { .fdLayout { grid-template-columns: 1fr; } }
+
+  .fdMain { min-width: 0; }
+
+  .fdBreadcrumb {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 0.8rem; font-weight: 900; letter-spacing: .12em;
+    text-transform: uppercase; margin-bottom: 12px;
+  }
+  .fdBreadLink { color: var(--pill-find, var(--brand1)); text-decoration: none; transition: opacity 130ms; }
+  .fdBreadLink:hover { opacity: .72; }
+  .fdBreadSep { opacity: .45; }
+  .fdBreadCurrent { color: var(--text); opacity: .7; }
+
+  .fdTitle {
+    font-size: clamp(30px, 4.5vw, 50px); font-weight: 900;
+    line-height: 1.04; letter-spacing: -0.02em; margin: 0 0 8px;
+  }
+  .fdMeta { font-size: 13px; opacity: .55; font-weight: 700; margin-bottom: 14px; }
+  .fdIntro {
+    font-size: 17px; line-height: 1.6; opacity: .88;
+    margin: 0 0 22px; max-width: 680px;
+  }
+
+  .fdCover {
+    border-radius: 16px; overflow: hidden; margin: 0 0 32px;
+    border: 1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03);
+  }
+  .fdCover img { width: 100%; display: block; aspect-ratio: 16/7; object-fit: cover; }
+
+  /* ── Product list ── */
+  .productList { list-style: none; padding: 0; margin: 0; display: grid; gap: 20px; }
+
+  .productCard {
+    position: relative;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 22px;
+    padding: 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(255,255,255,.10);
+    background: rgba(255,255,255,.03);
+    transition: border-color .15s, background .15s, box-shadow .15s;
+  }
+  .productCard:hover {
+    border-color: rgba(255,255,255,.18);
+    background: rgba(255,255,255,.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,.22);
+  }
+  .productCard.isLocal {
+    border-color: color-mix(in srgb, var(--pill-find) 55%, transparent);
+    background: color-mix(in srgb, var(--pill-find) 8%, rgba(255,255,255,.03));
+  }
+  @media (max-width: 640px) { .productCard { grid-template-columns: 1fr; gap: 14px; } }
+
+  .localBadge {
+    position: absolute; top: -11px; left: 18px; z-index: 2;
+    font-size: 11px; font-weight: 900; letter-spacing: .1em;
+    padding: 4px 12px; border-radius: 999px;
+    background: var(--pill-find); color: #fff;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--pill-find) 45%, transparent);
+  }
+
+  .pcMedia {
+    position: relative;
+    aspect-ratio: 4/3; border-radius: 12px; overflow: hidden;
+    border: 1px solid rgba(255,255,255,.10); background: rgba(255,255,255,.03);
+  }
+  .pcRank {
+    position: absolute; top: 8px; left: 8px; z-index: 2;
+    width: 30px; height: 30px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 14px; font-weight: 900;
+    background: rgba(0,0,0,.62); color: #fff; backdrop-filter: blur(2px);
+  }
+  .pcImg { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .pcBody { min-width: 0; display: flex; flex-direction: column; }
+
+  .pcHead {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; margin-bottom: 10px;
+  }
+  .pcName {
+    margin: 0; font-size: clamp(18px, 2vw, 22px); font-weight: 900;
+    line-height: 1.16; letter-spacing: -0.01em;
+  }
+  .pcPrice {
+    flex-shrink: 0; font-size: 18px; font-weight: 900;
+    color: var(--pill-find); white-space: nowrap;
+  }
+
+  .pcDesc { font-size: 14.5px; line-height: 1.6; opacity: .86; }
+  .pcDesc p { margin: 0 0 10px; }
+  .pcDesc p:last-child { margin-bottom: 0; }
+  .pcDesc :global(a) { color: var(--pill-find); text-decoration: underline; }
+  .pcDesc :global(strong) { font-weight: 900; }
+
+  .pcBtn {
+    display: inline-flex; align-items: center; align-self: flex-start;
+    margin-top: 16px; padding: 11px 22px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 900; letter-spacing: .01em;
+    text-decoration: none; transition: transform .12s, opacity .12s, box-shadow .12s;
+  }
+  .pcBtn:hover { transform: translateY(-1px); opacity: .95; }
+
+  .pcBtnAmazon {
+    background: #ff9900; color: #111;
+    box-shadow: 0 4px 14px rgba(255,153,0,.28);
+  }
+  .pcBtnLocal {
+    background: var(--pill-find); color: #fff;
+    box-shadow: 0 4px 14px color-mix(in srgb, var(--pill-find) 40%, transparent);
+  }
+
+  .fdNotes {
+    margin-top: 36px; padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,.10);
+    font-size: 13.5px; line-height: 1.6; opacity: .62;
+  }
+  .fdNotes :global(p) { margin: 0 0 10px; }
+
+  .fdBack { margin-top: 28px; }
+  .fdBackPill {
+    font-size: 13px; font-weight: 800; color: var(--pill-find, var(--brand1));
+    text-decoration: none; transition: opacity 130ms;
+  }
+  .fdBackPill:hover { opacity: .72; text-decoration: underline; }
+</style>

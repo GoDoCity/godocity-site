@@ -10,7 +10,7 @@ import ArticleSidebar from "../../../../components/ArticleSidebar.astro";
 import { getCollection } from "astro:content";
 
 export async function getStaticPaths() {
-  const DIY_TOPICS = ["clean", "paint", "maintain", "decorate", "craft", "recipe", "build"];
+  const DIY_TOPICS = ["clean", "paint", "body-mind", "maintain", "decorate", "craft", "recipe", "build"];
   const diyEntries  = await getCollection("diy");
   const allPosts    = await getCollection("posts");
 
@@ -56,7 +56,9 @@ const { city, topic } = Astro.params;
 const { allPosts, allDiy } = Astro.props as { allPosts: any[]; allDiy: any[] };
 
 const cityLabel  = city.charAt(0).toUpperCase() + city.slice(1);
-const topicLabel = topic.charAt(0).toUpperCase() + topic.slice(1);
+/* Multi-word topic slugs get a friendly display label; others title-case. */
+const TOPIC_LABELS: Record<string, string> = { "body-mind": "Body & Mind" };
+const topicLabel = TOPIC_LABELS[topic] ?? (topic.charAt(0).toUpperCase() + topic.slice(1));
 
 /* ── Unified data: diy collection + posts (category=DIY, subtopic=topic) ── */
 
