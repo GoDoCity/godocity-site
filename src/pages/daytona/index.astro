@@ -317,8 +317,8 @@ const guideCards = guideHero
             {latest.map((p) => (
               <a class="articleCard" href={`/daytona/posts/${p.slug.split('/').pop()}/`}>
                 <div class="cardImgWrap">
-                  {heroImage(p)
-                    ? <img class="cardImg" src={heroImage(p)} alt="" loading="lazy" decoding="async" />
+                  {thumbImage(p)
+                    ? <img class="cardImg" src={thumbImage(p)} alt="" loading="lazy" decoding="async" />
                     : <div class="cardImg cardImgFallback" aria-hidden="true" />
                   }
                 </div>

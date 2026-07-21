@@ -80,7 +80,7 @@ const postItems: FeedItem[] = diyPosts.map((p) => ({
   description: p.data.description ?? "",
   href: `/${city}/posts/${p.slug.split("/").pop()}/`,
   date: p.data.pubDate ?? null,
-  heroImage: (p.data.heroImage ?? p.data.thumbnail ?? "") as string,
+  heroImage: (p.data.thumbnail ?? p.data.heroImage ?? "") as string,
   type: "post",
 }));
 

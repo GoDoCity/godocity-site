@@ -98,7 +98,7 @@ const postItems = allPosts
   .map(post => {
     const slug = post.slug.split("/").pop();
     const href = city === "daytona" ? `/daytona/posts/${slug}/` : `/${city}/${slug}/`;
-    const img  = String(post.data.heroImage || post.data.thumbnail || post.data.image || "").trim() || FALLBACK_IMG;
+    const img  = String(post.data.thumbnail || post.data.heroImage || post.data.image || "").trim() || FALLBACK_IMG;
     return {
       title:  post.data.title ?? post.slug,
       date:   formatDate(getPostDate(post)),

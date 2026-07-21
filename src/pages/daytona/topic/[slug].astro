@@ -76,6 +76,11 @@ function heroImage(post) {
   return post?.data?.heroImage ?? "";
 }
 
+/** Grid thumbnail — prefer the uploaded thumbnail, fall back to hero. */
+function thumbImage(post) {
+  return post?.data?.thumbnail ?? post?.data?.heroImage ?? "";
+}
+
 function dateText(post) {
   const d = getPostDate(post);
   return d ? new Date(d).toLocaleDateString("en-US") : "";
@@ -198,7 +203,7 @@ const rest = hero ? posts.filter((p) => p.slug !== hero.slug) : posts;
         {rest.length > 0 && (
           <div class="cardGrid">
             {rest.map((p) => {
-              const img = heroImage(p);
+              const img = thumbImage(p);
               const kicker = postKicker(p);
               return (
                 <a class="mfCard" href={`/daytona/posts/${p.slug.split("/").pop()}/`}>

@@ -5,8 +5,8 @@ import ArticleSidebar from "./ArticleSidebar.astro";
 export interface Props {
   title:           string;
   intro:           string;
-  materials:       string[];
-  steps:           string | string[];
+  materials?:      string | string[];
+  steps?:          string | string[];
   community_note?: string;
   city?:           string;
   topic?:          string;
@@ -29,9 +29,10 @@ const {
 } = Astro.props;
 
 /* ── Normalise list fields ── */
+/* Materials is optional: absent/blank → [] so the block hides cleanly. */
 const normMaterials: string[] = Array.isArray(materials)
-  ? materials
-  : String(materials).split("\n").map((s) => s.trim()).filter(Boolean);
+  ? materials.map((s) => String(s).trim()).filter(Boolean)
+  : String(materials ?? "").split("\n").map((s) => s.trim()).filter(Boolean);
 /* ── Steps ──
  * Guides are authored in four shapes, so the parser keys off explicit
  * "Step N:" markers rather than line breaks:
@@ -107,8 +108,12 @@ const authorSlug = author
 const citySlug = (city ?? "daytona").toLowerCase().trim();
 
 /* ── Category / topic breadcrumb ── */
+/* Friendly display labels for slug-style topic values (e.g. "body-mind"). */
+const TOPIC_LABELS: Record<string, string> = { "body-mind": "Body & Mind" };
 const topicKey  = topic ? topic.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") : "";
-const topicLabel = topic ? topic.trim().split(" ").map((w) => w ? w[0].toUpperCase() + w.slice(1) : "").join(" ").toUpperCase() : "";
+const topicLabel = topic
+  ? (TOPIC_LABELS[topic.toLowerCase().trim()] ?? topic.trim().split(" ").map((w) => w ? w[0].toUpperCase() + w.slice(1) : "").join(" ")).toUpperCase()
+  : "";
 ---
 
 <div class="diyWrap">
@@ -149,44 +154,48 @@ const topicLabel = topic ? topic.trim().split(" ").map((w) => w ? w[0].toUpperCa
         </div>
       )}
 
-      {/* 3 — What You'll Need (materials) */}
-      <section class="diyMaterials" aria-labelledby="materials-heading">
-        <div class="diyBlockHead" id="materials-heading">
-          <span class="diyBlockIcon" aria-hidden="true">🛒</span>
-          What You'll Need
-        </div>
-        <ul class="materialGrid">
-          {normMaterials.map((m) => (
-            <li class="materialItem">
-              <span class="materialCheck" aria-hidden="true">✓</span>
-              <span>{m}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {/* 3 — What You'll Need (materials) — hidden when none provided */}
+      {normMaterials.length > 0 && (
+        <section class="diyMaterials" aria-labelledby="materials-heading">
+          <div class="diyBlockHead" id="materials-heading">
+            <span class="diyBlockIcon" aria-hidden="true">🛒</span>
+            What You'll Need
+          </div>
+          <ul class="materialGrid">
+            {normMaterials.map((m) => (
+              <li class="materialItem">
+                <span class="materialCheck" aria-hidden="true">✓</span>
+                <span>{m}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* 4 — Intro / description */}
       <div class="diyIntro">
         {paras.map((p) => p && <p class="diyPara">{p}</p>)}
       </div>
 
-      {/* 5 — Step-by-Step */}
-      <section class="diySteps" aria-labelledby="steps-heading">
-        <h2 class="sectionHead" id="steps-heading">Step-by-Step</h2>
-        <ol class="stepList">
-          {normSteps.map((step, i) => (
-            <li class="stepItem">
-              {/* Labelled, not aria-hidden: list-style:none drops list
-                  semantics in Safari/VoiceOver, losing the step number. */}
-              <div class="stepNum" aria-label={`Step ${i + 1}`}>{i + 1}</div>
-              <div class="stepBody">
-                {step.title && <h3 class="stepTitle">{step.title}</h3>}
-                <p class="stepText">{step.text}</p>
-              </div>
-            </li>
-          ))}
-        </ol>
-      </section>
+      {/* 5 — Step-by-Step — hidden when no steps provided */}
+      {normSteps.length > 0 && (
+        <section class="diySteps" aria-labelledby="steps-heading">
+          <h2 class="sectionHead" id="steps-heading">Step-by-Step</h2>
+          <ol class="stepList">
+            {normSteps.map((step, i) => (
+              <li class="stepItem">
+                {/* Labelled, not aria-hidden: list-style:none drops list
+                    semantics in Safari/VoiceOver, losing the step number. */}
+                <div class="stepNum" aria-label={`Step ${i + 1}`}>{i + 1}</div>
+                <div class="stepBody">
+                  {step.title && <h3 class="stepTitle">{step.title}</h3>}
+                  <p class="stepText">{step.text}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
 
       {/* 6 — Community Notes */}
       {community_note && (

@@ -151,19 +151,22 @@ const diy = defineCollection({
   schema: z.object({
     title:    z.string(),
     intro:    z.string(), // Cleaned: No word count or paragraph enforcement
+    // Optional — Body & Mind (and similar) guides may have no materials list.
+    // Empty/absent normalises to [], which the template uses to hide the block.
     materials: z.union([
-      z.string().min(1),
-      z.array(z.string()).min(1),
-    ]).transform((v) => Array.isArray(v) ? v : v.split("\n").map((s) => s.trim()).filter(Boolean)),
+      z.string(),
+      z.array(z.string()),
+    ]).optional().default([]).transform((v) => Array.isArray(v) ? v : v.split("\n").map((s) => s.trim()).filter(Boolean)),
     // Kept raw (string or array) — DiyPill parses it. Splitting on "\n" here
     // dropped the blank lines that separate a "Step N: Title" from its body,
     // which is what made titles and text render as separate numbered steps.
+    // Optional — an empty value parses to zero steps and the block is hidden.
     steps: z.union([
-      z.string().min(1),
-      z.array(z.string()).min(1),
-    ]),
+      z.string(),
+      z.array(z.string()),
+    ]).optional().default(""),
     community_note: z.string().optional(),
-    topic:          z.enum(["Clean", "Paint", "Maintain", "Decorate", "Craft", "Recipe"]).optional(),
+    topic:          z.enum(["Clean", "Paint", "body-mind", "Maintain", "Decorate", "Craft", "Recipe"]).optional(),
     cities:         z.array(z.string()).optional().default([]),
     pubDate:        z.coerce.date().optional(),
     author:         authorEnum.optional().default("Julian Wells"),

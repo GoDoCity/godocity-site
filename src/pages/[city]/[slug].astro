@@ -108,8 +108,9 @@ const morePosts = allPosts
   .sort((a, b) => new Date(getPostDate(a.data) ?? 0) > new Date(getPostDate(b.data) ?? 0) ? -1 : 1)
   .slice(0, 12);
 
+/* "More Stories" cards are thumbnails — prefer the uploaded thumbnail. */
 function moreHeroImg(p: any) {
-  const v = p?.data?.heroImage ?? p?.data?.heroimage ?? p?.data?.image ?? p?.data?.thumbnail ?? p?.data?.cover ?? "";
+  const v = p?.data?.thumbnail ?? p?.data?.heroImage ?? p?.data?.heroimage ?? p?.data?.image ?? p?.data?.cover ?? "";
   return typeof v === "string" ? v.trim() : "";
 }
 function moreDate(p: any) {

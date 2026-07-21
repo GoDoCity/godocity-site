@@ -9,8 +9,9 @@ function authorToSlug(name: string) {
 function getPostDate(post: any) {
   return post?.data?.pubDate ?? post?.data?.date ?? post?.data?.published ?? post?.data?.updated ?? null;
 }
-function heroImage(post: any) {
-  const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.thumbnail ?? post?.data?.cover ?? "";
+/* Author archive is a grid of thumbnail cards — prefer the uploaded thumbnail. */
+function thumbImage(post: any) {
+  const v = post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.cover ?? "";
   return typeof v === "string" ? v.trim() : "";
 }
 function excerpt(post: any) {
@@ -91,7 +92,7 @@ const posts = all
           {posts.map(p => {
             const city = p.data.city ?? p.slug.split("/")[0] ?? "daytona";
             const articleSlug = p.slug.split("/").pop();
-            const img = heroImage(p);
+            const img = thumbImage(p);
             const desc = excerpt(p);
             const date = formatDate(getPostDate(p));
             const cat = typeof p.data.category === "string" ? p.data.category.trim().toUpperCase() : "";

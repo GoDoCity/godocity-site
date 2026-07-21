@@ -198,8 +198,8 @@ collections:
     fields:
       - {label: "Title", name: "title", widget: "string", hint: "Clear, action-oriented headline (e.g. 'How to Hang Hurricane Shutters')."}
       - {label: "Intro", name: "intro", widget: "text", hint: "Minimum 2 paragraphs (separate with a blank line). Maximum 200 words. No markdown — plain text only."}
-      - {label: "Materials", name: "materials", widget: "text", hint: "One item per line. Be specific — brand names, sizes, quantities help readers. Each line becomes a checkmark item automatically."}
-      - {label: "Steps", name: "steps", widget: "text", hint: "One step per line. Write each as a full action sentence. Each line becomes a numbered yellow badge automatically."}
+      - {label: "Materials", name: "materials", widget: "text", required: false, hint: "Optional. One item per line — brand names, sizes, quantities help readers. Each line becomes a checkmark item. Leave blank (e.g. for Body & Mind guides) to hide the section entirely."}
+      - {label: "Steps", name: "steps", widget: "text", required: false, hint: "Optional. One step per line — write each as a full action sentence. Each line becomes a numbered badge. Leave blank to hide the section entirely."}
       - {label: "Community Note", name: "community_note", widget: "text", required: false, hint: "Optional expert tip, warning, or local insight. Rendered as a highlighted blockquote at the bottom of the main column."}
       - label: "Topic"
         name: "topic"
@@ -208,6 +208,7 @@ collections:
         options:
           - {label: "Clean", value: "Clean"}
           - {label: "Paint", value: "Paint"}
+          - {label: "Body & Mind", value: "body-mind"}
           - {label: "Maintain", value: "Maintain"}
           - {label: "Decorate", value: "Decorate"}
           - {label: "Craft", value: "Craft"}

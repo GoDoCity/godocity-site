@@ -16,8 +16,9 @@ function excerpt(post: any): string {
   return clean.length > 160 ? clean.slice(0, 157).trimEnd() + "…" : clean;
 }
 
+/* Journalist article cards are thumbnails — prefer the uploaded thumbnail. */
 function postHeroImage(post: any): string {
-  const v = post?.data?.heroImage ?? post?.data?.thumbnail ?? post?.data?.image ?? "";
+  const v = post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.image ?? "";
   return typeof v === "string" ? v.trim() : "";
 }
 

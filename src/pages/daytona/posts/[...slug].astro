@@ -39,6 +39,11 @@ function heroImage(post) {
   const v = post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? post?.data?.thumbnail ?? "";
   return String(v).trim() || FALLBACK_IMG;
 }
+/* Related "More Stories" cards are thumbnails — prefer the uploaded thumbnail. */
+function thumbImage(post) {
+  const v = post?.data?.thumbnail ?? post?.data?.heroImage ?? post?.data?.heroimage ?? post?.data?.image ?? "";
+  return String(v).trim() || FALLBACK_IMG;
+}
 
 /* Related posts */
 const RELATED_LIMIT = 12;
@@ -191,7 +196,7 @@ const subtopicLabel = tagLabelFromKey(subtopicKey).toUpperCase();
               <div class="relatedScroll">
                 {relatedPosts.map((p) => {
                   const t = p.data.title ?? p.slug;
-                  const img = heroImage(p);
+                  const img = thumbImage(p);
                   return (
                     <a class="relatedCard" href={`/daytona/posts/${p.slug.split("/").pop()}/`}>
                       <div class="relatedCardThumb">
