@@ -15,10 +15,15 @@
  */
 import type { APIRoute } from "astro";
 import { getCollection } from "astro:content";
+import { geocodeAddress } from "../../lib/geocode";
 
 export const prerender = true;
 
 const ORIGIN = "https://godocity-site.pages.dev";
+
+/* Daytona geocode bias — proximity [lng, lat] + Volusia/Flagler bounding box. */
+const DAYTONA_PROXIMITY: [number, number] = [-81.0228, 29.2108];
+const DAYTONA_BBOX: [number, number, number, number] = [-82.5, 28.3, -80.3, 30.2];
 
 function absolutise(src: string | undefined | null): string | null {
   if (!src) return null;
@@ -35,11 +40,27 @@ function toIso(v: unknown): string | null {
 export const GET: APIRoute = async () => {
   let events: any[] = [];
   try {
+    const mapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
     const all = await getCollection("events");
-    events = all
-      .filter((e: any) => (e.data.city ?? "").toLowerCase().trim() === "daytona")
-      .map((e: any) => ({
-        id:             `cms-${e.slug.split("/").pop()}`,
+    const daytona = all.filter((e: any) => (e.data.city ?? "").toLowerCase().trim() === "daytona");
+
+    events = await Promise.all(daytona.map(async (e: any) => {
+      /* Coordinates: manual lat/lng → geocoded address → null (hub falls back).
+         Editors usually enter only an address, so geocode at build time so the
+         hub can place the branded star pin at the venue instead of city-center. */
+      let lat: number | null = e.data.lat ?? null;
+      let lng: number | null = e.data.lng ?? null;
+      if (lat == null || lng == null) {
+        const parts = [e.data.location, e.data.address].map((s: any) => String(s ?? "").trim()).filter(Boolean);
+        let query = parts.join(", ");
+        if (query && !/\bfl\b|\bflorida\b/i.test(query)) query += ", Daytona Beach, FL";
+        const geo = await geocodeAddress(query, mapboxToken, { proximity: DAYTONA_PROXIMITY, bbox: DAYTONA_BBOX });
+        if (geo) { lat = geo.lat; lng = geo.lng; }
+      }
+
+      return {
+        // Lowercase id so a mixed-case link never mismatches the lowercase slug.
+        id:             `cms-${(e.slug.split("/").pop() ?? "").toLowerCase()}`,
         market_id:      "daytona",
         title:          e.data.title,
         description:    e.data.description ?? null,
@@ -47,12 +68,15 @@ export const GET: APIRoute = async () => {
         end_datetime:   toIso(e.data.endDate),
         venue_name:     e.data.location ?? null,
         venue_address:  e.data.address ?? null,
+        latitude:       lat,
+        longitude:      lng,
         image_url:      absolutise(e.data.image),
         event_url:      e.data.url ?? null,
         category:       e.data.category ?? null,
         // Featured OR Sponsored/Spotlight → paid spotlight in the hub feed.
         sponsored:      e.data.isSponsored === true || e.data.featured === true,
-      }));
+      };
+    }));
   } catch {
     // events collection empty / unavailable — emit an empty feed, never 500.
   }

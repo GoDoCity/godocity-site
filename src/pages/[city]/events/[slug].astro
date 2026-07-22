@@ -2,12 +2,16 @@
 import Base from "../../../layouts/Base.astro";
 import InteractiveMap from "../../../components/InteractiveMap.astro";
 import { getCollection } from "astro:content";
+import { geocodeAddress } from "../../../lib/geocode.ts";
 
 export async function getStaticPaths() {
   const events = await getCollection("events");
   return events.map(e => {
-    const city = e.data.city ?? e.slug.split("/")[0];
-    const slug = e.slug.split("/").pop();
+    /* Canonicalise route params to lowercase so a mixed-case incoming link
+       (e.g. .../Godo-4th-of-July-Event/) resolves to the same page as the
+       lowercase file slug instead of 404-ing. */
+    const city = (e.data.city ?? e.slug.split("/")[0]).toLowerCase();
+    const slug = (e.slug.split("/").pop() ?? "").toLowerCase();
     return { params: { city, slug }, props: { event: e } };
   });
 }
@@ -91,8 +95,25 @@ const CITY_CENTERS = {
 };
 const cityKey = city.toLowerCase().trim();
 const center  = CITY_CENTERS[cityKey] ?? { lat: 29.2108, lng: -81.0228 };
-const pinLat  = data.lat ?? center.lat;
-const pinLng  = data.lng ?? center.lng;
+
+/* ── Pin coordinates: manual lat/lng → geocoded address → city-center fallback.
+   Editors typically enter only an address in Sveltia, so when coordinates are
+   missing we geocode the venue at build time (Mapbox, same token as the tiles).
+   If geocoding is unavailable (no token / failure), we fall back to the city
+   centre so the map — and the branded star pin — still render cleanly.        */
+const mapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
+let pinLat: number | null = data.lat ?? null;
+let pinLng: number | null = data.lng ?? null;
+
+if (pinLat == null || pinLng == null) {
+  const geoParts = [data.location, data.address].map(s => String(s ?? "").trim()).filter(Boolean);
+  let geoQuery = geoParts.join(", ");
+  if (geoQuery && !/\bfl\b|\bflorida\b/i.test(geoQuery)) geoQuery += `, ${cityCap}, FL`;
+  const geo = await geocodeAddress(geoQuery, mapboxToken, { proximity: [center.lng, center.lat] });
+  if (geo) { pinLat = geo.lat; pinLng = geo.lng; }
+}
+if (pinLat == null || pinLng == null) { pinLat = center.lat; pinLng = center.lng; }
+
 const mapPin  = [{
   label:     data.title,
   address:   data.location + (data.address ? `, ${data.address}` : ""),
@@ -278,7 +299,7 @@ const pageUrl = Astro.url.href;
               const day = ed.getDate();
               const dow = ed.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
               const eCity = (e.data.city ?? e.slug.split("/")[0]).toLowerCase().trim();
-              const eSlug = e.slug.split("/").pop();
+              const eSlug = (e.slug.split("/").pop() ?? "").toLowerCase();
               const href = e.data.url
                 ? addUtm(e.data.url)
                 : `/${eCity}/events/${eSlug}/`;
