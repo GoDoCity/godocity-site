@@ -8,6 +8,7 @@ import SidebarEventsList from "../../components/SidebarEventsList.astro";
 import SidebarPoll from "../../components/SidebarPoll.astro";
 import SidebarTipCallout from "../../components/SidebarTipCallout.astro";
 import { getCollection } from "astro:content";
+import { geocodeAddress } from "../../lib/geocode";
 import { cityDisplayName, isStrictlyFuture, resolveEngineEventUrl, getEventsUrl, ENGINE_API_BASE } from "../../lib/events.js";
 import { getCityConfig, getVibeCheck } from "../../lib/cityConfigs.js";
 const daytonaConfig = getCityConfig("daytona");
@@ -145,7 +146,7 @@ const allDaytonaMerged: any[] = allDaytona
 /* Home sidebar events — passed directly to SidebarEventsList (slices to 6 internally) */
 
 /* Map pins — events with valid non-ocean coordinates */
-const homePins = allDaytona
+const enginePins = allDaytona
   .filter((e: any) => e.data.lat != null && e.data.lng != null && (e.data.lat !== 0 || e.data.lng !== 0))
   .map((e: any) => {
     const d = new Date(e.data.eventDate);
@@ -162,6 +163,64 @@ const homePins = allDaytona
       sponsored:    e.data.sponsored === true,
     };
   });
+
+/* ── CMS map pins ─────────────────────────────────────────────────────────────
+   Hand-curated Sveltia events (src/content/events/daytona/*.md) never reach the
+   engine's D1, so the engine feed above can't place their star pins. Mirror the
+   events.json build here: geocode each address (editors rarely enter lat/lng) so
+   featured/sponsored CMS events show their pulsing branded pin on the homepage
+   map. isStrictlyFuture keeps sponsored events regardless of date, drops stale
+   ones. Geocode failures / ocean pins are filtered out downstream by pin guards. */
+const CMS_PROXIMITY: [number, number] = [-81.0228, 29.2108];
+const CMS_BBOX: [number, number, number, number] = [-82.5, 28.3, -80.3, 30.2];
+const _cmsMapboxToken = import.meta.env.MAPBOX_ACCESS_TOKEN ?? "";
+
+let cmsPins: any[] = [];
+try {
+  const _cmsAll = await getCollection("events");
+  const _cmsDaytona = _cmsAll.filter(
+    (e: any) => String(e.data.city ?? "").toLowerCase().trim() === "daytona",
+  );
+
+  cmsPins = (await Promise.all(_cmsDaytona.map(async (e: any) => {
+    const isSponsored = e.data.isSponsored === true || e.data.featured === true;
+    if (!isStrictlyFuture(e.data.eventDate, isSponsored)) return null;
+
+    let lat: number | null = e.data.lat ?? null;
+    let lng: number | null = e.data.lng ?? null;
+    if (lat == null || lng == null) {
+      const parts = [e.data.location, e.data.address]
+        .map((s: any) => String(s ?? "").trim())
+        .filter(Boolean);
+      let query = parts.join(", ");
+      if (query && !/\bfl\b|\bflorida\b/i.test(query)) query += ", Daytona Beach, FL";
+      const geo = await geocodeAddress(query, _cmsMapboxToken, { proximity: CMS_PROXIMITY, bbox: CMS_BBOX });
+      if (geo) { lat = geo.lat; lng = geo.lng; }
+    }
+    if (lat == null || lng == null || (lat === 0 && lng === 0)) return null;
+
+    const d = new Date(e.data.eventDate);
+    const dateStr = isNaN(d.getTime())
+      ? ""
+      : d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return {
+      label:     e.data.title,
+      address:   `${dateStr}${dateStr ? " · " : ""}${e.data.location ?? ""}`,
+      lat,
+      lng,
+      image:     e.data.image ?? "/images/daytona-placeholder.jpg",
+      url:       e.data.url || null,
+      // "Branded Pins / Star Placement" — CMS featured/sponsored earn the star pin.
+      featured:  e.data.featured === true,
+      sponsored: isSponsored,
+    };
+  }))).filter(Boolean);
+} catch (err) {
+  console.warn("[homepage] CMS map pins failed:", err);
+}
+
+/* CMS pins first so premium branded stars are the visual anchor of the map. */
+const homePins = [...cmsPins, ...enginePins];
 
 const featuredAd = {
   tag: "Featured Business",
