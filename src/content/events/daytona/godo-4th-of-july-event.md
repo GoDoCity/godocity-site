@@ -1,7 +1,7 @@
 ---
 title: GoDo 4th of July Event
-eventDate: 2026-07-20
-endDate: 2026-07-27
+eventDate: 2026-07-21
+endDate: 2026-07-28
 location: Daytona Beach Band Shell
 address: 70 Boardwalk, Daytona Beach, Fl 32118
 city: daytona
