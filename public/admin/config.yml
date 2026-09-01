@@ -152,6 +152,183 @@ collections:
       - {label: "Show Table of Contents", name: "showTableOfContents", widget: "boolean", default: true}
       - {label: "Body", name: "body", widget: "markdown"}
 
+  # ── Newsroom ────────────────────────────────────────────────────────────
+  # Machine-generated story leads. The GoDoEVENTS newsroom pipeline (repo
+  # GoDoCity/godoevents-site) scores each day's ingested articles against the
+  # editorial brief and commits ranked Markdown into content/newsroom/ here.
+  # These are read-and-review: journalists don't hand-author them (create is
+  # off), but they can edit a lead — tick the checklist, refine the angle — and
+  # the pipeline leaves any file it has already written alone, so those edits
+  # survive the next run. Files live at the repo root (content/, not
+  # src/content/) so they never enter the Astro site build; only Sveltia reads
+  # them. Old leads are pruned by the pipeline after ~14 days.
+  - name: "newsroom"
+    label: "Newsroom"
+    label_singular: "Story Lead"
+    folder: "content/newsroom"
+    create: false
+    delete: true
+    identifier_field: "title"
+    filter: {field: "kind", value: "candidate"}
+    summary: "[{{fields.effective_score}}] {{fields.community}} · {{fields.title}} ({{fields.category}})"
+    sortable_fields:
+      fields: ["effective_score", "story_score", "engagement_score", "rank", "date", "geo_score", "community", "category"]
+      default:
+        field: "effective_score"
+        direction: "descending"
+    # Browse/filter leads by location and by the fun/uplifting tone — all inside
+    # the Sveltia list view, no code or query needed.
+    view_groups:
+      - {label: "Community", field: "community"}
+      - {label: "Market (City)", field: "city"}
+      - {label: "Category", field: "category"}
+      - {label: "Tone", field: "tone"}
+    view_filters:
+      - {label: "Fun & uplifting", field: "tone", pattern: "uplifting"}
+      - {label: "Fun (fun tone)", field: "tone", pattern: "^fun$"}
+      - {label: "Hide routine admin", field: "routine_admin", pattern: "false"}
+      - {label: "Original reporting leads", field: "original_reporting", pattern: "true"}
+      - {label: "Daytona Beach", field: "community", pattern: "^Daytona Beach$"}
+      - {label: "Ormond Beach", field: "community", pattern: "^Ormond Beach$"}
+      - {label: "Holly Hill", field: "community", pattern: "^Holly Hill$"}
+      - {label: "South Daytona", field: "community", pattern: "^South Daytona$"}
+      - {label: "Daytona Beach Shores", field: "community", pattern: "^Daytona Beach Shores$"}
+      - {label: "Port Orange", field: "community", pattern: "^Port Orange$"}
+      - {label: "Ponce Inlet", field: "community", pattern: "^Ponce Inlet$"}
+      - {label: "New Smyrna Beach", field: "community", pattern: "^New Smyrna Beach$"}
+      - {label: "DeLand", field: "community", pattern: "^DeLand$"}
+      - {label: "Regional / Other", field: "community", pattern: "Regional"}
+    fields:
+      - {label: "Kind", name: "kind", widget: "hidden", default: "candidate"}
+      - {label: "Working Title", name: "title", widget: "string"}
+      - {label: "Scan Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false}
+      - label: "Market (City)"
+        name: "city"
+        widget: "select"
+        required: false
+        hint: "Which GoDo market this lead belongs to. Group or filter the list by this."
+        options:
+          - {label: "Daytona Beach", value: "daytona"}
+          - {label: "Asheville", value: "asheville"}
+          - {label: "Macon", value: "macon"}
+          - {label: "Jacksonville", value: "jacksonville"}
+          - {label: "San Diego", value: "sandiego"}
+      - label: "Community"
+        name: "community"
+        widget: "select"
+        required: false
+        hint: "Specific community the story centers on — the main way to browse leads by location."
+        options:
+          - {label: "Daytona Beach", value: "Daytona Beach"}
+          - {label: "Ormond Beach", value: "Ormond Beach"}
+          - {label: "Ormond-by-the-Sea", value: "Ormond-by-the-Sea"}
+          - {label: "Holly Hill", value: "Holly Hill"}
+          - {label: "South Daytona", value: "South Daytona"}
+          - {label: "Daytona Beach Shores", value: "Daytona Beach Shores"}
+          - {label: "Port Orange", value: "Port Orange"}
+          - {label: "Ponce Inlet", value: "Ponce Inlet"}
+          - {label: "New Smyrna Beach", value: "New Smyrna Beach"}
+          - {label: "Edgewater", value: "Edgewater"}
+          - {label: "DeLand", value: "DeLand"}
+          - {label: "Orange City", value: "Orange City"}
+          - {label: "DeBary", value: "DeBary"}
+          - {label: "Deltona", value: "Deltona"}
+          - {label: "Other Volusia", value: "Other Volusia"}
+          - {label: "Regional / Other", value: "Regional / Other"}
+      - {label: "Overall Score (blended)", name: "effective_score", widget: "number", value_type: "int", required: false, hint: "The ranking score: 60% story strength + 40% reader engagement. Higher = surfaces first."}
+      - {label: "GoDoDaytona Story Score", name: "story_score", widget: "number", value_type: "int", min: 0, max: 100, hint: "0–100. 85+ = very strong, 70–84 = solid, 55–69 = usable."}
+      - {label: "Reader Engagement", name: "engagement_score", widget: "number", value_type: "int", min: 0, max: 100, required: false, hint: "How fun, shareable and uplifting — the higher, the more it fits GoDoDaytona's upbeat voice."}
+      - label: "Tone"
+        name: "tone"
+        widget: "select"
+        required: false
+        hint: "Emotional register. Filter the list to 'uplifting'/'fun' for the celebratory stories."
+        options:
+          - {label: "Uplifting", value: "uplifting"}
+          - {label: "Fun", value: "fun"}
+          - {label: "Neutral", value: "neutral"}
+          - {label: "Dry", value: "dry"}
+          - {label: "Negative", value: "negative"}
+      - {label: "Routine Admin", name: "routine_admin", widget: "boolean", required: false, default: false, hint: "Flagged as dry administrative filler — filter these out with 'Hide routine admin'."}
+      - {label: "Geographic Relevance", name: "geo_score", widget: "number", value_type: "int", min: 0, max: 100, required: false}
+      - {label: "Rank", name: "rank", widget: "number", value_type: "int", required: false}
+      - {label: "Band", name: "band", widget: "string", required: false, hint: "strong / solid / marginal"}
+      - {label: "Location", name: "location", widget: "string", required: false, hint: "Free-text spot within the community (e.g. a venue or street)."}
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        required: false
+        options:
+          - {label: "Development", value: "Development"}
+          - {label: "Business", value: "Business"}
+          - {label: "Government", value: "Government"}
+          - {label: "Public Safety", value: "Public Safety"}
+          - {label: "Restaurants", value: "Restaurants"}
+          - {label: "Transportation", value: "Transportation"}
+          - {label: "Weather", value: "Weather"}
+          - {label: "Community", value: "Community"}
+          - {label: "Events", value: "Events"}
+          - {label: "Health", value: "Health"}
+          - {label: "Environment", value: "Environment"}
+          - {label: "Education", value: "Education"}
+          - {label: "Other", value: "Other"}
+      - {label: "Possible Headline", name: "possible_headline", widget: "string", required: false}
+      - {label: "Why This Could Work (angle)", name: "newsletter_angle", widget: "text", required: false}
+      - {label: "Suggested GoDoDaytona Angle", name: "suggested_angle", widget: "text", required: false}
+      - label: "Source Quality"
+        name: "source_quality"
+        widget: "select"
+        required: false
+        options:
+          - {label: "Primary Source", value: "Primary Source"}
+          - {label: "Original Local Reporting", value: "Original Local Reporting"}
+          - {label: "Regional Media", value: "Regional Media"}
+          - {label: "Business Announcement", value: "Business Announcement"}
+          - {label: "Social Media", value: "Social Media"}
+          - {label: "Secondary Aggregation", value: "Secondary Aggregation"}
+      - label: "New or Update"
+        name: "new_or_update"
+        widget: "select"
+        required: false
+        options:
+          - {label: "NEW", value: "NEW"}
+          - {label: "UPDATE", value: "UPDATE"}
+      - {label: "Original Reporting Opportunity", name: "original_reporting", widget: "boolean", required: false, default: false, hint: "GoDoDaytona could report this before other local media."}
+      - {label: "Original Reporting Note", name: "original_reporting_note", widget: "text", required: false}
+      - {label: "Primary Source", name: "primary_source_name", widget: "string", required: false}
+      - {label: "Primary Source URL", name: "primary_source_url", widget: "string", required: false}
+      - {label: "Date First Reported", name: "date_first_reported", widget: "string", required: false}
+      - {label: "Image URL", name: "image", widget: "string", required: false}
+      - {label: "Key Facts", name: "key_facts", widget: "list", required: false, hint: "Facts the journalist should know."}
+      - {label: "Editorial Checklist", name: "checklist", widget: "list", required: false, hint: "What still needs verification before publishing."}
+      - {label: "Article ID", name: "article_id", widget: "hidden"}
+      - {label: "Dossier", name: "body", widget: "markdown", required: false}
+
+  # The daily "news desk" summary — one per city per scan: the header counts,
+  # the editor's shortlist, the best-per-category picks and the watch list.
+  - name: "newsroom-desk"
+    label: "Newsroom - News Desk"
+    label_singular: "News Desk Brief"
+    folder: "content/newsroom"
+    create: false
+    delete: true
+    identifier_field: "title"
+    filter: {field: "kind", value: "digest"}
+    summary: "{{fields.title}} ({{fields.candidate_count}} candidates)"
+    sortable_fields:
+      fields: ["date", "title"]
+      default:
+        field: "date"
+        direction: "descending"
+    fields:
+      - {label: "Kind", name: "kind", widget: "hidden", default: "digest"}
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Scan Date", name: "date", widget: "datetime", date_format: "YYYY-MM-DD", time_format: false}
+      - {label: "City", name: "city", widget: "hidden", default: "daytona"}
+      - {label: "Candidate Count", name: "candidate_count", widget: "number", value_type: "int", required: false}
+      - {label: "Sources Reviewed", name: "sources_reviewed", widget: "number", value_type: "int", required: false}
+      - {label: "Brief", name: "body", widget: "markdown", required: false}
+
   - name: "daytona-events"
     label: "Daytona - Events"
     label_singular: "Event"
