@@ -329,6 +329,61 @@ collections:
       - {label: "Sources Reviewed", name: "sources_reviewed", widget: "number", value_type: "int", required: false}
       - {label: "Brief", name: "body", widget: "markdown", required: false}
 
+  # ── Curated Links ────────────────────────────────────────────────────────
+  # Editor-picked outbound links to high-value local sources that have no
+  # ingestable feed (e.g. The Daytona Beach News-Journal). A human writes an
+  # original 30–45 word blurb and points at the source story. The GoDoEVENTS
+  # newsroom sync (repo GoDoCity/godoevents-site, `npm run newsroom:curated`)
+  # reads the entries marked "Ready" and upserts them into the article queue as
+  # MANUAL items — never scraped, never fed to the model. Set Status back to
+  # Draft to hold one out of the queue. Lives in its own folder so the candidate
+  # pruner that cleans content/newsroom never touches these.
+  - name: "curated-links"
+    label: "Curated Links"
+    label_singular: "Curated Link"
+    folder: "content/curated-links"
+    create: true
+    delete: true
+    identifier_field: "title"
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    summary: "[{{fields.status}}] {{fields.title}} — {{fields.source_name}}"
+    sortable_fields:
+      fields: ["title", "source_name", "category", "status"]
+    view_filters:
+      - {label: "Ready for queue", field: "status", pattern: "^ready$"}
+      - {label: "Draft (held)", field: "status", pattern: "^draft$"}
+    fields:
+      - {label: "Kind", name: "kind", widget: "hidden", default: "curated"}
+      - {label: "Title", name: "title", widget: "string", hint: "The headline as you want it read in the newsletter — your wording."}
+      - {label: "Original Source Name", name: "source_name", widget: "string", hint: 'The outlet being credited, e.g. "The Daytona Beach News-Journal".'}
+      - {label: "Outbound Link URL", name: "url", widget: "string", pattern: ["^https?://.+", "Must be a full http(s) link to the original story."], hint: "Direct link to the source story. Every curated link points back to its source."}
+      - label: "Category"
+        name: "category"
+        widget: "select"
+        default: "community"
+        hint: "Newsletter section. Only these three exist in the article queue."
+        options:
+          - {label: "Community", value: "community"}
+          - {label: "Business", value: "business"}
+          - {label: "Government", value: "government"}
+      - {label: "Custom Blurb / Summary", name: "summary", widget: "text", pattern: ["^\\s*(\\S+\\s+){29,44}\\S+\\s*$", "Blurb must be 30–45 words, in your own words — not pasted from the source."], hint: "30–45 words, original wording. The blurb + attribution + outbound link is the whole entry; never paste the source's article text."}
+      - label: "Status"
+        name: "status"
+        widget: "select"
+        default: "draft"
+        hint: "Draft = still editing, ignored by the sync. Ready = pushed into the article queue on the next newsroom run."
+        options:
+          - {label: "Draft (hold)", value: "draft"}
+          - {label: "Ready for Queue", value: "ready"}
+      - label: "City"
+        name: "city"
+        widget: "select"
+        default: "daytona"
+        options:
+          - {label: "Daytona Beach", value: "daytona"}
+      - {label: "Image URL", name: "image", widget: "string", required: false, hint: "Optional. A full image URL (often the source article's lead image)."}
+      - {label: "CTA Label", name: "cta_label", widget: "string", required: false, hint: 'Optional. Overrides the default "Read more" button text.'}
+
   - name: "daytona-events"
     label: "Daytona - Events"
     label_singular: "Event"
