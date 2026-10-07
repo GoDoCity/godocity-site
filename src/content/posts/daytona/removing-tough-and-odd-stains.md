@@ -1,17 +1,19 @@
 ---
 title: Removing Tough and Odd Stains
+pubDate: ''
 author: Charles King
 category: DIY
 subtopic: clean
 sponsorTier: None
-description: Stains can be such a challenge to remove and I put some to the
-  test. Here are a few ways I found to remove these stains with inexpensive and
-  easy to find ingredients.
-thumbnail: ""
-heroImage: /images/uploads/pop-art-poster-advertising-a-cleaning-vector-13381591.webp
+tags: []
+description: Stains can be such a challenge to remove and I put some to the test. Here are a few ways I found to remove these stains with inexpensive and easy to find ingredients.
+thumbnail: ''
+heroImage: /images/uploads/cleaning-cartoon.webp
 city: daytona
 featured: false
+showTableOfContents: true
 ---
+
 **Remove Pink Stains From Your Toliet -**
 
 Sometimes this is a bacteria and sometimes it's a mineral. Pour some Hydrogen Peroxide (3% you can find at the store) into your toilet. Let it sit for a bit, scrub with a toilet brush and flush.
