@@ -1,9 +1,9 @@
 ---
 title: Removing Tough and Odd Stains
-pubDate: ''
+pubDate: 2026-10-07
 author: Charles King
 category: DIY
-subtopic: clean
+subtopic: Recipe
 sponsorTier: None
 tags: []
 description: Stains can be such a challenge to remove and I put some to the test. Here are a few ways I found to remove these stains with inexpensive and easy to find ingredients.
