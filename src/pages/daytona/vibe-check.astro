@@ -3,8 +3,11 @@ import Base from "../../layouts/Base.astro";
 import SidebarPoll from "../../components/SidebarPoll.astro";
 import SidebarEventsList from "../../components/SidebarEventsList.astro";
 import { getMergedCityEvents } from "../../lib/getMergedCityEvents.ts";
+import { getVibeCheck } from "../../lib/cityConfigs.js";
 
 const eventList = await getMergedCityEvents("daytona");
+// Same poll as the homepage rail — edit it in cityConfigs.js, not here.
+const vibeCheck = getVibeCheck("daytona");
 ---
 
 <Base title="Vibe Check | GoDoDaytona" subtitle="Community polls for Daytona" cityBase="daytona">
@@ -15,7 +18,7 @@ const eventList = await getMergedCityEvents("daytona");
         <span class="vibe-hero__eyebrow">COMMUNITY PULSE</span>
         <h1 class="vibe-hero__title">Vibe Check</h1>
         <p class="vibe-hero__dek">
-          Vote on what Daytona is talking about. <br class="mobile-break" />
+          Vote on what Greater Daytona is talking about. <br class="mobile-break" />
           New results every week.
         </p>
         <div class="vibe-hero__divider"></div>
@@ -30,24 +33,21 @@ const eventList = await getMergedCityEvents("daytona");
         <div class="vibeContainer">
 
           {/* ── CURRENT POLL ── */}
-          <section class="vibeSection" aria-label="Current poll">
-            <div class="vibeSectionHead">
-              <span class="vibeSectionLabel">🗳️ Current Poll</span>
-            </div>
-            <div class="vibePollWrap">
-              <SidebarPoll
-                title="Vibe Check: Best of Ormond"
-                question="Who has the best tacos in Ormond?"
-                options={[
-                  { label: "La Fiesta" },
-                  { label: "Tortilla Republic" },
-                  { label: "Cabo's Mexican" },
-                  { label: "Other" },
-                ]}
-                pollId="ormond-tacos"
-              />
-            </div>
-          </section>
+          {vibeCheck && (
+            <section class="vibeSection" aria-label="Current poll">
+              <div class="vibeSectionHead">
+                <span class="vibeSectionLabel">🗳️ Current Poll</span>
+              </div>
+              <div class="vibePollWrap">
+                <SidebarPoll
+                  title={vibeCheck.title}
+                  question={vibeCheck.question}
+                  options={vibeCheck.options}
+                  pollId={vibeCheck.pollId}
+                />
+              </div>
+            </section>
+          )}
 
           {/* ── PAST POLLS ── */}
           <section class="vibeSection vibeSection--past" aria-label="Past polls">

@@ -1,0 +1,255 @@
+---
+/**
+ * /daytona/vibe-check/admin/ — Vibe Check vote admin.
+ *
+ * Static shell; all data comes from /api/vibe-admin (functions/api/vibe-admin.js),
+ * which requires the ADMIN_TOKEN. The page itself holds no secrets, so serving
+ * it publicly is safe — it's noindexed and does nothing without the token.
+ *
+ * Adjustments are logged +/- offsets on top of real votes; real votes are never
+ * edited. "Undo" posts the opposite offset so the log stays complete.
+ */
+import { allCitySlugs, getVibeCheck, getDisplayName } from "../../../lib/cityConfigs.js";
+
+const polls = allCitySlugs
+  .map((slug) => ({ slug, city: getDisplayName(slug), vc: getVibeCheck(slug) }))
+  .filter((p) => p.vc)
+  .map((p) => ({
+    pollId: p.vc.pollId,
+    label: `${p.city} — ${p.vc.question}`,
+    options: p.vc.options.map((o) => o.label),
+  }));
+---
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Vibe Check Admin</title>
+</head>
+<body>
+  <main class="wrap">
+    <h1>Vibe Check Admin</h1>
+    <p class="hint">Adjustments are logged offsets on top of real votes. Real votes are never changed.</p>
+
+    <section class="panel" data-auth>
+      <label>Admin token
+        <input type="password" data-token autocomplete="current-password" />
+      </label>
+      <label>Poll
+        <select data-poll>
+          {polls.map((p) => (
+            <option value={p.pollId} data-options={JSON.stringify(p.options)}>{p.label} ({p.pollId})</option>
+          ))}
+          <option value="__custom">Other poll id…</option>
+        </select>
+      </label>
+      <label data-custom-wrap hidden>Poll id
+        <input type="text" data-custom-poll placeholder="e.g. ormond-tacos" />
+      </label>
+      <label data-custom-opts-wrap hidden>Options (one per line)
+        <textarea data-custom-opts rows="4"></textarea>
+      </label>
+      <button type="button" data-load>Load counts</button>
+      <p class="msg" data-msg></p>
+    </section>
+
+    <section class="panel" data-results hidden>
+      <h2>Counts <span class="sub" data-totals></span></h2>
+      <table>
+        <thead>
+          <tr><th>Option</th><th>Real</th><th>Offset</th><th>Shown</th><th>Adjust</th></tr>
+        </thead>
+        <tbody data-rows></tbody>
+      </table>
+      <label>Note for this change (optional)
+        <input type="text" data-note maxlength="500" placeholder="e.g. removed duplicate votes from one IP" />
+      </label>
+
+      <h2>Adjustment log</h2>
+      <table>
+        <thead>
+          <tr><th>When</th><th>Option</th><th>Delta</th><th>Note</th><th></th></tr>
+        </thead>
+        <tbody data-log></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const $ = <T extends Element = HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
+    const tokenEl = $<HTMLInputElement>("[data-token]");
+    const pollEl = $<HTMLSelectElement>("[data-poll]");
+    const customPollEl = $<HTMLInputElement>("[data-custom-poll]");
+    const customOptsEl = $<HTMLTextAreaElement>("[data-custom-opts]");
+    const msgEl = $("[data-msg]");
+    const noteEl = $<HTMLInputElement>("[data-note]");
+
+    // Per-tab convenience only — the token is never written to localStorage.
+    try { tokenEl.value = sessionStorage.getItem("vibe-admin-token") ?? ""; } catch {}
+
+    pollEl.addEventListener("change", () => {
+      const custom = pollEl.value === "__custom";
+      $("[data-custom-wrap]").hidden = !custom;
+      $("[data-custom-opts-wrap]").hidden = !custom;
+    });
+
+    function currentPoll() {
+      if (pollEl.value === "__custom") {
+        return {
+          pollId: customPollEl.value.trim(),
+          options: customOptsEl.value.split("\n").map((s) => s.trim()).filter(Boolean),
+        };
+      }
+      const opt = pollEl.selectedOptions[0];
+      return { pollId: pollEl.value, options: JSON.parse(opt.dataset.options ?? "[]") as string[] };
+    }
+
+    async function api(method: "GET" | "POST", query: string, body?: unknown) {
+      const token = tokenEl.value.trim();
+      try { sessionStorage.setItem("vibe-admin-token", token); } catch {}
+      const res = await fetch(`/api/vibe-admin${query}`, {
+        method,
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
+      if (!json.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      return json;
+    }
+
+    function cell(text: string | number) {
+      const td = document.createElement("td");
+      td.textContent = String(text);
+      return td;
+    }
+
+    async function load() {
+      const { pollId, options } = currentPoll();
+      if (!pollId) { msgEl.textContent = "Enter a poll id."; return; }
+      msgEl.textContent = "Loading…";
+      try {
+        const qs = new URLSearchParams({ poll: pollId });
+        options.forEach((o) => qs.append("option", o));
+        const d = await api("GET", `?${qs}`);
+        render(pollId, d);
+        msgEl.textContent = "";
+      } catch (err) {
+        msgEl.textContent = `Error: ${(err as Error).message}`;
+        $("[data-results]").hidden = true;
+      }
+    }
+
+    async function adjust(pollId: string, option: string, delta: number, note: string) {
+      msgEl.textContent = "Saving…";
+      try {
+        await api("POST", "", { poll_id: pollId, option_label: option, delta, note });
+        noteEl.value = "";
+        await load();
+      } catch (err) {
+        msgEl.textContent = `Error: ${(err as Error).message}`;
+      }
+    }
+
+    function render(pollId: string, d: any) {
+      $("[data-totals]").textContent =
+        `— ${d.real_total} real votes · ${d.displayed_total} shown`;
+
+      const rows = $("[data-rows]");
+      rows.replaceChildren();
+      for (const option of d.options as string[]) {
+        const tr = document.createElement("tr");
+        const offset = d.offsets[option] ?? 0;
+        tr.append(
+          cell(option),
+          cell(d.real[option] ?? 0),
+          cell(offset > 0 ? `+${offset}` : offset),
+          cell(d.displayed[option] ?? 0),
+        );
+        const td = document.createElement("td");
+        td.className = "adjust";
+        const input = document.createElement("input");
+        input.type = "number";
+        input.step = "1";
+        input.placeholder = "±";
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = "Apply";
+        btn.addEventListener("click", () => {
+          const delta = Number(input.value);
+          if (!Number.isInteger(delta) || delta === 0) { msgEl.textContent = "Enter a non-zero whole number."; return; }
+          if (!confirm(`${delta > 0 ? "Add" : "Remove"} ${Math.abs(delta)} vote(s) ${delta > 0 ? "to" : "from"} "${option}"?`)) return;
+          adjust(pollId, option, delta, noteEl.value.trim());
+        });
+        td.append(input, btn);
+        tr.append(td);
+        rows.append(tr);
+      }
+
+      const log = $("[data-log]");
+      log.replaceChildren();
+      if (!d.adjustments.length) {
+        const tr = document.createElement("tr");
+        const td = cell("No adjustments yet.");
+        td.colSpan = 5;
+        tr.append(td);
+        log.append(tr);
+      }
+      for (const a of d.adjustments) {
+        const tr = document.createElement("tr");
+        tr.append(
+          cell(new Date(a.created_at).toLocaleString()),
+          cell(a.option_label),
+          cell(a.delta > 0 ? `+${a.delta}` : a.delta),
+          cell(a.note ?? ""),
+        );
+        const td = document.createElement("td");
+        const undo = document.createElement("button");
+        undo.type = "button";
+        undo.textContent = "Undo";
+        undo.addEventListener("click", () => {
+          if (!confirm(`Post a ${-a.delta > 0 ? "+" : ""}${-a.delta} offset to reverse #${a.id}?`)) return;
+          adjust(pollId, a.option_label, -a.delta, `undo #${a.id}`);
+        });
+        td.append(undo);
+        tr.append(td);
+        log.append(tr);
+      }
+
+      $("[data-results]").hidden = false;
+    }
+
+    $("[data-load]").addEventListener("click", load);
+  </script>
+
+  <style>
+    :root { color-scheme: light dark; --bg: #f6f7f9; --card: #fff; --text: #111827; --muted: #6b7280; --line: #e5e7eb; --accent: #0077be; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #0f1216; --card: #181c22; --text: #e5e7eb; --muted: #9ca3af; --line: #2a2f37; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 system-ui, sans-serif; }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 32px 16px 64px; }
+    h1 { margin: 0 0 4px; font-size: 26px; }
+    h2 { font-size: 17px; margin: 24px 0 10px; }
+    h2:first-child { margin-top: 0; }
+    .sub { font-weight: 500; color: var(--muted); font-size: 14px; }
+    .hint { color: var(--muted); margin: 0 0 20px; }
+    .panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 20px; display: grid; gap: 12px; }
+    label { display: grid; gap: 4px; font-weight: 600; font-size: 13px; }
+    input, select, textarea { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); width: 100%; }
+    button { font: inherit; font-weight: 700; padding: 8px 14px; border: 0; border-radius: 8px; background: var(--accent); color: #fff; cursor: pointer; justify-self: start; }
+    button:hover { opacity: .88; }
+    .msg { margin: 0; color: var(--muted); min-height: 1.5em; }
+    .panel > table { display: block; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    th { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    td.adjust { display: flex; gap: 6px; }
+    td.adjust input { width: 80px; }
+    td button { padding: 6px 10px; font-size: 13px; }
+  </style>
+</body>
+</html>

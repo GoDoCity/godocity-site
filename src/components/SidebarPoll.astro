@@ -27,6 +27,8 @@ const {
 // Read at server/build time where env vars are always resolved
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL ?? "";
 const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
+// Dev-only vote reset — stripped from production builds entirely.
+const isDev = import.meta.env.DEV;
 ---
 
 <div class="pollCard" data-poll-id={pollId} data-question={question} data-sb-url={supabaseUrl} data-sb-key={supabaseKey}>
@@ -82,25 +84,33 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     <a class="pollPageLink" href={pageUrl}>See all polls & past results →</a>
   )}
 
-  <div class="pollDevBar" data-poll-dev-bar>
-    <button
-      type="button"
-      class="pollResetBtn"
-      data-poll-reset-btn
-      onclick="localStorage.clear(); alert('Dev Reset: All local poll data cleared!'); location.reload();">
-      ↺ Reset vote (dev)
-    </button>
-  </div>
+  {isDev && (
+    <div class="pollDevBar">
+      <button type="button" class="pollResetBtn" data-poll-reset-btn>
+        ↺ Reset vote (dev)
+      </button>
+    </div>
+  )}
 </div>
 
-<script is:inline>
-  // Global escape hatch — callable from browser console: resetPoll()
-  window.resetPoll = function () {
-    localStorage.clear();
-    alert("Dev Reset: All local poll data cleared!");
-    location.reload();
-  };
-</script>
+{isDev && (
+  <script is:inline>
+    // Dev-only escape hatch — callable from the browser console: resetPoll().
+    // Clears only poll-voted-* keys, never the rest of the site's storage.
+    window.resetPoll = function () {
+      Object.keys(localStorage)
+        .filter((k) => k.startsWith("poll-voted-"))
+        .forEach((k) => localStorage.removeItem(k));
+      location.reload();
+    };
+    document.querySelectorAll("[data-poll-reset-btn]").forEach((b) => {
+      if (!b.dataset.bound) {
+        b.dataset.bound = "1";
+        b.addEventListener("click", () => window.resetPoll());
+      }
+    });
+  </script>
+)}
 
 <script>
   import { createClient } from "@supabase/supabase-js";
@@ -186,40 +196,61 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     if (form) form.style.display = "none";
     if (loading) loading.hidden = false;
 
-    const { data, error } = await getSupabase(card)
-      .from("vibe_check_votes")
-      .select("option_selected")
-      .eq("question_text", pollId);
+    const { counts, realVotes, total } = await fetchCounts(card, pollId);
 
     // Kill spinner immediately when data arrives
     if (loading) { loading.hidden = true; loading.style.display = "none"; }
 
-    console.log("[SidebarPoll] fetchAndShowResults — pollId:", pollId);
-    console.log("[SidebarPoll] data:", data, "| error:", error);
-
-    if (data && data.length > 0) {
-      const realVotes = data.length;
-      const counts: Record<string, number> = {};
-      data.forEach((row) => {
-        counts[row.option_selected] = (counts[row.option_selected] ?? 0) + 1;
-      });
-      updateResultsView(card, counts, realVotes, realVotes);
-    } else {
-      // Zero votes or Supabase error — show 0% for all options
-      updateResultsView(card, {}, 0, 0);
-    }
+    updateResultsView(card, counts, total, realVotes);
     showResultsView(card);
+  }
+
+  // Real votes (vibe_check_votes) plus admin offsets (vibe_check_adjustments).
+  // Offsets are clamped so no option displays below zero. If the adjustments
+  // table is missing or unreadable the poll falls back to real votes only.
+  // Per-option exact HEAD counts, so totals aren't capped by the REST API's
+  // default 1000-row response limit.
+  async function fetchCounts(card: Element, pollId: string) {
+    const sb = getSupabase(card);
+    const labels = [...card.querySelectorAll<HTMLElement>("[data-result-row]")]
+      .map((row) => row.dataset.label ?? "")
+      .filter(Boolean);
+    const [voteCounts, adj] = await Promise.all([
+      Promise.all(labels.map((label) =>
+        sb.from("vibe_check_votes")
+          .select("*", { count: "exact", head: true })
+          .eq("question_text", pollId)
+          .eq("option_selected", label)
+      )),
+      sb.from("vibe_check_adjustments").select("option_label, delta").eq("poll_id", pollId),
+    ]);
+
+    const counts: Record<string, number> = {};
+    let realVotes = 0;
+    voteCounts.forEach(({ count, error }, i) => {
+      if (error) console.error("[SidebarPoll] vote count failed:", error.message);
+      counts[labels[i]] = count ?? 0;
+      realVotes += count ?? 0;
+    });
+    const offsets: Record<string, number> = {};
+    if (!adj.error) {
+      (adj.data ?? []).forEach((row) => {
+        offsets[row.option_label] = (offsets[row.option_label] ?? 0) + row.delta;
+      });
+    }
+    for (const label of labels) {
+      counts[label] = Math.max(0, counts[label] + (offsets[label] ?? 0));
+    }
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    return { counts, realVotes, total };
   }
 
   async function fetchLiveCount(card: Element, pollId: string) {
     const footer = card.querySelector<HTMLElement>("[data-poll-footer]");
     if (!footer) return;
     try {
-      const { count } = await getSupabase(card)
-        .from("vibe_check_votes")
-        .select("*", { count: "exact", head: true })
-        .eq("question_text", pollId);
-      footer.textContent = `${(count ?? 0).toLocaleString()} votes cast`;
+      const { total } = await fetchCounts(card, pollId);
+      footer.textContent = `${total.toLocaleString()} ${total === 1 ? "vote" : "votes"} cast`;
     } catch (_) {
       footer.textContent = "";
     }
@@ -227,12 +258,6 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 
   async function initPoll(card: Element) {
     applyMonthTheme(card);
-
-    // Show dev bar when ?dev=true — onclick is inline on the button itself
-    const devBar = card.querySelector<HTMLElement>("[data-poll-dev-bar]");
-    if (devBar && new URLSearchParams(location.search).get("dev") === "true") {
-      devBar.hidden = false;
-    }
 
     const form = card.querySelector<HTMLFormElement>("[data-poll-form]");
     const loading = card.querySelector<HTMLElement>("[data-poll-loading]");
@@ -279,7 +304,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
         option_selected: selectedOption,
         question_text: pollId,
       });
-      console.log("[SidebarPoll] insert — option:", selectedOption, "| pollId:", pollId, "| error:", insertError);
+      if (insertError) console.error("[SidebarPoll] vote insert failed:", insertError.message);
 
       await fetchAndShowResults(card, pollId);
     });
@@ -526,16 +551,13 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     color: var(--faint);
   }
 
-  /* ── Dev reset bar — hidden by default, shown via JS when ?dev=true ── */
+  /* ── Dev reset bar — only rendered under `astro dev` ── */
   .pollDevBar {
-    display: none;
+    display: flex;
     margin-top: 10px;
     padding-top: 8px;
     border-top: 1px dashed rgba(255, 80, 80, 0.25);
     justify-content: flex-end;
-  }
-  .pollDevBar:not([hidden]) {
-    display: flex;
   }
   .pollResetBtn {
     font-size: 10px;
