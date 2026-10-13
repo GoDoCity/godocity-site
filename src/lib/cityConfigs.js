@@ -32,11 +32,36 @@ export const CITY_CONFIGS = {
      * Sidebar Vibe Check poll. Present = the interactive SidebarPoll renders in
      * the right rail; omit on a city to skip the poll until options are curated.
      * `question` falls back to vibeCheckText when not set here.
+     *
+     * Single source of truth for the homepage rail AND /daytona/vibe-check/.
+     * A new pollId starts a fresh vote tally (votes are keyed by pollId).
+     * New questions and options should draw from the full `pollRegion` below,
+     * not just Daytona Beach proper.
      */
     vibeCheck: {
       pollId: "ormond-tacos",
+      title: "Vibe Check: Best of Ormond",
       options: ["La Fiesta", "Tortilla Republic", "Cabo's Mexican", "Other"],
     },
+    /**
+     * Vibe Check market — the Greater Daytona coastal region, Ormond-by-the-Sea
+     * (north) to New Smyrna Beach (south). Poll questions and local options
+     * should span this whole stretch. Deliberately separate from regionCities,
+     * which also feeds event filtering and reaches inland (DeLand) and north
+     * (Flagler).
+     */
+    pollRegion: [
+      "Ormond-by-the-Sea",
+      "Ormond Beach",
+      "Holly Hill",
+      "Daytona Beach",
+      "Daytona Beach Shores",
+      "Wilbur-by-the-Sea",
+      "South Daytona",
+      "Port Orange",
+      "Ponce Inlet",
+      "New Smyrna Beach",
+    ],
     /** Lat/lng used as the default map centre AND the weather widget location */
     mapCenter: { lat: 29.2108, lng: -81.0228 },
     /**
@@ -202,6 +227,7 @@ export function getVibeCheck(slug) {
   if (!vc?.pollId || !Array.isArray(vc.options) || vc.options.length === 0) return null;
   return {
     pollId: vc.pollId,
+    title: vc.title ?? "Vibe Check",
     question: vc.question ?? cfg?.vibeCheckText ?? "What's the vibe this week?",
     options: vc.options.map((o) => ({ label: String(o) })),
   };
