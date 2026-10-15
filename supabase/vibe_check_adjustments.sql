@@ -19,6 +19,23 @@ create table if not exists public.vibe_check_adjustments (
   created_at   timestamptz not null default now()
 );
 
+-- An earlier hand-made version of this table named the column option_name,
+-- which makes SidebarPoll's select 400. Rename it in place if present.
+do $$
+begin
+  if exists (select 1 from information_schema.columns
+             where table_schema = 'public' and table_name = 'vibe_check_adjustments'
+               and column_name = 'option_name')
+     and not exists (select 1 from information_schema.columns
+             where table_schema = 'public' and table_name = 'vibe_check_adjustments'
+               and column_name = 'option_label') then
+    alter table public.vibe_check_adjustments rename column option_name to option_label;
+  end if;
+end $$;
+
+-- Make PostgREST pick up the renamed column immediately.
+notify pgrst, 'reload schema';
+
 create index if not exists vibe_check_adjustments_poll_idx
   on public.vibe_check_adjustments (poll_id);
 

@@ -27,7 +27,7 @@ export const CITY_CONFIGS = {
     /** Primary brand colour — mirrors themes.css --brand1 for use in JS contexts */
     brand1: "#0077be",
     /** Vibe Check question — reused as the sidebar poll question */
-    vibeCheckText: "Who has the best tacos in Ormond?",
+    vibeCheckText: "Who has the best coffee in Greater Daytona?",
     /**
      * Sidebar Vibe Check poll. Present = the interactive SidebarPoll renders in
      * the right rail; omit on a city to skip the poll until options are curated.
@@ -39,9 +39,19 @@ export const CITY_CONFIGS = {
      * not just Daytona Beach proper.
      */
     vibeCheck: {
-      pollId: "ormond-tacos",
-      title: "Vibe Check: Best of Ormond",
-      options: ["La Fiesta", "Tortilla Republic", "Cabo's Mexican", "Other"],
+      pollId: "daytona-coffee",
+      title: "Vibe Check: Best of Daytona",
+      options: [
+        "Sweet Marlay's",
+        "Copperline Coffee",
+        "Steel Oak Roastery",
+        "Supreme Beans",
+        "Pines to Palms",
+        "Gold Leaf Coffee",
+        "The Coastlands",
+        "National Chain (Starbucks/Dunkin/McDonalds)",
+        "Other",
+      ],
     },
     /**
      * Vibe Check market — the Greater Daytona coastal region, Ormond-by-the-Sea
