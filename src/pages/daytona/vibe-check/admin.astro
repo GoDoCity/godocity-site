@@ -1,6 +1,7 @@
 ---
 /**
- * /daytona/vibe-check/admin/ — Vibe Check vote admin.
+ * /daytona/vibe-check/admin/ — Vibe admin: poll vote adjustments + the
+ * Vibe Board approval queue (/api/vibe-posts-admin, functions/api/vibe-posts-admin.js).
  *
  * Static shell; all data comes from /api/vibe-admin (functions/api/vibe-admin.js),
  * which requires the ADMIN_TOKEN. The page itself holds no secrets, so serving
@@ -10,6 +11,7 @@
  * edited. "Undo" posts the opposite offset so the log stays complete.
  */
 import { allCitySlugs, getVibeCheck, getDisplayName } from "../../../lib/cityConfigs.js";
+import { VIBE_CATEGORIES } from "../../../lib/vibeBoard.js";
 
 const polls = allCitySlugs
   .map((slug) => ({ slug, city: getDisplayName(slug), vc: getVibeCheck(slug) }))
@@ -27,17 +29,27 @@ const polls = allCitySlugs
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>Vibe Check Admin</title>
+  <title>Vibe Admin</title>
 </head>
 <body>
   <main class="wrap">
-    <h1>Vibe Check Admin</h1>
-    <p class="hint">Adjustments are logged offsets on top of real votes. Real votes are never changed.</p>
+    <h1>Vibe Admin</h1>
 
-    <section class="panel" data-auth>
+    <section class="panel">
       <label>Admin token
         <input type="password" data-token autocomplete="current-password" />
       </label>
+    </section>
+
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" class="tab" data-tab="poll" aria-selected="true">Poll votes</button>
+      <button type="button" role="tab" class="tab" data-tab="board" aria-selected="false">Vibe Board queue</button>
+    </div>
+
+    <div data-panel="poll">
+    <p class="hint">Adjustments are logged offsets on top of real votes. Real votes are never changed.</p>
+
+    <section class="panel" data-auth>
       <label>Poll
         <select data-poll>
           {polls.map((p) => (
@@ -76,6 +88,31 @@ const polls = allCitySlugs
         <tbody data-log></tbody>
       </table>
     </section>
+    </div>
+
+    <div data-panel="board" hidden>
+      <p class="hint">Community posts from /[city]/vibe/. Nothing appears publicly until it's approved. Emails are private — visible only here.</p>
+      <section class="panel">
+        <div class="row">
+          <label>Show
+            <select data-board-status>
+              <option value="pending">Pending review</option>
+              <option value="approved">Approved (live)</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </label>
+          <label>City
+            <select data-board-city>
+              <option value="">All cities</option>
+              {allCitySlugs.map((slug) => <option value={slug}>{getDisplayName(slug)}</option>)}
+            </select>
+          </label>
+          <button type="button" data-board-load>Load posts</button>
+        </div>
+        <p class="msg" data-board-msg></p>
+      </section>
+      <div class="queue" data-board-list data-categories={JSON.stringify(VIBE_CATEGORIES)}></div>
+    </div>
   </main>
 
   <script>
@@ -222,6 +259,120 @@ const polls = allCitySlugs
     }
 
     $("[data-load]").addEventListener("click", load);
+
+    // ── Tabs ───────────────────────────────────────────────────────────────
+    function showTab(name: string) {
+      document.querySelectorAll<HTMLElement>("[data-tab]").forEach((t) =>
+        t.setAttribute("aria-selected", String(t.dataset.tab === name)));
+      document.querySelectorAll<HTMLElement>("[data-panel]").forEach((p) => { p.hidden = p.dataset.panel !== name; });
+      try { sessionStorage.setItem("vibe-admin-tab", name); } catch {}
+    }
+    document.querySelectorAll<HTMLElement>("[data-tab]").forEach((t) =>
+      t.addEventListener("click", () => showTab(t.dataset.tab ?? "poll")));
+    try { showTab(sessionStorage.getItem("vibe-admin-tab") ?? "poll"); } catch {}
+
+    // ── Vibe Board approval queue ──────────────────────────────────────────
+    const boardList = $("[data-board-list]");
+    const boardMsg = $("[data-board-msg]");
+    const boardStatus = $<HTMLSelectElement>("[data-board-status]");
+    const boardCity = $<HTMLSelectElement>("[data-board-city]");
+    const categories: { value: string; label: string; emoji: string }[] =
+      JSON.parse(boardList.dataset.categories ?? "[]");
+
+    async function boardApi(method: "GET" | "POST", query: string, body?: unknown) {
+      const token = tokenEl.value.trim();
+      try { sessionStorage.setItem("vibe-admin-token", token); } catch {}
+      const res = await fetch(`/api/vibe-posts-admin${query}`, {
+        method,
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
+      if (!json.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      return json;
+    }
+
+    function textEl(tag: string, cls: string, text: string) {
+      const n = document.createElement(tag);
+      n.className = cls;
+      n.textContent = text;
+      return n;
+    }
+
+    // Which moves each view offers: [label, target status, style]
+    const ACTIONS: Record<string, [string, string, string][]> = {
+      pending:  [["Approve", "approved", "ok"], ["Reject", "rejected", "no"]],
+      approved: [["Unpublish", "pending", "muted"], ["Reject", "rejected", "no"]],
+      rejected: [["Approve", "approved", "ok"], ["Back to queue", "pending", "muted"]],
+    };
+
+    async function loadBoard() {
+      boardMsg.textContent = "Loading…";
+      try {
+        const qs = new URLSearchParams({ status: boardStatus.value });
+        if (boardCity.value) qs.set("city", boardCity.value);
+        const d = await boardApi("GET", `?${qs}`);
+        renderBoard(d.status, d.posts);
+        boardMsg.textContent = `${d.posts.length} ${d.posts.length === 1 ? "post" : "posts"}`;
+      } catch (err) {
+        boardList.replaceChildren();
+        boardMsg.textContent = `Error: ${(err as Error).message}`;
+      }
+    }
+
+    function renderBoard(status: string, posts: any[]) {
+      boardList.replaceChildren();
+      if (!posts.length) {
+        boardList.append(textEl("p", "hint", status === "pending" ? "Queue is clear. 🎉" : "Nothing here."));
+        return;
+      }
+      for (const p of posts) {
+        const cat = categories.find((c) => c.value === p.category);
+        const item = document.createElement("article");
+        item.className = "qItem";
+        const meta = document.createElement("div");
+        meta.className = "qMeta";
+        meta.append(
+          textEl("strong", "", `${p.first_name} ${p.last_name}`),
+          textEl("span", "", p.email),
+          textEl("span", "", cat ? `${cat.emoji} ${cat.label}` : p.category),
+          textEl("span", "", p.city),
+          textEl("span", "", new Date(p.created_at).toLocaleString()),
+        );
+        if (p.newsletter_opt_in) meta.append(textEl("span", "pill", "📰 newsletter"));
+        if (status === "approved") meta.append(textEl("span", "pill", `❤️ ${p.vibe_count}`));
+        item.append(meta, textEl("p", "qMsg", p.message));
+
+        const actions = document.createElement("div");
+        actions.className = "qActions";
+        for (const [label, target, style] of ACTIONS[status] ?? []) {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = `btn-${style}`;
+          b.textContent = label;
+          b.addEventListener("click", async () => {
+            actions.querySelectorAll("button").forEach((x) => (x.disabled = true));
+            try {
+              await boardApi("POST", "", { id: p.id, status: target });
+              item.remove();
+              const left = boardList.querySelectorAll(".qItem").length;
+              boardMsg.textContent = `${label} ✓ — ${left} left`;
+              if (!left) renderBoard(status, []);
+            } catch (err) {
+              boardMsg.textContent = `Error: ${(err as Error).message}`;
+              actions.querySelectorAll("button").forEach((x) => (x.disabled = false));
+            }
+          });
+          actions.append(b);
+        }
+        item.append(actions);
+        boardList.append(item);
+      }
+    }
+
+    $("[data-board-load]").addEventListener("click", loadBoard);
+    boardStatus.addEventListener("change", loadBoard);
+    boardCity.addEventListener("change", loadBoard);
   </script>
 
   <style>
@@ -250,6 +401,24 @@ const polls = allCitySlugs
     td.adjust { display: flex; gap: 6px; }
     td.adjust input { width: 80px; }
     td button { padding: 6px 10px; font-size: 13px; }
+    [hidden] { display: none !important; }
+
+    .tabs { display: flex; gap: 4px; margin: 0 0 16px; border-bottom: 1px solid var(--line); }
+    .tab { background: transparent; color: var(--muted); border-radius: 8px 8px 0 0; padding: 10px 16px; border-bottom: 2px solid transparent; }
+    .tab[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+    .row { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+    .row label { flex: 1 1 180px; }
+    .queue { display: grid; gap: 12px; }
+    .qItem { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; display: grid; gap: 10px; }
+    .qMeta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; color: var(--muted); align-items: center; }
+    .qMeta strong { color: var(--text); font-size: 15px; }
+    .qMsg { margin: 0; white-space: pre-line; overflow-wrap: anywhere; }
+    .qActions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .pill { padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); }
+    .btn-ok { background: #15803d; }
+    .btn-no { background: #b91c1c; }
+    .btn-muted { background: var(--line); color: var(--text); }
+    button:disabled { opacity: .5; cursor: wait; }
   </style>
 </body>
 </html>

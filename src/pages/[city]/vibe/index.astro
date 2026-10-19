@@ -1,0 +1,728 @@
+---
+/**
+ * src/pages/[city]/vibe/index.astro
+ * ─────────────────────────────────────────────────────────────────────────────
+ * Vibe Board — community-submitted positive posts, one board per city.
+ *
+ * URL: /[city]/vibe/   (e.g. /daytona/vibe/, /asheville/vibe/)
+ *
+ * The page is static; the feed loads client-side from Supabase with the anon
+ * key, which can only see APPROVED posts and only their public columns (see
+ * supabase/vibe_posts.sql). Submissions POST to /api/vibe-submit and land as
+ * pending; editors approve them at /daytona/vibe-check/admin/ → Vibe Board.
+ *
+ * Hero mirrors the GoDoEVENTS hub's concert hero (.evHero) so the two feeds
+ * read as one product. Photo comes from cityConfigs.js `heroImage`.
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+import Base from "../../../layouts/Base.astro";
+import { allCitySlugs, getCityConfig, getDisplayName, getShortName, getVibeCheck } from "../../../lib/cityConfigs.js";
+import { VIBE_CATEGORIES, VIBE_LIMITS } from "../../../lib/vibeBoard.js";
+
+export async function getStaticPaths() {
+  return allCitySlugs.map((slug: string) => ({ params: { city: slug } }));
+}
+
+const { city } = Astro.params;
+const config = getCityConfig(city);
+const displayName = getDisplayName(city);
+const shortName = getShortName(city);
+const heroImage = config?.heroImage ?? null;
+const vibeCheck = getVibeCheck(city);
+
+const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL ?? "";
+const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
+---
+
+<Base title={`Vibe | GoDo${shortName}`} subtitle={`Good news, shoutouts and hidden gems from ${displayName} locals.`} cityBase={city}>
+
+  <!-- ── Hero (ported from the GoDoEVENTS concert hero) ── -->
+  <section class="vbHero" style={heroImage ? `background-image: url('${heroImage}')` : ""}>
+    <div class="vbHeroOverlay" aria-hidden="true"></div>
+    <div class="vbHeroInner">
+      <p class="vbHeroEyebrow">{displayName} · Community Board</p>
+      <h1 class="vbHeroTitle">
+        <span class="vbHeroAccent">Vibe</span><br>
+        Good News, Locally Grown.
+      </h1>
+      <p class="vbHeroSub">Shoutouts, hidden gems and the good stuff happening around {shortName} — shared by your neighbors.</p>
+      <div class="vbHeroCtas">
+        <button type="button" class="vbBtnBlue" data-vibe-open>+ Share a Positive Vibe</button>
+        <a href="#vibe-feed" class="vbBtnGhost">Read the Board ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="vbHub">
+    <div class="vbLayout">
+
+      <!-- ══ MAIN COLUMN ══ -->
+      <div class="vbMain">
+
+        {vibeCheck && (
+          <a class="vbCheckCard" href={`/${city}/vibe-check/`}>
+            <div class="vbCheckBadge">🗳️ Vibe Check · Live Poll</div>
+            <div class="vbCheckBody">
+              <div class="vbCheckTitle">{vibeCheck.title}</div>
+              <div class="vbCheckQ">{vibeCheck.question}</div>
+              <div class="vbCheckOpts">
+                {vibeCheck.options.slice(0, 4).map((o) => <span class="vbCheckOpt">{o.label}</span>)}
+                {vibeCheck.options.length > 4 && <span class="vbCheckOpt vbCheckOpt--more">+{vibeCheck.options.length - 4} more</span>}
+              </div>
+            </div>
+            <span class="vbCheckCta">Cast your vote →</span>
+          </a>
+        )}
+
+        <section id="vibe-feed" class="vbFeed" aria-label="Community vibes">
+          <div class="vbFeedHead">
+            <h2 class="vbFeedTitle">The Board</h2>
+            <button type="button" class="vbShareBtn" data-vibe-open>[ + Share a Positive Vibe ]</button>
+          </div>
+
+          <div class="vbFilters" role="group" aria-label="Filter by category">
+            <button type="button" class="vbChip is-active" data-filter="">All</button>
+            {VIBE_CATEGORIES.map((c) => (
+              <button type="button" class="vbChip" data-filter={c.value}>{c.emoji} {c.label}</button>
+            ))}
+          </div>
+
+          <div
+            class="vbGrid"
+            data-vibe-grid
+            data-city={city}
+            data-sb-url={supabaseUrl}
+            data-sb-key={supabaseKey}
+            data-categories={JSON.stringify(VIBE_CATEGORIES)}
+            aria-live="polite"
+          >
+            <p class="vbStatus" data-vibe-status>Loading the good vibes…</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- ══ SIDEBAR ══ -->
+      <aside class="vbSide">
+        <div class="vbSideBox vbSideBox--brand">
+          <div class="vbSideHead"><em>Got good news?</em></div>
+          <p class="vbSideText">Shout out a local business, a kind neighbor or a spot more people should know about. Every post is read by a GoDo editor before it goes live.</p>
+          <button type="button" class="vbSideBtn" data-vibe-open>Share a Vibe</button>
+        </div>
+
+        <div class="vbSideAd">
+          <div class="vbAdLabel">Advertisement</div>
+          <a class="vbAdCard" href={`/${city}/advertise/`}>
+            <div class="vbAdIcon">📢</div>
+            <div class="vbAdTitle">Your Ad Here</div>
+            <div class="vbAdDesc">Reach {shortName} locals where the good news lives</div>
+            <div class="vbAdCta">Advertise with us →</div>
+          </a>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- ── Submission modal ── -->
+  <dialog class="vbModal" data-vibe-modal aria-labelledby="vibe-modal-title">
+    <form class="vbForm" data-vibe-form novalidate>
+      <div class="vbModalHead">
+        <h2 id="vibe-modal-title" class="vbModalTitle">Share a Positive Vibe</h2>
+        <button type="button" class="vbModalClose" data-vibe-close aria-label="Close">×</button>
+      </div>
+
+      <div class="vbFormBody" data-vibe-fields>
+        <div class="vbRow2">
+          <label class="vbField">First name
+            <input type="text" name="first_name" required maxlength={VIBE_LIMITS.name} autocomplete="given-name" />
+          </label>
+          <label class="vbField">Last name
+            <input type="text" name="last_name" required maxlength={VIBE_LIMITS.name} autocomplete="family-name" />
+          </label>
+        </div>
+
+        <label class="vbField">Email address
+          <input type="email" name="email" required maxlength={VIBE_LIMITS.email} autocomplete="email" />
+          <span class="vbHint">Kept private — never shown on the board.</span>
+        </label>
+
+        <label class="vbField">Category
+          <select name="category" required>
+            <option value="" disabled selected>Choose one…</option>
+            {VIBE_CATEGORIES.map((c) => <option value={c.value}>{c.emoji} {c.label}</option>)}
+          </select>
+        </label>
+
+        <label class="vbField">Your positive message
+          <textarea name="message" required rows="5"
+            minlength={VIBE_LIMITS.messageMin} maxlength={VIBE_LIMITS.messageMax}
+            placeholder={`Who or what made ${shortName} better this week?`}></textarea>
+          <span class="vbHint"><span data-vibe-count>0</span> / {VIBE_LIMITS.messageMax}</span>
+        </label>
+
+        <label class="vbCheck">
+          <input type="checkbox" name="newsletter_opt_in" />
+          <span>Send me the GoDo{shortName} newsletter</span>
+        </label>
+
+        <!-- Honeypot — hidden from people, irresistible to bots -->
+        <input class="vbHoney" type="text" name="bot-field" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <input type="hidden" name="city" value={city} />
+
+        <p class="vbFine">Only your first name and last initial appear with your post.</p>
+        <p class="vbFormMsg" data-vibe-msg role="alert"></p>
+        <button type="submit" class="vbSubmit" data-vibe-submit>Submit for Review</button>
+      </div>
+
+      <div class="vbDone" data-vibe-done hidden>
+        <div class="vbDoneIcon">💛</div>
+        <p class="vbDoneTitle">Thanks for spreading the good vibes!</p>
+        <p class="vbDoneText">An editor will review your post shortly. Once it's approved it'll appear on the board.</p>
+        <button type="button" class="vbSubmit" data-vibe-close>Close</button>
+      </div>
+    </form>
+  </dialog>
+</Base>
+
+<script>
+  import { createClient } from "@supabase/supabase-js";
+
+  type Post = {
+    id: string;
+    first_name: string;
+    last_initial: string | null;
+    category: string;
+    message: string;
+    vibe_count: number;
+    created_at: string;
+  };
+  type Category = { value: string; label: string; emoji: string };
+
+  const SENT_KEY = "godo-vibes-sent";
+  const grid = document.querySelector<HTMLElement>("[data-vibe-grid]")!;
+  const city = grid.dataset.city ?? "";
+  const categories: Category[] = JSON.parse(grid.dataset.categories ?? "[]");
+  const sbUrl = grid.dataset.sbUrl ?? "";
+  const sbKey = grid.dataset.sbKey ?? "";
+  const sb = sbUrl.startsWith("https://") && sbKey ? createClient(sbUrl, sbKey) : null;
+
+  let posts: Post[] = [];
+  let activeFilter = "";
+
+  // Per-browser memory of which posts this viewer already hearted. Storage can
+  // be blocked (private mode), so every access is guarded.
+  function sentIds(): Set<string> {
+    try { return new Set(JSON.parse(localStorage.getItem(SENT_KEY) ?? "[]")); } catch { return new Set(); }
+  }
+  function rememberSent(id: string) {
+    try {
+      const ids = sentIds();
+      ids.add(id);
+      localStorage.setItem(SENT_KEY, JSON.stringify([...ids].slice(-500)));
+    } catch {}
+  }
+
+  function setStatus(text: string) {
+    grid.replaceChildren();
+    const p = document.createElement("p");
+    p.className = "vbStatus";
+    p.textContent = text;
+    grid.append(p);
+  }
+
+  function timeAgo(iso: string) {
+    const s = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+    if (s < 3600) return `${Math.max(1, Math.round(s / 60))}m ago`;
+    if (s < 86400) return `${Math.round(s / 3600)}h ago`;
+    if (s < 86400 * 7) return `${Math.round(s / 86400)}d ago`;
+    return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  }
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, cls: string, text?: string) {
+    const node = document.createElement(tag);
+    node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function card(post: Post, sent: Set<string>) {
+    const cat = categories.find((c) => c.value === post.category);
+    const article = el("article", `vbCard vbCard--${post.category}`);
+    article.append(el("span", "vbCardCat", cat ? `${cat.emoji} ${cat.label}` : "✨ Vibe"));
+    article.append(el("p", "vbCardMsg", post.message));
+
+    const foot = el("div", "vbCardFoot");
+    const who = el("div", "vbCardWho");
+    who.append(
+      el("span", "vbCardName", `${post.first_name}${post.last_initial ? ` ${post.last_initial}.` : ""}`),
+      el("span", "vbCardTime", timeAgo(post.created_at)),
+    );
+
+    const btn = el("button", "vbHeart");
+    btn.type = "button";
+    const already = sent.has(post.id);
+    btn.disabled = already;
+    btn.classList.toggle("is-sent", already);
+    btn.setAttribute("aria-label", already ? "Vibe sent" : `Send a vibe to ${post.first_name}`);
+    const label = el("span", "vbHeartLabel", already ? "❤️ Vibe Sent" : "❤️ Send Vibe");
+    const count = el("span", "vbHeartCount", String(post.vibe_count));
+    btn.append(label, count);
+    btn.addEventListener("click", () => sendVibe(post, btn, label, count));
+
+    foot.append(who, btn);
+    article.append(foot);
+    return article;
+  }
+
+  function render() {
+    const shown = activeFilter ? posts.filter((p) => p.category === activeFilter) : posts;
+    if (!shown.length) {
+      setStatus(posts.length
+        ? "No vibes in this category yet — be the first!"
+        : "No vibes on the board yet. Share the first one!");
+      return;
+    }
+    const sent = sentIds();
+    grid.replaceChildren(...shown.map((p) => card(p, sent)));
+  }
+
+  async function sendVibe(post: Post, btn: HTMLButtonElement, label: HTMLElement, count: HTMLElement) {
+    if (!sb || btn.disabled) return;
+    btn.disabled = true;
+    // Optimistic: bump now, roll back if the RPC fails.
+    count.textContent = String(post.vibe_count + 1);
+    label.textContent = "❤️ Vibe Sent";
+    btn.classList.add("is-sent", "is-popping");
+    const { data, error } = await sb.rpc("send_vibe", { p_post_id: post.id });
+    if (error || typeof data !== "number") {
+      console.error("[Vibe] send_vibe failed:", error?.message);
+      count.textContent = String(post.vibe_count);
+      label.textContent = "❤️ Send Vibe";
+      btn.classList.remove("is-sent");
+      btn.disabled = false;
+      return;
+    }
+    post.vibe_count = data;
+    count.textContent = String(data);
+    rememberSent(post.id);
+  }
+
+  async function loadFeed() {
+    if (!sb) { setStatus("The Vibe Board is warming up — check back soon."); return; }
+    // RLS returns approved rows only; `status` isn't readable by anon, so it
+    // can't (and needn't) be filtered on here.
+    const { data, error } = await sb
+      .from("vibe_posts")
+      .select("id, first_name, last_initial, category, message, vibe_count, created_at")
+      .eq("city", city)
+      .order("created_at", { ascending: false })
+      .limit(90);
+    if (error) {
+      console.error("[Vibe] feed load failed:", error.message);
+      setStatus("Couldn't load the board right now. Try again in a minute.");
+      return;
+    }
+    posts = data ?? [];
+    render();
+  }
+
+  document.querySelectorAll<HTMLButtonElement>("[data-filter]").forEach((chip) => {
+    chip.addEventListener("click", () => {
+      activeFilter = chip.dataset.filter ?? "";
+      document.querySelectorAll("[data-filter]").forEach((c) => c.classList.toggle("is-active", c === chip));
+      render();
+    });
+  });
+
+  // ── Submission modal ─────────────────────────────────────────────────────
+  const modal = document.querySelector<HTMLDialogElement>("[data-vibe-modal]")!;
+  const form = modal.querySelector<HTMLFormElement>("[data-vibe-form]")!;
+  const fields = modal.querySelector<HTMLElement>("[data-vibe-fields]")!;
+  const done = modal.querySelector<HTMLElement>("[data-vibe-done]")!;
+  const msg = modal.querySelector<HTMLElement>("[data-vibe-msg]")!;
+  const submitBtn = modal.querySelector<HTMLButtonElement>("[data-vibe-submit]")!;
+  const message = form.querySelector<HTMLTextAreaElement>("textarea[name=message]")!;
+  const counter = modal.querySelector<HTMLElement>("[data-vibe-count]")!;
+
+  function openModal() {
+    if (!done.hidden) { form.reset(); counter.textContent = "0"; }
+    fields.hidden = false;
+    done.hidden = true;
+    msg.textContent = "";
+    modal.showModal();
+    form.querySelector<HTMLInputElement>("input[name=first_name]")?.focus();
+  }
+  document.querySelectorAll("[data-vibe-open]").forEach((b) => b.addEventListener("click", openModal));
+  modal.querySelectorAll("[data-vibe-close]").forEach((b) => b.addEventListener("click", () => modal.close()));
+  // Click on the backdrop (the dialog itself, outside the form) closes it.
+  modal.addEventListener("click", (e) => { if (e.target === modal) modal.close(); });
+  message.addEventListener("input", () => { counter.textContent = String(message.value.length); });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    msg.textContent = "";
+    if (!form.reportValidity()) return;
+
+    const fd = new FormData(form);
+    const payload = {
+      city: fd.get("city"),
+      first_name: String(fd.get("first_name") ?? "").trim(),
+      last_name: String(fd.get("last_name") ?? "").trim(),
+      email: String(fd.get("email") ?? "").trim(),
+      category: fd.get("category"),
+      message: String(fd.get("message") ?? "").trim(),
+      newsletter_opt_in: fd.get("newsletter_opt_in") === "on",
+      "bot-field": fd.get("bot-field"),
+    };
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Sending…";
+    try {
+      const res = await fetch("/api/vibe-submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
+      if (!json.ok) throw new Error(json.error ?? `HTTP ${res.status}`);
+      fields.hidden = true;
+      done.hidden = false;
+    } catch (err) {
+      msg.textContent = (err as Error).message || "Something went wrong — please try again.";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit for Review";
+    }
+  });
+
+  loadFeed();
+</script>
+
+<style>
+  /* ── Hero — 1:1 with GoDoEVENTS .evHero ── */
+  .vbHero {
+    position: relative;
+    min-height: 440px;
+    display: flex;
+    align-items: center;
+    background-color: #080a10;
+    background-image: radial-gradient(circle at 70% 20%, color-mix(in srgb, var(--brand1, #0077be) 45%, transparent), transparent 60%);
+    background-position: center 20%;
+    background-size: cover;
+    background-repeat: no-repeat;
+    overflow: hidden;
+  }
+  .vbHeroOverlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(rgba(8,10,16,0.40), rgba(8,10,16,0.30));
+  }
+  .vbHeroInner {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 72px clamp(20px, 4vw, 60px);
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .vbHeroEyebrow {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 900;
+    letter-spacing: .2em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.6);
+    margin: 0 0 12px;
+  }
+  .vbHeroTitle {
+    font-size: clamp(32px, 5vw, 54px);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    color: #fff;
+    line-height: 1.08;
+    margin: 0 0 14px;
+  }
+  .vbHeroAccent {
+    color: var(--brand1, #0077be);
+    display: inline-block;
+    font-size: clamp(37px, 5.75vw, 62px);
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    line-height: 1.08;
+    padding: 10px 28px;
+    border: 2px solid #fff;
+    border-radius: 6px;
+    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+    margin-bottom: 8px;
+  }
+  .vbHeroSub {
+    font-size: clamp(15px, 1.8vw, 18px);
+    color: rgba(255,255,255,.78);
+    line-height: 1.6;
+    margin: 0 0 32px;
+    max-width: 560px;
+  }
+  .vbHeroCtas { display: flex; gap: 12px; flex-wrap: wrap; }
+  @media (max-width: 767px) {
+    .vbHero { min-height: 280px; }
+    .vbHeroInner { padding: 48px 16px; }
+    .vbHeroOverlay {
+      background: linear-gradient(160deg, rgba(0,0,0,.55) 0%, rgba(0,10,30,.50) 55%, rgba(0,5,20,.45) 100%);
+    }
+    .vbHeroTitle { font-size: clamp(26px, 8vw, 38px); }
+  }
+
+  .vbBtnBlue, .vbBtnGhost {
+    display: inline-flex; align-items: center;
+    padding: 13px 26px;
+    font: inherit; font-size: 14px; font-weight: 800;
+    border-radius: 8px; text-decoration: none; cursor: pointer;
+    transition: opacity 150ms, background 150ms;
+  }
+  .vbBtnBlue { background: var(--brand1, #0077be); color: #fff; border: 2px solid var(--brand1, #0077be); }
+  .vbBtnBlue:hover { opacity: .88; }
+  .vbBtnGhost { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,.7); }
+  .vbBtnGhost:hover { background: rgba(255,255,255,.12); }
+
+  /* ── Layout — main + sticky sidebar, like the events hub ── */
+  .vbHub { --vb-line: rgba(0,0,0,.1); --vb-muted: rgba(17,17,17,.6); --vb-card: #fff; }
+  .vbLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 40px;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 40px clamp(16px, 4vw, 60px) 80px;
+    align-items: start;
+  }
+  .vbMain { display: grid; gap: 36px; min-width: 0; }
+  .vbSide { display: grid; gap: 24px; position: sticky; top: calc(var(--nav-h, 80px) + 16px); }
+  @media (max-width: 1024px) {
+    .vbLayout { grid-template-columns: 1fr; }
+    .vbSide { position: static; }
+  }
+
+  /* ── Vibe Check featured card ── */
+  .vbCheckCard {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 6px 24px;
+    padding: 22px 26px;
+    border-radius: 16px;
+    background: var(--theme-gradient, linear-gradient(135deg, #0077be, #00a9ce));
+    color: #fff;
+    text-decoration: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,.14);
+    transition: transform 150ms, box-shadow 150ms;
+  }
+  .vbCheckCard:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(0,0,0,.2); }
+  .vbCheckBadge {
+    grid-column: 1 / -1;
+    font-size: 11px; font-weight: 900; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(255,255,255,.85);
+  }
+  .vbCheckBody { display: grid; gap: 6px; min-width: 0; }
+  .vbCheckTitle { font-size: 13px; font-weight: 700; opacity: .9; }
+  .vbCheckQ { font-size: clamp(19px, 2.4vw, 24px); font-weight: 900; line-height: 1.2; }
+  .vbCheckOpts { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+  .vbCheckOpt {
+    font-size: 12px; font-weight: 700;
+    padding: 4px 10px; border-radius: 999px;
+    background: rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.35);
+  }
+  .vbCheckOpt--more { background: transparent; }
+  .vbCheckCta {
+    font-size: 14px; font-weight: 900; white-space: nowrap;
+    padding: 12px 20px; border-radius: 999px; background: #fff; color: #111;
+  }
+  @media (max-width: 640px) {
+    .vbCheckCard { grid-template-columns: 1fr; padding: 20px; }
+    .vbCheckCta { justify-self: start; }
+  }
+
+  /* ── Feed ── */
+  .vbFeed { display: grid; gap: 18px; scroll-margin-top: calc(var(--nav-h, 80px) + 16px); }
+  .vbFeedHead {
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+    border-bottom: 2px solid var(--brand1, #0077be); padding-bottom: 10px;
+  }
+  .vbFeedTitle {
+    margin: 0; font-size: 14px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--text, #111);
+  }
+  .vbShareBtn {
+    font: inherit; font-size: 13px; font-weight: 900; letter-spacing: .04em;
+    padding: 9px 16px; border-radius: 999px; cursor: pointer;
+    color: var(--brand1, #0077be);
+    background: var(--pillBg, rgba(0,119,190,.12));
+    border: 1.5px solid var(--pillBorder, rgba(0,119,190,.45));
+    transition: background 150ms;
+  }
+  .vbShareBtn:hover { background: color-mix(in srgb, var(--brand1, #0077be) 20%, transparent); }
+
+  .vbFilters { display: flex; flex-wrap: wrap; gap: 8px; }
+  .vbChip {
+    font: inherit; font-size: 13px; font-weight: 700;
+    padding: 7px 14px; border-radius: 999px; cursor: pointer;
+    background: var(--vb-card); color: var(--text, #111);
+    border: 1px solid var(--vb-line);
+    transition: border-color 140ms, background 140ms;
+  }
+  .vbChip:hover { border-color: var(--brand1, #0077be); }
+  .vbChip.is-active { background: var(--brand1, #0077be); border-color: var(--brand1, #0077be); color: #fff; }
+
+  .vbGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 18px;
+  }
+  .vbStatus {
+    grid-column: 1 / -1;
+    margin: 0; padding: 48px 20px; text-align: center;
+    color: var(--vb-muted); font-weight: 600;
+    border: 1.5px dashed var(--vb-line); border-radius: 16px;
+  }
+
+  /* Cards are built in the client script, so their styles must be global. */
+  .vbGrid :global(.vbCard) {
+    --vb-cat: var(--brand1, #0077be);
+    display: flex; flex-direction: column; gap: 14px;
+    padding: 20px;
+    background: var(--vb-card);
+    border: 1px solid var(--vb-line);
+    border-top: 4px solid var(--vb-cat);
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    transition: transform 150ms, box-shadow 150ms;
+  }
+  .vbGrid :global(.vbCard:hover) { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(0,0,0,.09); }
+  .vbGrid :global(.vbCard--local-shoutout) { --vb-cat: #d97706; }
+  .vbGrid :global(.vbCard--good-news)      { --vb-cat: #059669; }
+  .vbGrid :global(.vbCard--hidden-gem)     { --vb-cat: #7c3aed; }
+  .vbGrid :global(.vbCard--kindness)       { --vb-cat: #db2777; }
+  .vbGrid :global(.vbCardCat) {
+    align-self: flex-start;
+    font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase;
+    padding: 4px 10px; border-radius: 999px;
+    color: var(--vb-cat);
+    background: color-mix(in srgb, var(--vb-cat) 12%, transparent);
+  }
+  .vbGrid :global(.vbCardMsg) {
+    margin: 0; flex: 1;
+    font-size: 15.5px; line-height: 1.55; color: var(--text, #111);
+    white-space: pre-line; overflow-wrap: anywhere;
+  }
+  .vbGrid :global(.vbCardFoot) {
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+    padding-top: 12px; border-top: 1px solid var(--vb-line);
+  }
+  .vbGrid :global(.vbCardWho) { display: grid; gap: 2px; min-width: 0; }
+  .vbGrid :global(.vbCardName) { font-size: 14px; font-weight: 800; color: var(--text, #111); }
+  .vbGrid :global(.vbCardTime) { font-size: 12px; color: var(--vb-muted); }
+  .vbGrid :global(.vbHeart) {
+    display: inline-flex; align-items: center; gap: 8px; flex-shrink: 0;
+    font: inherit; font-size: 13px; font-weight: 800;
+    padding: 7px 8px 7px 12px; border-radius: 999px; cursor: pointer;
+    color: #be123c; background: #fff1f2; border: 1px solid #fecdd3;
+    transition: background 140ms, transform 140ms;
+  }
+  .vbGrid :global(.vbHeart:hover:not(:disabled)) { background: #ffe4e6; }
+  .vbGrid :global(.vbHeart:disabled) { cursor: default; }
+  .vbGrid :global(.vbHeart.is-sent) { background: #ffe4e6; border-color: #fda4af; }
+  .vbGrid :global(.vbHeart.is-popping) { animation: vbPop 320ms ease-out; }
+  .vbGrid :global(.vbHeartCount) {
+    min-width: 26px; padding: 2px 7px; border-radius: 999px; text-align: center;
+    background: #be123c; color: #fff; font-size: 12px;
+  }
+  @keyframes vbPop { 40% { transform: scale(1.12); } 100% { transform: scale(1); } }
+
+  /* ── Sidebar ── */
+  .vbSideBox--brand {
+    padding: 28px 22px; border-radius: 16px;
+    background: var(--theme-gradient, linear-gradient(135deg, #0077be, #00a9ce));
+    border: 1px solid #000;
+    display: grid; gap: 12px; text-align: center; color: #fff;
+  }
+  .vbSideHead { font-size: 26px; font-weight: 900; line-height: 1.05; letter-spacing: -0.03em; }
+  .vbSideText { margin: 0; font-size: 15px; line-height: 1.45; color: rgba(255,255,255,.9); }
+  .vbSideBtn {
+    font: inherit; font-size: 14px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase;
+    padding: 12px 0; border-radius: 999px; border: 0; cursor: pointer;
+    background: #000; color: #fff; transition: opacity 150ms;
+  }
+  .vbSideBtn:hover { opacity: .82; }
+  .vbSideAd { display: grid; gap: 5px; }
+  .vbAdLabel {
+    font-size: 8.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--vb-muted); text-align: center;
+  }
+  .vbAdCard {
+    display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center;
+    padding: 28px 20px; border-radius: 14px; text-decoration: none;
+    border: 1.5px dashed var(--vb-line); background: var(--pillBg, rgba(0,119,190,.08));
+    transition: border-color 140ms;
+  }
+  .vbAdCard:hover { border-color: var(--brand1, #0077be); }
+  .vbAdIcon { font-size: 28px; line-height: 1; }
+  .vbAdTitle { font-size: 15px; font-weight: 900; color: var(--text, #111); }
+  .vbAdDesc { font-size: 12.5px; color: var(--vb-muted); }
+  .vbAdCta { font-size: 12.5px; font-weight: 700; color: var(--brand1, #0077be); margin-top: 4px; }
+
+  /* ── Modal ── */
+  .vbModal {
+    width: min(560px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    padding: 0; border: 0; border-radius: 18px;
+    background: #fff; color: #111;
+    box-shadow: 0 24px 60px rgba(0,0,0,.35);
+  }
+  .vbModal::backdrop { background: rgba(8,10,16,.6); backdrop-filter: blur(3px); }
+  .vbForm { display: grid; }
+  .vbModalHead {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 22px; color: #fff;
+    background: var(--theme-gradient, linear-gradient(135deg, #0077be, #00a9ce));
+  }
+  .vbModalTitle { margin: 0; font-size: 20px; font-weight: 900; }
+  .vbModalClose {
+    font: inherit; font-size: 28px; line-height: 1; width: 36px; height: 36px;
+    border: 0; border-radius: 50%; cursor: pointer;
+    background: rgba(255,255,255,.18); color: #fff;
+  }
+  .vbFormBody { display: grid; gap: 14px; padding: 22px; }
+  .vbFormBody[hidden] { display: none; }
+  .vbRow2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 480px) { .vbRow2 { grid-template-columns: 1fr; } }
+  .vbField { display: grid; gap: 5px; font-size: 13px; font-weight: 800; color: #111; }
+  .vbField input, .vbField select, .vbField textarea {
+    font: inherit; font-size: 15px; font-weight: 400;
+    width: 100%; box-sizing: border-box;
+    padding: 10px 12px; border-radius: 10px;
+    border: 1px solid rgba(0,0,0,.18); background: #fff; color: #111;
+    flex: none;
+  }
+  .vbField textarea { resize: vertical; min-height: 110px; }
+  .vbField input:focus, .vbField select:focus, .vbField textarea:focus {
+    outline: 2px solid var(--brand1, #0077be); outline-offset: 1px; border-color: transparent;
+  }
+  .vbHint { font-size: 12px; font-weight: 500; color: rgba(17,17,17,.55); }
+  .vbCheck { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
+  .vbCheck input { width: 18px; height: 18px; accent-color: var(--brand1, #0077be); flex: none; }
+  .vbHoney { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .vbFine { margin: 0; font-size: 12px; color: rgba(17,17,17,.55); }
+  .vbFormMsg { margin: 0; min-height: 1.2em; font-size: 13px; font-weight: 700; color: #b91c1c; }
+  .vbFormMsg:empty { display: none; }
+  .vbSubmit {
+    font: inherit; font-size: 15px; font-weight: 900; letter-spacing: .04em;
+    padding: 13px 0; border-radius: 999px; border: 0; cursor: pointer;
+    background: var(--brand1, #0077be); color: #fff; transition: opacity 150ms;
+  }
+  .vbSubmit:hover { opacity: .88; }
+  .vbSubmit:disabled { opacity: .6; cursor: wait; }
+  .vbDone { display: grid; gap: 10px; padding: 32px 26px; text-align: center; }
+  .vbDone[hidden] { display: none; }
+  .vbDoneIcon { font-size: 44px; line-height: 1; }
+  .vbDoneTitle { margin: 0; font-size: 20px; font-weight: 900; }
+  .vbDoneText { margin: 0 0 10px; color: rgba(17,17,17,.7); line-height: 1.5; }
+</style>
