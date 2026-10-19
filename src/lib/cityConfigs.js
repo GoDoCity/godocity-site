@@ -28,6 +28,8 @@ export const CITY_CONFIGS = {
     brand1: "#0077be",
     /** Hero photo for /[city]/vibe/ (under /public). Omit to use DEFAULT_VIBE_HERO (vibeBoard.js). */
     vibeHeroImage: "/images/vibe-cafe-hero.webp",
+    /** Vibe Board moderation contact. Omit to use DEFAULT_VIBE_CONTACT (vibeBoard.js). */
+    contactEmail: "vibe@godocity.com",
     /** Vibe Check question — reused as the sidebar poll question */
     vibeCheckText: "Who has the best coffee in Greater Daytona?",
     /**

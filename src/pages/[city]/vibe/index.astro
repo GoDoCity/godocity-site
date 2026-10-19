@@ -17,7 +17,7 @@
  */
 import Base from "../../../layouts/Base.astro";
 import { allCitySlugs, getCityConfig, getDisplayName, getShortName, getVibeCheck } from "../../../lib/cityConfigs.js";
-import { DEFAULT_VIBE_HERO, VIBE_CATEGORIES, VIBE_LIMITS } from "../../../lib/vibeBoard.js";
+import { DEFAULT_VIBE_CONTACT, DEFAULT_VIBE_HERO, VIBE_CATEGORIES, VIBE_LIMITS, vibeRules } from "../../../lib/vibeBoard.js";
 
 export async function getStaticPaths() {
   return allCitySlugs.map((slug: string) => ({ params: { city: slug } }));
@@ -29,6 +29,8 @@ const displayName = getDisplayName(city);
 const shortName = getShortName(city);
 const heroImage = config?.vibeHeroImage ?? DEFAULT_VIBE_HERO;
 const vibeCheck = getVibeCheck(city);
+const rules = vibeRules(displayName);
+const contactEmail = config?.contactEmail ?? DEFAULT_VIBE_CONTACT;
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL ?? "";
 const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
@@ -51,6 +53,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
         <button type="button" class="vbBtnBlue" data-vibe-open>+ Share a Positive Vibe</button>
         <a href="#vibe-feed" class="vbBtnGhost">Read the Board ↓</a>
       </div>
+      <button type="button" class="vbPolicyLink" data-rules-open>Community Guidelines &amp; Moderation Policy</button>
     </div>
   </section>
 
@@ -108,6 +111,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
           <div class="vbSideHead"><em>Got good news?</em></div>
           <p class="vbSideText">Shout out a local business, a kind neighbor or a spot more people should know about. Every post is read by a GoDo editor before it goes live.</p>
           <button type="button" class="vbSideBtn" data-vibe-open>Share a Vibe</button>
+          <button type="button" class="vbSideRules" data-rules-open>Read the community rules</button>
         </div>
 
         <div class="vbSideAd">
@@ -132,6 +136,14 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
       </div>
 
       <div class="vbFormBody" data-vibe-fields>
+        <details class="vbRules">
+          <summary><span>📋 Community Rules</span> <span class="vbRulesHint">Local, kind, private, no pitches — reviewed by a GoDo editor.</span></summary>
+          <ol class="vbRulesList">
+            {rules.map((r) => <li><strong>{r.title}:</strong> {r.body}</li>)}
+          </ol>
+          <button type="button" class="vbRulesMore" data-rules-open>Full guidelines &amp; moderation policy →</button>
+        </details>
+
         <div class="vbRow2">
           <label class="vbField">First name
             <input type="text" name="first_name" required maxlength={VIBE_LIMITS.name} autocomplete="given-name" />
@@ -169,7 +181,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
         <input class="vbHoney" type="text" name="bot-field" tabindex="-1" autocomplete="off" aria-hidden="true" />
         <input type="hidden" name="city" value={city} />
 
-        <p class="vbFine">Only your first name and last initial appear with your post.</p>
+        <p class="vbFine">Only your first name and last initial appear with your post. By submitting, you agree to the community rules above.</p>
         <p class="vbFormMsg" data-vibe-msg role="alert"></p>
         <button type="submit" class="vbSubmit" data-vibe-submit>Submit for Review</button>
       </div>
@@ -181,6 +193,33 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
         <button type="button" class="vbSubmit" data-vibe-close>Close</button>
       </div>
     </form>
+  </dialog>
+
+  <!-- ── Community Guidelines & Moderation Policy ── -->
+  <dialog class="vbModal vbPolicy" data-rules-modal aria-labelledby="vibe-rules-title">
+    <div class="vbModalHead">
+      <h2 id="vibe-rules-title" class="vbModalTitle">Community Guidelines</h2>
+      <button type="button" class="vbModalClose" data-rules-close aria-label="Close">×</button>
+    </div>
+    <div class="vbPolicyBody">
+      <p class="vbPolicyLead">The {shortName} Vibe Board is a place for good news from {displayName}. To keep it that way, every post follows these rules:</p>
+      <ol class="vbRulesList">
+        {rules.map((r) => <li><strong>{r.title}:</strong> {r.body}</li>)}
+      </ol>
+
+      <h3 class="vbPolicyH">Moderation policy</h3>
+      <ul class="vbPolicyList">
+        <li>Every submission is held for review and only appears on the board once a GoDo editor approves it.</li>
+        <li>Posts that break the rules above are declined. We don't edit your words — if something needs changing, we'll pass on the post.</li>
+        <li>Approved posts can be taken down later if they turn out to break the rules or someone asks us to remove a post about them.</li>
+        <li>Your email address is never shown publicly. Only your first name and last initial appear with your post.</li>
+      </ul>
+
+      <h3 class="vbPolicyH">Contact</h3>
+      <p class="vbPolicyText">Questions, a post you'd like removed, or something we should look at? Email <a href={`mailto:${contactEmail}?subject=${encodeURIComponent(`${shortName} Vibe Board`)}`}>{contactEmail}</a>.</p>
+
+      <button type="button" class="vbSubmit" data-rules-close>Got it</button>
+    </div>
   </dialog>
 </Base>
 
@@ -356,6 +395,13 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
   modal.querySelectorAll("[data-vibe-close]").forEach((b) => b.addEventListener("click", () => modal.close()));
   // Click on the backdrop (the dialog itself, outside the form) closes it.
   modal.addEventListener("click", (e) => { if (e.target === modal) modal.close(); });
+
+  // Guidelines dialog — opens from the hero, the sidebar, or on top of the
+  // submit modal (stacked dialogs), so closing it returns to the half-filled form.
+  const rulesModal = document.querySelector<HTMLDialogElement>("[data-rules-modal]")!;
+  document.querySelectorAll("[data-rules-open]").forEach((b) => b.addEventListener("click", () => rulesModal.showModal()));
+  rulesModal.querySelectorAll("[data-rules-close]").forEach((b) => b.addEventListener("click", () => rulesModal.close()));
+  rulesModal.addEventListener("click", (e) => { if (e.target === rulesModal) rulesModal.close(); });
   message.addEventListener("input", () => { counter.textContent = String(message.value.length); });
 
   form.addEventListener("submit", async (e) => {
@@ -713,6 +759,43 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
   .vbCheck input { width: 18px; height: 18px; accent-color: var(--brand1, #0077be); flex: none; }
   .vbHoney { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
   .vbFine { margin: 0; font-size: 12px; color: rgba(17,17,17,.55); }
+
+  /* ── Community rules (collapsible in the submit modal) ── */
+  .vbRules {
+    border: 1px solid color-mix(in srgb, var(--brand1, #0077be) 30%, transparent);
+    background: color-mix(in srgb, var(--brand1, #0077be) 6%, #fff);
+    border-radius: 12px;
+    padding: 10px 14px;
+  }
+  .vbRules summary {
+    cursor: pointer; list-style: none;
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px;
+    font-size: 14px; font-weight: 800; color: #111;
+  }
+  .vbRules summary::-webkit-details-marker { display: none; }
+  .vbRules summary::after { content: "▾"; margin-left: auto; color: var(--brand1, #0077be); transition: transform 150ms; }
+  .vbRules[open] summary::after { transform: rotate(180deg); }
+  .vbRulesHint { font-size: 12px; font-weight: 500; color: rgba(17,17,17,.6); }
+  .vbRulesList { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 6px; font-size: 13.5px; line-height: 1.45; color: #222; }
+  .vbRulesMore, .vbPolicyLink, .vbSideRules {
+    font: inherit; background: none; border: 0; padding: 0; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .vbRulesMore { margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--brand1, #0077be); }
+
+  /* Sub-hero + sidebar links — deliberately quiet */
+  .vbPolicyLink { margin-top: 18px; font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.75); }
+  .vbPolicyLink:hover { color: #fff; }
+  .vbSideRules { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.85); justify-self: center; }
+  .vbSideRules:hover { color: #fff; }
+
+  /* ── Guidelines & moderation policy dialog ── */
+  .vbPolicyBody { display: grid; gap: 12px; padding: 22px; overflow-y: auto; }
+  .vbPolicyLead, .vbPolicyText { margin: 0; font-size: 14.5px; line-height: 1.55; color: #222; }
+  .vbPolicyText a { color: var(--brand1, #0077be); font-weight: 700; }
+  .vbPolicyH { margin: 8px 0 0; font-size: 13px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #111; }
+  .vbPolicyList { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 13.5px; line-height: 1.45; color: #222; }
+  .vbPolicy[open] { display: flex; flex-direction: column; }
   .vbFormMsg { margin: 0; min-height: 1.2em; font-size: 13px; font-weight: 700; color: #b91c1c; }
   .vbFormMsg:empty { display: none; }
   .vbSubmit {
