@@ -26,6 +26,8 @@ export const CITY_CONFIGS = {
     theme: "godo-blue",
     /** Primary brand colour — mirrors themes.css --brand1 for use in JS contexts */
     brand1: "#0077be",
+    /** Hero photo for /[city]/vibe/ (under /public). Omit for the dark fallback. */
+    heroImage: "/images/db-bandshell.png",
     /** Vibe Check question — reused as the sidebar poll question */
     vibeCheckText: "Who has the best coffee in Greater Daytona?",
     /**
