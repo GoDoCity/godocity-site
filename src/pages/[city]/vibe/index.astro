@@ -172,16 +172,11 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
           <span class="vbHint"><span data-vibe-count>0</span> / {VIBE_LIMITS.messageMax}</span>
         </label>
 
-        <label class="vbCheck">
-          <input type="checkbox" name="newsletter_opt_in" />
-          <span>Send me the GoDo{shortName} newsletter</span>
-        </label>
-
         <!-- Honeypot — hidden from people, irresistible to bots -->
         <input class="vbHoney" type="text" name="bot-field" tabindex="-1" autocomplete="off" aria-hidden="true" />
         <input type="hidden" name="city" value={city} />
 
-        <p class="vbFine">Only your first name and last initial appear with your post. By submitting, you agree to the community rules above.</p>
+        <p class="vbFine">Only your first name and last initial appear with your post. By submitting, you agree to the community rules above and to receive the weekly GoDo{shortName} newsletter.</p>
         <p class="vbFormMsg" data-vibe-msg role="alert"></p>
         <button type="submit" class="vbSubmit" data-vibe-submit>Submit for Review</button>
       </div>
@@ -212,7 +207,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
         <li>Every submission is held for review and only appears on the board once a GoDo editor approves it.</li>
         <li>Posts that break the rules above are declined. We don't edit your words — if something needs changing, we'll pass on the post.</li>
         <li>Approved posts can be taken down later if they turn out to break the rules or someone asks us to remove a post about them.</li>
-        <li>Your email address is never shown publicly. Only your first name and last initial appear with your post.</li>
+        <li>Your email address is never shown publicly. Only your first name and last initial appear with your post. Submitting also signs you up for the weekly GoDo{shortName} newsletter — unsubscribe anytime from any issue.</li>
       </ul>
 
       <h3 class="vbPolicyH">Contact</h3>
@@ -417,7 +412,6 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
       email: String(fd.get("email") ?? "").trim(),
       category: fd.get("category"),
       message: String(fd.get("message") ?? "").trim(),
-      newsletter_opt_in: fd.get("newsletter_opt_in") === "on",
       "bot-field": fd.get("bot-field"),
     };
 
@@ -755,8 +749,6 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     outline: 2px solid var(--brand1, #0077be); outline-offset: 1px; border-color: transparent;
   }
   .vbHint { font-size: 12px; font-weight: 500; color: rgba(17,17,17,.55); }
-  .vbCheck { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; cursor: pointer; }
-  .vbCheck input { width: 18px; height: 18px; accent-color: var(--brand1, #0077be); flex: none; }
   .vbHoney { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
   .vbFine { margin: 0; font-size: 12px; color: rgba(17,17,17,.55); }
 
