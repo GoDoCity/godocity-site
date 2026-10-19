@@ -5,14 +5,18 @@
  *
  * Endpoint : POST /api/vibe-submit   (JSON)
  *   { city, first_name, last_name, email, category, message,
- *     newsletter_opt_in, "bot-field" }
+ *     "bot-field" }
+ *
+ * Every submitter is added to the newsletter list: the modal's fine print
+ * tells them so ("…and to receive the weekly GoDo<City> newsletter"), so
+ * newsletter_opt_in is always stored as true to record that sign-up.
  *
  * Every row is inserted as status = 'pending' with the service-role key; the
  * public anon key cannot insert, so this is the only way in. Editors approve
  * from /daytona/vibe-check/admin/ (functions/api/vibe-posts-admin.js).
  *
  * Optional side effects (no-op when the env vars are missing):
- *   BEEHIIV_API_KEY + BEEHIIV_PUBLICATION_ID → subscribe on newsletter opt-in
+ *   BEEHIIV_API_KEY + BEEHIIV_PUBLICATION_ID → subscribe the submitter
  *   RESEND_API_KEY                           → notify the desk of a new post
  *
  * Pages env: SUPABASE_SERVICE_ROLE_KEY (secret), PUBLIC_SUPABASE_URL.
@@ -42,7 +46,7 @@ export async function onRequestPost({ request, env }) {
     email:             clean(d.email).toLowerCase(),
     category:          clean(d.category),
     message:           String(d.message ?? "").replace(/\r\n?/g, "\n").replace(/\n{3,}/g, "\n\n").trim(),
-    newsletter_opt_in: d.newsletter_opt_in === true,
+    newsletter_opt_in: true,  // disclosed in the modal fine print — see header
   };
 
   const problem = validate(post);
@@ -66,7 +70,7 @@ export async function onRequestPost({ request, env }) {
 
   // Side effects never fail the submission.
   await Promise.allSettled([
-    post.newsletter_opt_in ? subscribe(env, post.email) : null,
+    subscribe(env, post.email),
     notifyDesk(env, post),
   ]);
 
@@ -90,7 +94,7 @@ function validate(p) {
 
 async function subscribe(env, email) {
   if (!env.BEEHIIV_API_KEY || !env.BEEHIIV_PUBLICATION_ID) {
-    console.log("[vibe-submit] Newsletter opt-in (Beehiiv not configured — add manually):", email);
+    console.log("[vibe-submit] Newsletter sign-up (Beehiiv not configured — add manually):", email);
     return;
   }
   const res = await fetch(
