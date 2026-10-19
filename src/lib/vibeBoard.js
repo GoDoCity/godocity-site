@@ -25,3 +25,6 @@ export const VIBE_LIMITS = {
 export function vibeCategory(value) {
   return VIBE_CATEGORIES.find((c) => c.value === value) ?? null;
 }
+
+/** Hero photo for cities without their own `vibeHeroImage` in cityConfigs.js. */
+export const DEFAULT_VIBE_HERO = "/images/vibe-cafe-hero.webp";

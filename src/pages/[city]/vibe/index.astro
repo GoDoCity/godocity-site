@@ -12,12 +12,12 @@
  * pending; editors approve them at /daytona/vibe-check/admin/ → Vibe Board.
  *
  * Hero mirrors the GoDoEVENTS hub's concert hero (.evHero) so the two feeds
- * read as one product. Photo comes from cityConfigs.js `heroImage`.
+ * read as one product. Photo comes from cityConfigs.js `vibeHeroImage`.
  * ─────────────────────────────────────────────────────────────────────────────
  */
 import Base from "../../../layouts/Base.astro";
 import { allCitySlugs, getCityConfig, getDisplayName, getShortName, getVibeCheck } from "../../../lib/cityConfigs.js";
-import { VIBE_CATEGORIES, VIBE_LIMITS } from "../../../lib/vibeBoard.js";
+import { DEFAULT_VIBE_HERO, VIBE_CATEGORIES, VIBE_LIMITS } from "../../../lib/vibeBoard.js";
 
 export async function getStaticPaths() {
   return allCitySlugs.map((slug: string) => ({ params: { city: slug } }));
@@ -27,7 +27,7 @@ const { city } = Astro.params;
 const config = getCityConfig(city);
 const displayName = getDisplayName(city);
 const shortName = getShortName(city);
-const heroImage = config?.heroImage ?? null;
+const heroImage = config?.vibeHeroImage ?? DEFAULT_VIBE_HERO;
 const vibeCheck = getVibeCheck(city);
 
 const supabaseUrl = import.meta.env.PUBLIC_SUPABASE_URL ?? "";
@@ -411,9 +411,14 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     background-repeat: no-repeat;
     overflow: hidden;
   }
+  /* Left-weighted scrim: the copy sits left, while hero photos (the cafe neon,
+     bright windows) tend to be brightest centre/right. Keeps white text
+     readable on any city's photo without flattening the whole image. */
   .vbHeroOverlay {
     position: absolute; inset: 0;
-    background: linear-gradient(rgba(8,10,16,0.40), rgba(8,10,16,0.30));
+    background:
+      linear-gradient(90deg, rgba(8,10,16,.78) 0%, rgba(8,10,16,.55) 45%, rgba(8,10,16,.20) 100%),
+      linear-gradient(0deg, rgba(8,10,16,.45) 0%, transparent 45%);
   }
   .vbHeroInner {
     position: relative;
@@ -423,6 +428,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     padding: 72px clamp(20px, 4vw, 60px);
     width: 100%;
     box-sizing: border-box;
+    text-shadow: 0 1px 2px rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.35);
   }
   .vbHeroEyebrow {
     display: block;
@@ -430,7 +436,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     font-weight: 900;
     letter-spacing: .2em;
     text-transform: uppercase;
-    color: rgba(255,255,255,.6);
+    color: rgba(255,255,255,.82);
     margin: 0 0 12px;
   }
   .vbHeroTitle {
@@ -457,7 +463,7 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
   }
   .vbHeroSub {
     font-size: clamp(15px, 1.8vw, 18px);
-    color: rgba(255,255,255,.78);
+    color: rgba(255,255,255,.9);
     line-height: 1.6;
     margin: 0 0 32px;
     max-width: 560px;
@@ -467,7 +473,8 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     .vbHero { min-height: 280px; }
     .vbHeroInner { padding: 48px 16px; }
     .vbHeroOverlay {
-      background: linear-gradient(160deg, rgba(0,0,0,.55) 0%, rgba(0,10,30,.50) 55%, rgba(0,5,20,.45) 100%);
+      /* Copy spans the full width on phones — darken evenly. */
+      background: linear-gradient(160deg, rgba(0,0,0,.68) 0%, rgba(0,10,30,.62) 55%, rgba(0,5,20,.55) 100%);
     }
     .vbHeroTitle { font-size: clamp(26px, 8vw, 38px); }
   }
