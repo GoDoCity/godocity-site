@@ -36,13 +36,14 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 <Base title={`Vibe | GoDo${shortName}`} subtitle={`Good news, shoutouts and hidden gems from ${displayName} locals.`} cityBase={city}>
 
-  <!-- ── Hero (ported from the GoDoEVENTS concert hero) ── -->
+  <!-- ── Hero — the neon "VIBE" in the photo is the visual title, so the copy
+       sits beneath it. The h1 still names the page for screen readers. ── -->
   <section class="vbHero" style={heroImage ? `background-image: url('${heroImage}')` : ""}>
     <div class="vbHeroOverlay" aria-hidden="true"></div>
     <div class="vbHeroInner">
       <p class="vbHeroEyebrow">{displayName} · Community Board</p>
       <h1 class="vbHeroTitle">
-        <span class="vbHeroAccent">Vibe</span><br>
+        <span class="vbSrOnly">{shortName} Vibe Board — </span>
         Good News, Locally Grown.
       </h1>
       <p class="vbHeroSub">Shoutouts, hidden gems and the good stuff happening around {shortName} — shared by your neighbors.</p>
@@ -398,34 +399,34 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
 </script>
 
 <style>
-  /* ── Hero — 1:1 with GoDoEVENTS .evHero ── */
+  /* ── Hero — GoDoEVENTS .evHero styling, copy bottom-centred under the
+     photo's neon sign (which sits in the upper half of the frame). ── */
   .vbHero {
     position: relative;
-    min-height: 440px;
+    min-height: 560px;
     display: flex;
-    align-items: center;
+    align-items: flex-end;
+    text-align: center;
     background-color: #080a10;
     background-image: radial-gradient(circle at 70% 20%, color-mix(in srgb, var(--brand1, #0077be) 45%, transparent), transparent 60%);
-    background-position: center 20%;
+    background-position: center top;
     background-size: cover;
     background-repeat: no-repeat;
     overflow: hidden;
   }
-  /* Left-weighted scrim: the copy sits left, while hero photos (the cafe neon,
-     bright windows) tend to be brightest centre/right. Keeps white text
-     readable on any city's photo without flattening the whole image. */
+  /* Bottom-up scrim: keeps the neon title at the top of the photo bright
+     while the copy beneath it stays crisp on any city's image. */
   .vbHeroOverlay {
     position: absolute; inset: 0;
     background:
-      linear-gradient(90deg, rgba(8,10,16,.78) 0%, rgba(8,10,16,.55) 45%, rgba(8,10,16,.20) 100%),
-      linear-gradient(0deg, rgba(8,10,16,.45) 0%, transparent 45%);
+      linear-gradient(0deg, rgba(8,10,16,.88) 0%, rgba(8,10,16,.62) 38%, rgba(8,10,16,.12) 72%, rgba(8,10,16,.05) 100%);
   }
   .vbHeroInner {
     position: relative;
     z-index: 1;
     max-width: 1240px;
     margin: 0 auto;
-    padding: 72px clamp(20px, 4vw, 60px);
+    padding: 40px clamp(20px, 4vw, 60px) 48px;
     width: 100%;
     box-sizing: border-box;
     text-shadow: 0 1px 2px rgba(0,0,0,.55), 0 2px 14px rgba(0,0,0,.35);
@@ -440,43 +441,37 @@ const supabaseKey = import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? "";
     margin: 0 0 12px;
   }
   .vbHeroTitle {
-    font-size: clamp(32px, 5vw, 54px);
+    font-size: clamp(28px, 4vw, 44px);
     font-weight: 900;
     letter-spacing: -0.03em;
     color: #fff;
     line-height: 1.08;
     margin: 0 0 14px;
   }
-  .vbHeroAccent {
-    color: var(--brand1, #0077be);
-    display: inline-block;
-    font-size: clamp(37px, 5.75vw, 62px);
-    font-weight: 900;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    line-height: 1.08;
-    padding: 10px 28px;
-    border: 2px solid #fff;
-    border-radius: 6px;
-    text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
-    margin-bottom: 8px;
-  }
   .vbHeroSub {
     font-size: clamp(15px, 1.8vw, 18px);
     color: rgba(255,255,255,.9);
     line-height: 1.6;
-    margin: 0 0 32px;
+    margin: 0 auto 28px;
     max-width: 560px;
   }
-  .vbHeroCtas { display: flex; gap: 12px; flex-wrap: wrap; }
+  .vbHeroCtas { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .vbSrOnly {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
   @media (max-width: 767px) {
-    .vbHero { min-height: 280px; }
-    .vbHeroInner { padding: 48px 16px; }
-    .vbHeroOverlay {
-      /* Copy spans the full width on phones — darken evenly. */
-      background: linear-gradient(160deg, rgba(0,0,0,.68) 0%, rgba(0,10,30,.62) 55%, rgba(0,5,20,.55) 100%);
+    .vbHero {
+      min-height: 0;
+      padding-top: 50vw;           /* photo is ~56vw tall at full width; copy overlaps its foot */
+      background-size: 100% auto;  /* whole sign visible, no side crop */
     }
-    .vbHeroTitle { font-size: clamp(26px, 8vw, 38px); }
+    .vbHeroInner { padding: 8px 16px 36px; }
+    .vbHeroOverlay {
+      /* Fade the photo into the dark band the copy sits on. */
+      background: linear-gradient(180deg, rgba(8,10,16,.1) 0, rgba(8,10,16,.1) 26vw, #080a10 56vw);
+    }
+    .vbHeroTitle { font-size: clamp(24px, 7vw, 32px); }
   }
 
   .vbBtnBlue, .vbBtnGhost {
