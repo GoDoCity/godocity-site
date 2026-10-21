@@ -1,9 +1,9 @@
 ---
 /**
- * /admin/parse — CitySpark → manual-events.json Quick Parser
+ * /admin/parse — raw event text → manual-events.json Quick Parser
  *
  * Internal utility, not linked from the public site.
- * Paste raw text from CitySpark (or any event listing) and get a
+ * Paste raw text from any event listing and get a
  * JSON object ready to drop into src/data/manual-events.json > quickEntry[].
  *
  * Handles:
@@ -27,7 +27,7 @@ import Base from "../../layouts/Base.astro";
           <div class="adminBadge">Admin Tool</div>
           <h1 class="parserTitle">Event Parser</h1>
           <p class="parserSub">
-            Paste raw event text (CitySpark, email, any source). Auto-parses to JSON
+            Paste raw event text (email, flyer, any source). Auto-parses to JSON
             ready to drop into <code>src/data/manual-events.json</code> → <code>quickEntry[]</code>.
           </p>
           <div class="workflowBar">
@@ -43,7 +43,7 @@ import Base from "../../layouts/Base.astro";
 
         <div class="splitPane">
           <div class="pane">
-            <label class="paneLabel" for="rawInput">Raw CitySpark Text</label>
+            <label class="paneLabel" for="rawInput">Raw Event Text</label>
             <textarea id="rawInput" class="paneArea"
               placeholder="Paste event text here…
 
