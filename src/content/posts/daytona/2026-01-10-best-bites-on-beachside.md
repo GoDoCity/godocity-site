@@ -1,6 +1,6 @@
 ---
 title: 5 Beachside Bites That Don’t Feel Like Tourist Traps
-pubDate: 2026-07-14
+pubDate: 2026-11-18
 author: Charles King
 category: Food
 subtopic: Casual
