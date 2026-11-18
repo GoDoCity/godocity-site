@@ -4,7 +4,7 @@ pubDate: 2026-07-14
 author: Charles King
 category: Food
 subtopic: Casual
-sponsorTier: None
+sponsorTier: Featured
 tags:
   - 'Tags: #DaytonaBeach #BeachsideBites #LocalEats #DaytonaDining #FloridaFoodie'
 description: Skip the blinding neon signs and greasy fried-everything traps. These five local culinary secrets deliver incredibly fresh flavors, authentic beach vibes, and prices that won't give you heart palpitations.
@@ -12,25 +12,26 @@ thumbnail: ''
 heroImage: /images/pasted-image-1784231289913.png
 city: daytona
 featured: true
+showTableOfContents: true
 map_locations:
-  - label: Bethune Grill
-    address: 820 Dr Mary McLeod Bethune Blvd, Daytona Beach, FL 32114
+  - address: 820 Dr Mary McLeod Bethune Blvd, Daytona Beach, FL 32114
+    label: Bethune Grill
     lat: 29.2108
     lng: -81.0228
-  - label: Millie’s Restaurant
-    address: 3855 S Nova Rd, Port Orange, FL 32127
+  - address: 3855 S Nova Rd, Port Orange, FL 32127
+    label: Millie’s Restaurant
     lat: 29.1003
     lng: -80.9977
-  - label: Senor Taco
-    address: 801 N Atlantic Ave, Daytona Beach Shores, FL 32118
+  - address: 801 N Atlantic Ave, Daytona Beach Shores, FL 32118
+    label: Senor Taco
     lat: 29.2016
     lng: -81.0023
-  - label: Dancing Avocado Kitchen
-    address: 110 S Beach St, Daytona Beach, FL 32114
+  - address: 110 S Beach St, Daytona Beach, FL 32114
+    label: Dancing Avocado Kitchen
     lat: 29.2103
     lng: -81.0128
-  - label: Ocean Deck
-    address: 127 S Ocean Ave, Daytona Beach, FL 32118
+  - address: 127 S Ocean Ave, Daytona Beach, FL 32118
+    label: Ocean Deck
     lat: 29.2115
     lng: -81.0003
 ---
