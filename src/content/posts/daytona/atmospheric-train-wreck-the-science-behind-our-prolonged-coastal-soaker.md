@@ -4,7 +4,7 @@ pubDate: 2026-11-18
 author: Jax Sterling
 category: City
 subtopic: Environment
-sponsorTier: None
+sponsorTier: Featured
 tags:
   - '#OrmondBeach #DaytonaBeach #FloridaWeather #NWS #FloodWatch #StormTracking'
 description: Forget standard afternoon thunderstorms. Meteorologists are tracking a rare, multi-system atmospheric setup dumping inches of rain across Volusia County. Here is the meteorological breakdown behind our soggy week.
