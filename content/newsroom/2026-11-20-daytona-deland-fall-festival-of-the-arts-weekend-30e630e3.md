@@ -1,40 +1,41 @@
 ---
-kind: "candidate"
-title: "DeLand Fall Festival of the Arts Weekend"
-date: "2026-11-20"
-city: "daytona"
-rank: 2
+kind: candidate
+title: DeLand Fall Festival of the Arts Weekend
+date: 2026-11-20
+city: daytona
+community: DeLand
+effective_score: 75
 story_score: 68
 engagement_score: 72
-effective_score: 70
-geo_score: 70
-band: "solid"
-tone: "fun"
+tone: fun
 routine_admin: false
-community: "DeLand"
-location: "DeLand"
-category: "Events"
-possible_headline: "DeLand's 33rd Fall Festival of the Arts Takes Over Downtown This Weekend"
-newsletter_angle: "A can't-miss weekend event with a practical heads-up about street closures downtown."
-suggested_angle: "Frame as a weekend go-and-do: what to see, when, where to park, plus the closure details."
-source_quality: "Regional Media"
-new_or_update: "NEW"
+geo_score: 70
+rank: 2
+band: solid
+location: DeLand
+category: Events
+possible_headline: DeLand's 33rd Fall Festival of the Arts Takes Over Downtown This Weekend
+newsletter_angle: A can't-miss weekend event with a practical heads-up about street closures downtown.
+suggested_angle: 'Frame as a weekend go-and-do: what to see, when, where to park, plus the closure details.'
+source_quality: Regional Media
+new_or_update: NEW
 original_reporting: false
-primary_source_name: "West Volusia Beacon"
-primary_source_url: "https://www.beacononlinenews.com/articles/news/a-reminder-about-the-weekend-in-downtown-deland/"
-date_first_reported: "2026-11-19T14:21:07+00:00"
-image: "https://www.beacononlinenews.com/wp-content/uploads/2026/11/34-scaled-150x150.jpg"
+original_reporting_note: ''
+primary_source_name: West Volusia Beacon
+primary_source_url: https://www.beacononlinenews.com/articles/news/a-reminder-about-the-weekend-in-downtown-deland/
+date_first_reported: 2026-11-19T14:21:07+00:00
+image: https://www.beacononlinenews.com/wp-content/uploads/2026/11/34-scaled-150x150.jpg
 key_facts:
-  - "33rd annual Fall Festival of the Arts"
-  - "Nov. 21-22, 2026 in downtown DeLand"
-  - "Inner downtown closed to vehicle traffic"
-  - "Many stores open during the event"
+  - 33rd annual Fall Festival of the Arts
+  - Nov. 21-22, 2026 in downtown DeLand
+  - Inner downtown closed to vehicle traffic
+  - Many stores open during the event
 checklist:
-  - "Exact event hours each day"
-  - "Specific streets closed and parking options"
-  - "Vendor count or featured artists"
-  - "Admission cost (likely free)"
-article_id: "30e630e3-af9a-4895-8c8c-1acc85902e20"
+  - Exact event hours each day
+  - Specific streets closed and parking options
+  - Vendor count or featured artists
+  - Admission cost (likely free)
+article_id: 30e630e3-af9a-4895-8c8c-1acc85902e20
 ---
 
 ## Why it matters
