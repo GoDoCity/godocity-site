@@ -1,41 +1,42 @@
 ---
-kind: "candidate"
-title: "University High Band Marches in London"
-date: "2026-11-24"
-city: "daytona"
-rank: 10
+kind: candidate
+title: University High Band Marches in London
+date: 2026-11-24
+city: daytona
+community: Orange City
+effective_score: 72
 story_score: 68
 engagement_score: 72
-effective_score: 70
-geo_score: 70
-band: "solid"
-tone: "uplifting"
+tone: uplifting
 routine_admin: false
-community: "Orange City"
-location: "Orange City"
-category: "Education"
-possible_headline: "Orange City's Titan Regiment to March in London's New Year's Day Parade"
-newsletter_angle: "Hometown teens earn a rare invitation-only honor on a world stage — a shareable local pride story with a watch-at-home hook."
-suggested_angle: "Profile the Titan Regiment's prep and the invitation-only honor, with details on how locals can watch the parade on PBS or livestream."
-source_quality: "Original Local Reporting"
-new_or_update: "NEW"
+geo_score: 70
+rank: 10
+band: solid
+location: Orange City
+category: Education
+possible_headline: Orange City's Titan Regiment to March in London's New Year's Day Parade
+newsletter_angle: Hometown teens earn a rare invitation-only honor on a world stage — a shareable local pride story with a watch-at-home hook.
+suggested_angle: Profile the Titan Regiment's prep and the invitation-only honor, with details on how locals can watch the parade on PBS or livestream.
+source_quality: Original Local Reporting
+new_or_update: NEW
 original_reporting: false
-primary_source_name: "West Volusia Beacon"
-primary_source_url: "https://www.beacononlinenews.com/articles/news/university-high-heads-to-london/"
-date_first_reported: "2026-11-24T13:36:50+00:00"
-image: "https://www.beacononlinenews.com/wp-content/uploads/2026/11/uhs-band2-150x150.jpeg"
+original_reporting_note: ''
+primary_source_name: West Volusia Beacon
+primary_source_url: https://www.beacononlinenews.com/articles/news/university-high-heads-to-london/
+date_first_reported: 2026-11-24T13:36:50+00:00
+image: https://www.beacononlinenews.com/wp-content/uploads/2026/11/uhs-band2-150x150.jpeg
 key_facts:
-  - "155 travelers including 90 students depart Orlando Dec. 27, return Jan. 3"
-  - "Band performs Elton John's 'Saturday Night's Alright' along the parade route"
-  - "Invitation-only event; second UHS trip, director Koskoski's third"
-  - "Cost roughly $4,000 per traveler"
-  - "Parade starts 1 p.m. London time (6 a.m. ET); viewable on PBS and londonparade.com"
+  - 155 travelers including 90 students depart Orlando Dec. 27, return Jan. 3
+  - Band performs Elton John's 'Saturday Night's Alright' along the parade route
+  - Invitation-only event; second UHS trip, director Koskoski's third
+  - Cost roughly $4,000 per traveler
+  - Parade starts 1 p.m. London time (6 a.m. ET); viewable on PBS and londonparade.com
 checklist:
-  - "Confirm the UK prime minister named in article (Andy Burnham) — verify accuracy"
-  - "Confirm PBS broadcast availability and livestream details"
-  - "Verify departure/return dates and traveler counts"
-  - "Confirm the band's fundraising or how costs were covered"
-article_id: "9847bde5-1e63-4f16-a63f-56de4f02c9c0"
+  - Confirm the UK prime minister named in article (Andy Burnham) — verify accuracy
+  - Confirm PBS broadcast availability and livestream details
+  - Verify departure/return dates and traveler counts
+  - Confirm the band's fundraising or how costs were covered
+article_id: 9847bde5-1e63-4f16-a63f-56de4f02c9c0
 ---
 
 ## Why it matters
