@@ -1,44 +1,44 @@
 ---
-kind: "candidate"
-title: "Deltona Reverses Christmas Parade Cancellation"
-date: "2026-11-24"
-city: "daytona"
-rank: 5
-story_score: 78
-engagement_score: 72
+kind: candidate
+title: Deltona Reverses Christmas Parade Cancellation
+date: 2026-11-24
+city: daytona
+community: Deltona
 effective_score: 76
-geo_score: 70
-band: "solid"
-tone: "uplifting"
+story_score: 78
+engagement_score: 74
+tone: uplifting
 routine_admin: false
-community: "Deltona"
-location: "Deltona"
-category: "Government"
-possible_headline: "Deltona Saves Christmas Parade After Community Backlash and Amendment 3 Cuts"
-newsletter_angle: "A feel-good community-rescue story with real stakes: residents rallied and brought their parade back, but the Amendment 3 cuts behind it signal more painful reductions ahead."
-suggested_angle: "Frame as a community triumph while explaining the looming Amendment 3 fiscal squeeze on Deltona and what services could be next on the chopping block."
-source_quality: "Regional Media"
-new_or_update: "UPDATE"
+geo_score: 70
+rank: 5
+band: solid
+location: Deltona
+category: Government
+possible_headline: Deltona Saves Christmas Parade After Community Backlash and Amendment 3 Cuts
+newsletter_angle: 'A feel-good community-rescue story with real stakes: residents rallied and brought their parade back, but the Amendment 3 cuts behind it signal more painful reductions ahead.'
+suggested_angle: Frame as a community triumph while explaining the looming Amendment 3 fiscal squeeze on Deltona and what services could be next on the chopping block.
+source_quality: Regional Media
+new_or_update: UPDATE
 original_reporting: true
-original_reporting_note: "Opportunity to report which specific community groups and sponsors saved the parade, and to detail the full list of Deltona events and services facing Amendment 3 cuts before other outlets."
-primary_source_name: "News Daytona Beach (WNDB)"
-primary_source_url: "http://newsdaytonabeach.com/stories/deltona-temporarily-cancels-christmas-parade-citing-amendment-3,184627"
-date_first_reported: "2026-11-23T14:48:00+00:00"
-image: "https://beta.creativecirclecdn.com/southernstone/original/20261123-094557-436-deltona_cityhall.png.jpg"
+original_reporting_note: Opportunity to report which specific community groups and sponsors saved the parade, and to detail the full list of Deltona events and services facing Amendment 3 cuts before other outlets.
+primary_source_name: News Daytona Beach (WNDB)
+primary_source_url: http://newsdaytonabeach.com/stories/deltona-temporarily-cancels-christmas-parade-citing-amendment-3,184627
+date_first_reported: 2026-11-23T14:48:00+00:00
+image: https://beta.creativecirclecdn.com/southernstone/original/20261123-094557-436-deltona_cityhall.png.jpg
 key_facts:
-  - "Parade originally scheduled for Saturday, December 12"
-  - "Canceled Saturday, reinstated Monday evening after community outreach"
-  - "City Manager Doc Dougherty cites Amendment 3 budget cuts"
-  - "Deltona projects $12M in cuts for 2027, $5M in 2028, over $23M by 2030"
-  - "All other city-run events 'effectively canceled' except two self-supporting 5K runs"
-  - "Amendment 3 passed statewide with 61.98% on Nov. 3"
+  - Parade originally scheduled for Saturday, December 12
+  - Canceled Saturday, reinstated Monday evening after community outreach
+  - City Manager Doc Dougherty cites Amendment 3 budget cuts
+  - Deltona projects $12M in cuts for 2027, $5M in 2028, over $23M by 2030
+  - All other city-run events 'effectively canceled' except two self-supporting 5K runs
+  - Amendment 3 passed statewide with 61.98% on Nov. 3
 checklist:
-  - "Which community groups stepped in and what they are contributing"
-  - "Final confirmed parade date, time and registration details"
-  - "Status of participants who had already registered or prepared"
-  - "Exact list of other canceled Deltona events"
-  - "Independent confirmation of the city's $23M cut projections"
-article_id: "57f35443-8d5a-43bb-b94e-fef8fae583b8"
+  - Which community groups stepped in and what they are contributing
+  - Final confirmed parade date, time and registration details
+  - Status of participants who had already registered or prepared
+  - Exact list of other canceled Deltona events
+  - Independent confirmation of the city's $23M cut projections
+article_id: 57f35443-8d5a-43bb-b94e-fef8fae583b8
 ---
 
 ## Why it matters
