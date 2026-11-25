@@ -1,7 +1,7 @@
 ---
 kind: candidate
 title: Catfish Found on Deltona Lawn
-date: 2026-11-23
+date: 2026-11-24
 city: daytona
 community: Deltona
 effective_score: 75
